@@ -2,7 +2,7 @@
 
 ![Logo](media/Logo.png)
 
-Gaze controlled web browser, part of the EU-funded research project MAMEM. Currently, a rough prototype exists in the _Prototype_ subfolder, please check the readme there for information about this prototype. Does work on Windows with Visual Studio 2015 as 32bit project or on Linux with GCC 5.x as 64bit project for the moment.
+Gaze controlled web browser, part of the EU-funded research project MAMEM. Currently, a rough prototype exists in the _Prototype_ subfolder, please check the readme [**there**](Prototype) for information about this prototype. Does work on Windows with Visual Studio 2015 as 32bit project or on Linux with GCC 5.x as 64bit project for the moment.
 
 ## Videos
 * [Demonstration of prototype](https://www.youtube.com/watch?v=zj1u6QTmk5k)
