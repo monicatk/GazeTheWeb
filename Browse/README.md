@@ -14,7 +14,7 @@ Gaze controlled web browser, part of the EU-funded research project MAMEM. Curre
 Since the CEF3 binaries for Windows and Linux do not like each other, one has to copy them manually into the cloned project. Just follow these easy steps:
 
 1. Clone this repository.
-2. Download either Windows 32bit or Linux 64bit CEF 3.x binaries of branch 2454 here: https://cefbuilds.com/#branch_2454
+2. Download either Windows 32bit or Linux 64bit CEF 3.x binaries of branch 2454 [**here**](https://cefbuilds.com/#branch_2454).
 3. Extract the downloaded files and copy following content into the locally cloned repository:
   * include
   * libcef_dll
