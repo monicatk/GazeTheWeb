@@ -1,8 +1,20 @@
 # GazeTheWeb - Browse: Prototype
 Prototype of gaze controlled web browser, part of the EU-funded research project MAMEM.
 
+## Structure
+![Structure](media/Structure.png)
+
 ## HowTo
-Please refer to the Readme in the parent folder for details about compiling.
+Please refer to the Readme in the [parent folder](https://github.com/MAMEM/GazeTheWeb/tree/master/Browse) for details about compiling.
+
+For configuration, edit the lines 12-15 in _src/EntryPoint.h_:
+```C++
+//#define USE_EYETRACKER // Only with connected SMI RED eyetracker for the moment
+const int WINDOW_WIDTH = 1280;
+const int WINDOW_HEIGHT = 720;
+const bool FULLSCREEN = false; // Uses operation system resolution
+```
+If the eyetracker definition is not used, the input from the connected mouse emulates gaze.
 
 ## Dependencis
 All necessary dependencies are provided in the _externals_ folder.
@@ -14,8 +26,5 @@ All necessary dependencies are provided in the _externals_ folder.
 
 ## TODO
 * Reload page in current resolution at resize of window
-* How to change between mouse and eyetracker input
-* Supported eyetracker
-* Add structure diagram
 * Crashes when closing window
 * Get rid of compiled dependencies and use git submodule
