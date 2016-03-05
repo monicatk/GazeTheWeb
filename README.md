@@ -8,7 +8,8 @@ Software developed by Institute for Web Science and Technologies at University o
 * [**Tweet**](Tweet) Twitter application developed by students in research lab
 
 ## Links
-* [Institute for Web Science and Technologies](http://west.uni-koblenz.de)
-* [YouTube Channel](https://www.youtube.com/channel/UCiM5FSmeFyeU1s4tj_e794Q)
-* [Twitter](https://twitter.com/GazeTheWeb)
-* [MAMEM](http://www.mamem.eu)
+* [Institute for Web Science and Technologies](http://west.uni-koblenz.de) Website of our institute
+* [YouTube Channel](https://www.youtube.com/channel/UCiM5FSmeFyeU1s4tj_e794Q) Get our latests videos
+* [Twitter](https://twitter.com/GazeTheWeb) Get our latest tweets
+* [MAMEM](http://www.mamem.eu) European project
+* [eyeGUI](https://github.com/raphaelmenges/eyegui) Library for user interface
