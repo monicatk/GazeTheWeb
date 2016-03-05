@@ -16,15 +16,18 @@ Since the CEF3 binaries for Windows and Linux do not like each other, one has to
 1. Clone this repository.
 2. Download either Windows 32bit or Linux 64bit CEF 3.x binaries of branch 2454 [**here**](https://cefbuilds.com/#branch_2454).
 3. Extract the downloaded files and copy following content into the locally cloned repository:
-  * include
-  * libcef_dll
-  * Release
-  * Debug
-  * Resources
-  * README.txt
-  * LICENSE.txt
-  * **DO NOT** overwrite the provided CMakeLists.txt, otherwise the prototype is not found.
+ * include
+ * libcef_dll
+ * Release
+ * Debug
+ * Resources
+ * README.txt
+ * LICENSE.txt
+ * **DO NOT** overwrite the provided CMakeLists.txt, otherwise the prototype is not found.
+5. Should look like this screenshot:
+ * ![Folder structure](media/Folder.png)
 4. Create a build folder somewhere and execute CMake to create a project, which can be compiled.
+ 
 
 ## Notes
 This project uses the Chromium Embedded Framework. Please visit https://bitbucket.org/chromiumembedded/cef for more information about that project!
