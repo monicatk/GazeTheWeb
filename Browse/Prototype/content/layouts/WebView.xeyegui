@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<layout stylesheet="styles/Global.seyegui">
+    <grid style="webViewGrid">
+		<row size="100%">
+				<column size="10%">
+				<!-- Left bar -->
+					<stack style="webViewBar" showbackground="true" consumeinput="true">
+						<circlebutton icon="icons/EditURL.svg" id="edit_url" border="10%"/>
+						<!-- <circlebutton icon="icons/Settings.svg" id="settings" border="10%"/>
+						<circlebutton id="placeholder_a" border="10%"/>
+						<circlebutton id="placeholder_b" border="10%"/> -->
+					</stack>
+				</column>
+				<column size="80%">
+          <!-- Inner grid -->
+					<grid>
+						<row size="10%">
+							<column size="100%">
+								<!-- Upper panel -->
+								<stack style="webViewPanel" alignment="fill" border="0%" separator="0.0%">
+									<boxbutton icon="icons/Back.svg" id="back"/>
+									<boxbutton icon="icons/Magnify.svg" id="magnify" switch="true"/>
+									<sensor icon="icons/ScrollUp.svg" id="scroll_up" relativescale="300%"/>
+									<boxbutton icon="icons/AutoScroll.svg" id="auto_scroll" switch="true"/>
+									<boxbutton icon="icons/Forward.svg" id="forward"/>
+								</stack>
+							</column>
+						</row>
+						<row size="80%">
+							<!-- Webpage -->
+							<column size="100%">
+								<blank id="inner_cell"/>
+							</column>
+						</row>
+						<row size="10%">
+							<column size="100%">
+								<!-- Lower panel -->
+								<stack id="lower_panel" style="webViewPanel" alignment="fill" border="0%" separator="0.0%" dimming="true">
+									<boxbutton icon="icons/PivotMode.svg" id="pivot_mode" switch="true"/>
+									<boxbutton icon="icons/MouseMode.svg" id="mouse_mode" switch="true"/>
+									<boxbutton icon="icons/ClickMode.svg" id="click_mode" switch="true"/>
+									<sensor icon="icons/ScrollDown.svg" id="scroll_down" relativescale="150%"/>
+									<dropbutton icon="icons/Plus.svg" id="extras" space="20%">
+										<stack>
+											<boxbutton icon="icons/MarkBookmark.svg" id="mark_bookmark"/>
+										</stack>
+									</dropbutton>
+									<boxbutton icon="icons/ScrollLeft.svg" id="scroll_left"/>
+									<boxbutton icon="icons/ScrollRight.svg" id="scroll_right"/>
+								</stack>
+							</column>
+						</row>
+					</grid>
+				</column>
+				<column size="10%">
+					<!-- Right bar -->
+          <stack style="webViewBookmarksBar" showbackground="true" consumeinput="true">
+            <circlebutton icon="icons/TestLinks/Google.png" id="google" border="10%"/>
+            <circlebutton icon="icons/TestLinks/Mamem.png" id="mamem" border="10%"/>
+            <circlebutton icon="icons/TestLinks/Wikipedia.png" id="wikipedia" border="10%"/>
+            <circlebutton icon="icons/TestLinks/UniKoblenz.png" id="uni_koblenz" border="10%"/>
+          </stack>
+				</column>
+		</row>
+	</grid>
+</layout>

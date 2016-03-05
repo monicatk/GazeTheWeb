@@ -1,0 +1,48 @@
+default
+{
+	font-color = 0xFFFFFFFF
+	color=0x607d8bFF
+	dim-color = 0xFFFFFF77
+}
+
+webViewGrid:default
+{
+	background-color = 0x00000000
+}
+
+webViewBar:default
+{
+	background-color = 0x505659FF
+}
+
+webViewBookmarksBar:webViewBar
+{
+	color = 0xFFFFFFFF
+}
+
+webViewPanel:default
+{
+	separator-color = 0x2E3133FF
+	background-color = 0x00000000
+}
+
+addressGrid:default
+{
+	background-color = 0x505659EE
+}
+
+addressKeyboard:default
+{
+	background-color = 0xFFFFFFFF
+	color = 0x000000FF
+}
+
+addressPreview:default
+{
+	background-color = 0x00000000
+}
+
+addressDeleteKey:default
+{
+	color = 0x8E210BFF
+}

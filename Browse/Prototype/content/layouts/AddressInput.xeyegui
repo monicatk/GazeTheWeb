@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<layout stylesheet="styles/Global.seyegui">
+	<grid showbackground="true" style="addressGrid" consumeinput="true">
+		<row size="40%">
+			<column size="100%">
+				<grid>
+					<row size="100%">
+						<column size="15%">
+							<circlebutton icon="icons/Delete.svg" id="delete_address" style="addressDeleteKey" border="10%"/>
+						</column>
+						<column size="70%">
+							<textblock style="addressPreview" id="address_preview" alignment="center" verticalalignment="center" fontsize="tall" content="Here appears the URL"/>
+						</column>
+						<column size="15%">
+							<circlebutton icon="icons/Forward.svg" id="use_address" border="10%"/>
+						</column>
+					</row>
+				</grid>
+				
+			</column>
+		</row>
+		<row size="60%">
+			<column size="100%">
+				<keyboard id="address_input" style="addressKeyboard"/>
+			</column>
+		</row>
+	</grid>
+</layout>
+
+
+
