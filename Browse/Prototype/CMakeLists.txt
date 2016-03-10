@@ -71,8 +71,8 @@ if(OS_WINDOWS) # Windows
 elseif(OS_LINUX) # Linux, GLFW3 has to be installed via package manager
 
   # eyeGUI
-	set(EYEGUI_LIBRARIES_DEBUG "${EYEGUI_DIRECTORY}/lib-gcc_x64_debug/eyeGUI.a")
-  set(EYEGUI_LIBRARIES_RELEASE "${EYEGUI_DIRECTORY}/lib-gcc_x64_release/eyeGUI.a")
+  set(EYEGUI_LIBRARIES_DEBUG "${EYEGUI_DIRECTORY}/lib-gcc_x64_debug/libeyeGUI.a")
+  set(EYEGUI_LIBRARIES_RELEASE "${EYEGUI_DIRECTORY}/lib-gcc_x64_release/libeyeGUI.a")
 
   # GLFW 3
   find_package(PkgConfig REQUIRED)
@@ -117,7 +117,7 @@ if(OS_WINDOWS) # Windows
     ${OPENGL_LIBRARIES}
     ${GLFW3_STATIC_LIBRARIES}
     eyegui_lib
-		${IVIEW_X_LIBRARIES}
+    ${IVIEW_X_LIBRARIES}
     libcef_lib
     libcef_dll_wrapper
     ${CEF_STANDARD_LIBS})
@@ -153,7 +153,7 @@ elseif(OS_LINUX) # Linux
     ${CEF_TARGET}
     ${OPENGL_LIBRARIES}
     ${GLFW3_STATIC_LIBRARIES}
-    ${EYEGUI_LIBRARIES}
+    eyegui_lib
     libcef_lib
     libcef_dll_wrapper
     ${CEF_STANDARD_LIBS})
