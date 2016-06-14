@@ -23,6 +23,7 @@ const bool FULLSCREEN = false; // Uses operation system resolution
 
 #include "SimpleApp.h"
 #include "WebView.h"
+#include "TextInput.h"
 
 #ifdef USE_EYETRACKER
 #include "EyetrackerInput.h"
@@ -49,6 +50,9 @@ bool newClick = true;
 glm::vec2 clickPositionCenterOffset = glm::vec2(0,0);
 bool useAutoScroll = false;
 bool instantInteraction = false;
+bool textInputMode = false;
+double scrollOffsetX = 0, scrollOffsetY = 0;
+double scrollingInLastFrameY = 0;
 
 // Global variables
 eyegui::GUI* pGUI;
@@ -56,6 +60,28 @@ eyegui::Layout* pBrowserLayout;
 eyegui::Layout* pAddressInputLayout;
 CefRefPtr<SimpleApp> pApp;
 std::string nextURL;
+std::unique_ptr<TextInput> upTextInput;
+std::unique_ptr<WebView> upWebView;
+unsigned int inputFieldIndex;
+
+// Callback for text input layout to call (very hacky stuff)
+void textInputCallback(std::string input)
+{
+    textInputMode = false;
+    pApp->SetInputText(inputFieldIndex, input);
+    upTextInput->hide();
+}
+
+// Callback for web view input field (very hacky stuff)
+void inputFieldButtonCallback(unsigned int index)
+{
+    // Remember which input field to fill
+    inputFieldIndex = index;
+
+    // Display text input
+    textInputMode = true;
+    upTextInput->show();
+}
 
 // Callback to receive information from eyeGUI
 void printCallback(std::string message)
@@ -70,7 +96,7 @@ void resizeCallback(GLFWwindow* window, int width, int height)
     eyegui::resizeGUI(pGUI, width, height);
     windowWidth = width;
     windowHeight = height;
-	reloadPage = true;
+    reloadPage = true;
 }
 
 // Key callback for GLFW
@@ -145,10 +171,10 @@ public:
     {
         // Hide input layout and load given url
         eyegui::setVisibilityOfLayout(pAddressInputLayout, false, false, true);
-		if (!nextURL.empty())
-		{
-			pApp->loadNewURL(nextURL);
-		}
+        if (!nextURL.empty())
+        {
+            pApp->loadNewURL(nextURL);
+        }
     }
 
     void up(eyegui::Layout* pLayout, std::string id)
@@ -241,6 +267,7 @@ public:
     void down(eyegui::Layout* pLayout, std::string id)
     {
         clickMode = true;
+        upWebView->setVisibilityOfOverlay(false);
     }
 
     void up(eyegui::Layout* pLayout, std::string id)
@@ -251,6 +278,7 @@ public:
         linearZoom = 1;
         clickZoom = 1;
         newClick = true;
+        upWebView->setVisibilityOfOverlay(true);
     }
 };
 
@@ -394,12 +422,12 @@ void entry(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<Simpl
     eyegui::setWarningCallback(&printCallback);
 
     // Create GUI
-		eyegui::GUIBuilder guiBuilder;
-		guiBuilder.width = windowWidth;
-		guiBuilder.height = windowHeight;
-		guiBuilder.fontFilepath = "fonts/tauri/Tauri-Regular.ttf";
-		guiBuilder.characterSet = eyegui::CharacterSet::GERMANY_GERMAN;
-		pGUI = guiBuilder.construct();
+    eyegui::GUIBuilder guiBuilder;
+    guiBuilder.width = windowWidth;
+    guiBuilder.height = windowHeight;
+    guiBuilder.fontFilepath = "fonts/tauri/Tauri-Regular.ttf";
+    guiBuilder.characterSet = eyegui::CharacterSet::GERMANY_GERMAN;
+    pGUI = guiBuilder.construct();
 
     // Add layouts
     pBrowserLayout = eyegui::addLayout(pGUI, "layouts/WebView.xeyegui");
@@ -462,15 +490,21 @@ void entry(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<Simpl
     webViewWidth = innerCellTransformation.width;
     webViewHeight = innerCellTransformation.height + lowerPanelTransformation.height;
 
+    // ### TextInput ###
+
+    upTextInput = std::unique_ptr<TextInput>(new TextInput(pGUI, textInputCallback));
+
     // ### WebView ###
 
-    WebView webView(
+    upWebView = std::unique_ptr<WebView>(new WebView (
+        pGUI,
+        inputFieldButtonCallback,
         webViewX,
         webViewY,
         webViewWidth,
-        webViewHeight);
+        webViewHeight));
 
-    pApp->SetStuff(webView.getTextureHandle(), &webViewWidth, &webViewHeight);
+    pApp->SetStuff(upWebView->getTextureHandle(), &webViewWidth, &webViewHeight, &scrollOffsetX, &scrollOffsetY);
 
     // ### CEF ###
 
@@ -499,6 +533,10 @@ void entry(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<Simpl
         eyegui::Input input;
         input.gazeX = (int)x;
         input.gazeY = (int)y;
+        //pApp->setMouseCoordinates(	(x - webViewX) / webViewWidth,
+        //							(y - webViewY) / webViewHeight );
+        pApp->setMouseCoordinates((x - webViewX),(y - webViewY));
+
 #endif
 
         // Instant interaction
@@ -508,6 +546,24 @@ void entry(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<Simpl
             instantInteraction = false;
         }
 
+        // Check for new input fields
+        upWebView->update(windowWidth, windowHeight, scrollOffsetY, scrollingInLastFrameY);
+        scrollingInLastFrameY = 0;
+        if (pApp->CheckForNewInputFields())
+        {
+            // Tell web view about new input fields
+            std::vector<glm::vec2> inputPositions;
+            auto coordinates = pApp->GetInputCoordinateMemoryLocation();
+            for (const glm::vec4& rCoordinate : *coordinates)
+            {
+                inputPositions.push_back(
+                    glm::vec2(
+                        (rCoordinate.z + rCoordinate.w) / 2.f,
+                        (rCoordinate.x + rCoordinate.y) / 2.f));
+            }
+            upWebView->setInputFields(inputPositions);
+        }
+
         // Update GUI
         eyegui::Input usedInput = eyegui::updateGUI(pGUI, deltaTime, input);
 
@@ -515,7 +571,7 @@ void entry(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<Simpl
         CefMouseEvent event;
 
         // Automatic scrolling (should depend on screen resolution...)
-        if(useAutoScroll  && !usedInput.gazeUsed && !clickMode)
+        if(useAutoScroll && !usedInput.gazeUsed && !clickMode)
         {
             double value = - input.gazeY + (windowHeight/2);
             bool negativeValue = value < 0 ? true : false;
@@ -529,6 +585,7 @@ void entry(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<Simpl
         {
             pApp->SendMouseWheelEvent(event, 0, SCROLL_SPEED * webViewYOffset);
             webViewYOffset = 0;
+            scrollingInLastFrameY = (double) (SCROLL_SPEED * webViewYOffset);
         }
 
         // Give OpenGL the window resolution
@@ -549,16 +606,16 @@ void entry(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<Simpl
         webViewHeight = innerCellTransformation.height + lowerPanelTransformation.height;
 
         // Update webview
-        webView.setSize(webViewWidth, webViewHeight);
-        webView.setPosition(webViewX, windowHeight - webViewY - webViewHeight);
+        upWebView->setSize(webViewWidth, webViewHeight);
+        upWebView->setPosition(webViewX, windowHeight - webViewY - webViewHeight);
 
-		// Check whether page reload should be performed (after window size change)
-		if (reloadPage)
-		{
-			// TODO: does work but size is not correct :(
-			pApp->reload();
-			reloadPage = false;
-		}
+        // Check whether page reload should be performed (after window size change)
+        if (reloadPage)
+        {
+            // TODO: does work but size is not correct :(
+            pApp->reload();
+            reloadPage = false;
+        }
 
         // Click mode
         if(clickMode && !usedInput.gazeUsed)
@@ -619,7 +676,7 @@ void entry(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<Simpl
         }
 
         // Render webview
-        webView.draw(windowWidth, windowHeight, clickPositionCenterOffset, clickPosition, clickZoom);
+        upWebView->draw(clickPositionCenterOffset, clickPosition, clickZoom);
 
         // Render GUI
         eyegui::drawGUI(pGUI);
@@ -630,6 +687,7 @@ void entry(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<Simpl
 
         // Reset instant interaction in input structure
         input.instantInteraction = false;
+
     }
 
 #ifdef USE_EYETRACKER

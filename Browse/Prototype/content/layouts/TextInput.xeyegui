@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<layout stylesheet="styles/Global.seyegui">
+	<grid showbackground="true" consumeinput="true">
+		<row size="15%">
+			<column size="100%">
+				<textblock id="textblock" innerborder="10%" verticalalignment="center" alignment="center" content="Lorem ipsum"/>
+			</column>
+		</row>
+		<row size="85%">
+			<column size="100%">
+				<grid>
+					<row size="100%">
+						<column size="7%">
+							<stack>
+								<boxbutton icon="icons/Circle.svg"/>
+								<boxbutton icon="icons/Circle.svg"/>
+								<boxbutton icon="icons/Circle.svg"/>
+							</stack>
+						</column>
+						<column size="86%">
+							<grid>
+								<row size="12%">
+									<column size="100%">
+										<wordsuggest id="word_suggest" style="suggestion"/>
+									</column>
+								</row>
+								<row size="76%">
+									<column size="100%">
+										<keyboard id="keyboard" style="textinput"/>
+									</column>
+								</row>
+								<row size="12%">
+									<column size="100%">
+										<stack separator="2%">
+											<boxbutton icon="icons/Circle.svg"/>
+											<boxbutton id="space" icon="icons/Space.svg" desc="space" relativescale="250%"/>
+											<boxbutton icon="icons/Circle.svg"/>
+										</stack>
+									</column>
+								</row>
+							</grid>
+						</column>
+						<column size="7%">
+							<stack>
+								<boxbutton icon="icons/Circle.svg"/>
+								<boxbutton icon="icons/Circle.svg"/>
+								<boxbutton id="finish" icon="icons/Finish.svg"/>
+							</stack>
+						</column>
+					</row>
+				</grid>
+			</column>
+		</row>
+	</grid>
+</layout>

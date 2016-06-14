@@ -9,6 +9,32 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <vector>
+#include <iostream>
+
+// ### INPUT FIELD BUTTON LISTENER ###
+
+InputFieldButtonListener::InputFieldButtonListener(WebView* pWebView)
+{
+    mpWebView = pWebView;
+}
+
+void InputFieldButtonListener::hit(eyegui::Layout* pLayout, std::string id)
+{
+    // Nothing to do
+}
+
+void InputFieldButtonListener::down(eyegui::Layout* pLayout, std::string id)
+{
+    // Get index and tell web view (just id to unsigned int)
+    mpWebView->inputFieldButtonCallback((unsigned int)(std::atoi(id.c_str())));
+}
+
+void InputFieldButtonListener::up(eyegui::Layout* pLayout, std::string id)
+{
+    // Nothing to do
+}
+
+// ### WEB VIEW ###
 
 // Geometry
 const std::vector<float> quadVertices =
@@ -53,11 +79,15 @@ static const char *fragmentShaderSource =
 "}\n";
 
 // Implementation
-WebView::WebView(int x, int y, int width, int height)
+WebView::WebView(eyegui::GUI* pGUI, void(*inputFieldCallback) (unsigned int index), int x, int y, int width, int height)
 {
     // Initialize members
+    mpGUI = pGUI;
+    mInputFieldCallback = inputFieldCallback;
     setPosition(x,y);
     setSize(width, height);
+    mOldScrollOffsetY = 0;
+    mSmoothScrollOffsetY = 0;
 
     // Vertex shader
     int vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -115,6 +145,13 @@ WebView::WebView(int x, int y, int width, int height)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Create layout for overlays
+    mpLayout = eyegui::addLayout(mpGUI, "layouts/Empty.xeyegui", true);
+    eyegui::moveLayoutToBack(mpGUI, mpLayout);
+
+    // Create button listener
+    mspInputFieldButtonListener = std::shared_ptr<InputFieldButtonListener>(new InputFieldButtonListener(this));
 }
 
 WebView::~WebView()
@@ -122,7 +159,37 @@ WebView::~WebView()
     // TODO: Delete OpenGL stuff (Just a prototype :-P )
 }
 
-void WebView::draw(int windowWidth, int windowHeight, glm::vec2 clickOffset, glm::vec2 clickPosition, float clickZoom) const
+void WebView::update(int windowWidth, int windowHeight, double scrollOffsetY, double scrollingInLastFrame)
+{
+    // Save window size to members
+    mWindowWidth = windowWidth;
+    mWindowHeight = windowHeight;
+
+    // Smooth scrolling
+    mSmoothScrollOffsetY += scrollingInLastFrame; // Add scrolling of frame
+    mSmoothScrollOffsetY -= scrollOffsetY - mOldScrollOffsetY; // Subtract done scrolling
+
+    // Only to expensive stuff when necessary
+    if(mOldScrollOffsetY != scrollOffsetY)
+    {
+        mOldScrollOffsetY = scrollOffsetY;
+
+        // Update position of input field buttons
+        for(int i = 0; i < (int)mInputFieldIndices.size(); i++)
+        {
+            // Prepare values
+            unsigned int floatingFrameIndex = mInputFieldIndices.at(i);
+            glm::vec2 position = mInputFieldPositions.at(i);
+            float x = (((float)mX + position.x) / (float)mWindowWidth) - (INPUT_FIELD_BUTTON_SIZE / 2.f);
+            float y = (((float)((mWindowHeight - mHeight) + (position.y - (int)scrollOffsetY)) / (float)mWindowHeight) - (INPUT_FIELD_BUTTON_SIZE / 2.f)); // TODO: i think that is not correct, mY missing in formula
+
+            // Tell floating frame about it
+            eyegui::setPositionOfFloatingFrame(mpLayout, floatingFrameIndex, x, y);
+        }
+    }
+}
+
+void WebView::draw(glm::vec2 clickOffset, glm::vec2 clickPosition, float clickZoom) const
 {
     glUseProgram(mShaderProgram);
 
@@ -130,7 +197,8 @@ void WebView::draw(int windowWidth, int windowHeight, glm::vec2 clickOffset, glm
     glm::mat4 projection = glm::ortho(0, 1, 0, 1);
 
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::scale(model, glm::vec3(1.f / windowWidth, 1.f / windowHeight, 1.f));
+    model = glm::scale(model, glm::vec3(1.f / mWindowWidth, 1.f / mWindowHeight, 1.f));
+    // model = glm::translate(model, glm::vec3(mX, mY - mSmoothScrollOffsetY, 0)); // TODO: testing smooth scrolling.
     model = glm::translate(model, glm::vec3(mX, mY, 0));
     model = glm::scale(model, glm::vec3(mWidth, mHeight, 1));
 
@@ -144,7 +212,7 @@ void WebView::draw(int windowWidth, int windowHeight, glm::vec2 clickOffset, glm
     glUniform2fv(glGetUniformLocation(mShaderProgram, "clickPosition"), 1, glm::value_ptr(clickPosition));
     glUniform1f(glGetUniformLocation(mShaderProgram, "clickZoom"), clickZoom);
 
-    // Draw view
+    // Draw viewy
     glBindVertexArray(mVertexArrayObject);
     glBindTexture(GL_TEXTURE_2D, mTextureHandle);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -165,4 +233,60 @@ void WebView::setSize(int width, int height)
 {
     mWidth = width;
     mHeight = height;
+}
+
+void WebView::setInputFields(std::vector<glm::vec2> positions)
+{
+    // Remember positions for updates
+    mInputFieldPositions = positions;
+
+    // Delete old floating frames
+    for (unsigned int index : mInputFieldIndices)
+    {
+        eyegui::removeFloatingFrame(mpLayout, index, true);
+    }
+
+    // Forget about old floating frames
+    mInputFieldIndices.clear();
+
+    // Add new floating frames
+    unsigned int index = 0;
+    for (glm::vec2& position : mInputFieldPositions)
+    {
+        // Create id map for that button
+        std::map<std::string, std::string> idMap;
+        std::string id = std::to_string(index);
+        idMap["button"] = id; // create id of that button, just use index
+
+        // Layout is in fullscreen and web view has different coordinate system than eyeGUI
+        float x = (((float)mX + position.x) / (float)mWindowWidth) - (INPUT_FIELD_BUTTON_SIZE / 2.f);
+        float y = (((float)((mWindowHeight - mHeight) + position.y) / (float)mWindowHeight) - (INPUT_FIELD_BUTTON_SIZE / 2.f)); // TODO: i think that is not correct, mY missing in formula
+        mInputFieldIndices.push_back(
+            eyegui::addFloatingFrameWithBrick(
+                mpLayout,
+                "bricks/InputButton.beyegui",
+                x,
+                y,
+                INPUT_FIELD_BUTTON_SIZE,
+                INPUT_FIELD_BUTTON_SIZE,
+                idMap,
+                true,
+                true));
+
+        // Add listener for that button
+        eyegui::registerButtonListener(mpLayout, id, mspInputFieldButtonListener);
+
+        // Increment index of input field
+        index++;
+    }
+}
+
+void WebView::inputFieldButtonCallback(unsigned int index)
+{
+    mInputFieldCallback(index);
+}
+
+void WebView::setVisibilityOfOverlay(bool visible)
+{
+    eyegui::setVisibilityOfLayout(mpLayout, visible, false, true);
 }

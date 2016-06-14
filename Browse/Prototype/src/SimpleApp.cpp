@@ -21,6 +21,7 @@ void LinkFinder::Visit(CefRefPtr<CefDOMDocument> document)
 SimpleApp::SimpleApp()
 {
    //  mLinkFinder = new LinkFinder();
+	renderProcessHandler = new SimpleRenderProcessHandler();
 }
 
 void SimpleApp::OnContextInitialized() {
@@ -36,7 +37,7 @@ void SimpleApp::OnContextInitialized() {
 #endif
 
   // Create renderer
-  CefRefPtr<SimpleRenderer> renderer(new SimpleRenderer(mTextureHandle, mpWidth, mpHeight));
+  CefRefPtr<SimpleRenderer> renderer(new SimpleRenderer(mTextureHandle, mpWidth, mpHeight, scrollOffsetX, scrollOffsetY));
 
   // SimpleHandler implements browser-level callbacks
   mHandler = new SimpleHandler(renderer);
@@ -51,9 +52,9 @@ void SimpleApp::OnContextInitialized() {
       CefCommandLine::GetGlobalCommandLine();
   url = command_line->GetSwitchValue("url");
   if (url.empty())
-    // Some offline page for testing without internet (living tough life in dorm)
-    //url = "file://" + std::string(CONTENT_PATH) + "/websites/hello.html";
-    url = "https://en.wikipedia.org/wiki/Main_Page";
+	  // Some offline page for testing without internet (living tough life in dorm)
+	  //url = "file://" + std::string(CONTENT_PATH) + "/websites/hello.html";
+	  url = "https://www.facebook.com";// "https://www.google.com"; // "https://en.wikipedia.org/wiki/Main_Page";
 
   // Window handle set to zero (may cause visual errors)
   window_info.SetAsWindowless(0,false);
@@ -63,29 +64,17 @@ void SimpleApp::OnContextInitialized() {
                                 browser_settings, NULL);
 }
 
-void SimpleApp::loadNewURL(std::string url)
-{
-    mHandler->loadNewURL(url);
-}
-
-void SimpleApp::goBack()
-{
-    mHandler->goBack();
-}
-
-void SimpleApp::goForward()
-{
-    mHandler->goForward();
-}
-
-void SimpleApp::reload()
-{
-	mHandler->reload();
-}
+void SimpleApp::loadNewURL(std::string url){mHandler->loadNewURL(url);}
+void SimpleApp::goBack(){mHandler->goBack();}
+void SimpleApp::goForward(){mHandler->goForward();}
+void SimpleApp::reload(){mHandler->reload();}
 
 void SimpleApp::OnBeforeCommandLineProcessing(const CefString& process_type, CefRefPtr< CefCommandLine > command_line)
 {
     // Setup for offscreen rendering
     command_line->AppendSwitch("disable-gpu");
     command_line->AppendSwitch("disable-gpu-compositing");
+	// following lines don't work?
+	command_line->AppendSwitch("enable-logging");	// get LOG(..) writes in console
+	command_line->AppendSwitch("no-sandbox");		// enable logging in renderer process
 }

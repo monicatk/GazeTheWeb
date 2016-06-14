@@ -36,7 +36,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 	// Provide CEF with command-line arguments
 	CefMainArgs main_args(hInstance);
 
-	// Application level callbacks are implemented by SimpleApp
+	// Application level callbacks are implemented by App
 	CefRefPtr<SimpleApp> app(new SimpleApp);
 
 	// Decide subprocess or not

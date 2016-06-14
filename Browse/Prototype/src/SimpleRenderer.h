@@ -12,19 +12,22 @@
 #include "include/base/cef_logging.h"
 
 #include "externals/OGL/gl_core_3_3.h"
+#include <iostream>
 
 // Does offscreen rendering
 class SimpleRenderer : public CefRenderHandler
 {
 public:
 
-    SimpleRenderer(unsigned int textureHandle, int* pWidth, int* pHeight)
+    SimpleRenderer(unsigned int textureHandle, int* pWidth, int* pHeight, double* offsetX, double* offsetY)
     {
         mTextureHandle = textureHandle;
         mpWidth = pWidth;
         mpHeight = pHeight;
         mFirstPaint = true;
         mRecreateTexture = false;
+		scrollOffsetX = offsetX;
+		scrollOffsetY = offsetY;
     } // give it pointer to texture, width and height
 
     // Tell CEF3 size of texture to render to
@@ -58,6 +61,12 @@ public:
         }
     }
 
+	void OnScrollOffsetChanged(CefRefPtr< CefBrowser > browser, double x, double y) OVERRIDE
+	{
+		*scrollOffsetX = x;
+		*scrollOffsetY = y;
+	}
+
 private:
 
     // CefBase interface
@@ -68,6 +77,8 @@ private:
     bool mRecreateTexture;
     int* mpWidth;
     int* mpHeight;
+	double* scrollOffsetX;
+	double* scrollOffsetY;
 };
 
 

@@ -3,6 +3,7 @@ default
 	font-color = 0xFFFFFFFF
 	color=0x607d8bFF
 	dim-color = 0xFFFFFF77
+	separator-color = 0x393E40FF
 }
 
 webViewGrid:default
@@ -45,4 +46,14 @@ addressPreview:default
 addressDeleteKey:default
 {
 	color = 0x8E210BFF
+}
+
+suggestion:default
+{
+	background-color = 0x505659FF
+}
+
+textinput:default
+{
+	background-color = 0x393E40FF
 }

@@ -15,10 +15,12 @@ include_directories("${CMAKE_CURRENT_LIST_DIR}")
 # Collect own code
 file(GLOB SOURCES
   "src/*.cpp"
-  "src/*.c")
+  "src/*/*.cpp"   # include 1st lvl subfolders
+  "src/*/*.c")
 
 file(GLOB HEADERS
-  "src/*.h")
+  "src/*.h"
+  "src/*/*.h")    # include 1st lvl subfolders
 
 # Add OpenGLLoader
 file(GLOB OGL

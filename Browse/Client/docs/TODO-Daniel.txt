@@ -1,0 +1,94 @@
+[Y] offscreen rendering ready?
+	--> [ ] implement DOM relevant CEF methods
+	--> [ ] update Javascript Code for all kinds of DOM nodes and their data
+	--> [Y] get rid of scrollbars on webpages (take a look at prototype for a rough idea)
+
+TOPIC: Update function for DOM Nodes (after page load finished, e.g. Popups)
+	[?] Is there a callback when changes on web page are displayed >>after<< load ended? Update DOM Nodes using their ID?
+	IDEA: Concentrate on dirtyRects (see Renderer::OnPaint) to get changed regions (implies possible changes in DOM nodes),
+			(OR check if there are any new HTML IDs not corresponding to any DOM Node --> HTML IDs suck bc they usually aren't set)
+
+_________
+
+Get actual page size: see for example wikipidia.org, uni-koblenz.de
+--> what if zooming is enabled? Times zoom factor sufficient?
+
+_________
+
+
+
+
+
+[ ] Test CSS injection
+
+[ ] SCROLLING: set absolute coordinates of frame via JS?
+[Y] SCROLLING: Set back Scrolling to (0, 0) on button click --> Javascript? Yes, sir. Atm only main frame
+		--> [ ] Setting back scrollable areas within the document? (you would need some kind of button in a circle menu)
+
+[ ] KILL EXCEPTIONS when closing by setting warning lvl to higher lvl
+
+[ ] Remove text already filled in (aka 'placeholder') input fields after input happend (see fb.com before logging in)
+
+MutationObserver use-cases:
+	[ ] DOM nodes adds himself to list of nodes (future: induce C++ callback via JS when this happend)
+	[ ] Set zoom asap (when body.style.zoom exists)
+	[ ] document.documentElement.getClientBoundingRect().width/height observable?
+
+[ ] TIMING DOM NODE UPDATE: Maybe append new DOM nodes to lists instead of complete recreation  
+
+[Y] COLORING -> FAVICONS: Get icon url via JS, open with icon CefBrowser, render it, get main color
+
+[ ] POP-UP HANDLING: Open new Tab instead of new Window, not belonging to our OSR window...
+
+TOPIC: Copy & Paste of Strings: Predefined methods in CefFrame
+
+NO LOAD END: endlessly scrollable pages like a Fb timeline 	
+	--> do not trigger onLoadEnd callback
+		--> you don't know when to update DOM node data 
+			(e.g., mainly links may be contained)
+			--> recognize those regions via Javascript? 
+				or when scrolled to former end of page!
+
+HIDDEN DOM NODES: Upon scrolling, DOM nodes can be hidden by other elements (may be solved in future approach)
+
+WINDOW TITLES: Get window titles of each Tab and get String to Tab as caption
+
+MINOR STUFF:
+	- Setting of canGoBack/Forward not with each OnLoadingStateChange call?
+	- IPC_Container::SetIPCArgumentsValue
+		    if (attr.GetArraySize() == 0)
+    		{
+        		// TODO: Unneccessary branch? Does v8Value->GetValue(0)->GetIntValue() work on non-arrays too? Test it!
+       			 switch (attr.GetDatatype())
+        	{ [...]
+
+
+KNOWN BUGS:
+[ ] .ico Favicons not shown in GUI, wrong encoding?
+		ERROR: Received favicon width or height <= 0! url=http://www.tagesschau.de/apple-touch-icon-120x120.png
+[Y] CefBrowser continues loading even though Tab was closed (see a playing video while closing Tab for example)
+
+
+[ ] Stuff from Raphael
+	[Y] Some pages do not load correctly (mamem.eu)
+	[Y] Mediator: CanGoBack / CanGoForward  				
+		--> Daniel says: For GUI button highlighting? There's a callback telling you if browser can go back/forward at this moment
+				If Tab would have some bool attributes for that I could set them when this callback is received
+				If there is any error taking place because of this, let me know :)
+	[Y] Call SetURL of tab when new page starts loading
+	[Y] Set Zoom (Global or for Tab?)
+		--> Daniel says: A permanent zoom for each Tab/browser? Or for each website individualy? Or both? (all of them may be settings worth safing to a permanent file)
+		[ ] No global zoom yet
+
+DONE
+[Y] Get rid of CefExpansion?
+[Y] Try expanding CEF to work with multiple tabs
+[Y] BrowserHost::CreateBrowser changeable? Better handling of concurrent browser creation when Tab is registered needed
+	--> Nope. BrowserHost::CreateBrowserSync (returns CefRefPtr<CefBrowser>) and Tab* _pendingTab used, because Renderer starts extremely quickly after CefBrowser creation (before std::maps with target texture can be filled) -- works this way
+[Y] Move DOMMapping to CefMediator
+[Y] SCROLLING: Expand CefMediator to send scrolling commands to CEF
+
+
+STUFF:
+[+] Browser pointer or identificator? (in CefMediator's std::map)
+	--> Depends, e.g. std::map _browsers in CefMediator, you look up a specific browser corresponding to a Tab an you can directly access it because of the pointer. Identificator would mean that you have to iterate over list of all browsers and compare identificators.

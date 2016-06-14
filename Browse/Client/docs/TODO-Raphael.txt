@@ -1,0 +1,17 @@
+- Settings: Icons on the left which indicate status of setting
+- Class for TabOverview? (InnerState?)
+- TabOverview preview: seems that preview textures are clamped and not cut
+- (eyeGUI) Resize stuff is strange. Update() forces resize which let all! tabs reload their stuff. So if one layout is added, all tabs get reloaded. For DOMNodes, it is not possible to call it, because at a resize they get reloaded and trigger..a resize...
+- ActionConnector and DataConnector (instead of pushing actions to a vector)
+- Floating frames flicker at creation
+- Some "now new page is loading" screen
+- Scroll bar or similar for visualization how much for scrolling is left
+- ScrollingSensors are not correct until reload (sometimes on 9gag for example)
+- Fullscreen does not work unter Windows 10
+- ActionData Map stuff with templates
+- Much more settings (all the eyeGUI stuff)
+- LabStreaming Layer Communication
+- Show descriptions in Pause
+- Tobii EyeX seems to connect event when there is no...
+- Compile GLFW on linux to static library?
+- Custom Mouse cursor? Problems with native under Windows 10 in fullscreen

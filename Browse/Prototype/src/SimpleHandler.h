@@ -12,6 +12,7 @@
 #include "include/base/cef_logging.h"
 
 #include <list>
+#include "glm/glm.hpp"
 
 // Responsible for single browser instance specific callbacks
 class SimpleHandler : public CefClient,
@@ -63,6 +64,31 @@ public:
 
   bool IsClosing() const { return is_closing_; }
 
+  void MoveMouse(const CefMouseEvent &event)
+  {
+      // browser may not exist yet
+      if (browser_list_.size() > 0 && browser_list_.back().get() != NULL)
+      {
+          browser_list_.back().get()->GetHost()->SendMouseMoveEvent(event, false);
+      }
+
+  }
+  void SendLeftMouseButtonEvent(const CefMouseEvent &event, bool up)
+  {
+      if (browser_list_.size() > 0 && browser_list_.back().get() != NULL)
+      {
+          // BTW: give browser focus? --> for offscreen rendering?
+          browser_list_.back()->GetHost()->SendFocusEvent(true);
+          browser_list_.back().get()->GetHost()->SendMouseClickEvent(event, MBT_LEFT, up, 1);
+      }
+  }
+
+  // receive messages from renderer process
+  virtual bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
+      CefProcessId source_process,
+      CefRefPtr<CefProcessMessage> message) OVERRIDE;
+
+  // Raphaels stuff
   void SendMouseWheelEvent(const CefMouseEvent &event, int deltaX, int deltaY)
   {
     if(browser_list_.back().get() != NULL)
@@ -78,14 +104,21 @@ public:
         browser_list_.back()->GetHost()->SendMouseClickEvent(event, MBT_LEFT, up, 1);
     }
   }
-
   void loadNewURL(std::string url);
-
   void goBack();
-
   void goForward();
-
   void reload();
+
+
+  std::vector<glm::vec4>* GetInputCoordinateMemoryLocation()
+  {
+      return &inputCoords;
+  }
+
+  // |index| refers to input field coordinates' position in vector |inputCoords|
+  void SetInputText(unsigned int index, std::string txt);
+  void SubmitInput(unsigned int index);
+  bool CheckForNewInputFields();
 
 private:
 
@@ -96,6 +129,10 @@ private:
   bool is_closing_;
 
   CefRefPtr<SimpleRenderer> m_renderer;
+
+  // amount of elements in this vector may vary!
+  std::vector<glm::vec4> inputCoords; // top, bottom, left, right coordinates of HTML text input fields
+  bool newInputCoords;
 
   // Include the default reference counting implementation
   IMPLEMENT_REFCOUNTING(SimpleHandler);

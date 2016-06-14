@@ -1,16 +1,19 @@
 //============================================================================
 // Distributed under the MIT License.
-// Author: Raphael Menges (https://github.com/raphaelmenges)
+// Author: Daniel Müller (muellerd@uni-koblenz.de) & Raphael Menges (https://github.com/raphaelmenges)
 //============================================================================
 
-#ifndef SIMPLE_APP_H
-#define SIMPLE_APP_H
+#ifndef SIMPLE_APP_H_
+#define SIMPLE_APP_H_
 
 #include "include/cef_app.h"
 #include "SimpleHandler.h"
 
 #include "include/wrapper/cef_helpers.h"
 #include "include/base/cef_logging.h"
+
+#include "SimpleRenderProcessHandler.h"
+#include <iostream>
 
 /* Test for finding links in DOM-Tree (TODO: MOVE TO RENDER PROCESS?!) */
 /*class LinkFinder : public CefDOMVisitor
@@ -27,24 +30,33 @@ private:
     IMPLEMENT_REFCOUNTING(LinkFinder);
 };*/
 
+
+
 // Simple app
 class SimpleApp : public CefApp,
                   public CefBrowserProcessHandler {
  public:
-  SimpleApp();
+	 SimpleApp();
 
   // CefApp methods
   virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler()
       OVERRIDE { return this; }
 
+  CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() OVERRIDE
+  {
+	  return renderProcessHandler;
+  }
+
   // CefBrowserProcessHandler methods
   virtual void OnContextInitialized() OVERRIDE;
 
-    void SetStuff(unsigned int textureHandle, int* pWidth, int* pHeight)
+    void SetStuff(unsigned int textureHandle, int* pWidth, int* pHeight, double* offsetX, double* offsetY)
     {
         mTextureHandle = textureHandle;
         mpWidth = pWidth;
         mpHeight = pHeight;
+		scrollOffsetX = offsetX;
+		scrollOffsetY = offsetY;
     }
 
     void SendMouseWheelEvent(const CefMouseEvent &event, int deltaX, int deltaY)
@@ -94,15 +106,51 @@ class SimpleApp : public CefApp,
 
     virtual void OnBeforeCommandLineProcessing(const CefString& process_type, CefRefPtr< CefCommandLine > command_line);
 
- private:
-  // Include the default reference counting implementation.
-  IMPLEMENT_REFCOUNTING(SimpleApp);
+	// currently used in EntryPoint.h each while loop iteration --> pointer to shared memory instead of data copy?
+	void setMouseCoordinates(double x, double y)
+	{ 
+		_x = x;
+		_y = y;
+		CefMouseEvent e;
+		e.x = x;
+		e.y = y;
+		mHandler->MoveMouse(e);
+	}
 
-  unsigned int mTextureHandle;
-  int* mpWidth;
-  int* mpHeight;
-  CefRefPtr<SimpleHandler> mHandler;
-  // CefRefPtr<LinkFinder> mLinkFinder; (TODO: MOVE TO RENDER PROCESS?!)
+	// data in this location is updated when page is loaded, TODO: does eyeGUI need extra notifications after changes happened? -> YES
+	std::vector<glm::vec4> const * GetInputCoordinateMemoryLocation() { return mHandler->GetInputCoordinateMemoryLocation(); }
+
+	// |index| refers to input field coordinates' position in SimpleHandler's vector |inputCoords|
+	void SetInputText(unsigned int index, std::string txt) { mHandler->SetInputText(index, txt); }
+
+	void SubmitInputField(unsigned int index) { mHandler->SubmitInput(index); }
+
+	bool CheckForNewInputFields() { return mHandler->CheckForNewInputFields(); }
+
+ private:
+	unsigned int mTextureHandle;
+	int* mpWidth;
+	int* mpHeight;
+	double* scrollOffsetX;
+	double* scrollOffsetY;
+
+	CefRefPtr<SimpleHandler> mHandler;
+	CefRefPtr<SimpleRenderProcessHandler> renderProcessHandler;
+	// CefRefPtr<LinkFinder> mLinkFinder; (TODO: MOVE TO RENDER PROCESS?!)
+ 
+	// current mouse position in web view coordinates
+	double _x, _y;
+
+
+
+	// Include the default reference counting implementation.
+	IMPLEMENT_REFCOUNTING(SimpleApp); // read something about that this should be at the end..
 };
 
-#endif  // SIMPLE_APP_H
+
+
+
+
+#endif  // SIMPLE_APP_H_
+
+

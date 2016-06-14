@@ -1,15 +1,16 @@
 # Project files
 CMakeLists.txt.user
+*.aps
 
 # Chromium Embedded Framework
 Browse/include
 Browse/libcef_dll
 Browse/Release
-
 Browse/Debug
-
 Browse/Resources
-
 Browse/README.txt
-
 Browse/LICENSE.txt
+
+# Build folder
+BUILD
+build
