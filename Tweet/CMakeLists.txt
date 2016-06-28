@@ -11,8 +11,8 @@ set(APPNAME Tweet)
 set(CMAKE_BUILD_TYPE Release)
 
 # Set to ON to enable eye tracker support
-set(USEEYETRACKER OFF)
-set(USETOBII OFF)
+set(USEEYETRACKER OFF CACHE BOOL "Use SMI REDn eyetracker as input.")
+set(USETOBII OFF CACHE BOOL "If eyetracker used, use Tobii EyeX.")
 
 # Activate C++11 in GCC and CLANG
 if(NOT MSVC)
