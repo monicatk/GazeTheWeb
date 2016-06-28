@@ -54,9 +54,9 @@ int main(int argc, char* argv[]) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #ifdef USEEYETRACKER
-    GLFWwindow* window = glfwCreateWindow(1280, 800, "EyeTrackingProject", glfwGetPrimaryMonitor(), NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 800, "GazeTheWeb - Tweet", glfwGetPrimaryMonitor(), NULL);
 #else
-    GLFWwindow* window = glfwCreateWindow(1280, 800, "EyeTrackingProject", fullscreen? glfwGetPrimaryMonitor() : NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 800, "GazeTheWeb - Tweet", fullscreen? glfwGetPrimaryMonitor() : NULL, NULL);
 #endif
     glfwMakeContextCurrent(window);
     ogl_LoadFunctions();
