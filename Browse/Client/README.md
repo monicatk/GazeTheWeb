@@ -37,7 +37,7 @@ A file named _log.txt_ is created at binary folder containing information about 
 ![Tab Overview](media/Screenshot-C.png)
 
 ## Issues
-* Mouse cursor not visible in fullscreen under Windows 10
+* Currently not building on Linux
 
 ## Dependencies
 All necessary dependencies are provided in the _externals_ folder.
