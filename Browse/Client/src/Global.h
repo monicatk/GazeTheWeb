@@ -10,10 +10,11 @@
 #include "externals/GLM/glm/glm.hpp"
 #include <string>
 
-static const int EYEGUI_WEB_URLINPUT_LAYER = -1;
-static const int EYEGUI_WEB_LAYER = -2;
-static const int EYEGUI_TAB_LAYER = -3;
-static const int EYEGUI_PAUSE_LAYER = 1;
+static const int EYEGUI_WEB_URLINPUT_LAYER = -1; // in default GUI...
+static const int EYEGUI_WEB_LAYER = -2; // in default GUI...
+static const int EYEGUI_TAB_LAYER = -3; // in default GUI...
+static const int EYEGUI_SUPER_LAYER = 0; // in super GUI...
+static const int EYEGUI_CURSOR_LAYER = 1; // in super GUI...
 static const int EYEGUI_SETTINGS_LAYER = -2;
 static const std::string BLANK_PAGE_URL = "about:blank";
 static const int SLOTS_PER_TAB_OVERVIEW_PAGE = 5;
@@ -34,5 +35,6 @@ static const int EYETRACKER_AVERAGE_SAMPLE_COUNT = 5;
 static const std::string LOG_FILE_NAME = "log";
 static const int LOG_FILE_MAX_SIZE = 1024 * 1024;
 static const int LOG_FILE_COUNT = 5;
+static const float MOUSE_CURSOR_RELATIVE_SIZE = 0.1f;
 
 #endif // GLOBAL_H_

@@ -8,6 +8,7 @@
 #define WEBVIEW_H_
 
 #include "src/State/Web/Tab/WebViewParameters.h"
+#include "src/Utils/RenderItem.h"
 #include "externals/OGL/gl_core_3_3.h"
 #include "externals/GLM/glm/glm.hpp"
 #include <memory>
@@ -44,9 +45,8 @@ private:
     // Texture object which belongs here but filled by CEF and read maybe by other
     std::shared_ptr<Texture> _spTexture;
 
-    // OpenGL handles for quad (may use util classes in future)
-    GLuint _shaderProgram = 0;
-    GLuint _vertexArrayObject = 0;
+    // Render item
+    std::unique_ptr<RenderItem> _upRenderItem;
 
     // Current values
     int _x = 0;

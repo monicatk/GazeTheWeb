@@ -1,3 +1,0 @@
-The library "eyeGUI" by Raphael Menges uses in the current (development) version 0.9 the FreeType library for text rendering. As part of its FreeType license, one has to mention it when distributing source code or binaries containing this library.
-
-For more information, visit: https://github.com/raphaelmenges/eyegui

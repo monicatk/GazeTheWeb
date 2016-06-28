@@ -9,11 +9,14 @@
 #include "src/CEF/Extension/JSCode.h"
 #include "include/cef_render_process_handler.h"
 
+// Forward declaration
+class CefMessageRouterRendererSide;
+
 /* All methods are called in the renderer process, IPC may be required (see process messages) */
 class RenderProcessHandler : public CefRenderProcessHandler {
 public:
 
-    RenderProcessHandler() {}
+	RenderProcessHandler();
     ~RenderProcessHandler() {}
 
     // Callback, called when IPC message from e.g. browser process (see Handler) is received
@@ -45,6 +48,7 @@ private:
     void IPCLogDebug(CefRefPtr<CefBrowser> browser, std::string text);
 
     /* MEMBERS */
+	CefRefPtr<CefMessageRouterRendererSide> _msgRouter;
 
     // Javascript code as Strings
     const std::string _js_dom_update_sizes = GetJSCode(DOM_UPDATE_SIZES);

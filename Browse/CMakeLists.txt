@@ -126,8 +126,8 @@ cmake_minimum_required(VERSION 2.8.12.2)
 # Only generate Debug and Release configuration types.
 set(CMAKE_CONFIGURATION_TYPES Debug Release)
 
-# Project name.
-project(cef)
+# Project name. (Changed by Raphael Menges)
+project(GazeTheWeb-Browse)
 
 # Use folders in the resulting project files.
 set_property(GLOBAL PROPERTY OS_FOLDERS ON)
@@ -195,7 +195,8 @@ if(OS_LINUX)
   # -Werror                         = Treat warnings as errors
   # -Wno-missing-field-initializers = Don't warn about missing field initializers
   # -Wno-unused-parameter           = Don't warn about unused parameters
-  set(CEF_COMPILER_FLAGS          "-fno-strict-aliasing -fPIC -fstack-protector -funwind-tables -fvisibility=hidden --param=ssp-buffer-size=4 -pipe -pthread -Wall -Werror -Wno-missing-field-initializers -Wno-unused-parameter")
+  set(CEF_COMPILER_FLAGS          "-fno-strict-aliasing -fPIC -fstack-protector -funwind-tables -fvisibility=hidden --param=ssp-buffer-size=4 -pipe -pthread -Wall -Wno-missing-field-initializers -Wno-unused-parameter")
+  # Edit by Raphael Menges: Removed -Werror
   # -std=c99                        = Use the C99 language standard
   set(CEF_C_COMPILER_FLAGS        "-std=c99")
   # -fno-exceptions                 = Disable exceptions

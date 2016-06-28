@@ -5,9 +5,18 @@
 
 #include "RenderProcessHandler.h"
 #include "src/CEF/Extension/Container.h"
+#include "include/wrapper/cef_message_router.h"
 #include "include/base/cef_logging.h"
 #include "include/wrapper/cef_helpers.h"
 #include <sstream>
+
+RenderProcessHandler::RenderProcessHandler()
+{
+	CefMessageRouterConfig config;
+	config.js_query_function = "cefQuery";
+	config.js_cancel_function = "cefQueryCancel";
+	_msgRouter = CefMessageRouterRendererSide::Create(config);
+}
 
 bool RenderProcessHandler::OnProcessMessageReceived(
     CefRefPtr<CefBrowser> browser,
@@ -17,7 +26,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
     CEF_REQUIRE_RENDERER_THREAD();
 
     const std::string& msgName = msg->GetName().ToString();
-    IPCLogDebug(browser, "Received '" + msgName + "' IPC msg in RenderProcessHandler");
+    //IPCLogDebug(browser, "Received '" + msgName + "' IPC msg in RenderProcessHandler");
 
     // Handle request of DOM node data
     if (msgName == "GetDOMElements")
@@ -39,7 +48,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
             arraySize += global->GetValue("sizeTextInputs")->GetUIntValue();
             context->Exit();
         }
-        IPCLogDebug(browser, "Found " + std::to_string(arraySize) + " objects to be packed in IPC");
+        IPCLogDebug(browser, "Found " + std::to_string(arraySize) + " objects to be packed into IPC msg");
 
         if (arraySize > 0)
         {
@@ -76,43 +85,34 @@ bool RenderProcessHandler::OnProcessMessageReceived(
         CefRefPtr<CefFrame> frame = browser->GetMainFrame();
         CefRefPtr<CefV8Context> context = frame->GetV8Context();
 
-        std::string lastFaviconURL = msg->GetArgumentList()->GetString(0);
+		CefRefPtr<CefListValue> args = msg->GetArgumentList();
+		int height = -2, width = -2;
+		const std::string url = args->GetString(0);
+		//height = args->GetInt(1);
 
         // Create process message, which is to be sent to Handler
         msg = CefProcessMessage::Create("ReceiveFavIconBytes");
-        CefRefPtr<CefListValue> args = msg->GetArgumentList();
-
-
-        std::string favIconURL = "";
-        int height = -2, width = -2;
+        args = msg->GetArgumentList();
 
         if (context->Enter())
-        {
+		{
             CefRefPtr<CefV8Value> globalObj = context->GetGlobal();
 
-            // Read out values in width and height
-            favIconURL = globalObj->GetValue("favIconUrl")->GetStringValue();
-            height = globalObj->GetValue("favIconHeight")->GetIntValue();
-            width = globalObj->GetValue("favIconWidth")->GetIntValue();
+			height = globalObj->GetValue("favIconHeight")->GetDoubleValue();
+			width = globalObj->GetValue("favIconWidth")->GetDoubleValue();
 
-            // Fill msg args with this index
+
+            // Fill msg args with help of this index variable
             int index = 0;
-            args->SetString(index++, favIconURL);
-            // Write image resolution at the beginning after URL
+            // Write image resolution to IPC response
             args->SetInt(index++, width);
             args->SetInt(index++, height);
 
-            // Skip reading favicon image's byte data, when URL hasn't changed
-            if (favIconURL != lastFaviconURL || width <= 0 || height <= 0)
+            if (width > 0 && height > 0)
             {
-                IPCLogDebug(browser, "RenderProcessHandler: Load new favicon URL: '" + favIconURL + "' (w: " + std::to_string(width) +", h: " + std::to_string(height) + ")");
-                //Create byte array in JS for image data
-                CefRefPtr<CefV8Value> byteArray = CefV8Value::CreateArray(width*height); // Combine 4 * byte in one int value via bit shifting
-                for (int i = 0; i < width*height; i++)
-                {
-                    byteArray->SetValue(i, CefV8Value::CreateInt(0));
-                }
-                globalObj->SetValue("favIconData", byteArray, V8_PROPERTY_ATTRIBUTE_NONE);
+                IPCLogDebug(browser, "Reading bytes of favicon (w: " + std::to_string(width) +", h: " + std::to_string(height) + ")");
+
+				CefRefPtr<CefV8Value> byteArray = globalObj->GetValue("favIconData");
 
                 // Fill byte array with JS
                 browser->GetMainFrame()->ExecuteJavaScript(_js_favicon_copy_img_bytes_to_v8array, browser->GetMainFrame()->GetURL(), 0);
@@ -128,13 +128,11 @@ bool RenderProcessHandler::OnProcessMessageReceived(
                 // Release V8 value afterwards
                 globalObj->DeleteValue("favIconData");
             }
-            else
-            {
-                if(favIconURL != "")
-                    IPCLogDebug(browser, "RenderProcessHandler: old and new favicon URL are identical: '" + favIconURL +"'");
-                else
-                    IPCLogDebug(browser, "RenderProcessHandler: ERROR: Read empty favIconURL!");
-            }
+			else
+			{
+				IPCLogDebug(browser, "Invalid favicon image resolution: w=" + std::to_string(width) + ", h=" + std::to_string(height));
+			}
+
             context->Exit();
         }
         browser->SendProcessMessage(PID_BROWSER, msg);
@@ -212,8 +210,8 @@ bool RenderProcessHandler::OnProcessMessageReceived(
         //}
     }
 
-    // If no suitable handling was found
-    return false;
+    // If no suitable handling was found, try message router
+    return _msgRouter->OnProcessMessageReceived(browser, sourceProcess, msg);
 }
 
 void RenderProcessHandler::OnFocusedNodeChanged(
@@ -229,6 +227,8 @@ void RenderProcessHandler::OnContextCreated(
     CefRefPtr<CefFrame> frame,
     CefRefPtr<CefV8Context> context)
 {
+	_msgRouter->OnContextCreated(browser, frame, context);
+
     if (frame->IsMain())
     {
     // Create variables in Javascript which are to be read after page finished loading.
@@ -244,16 +244,13 @@ void RenderProcessHandler::OnContextCreated(
             globalObj->SetValue("_pageHeight", CefV8Value::CreateDouble(-1), V8_PROPERTY_ATTRIBUTE_NONE);
             globalObj->SetValue("sizeTextLinks", CefV8Value::CreateInt(0), V8_PROPERTY_ATTRIBUTE_NONE);
             globalObj->SetValue("sizeTextInputs", CefV8Value::CreateInt(0), V8_PROPERTY_ATTRIBUTE_NONE);
-            globalObj->SetValue("_pageHeight", CefV8Value::CreateDouble(-1), V8_PROPERTY_ATTRIBUTE_NONE);
 
-            // Create JS variables for width and height of icon image
-            globalObj->SetValue("favIconUrl", CefV8Value::CreateString(""), V8_PROPERTY_ATTRIBUTE_NONE);
+            // Create JS variables for width and height of favicon image
             globalObj->SetValue("favIconHeight", CefV8Value::CreateInt(-1), V8_PROPERTY_ATTRIBUTE_NONE);
             globalObj->SetValue("favIconWidth", CefV8Value::CreateInt(-1), V8_PROPERTY_ATTRIBUTE_NONE);
 
+			// Create an image object, which will later contain favicon image 
             frame->ExecuteJavaScript(_js_favicon_create_img, frame->GetURL(), 0);
-            //// Fill URL, width and height variables with values (via Javascript)
-            //frame->ExecuteJavaScript(JS_SET_FAVICON_URL_RESOLUTION, frame->GetURL(), 0);
 
             context->Exit();
         }
@@ -262,13 +259,15 @@ void RenderProcessHandler::OnContextCreated(
         * END *******************************************************************************/
 
     }
-    else IPCLogDebug(browser, "Not able to enter context!");
+    else IPCLogDebug(browser, "Not able to enter context! (main frame?="+std::to_string(frame->IsMain())+")");
 }
 
 void RenderProcessHandler::OnContextReleased(CefRefPtr<CefBrowser> browser,
     CefRefPtr<CefFrame> frame,
     CefRefPtr<CefV8Context> context)
 {
+	_msgRouter->OnContextReleased(browser, frame, context);
+
     if (frame->IsMain())
     {
         // Release all created V8 values, when context is released
@@ -280,7 +279,6 @@ void RenderProcessHandler::OnContextReleased(CefRefPtr<CefBrowser> browser,
         globalObj->DeleteValue("sizeTextLinks");
         globalObj->DeleteValue("sizeTextInputs");
 
-        globalObj->DeleteValue("favIconUrl");
         globalObj->DeleteValue("favIconHeight");
         globalObj->DeleteValue("favIconWidth");
     }

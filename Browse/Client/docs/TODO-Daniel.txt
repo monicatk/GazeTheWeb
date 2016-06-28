@@ -51,7 +51,7 @@ NO LOAD END: endlessly scrollable pages like a Fb timeline
 
 HIDDEN DOM NODES: Upon scrolling, DOM nodes can be hidden by other elements (may be solved in future approach)
 
-WINDOW TITLES: Get window titles of each Tab and get String to Tab as caption
+WINDOW TITLES: Get window titles of each Tab and get String to Tab as caption --> there's a CEF callback for that!
 
 MINOR STUFF:
 	- Setting of canGoBack/Forward not with each OnLoadingStateChange call?

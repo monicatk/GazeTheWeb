@@ -11,7 +11,6 @@
 
 #include "src/Input/Eyetracker/Eyetracker.h"
 #include "src/Global.h"
-#include "externals/GLFW/include/GLFW/glfw3.h"
 #include <memory>
 
 class EyeInput
@@ -24,13 +23,10 @@ public:
     // Destructor
     virtual ~EyeInput();
 
-    // Update. Needs GLFWwindow to poll cursor coordinates. Returns whether gaze is currently used
-    bool Update(float tpf, GLFWwindow* pWindow, double& rGazeX, double& rGazeY);
+    // Update. Returns whether gaze is currently used (or mouse when false)
+    bool Update(float tpf, double mouseX, double mouseY, double& rGazeX, double& rGazeY);
 
 private:
-
-    // Set GLFW cursor visibility
-    void SetGLFWCursorVisibility(bool visible, GLFWwindow* pWindow) const;
 
     // Vendor of input
     std::unique_ptr<Eyetracker> _upEyetracker = NULL;
@@ -38,9 +34,6 @@ private:
     // Mouse cursor coordinates
     double _mouseX = 0;
     double _mouseY = 0;
-
-    // Remember whether mouse cursor is visible
-    bool _mouseCursorVisible = true;
 
     // Eyetracker overidden by mouse
     bool _mouseOverride = false;

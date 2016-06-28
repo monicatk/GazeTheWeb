@@ -29,9 +29,6 @@ public:
     // Called for IPC message navigation
     CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() OVERRIDE {	return _renderProcessHandler; }
 
-    // Shut down CEF
-    void ShutdownCef();
-
 private:
 
     // Keep a reference to RenderProcessHandler

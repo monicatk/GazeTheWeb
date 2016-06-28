@@ -4,8 +4,10 @@
 //============================================================================
 
 #include "Master.h"
+#include "src/LabStream/LabStream.h"
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
+#include "externals/glfw-master/include/GLFW/glfw3.h"
 #include <functional>
 
 Master::Master(CefMediator* pCefMediator)
@@ -43,6 +45,7 @@ Master::Master(CefMediator* pCefMediator)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     _pWindow = glfwCreateWindow(_width, _height, "GazeTheWeb - Browse", usedMonitor, NULL);
     glfwMakeContextCurrent(_pWindow);
+    glfwSetInputMode(_pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN); // hide native mouse cursor
     LogInfo("..done.");
     LogInfo("Initializing OpenGL...");
     ogl_LoadFunctions();
@@ -126,21 +129,26 @@ Master::Master(CefMediator* pCefMediator)
     // ### HOMEPAGE ###
     _upWeb->AddTab("https://duckduckgo.com");
 
-    // ### PAUSE LAYOUT ###
+    // ### SUPER LAYOUT ###
 
     // Load layout (deleted at eyeGUI termination)
-    _pPauseLayout = eyegui::addLayout(_pSuperGUI, "layouts/Pause.xeyegui", EYEGUI_PAUSE_LAYER, true);
+    _pSuperLayout = eyegui::addLayout(_pSuperGUI, "layouts/Super.xeyegui", EYEGUI_SUPER_LAYER, true);
 
     // Button listener
     _spMasterButtonListener = std::shared_ptr<MasterButtonListener>(new MasterButtonListener(this));
-    eyegui::registerButtonListener(_pPauseLayout, "pause", _spMasterButtonListener);
+    eyegui::registerButtonListener(_pSuperLayout, "pause", _spMasterButtonListener);
 
     // Initialization
     if(setup::PAUSED_AT_STARTUP)
     {
-        eyegui::buttonDown(_pPauseLayout, "pause", true);
+        eyegui::buttonDown(_pSuperLayout, "pause", true);
     }
     _pausedDimming.setValue(0);
+
+    // Add floating frame on empty layout for cursor
+    _pCursorLayout = eyegui::addLayout(_pSuperGUI, "layouts/Empty.xeyegui", EYEGUI_CURSOR_LAYER, true);
+    eyegui::setInputUsageOfLayout(_pCursorLayout, false);
+    _cursorFrameIndex = eyegui::addFloatingFrameWithBrick(_pCursorLayout, "bricks/Cursor.beyegui", 0, 0, 0, 0, true, false); // will be moved and sized in loop
 
     // ### INPUT ###
     _upEyeInput = std::unique_ptr<EyeInput>(new EyeInput);
@@ -149,6 +157,9 @@ Master::Master(CefMediator* pCefMediator)
 
     // Time
     _lastTime = glfwGetTime();
+
+	// Connection to LabStreamingLayer
+	_upLabStream = std::unique_ptr<LabStream>(new LabStream);
 }
 
 Master::~Master()
@@ -167,6 +178,16 @@ Master::~Master()
 void Master::Run()
 {
     this->Loop();
+}
+
+double Master::GetTime() const
+{
+	return glfwGetTime();
+}
+
+void Master::Exit()
+{
+	glfwSetWindowShouldClose(_pWindow, GL_TRUE);
 }
 
 eyegui::Layout* Master::AddLayout(std::string filepath, int layer, bool visible)
@@ -197,18 +218,44 @@ void Master::Loop()
             _timeUntilInput -= tpf;
         }
 
+		// Poll lab streaming layer communication (TODO: testing)
+		auto labStreamInput = _upLabStream->Poll();
+		for (const std::string& rEvent : labStreamInput)
+		{
+			LogInfo("Master: LabStreamInput = ", rEvent);
+		}	
+
         // Clearing of buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Get cursor coordinates
+        double currentMouseX;
+        double currentMouseY;
+        glfwGetCursorPos(_pWindow, &currentMouseX, &currentMouseY);
 
         // Update eye input
         double gazeX;
         double gazeY;
-        bool gazeUsed = _upEyeInput->Update(tpf, _pWindow, gazeX, gazeY);
+        bool gazeUsed = _upEyeInput->Update(tpf, currentMouseX, currentMouseY, gazeX, gazeY);
+
+        // Update cursor
+        eyegui::setVisibilityOfLayout(_pCursorLayout, !gazeUsed, false, true);
+        float halfRelativeMouseCursorSize = MOUSE_CURSOR_RELATIVE_SIZE / 2.f;
+        eyegui::setPositionOfFloatingFrame(
+            _pCursorLayout,
+            _cursorFrameIndex,
+            (gazeX / _width) - halfRelativeMouseCursorSize,
+            (gazeY / _height) - halfRelativeMouseCursorSize);
+        eyegui::setSizeOfFloatingFrame(
+            _pCursorLayout,
+            _cursorFrameIndex,
+            MOUSE_CURSOR_RELATIVE_SIZE,
+            MOUSE_CURSOR_RELATIVE_SIZE);
 
         // Pause visualization
         _pausedDimming.update(tpf, !_paused);
         eyegui::setValueOfStyleAttribute(
-            _pPauseLayout,
+            _pSuperLayout,
             "pause_background",
             "background-color",
             RGBAToHexString(glm::vec4(0, 0, 0, MASTER_PAUSE_ALPHA * _pausedDimming.getValue())));
@@ -310,8 +357,9 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
         switch (key)
         {
             case GLFW_KEY_ESCAPE: { glfwSetWindowShouldClose(_pWindow, GL_TRUE); break; }
-            case GLFW_KEY_TAB:  { eyegui::hitButton(_pPauseLayout, "pause"); break; }
+            case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; }
+			case GLFW_KEY_S: { _upLabStream->Send("42");  } // TODO: testing
         }
     }
 }
@@ -359,7 +407,7 @@ void Master::GUIPrintCallback(std::string message) const
 
 void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
 {
-    if(pLayout == _pMaster->_pPauseLayout)
+    if(pLayout == _pMaster->_pSuperLayout)
     {
         _pMaster->_paused = true;
     }
@@ -367,7 +415,7 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
 
 void Master::MasterButtonListener::up(eyegui::Layout* pLayout, std::string id)
 {
-    if(pLayout == _pMaster->_pPauseLayout)
+    if(pLayout == _pMaster->_pSuperLayout)
     {
         _pMaster->_paused = false;
     }

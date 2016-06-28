@@ -12,6 +12,7 @@
 #include "include/wrapper/cef_helpers.h"
 #include <sstream>
 #include <string>
+#include <cmath>
 
 namespace
 {
@@ -24,6 +25,7 @@ Handler::Handler(CefMediator* pMediator, CefRefPtr<Renderer> renderer) : _isClos
   g_instance = this;
   _pMediator = pMediator;
   _renderer = renderer;
+  _msgRouter = new BrowserMsgRouter(this);
 }
 
 Handler::~Handler()
@@ -70,6 +72,8 @@ bool Handler::DoClose(CefRefPtr<CefBrowser> browser)
 void Handler::OnBeforeClose(CefRefPtr<CefBrowser> browser)
 {
   CEF_REQUIRE_UI_THREAD();
+
+  _msgRouter->OnBeforeClose(browser);
 
    //Remove from the list of existing browsers.
   BrowserList::iterator bit = _browserList.begin();
@@ -135,8 +139,10 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
         // Add own ID + false to loading frame map
         _loadingMainFrames.emplace(std::make_pair(frame->GetIdentifier(), true));
 
-        LogDebug("Handler: Updating favicon URL and image information via Javascript");
-        frame->ExecuteJavaScript(_js_favicon_get_url_and_resolution, frame->GetURL(), 0);
+        //LogDebug("Handler: Updating favicon URL and image information via Javascript");
+        //frame->ExecuteJavaScript(_js_favicon_get_url_and_resolution, frame->GetURL(), 0);
+
+        //frame->ExecuteJavaScript(_js_mutation_observer_test, "", 0);
 
 
     }
@@ -214,7 +220,7 @@ void Handler::OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
         UpdatePageResolution(browser);
 
         // EXPERIMENTAL
-        RequestFaviconBytes(browser);
+        //RequestFaviconBytes(browser); // OLD APPROACH
 
     }
 }
@@ -258,7 +264,6 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
     CefRefPtr<CefProcessMessage> msg)
 {
     const std::string& msgName = msg->GetName().ToString();
-    LogDebug("Handler: Received IPC msg called '", msgName, "'.");
 
     if (msgName == "ReceiveDOMElements")
     {
@@ -287,7 +292,7 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
         IPCLogRenderer(browser, msg);
     }
 
-    return false;
+    return _msgRouter->OnProcessMessageReceived(browser, source_process, msg);
 }
 
 void Handler::ResizeBrowsers()
@@ -429,25 +434,6 @@ void Handler::UpdatePageResolution(CefRefPtr<CefBrowser> browser)
 }
 
 // EXPERIMENTAL
-void Handler::RequestFaviconBytes(CefRefPtr<CefBrowser> browser)
-{
-
-    std::string lastFaviconURL = _pMediator->GetLastFaviconURL(browser);
-
-    if (lastFaviconURL != "ERROR_STRING" && browser->GetMainFrame()->GetURL() != "about:blank" ) // error string if Tab doesn't exist anymore
-    {
-        // Get favicon URL and set it as image's source in order to get its resolution
-        browser->GetMainFrame()->ExecuteJavaScript(_js_favicon_get_url_and_resolution, browser->GetMainFrame()->GetURL(), 0);
-
-        LogDebug("Handler: Sending \"GetFavIconBytes\" msg to renderer, in order to receive URL and resolution.");
-        // Send a request to get favicon bytes from renderer process
-        CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("GetFavIconBytes");
-        msg->GetArgumentList()->SetString(0, lastFaviconURL);
-        browser->SendProcessMessage(PID_RENDERER, msg);
-    }
-}
-
-// EXPERIMENTAL
 void Handler::GetFixedElements(CefRefPtr<CefBrowser> browser)
 {
     LogDebug("Handler: Searching for fixed elements on page.");
@@ -465,6 +451,72 @@ void Handler::IPCLogRenderer(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcess
 
     if (debugLog)
     {
-        LogDebug("IPCLog(browserID = ", browserID, "): ", text);
+        LogDebug("Renderer: ", text, " (browserID = ", browserID, ")");
     }
+}
+
+void Handler::OnFaviconURLChange(CefRefPtr<CefBrowser> browser,
+    const std::vector<CefString>& icon_urls)
+{
+    std::string highResURL;
+    int currentRes = 0;
+    std::string icoURL;
+
+    for (int i = 0; i < (int)icon_urls.size(); i++)
+    {
+        std::string url = icon_urls[i].ToString();
+        std::string format = "", res = "";
+
+        // Read out file ending
+        for (int j = url.size() - 1; j >= (int)url.size() - 7; j--)
+        {
+            if (url[j] == '.')
+            {
+                break;
+            }
+            format = url[j] + format;
+        }
+
+        if (format == "ico")
+        {
+            icoURL = url;
+            continue;
+        }
+
+        // Try to read parts of resolution like "160x160" from URL's end
+        for (int j = url.size() - format.size() - 7; j < (int)(url.size() - format.size()) - 1; j++)
+        {
+            res += url[j];
+        }
+
+        int height = 0;
+        for (int j = res.size()-1; j >= 0; j--)
+        {
+            // char is a digit?
+            if (digits.find(res[j]) != digits.end())
+            {
+                height += ((res[j]-'0') * pow(10, res.size()-1-j));
+            }
+            else
+            {
+                // break, when 'x' is reached
+                break;
+            }
+        }
+
+        if (height > currentRes)
+        {
+            highResURL = url;
+            currentRes = height;
+        }
+    }
+
+    const std::string iconURL = (currentRes > 0) ? highResURL : icoURL;
+
+    // Trigger favIconImg.onload function by setting image src
+    const std::string jscode = "favIconImg.src = '" + iconURL + "';";
+    browser->GetMainFrame()->ExecuteJavaScript(jscode, "", 0);
+
+    // New image incoming, delete the last one
+    _pMediator->ResetFavicon(browser);
 }

@@ -16,11 +16,12 @@
 #include "src/Setup.h"
 #include "src/Utils/LerpValue.h"
 #include "externals/OGL/gl_core_3_3.h"
-#include "externals/GLFW/include/GLFW/glfw3.h"
-#include "externals/eyeGUI/include/eyeGUI.h"
+#include "externals/eyeGUI-development/include/eyeGUI.h"
 
 // Forward declaration
 class Texture;
+struct GLFWwindow;
+class LabStream;
 
 class Master
 {
@@ -40,10 +41,10 @@ public:
     int GetWindowHeight() const { return _height; }
 
     // Get time provided by GLFW
-    double GetTime() const { return glfwGetTime(); }
+	double GetTime() const;
 
     // Exit
-    void Exit() { glfwSetWindowShouldClose(_pWindow, GL_TRUE); }
+	void Exit();
 
     // Set gaze visualization
     void SetGazeVisualization(bool show) { eyegui::setGazeVisualizationDrawing(_pGUI, show); }
@@ -133,14 +134,23 @@ private:
     // Time until input is accepted
     float _timeUntilInput = setup::DURATION_BEFORE_INPUT;
 
-    // Layout for pause button
-    eyegui::Layout* _pPauseLayout;
+    // Layout for pause button etc.
+    eyegui::Layout* _pSuperLayout;
+
+    // Emtpy layout to handle cursor floating frame that may not take input
+    eyegui::Layout* _pCursorLayout;
+
+    // Floating frame index of cusor
+    unsigned int _cursorFrameIndex = 0;
 
     // Bool to indicate pause (PAUSED_AT_STARTUP used in constructor). Pauses input, not application!
     bool _paused = false;
 
     // Lerp value to show pause as dimming of whole screen
     LerpValue _pausedDimming;
+
+    // Communication with LabStreamingLayer
+    std::unique_ptr<LabStream> _upLabStream;
 };
 
 #endif // MASTER_H_

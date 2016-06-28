@@ -55,7 +55,7 @@ int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app
 
     // Shutdown CEF
     LogInfo("Shutdown CEF...");
-    app->ShutdownCef();
+    CefShutdown();
     LogInfo("..done.");
 
     // Return zero

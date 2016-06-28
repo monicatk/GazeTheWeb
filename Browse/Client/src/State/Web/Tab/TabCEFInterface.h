@@ -35,6 +35,7 @@ public:
 
     // Receive favicon bytes as char vector ordered in RGBA
     virtual void ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upData, int width, int height) = 0;
+	virtual void ResetFaviconBytes() = 0;
 
     // Get weak pointer to texture of web view
     virtual std::weak_ptr<Texture> GetWebViewTexture() = 0;

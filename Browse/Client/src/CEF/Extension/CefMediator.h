@@ -2,8 +2,6 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Daniel Müller (muellerd@uni-koblenz.de)
 //============================================================================
-// Expand CefApp by methods and attributes used to communicate with Master and
-// Tab classes.
 
 #ifndef CEF_MEDIATOR_H_
 #define CEF_MEDIATOR_H_
@@ -71,8 +69,8 @@ public:
     // Sets Tab's URL attribute, called by Handler when main frame starts loading a page
     void SetURL(CefRefPtr<CefBrowser> browser);
 
-    std::string GetLastFaviconURL(CefRefPtr<CefBrowser> browser) const;
     void ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
+	void ResetFavicon(CefRefPtr<CefBrowser> browser);
 
     void SetCanGoBack(CefRefPtr<CefBrowser> browser, bool canGoBack);
     void SetCanGoForward(CefRefPtr<CefBrowser> browser, bool canGoForward);

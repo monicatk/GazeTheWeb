@@ -642,6 +642,11 @@ void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upDa
     _colorInterpolation = 0;
 }
 
+void Tab::ResetFaviconBytes()
+{
+	// TODO
+}
+
 std::weak_ptr<Texture> Tab::GetWebViewTexture()
 {
     return _upWebView->GetTexture();

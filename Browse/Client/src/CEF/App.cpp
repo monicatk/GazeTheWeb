@@ -48,10 +48,9 @@ void App::OnBeforeCommandLineProcessing(const CefString& process_type, CefRefPtr
     // EXPERIMENTAL: slow loading?
     // see end of https://bitbucket.org/chromiumembedded/cef/wiki/GeneralUsage#markdown-header-proxy-resolution
     command_line->AppendSwitch("no-proxy-server");
-}
 
-void App::ShutdownCef()
-{
-    CEF_REQUIRE_UI_THREAD();
-    CefShutdown();
+
+	// EXPERIMENTAL
+	// Javascript debugging?
+	command_line->AppendArgument("remote-debugging-port=666");
 }

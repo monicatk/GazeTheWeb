@@ -19,7 +19,7 @@
 #include "src/Utils/Input.h"
 #include "src/Global.h"
 #include "externals/GLM/glm/glm.hpp"
-#include "externals/eyeGUI/include/eyeGUI.h"
+#include "externals/eyeGUI-development/include/eyeGUI.h"
 #include <vector>
 #include <deque>
 #include <memory>
@@ -179,6 +179,7 @@ public:
 
     // Receive favicon bytes as char vector ordered in RGBA. Accepts also NULL for upData!
     virtual void ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upData, int width, int height);
+	virtual void ResetFaviconBytes(); // TODO
 
     // Get weak pointer to texture of web view
     virtual std::weak_ptr<Texture> GetWebViewTexture();

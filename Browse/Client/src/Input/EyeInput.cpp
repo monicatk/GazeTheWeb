@@ -25,26 +25,26 @@ EyeInput::EyeInput(bool useEmulation)
         if (!_upEyetracker->Connect())
         {
             _upEyetracker.reset(NULL);
-			LogInfo("..failed.");
+            LogInfo("..failed.");
         }
         else
         {
-			LogInfo("..connected.");
+            LogInfo("..connected.");
         }
 #endif
 #ifdef TOBII_SUPPORT
         if (_upEyetracker == NULL) // Do not try to use EyeX when SMI connected
         {
-			LogInfo("Trying to connect to Tobii EyeX SDK...");
+            LogInfo("Trying to connect to Tobii EyeX SDK...");
             _upEyetracker = std::unique_ptr<Eyetracker>(new Tobii);
             if (!_upEyetracker->Connect())
             {
                 _upEyetracker.reset(NULL);
-				LogInfo("..failed.");
+                LogInfo("..failed.");
             }
             else
             {
-				LogInfo("..connected.");
+                LogInfo("..connected.");
             }
         }
 #endif
@@ -73,18 +73,13 @@ EyeInput::~EyeInput()
     }
 }
 
-bool EyeInput::Update(float tpf, GLFWwindow* pWindow, double& rGazeX, double& rGazeY)
+bool EyeInput::Update(float tpf,  double mouseX, double mouseY, double& rGazeX, double& rGazeY)
 {
-    // Get cursor coordinates
-    double currentMouseX;
-    double currentMouseY;
-    glfwGetCursorPos(pWindow, &currentMouseX, &currentMouseY);
-
     // Mouse override of eyetracker
     if(_mouseOverride)
     {
         // Check whether override should stop
-        if(currentMouseX == _mouseX && currentMouseY == _mouseY)
+        if(mouseX == _mouseX && mouseY == _mouseY)
         {
             // Check whether override is over
             _mouseOverrideTime -= tpf;
@@ -110,8 +105,8 @@ bool EyeInput::Update(float tpf, GLFWwindow* pWindow, double& rGazeX, double& rG
             if(_mouseOverrideTime <= 0)
             {
                 // Check whether mouse cursor movement was enough to trigger override
-                float x = (float)(currentMouseX - _mouseOverrideX);
-                float y = (float)(currentMouseY - _mouseOverrideY);
+                float x = (float)(mouseX - _mouseOverrideX);
+                float y = (float)(mouseY - _mouseOverrideY);
                 float distance = std::sqrt(x*x + y*y);
                 if(distance >= EYEINPUT_MOUSE_OVERRIDE_INIT_DISTANCE)
                 {
@@ -129,12 +124,12 @@ bool EyeInput::Update(float tpf, GLFWwindow* pWindow, double& rGazeX, double& rG
         else
         {
             // Check whether there was initial movement
-            if(currentMouseX != _mouseX || currentMouseY != _mouseY)
+            if(mouseX != _mouseX || mouseY != _mouseY)
             {
                 // Start override initialization frame
                 _mouseOverrideInitFrame = true;
-                _mouseOverrideX = currentMouseX;
-                _mouseOverrideY = currentMouseY;
+                _mouseOverrideX = mouseX;
+                _mouseOverrideY = mouseY;
                 _mouseOverrideTime = EYEINPUT_MOUSE_OVERRIDE_INIT_FRAME_DURATION;
             }
         }
@@ -149,22 +144,15 @@ bool EyeInput::Update(float tpf, GLFWwindow* pWindow, double& rGazeX, double& rG
     // Bool to indicate mouse usage
     bool mouseCursorUsed = _upEyetracker == NULL || _mouseOverride;
 
-    // Update mouse cusor visibility
-    if(mouseCursorUsed != _mouseCursorVisible)
-    {
-        _mouseCursorVisible = mouseCursorUsed;
-        SetGLFWCursorVisibility(_mouseCursorVisible, pWindow);
-    }
-
     // Save mouse cursor coordinate in members
-    _mouseX = currentMouseX;
-    _mouseY = currentMouseY;
+    _mouseX = mouseX;
+    _mouseY = mouseY;
 
     // Return
     if (mouseCursorUsed)
     {
-        rGazeX = currentMouseX;
-        rGazeY = currentMouseY;
+        rGazeX = mouseX;
+        rGazeY = mouseY;
         return false;
     }
     else
@@ -172,17 +160,5 @@ bool EyeInput::Update(float tpf, GLFWwindow* pWindow, double& rGazeX, double& rG
         rGazeX = _upEyetracker->GetGazeX();
         rGazeY = _upEyetracker->GetGazeY();
         return true;
-    }
-}
-
-void EyeInput::SetGLFWCursorVisibility(bool visible, GLFWwindow* pWindow) const
-{
-    if(visible)
-    {
-        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    }
-    else
-    {
-        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
     }
 }

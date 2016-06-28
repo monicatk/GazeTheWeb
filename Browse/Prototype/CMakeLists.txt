@@ -4,8 +4,8 @@ set(CEF_TARGET Prototype)
 
 ### CONTENT ####################################################################
 
-set(CONTENT_PATH ${CMAKE_CURRENT_LIST_DIR}/content CACHE PATH "Project specific path. Set manually if it was not found.")
-add_definitions(-DCONTENT_PATH="${CONTENT_PATH}")
+set(PROTOTYPE_CONTENT_PATH ${CMAKE_CURRENT_LIST_DIR}/content CACHE PATH "Path to content folder.")
+add_definitions(-DCONTENT_PATH="${PROTOTYPE_CONTENT_PATH}")
 
 ### SOURCES ####################################################################
 
@@ -49,7 +49,7 @@ include_directories("${EYEGUI_DIRECTORY}/include")
 if(OS_WINDOWS) # Windows
 
   # eyeGUI
-	set(EYEGUI_LIBRARIES_DEBUG "${EYEGUI_DIRECTORY}/lib-vs2015_x86_debug_MTd/eyeGUI.lib")
+  set(EYEGUI_LIBRARIES_DEBUG "${EYEGUI_DIRECTORY}/lib-vs2015_x86_debug_MTd/eyeGUI.lib")
   set(EYEGUI_LIBRARIES_RELEASE "${EYEGUI_DIRECTORY}/lib-vs2015_x86_release_MT/eyeGUI.lib")
 
   # GLFW 3
@@ -195,3 +195,9 @@ if(MSVC)
     endforeach()
 
 endif(MSVC)
+
+### OTHER ######################################################################
+
+# Delete some variables from cache which should not appear in GUI
+unset(IVIEW_X_LIBRARIES CACHE)
+unset(GLFW3_STATIC_LIBRARIES CACHE)

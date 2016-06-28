@@ -9,10 +9,13 @@
 #include "src/CEF/Renderer.h"
 #include "src/CEF/Extension/JSCode.h"
 #include "include/cef_client.h"
+#include "src/CEF/BrowserMsgRouter.h"
 #include <list>
+#include <set>
 
 // Forward declaration
 class CefMediator;
+class BrowserMsgRouter;
 
 class Handler : public CefClient,
                 public CefDisplayHandler,
@@ -91,11 +94,12 @@ public:
     // Write page resolution to V8 variables, read them and update Tab
     void UpdatePageResolution(CefRefPtr<CefBrowser> browser);
 
-    // EXPERIMENTAL: Request favicon image bytes from renderer process
-    void RequestFaviconBytes(CefRefPtr<CefBrowser> browser);
-
     // EXPERIMENTAL: Request coordinates of fixed elements (like bars on top of pages)
     void GetFixedElements(CefRefPtr<CefBrowser> browser);
+
+	// CefDisplayHandler callbacks
+	void OnFaviconURLChange(CefRefPtr<CefBrowser> browser,
+		const std::vector<CefString>& icon_urls) OVERRIDE;
 
 private:
 
@@ -124,11 +128,17 @@ private:
     // Renderer, whose methods are called when rendering relevant actions take place
     CefRefPtr<Renderer> _renderer;
 
+	// Message router for Javascript induced C++ callbacks
+	CefRefPtr<BrowserMsgRouter> _msgRouter;
+
     // Javascript code as Strings
     const std::string _js_remove_css_scrollbar = GetJSCode(REMOVE_CSS_SCROLLBAR);
-    const std::string _js_favicon_get_url_and_resolution = GetJSCode(FAVICON_GET_URL_AND_RESOLUTION);
+    //const std::string _js_favicon_get_url_and_resolution = GetJSCode(FAVICON_GET_URL_AND_RESOLUTION);
     const std::string _js_mutation_observer_test = GetJSCode(MUTATION_OBSERVER_TEST);
     const std::string _js_fixed_element_search = GetJSCode(FIXED_ELEMENT_SEARCH);
+
+	// Set for parsing strings (as char by accessing it with []) to numbers
+	std::set<char> digits = { '0', '1', '2', '3', '4', '5', '6' ,'7', '8', '9' };
 
     // Include CEF'S default reference counting implementation
     IMPLEMENT_REFCOUNTING(Handler);
