@@ -25,7 +25,7 @@ Handler::Handler(CefMediator* pMediator, CefRefPtr<Renderer> renderer) : _isClos
   g_instance = this;
   _pMediator = pMediator;
   _renderer = renderer;
-  _msgRouter = new BrowserMsgRouter(this);
+  _msgRouter = new BrowserMsgRouter(pMediator);
 }
 
 Handler::~Handler()

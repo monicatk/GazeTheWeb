@@ -8,7 +8,7 @@
 
 #include "include/wrapper/cef_message_router.h"
 
-class Handler; // Forward declaration
+class CefMediator;		// Forward declaration
 class BrowserMsgRouter; // Forward declaration
 
 class MsgHandler :	public CefMessageRouterBrowserSide::Handler
@@ -39,7 +39,7 @@ private:
 class BrowserMsgRouter : public CefBase
 {
 public:
-	BrowserMsgRouter(CefRefPtr<Handler> cefHandler);
+	BrowserMsgRouter(CefMediator* cefMediator);
 
 	// Redirecting all method calls to browser side message router
 	void OnBeforeBrowse(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame) const
@@ -70,7 +70,7 @@ private:
 	CefRefPtr<CefMessageRouterBrowserSide> _router;
 
 	// Keep reference to Handler class in order to communicate with whole CEF architecture
-	CefRefPtr<Handler> _cefHandler;
+	CefMediator* _cefMediator;
 
 	IMPLEMENT_REFCOUNTING(BrowserMsgRouter);
 };

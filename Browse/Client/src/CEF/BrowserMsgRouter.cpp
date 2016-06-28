@@ -4,12 +4,12 @@
 //============================================================================
 
 #include "BrowserMsgRouter.h"
-#include "src/CEF/Handler.h"
+#include "src/CEF/Extension/CefMediator.h"
 #include "src/Utils/Logger.h"
 
-BrowserMsgRouter::BrowserMsgRouter(CefRefPtr<Handler> cefHandler)
+BrowserMsgRouter::BrowserMsgRouter(CefMediator* cefMediator)
 {
-	_cefHandler = cefHandler;
+	_cefMediator = cefMediator;
 
 	// Create configuration for browser side message router
 	CefMessageRouterConfig config;
