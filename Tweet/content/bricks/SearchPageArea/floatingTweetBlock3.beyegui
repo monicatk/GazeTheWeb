@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<grid>
+  <row size="100%">
+    <column size="1%">
+      <block style="invisible"></block>
+    </column>
+    <column size = "20%">
+      <grid>
+        <row size="10%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="80%">
+          <column size="100%">
+            <picture id="profilePic3" src="img/invisProf.png" style="block" alignment="stretched"></picture>
+          </column>
+        </row>
+        <row size="10%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+      </grid>
+    </column>
+    <column size = "62.0%">
+      <grid>
+        <row size="8.0%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="84.0%">
+          <column size="100%">
+            <textblock id="textBlock3_1"  style="invisible" textscale="65.0%"></textblock>
+          </column>
+        </row>
+        <row size="8.0%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+      </grid>
+    </column>
+    <column size="1%">
+      <block style="invisible"></block>
+    </column>
+    <column size = "15%">
+      <grid>
+        <row size="8%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size= "42%">
+          <column size = "100%">
+            <textblock id="textBlock3_2"  style="invisible" textscale="65.0%" alignment="center" verticalalignment="center"></textblock>
+          </column>
+        </row>
+        <row size= "42%">
+          <column size = "100%">
+            <textblock id="textBlock3_3"  style="invisible" textscale="65.0%" alignment="center" verticalalignment="center" ></textblock>
+          </column>
+        </row>
+        <row size="8%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+      </grid>
+    </column>
+    <column size="1%">
+      <block style="invisible"></block>
+    </column>
+  </row>
+</grid>

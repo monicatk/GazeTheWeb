@@ -1,0 +1,12 @@
+﻿<?xml version="1.0"?>
+<grid>
+  <row  size="100%">
+    <column size="50%">
+      <boxbutton id="button1"></boxbutton>
+      </column>
+      <column size="50%">
+	<boxbutton id="button2"></boxbutton>
+      
+      </column>
+  </row>
+</grid>

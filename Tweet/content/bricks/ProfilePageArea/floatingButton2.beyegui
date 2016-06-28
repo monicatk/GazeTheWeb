@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<grid>
+<row size="100%">
+<column size="100%">
+<boxbutton id="1" style="invisible"></boxbutton>
+</column>
+</row>
+</grid>

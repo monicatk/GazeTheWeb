@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<grid>
+  <row size="100%">
+    <column size="1%">
+      <block style="invisible"></block>
+    </column>
+    <column size = "82.0%">
+      <grid>
+        <row size="8.0%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="84.0%">
+          <column size="100%">
+            <textblock id="textBlock4_1"  style="invisible" textscale="70.0%" content="test"></textblock>
+          </column>
+        </row>
+        <row size="8.0%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+      </grid>
+    </column>
+    <column size="1%">
+      <block style="invisible"></block>
+    </column>
+    <column size = "15%">
+      <grid>
+        <row size="8%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size= "42%">
+          <column size = "100%">
+            <textblock id="textBlock4_2"  style="invisible" textscale="70.0%" content="test" alignment="center" verticalalignment="center"></textblock>
+          </column>
+        </row>
+        <row size= "42%">
+          <column size = "100%">
+            <textblock id="textBlock4_3"  style="invisible" textscale="70.0%" content="test" alignment="center" verticalalignment="center" ></textblock>
+          </column>
+        </row>
+        <row size="8%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+      </grid>
+    </column>
+    <column size="1%">
+      <block style="invisible"></block>
+    </column>
+  </row>
+</grid>

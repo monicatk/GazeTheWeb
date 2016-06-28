@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+
+<grid>
+  <row size="25%%">
+    <column size="100%">
+      	 <stack>
+	  <boxbutton id="keySlower5" style="keyboard_special_buttons"  icon="img/keyboard_new/slower.png"></boxbutton>
+	  <boxbutton id="keyFaster5" style="keyboard_special_buttons"  icon="img/keyboard_new/faster.png"></boxbutton>
+	  <boxbutton id="keyCircumflex" style="keyboard_buttons" icon="img/keyboard_new/circumflex.png"></boxbutton>
+	  <boxbutton id="keyQuotationMark" style="keyboard_buttons"  icon="img/keyboard_new/quotationmark.png"></boxbutton>
+	  <boxbutton id="keyAt" style="keyboard_buttons" icon="img/keyboard_new/at.png"></boxbutton>
+	  <boxbutton id="keyAmpersand" style="keyboard_buttons" icon="img/keyboard_new/ampersand.png"></boxbutton>
+	  <boxbutton id="keyExclammark" style="keyboard_buttons" icon="img/keyboard_new/exclammark.png"></boxbutton>
+	  <boxbutton id="keyQuestionmark" style="keyboard_buttons" icon="img/keyboard_new/questionmark.png"></boxbutton>
+	  <boxbutton id="keyColon" style="keyboard_buttons" icon="img/keyboard_new/colon.png"></boxbutton>
+	  <boxbutton id="keyComma" style="keyboard_buttons" icon="img/keyboard_new/comma.png"></boxbutton>
+	  <boxbutton id="keySemicolon" style="keyboard_buttons" icon="img/keyboard_new/semicolon.png"></boxbutton>
+	  <boxbutton id="keyPlus" style="keyboard_buttons" icon="img/keyboard_new/plus.png"></boxbutton>
+       </stack>
+    </column>
+  </row>
+  <row size="25%">
+    <column size="100%">
+      <stack>
+	<boxbutton id="keyNumbers5" style="keyboard_special_buttons" icon="img/keyboard_new/numbers.png"></boxbutton>
+	<boxbutton id="keySymbols5" style="keyboard_special_buttons" icon="img/keyboard_new/smallLetters.png"></boxbutton>
+	<boxbutton id="keyRoundBracketOpen" style="keyboard_buttons" icon="img/keyboard_new/roundbracketopen.png"></boxbutton>  
+	<boxbutton id="keyRoundBracketClosing" style="keyboard_buttons"  icon="img/keyboard_new/roundbracketclosing.png"></boxbutton>
+	<boxbutton id="keyRectangularBracketOpen" style="keyboard_buttons" icon="img/keyboard_new/rectangularbracketopen.png"></boxbutton>
+	<boxbutton id="keyRectangularBracketClosing" style="keyboard_buttons" icon="img/keyboard_new/rectangularbracketclosing.png"></boxbutton>
+	<boxbutton id="keyCurlyBracketOpen" style="keyboard_buttons" icon="img/keyboard_new/curlybracketopen.png"></boxbutton>
+	<boxbutton id="keyCurlyBracketClosing" style="keyboard_buttons" icon="img/keyboard_new/curlybracketclosing.png"></boxbutton>
+	<boxbutton id="keyBackslash" style="keyboard_buttons" icon="img/keyboard_new/backslash.png"></boxbutton>
+	<boxbutton id="keyForwardSlash" style="keyboard_buttons" icon="img/keyboard_new/forwardslash.png"></boxbutton>
+	<boxbutton id="keyUnderscore" style="keyboard_buttons" icon="img/keyboard_new/underscore.png"></boxbutton>
+	<boxbutton id="keyMinus" style="keyboard_buttons" icon="img/keyboard_new/minus.png"></boxbutton>
+      </stack>
+    </column>
+  </row>
+  <row size="25%">
+    <column size="100%">
+      	 <stack>
+	  <boxbutton id="keySpecial5" style="keyboard_special_buttons" icon="img/keyboard_new/special.png"></boxbutton>
+	   <boxbutton id="keyFunctions5" style="keyboard_special_buttons" icon="img/keyboard_new/functions.png"></boxbutton>
+	  <boxbutton id="keySmallerThan" style="keyboard_buttons" icon="img/keyboard_new/smallerthan.png"></boxbutton>
+	  <boxbutton id="keyGreaterThan" style="keyboard_buttons" icon="img/keyboard_new/greaterthan.png"></boxbutton>
+	  <boxbutton id="keyTilde" style="keyboard_buttons" icon="img/keyboard_new/tilde.png"></boxbutton>
+	  <boxbutton id="keyEquals" style="keyboard_buttons"  icon="img/keyboard_new/equals.png"></boxbutton>
+	  <boxbutton id="keyPipe" style="keyboard_buttons" icon="img/keyboard_new/pipe.png"></boxbutton>
+	  <boxbutton id="keyParagraph" style="keyboard_buttons" icon="img/keyboard_new/paragraph.png"></boxbutton>
+	  <boxbutton id="keyDollar" style="keyboard_buttons" icon="img/keyboard_new/dollar.png"></boxbutton>
+	  <boxbutton id="keyPercentage" style="keyboard_buttons" icon="img/keyboard_new/percent.png"></boxbutton>
+	  <boxbutton id="keyStar" style="keyboard_buttons" icon="img/keyboard_new/star.png"></boxbutton>
+	  <boxbutton id="keyDelete5" style="keyboard_special_buttons" icon="img/keyboard_new/remove.png">></boxbutton>
+       </stack>
+    </column>
+  </row>
+  <row size="25%">
+    <column size="17%">
+      	<stack>
+	<boxbutton id="keyMoveLeft5" style="keyboard_special_buttons" icon="img/keyboard_new/moveCursorLeft.png"></boxbutton>
+	<boxbutton id="keyMoveRight5" style="keyboard_special_buttons" icon="img/keyboard_new/moveCursorRight.png"></boxbutton>
+      </stack>
+    </column>
+    <column size="83%">
+      	 <stack>
+	<boxbutton id="keyLeer5" style="keyboard_special_buttons" icon="img/keyboard_new/space.png"></boxbutton>
+	<boxbutton id="keyEnter5" style="keyboard_special_buttons" icon="img/keyboard_new/enter.png"></boxbutton>
+       </stack>
+    </column>
+  </row>
+</grid>

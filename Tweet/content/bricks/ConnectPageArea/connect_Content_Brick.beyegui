@@ -1,0 +1,186 @@
+﻿<?xml version="1.0"?>
+<grid id="content_area"  backgroundsrc="img/wall_page/contenArea/background_tweets_wall2x.png" backgroundalignment="stretched" showbackground="true">
+<row size="25%">
+  <column size="1.2%">
+    <block style="invisible"></block>
+  </column>
+  <column size="96.4%">
+<grid>
+  <row size = "2.8%">
+    <column size = "100%">
+      <block style="invisible"></block>
+    </column>
+  </row>
+  <row size="94.4%">
+    <column size = "100%">
+	<block id="message0" style="invisible" backgroundsrc="menuebar_elements/tweet_content2.png" backgroundalignment="stretched"></block>  
+    </column>
+  </row>
+  <row size="2.8%">
+    <column size = "100%">
+      <block style="invisible"></block>
+    </column>
+  </row>
+</grid>
+  </column>
+  <column size="2.4%">
+<grid>
+  <row size = "2.8%">
+    <column size = "100%">
+      <block style="invisible"></block>
+    </column>
+  </row>
+  <row size="94.4%">
+    <column size = "100%">
+    <block id="rightSide0" style="invisible"></block>
+    </column>
+  </row>
+  <row size="2.8%">
+    <column size = "100%">
+      <block style="invisible"></block>
+    </column>
+  </row>
+</grid>
+  </column>
+  </row>
+  
+<row size="25%">
+  <column size="1.2%">
+    <block style="invisible"></block>
+  </column>
+  <column size="96.4%">
+<grid>
+  <row size = "2.8%">
+    <column size = "100%">
+      <block style="invisible"></block>
+    </column>
+  </row>
+  <row size="94.4%">
+    <column size = "100%">
+	<block id="message1" style="invisible" backgroundsrc="menuebar_elements/tweet_content2.png" backgroundalignment="stretched"></block>  
+    </column>
+  </row>
+  <row size="2.8%">
+    <column size = "100%">
+      <block style="invisible"></block>
+    </column>
+  </row>
+</grid>
+  </column>
+  <column size="2.4%">
+<grid>
+  <row size = "2.8%">
+    <column size = "100%">
+      <block style="invisible"></block>
+    </column>
+  </row>
+  <row size="94.4%">
+    <column size = "100%">
+    <block id="rightSide1" style="invisible"></block>
+    </column>
+  </row>
+  <row size="2.8%">
+    <column size = "100%">
+      <block style="invisible"></block>
+    </column>
+  </row>
+</grid>
+  </column>
+  </row>
+  
+<row size="25%">
+  <column size="1.2%">
+    <block style="invisible"></block>
+  </column>
+  <column size="96.4%">
+<grid>
+  <row size = "2.8%">
+    <column size = "100%">
+      <block style="invisible"></block>
+    </column>
+  </row>
+  <row size="94.4%">
+    <column size = "100%">
+	<block id="message2" style="invisible" backgroundsrc="menuebar_elements/tweet_content2.png" backgroundalignment="stretched"></block>   
+    </column>
+  </row>
+  <row size="2.8%">
+    <column size = "100%">
+      <block style="invisible"></block>
+    </column>
+  </row>
+</grid>
+  </column>
+  <column size="2.4%">
+<grid>
+  <row size = "2.8%">
+    <column size = "100%">
+      <block style="invisible"></block>
+    </column>
+  </row>
+  <row size="94.4%">
+    <column size = "100%">
+    <block id="rightSide2" style="invisible"></block>
+    </column>
+  </row>
+  <row size="2.8%">
+    <column size = "100%">
+      <block style="invisible"></block>
+    </column>
+  </row>
+</grid>
+  </column>
+  </row>
+  
+  
+  
+  
+  
+  
+<row size="25%">
+  <column size="1.2%">
+    <block style="invisible"></block>
+  </column>
+  <column size="96.4%">
+<grid>
+  <row size = "2.8%">
+    <column size = "100%">
+      <block style="invisible"></block>
+    </column>
+  </row>
+  <row size="94.4%">
+    <column size = "100%">
+	<block id="message3" style="invisible" backgroundsrc="menuebar_elements/tweet_content2.png" backgroundalignment="stretched"></block>    
+    </column>
+  </row>
+  <row size="2.8%">
+    <column size = "100%">
+      <block style="invisible"></block>
+    </column>
+  </row>	
+  
+</grid>
+  </column>
+  <column size="2.4%">
+<grid>
+  <row size = "2.8%">
+    <column size = "100%">
+      <block style="invisible"></block>
+    </column>
+  </row>
+  <row size="94.4%">
+    <column size = "100%">
+    <block id="rightSide3" style="invisible"></block>
+    </column>
+  </row>
+  <row size="2.8%">
+    <column size = "100%">
+      <block style="invisible"></block>
+    </column>
+  </row>
+</grid>
+
+  </column>
+  </row>
+  
+</grid>

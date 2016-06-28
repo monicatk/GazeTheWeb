@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+<grid id = "menue_button_area" showbackground="true"  style = "block">
+<row size ="100.0%">
+	<column size="5.625%">
+		<block style ="block"></block>
+	</column>
+	<column size = "11.171875%">
+		<grid>
+			<row size ="12.08%">
+				<column size="100.0%">
+					<block style ="block"></block>
+				</column>
+			</row>
+			<row size = "69.08%">
+				<column size="100.0%">
+					<circlebutton style="block" id="discover_button" icon="menuebar_elements/discover.png" ></circlebutton>
+				</column>
+			</row>
+      <row size="18.84%">
+        <column size="100.0%">
+          <block style="block"></block>
+        </column>
+      </row>
+		</grid>
+	</column>
+	<column size="2.578125%">
+		<block style ="block"></block>
+	</column>	
+	<column size="11.171875%">
+		<grid>
+			<row size ="19.32%">
+				<column size="100.0%">
+						<picture src="menuebar_elements/left_corner.png" style="block" alignment="stretched"></picture>
+				</column>
+			</row>
+			<row size = "69.08%">
+				<column size="100.0%">
+					<circlebutton style="block" id="profile_button" icon="menuebar_elements/profile.png"  ></circlebutton>
+				</column>
+			</row>
+      <row size="11.6%">
+        <column size="100.0%">
+          <block style="block"></block>
+        </column>
+      </row>
+		</grid>
+	</column>
+	<column size="3.046875%">
+		<grid>
+			<row size="66.666%">
+				<column size="100.0%">
+						<picture src="menuebar_elements/left.png" style="block" alignment="stretched"></picture>
+				</column>
+			</row>
+			<row size="33.334%">
+				<column size="100.0%">
+					<block style ="block"></block>
+				</column>
+			</row>
+		</grid>
+	</column>
+	<column size = "32.8125.0%">
+		<grid>
+			<row size="66.666%">
+				<column size="49.6437%">
+					<boxbutton style="block" id="wall_button" icon="menuebar_elements/home_button_cropped.png"></boxbutton>
+				</column>
+        <column size="0.7126">
+          <block style="block"></block>
+        </column>
+				<column size="49.6437%">
+					<boxbutton style="block" id="tweet_button" icon="menuebar_elements/tweet_button_cropped.png"></boxbutton>
+				</column>
+			</row>
+			<row size="33.334%">
+				<column size="100.0%">
+					<boxbutton style ="block" id="toTheTopButton" icon="menuebar_elements/goTop2.png"></boxbutton>
+				</column>
+			</row>
+		</grid>
+	</column>
+	<column size="3.046875%">
+		<grid>
+			<row size="66.666%">
+				<column size="100.0%">
+						<picture src="menuebar_elements/right.png" style="block" alignment="stretched"></picture>
+				</column>
+			</row>
+			<row size="33.334%">
+				<column size="100.0%">
+					<block style ="block"></block>
+				</column>
+			</row>
+		</grid>
+	</column>
+	<column size = "11.171875%">
+		<grid>
+			<row size ="19.32%">
+				<column size="100.0%">
+						<picture src="menuebar_elements/right_corner.png" style="block" alignment="stretched"></picture>
+				</column>
+			</row>
+			<row size = "69.08%">
+				<column size="100.0%">
+					<circlebutton style="block" id="connect_button" icon="menuebar_elements/messeges.png"></circlebutton>
+				</column>
+			</row>
+      <row size="11.6%">
+        <column size="100.0%">
+          <block style="block"></block>
+        </column>
+      </row>
+		</grid>
+	</column>
+	<column size="2.578125%">
+		<block style ="block"></block>
+	</column>
+	<column size = "11.171875%">
+		<grid>
+			<row size ="12.08%">
+				<column size="100.0%">
+					<block style ="block"></block>
+				</column>
+			</row>
+			<row size = "69.08%">
+				<column size="100.0%">
+					<circlebutton style="block" id="search_button" icon="menuebar_elements/search.png"></circlebutton>
+				</column>
+			</row>
+      <row size="19.84%">
+        <column size="100,0%">
+          <block style="block"></block>
+        </column>
+      </row>
+		</grid>
+	</column>
+	<column size="5.625%">
+		<block style ="block"></block>
+	</column>
+</row>
+</grid>

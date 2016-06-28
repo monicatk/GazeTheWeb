@@ -1,0 +1,47 @@
+﻿<?xml version="1.0"?>
+<layout stylesheet="style/stylesheet.seyegui" >
+    <grid>
+	
+  <row  size="22%">
+  <column size="95">
+   
+	<textblock innerborder="25%" id="keyboardtext"  style="keyboard_background" content="Ausgabetext"></textblock>
+		
+  </column>
+  
+    <column size="5">
+   
+	      <circlebutton id="keyAbort" style="keyboard_background"  icon="img/keyboard_new/abort2.png"></circlebutton>
+
+  </column>
+  
+  </row>
+  
+  <row size="10%" >
+
+     <column size="5%">
+	<boxbutton id="keyWleft" style="keyboard_special_buttons"  icon="img/keyboard_new/moveWordLeft.png"></boxbutton>
+     </column>		
+     <column size="90%"> 
+	    <stack>
+		 <boxbutton id="keyWord1" style="keyboard_wordCompletion" alignment="center" icon="img/keyboard_new/placeholder.png"></boxbutton>
+		 <boxbutton id="keyWord2" style="keyboard_wordCompletion" icon="img/keyboard_new/placeholder.png"></boxbutton>
+		 <boxbutton id="keyWord3" style="keyboard_wordCompletion" icon="img/keyboard_new/placeholder.png"></boxbutton>
+	    </stack>
+    </column>
+    <column size="5%">
+	<boxbutton id="keyWright" style="keyboard_special_buttons"  icon="img/keyboard_new/moveWordRight.png"></boxbutton>
+    </column>			
+</row>	
+		<row size="68%" >
+
+			<column size="100%">
+			  <block style="red" id="key_area"></block>
+			</column>
+			
+		</row>
+		
+		
+		
+	</grid>
+</layout>

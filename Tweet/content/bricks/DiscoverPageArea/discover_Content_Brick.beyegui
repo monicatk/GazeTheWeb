@@ -1,0 +1,161 @@
+﻿<?xml version="1.0"?>
+<grid id="content_area" backgroundsrc="img/wall_page/contenArea/background_tweets_wall2x.png" backgroundalignment="stretched" showbackground="true">
+<row size="100%">
+<column size="0.7%">
+	<block style="invisible"></block>
+</column>
+<column size="97%">
+<grid>
+<row size="30%">
+	<column size="100%">
+		<grid>
+			<row size="2%">
+				<column size="100%">
+				<block style="invisible"></block>
+				</column>
+				
+			</row>
+			<row size="46.56%">
+				<column size="49.92%">
+				<block id="hashtag0" style="invisible" backgroundsrc="menuebar_elements/tweet_content3.png" backgroundalignment="stretched"></block>
+				</column>
+				<column size="0.16%">
+				<block style="invisible"></block>
+				</column>
+				<column size="49.92%">
+				<block id="hashtag1" style="invisible" backgroundsrc="menuebar_elements/tweet_content3.png" backgroundalignment="stretched"></block>
+				</column>
+			</row>
+			
+			<row size="0.96%">
+				<column size="100%">
+				<block style="invisible"></block>
+				</column>
+			</row>
+			
+			<row size="46.56%">
+				<column size="49.92%">
+				<block id="hashtag2" style="invisible" backgroundsrc="menuebar_elements/tweet_content3.png" backgroundalignment="stretched"></block>
+				</column>
+				<column size="0.16%">
+				<block style="invisible"></block>
+				</column>
+				<column size="49.92%">
+				<block id="hashtag3" style="invisible" backgroundsrc="menuebar_elements/tweet_content3.png" backgroundalignment="stretched"></block>
+				</column>
+			</row>
+			
+			<row size="2%">
+				<column size="100%">
+				<block style="invisible"></block>
+				</column>
+			</row>
+		</grid>
+	</column>
+</row>
+  
+<row size="70%">
+	<column size="100%">
+		
+		<grid>
+			<row size="0.5%">
+				<column size="100%">
+				<block style="invisible"></block>
+				</column>
+			</row>
+			<row size="32.6%">
+				<column size="100%">
+				<block style="invisible" id="suggestion4" backgroundsrc="menuebar_elements/tweet_content4.png" backgroundalignment="stretched"></block>
+				</column>
+			</row>
+			<row size="0.5%">
+				<column size="100%">
+				<block style="invisible"></block>
+				</column>
+			</row>
+			<row size="32.6%">
+				<column size="100%">
+				<block style="invisible" id="suggestion5" backgroundsrc="menuebar_elements/tweet_content4.png" backgroundalignment="stretched"></block>
+				</column>
+			</row>
+			<row size="0.5%">
+				<column size="100%">
+				<block style="invisible"></block>
+				</column>
+			</row>
+			<row size="32.6%">
+				<column size="100%">
+				<block style="invisible" id="suggestion6" backgroundsrc="menuebar_elements/tweet_content4.png" backgroundalignment="stretched"></block>
+				</column>
+			</row>
+			<row size="0.5%">
+				<column size="100%">
+				<block style="invisible"></block>
+				</column>
+			</row>
+		</grid>
+		
+	</column>
+</row>
+</grid>
+</column>
+<column size="2.3%">
+
+
+<grid>
+<row size="30%">
+	<column size="100%">
+				<block style="invisible"></block>
+	</column>
+</row>
+  
+<row size="70%">
+	<column size="100%">
+		
+		<grid>
+			<row size="0.5%">
+				<column size="100%">
+				<block style="invisible"></block>
+				</column>
+			</row>
+			<row size="32.6%">
+				<column size="100%">
+					<block style="invisible" id="rightSide4"></block>
+				</column>
+			</row>
+			<row size="0.5%">
+				<column size="100%">
+				<block style="invisible"></block>
+				</column>
+			</row>
+			<row size="32.6%">
+				<column size="100%">
+					<block style="invisible" id="rightSide5"></block>
+				</column>
+			</row>
+			<row size="0.5%">
+				<column size="100%">
+				<block style="invisible"></block>
+				</column>
+			</row>
+			<row size="32.6%">
+				<column size="100%">
+					<block style="invisible" id="rightSide6"></block>
+				</column>
+			</row>
+			<row size="0.5%">
+				<column size="100%">
+				<block style="invisible"></block>
+				</column>
+			</row>
+		</grid>
+		
+	</column>
+</row>
+</grid>
+
+
+</column>
+</row>
+  
+</grid>

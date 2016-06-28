@@ -1,0 +1,148 @@
+﻿<?xml version="1.0"?>
+<grid id="content_area" backgroundsrc="img/profile_page/elements/profile_page_background2.png" backgroundalignment="stretched" showbackground="true">
+  <row size="32.7526%">
+    <columns size="17.7494%">
+      <block style="block"></block>
+    </columns>
+    <column size="64.5012%">
+      <grid>
+        <row size = "73.468%">
+          <column size = "36.3964%">
+            <block id="tweet_count" style="invisible" backgroundsrc="img/profile_page/elements/tweet_count2.png" backgroundalignment="stretched"></block>
+          </column>
+          <column size = "27.2072%">
+            <picture id="profilePic" style="invisible" src="menuebar_elements/logout.png"></picture>
+          </column>
+          <column size = "36.3964%">
+            <block id="follower_count" style="invisible" backgroundsrc="img/profile_page/elements/follower_count2.png" backgroundalignment="stretched"></block>
+          </column>
+        </row>
+        <row size="4%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="22.532%">
+          <column size ="100%">
+            <block id="decription" style="invisible" backgroundsrc="img/profile_page/elements/description2.png" backgroundalignment="stretched"></block>
+          </column>
+        </row>
+      </grid>
+    </column>
+    <column size="17.7493%">
+      <block style="block"></block>
+    </column>
+  </row>
+
+  <row size="1.2195%">
+    <column size="100%">
+      <block style="block"></block>
+    </column>
+  </row>
+  
+  <row size="66.0279%">
+    <column size="1.16%">
+      <block style="invisible"></block>
+    </column>
+    <column size="96.2877%">
+      <grid>
+        <row size="2.41305%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="30.2949%">
+          <column size="100%">
+            <block id="content1" backgroundsrc="menuebar_elements/tweet_content2.png" backgroundalignment="stretched" style="invisible"></block>
+          </column>
+        </row>
+        <row size="1.0723">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="1.0723">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="30.2949%">
+          <column size="100%">
+            <block id="content2" backgroundsrc="menuebar_elements/tweet_content2.png" backgroundalignment="stretched" style="invisible"></block>
+          </column>
+        </row>
+        <row size="1.0723">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="1.0723">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="30.2949%">
+          <column size="100%">
+            <block id="content3" backgroundsrc="menuebar_elements/tweet_content2.png" backgroundalignment="stretched" style="invisible"></block>
+          </column>
+        </row>
+        <row size="2.41305%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+      </grid>
+    </column>
+    <column size="2.5523%">
+	
+      <grid>
+        <row size="2.41305%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="30.2949%">
+          <column size="100%">
+            <block id="rightSide1" style="invisible"></block>
+          </column>
+        </row>
+        <row size="1.0723">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="1.0723">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="30.2949%">
+          <column size="100%">
+            <block id="rightSide2" style="invisible"></block>
+          </column>
+        </row>
+        <row size="1.0723">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="1.0723">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="30.2949%">
+          <column size="100%">
+            <block id="rightSide3" style="invisible"></block>
+          </column>
+        </row>
+        <row size="2.41305%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+      </grid>
+	  
+    </column>
+  </row>  
+</grid>

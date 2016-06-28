@@ -1,0 +1,47 @@
+﻿<?xml version="1.0"?>
+<grid>
+
+  <row  size="32%">
+	<column size="90">
+		<block style="back"></block>	
+	</column>
+  
+    <column size="10">
+	<block style="back"></block>
+	</column>
+  </row>
+  
+  
+  <!--This row should be extended for word completion! -->
+  <row size="0%">
+    <column size="100%">
+      <block style="back"></block>
+    </column>
+  </row>
+  
+    <row  size="10%">
+		<column size="100%">
+		<block style="back"></block>
+		</column>
+	</row>
+  
+    <row  size="48%">
+		<column size="100%">
+			<stack>
+				<block style="back"></block>
+				<boxbutton id="yes" icon="img/keyboard/yes.png"></boxbutton>
+				<block style="back"></block>
+				<boxbutton id="no" icon="img/keyboard/no.png"></boxbutton>
+				<block style="back"></block>
+			</stack>
+		</column>
+	</row>
+  
+      <row  size="10%">
+		<column size="100%">
+		<block style="back"></block>
+		</column>
+	</row>
+  
+  
+</grid>

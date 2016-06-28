@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+  <grid>
+
+    <row  size="6.431%">
+      <column size="100%">
+        <block style="login"></block>
+      </column>
+    </row>
+    <row size="70.7395%">
+      <column size="100%">
+        <circlebutton id="username_button" icon="Eprojekt_Design/user.png" style="login"></circlebutton>
+      </column>
+    </row>
+    <row size="22.83%">
+      <column size="100%">
+        <block style="login"></block>
+      </column>
+    </row>
+  </grid>

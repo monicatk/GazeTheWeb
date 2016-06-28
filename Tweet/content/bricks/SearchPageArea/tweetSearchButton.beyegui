@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<grid>
+	<row size="100%">
+		<column size = "100%">
+			<boxbutton id="tweetSearchButton"  icon="img/search_page/elements/tweet_search_button2.png"></boxbutton>
+		</column>
+	</row>
+</grid>

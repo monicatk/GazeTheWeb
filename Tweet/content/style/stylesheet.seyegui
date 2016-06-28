@@ -1,0 +1,155 @@
+default 
+{
+	background-color= 0xFFFFFFFF
+	color = 0xFFFFFFFF
+	font-color=0xB5B5B5FF
+}
+
+blocky
+{
+  background-color= 0xFF000055
+}
+
+text
+{
+  font-color=0xFFFFFFFF
+}
+
+red
+{
+  background-color=0xFF0000FF
+}
+
+blue
+{
+  background-color=0x0000FFFF
+}
+
+block
+{
+	background-color=0x383838FF
+	color = 0x383838FF
+	font-color=0xB5B5B5FF
+	separator-color = 383838ff
+	selection-color = 383838ff
+	mark-color = 383838ff
+	highlight-color = 383838ff
+}
+
+textblock
+{
+	font-color=0xB5B5B5FF
+}
+
+keyboard3
+{
+	background-color= 0x000000		
+	font-color=0xFFFFFFFF
+}
+
+keyboard1
+{
+	background-color= 0xFFFFFFFF
+}
+
+keyboard2
+{
+	background-color=0x888888FF	
+	font-color=0xFF0000FF
+}
+
+keyboard4
+{
+	background-color= 0x000000	
+	font-color=0xeae8e8ff
+}
+
+keyboardBack
+{
+background-color=0x888888FF	
+}
+
+invisible
+{
+    color = 0x00000000
+    background-color = 0x00000000
+    icon-color = 0x00000000
+	font-color=0x000000FF
+}
+
+invisibleBackground
+{
+color = 0x00000000
+}
+
+back
+{
+	background-color = 0x383838ff	
+}
+
+backSelected
+{
+	background-color = 0x4f4f4fff	
+}
+
+keyboard_buttons
+{
+   color = 383838ff
+   background-color = 383838ff
+}
+
+keyboard_special_buttons
+{
+   color=2b2b2bff
+  background-color=2b2b2bff
+}
+
+keyboard_background
+{
+  color=000000ff
+  background-color=000000ff
+}
+keyboard_wordCompletion
+{
+	font-color=eae8e8ff
+	color=2b2b2bff
+}
+
+greySeeThrough
+{
+	color = 0x696969D9
+	background-color= 0x696969D9
+}
+
+login
+{
+	color = 0x383838ff
+	background-color = 383838ff
+	separator-color = 383838ff
+	selection-color = 383838ff
+	mark-color = 383838ff
+	font-color = 383838ff
+	highlight-color = 383838ff
+}
+
+actionbar_background
+{
+	color = 474747ff
+	background-color = 474747ff
+}
+
+font_color_orange
+{	
+	color = 0x00000000
+    background-color = 0x00000000
+    icon-color = 0x00000000
+	font-color = f3a503ff
+}
+
+font_color_white
+{	
+	color = 0x00000000
+    background-color = 0x00000000
+    icon-color = 0x00000000
+	font-color = f0f0f0ff
+}

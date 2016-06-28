@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<grid>
+	<row size="100%">
+		<column size = "100%">
+			<textblock id="textBlock3_1"  textscale="70.0%" style="invisible" content="#test3"></textblock>
+		</column>
+	</row>
+</grid>
