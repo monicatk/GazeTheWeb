@@ -13,6 +13,8 @@ Svenja Neuneier, Dennis Hahn, Caterine Ospina Ocampo, Sergei Diez, Saskia Handab
 ## HowTo
 Use CMake to create a project either for Visual Studio 2015 or Unix Makefile. The provided CMakeLists.txt should find all necessary dependencies in the _externals_ folder. As default, mouse control is chosen. For eyetracker support, set the CMake variable *USEEYETRACKER* to `ON`. The program tries to connect to a SMI REDn tracker by default, for connection to an Tobii EyeX tracker one has to set the variable *USETOBII* to `ON`, in addition.
 
+For showing in fullscreen, one has to add '-fullscreen' to the execution arguments.
+
 ## Dependencies
 All necessary dependencies are provided in the _externals_ folder.
 * GLM: http://glm.g-truc.net/0.9.7/index.html (MIT license chosen)
