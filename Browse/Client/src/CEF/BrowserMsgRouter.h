@@ -16,7 +16,7 @@ class MsgHandler :	public CefMessageRouterBrowserSide::Handler
 {
 public:
 
-	MsgHandler(BrowserMsgRouter* msgRouter);
+	MsgHandler(BrowserMsgRouter* pMsgRouter);
 
 	// Called when |cefQuery| was called in Javascript
 	virtual bool OnQuery(CefRefPtr<CefBrowser> browser,
@@ -29,7 +29,7 @@ public:
 
 private:
 	// Keep reference to msg router to handle outgoing commands
-	CefRefPtr<BrowserMsgRouter> _msgRouter;
+	CefRefPtr<BrowserMsgRouter> _pMsgRouter;
 
 	//IMPLEMENT_REFCOUNTING(MsgHandler);
 };
@@ -39,7 +39,7 @@ private:
 class BrowserMsgRouter : public CefBase
 {
 public:
-	BrowserMsgRouter(CefMediator* cefMediator);
+	BrowserMsgRouter(CefMediator* pMediator);
 
 	// Redirecting all method calls to browser side message router
 	void OnBeforeBrowse(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame) const
@@ -70,7 +70,7 @@ private:
 	CefRefPtr<CefMessageRouterBrowserSide> _router;
 
 	// Keep reference to Handler class in order to communicate with whole CEF architecture
-	CefMediator* _cefMediator;
+	CefMediator* _pMediator;
 
 	IMPLEMENT_REFCOUNTING(BrowserMsgRouter);
 };
