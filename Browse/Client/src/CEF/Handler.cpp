@@ -120,7 +120,8 @@ void Handler::OnLoadError(
 void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame)
 {
     //CEF_REQUIRE_UI_THREAD();
-    LogDebug("Handler: Started loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), "), browserID = ", browser->GetIdentifier());
+	if(frame->IsMain())
+		LogDebug("Handler: Started loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), "), browserID = ", browser->GetIdentifier());
 
     if (frame->IsMain())
     {
@@ -142,7 +143,7 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
         //LogDebug("Handler: Updating favicon URL and image information via Javascript");
         //frame->ExecuteJavaScript(_js_favicon_get_url_and_resolution, frame->GetURL(), 0);
 
-        //frame->ExecuteJavaScript(_js_mutation_observer_test, "", 0);
+        frame->ExecuteJavaScript(_js_mutation_observer_test, "", 0);
 
 
     }
@@ -152,7 +153,7 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
 
         // Check if parent main frame's ID is already as key in map
         if (_loadingMainFrames.find(mainFrameID) != _loadingMainFrames.end())
-        {
+		{
             // Corresponding value=true, set to false and start loading DOM node information in renderer process
             if (_loadingMainFrames.at(mainFrameID))
             {
@@ -169,7 +170,8 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
 
 void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode)
 {
-    LogDebug("Handler: End of loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), ").");
+	if(frame->IsMain())
+		LogDebug("Handler: End of loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), ").");
 
     // Inject Javascript to hide scrollbar
     frame->ExecuteJavaScript(_js_remove_css_scrollbar, frame->GetURL(), 0);
@@ -192,7 +194,6 @@ void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame
         //GetFixedElements(browser);
     }
 
-    LogDebug("Handler: Load ended for frameID = ", frame->GetIdentifier(), "(main frame? -> ", frame->IsMain(), ")");
 }
 
 void Handler::OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
@@ -436,10 +437,10 @@ void Handler::UpdatePageResolution(CefRefPtr<CefBrowser> browser)
 // EXPERIMENTAL
 void Handler::GetFixedElements(CefRefPtr<CefBrowser> browser)
 {
-    LogDebug("Handler: Searching for fixed elements on page.");
-    browser->GetMainFrame()->ExecuteJavaScript(_js_fixed_element_search, browser->GetMainFrame()->GetURL(), 0);
-    CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("GetFixedElements");
-    browser->SendProcessMessage(PID_RENDERER, msg);
+    //LogDebug("Handler: Searching for fixed elements on page.");
+    //browser->GetMainFrame()->ExecuteJavaScript(_js_fixed_element_search, browser->GetMainFrame()->GetURL(), 0);
+    //CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("GetFixedElements");
+    //browser->SendProcessMessage(PID_RENDERER, msg);
 }
 
 void Handler::IPCLogRenderer(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)

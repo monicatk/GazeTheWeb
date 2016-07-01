@@ -50,5 +50,9 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		return true;
 	}
 
+	// Print message to console and withdraw callback
+	LogDebug("MsgHandler: ", requestName);
+	callback->Failure(0, "");
+
 	return false;
 }
