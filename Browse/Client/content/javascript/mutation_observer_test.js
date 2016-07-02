@@ -7,16 +7,6 @@ function consolePrint(msg)
 	window.cefQuery({ request: msg, persistent : false, onSuccess : function(response) {}, onFailure : function(error_code, error_message){} });
 }
 
-function RemovedFixedElement(fixedID)
-{
-	consolePrint('#fixElem#rem#'+fixedID);
-}
-
-function AddedFixedElement(fixedID)
-{
-	consolePrint('#fixElem#add#'+fixedID);
-}
-
 function CheckRectResolution(node)
 {
 	var rect = node.getBoundingClientRect();
@@ -27,10 +17,108 @@ function CheckRectResolution(node)
 // zu überwachende Zielnode (target) auswählen
 var target = document.documentElement;
  
+
+// node.fixedID defines position, where to store bounding rectangle coordinates in |window.fixed_coordinates|
 window.elements = [];
 window.fixed_elements = new Set();
-window.fixed_current_key = 0;			// Inkrement this key, when adding new elements to set & map
-window.fixed_ID_to_node = new Map();	// Map IDs of fixed elements to node objects, access nodes from C++ with given ID
+window.fixed_IDlist = [];				// Position |i| contains boolean information if ID |i| is currently used
+window.fixed_coordinates = [[]];		// 2D list of bounding rectangle coordinates, fill with bounding rect coordinates of fixed node and its children (if position == 'relative')
+
+// Iterate over Set of already used fixedIDs to find the next ID not yet used and assign it to node as attribute
+function AddFixedElement(node)
+{
+	// Add node to set of fixed elements, if position is fixed
+	window.fixed_elements.add(node);
+
+	// Find smallest ID not yet in use
+	var id;
+	var found = false;
+	for(i=0, n=window.fixed_IDlist.length; i < n; i++)
+	{
+		if(!window.fixed_IDlist[i])
+		{
+			window.fixed_IDlist[i] = true;
+			id = i;
+			found = true;
+		}
+	}
+	if(!found)
+	{
+		// Extend ID list by one entry
+		window.fixed_IDlist.push(true);
+		// Use new last position as ID
+		id = window.fixed_IDlist.length-1;
+	}
+
+	// Create attribute in node and store ID there
+	node.setAttribute('fixedID', id);
+
+	// Write node's (and its children's) bounding rectangle coordinates to List
+	SaveBoundingRectCoordinates(node);
+
+	// Tell CEF that fixed node was added
+	var zero = '';
+	if(id < 10)
+	{
+		zero = '0';
+	}
+	consolePrint('#fixElem#add#'+zero+id);
+}
+
+
+function SaveBoundingRectCoordinates(node)
+{
+	var rect = node.getBoundingClientRect();
+	// Only add coordinates if width and height are greater zero
+	if(rect.width && rect.height)
+	{
+		var id = node.getAttribute('fixedID');
+
+		var coords = [];
+		coords.push(rect.top);
+		coords.push(rect.left);
+		coords.push(rect.bottom);
+		coords.push(rect.right);
+
+		// TODO: Include zoom factor!
+
+		// TODO: Include child nodes with position == 'relative' to fixed node
+
+		while(window.fixed_coordinates.length <= id)
+		{
+			window.fixed_coordinates.push([]);
+		}
+
+		window.fixed_coordinates[id] = coords;
+
+		consolePrint('DEBUG: fixed coords: '+rect.top+' '+rect.left+' '+rect.bottom+' '+rect.right);
+	}
+}
+
+function RemoveFixedElement(node)
+{
+	// Remove node from Set of fixed elements
+	window.fixed_elements.delete(node);
+
+	if(node.hasAttribute('fixedID'))
+	{
+		var id = node.getAttribute('fixedID');
+		// Remove fixedID from ID List
+		window.fixed_IDlist[id] = false;
+		// Delete bounding rectangle coordinates for this ID
+		window.fixed_coordinates[id] = [];
+
+		var zero = '';
+		if(id < 10)
+		{
+			zero = '0';
+		}
+		// Tell CEF that fixed node with ID was removed
+		consolePrint('#fixElem#rem#'+zero+id);
+		// Remove 'fixedID' attribute
+		node.removeAttribute('fixedID');
+	}
+}
 
 // alert(window.elements.length);
 // eine Instanz des Observers erzeugen
@@ -59,38 +147,20 @@ var observer = new MutationObserver(
 	  					if(attr == 'style')
 	  					{
 	  						// alert('attr: \''+attr+'\' value: \''+node.getAttribute(attr)+'\' oldvalue: \''+mutation.oldValue+'\'');
-	  						if(node.style.position && node.style.position == 'fixed' && !window.fixed_elements.has(node))
+	  						if(node.style.position && node.style.position == 'fixed')
 	  						{
-	  							// Add node to set of fixed elements, if position is fixed
-	  							window.fixed_elements.add(node);
-	  							// Add node as value to fixed element map with a given ID as key
-	  							window.fixed_ID_to_node.set(window.fixed_current_key, node);
-	  							// Tell CEF about adding fixed element
-	  							AddedFixedElement(window.fixed_current_key);
-	  							// Increment current key to avoid duplicates
-	  							window.fixed_current_key++;
+	  							if(!window.fixed_elements.has(node))
+	  							{
+	  								AddFixedElement(node);
+	  							}
 	  						}
-	  						else // style.position not fixed
+	  						else // case: style.position not fixed
 	  						{
-	  							// consolePrint('position attribute removed or not fixed (anymore)!');
-	  							// Remove node from set of fixed elements, if contained
+	  							// If contained, remove node from set of fixed elements
 	  							if(window.fixed_elements.has(node))
 	  							{
-	  								window.fixed_elements.delete(node);
-	  								consolePrint('Removed node from set of fixed elements');
-
-	  								// Get fixedID, delete it from Map and tell CEF that fixed element with this ID was removed
-	  								for(var id of window.fixed_ID_to_node.keys())
-	  								{
-	  									if (window.fixed_ID_to_node.get(id) == node)
-	  									{
-	  										window.fixed_ID_to_node.delete(id);
-	  										// Tell CEF about the removal
-	  										RemovedFixedElement(id);
-	  									}
-	  								}
+	  								RemoveFixedElement(node);
 	  							}
-	  							// NOTE: Deleting node as value from Map is ignored, because it would be too much overhead
 	  						}
 	  					}
 
@@ -129,7 +199,9 @@ var observer = new MutationObserver(
 
 		  					if(node.tagName == 'INPUT' && (node.type == 'text' || node.type == 'search' || node.type == 'email' || node.type == 'password') )
 		  					{
-		  						node.value = node.type;
+		  						// node.value = node.type;
+
+
 		  						// var rect = node.getBoundingClientRect();
 		  						// alert('input! top: '+rect.top+', left: '+rect.left+', bottom: '+rect.bottom+', right: '+rect.right);
 		  				// 		rect = node.getBoundingClientRect();
@@ -181,6 +253,7 @@ var config = { attributes: true, childList: true, characterData: true, subtree: 
 // eigentliche Observierung starten und Zielnode und Konfiguration übergeben
 observer.observe(target, config);
 consolePrint('MutationObserver successfully created!');
+
 
 // (function (global) {
 //     "use strict";

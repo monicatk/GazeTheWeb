@@ -143,7 +143,7 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
         //LogDebug("Handler: Updating favicon URL and image information via Javascript");
         //frame->ExecuteJavaScript(_js_favicon_get_url_and_resolution, frame->GetURL(), 0);
 
-        frame->ExecuteJavaScript(_js_mutation_observer_test, "", 0);
+        
 
 
     }

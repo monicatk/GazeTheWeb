@@ -133,8 +133,6 @@ private:
 
     // Javascript code as Strings
     const std::string _js_remove_css_scrollbar = GetJSCode(REMOVE_CSS_SCROLLBAR);
-    //const std::string _js_favicon_get_url_and_resolution = GetJSCode(FAVICON_GET_URL_AND_RESOLUTION);
-    const std::string _js_mutation_observer_test = GetJSCode(MUTATION_OBSERVER_TEST);
     const std::string _js_fixed_element_search = GetJSCode(FIXED_ELEMENT_SEARCH);
 
 	// Set for parsing strings (as char by accessing it with []) to numbers

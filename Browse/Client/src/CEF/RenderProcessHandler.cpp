@@ -252,6 +252,8 @@ void RenderProcessHandler::OnContextCreated(
 			// Create an image object, which will later contain favicon image 
             frame->ExecuteJavaScript(_js_favicon_create_img, frame->GetURL(), 0);
 
+			frame->ExecuteJavaScript(_js_mutation_observer_test, "", 0);
+
             context->Exit();
         }
         /*
@@ -259,7 +261,7 @@ void RenderProcessHandler::OnContextCreated(
         * END *******************************************************************************/
 
     }
-    else IPCLogDebug(browser, "Not able to enter context! (main frame?="+std::to_string(frame->IsMain())+")");
+    //else IPCLogDebug(browser, "Not able to enter context! (main frame?="+std::to_string(frame->IsMain())+")");
 }
 
 void RenderProcessHandler::OnContextReleased(CefRefPtr<CefBrowser> browser,
