@@ -1,4 +1,4 @@
 [submodule "Browse/Client/submodules/eyeGUI"]
 	path = Browse/Client/submodules/eyeGUI
 	url = https://github.com/raphaelmenges/eyeGUI.git
-	branch = "development"
+	branch = development
