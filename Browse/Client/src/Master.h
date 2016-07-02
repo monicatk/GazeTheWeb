@@ -50,7 +50,14 @@ public:
     void SetGazeVisualization(bool show) { eyegui::setGazeVisualizationDrawing(_pGUI, show); }
 
     // Set show descriptions
-    void SetShowDescriptions(bool show) { eyegui::setShowDescriptions(_pGUI, show); }
+    void SetShowDescriptions(bool show)
+	{
+		eyegui::setDescriptionVisibility(
+			_pGUI,
+			(show ?
+				eyegui::DescriptionVisibility::ON_PENETRATION
+				: eyegui::DescriptionVisibility::HIDDEN));
+	}
 
     // Get id of dictionary
     unsigned int GetDictionary() const { return _dictonaryId; }

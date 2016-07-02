@@ -410,7 +410,7 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
     if(pLayout == _pMaster->_pSuperLayout)
     {
         _pMaster->_paused = true;
-		eyegui::setShowDescriptions(_pMaster->_pGUI, true, false);
+		eyegui::setDescriptionVisibility(_pMaster->_pGUI, eyegui::DescriptionVisibility::VISIBLE);
     }
 }
 
@@ -419,6 +419,6 @@ void Master::MasterButtonListener::up(eyegui::Layout* pLayout, std::string id)
     if(pLayout == _pMaster->_pSuperLayout)
     {
         _pMaster->_paused = false;
-		eyegui::setShowDescriptions(_pMaster->_pGUI, true, true);
+		eyegui::setDescriptionVisibility(_pMaster->_pGUI, eyegui::DescriptionVisibility::ON_PENETRATION); // TODO look up in Settings for set value
     }
 }

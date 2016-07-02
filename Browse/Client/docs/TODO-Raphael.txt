@@ -1,6 +1,5 @@
 - utf8rewind.h -> see new inclusion for linux. merge it to eyeGUI dev branch
 
-- Readme: Describe how to check out with submodules
 - Settings: Icons on the left which indicate status of setting
 - Class for TabOverview? (InnerState?)
 - TabOverview preview: seems that preview textures are clamped and not cut
