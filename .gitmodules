@@ -1,0 +1,3 @@
+[submodule "Browse/Client/externals/eyeGUI"]
+	path = Browse/Client/externals/eyeGUI
+	url = https://github.com/raphaelmenges/eyeGUI.git
