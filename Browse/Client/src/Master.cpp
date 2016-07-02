@@ -7,7 +7,7 @@
 #include "src/LabStream/LabStream.h"
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
-#include "externals/glfw-master/include/GLFW/glfw3.h"
+#include "submodules/glfw/include/GLFW/glfw3.h"
 #include <functional>
 
 Master::Master(CefMediator* pCefMediator)

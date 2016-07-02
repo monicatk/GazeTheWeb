@@ -5,7 +5,7 @@
 
 #include "WebView.h"
 #include "src/Utils/Texture.h"
-#include "externals/GLM/glm/gtc/matrix_transform.hpp"
+#include "submodules/GLM/glm/gtc/matrix_transform.hpp"
 
 // Shaders
 const std::string vertexShaderSource =

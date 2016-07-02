@@ -52,12 +52,6 @@ file(GLOB OGL
 	"${EXTERNALS_DIR}/OGL/*.c")
 include_directories(externals/OGL)
 
-# Add GLM
-include_directories("${EXTERNALS_DIR}/GLM")
-
-# Add spdlog
-include_directories("${EXTERNALS_DIR}/spdlog/include")
-
 # LabStreamingLayer directory and include
 set(LIBLSL_DIRECTORY "${EXTERNALS_DIR}/liblsl")
 include_directories("${LIBLSL_DIRECTORY}/include")
@@ -89,7 +83,13 @@ set(GLFW_USE_HYBRID_HPG OFF CACHE INTERNAL "GLFW use hybrid HPG.")
 set(USE_MSVC_RUNTIME_LIBRARY_DLL ON CACHE INTERNAL "MSCV runtime library dll.")
 set(LIB_SUFFIX "" CACHE INTERNAL "Suffix of lib.")
 set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "GLFW build shared libs.")
-add_subdirectory(${EXTERNALS_DIR}/glfw-master)
+add_subdirectory(${SUBMODULES_DIR}/glfw)
+
+# GLM
+include_directories("${SUBMODULES_DIR}/GLM")
+
+# spdlog
+include_directories("${SUBMODULES_DIR}/spdlog/include")
 
 # Find libraries
 if(OS_WINDOWS) # Windows
