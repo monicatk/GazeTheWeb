@@ -16,7 +16,7 @@
 #include "src/Setup.h"
 #include "src/Utils/LerpValue.h"
 #include "externals/OGL/gl_core_3_3.h"
-#include "externals/eyeGUI/include/eyeGUI.h"
+#include "submodules/eyeGUI/include/eyeGUI.h"
 
 // Forward declaration
 class Texture;

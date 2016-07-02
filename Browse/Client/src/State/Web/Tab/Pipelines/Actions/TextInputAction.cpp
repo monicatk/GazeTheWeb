@@ -5,7 +5,7 @@
 
 #include "TextInputAction.h"
 #include "src/State/Web/Tab/TabInteractionInterface.h"
-#include "externals/eyeGUI/include/eyeGUI.h"
+#include "submodules/eyeGUI/include/eyeGUI.h"
 
 TextInputAction::TextInputAction(TabInteractionInterface *pTab) : Action(pTab)
 {

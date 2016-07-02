@@ -41,6 +41,8 @@ file(GLOB_RECURSE SOURCES
 
 file(GLOB_RECURSE HEADERS
 	"src/*.h")
+	
+### EXTERNALS ##################################################################
 
 # Set path to externals folder
 set(EXTERNALS_DIR "${CMAKE_CURRENT_LIST_DIR}/externals")
@@ -51,24 +53,28 @@ file(GLOB OGL
 include_directories(externals/OGL)
 
 # Add GLM
-file(GLOB_RECURSE GLM
-	"${EXTERNALS_DIR}/GLM/glm/*.hpp")
 include_directories("${EXTERNALS_DIR}/GLM")
 
 # Add spdlog
 include_directories("${EXTERNALS_DIR}/spdlog/include")
 
+# LabStreamingLayer directory and include
+set(LIBLSL_DIRECTORY "${EXTERNALS_DIR}/liblsl")
+include_directories("${LIBLSL_DIRECTORY}/include")
+
 # Collect all code
 set(ALL_CODE
 	${SOURCES}
 	${HEADERS}
-	${OGL}
-	${GLM})
+	${OGL})
+	
+### SUBMODULES #################################################################
 
-### GLFW, eyeGUI and OpenGL ####################################################
+# Set path to submodules
+set(SUBMODULES_DIR "${CMAKE_CURRENT_LIST_DIR}/submodules")
 
 # eyeGUI
-set(EYEGUI_DIRECTORY "${EXTERNALS_DIR}/eyeGUI")
+set(EYEGUI_DIRECTORY "${SUBMODULES_DIR}/eyeGUI")
 include_directories("${EYEGUI_DIRECTORY}/include")
 add_subdirectory(${EYEGUI_DIRECTORY})
 
@@ -84,10 +90,6 @@ set(USE_MSVC_RUNTIME_LIBRARY_DLL ON CACHE INTERNAL "MSCV runtime library dll.")
 set(LIB_SUFFIX "" CACHE INTERNAL "Suffix of lib.")
 set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "GLFW build shared libs.")
 add_subdirectory(${EXTERNALS_DIR}/glfw-master)
-
-# LabStreamingLayer directory and include
-set(LIBLSL_DIRECTORY "${EXTERNALS_DIR}/liblsl")
-include_directories("${LIBLSL_DIRECTORY}/include")
 
 # Find libraries
 if(OS_WINDOWS) # Windows
