@@ -68,7 +68,7 @@ set(ALL_CODE
 ### GLFW, eyeGUI and OpenGL ####################################################
 
 # eyeGUI
-set(EYEGUI_DIRECTORY "${EXTERNALS_DIR}/eyeGUI-development")
+set(EYEGUI_DIRECTORY "${EXTERNALS_DIR}/eyeGUI")
 include_directories("${EYEGUI_DIRECTORY}/include")
 add_subdirectory(${EYEGUI_DIRECTORY})
 

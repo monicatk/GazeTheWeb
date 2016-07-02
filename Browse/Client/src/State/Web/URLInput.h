@@ -7,7 +7,7 @@
 #ifndef URLINPUT_H_
 #define URLINPUT_H_
 
-#include "externals/eyeGUI-development/include/eyeGUI.h"
+#include "externals/eyeGUI/include/eyeGUI.h"
 #include <string>
 
 // Forward declaration

@@ -410,6 +410,7 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
     if(pLayout == _pMaster->_pSuperLayout)
     {
         _pMaster->_paused = true;
+		eyegui::setShowDescriptions(_pMaster->_pGUI, true, false);
     }
 }
 
@@ -418,5 +419,6 @@ void Master::MasterButtonListener::up(eyegui::Layout* pLayout, std::string id)
     if(pLayout == _pMaster->_pSuperLayout)
     {
         _pMaster->_paused = false;
+		eyegui::setShowDescriptions(_pMaster->_pGUI, true, true);
     }
 }

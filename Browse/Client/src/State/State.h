@@ -8,7 +8,7 @@
 #ifndef STATE_H_
 #define STATE_H_
 
-#include "externals/eyeGUI-development/include/eyeGUI.h"
+#include "externals/eyeGUI/include/eyeGUI.h"
 #include "src/Utils/Input.h"
 
 // Forward declaration

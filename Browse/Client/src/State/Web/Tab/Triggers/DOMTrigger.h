@@ -9,7 +9,7 @@
 
 #include "src/State/Web/Tab/Triggers/Trigger.h"
 #include "src/State/Web/Tab/DOMNode.h"
-#include "externals/eyeGUI-development/include/eyeGUI.h"
+#include "externals/eyeGUI/include/eyeGUI.h"
 #include <memory>
 
 class DOMTrigger : public Trigger
