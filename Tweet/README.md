@@ -34,7 +34,7 @@ All necessary dependencies are provided in the _externals_ folder.
 * Twitter API limits amount of access in a certain time frame
 
 ## Todo
-* Describe how to set up your Twitter account to work with the app
+* SMI eyetracker does not work with the app at the moment
 * Sometimes crashes on exit
 
 ## License
