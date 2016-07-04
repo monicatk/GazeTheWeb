@@ -24,12 +24,12 @@ Since the CEF3 binaries for Windows and Linux do not like each other, one has to
  * Resources
  * README.txt
  * LICENSE.txt
- * **DO NOT** overwrite the provided CMakeLists.txt, otherwise the prototype and client is not found.
+ * **DO NOT** overwrite the provided CMakeLists.txt, otherwise the Prototype and Client is not found.
 5. Folder structure should look like this screenshot:
  * ![Folder structure](media/Folder.png)
 4. Create a build folder somewhere and execute CMake to create a project, which can be compiled.
- * SMI_REDN_SUPPORT defines, whether Client should compile with support for SMI iViewX
- * TOBII_EYEX_SUPPORT defines, whether Client should compile with support for Tobii EyeX SDK
+ * CLIENT_SMI_REDN_SUPPORT defines, whether Client should compile with support for SMI iViewX
+ * CLIENT_TOBII_EYEX_SUPPORT defines, whether Client should compile with support for Tobii EyeX SDK
 
 ## Notes
 This project uses the Chromium Embedded Framework. Please visit https://bitbucket.org/chromiumembedded/cef for more information about that project!

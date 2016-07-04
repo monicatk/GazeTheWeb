@@ -8,7 +8,7 @@
 #define DOMNODE_H_
 
 #include "src/Typedefs.h"
-#include "externals/GLM/glm/glm.hpp"
+#include "submodules/GLM/glm/glm.hpp"
 #include <vector>
 #include <string>
 

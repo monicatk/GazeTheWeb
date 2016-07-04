@@ -40,7 +40,7 @@ A file named _log.txt_ is created at binary folder containing information about 
 * Currently not building on Linux
 
 ## Dependencies
-All necessary dependencies are provided in the _externals_ folder.
+All necessary dependencies are provided in the _externals_ or _submodules_ folder.
 * GLM: http://glm.g-truc.net/0.9.7/index.html (MIT license chosen)
 * GLFW3: http://www.glfw.org
 * iViewX: Connection to the iViewX SDK, copyright SMI GmbH (http://www.smivision.com)

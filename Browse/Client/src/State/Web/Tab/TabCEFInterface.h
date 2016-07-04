@@ -9,7 +9,7 @@
 
 #include <memory>
 #include <vector>
-#include "externals/GLM/glm/glm.hpp"
+#include "submodules/GLM/glm/glm.hpp"
 
 // Forward declaration
 class Texture;

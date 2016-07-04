@@ -4,12 +4,12 @@
 //============================================================================
 
 #include "BrowserMsgRouter.h"
-#include "src/CEF/Handler.h"
+#include "src/CEF/Extension/CefMediator.h"
 #include "src/Utils/Logger.h"
 
-BrowserMsgRouter::BrowserMsgRouter(CefRefPtr<Handler> cefHandler)
+BrowserMsgRouter::BrowserMsgRouter(CefMediator* pMediator)
 {
-	_cefHandler = cefHandler;
+	_pMediator = pMediator;
 
 	// Create configuration for browser side message router
 	CefMessageRouterConfig config;
@@ -24,9 +24,9 @@ BrowserMsgRouter::BrowserMsgRouter(CefRefPtr<Handler> cefHandler)
 	_router->AddHandler(myHandler, true);
 }
 
-MsgHandler::MsgHandler(BrowserMsgRouter* msgRouter)
+MsgHandler::MsgHandler(BrowserMsgRouter* pMsgRouter)
 {
-	_msgRouter = msgRouter;
+	_pMsgRouter = pMsgRouter;
 }
 
 bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,

@@ -18,7 +18,7 @@ namespace setup
     static const float DURATION_BEFORE_INPUT = 1.f; // wait one second before accepting input
     static const bool PAUSED_AT_STARTUP = false;
     static const bool ENABLE_WEBGL = false; // only on Windows
-	static const bool LOG_DEBUG_MESSAGES = false;
+	static const bool LOG_DEBUG_MESSAGES = true;
 	static const std::string LAB_STREAM_OUTPUT_NAME = "BrowserOutputStream";
 	static const std::string LAB_STREAM_OUTPUT_SOURCE_ID = "myuniquesourceid23443";
 	static const std::string LAB_STREAM_INPUT_NAME = "MiddlewareStream"; // may be set to same value as LAB_STREAM_OUTPUT_NAME to receive own events for debugging purposes

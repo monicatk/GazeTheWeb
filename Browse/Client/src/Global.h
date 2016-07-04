@@ -7,7 +7,7 @@
 #ifndef GLOBAL_H_
 #define GLOBAL_H_
 
-#include "externals/GLM/glm/glm.hpp"
+#include "submodules/GLM/glm/glm.hpp"
 #include <string>
 
 static const int EYEGUI_WEB_URLINPUT_LAYER = -1; // in default GUI...
@@ -26,7 +26,7 @@ static const float TAB_SCROLLING_SENSOR_WIDTH = 0.2f;
 static const float TAB_SCROLLING_SENSOR_HEIGHT = 0.1f;
 static const float TAB_SCROLLING_SENSOR_PADDING = 0.025f;
 static const float TAB_GET_PAGE_RES_INTERVAL = 1.0f;
-static const float MASTER_PAUSE_ALPHA = 0.55f;
+static const float MASTER_PAUSE_ALPHA = 0.35f;
 static const float EYEINPUT_MOUSE_OVERRIDE_INIT_FRAME_DURATION = 0.25f; // duration between mouse movement is expected. Triggered by initial movement
 static const float EYEINPUT_MOUSE_OVERRIDE_INIT_DISTANCE = 100.f; // pixels on screen (not best but works)
 static const float EYEINPUT_MOUSE_OVERRIDE_STOP_DURATION = 3.f; // duration until override is stopped when no mouse movement done
