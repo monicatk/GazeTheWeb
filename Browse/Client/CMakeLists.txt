@@ -19,6 +19,10 @@ if(${CLIENT_SMI_REDN_SUPPORT})
 	add_definitions(-DSMI_SUPPORT)
 endif()
 
+if(OS_LINUX) # Linux
+	add_definitions(-Doff_t=__off_t)
+endif()
+
 ### CONTENT ####################################################################
 
 set(CLIENT_CONTENT_PATH ${CMAKE_CURRENT_LIST_DIR}/content CACHE PATH "Path to content folder.")
