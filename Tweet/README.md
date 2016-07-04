@@ -35,6 +35,8 @@ All necessary dependencies are provided in the _externals_ folder.
 
 ## Issues
 * Twitter API limits amount of access in a certain time frame
+* Profile search does not work
+* Crashes when something in own profile is activated (debugging fails)
 
 ## License
 >Copyright 2016 Svenja Neuneier, Dennis Hahn, Caterine Ospina Ocampo, Sergei Diez, Saskia Handabura, Kim Ballmes, Wojciech Kwasnik, Benjamin Stephan, Eike Idczak, Matthias Barde, Annika Wießgügel, Philipp Weber
