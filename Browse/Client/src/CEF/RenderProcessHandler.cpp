@@ -160,54 +160,33 @@ bool RenderProcessHandler::OnProcessMessageReceived(
     }
 
     // EXPERIMENTAL: Handle request of fixed elements' coordinates
-    if (msgName == "GetFixedElements")
+    if (msgName == "FetchFixedElements")
     {
-        //CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
+        CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
 
-        //if (context->Enter())
-        //{
-        //	CefRefPtr<CefV8Value> global = context->GetGlobal();
+        if (context->Enter())
+        {
+			int fixedID = msg->GetArgumentList()->GetInt(0);
 
-        //	int number_of_fixed_elements = 5;
-        //	CefRefPtr<CefV8Value> fixedElemArray = CefV8Value::CreateArray(4 * number_of_fixed_elements);
+			// Create response
+			msg = CefProcessMessage::Create("ReceiveFixedElements");
+			CefRefPtr<CefListValue> args = msg->GetArgumentList();
 
-        //	for (int i = 0; i < 4 * number_of_fixed_elements; i++)
-        //	{
-        //		fixedElemArray->SetValue(i, CefV8Value::CreateDouble(-1));
-        //	}
+			CefRefPtr<CefV8Value> global = context->GetGlobal();
+			CefRefPtr<CefV8Value> coordsArray = global->GetValue("fixed_coordinates")->GetValue(fixedID);
 
-        //	global->SetValue("_fixedElements", fixedElemArray , V8_PROPERTY_ATTRIBUTE_NONE);
+			args->SetInt(0, fixedID);
+			int n = coordsArray->GetArrayLength();
+			for (int i = 0; i < n; i++)
+			{
+				args->SetDouble(i+1, coordsArray->GetValue(i)->GetDoubleValue());
+			}
+      
+			// Send response
+			browser->SendProcessMessage(PID_BROWSER, msg);
 
-            // Execute JS to fill V8 array with coordinates
-            // browser->GetMainFrame()->ExecuteJavaScript(_js_fixed_element_read_out, browser->GetMainFrame()->GetURL(), 0);
-
-        //	msg = CefProcessMessage::Create("ReceiveFixedElements");
-        //	CefRefPtr<CefListValue> args = msg->GetArgumentList();
-
-
-        //	for (int i = 0; i < 4 * number_of_fixed_elements; i++)
-        //	{
-        //		double coordinate = fixedElemArray->GetValue(i)->GetDoubleValue();
-
-        //		if (coordinate == -1)
-        //			break;
-
-        //		args->SetDouble(i, coordinate);
-        //	}
-
-            // Send process msg
-            // browser->SendProcessMessage(PID_BROWSER, msg);
-
-        //	// TODO: Send process msg
-
-        //	// TODO: Release V8 values
-
-
-            // Release V8 values in JS
-            // global->DeleteValue("_fixedElements");
-
-        //	context->Exit();
-        //}
+        	context->Exit();
+        }
     }
 
     // If no suitable handling was found, try message router

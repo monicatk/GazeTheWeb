@@ -321,12 +321,10 @@ void CefMediator::GetPageResolution(TabCEFInterface * pTab)
 void CefMediator::ReceiveFixedElements(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
 {
     CefRefPtr<CefListValue> args = msg->GetArgumentList();
+	int id = args->GetInt(0);
     std::vector<glm::vec4> fixedCoords = {};
-    for (int i = 0; i < (int)args->GetSize(); i+=4)
+    for (int i = 1; i < (int)args->GetSize(); i+=4)
     {
-        if (args->GetDouble(i) == -1)
-            break;
-
         fixedCoords.push_back(
             glm::vec4(
                 args->GetDouble(i),
@@ -338,13 +336,22 @@ void CefMediator::ReceiveFixedElements(CefRefPtr<CefBrowser> browser, CefRefPtr<
     }
     if (TabCEFInterface* pTab = GetTab(browser))
     {
-        LogDebug("CefMediator: Sending ", fixedCoords.size(), " fixed elements' coordinates to Tab.");
+        LogDebug("CefMediator: Sending ", fixedCoords.size(), " fixed element coordinate tupel(s) to Tab.");
         for (int i = 0; i < (int)fixedCoords.size(); i++)
         {
-             LogDebug("\t", fixedCoords[i].x, ", ", fixedCoords[i].y, ", ", fixedCoords[i].z, ", ", fixedCoords[i].w);
+             LogDebug("\t-->", fixedCoords[i].x, ", ", fixedCoords[i].y, ", ", fixedCoords[i].z, ", ", fixedCoords[i].w);
         }
-        pTab->SetFixedElementsCoordinates(fixedCoords);
+        pTab->SetFixedElementsCoordinates(id, fixedCoords);
     }
+}
+
+void CefMediator::RemoveFixedElement(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		LogDebug("CefMediator: Removing fixed element with id=", id, " from Tab.");
+		pTab->RemoveFixedElement(id);
+	}
 }
 
 
@@ -394,12 +401,6 @@ void CefMediator::OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser, double x,
     {
         // Set scrolling offset of correlating Tab
         pTab->SetScrollingOffset(x, y);
-
-        // Check if fixed elements have to be searched after scrolling took place for the first time
-        if (!pTab->GetFixedElementsLoadedAfterScrolling())
-        {
-            _handler->GetFixedElements(browser);
-        }
     }
 }
 

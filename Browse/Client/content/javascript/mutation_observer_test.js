@@ -7,12 +7,66 @@ function consolePrint(msg)
 	window.cefQuery({ request: msg, persistent : false, onSuccess : function(response) {}, onFailure : function(error_code, error_message){} });
 }
 
-function CheckRectResolution(node)
+
+
+// function writeToArray()
+// {
+// for(i = 0; i < textInput.length; i++)
+// 	{
+// 		// TODO: Nested DOM nodes should get their parent's information as well
+// 	    var rect = textInput[i].getBoundingClientRect();
+// 	    window.TextInputs[i].coordinates = [rect.top*zoomFactor + offsetY, rect.left*zoomFactor + offsetX, rect.bottom*zoomFactor + offsetY, rect.right*zoomFactor + offsetX];
+// 	    window.TextInputs[i].value = textInput[i].value;
+// 	}
+// }
+
+// TODO: Add as global function and also use it in DOM node work
+/**
+	Adjust bounding client rectangle coordinates to window, using scrolling offset and zoom factor.
+
+	@param: DOMRect, as returned by Element.getBoundingClientRect()
+	@return: Double array with length = 4, containing coordinates as follows: top, left, bottom, right
+*/
+function AdjustRectCoordinatesToWindow(rect)
 {
-	var rect = node.getBoundingClientRect();
-	// true, if both values greater than zero
-	return rect.height && rect.width;
+	var doc = document.documentElement;
+	var zoomFactor = 1;
+	var offsetX = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0); 
+	var offsetY = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0); 
+
+	var docRect = document.body.getBoundingClientRect();
+
+	if(document.body.style.zoom)
+	{
+		zoomFactor = document.body.style.zoom;
+	};
+
+	var output = [];
+	output.push(rect.top*zoomFactor + offsetY);
+	output.push(rect.left*zoomFactor + offsetX);
+	output.push(rect.bottom*zoomFactor + offsetY);
+	output.push(rect.right*zoomFactor + offsetX);
+
+	return output;
 }
+
+function AdjustRectToZoom(rect)
+{
+	var zoomFactor = 1;
+	if(document.body.style.zoom)
+	{
+		zoomFactor = document.body.style.zoom;
+	};
+
+	var output = [];
+	output.push(rect.top*zoomFactor);
+	output.push(rect.left*zoomFactor);
+	output.push(rect.bottom*zoomFactor);
+	output.push(rect.right*zoomFactor);
+
+	return output;
+}
+
 
 // zu überwachende Zielnode (target) auswählen
 var target = document.documentElement;
@@ -56,15 +110,11 @@ function AddFixedElement(node)
 	// Write node's (and its children's) bounding rectangle coordinates to List
 	SaveBoundingRectCoordinates(node);
 
-	// Tell CEF that fixed node was added
 	var zero = '';
-	if(id < 10)
-	{
-		zero = '0';
-	}
+	if(id < 10) zero = '0';
+	// Tell CEF that fixed node was added
 	consolePrint('#fixElem#add#'+zero+id);
 }
-
 
 function SaveBoundingRectCoordinates(node)
 {
@@ -74,24 +124,51 @@ function SaveBoundingRectCoordinates(node)
 	{
 		var id = node.getAttribute('fixedID');
 
-		var coords = [];
-		coords.push(rect.top);
-		coords.push(rect.left);
-		coords.push(rect.bottom);
-		coords.push(rect.right);
+		// consolePrint('JSDEBUG: fixed coords: '+rect.top+' '+rect.left+' '+rect.bottom+' '+rect.right);
 
-		// TODO: Include zoom factor!
+		// Adjust rectangle to zoom factor
+		var coords = AdjustRectToZoom(rect);
 
-		// TODO: Include child nodes with position == 'relative' to fixed node
-
+		// Add empty 1D array to 2D array, if needed
 		while(window.fixed_coordinates.length <= id)
 		{
 			window.fixed_coordinates.push([]);
 		}
 
+
+
+		// TODO: Union function for union of parent rect with all its children's rects
+
+		// for(i=0, n=node.children.length; i < n; i++)
+		// {
+		// 	if(node.children[i].style.position == 'relative')
+		// 		consolePrint('Relative child found');
+			
+		// 	if(node.children[i].nodeType == 1) // && node.children[i].style.position == 'relative')
+		// 	{
+			
+
+		// 		var childRect = node.children[i].getBoundingClientRect();
+		// 		// Size must not be zero
+		// 		if(childRect.width && childRect.height)
+		// 		{
+		// 			// Child rect not wholly contained in parent rect
+		// 			if(childRect.top < rect.top || childRect.left < rect.left || childRect.bottom > rect.bottom || childRect.right > rect.right)
+		// 			{
+		// 				coords = coords.concat(AdjustRectToZoom(childRect));				
+		// 			}
+		// 		}
+		// 	}
+		// }
+
+		// Assign coordinates as 1D array to specified position in 2D array
 		window.fixed_coordinates[id] = coords;
 
-		consolePrint('DEBUG: fixed coords: '+rect.top+' '+rect.left+' '+rect.bottom+' '+rect.right);
+
+		// var out = '';
+		// for(i=0, n=coords.length; i < n; i++) out+=(coords[i]+' ');
+		// consolePrint('JSDEBUG: fixed coords: '+out);
+		// consolePrint('JSDEBUG: '+coords);
 	}
 }
 
@@ -109,10 +186,8 @@ function RemoveFixedElement(node)
 		window.fixed_coordinates[id] = [];
 
 		var zero = '';
-		if(id < 10)
-		{
-			zero = '0';
-		}
+		if(id < 10) zero = '0';
+
 		// Tell CEF that fixed node with ID was removed
 		consolePrint('#fixElem#rem#'+zero+id);
 		// Remove 'fixedID' attribute

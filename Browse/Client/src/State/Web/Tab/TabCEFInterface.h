@@ -57,8 +57,8 @@ public:
     virtual void SetPageResolution(double width, double height) = 0;
 
     // Fixed elements' coordinates
-    virtual void SetFixedElementsCoordinates(std::vector<glm::vec4> elements) = 0;
-    virtual bool GetFixedElementsLoadedAfterScrolling() = 0;
+    virtual void SetFixedElementsCoordinates(int id, std::vector<glm::vec4> elements) = 0;
+	virtual void RemoveFixedElement(int id) = 0;
 };
 
 #endif // TABCEFINTERFACE_H_

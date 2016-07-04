@@ -200,8 +200,9 @@ public:
     // Set page resolution from Cef Mediator
     virtual void SetPageResolution(double width, double height);
 
-    void SetFixedElementsCoordinates(std::vector<glm::vec4> elements);
-    bool GetFixedElementsLoadedAfterScrolling();
+	virtual void SetFixedElementsCoordinates(int id, std::vector<glm::vec4> elements);
+	virtual void RemoveFixedElement(int id);
+
 
 private:
 
@@ -377,8 +378,8 @@ private:
     double _pageWidth = 0, _pageHeight = 0;
 
     // Coordinates of current fixed elements on site, vec4 = (top, left, bottom, right)
-    std::vector<glm::vec4> _fixedElements;
-    bool _fixedElementsLoadedAfterScrolling = false;	// TODO: Must be set to false everytime a new page is loaded
+    std::vector<std::vector<glm::vec4>> _fixedElements;
+ 
 
     // URL of current favIcon
     std::string _favIconUrl;

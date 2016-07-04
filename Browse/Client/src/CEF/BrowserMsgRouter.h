@@ -65,6 +65,8 @@ public:
 		_router->OnRenderProcessTerminated(browser);
 	}
 
+	CefMediator* GetMediator() const { return _pMediator; };
+
 private:
 	// Wrapping CEF browser side message router
 	CefRefPtr<CefMessageRouterBrowserSide> _router;

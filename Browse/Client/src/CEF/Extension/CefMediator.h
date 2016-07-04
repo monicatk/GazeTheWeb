@@ -87,6 +87,7 @@ public:
     void GetPageResolution(TabCEFInterface* pTab);
 
     void ReceiveFixedElements(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
+	void RemoveFixedElement(CefRefPtr<CefBrowser> browser, int id);
 
 protected:
 

@@ -18,8 +18,11 @@ for(i = 0; i < textInput.length; i++)
 function updateOffsets()
 {
 	// Update scrolling offset and zoom factor for 
-	scrollOffsetX = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0); 
-	scrollOffsetY = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0); 
+	offsetX = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0); 
+	offsetY = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0); 
+	// NOTE: Never used the following variables? Seem to be offsetX and offsetY
+	// scrollOffsetX = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0); 
+	// scrollOffsetY = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0); 
 
 	var docRect = document.body.getBoundingClientRect();
 
