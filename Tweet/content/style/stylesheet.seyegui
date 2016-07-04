@@ -87,13 +87,13 @@ invisible
     background-color = 0x00000000
     icon-color = 0x00000000
 	font-color=0x000000FF
-	threshold-color=0xF3A503F0
+	threshold-color=0x00000000
 }
 
 invisibleBackground
 {
 	color = 0x00000000
-	threshold-color=0xF3A503F0
+	threshold-color=0x00000000
 }
 
 back
@@ -139,7 +139,7 @@ greySeeThrough
 {
 	color = 0x696969D9
 	background-color= 0x696969D9
-	threshold-color=0xF3A503F0
+	threshold-color=0x00000000
 }
 
 login
