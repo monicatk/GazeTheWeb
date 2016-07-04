@@ -1,6 +1,6 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel Müller (muellerd@uni-koblenz.de)
+// Author: Daniel Mï¿½ller (muellerd@uni-koblenz.de)
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
@@ -496,7 +496,7 @@ void Tab::SetPageResolution(double width, double height)
 void Tab::SetFixedElementsCoordinates(int id, std::vector<glm::vec4> elements)
 {
 	// Fill 2D vector with new empty 1D vector, if needed
-	while (_fixedElements.size() < id+1)
+	while ((int)_fixedElements.size() < id+1)
 	{
 		_fixedElements.push_back(std::vector<glm::vec4>{});
 	}
@@ -506,7 +506,7 @@ void Tab::SetFixedElementsCoordinates(int id, std::vector<glm::vec4> elements)
 
 void Tab::RemoveFixedElement(int id)
 {
-	if (_fixedElements.size() > id)
+	if ((int)_fixedElements.size() > id)
 	{
 		_fixedElements[id].clear();
 	}
