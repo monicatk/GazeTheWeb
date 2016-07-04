@@ -61,7 +61,7 @@ void DiscoverPageArea::hide() {
             eyegui::removeFloatingFrame(pLayout, textFrames[i]);
             eyegui::removeFloatingFrame(pLayout, buttonFrames[i]);
         }
-        eyegui::replaceElementWithBoxButton(pLayout, "toTheTopButton", "menuebar_elements/goTop2.png");
+        eyegui::replaceElementWithBoxButton(pLayout, "toTheTopButton", "menuebar_elements/goTop2.png", u"", "");
         eyegui::registerButtonListener(pLayout, "toTheTopButton", TwitterApp::getInstance()->menueButtonArea->menueButtonListener);
     }
     Element::hide();

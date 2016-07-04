@@ -481,13 +481,13 @@ void Keyboard::activate() {
 */
 void Keyboard::UpperKeys() {
     isUpper=true;
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys, true, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys2, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys3, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, numbers,false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, specialKeys, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keysSymbol, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, functionSymbol, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys, true, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys2, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys3, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, numbers,false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, specialKeys, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keysSymbol, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, functionSymbol, false, false, false);
 }
 
 /**
@@ -497,13 +497,13 @@ void Keyboard::UpperKeys() {
 */
 void Keyboard::LowerKeys() {
     isUpper=false;
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys2, true, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys3, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, numbers,false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, specialKeys, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keysSymbol, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, functionSymbol, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys2, true, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys3, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, numbers,false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, specialKeys, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keysSymbol, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, functionSymbol, false, false, false);
 }
 
 /**
@@ -513,57 +513,57 @@ void Keyboard::LowerKeys() {
 */
 void Keyboard::YesNoKeys() {
     isUpper=false;
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys2, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys3, true, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, numbers,false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, specialKeys, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keysSymbol, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, functionSymbol, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys2, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys3, true, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, numbers,false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, specialKeys, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keysSymbol, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, functionSymbol, false, false, false);
 }
 
 void Keyboard::numberKeys(){
     isUpper=false;
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys2, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys3, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, numbers,true, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, specialKeys, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keysSymbol, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, functionSymbol, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys2, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys3, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, numbers,true, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, specialKeys, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keysSymbol, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, functionSymbol, false, false, false);
 }
 
 void Keyboard::specialKeysFunc(){
     isUpper=false;
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys2, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys3, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, numbers,false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, specialKeys, true, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keysSymbol, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, functionSymbol, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys2, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys3, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, numbers,false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, specialKeys, true, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keysSymbol, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, functionSymbol, false, false, false);
 }
 
 void Keyboard::symbolKeys(){
     isUpper=false;
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys2, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys3, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, numbers,false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, specialKeys, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keysSymbol, true, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, functionSymbol, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys2, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys3, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, numbers,false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, specialKeys, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keysSymbol, true, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, functionSymbol, false, false, false);
 }
 
 void Keyboard::functionKeys(){
     isUpper=false;
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys2, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keys3, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, numbers,false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, specialKeys, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, keysSymbol, false, false, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout2, functionSymbol, true, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys2, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keys3, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, numbers,false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, specialKeys, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, keysSymbol, false, false, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout2, functionSymbol, true, false, false);
 }
 
 //AutoComplete Section---------------------------------------------------------------------

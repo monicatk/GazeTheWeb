@@ -49,17 +49,17 @@ void ActionBar::instanciateAllActionButtons() {
 * makes all Buttons visible
 */
 void ActionBar::makeButtonsInvisible() {
-    eyegui::setVisibilityOFloatingfFrame(pLayout, likeButton, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout, retweetButton, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout, respondButton, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout, followButton, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout, unfollowButton, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout, goToProfileButton, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout, deleteButton, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout, dislikeButton, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout, searchForButton, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout, showImageButton, false);
-    eyegui::setVisibilityOFloatingfFrame(pLayout, writePNButton, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout, likeButton, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout, retweetButton, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout, respondButton, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout, followButton, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout, unfollowButton, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout, goToProfileButton, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout, deleteButton, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout, dislikeButton, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout, searchForButton, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout, showImageButton, false);
+    eyegui::setVisibilityOFloatingFrame(pLayout, writePNButton, false);
 }
 
 /**
@@ -90,11 +90,11 @@ void ActionBar::changeToMessages(std::string userid) {
 
     eyegui::setPositionOfFloatingFrame(pLayout, writePNButton, buttonX, buttonY);
 
-    eyegui::setVisibilityOFloatingfFrame(pLayout, writePNButton, true);
+    eyegui::setVisibilityOFloatingFrame(pLayout, writePNButton, true);
 
     eyegui::setPositionOfFloatingFrame(pLayout, goToProfileButton, buttonX, buttonY+buttonGap);
 
-    eyegui::setVisibilityOFloatingfFrame(pLayout, goToProfileButton, true);
+    eyegui::setVisibilityOFloatingFrame(pLayout, goToProfileButton, true);
 }
 
 /**
@@ -110,7 +110,7 @@ void ActionBar::changeToHashtags(std::string content) {
 
     eyegui::setPositionOfFloatingFrame(pLayout, searchForButton, buttonX, buttonY);
 
-    eyegui::setVisibilityOFloatingfFrame(pLayout, searchForButton, true);
+    eyegui::setVisibilityOFloatingFrame(pLayout, searchForButton, true);
 }
 
 /**
@@ -126,13 +126,13 @@ void ActionBar::changeToProfiles(std::string userid, bool followed) {
     currentState = PROFILES;
     if (followed) {
         eyegui::setPositionOfFloatingFrame(pLayout, unfollowButton, buttonX, buttonY);
-        eyegui::setVisibilityOFloatingfFrame(pLayout, unfollowButton, true);
+        eyegui::setVisibilityOFloatingFrame(pLayout, unfollowButton, true);
         eyegui::setPositionOfFloatingFrame(pLayout, writePNButton, buttonX, buttonY + buttonGap);
-        eyegui::setVisibilityOFloatingfFrame(pLayout, writePNButton, true);
+        eyegui::setVisibilityOFloatingFrame(pLayout, writePNButton, true);
     }
     else {
         eyegui::setPositionOfFloatingFrame(pLayout, followButton, buttonX, buttonY);
-        eyegui::setVisibilityOFloatingfFrame(pLayout, followButton, true);
+        eyegui::setVisibilityOFloatingFrame(pLayout, followButton, true);
     }
 }
 
@@ -150,19 +150,19 @@ void ActionBar::changeToProfilesWithGo(std::string userid, bool followed) {
     int i = 0;
     if (followed) {
         eyegui::setPositionOfFloatingFrame(pLayout, unfollowButton, buttonX, buttonY);
-        eyegui::setVisibilityOFloatingfFrame(pLayout, unfollowButton, true);
+        eyegui::setVisibilityOFloatingFrame(pLayout, unfollowButton, true);
         eyegui::setPositionOfFloatingFrame(pLayout, writePNButton, buttonX, buttonY+buttonGap);
-        eyegui::setVisibilityOFloatingfFrame(pLayout, writePNButton, true);
+        eyegui::setVisibilityOFloatingFrame(pLayout, writePNButton, true);
         i += 2;
     }
     else {
         eyegui::setPositionOfFloatingFrame(pLayout, followButton, buttonX, buttonY);
-        eyegui::setVisibilityOFloatingfFrame(pLayout, followButton, true);
+        eyegui::setVisibilityOFloatingFrame(pLayout, followButton, true);
 		i++;
     }
 
     eyegui::setPositionOfFloatingFrame(pLayout, goToProfileButton, buttonX, buttonY+buttonGap*i);
-    eyegui::setVisibilityOFloatingfFrame(pLayout, goToProfileButton, true);
+    eyegui::setVisibilityOFloatingFrame(pLayout, goToProfileButton, true);
 }
 
 /**
@@ -251,31 +251,31 @@ void ActionBar::changeToTweets(std::string tweetid, std::string userid, bool lik
     if (liked)
     {
         eyegui::setPositionOfFloatingFrame(pLayout, dislikeButton, buttonX, buttonY + buttonGap*i);
-        eyegui::setVisibilityOFloatingfFrame(pLayout, dislikeButton, true);
+        eyegui::setVisibilityOFloatingFrame(pLayout, dislikeButton, true);
         i++;
     } else {
         eyegui::setPositionOfFloatingFrame(pLayout, likeButton, buttonX, buttonY + buttonGap*i);
-        eyegui::setVisibilityOFloatingfFrame(pLayout, likeButton, true);
+        eyegui::setVisibilityOFloatingFrame(pLayout, likeButton, true);
         i++;
     }
 
     if (!own&&!retweeted) {
         eyegui::setPositionOfFloatingFrame(pLayout, retweetButton, buttonX, buttonY + buttonGap*i);
-        eyegui::setVisibilityOFloatingfFrame(pLayout, retweetButton, true);
+        eyegui::setVisibilityOFloatingFrame(pLayout, retweetButton, true);
         i++;
     }
 
     eyegui::setPositionOfFloatingFrame(pLayout, respondButton, buttonX, buttonY + buttonGap*i);
-    eyegui::setVisibilityOFloatingfFrame(pLayout, respondButton, true);
+    eyegui::setVisibilityOFloatingFrame(pLayout, respondButton, true);
     i++;
     eyegui::setPositionOfFloatingFrame(pLayout, goToProfileButton, buttonX, buttonY + buttonGap*i);
-    eyegui::setVisibilityOFloatingfFrame(pLayout, goToProfileButton, true);
+    eyegui::setVisibilityOFloatingFrame(pLayout, goToProfileButton, true);
     i++;
 
     if (own)
     {
         eyegui::setPositionOfFloatingFrame(pLayout, deleteButton, buttonX, buttonY + buttonGap*i);
-        eyegui::setVisibilityOFloatingfFrame(pLayout, deleteButton, true);
+        eyegui::setVisibilityOFloatingFrame(pLayout, deleteButton, true);
         i++;
     }
 
@@ -302,38 +302,38 @@ void ActionBar::changeToTweetsWithPics(std::string tweetid, std::string userid, 
     if (liked)
     {
         eyegui::setPositionOfFloatingFrame(pLayout, dislikeButton, buttonX, buttonY + buttonGap*i);
-        eyegui::setVisibilityOFloatingfFrame(pLayout, dislikeButton, true);
+        eyegui::setVisibilityOFloatingFrame(pLayout, dislikeButton, true);
         i++;
     }
     else {
         eyegui::setPositionOfFloatingFrame(pLayout, likeButton, buttonX, buttonY + buttonGap*i);
-        eyegui::setVisibilityOFloatingfFrame(pLayout, likeButton, true);
+        eyegui::setVisibilityOFloatingFrame(pLayout, likeButton, true);
         i++;
     }
 
     if (!own&&!retweeted) {
         eyegui::setPositionOfFloatingFrame(pLayout, retweetButton, buttonX, buttonY + buttonGap*i);
-        eyegui::setVisibilityOFloatingfFrame(pLayout, retweetButton, true);
+        eyegui::setVisibilityOFloatingFrame(pLayout, retweetButton, true);
         i++;
     }
 
 
     eyegui::setPositionOfFloatingFrame(pLayout, respondButton, buttonX, buttonY + buttonGap*i);
-    eyegui::setVisibilityOFloatingfFrame(pLayout, respondButton, true);
+    eyegui::setVisibilityOFloatingFrame(pLayout, respondButton, true);
     i++;
     eyegui::setPositionOfFloatingFrame(pLayout, goToProfileButton, buttonX, buttonY + buttonGap*i);
-    eyegui::setVisibilityOFloatingfFrame(pLayout, goToProfileButton, true);
+    eyegui::setVisibilityOFloatingFrame(pLayout, goToProfileButton, true);
     i++;
 
     if (own)
     {
         eyegui::setPositionOfFloatingFrame(pLayout, deleteButton, buttonX, buttonY + buttonGap*i);
-        eyegui::setVisibilityOFloatingfFrame(pLayout, deleteButton, true);
+        eyegui::setVisibilityOFloatingFrame(pLayout, deleteButton, true);
         i++;
     }
 
     eyegui::setPositionOfFloatingFrame(pLayout, showImageButton, buttonX, buttonY + buttonGap*i);
-    eyegui::setVisibilityOFloatingfFrame(pLayout, showImageButton, true);
+    eyegui::setVisibilityOFloatingFrame(pLayout, showImageButton, true);
 
     return;
 }
