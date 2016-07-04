@@ -19,6 +19,17 @@ void printCallback(std::string message)
     std::cout << message << std::endl;
 }
 
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (action == GLFW_PRESS)
+	{
+		switch (key)
+		{
+		case GLFW_KEY_ESCAPE: { glfwSetWindowShouldClose(window, GL_TRUE); break; }
+		}
+	}
+}
+
 /**
 * Main function
 * Supported arguments:
@@ -30,12 +41,12 @@ int main(int argc, char* argv[]) {
     //Arguments (Windows only)
     bool fullscreen = false;
     #ifdef _WIN32
-        bool console = true;
+        bool console = false;
         for (int i = 0; i < argc; i++) {
             cout << "argv[" << i << "] = " << argv[i] << endl;
             std::string arg = argv[i];
             if (arg.compare("-console") == 0) {
-                console = false;
+                console = true;
             }
             if (arg.compare("-fullscreen") == 0) {
                 fullscreen = true;
@@ -43,7 +54,10 @@ int main(int argc, char* argv[]) {
         }
 
         if (console) {
-            ShowWindow(GetConsoleWindow(), SW_HIDE);
+			AllocConsole();
+			freopen("conin$", "r", stdin);
+			freopen("conout$", "w", stdout);
+			freopen("conout$", "w", stderr);
         }
     #endif
 
@@ -73,6 +87,9 @@ int main(int argc, char* argv[]) {
             wglSwapIntervalEXT(1);
     #endif
 
+	// Register callbacks
+	glfwSetKeyCallback(window, key_callback);
+
     //Set content path
     eyegui::setRootFilepath(CONTENT_PATH);
 
@@ -89,6 +106,12 @@ int main(int argc, char* argv[]) {
     float lastTime, deltaTime;
     lastTime = (float)glfwGetTime();
 
+	// Hide mouse for eyetracking input
+#if defined(USEEYETRACKER_IVIEW) || defined(USEEYETRACKER_TOBII)
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN); // hide native mouse cursor
+#endif
+
+	// Setup input
     input_setup();
 
     // Main loop

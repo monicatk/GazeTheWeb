@@ -53,14 +53,8 @@ double eye_tracker_y = 0;
 */
 void iview_setup()
 {
-    AccuracyStruct accuracyData;
     SystemInfoStruct systemInfoData;
-    CalibrationStruct calibrationData;
-    int ret_calibrate = 0, ret_validate = 0, ret_connect = 0;
-    char c = ' ';
-    char repeat = ' ';
-
-    std::cout << "Test iViewXAPI Demo" << std::endl;
+    int ret_connect = 0;
 
     // connect to iViewX
     ret_connect = iV_Connect("127.0.0.1", 4444, "127.0.0.1", 5555);
@@ -91,74 +85,10 @@ void iview_setup()
 
     if (ret_connect == RET_SUCCESS)
     {
-        // shall we perform a calibration?
-        //std::cout << "Do you want to calibrate? (y)es | (n)o" << std::endl;
-        c = 'n'; // Dont do calibration
-
-                 //flush the buffer
-        getchar();
-
-        if (c == 'y')
-        {
-            // set up calibration
-            calibrationData.method = 2;
-            calibrationData.speed = 0;
-            calibrationData.displayDevice = 0;
-            calibrationData.targetShape = 2;
-            calibrationData.foregroundBrightness = 250;
-            calibrationData.backgroundBrightness = 230;
-            calibrationData.autoAccept = 2;
-            calibrationData.targetSize = 20;
-            calibrationData.visualization = 1;
-            strcpy_s(calibrationData.targetFilename, 256, "");
-
-            iV_SetupCalibration(&calibrationData);
-
-            // start calibration
-            ret_calibrate = iV_Calibrate();
-
-            switch (ret_calibrate)
-            {
-            case RET_SUCCESS:
-                std::cout << "Calibration done successfully" << std::endl;
-
-                // start validation
-                ret_validate = iV_Validate();
-
-                // show accuracy only if validation was successful
-                if (ret_validate == RET_SUCCESS)
-                {
-                    std::cout << "iV_GetAccuracy: " << iV_GetAccuracy(&accuracyData, 0) << std::endl;
-                    std::cout << "AccuracyData DevX: " << accuracyData.deviationLX << " DevY: " << accuracyData.deviationLY << std::endl;
-                    getchar();
-                }
-                break;
-            case ERR_NOT_CONNECTED:
-                std::cout << "iViewX is not reachable" << std::endl;
-                break;
-            case ERR_WRONG_PARAMETER:
-                std::cout << "Wrong Parameter used" << std::endl;
-                break;
-            case ERR_WRONG_DEVICE:
-                std::cout << "Not possible to calibrate connected Eye Tracking System" << std::endl;
-                break;
-            default:
-                std::cout << "An unknown error appeared" << std::endl;
-                break;
-            }
-        }
-
-        // show some windows
-        //iV_ShowEyeImageMonitor();
-        //iV_ShowTrackingMonitor();
-        //iV_ShowSceneVideoMonitor();
-
         // start data output via callback function
         // define a callback function for receiving samples
         iV_SetSampleCallback(SampleCallbackFunction);
-        //iV_SetTrackingMonitorCallback(TrackingMonitorCallbackFunction);
     }
-
     return;
 }
 
@@ -166,6 +96,7 @@ void iview_setup()
 * Close connection to IView Eye Tracker
 */
 void iview_disconnect() {
+
     // disable callbacks
     iV_SetSampleCallback(NULL);
     iV_SetTrackingMonitorCallback(NULL);

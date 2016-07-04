@@ -13,7 +13,9 @@ Svenja Neuneier, Dennis Hahn, Caterine Ospina Ocampo, Sergei Diez, Saskia Handab
 ## HowTo
 Use CMake to create a project either for Visual Studio 2015 or Unix Makefile. The provided CMakeLists.txt should find all necessary dependencies in the _externals_ folder. As default, mouse control is chosen. For eyetracker support, set the CMake variable *USEEYETRACKER* to `ON`. The program tries to connect to a SMI REDn tracker by default, for connection to an Tobii EyeX tracker one has to set the variable *USETOBII* to `ON`, in addition.
 
-For showing in fullscreen, one has to add '-fullscreen' to the execution arguments.
+For showing in fullscreen, one has to add '-fullscreen' to the execution arguments. To activate the console, the same procedure with "-console" has to be done. This does only work on Windows.
+
+Escape button quits the application.
 
 ## Dependencies
 All necessary dependencies are provided in the _externals_ folder.
@@ -32,10 +34,6 @@ All necessary dependencies are provided in the _externals_ folder.
 
 ## Issues
 * Twitter API limits amount of access in a certain time frame
-
-## Todo
-* SMI eyetracker does not work with the app at the moment
-* Sometimes crashes on exit
 
 ## License
 >Copyright 2016 Svenja Neuneier, Dennis Hahn, Caterine Ospina Ocampo, Sergei Diez, Saskia Handabura, Kim Ballmes, Wojciech Kwasnik, Benjamin Stephan, Eike Idczak, Matthias Barde, Annika Wießgügel, Philipp Weber
