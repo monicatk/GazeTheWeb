@@ -1,0 +1,33 @@
+﻿<?xml version="1.0"?>
+<layout stylesheet="style/stylesheet.seyegui" >
+    <grid>
+		<row size="10%">
+			<column size = "100%">
+				<stack>
+					<boxbutton id="my_button"></boxbutton>
+					<boxbutton id="other_button"></boxbutton>
+					<boxbutton></boxbutton>
+					<boxbutton></boxbutton>
+					<boxbutton></boxbutton>
+					<boxbutton></boxbutton>
+					<boxbutton></boxbutton>
+				</stack>
+			</column>
+		</row>
+		<row size="90%">
+			<column size="5%">
+				<boxbutton id="testbutton"></boxbutton>
+			</column>
+			<column size="90%">
+			  <stack>
+			  <picture id="portrait" alignment="original" src="img/testimage.png" adaptivescaling="false"></picture>
+			  <textblock id="maintext" alignment="center" verticalalignment="center" fontsize="tall" content=" Lorem ipsum" style="text"></textblock>
+			  <block style="blocky" id="content1" consumeinput="true"></block><!--can be replaced on runtime!-->
+			  </stack>
+			</column>
+			<column size="5%">
+				<boxbutton></boxbutton>
+			</column>
+		</row>
+	</grid>
+</layout>

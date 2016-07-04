@@ -16,7 +16,7 @@
 #include "src/Setup.h"
 #include "src/Utils/LerpValue.h"
 #include "externals/OGL/gl_core_3_3.h"
-#include "externals/eyeGUI-development/include/eyeGUI.h"
+#include "submodules/eyeGUI/include/eyeGUI.h"
 
 // Forward declaration
 class Texture;
@@ -50,7 +50,14 @@ public:
     void SetGazeVisualization(bool show) { eyegui::setGazeVisualizationDrawing(_pGUI, show); }
 
     // Set show descriptions
-    void SetShowDescriptions(bool show) { eyegui::setShowDescriptions(_pGUI, show); }
+    void SetShowDescriptions(bool show)
+	{
+		eyegui::setDescriptionVisibility(
+			_pGUI,
+			(show ?
+				eyegui::DescriptionVisibility::ON_PENETRATION
+				: eyegui::DescriptionVisibility::HIDDEN));
+	}
 
     // Get id of dictionary
     unsigned int GetDictionary() const { return _dictonaryId; }

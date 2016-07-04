@@ -1,0 +1,139 @@
+﻿<?xml version="1.0"?>
+<grid id="content_area">
+<row size="34%">
+    <column size = "1%">
+      <block style="block"></block>
+    </column>
+  <column size="98%">
+<grid>
+  <row size = "2%">
+    <column size = "1%">
+      <block style="block"></block>
+    </column>
+    <column size = "99%">      
+      <block style="block"></block>
+    </column>
+  </row>
+  <row size="94%">
+    <column size = "100%">
+	<block id="profileBlock" style="back"></block>  
+    </column>
+  </row>
+  <row size="4%">
+    <column size = "1%">
+      <block style="block"></block>
+    </column>
+    <column size = "99%">
+      <block style="block"></block>
+    </column>
+  </row>
+</grid>
+  </column>
+    <column size = "1%">
+      <block style="block"></block>
+    </column>
+  </row>
+  
+<row size="22%">
+    <column size = "1%">
+      <block style="block"></block>
+    </column>
+  <column size="98%">
+<grid>
+  <row size = "2%">
+    <column size = "1%">
+      <block style="block"></block>
+    </column>
+    <column size = "99%">      
+      <block style="block"></block>
+    </column>
+  </row>
+  <row size="94%">
+    <column size = "100%">
+	<block id="tweet0" style="back"></block>  
+    </column>
+  </row>
+  <row size="4%">
+    <column size = "1%">
+      <block style="block"></block>
+    </column>
+    <column size = "99%">
+      <block style="block"></block>
+    </column>
+  </row>
+</grid>
+  </column>
+    <column size = "1%">
+      <block style="block"></block>
+    </column>
+  </row>
+  
+<row size="22%">
+    <column size = "1%">
+      <block style="block"></block>
+    </column>
+  <column size="98%">
+<grid>
+  <row size = "2%">
+    <column size = "1%">
+      <block style="block"></block>
+    </column>
+    <column size = "99%">      
+      <block style="block"></block>
+    </column>
+  </row>
+  <row size="94%">
+    <column size = "100%">
+	<block id="tweet1" style="back"></block>   
+    </column>
+  </row>
+  <row size="4%">
+    <column size = "1%">
+      <block style="block"></block>
+    </column>
+    <column size = "99%">
+      <block style="block"></block>
+    </column>
+  </row>
+</grid>
+  </column>
+    <column size = "1%">
+      <block style="block"></block>
+    </column>
+  </row>
+  
+<row size="22%">
+    <column size = "1%">
+      <block style="block"></block>
+    </column>
+  <column size="98%">
+<grid>
+  <row size = "2%">
+    <column size = "1%">
+      <block style="block"></block>
+    </column>
+    <column size = "99%">      
+      <block style="block"></block>
+    </column>
+  </row>
+  <row size="94%">
+    <column size = "100%">
+	<block id="tweet2" style="back"></block>    
+    </column>
+  </row>
+  <row size="4%">
+    <column size = "1%">
+      <block style="block"></block>
+    </column>
+    <column size = "99%">
+      <block style="block"></block>
+    </column>
+  </row>
+</grid>
+  </column>
+    <column size = "1%">
+      <block style="block"></block>
+    </column>
+  </row>
+  
+</grid>

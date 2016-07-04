@@ -1,0 +1,180 @@
+default 
+{
+	background-color= 0xFFFFFFFF
+	color = 0xFFFFFFFF
+	font-color=0xB5B5B5FF
+	threshold-color=0xF3A503F0
+}
+
+blocky
+{
+	background-color= 0xFF000055
+	threshold-color=0xF3A503F0
+}
+
+text
+{
+	font-color=0xFFFFFFFF
+	threshold-color=0xF3A503F0
+}
+
+red
+{
+	background-color=0xFF0000FF
+	threshold-color=0xF3A503F0
+}
+
+blue
+{
+	background-color=0x0000FFFF
+	threshold-color=0xF3A503F0
+}
+
+block
+{
+	background-color=0x383838FF
+	color = 0x383838FF
+	font-color=0xB5B5B5FF
+	separator-color = 383838ff
+	selection-color = 383838ff
+	mark-color = 383838ff
+	highlight-color = 383838ff
+	threshold-color=0xF3A503F0
+}
+
+textblock
+{
+	font-color=0xB5B5B5FF
+	threshold-color=0xF3A503F0
+}
+
+keyboard3
+{
+	background-color= 0x000000		
+	font-color=0xFFFFFFFF
+	threshold-color=0xF3A503F0
+}
+
+keyboard1
+{
+	background-color= 0xFFFFFFFF
+	threshold-color=0xF3A503F0
+}
+
+keyboard2
+{
+	background-color=0x888888FF	
+	font-color=0xFF0000FF
+	threshold-color=0xF3A503F0
+}
+
+keyboard4
+{
+	background-color= 0x000000	
+	font-color=0xeae8e8ff
+	threshold-color=0xF3A503F0
+}
+
+keyboardBack
+{
+	background-color=0x888888FF
+	threshold-color=0xF3A503F0
+}
+
+invisible
+{
+    color = 0x00000000
+    background-color = 0x00000000
+    icon-color = 0x00000000
+	font-color=0x000000FF
+	threshold-color=0x00000000
+}
+
+invisibleBackground
+{
+	color = 0x00000000
+	threshold-color=0x00000000
+}
+
+back
+{
+	background-color = 0x383838ff
+	threshold-color=0xF3A503F0	
+}
+
+backSelected
+{
+	background-color = 0x4f4f4fff	
+	threshold-color=0xF3A503F0
+}
+
+keyboard_buttons
+{
+	color = 383838ff
+	background-color = 383838ff
+	threshold-color=0xF3A503F0
+}
+
+keyboard_special_buttons
+{
+	color=2b2b2bff
+	background-color=2b2b2bff
+	threshold-color=0xF3A503F0
+}
+
+keyboard_background
+{
+	color=000000ff
+	background-color=000000ff
+	threshold-color=0xF3A503F0
+}
+keyboard_wordCompletion
+{
+	font-color=eae8e8ff
+	color=2b2b2bff
+	threshold-color=0xF3A503F0
+}
+
+greySeeThrough
+{
+	color = 0x696969D9
+	background-color= 0x696969D9
+	threshold-color=0x00000000
+}
+
+login
+{
+	color = 0x383838ff
+	background-color = 383838ff
+	separator-color = 383838ff
+	selection-color = 383838ff
+	mark-color = 383838ff
+	font-color = 383838ff
+	highlight-color = 383838ff
+	threshold-color=0xF3A503F0
+}
+
+actionbar_background
+{
+	color = 474747ff
+	background-color = 474747ff
+	threshold-color=0xF3A503F0
+}
+
+font_color_orange
+{	
+	color = 0x00000000
+    background-color = 0x00000000
+    icon-color = 0x00000000
+	font-color = f3a503ff
+	threshold-color=0xF3A503F0
+}
+
+font_color_white
+{	
+	color = 0x00000000
+    background-color = 0x00000000
+    icon-color = 0x00000000
+	font-color = f0f0f0ff
+	threshold-color=0xF3A503F0
+}

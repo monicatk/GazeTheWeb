@@ -1,0 +1,200 @@
+﻿<?xml version="1.0"?>
+<grid id="content_area" backgroundsrc="img/search_page/elements/search_background2.png" backgroundalignment="stretched" showbackground="true">
+
+<row size="18.12%">
+  <column size="1.6062%">
+    <block style="invisible"></block>
+  </column>
+  <column size="16.4733%">
+    <grid>
+      <row size="8.4507%">
+        <column size="100%">
+          <block style="invisible"></block>
+        </column>
+      </row>
+      <row size="83.0986%">
+        <column size="100%">
+          <picture id="searching" src="img/search_page/elements/searching2.png"></picture>
+        </column>
+      </row>
+      <row size="8.4507%">
+        <column size="100%">
+          <block style="invisible"></block>
+        </column>
+      </row>
+    </grid>
+  </column>
+
+  <column size="0.5%">
+    <block style="invisible"></block>
+  </column>
+
+  <column size="78.4942%">
+    <grid>
+      <row size = "8.4507%">
+        <column size = "100%">
+          <block style="invisible"></block>
+        </column>
+      </row>
+      <row size="83.0986%">
+        <column size = "100%">
+          <block id="searchContent" style="invisible" backgroundsrc="img/search_page/elements/searchfield2.png" backgroundalignment="stretched"></block>
+        </column>
+      </row>
+      <row size="8.4507%">
+        <column size = "100%">
+          <block style="invisible"></block>
+        </column>
+      </row>
+    </grid>
+  </column>
+  <column size="2.9263%">
+    <block style="invisible"></block>
+  </column>
+  </row>
+  
+  <row size="1.2195%">
+   <column size="100%">
+     <block style="block"></block>
+   </column>
+  </row>
+  
+  <row size="80.6605%">
+    <column size="1.16%">
+      <block style="invisible"></block>
+    </column>
+    <column size="96.2877%">
+      <grid>
+        <row size="2.1738%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="22.6087%">
+          <column size="100%">
+            <block id="result0" style="invisible" backgroundsrc="menuebar_elements/tweet_content2.png" backgroundalignment="stretched"></block>
+          </column>
+        </row>
+        <row size="0.8696%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="0.8696%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="22.6087%">
+          <column size="100%">
+            <block id="result1" style="invisible" backgroundsrc="menuebar_elements/tweet_content2.png" backgroundalignment="stretched"></block>
+          </column>
+        </row>
+        <row size="0.8696%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="0.8696%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="22.6087%">
+          <column size="100%">
+            <block id="result2" style="invisible" backgroundsrc="menuebar_elements/tweet_content2.png" backgroundalignment="stretched"></block>
+          </column>
+        </row>
+        <row size="0.8696%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="0.8696%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="22.6087%">
+          <column size="100%">
+            <block id="result3" style="invisible" backgroundsrc="menuebar_elements/tweet_content2.png" backgroundalignment="stretched"></block>
+          </column>
+        </row>
+        <row size="2.1738%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>       
+      </grid>
+    </column>
+      <column size="2.5523%">
+	  
+	  
+      <grid>
+        <row size="2.1738%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="22.6087%">
+          <column size="100%">
+            <block id="rightSide0" style="invisible" ></block>
+          </column>
+        </row>
+        <row size="0.8696%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="0.8696%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="22.6087%">
+          <column size="100%">
+            <block id="rightSide1" style="invisible" ></block>
+          </column>
+        </row>
+        <row size="0.8696%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="0.8696%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="22.6087%">
+          <column size="100%">
+            <block id="rightSide2" style="invisible" ></block>
+          </column>
+        </row>
+        <row size="0.8696%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="0.8696%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>
+        <row size="22.6087%">
+          <column size="100%">
+            <block id="rightSide3" style="invisible" ></block>
+          </column>
+        </row>
+        <row size="2.1738%">
+          <column size="100%">
+            <block style="invisible"></block>
+          </column>
+        </row>       
+      </grid>
+	  
+	  
+	  
+      </column>
+  </row>
+</grid>

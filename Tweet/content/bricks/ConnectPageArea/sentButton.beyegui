@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<grid>
+	<row size="100%">
+		<column size = "100%">
+			<boxbutton id="sentButton"  icon="img/connect_page/elements/sent_button2.png"></boxbutton>
+		</column>
+	</row>
+</grid>

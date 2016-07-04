@@ -8,7 +8,7 @@
 #define SHADER_H_
 
 #include "externals/OGL/gl_core_3_3.h"
-#include "externals/GLM/glm/glm.hpp"
+#include "submodules/GLM/glm/glm.hpp"
 #include <string>
 
 class Shader

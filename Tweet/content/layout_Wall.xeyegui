@@ -1,0 +1,45 @@
+﻿<?xml version="1.0"?>
+<layout stylesheet="style/stylesheet.seyegui" >
+    <grid>
+		<row size="25.875%">
+			<column size = "100%">
+				<block id="menue_button_area"></block>
+			</column>
+		</row>
+		<row size="71.75%" >
+			<column size="16.875%">
+				<grid  style = "block" showbackground="true">
+					<row size="70.0%">
+						<column size="100%">
+							<block style="block"></block>
+						</column>
+					</row>
+					<row size="24.9%">
+						<column size="100%">
+							<circlebutton id="back_button" icon="menuebar_elements/logout.png"></circlebutton>
+						</column>
+					</row>
+					<row size="5.1%">
+						<column size="100%">
+							<block style="block"></block>
+						</column>
+					</row>
+				</grid>
+			</column>
+			<column size="67.34375%">
+			  <block style="block" id="content_area"></block>
+			</column>
+			<column size="14.21875%">
+			  <block style="blue" id="action_button_area"></block>
+			</column>
+			<column size="1.5625%">
+				<block style="block"></block>
+			</column>
+		</row>
+		<row size="2.375%">
+			<column size = "100%">
+				<block style="block"></block>
+			</column>
+		</row>
+	</grid>
+</layout>

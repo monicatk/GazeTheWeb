@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<grid>
+	<row size= "26.656%">
+		<column size = "100%">
+			<block style="invisible"></block>
+		</column>
+	</row>
+	<row size= "52.517%">
+		<column size = "17%">
+			<block style="invisible"></block>
+		</column>
+		<column size = "25%">
+			<textblock id="textBlock1_2"  style="font_color_white" content="test" textscale="78%" alignment="center"  ></textblock>
+		</column>
+		<column size = "18%">
+			<block style="invisible"></block>
+		</column>
+		<column size = "25%">
+			<textblock id="textBlock1_3"  style="font_color_white" content="test"  textscale="78%" alignment="center" ></textblock>
+		</column>
+		<column size = "15%">
+			<block style="invisible"></block>
+		</column>
+	</row>
+	<row size= "20.827%">
+		<column size = "32.7%">
+			<block style="invisible"></block>
+		</column>
+		<column size = "49.07%">
+			<textblock id="textBlock1_4"  style="font_color_white" content="testawdawd"  textscale="50%"></textblock>
+		</column>
+		<column size = "18.23%">
+			<block style="invisible"></block>
+		</column>
+	</row>
+</grid>

@@ -1,0 +1,8 @@
+﻿<?xml version="1.0"?>
+<grid showbackground="true" style="block">
+  <row size="100%">
+    <column size="100%">
+      <boxbutton  id="likeButton" style="actionbar_background" icon="actionbar_elements/like_button2.png"></boxbutton>
+    </column>
+  </row>
+</grid>

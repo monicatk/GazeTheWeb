@@ -7,7 +7,7 @@
 #ifndef WEBVIEWPARAMETERS_H_
 #define WEBVIEWPARAMETERS_H_
 
-#include "externals/GLM/glm/glm.hpp"
+#include "submodules/GLM/glm/glm.hpp"
 
 struct WebViewParameters
 {

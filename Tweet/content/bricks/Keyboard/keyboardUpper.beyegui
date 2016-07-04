@@ -1,0 +1,92 @@
+﻿<?xml version="1.0"?>
+<grid>
+
+  <row  size="32%">
+  <column size="90">
+	<block style="back"></block>
+		
+  </column>
+  
+    <column size="10">
+	<boxbutton id="keyAbort2"  icon="img/keyboard/Exit.png"></boxbutton>
+  </column>
+  
+  </row>
+  
+  <!--This row should be extended for word completion! -->
+  <row size="0%">
+    <column size="100%">
+      <block style="back"></block>
+    </column>
+  </row>
+  
+  <row  size="17%">
+    <column size="100%">
+	 <stack>
+	  <boxbutton id="keyQ"  icon="img/keyboard/Q.png"></boxbutton>
+      <boxbutton id="keyW"  icon="img/keyboard/W.png"></boxbutton>
+	  <boxbutton id="keyE"  icon="img/keyboard/E.png"></boxbutton>
+	  <boxbutton id="keyR"  icon="img/keyboard/R.png"></boxbutton>
+	  <boxbutton id="keyT"  icon="img/keyboard/T.png"></boxbutton>
+	  <boxbutton id="keyZ"  icon="img/keyboard/Z.png"></boxbutton>
+	  <boxbutton id="keyU"  icon="img/keyboard/U.png"></boxbutton>
+	  <boxbutton id="keyI"  icon="img/keyboard/I.png"></boxbutton>
+	  <boxbutton id="keyO"  icon="img/keyboard/O.png"></boxbutton>
+	  <boxbutton id="keyP"  icon="img/keyboard/P.png"></boxbutton>
+       </stack>
+      </column>
+  </row>
+  
+  
+    <row  size="17%">
+    <column size="100%">
+	 <stack>
+	  <boxbutton id="keyA"  icon="img/keyboard/A.png"></boxbutton>
+      <boxbutton id="keyS"  icon="img/keyboard/S.png"></boxbutton>
+	  <boxbutton id="keyD"  icon="img/keyboard/D.png"></boxbutton>
+	  <boxbutton id="keyF"  icon="img/keyboard/F.png"></boxbutton>
+	  <boxbutton id="keyG"  icon="img/keyboard/G.png"></boxbutton>
+	  <boxbutton id="keyH"  icon="img/keyboard/H.png"></boxbutton>
+	  <boxbutton id="keyJ"  icon="img/keyboard/J.png"></boxbutton>
+	  <boxbutton id="keyK"  icon="img/keyboard/K.png"></boxbutton>
+	  <boxbutton id="keyL"  icon="img/keyboard/L.png"></boxbutton>
+       </stack>
+      </column>
+  </row>
+  
+    <row  size="17%">
+    <column size="100%">
+	 <stack>
+	 <boxbutton id="keyLower"  icon="img/keyboard/Lower2.png">></boxbutton>
+	  <boxbutton id="keyY"  icon="img/keyboard/Y.png"></boxbutton>
+	  <boxbutton id="keyX"  icon="img/keyboard/X.png"></boxbutton>
+	  <boxbutton id="keyC"  icon="img/keyboard/C.png"></boxbutton>
+	  <boxbutton id="keyV"  icon="img/keyboard/V.png"></boxbutton>
+	  <boxbutton id="keyB"  icon="img/keyboard/B.png"></boxbutton>
+	  <boxbutton id="keyN"  icon="img/keyboard/N.png"></boxbutton>
+	  <boxbutton id="keyM"  icon="img/keyboard/M.png"></boxbutton>
+	  <boxbutton id="keyDelete"  icon="img/keyboard/Delete2.png">></boxbutton>
+       </stack>
+      </column>
+  </row>
+  
+    <row  size="17%">
+      <column size="20%">
+	<stack>
+	<boxbutton id="keyMoveLeft" icon="img/keyboard/moveLeft.png"></boxbutton>
+	<boxbutton id="keyMoveRight" icon="img/keyboard/moveRight.png"></boxbutton>
+      </stack>
+      </column>
+    <column size="80%">
+	 <stack>
+	
+	<boxbutton id="keyLeer"  icon="img/keyboard/Leer2.png"></boxbutton>
+	<boxbutton id="keyEnter"  icon="img/keyboard/Enter2.png"></boxbutton>
+	
+       </stack>
+      </column>
+  </row>
+  
+  
+  
+</grid>

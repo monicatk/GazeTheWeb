@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<layout stylesheet="style/stylesheet.seyegui" >
+  <grid style="login" showbackground="true">
+    <row size ="37.5%">
+      <column size="25%">
+        <block></block>
+      </column>
+      <column size="50%">
+        <picture id="logo" src="/Eprojekt_Design/close_screen/logo2x.png" style="block"></picture>
+      </column>
+      <column size="25%">
+        <block></block>
+      </column>
+    </row>
+    <row size="30.0%">
+      <column size="20%">
+        <block></block>
+      </column>
+      <column size="60%">
+        <picture id="close_text" src="/Eprojekt_Design/close_screen/close_text2x.png" style="block"></picture>
+      </column>
+      <column size="20%">
+        <block></block>
+      </column>
+    </row>
+    <row size="25%">
+      <column size="1%">
+        <block></block>
+      </column>
+      <column size="25%">
+        <circlebutton id="close_yes" icon="/Eprojekt_Design/close_screen/yes.png"></circlebutton>
+      </column>
+      <column size="48%">
+        <block></block>
+      </column>
+      <column size="25%">
+        <circlebutton id="close_no" icon="/Eprojekt_Design/close_screen/no.png"></circlebutton>
+      </column>   
+      <column size="1%">
+        <block></block>
+      </column>
+    </row>
+    <row size="7.5%">
+      <column size="100%">
+        <block></block>
+      </column>
+    </row>
+  </grid>
+</layout>

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<grid>
+  <row size="90%">
+    <column size="100%">
+      <textblock id="toTheTopButton" textscale="90%" content="name@blabla" style="font_color_orange" alignment="center" verticalalignment="center"> </textblock>
+    </column>
+  </row>
+  <row size="10%">
+    <column size="100%">
+      <block style="block"></block>
+    </column>
+  </row>
+</grid>

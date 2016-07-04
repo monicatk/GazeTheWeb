@@ -18,8 +18,8 @@
 #include "src/State/Web/Tab/Triggers/DOMTrigger.h"
 #include "src/Utils/Input.h"
 #include "src/Global.h"
-#include "externals/GLM/glm/glm.hpp"
-#include "externals/eyeGUI-development/include/eyeGUI.h"
+#include "submodules/GLM/glm/glm.hpp"
+#include "submodules/eyeGUI/include/eyeGUI.h"
 #include <vector>
 #include <deque>
 #include <memory>

@@ -1,0 +1,25 @@
+﻿<?xml version="1.0"?>
+<grid>
+	<row size="20%">
+		<column style="invisibleBackground" size="40%">
+			<block style="invisibleBackground"></block>
+		</column>
+		<column size="20%">
+			<boxbutton style="invisibleBackground" id="unshowImage" icon="img/gallery/closeimage.png"> </boxbutton>
+		</column>
+		<column style="invisibleBackground" size="40%">
+			<block style="invisibleBackground"></block>
+		</column>
+	</row>
+	<row style="invisibleBackground" size="80%">
+		<column size="12%">
+			<boxbutton style="invisibleBackground" id="imageLeft" icon="img/side_buttons/left_side_button.png"> </boxbutton>
+		</column>
+		<column style="invisibleBackground" size="76%">
+				<picture id="shownPicture"></picture>
+		</column>
+		<column size="12%">
+			<boxbutton style="invisibleBackground" id="imageRight" icon="img/side_buttons/right_side_button.png"> </boxbutton>
+		</column>
+	</row>
+</grid>

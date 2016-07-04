@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<grid>
+<row size="25%">
+  <column size="100%">
+    <stack>
+      <boxbutton id="keySlower3" style="keyboard_special_buttons"  icon="img/keyboard_new/slower.png"></boxbutton>
+      <boxbutton id="keyFaster3" style="keyboard_special_buttons"  icon="img/keyboard_new/faster.png"></boxbutton>
+      <block id = "block1" style="keyboard_buttons"></block>
+      <block style="keyboard_buttons"></block>
+      <block style="keyboard_buttons"></block>
+      <boxbutton id="keySeven" style="keyboard_buttons" icon="img/keyboard_new/7.png"></boxbutton>
+      <boxbutton id="keyEight" style="keyboard_buttons" icon="img/keyboard_new/8.png"></boxbutton>
+      <boxbutton id="keyNine" style="keyboard_buttons" icon="img/keyboard_new/9.png"></boxbutton>
+     <block style="keyboard_buttons"></block>
+      <block style="keyboard_buttons"></block>
+      <block style="keyboard_buttons"></block>
+      <block style="keyboard_buttons"></block>
+    </stack>
+  </column>
+</row>
+    <row  size="25%">
+    <column size="100%">
+	 <stack>
+	   <boxbutton id="keyNumbers3" style="keyboard_special_buttons" icon="img/keyboard_new/smallLetters.png"></boxbutton>
+	  <boxbutton id="keySymbols3" style="keyboard_special_buttons" icon="img/keyboard_new/symbols.png"></boxbutton>
+	  <block style="keyboard_buttons"></block>
+	  <block style="keyboard_buttons"></block>
+	  <block style="keyboard_buttons"></block>
+	  <boxbutton id="keyFour" style="keyboard_buttons" icon="img/keyboard_new/4.png"></boxbutton>
+	  <boxbutton id="keyFive" style="keyboard_buttons" icon="img/keyboard_new/5.png"></boxbutton>
+	  <boxbutton id="keySix" style="keyboard_buttons" icon="img/keyboard_new/6.png"></boxbutton>
+	  <block style="keyboard_buttons"></block>
+	  <block style="keyboard_buttons"></block>
+	  <block style="keyboard_buttons"></block>
+	  <block style="keyboard_buttons"></block>
+       </stack>
+      </column>
+  </row>
+   <row  size="25%">
+    <column size="100%">
+	 <stack>
+	  <boxbutton id="keySpecial3" style="keyboard_special_buttons" icon="img/keyboard_new/special.png"></boxbutton>
+	   <boxbutton id="keyFunctions3" style="keyboard_special_buttons" icon="img/keyboard_new/functions.png"></boxbutton>
+	  <block style="keyboard_buttons"></block>
+	  <block style="keyboard_buttons"></block>
+	  <boxbutton id="keyZero" style="keyboard_buttons" icon = "img/keyboard_new/0.png"></boxbutton>
+	  <boxbutton id="keyOne" style="keyboard_buttons" icon="img/keyboard_new/1.png"></boxbutton>
+	  <boxbutton id="keyTwo" style="keyboard_buttons" icon="img/keyboard_new/2.png"></boxbutton>
+	  <boxbutton id="keyThree" style="keyboard_buttons" icon="img/keyboard_new/3.png"></boxbutton>
+	  <block style="keyboard_buttons"></block>
+	  <block style="keyboard_buttons"></block>
+	  <block style="keyboard_buttons"></block>
+	  <boxbutton id="keyDelete3" style="keyboard_special_buttons"  icon="img/keyboard_new/remove.png"></boxbutton>
+       </stack>
+      </column>
+  </row>
+  
+  <row size="25%">
+    <column size="17%">
+      	<stack>
+	<boxbutton id="keyMoveLeft3" style="keyboard_special_buttons" icon="img/keyboard_new/moveCursorLeft.png"></boxbutton>
+	<boxbutton id="keyMoveRight3" style="keyboard_special_buttons" icon="img/keyboard_new/moveCursorRight.png"></boxbutton>
+      </stack>
+    </column>
+    <column size="83%">
+      	 <stack>
+	<boxbutton id="keyLeer3" style="keyboard_special_buttons" icon="img/keyboard_new/space.png"></boxbutton>
+	<boxbutton id="keyEnter3" style="keyboard_special_buttons" icon="img/keyboard_new/enter.png"></boxbutton>
+       </stack>
+    </column>
+  </row>
+</grid>

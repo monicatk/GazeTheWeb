@@ -6,7 +6,7 @@
 #include "Logger.h"
 #include "src/Global.h"
 #include "src/Setup.h"
-#include "externals/spdlog/include/spdlog/spdlog.h"
+#include "submodules/spdlog/include/spdlog/spdlog.h"
 #include <memory>
 
 // Shared pointer of global logger

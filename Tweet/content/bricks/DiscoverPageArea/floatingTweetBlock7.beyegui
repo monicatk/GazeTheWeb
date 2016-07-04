@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<grid>
+	<row size="100%">
+		<column size = "30%">
+			<picture id="picture3" ></picture>
+		</column>
+		<column size = "70%">
+			<grid>
+				<row size= "50%">
+					<column size = "100%">
+						<textblock id="textBlock7_1" textscale="70.0%" style="invisible" content="test" alignment="center" verticalalignment="center"></textblock>
+					</column>
+				</row>
+				<row size= "50%">
+					<column size = "100%">
+						<textblock id="textBlock7_2"  textscale="70.0%" style="invisible" content="test" alignment="center" verticalalignment="center"></textblock>
+					</column>
+				</row>
+			</grid>
+		</column>
+	</row>
+</grid>

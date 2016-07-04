@@ -7,7 +7,7 @@
 #include "src/LabStream/LabStream.h"
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
-#include "externals/glfw-master/include/GLFW/glfw3.h"
+#include "submodules/glfw/include/GLFW/glfw3.h"
 #include <functional>
 
 Master::Master(CefMediator* pCefMediator)
@@ -410,6 +410,7 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
     if(pLayout == _pMaster->_pSuperLayout)
     {
         _pMaster->_paused = true;
+		eyegui::setDescriptionVisibility(_pMaster->_pGUI, eyegui::DescriptionVisibility::VISIBLE);
     }
 }
 
@@ -418,5 +419,6 @@ void Master::MasterButtonListener::up(eyegui::Layout* pLayout, std::string id)
     if(pLayout == _pMaster->_pSuperLayout)
     {
         _pMaster->_paused = false;
+		eyegui::setDescriptionVisibility(_pMaster->_pGUI, eyegui::DescriptionVisibility::ON_PENETRATION); // TODO look up in Settings for set value
     }
 }

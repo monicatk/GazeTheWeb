@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<grid>
+	<row size="17%">
+		<column size="100%">
+			<block style="invisible"> </block>
+		</column>
+	</row>
+	<row size="83%">
+		<column size = "20%">
+			<block style="invisible"> </block>
+		</column>
+		<column size = "5%">
+			<block  style="invisible" ></block>
+		</column>
+		<column size = "75%">
+			<textblock id="searchText"  style="invisible" content=""></textblock>
+		</column>
+	</row>
+</grid>

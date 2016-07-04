@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<layout stylesheet="style/stylesheet.seyegui" >
+  <grid style="login" showbackground="true">
+    <row size="49.25%">
+      <column size="100%">
+        <picture id="top_logo_part" src="/Eprojekt_Design/top_logo_part.png" style="block"></picture>
+      </column>
+    </row>
+    <row size="8.25%">
+      <column size="31.428%">
+        <picture id="left_middle_part" src="/Eprojekt_Design/left.png" style="block"></picture>
+      </column>
+      <column size="37.344%">
+        <textblock id="textblock" style="default" content="Enter Username and Password" alignment="center"></textblock>
+      </column>
+      <column size="31.328%">
+        <picture id="right_middle_part" src="/Eprojekt_Design/right.png" style="block"></picture>
+      </column>
+    </row>
+    <row size="3.625%">
+      <column size="100%">
+        <picture id="bottom_middle_part" src="/Eprojekt_Design/bottom_middle_part.png" style="block"></picture>
+      </column>
+    </row>
+    
+    <row size="38.875%">
+      
+      <column size="22.734375%">
+        <grid>
+          <row size="55%">
+            <column size="100%">
+              <block style="login"></block>
+            </column>
+          </row>
+          <row size="40%">
+            <column size="5%">
+              <block style="login"></block>
+            </column>
+            <column size="45%">
+              <circlebutton id="close_button" icon="menuebar_elements/logout.png"></circlebutton>
+            </column>
+            <column size="50%">
+              <block style="login"></block>
+            </column>
+          </row>
+          <row size="5%">
+            <column size="100%">
+              <block style="login"></block>
+            </column>
+          </row>
+        </grid>
+      </column>
+      <column size="17.1875%">
+        <block id="left" style="login"></block>
+      </column>
+      
+      <column size="0.78125%">
+        <block style="login"></block>
+      </column>
+      <column size="18.59375%">
+        <block id="middle" style="login"></block>
+      </column>
+      <column size="0.78125%">
+        <block style="login"></block>
+      </column>
+      
+    <column size="17.1875%">
+      <block id="right" style="login"></block>
+    </column>
+       <column size="22.734375%">
+        <block style="login"></block>
+      </column>
+    
+    </row>
+  </grid>
+</layout>
