@@ -6,6 +6,7 @@
 #include "BrowserMsgRouter.h"
 #include "src/CEF/Extension/CefMediator.h"
 #include "src/Utils/Logger.h"
+#include <cstdlib>
 
 BrowserMsgRouter::BrowserMsgRouter(CefMediator* pMediator)
 {
@@ -49,6 +50,38 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 
 		return true;
 	}
+
+	// Fixed element callbacks
+	if (requestName.compare(0, 9, "#fixElem#") == 0)
+	{
+		if (requestName.compare(9, 4, "rem#") == 0)
+		{
+			std::string id = requestName.substr(13, 2);
+			LogDebug("BrowserMsgRouter: Fixed element #", id, " was removed.");
+
+			// Notify Tab via CefMediator, that a fixed element was removed
+			_pMsgRouter->GetMediator()->RemoveFixedElement(browser, atoi(id.c_str()));
+
+			return true;
+		}
+		if (requestName.compare(9, 4, "add#") == 0)
+		{
+			std::string id = requestName.substr(13, 2);
+			LogDebug("BrowserMsgRouter: Fixed element #", id, " was added.");
+
+			// Tell Renderer to read out bounding rectangle coordinates belonging to the given ID
+			CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("FetchFixedElements");
+			msg->GetArgumentList()->SetInt(0, atoi(id.c_str()));
+			browser->SendProcessMessage(PID_RENDERER, msg);
+
+			return true;
+		}
+		
+	}
+
+	// Print message to console and withdraw callback
+	LogDebug("MsgHandler: ", requestName);
+	callback->Failure(0, "");
 
 	return false;
 }

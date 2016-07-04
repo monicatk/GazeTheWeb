@@ -493,21 +493,25 @@ void Tab::SetPageResolution(double width, double height)
     _pageHeight = height;
 }
 
-void Tab::SetFixedElementsCoordinates(std::vector<glm::vec4> elements)
+void Tab::SetFixedElementsCoordinates(int id, std::vector<glm::vec4> elements)
 {
-    _fixedElements = elements;
+	// Fill 2D vector with new empty 1D vector, if needed
+	while (_fixedElements.size() < id+1)
+	{
+		_fixedElements.push_back(std::vector<glm::vec4>{});
+	}
+	// Assign list of fixed element coordinates to given position
+    _fixedElements[id] = elements;
 }
 
-bool Tab::GetFixedElementsLoadedAfterScrolling()
+void Tab::RemoveFixedElement(int id)
 {
-    if (!_fixedElementsLoadedAfterScrolling)
-    {
-        // Return false only once if bool value is false on method call
-        _fixedElementsLoadedAfterScrolling = true;
-        return false;
-    }
-    return true;
+	if (_fixedElements.size() > id)
+	{
+		_fixedElements[id].clear();
+	}
 }
+
 
 void Tab::SetContentOfTextBlock(std::string id, std::u16string content)
 {
