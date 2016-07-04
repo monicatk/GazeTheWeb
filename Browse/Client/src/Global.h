@@ -7,7 +7,7 @@
 #ifndef GLOBAL_H_
 #define GLOBAL_H_
 
-#include "submodules/GLM/glm/glm.hpp"
+#include "submodules/glm/glm/glm.hpp"
 #include <string>
 
 static const int EYEGUI_WEB_URLINPUT_LAYER = -1; // in default GUI...
