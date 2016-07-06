@@ -7,19 +7,6 @@ function consolePrint(msg)
 	window.cefQuery({ request: msg, persistent : false, onSuccess : function(response) {}, onFailure : function(error_code, error_message){} });
 }
 
-
-
-// function writeToArray()
-// {
-// for(i = 0; i < textInput.length; i++)
-// 	{
-// 		// TODO: Nested DOM nodes should get their parent's information as well
-// 	    var rect = textInput[i].getBoundingClientRect();
-// 	    window.TextInputs[i].coordinates = [rect.top*zoomFactor + offsetY, rect.left*zoomFactor + offsetX, rect.bottom*zoomFactor + offsetY, rect.right*zoomFactor + offsetX];
-// 	    window.TextInputs[i].value = textInput[i].value;
-// 	}
-// }
-
 // TODO: Add as global function and also use it in DOM node work
 /**
 	Adjust bounding client rectangle coordinates to window, using scrolling offset and zoom factor.
@@ -87,7 +74,7 @@ function AddFixedElement(node)
 	// Find smallest ID not yet in use
 	var id;
 	var found = false;
-	for(i=0, n=window.fixed_IDlist.length; i < n; i++)
+	for(var i=0, n=window.fixed_IDlist.length; i < n; i++)
 	{
 		if(!window.fixed_IDlist[i])
 		{
@@ -116,6 +103,72 @@ function AddFixedElement(node)
 	consolePrint('#fixElem#add#'+zero+id);
 }
 
+// parent & child are 1D arrays of length 4
+function CompareRectangles(parent, child)
+{
+
+
+	return [0,0,0,0]; // child lies completely in parent
+}
+
+function TraverseChildrenForBoundingRectUnion(node, id)
+{
+	// Check if node's bounding rectangle is outside of the current union of rectangles in |window.fixed_coordinates[id]|
+
+
+	if(node.children && node.children.length > 0)
+	{
+		// consolePrint('Starting to check all children');
+		var new_bounds = bounds;
+		var n = node.children.length;
+		for(var i=0; i < n ; i++)
+		{
+		
+			var child = node.children.item(i);
+			
+
+			if(child.nodeType == 1)
+			{
+				// var out = ('depth: '+depth+' ('+(i+1)+'/'+node.childElementCount+'); ');
+
+				// if(child.style.position)
+				// 	out += ('position: '+child.style.position+'; ');
+
+				var rect = child.getBoundingClientRect();
+				// out+= ('rect: '+rect.top+', '+rect.left+', '+rect.bottom+', '+rect.right+'; id: '+child.id+'; ');
+
+				// if(child.tagName)
+				// 	out += ('tagname: '+child.tagName+'; ');
+
+				var childBounds = AdjustRectToZoom(rect);
+				// // Compare bounds
+				// if(bounds[0] > childBounds[0] || bounds[1] > childBounds[1] || bounds[2] < childBounds[2] || bounds[3] < childBounds[3])
+				// {
+				// 	consolePrint('Child outside of parent rect! Child: '+childBounds+'; parent: '+bounds);
+				// 	new_bounds = [Math.min(new_bounds[0], childBounds[0]), Math.min(new_bounds[1], childBounds[1]), Math.max(new_bounds[2], childBounds[2]), Math.max(new_bounds[3], childBounds[3])];
+				// }
+
+			}
+			else
+				out += 'No Element.';
+
+
+
+			consolePrint(out);
+			// consolePrint('i:'+i+', n:'+n+', child#:'+child.children.length);
+		}
+
+		consolePrint('New bounds: '+new_bounds);
+
+		for(var i=0; i < n; i++)
+		{
+			var child = node.children.item(i);
+
+			TraverseChildrenForBoundingRectUnion(child, id);
+		}
+	}
+}
+
 function SaveBoundingRectCoordinates(node)
 {
 	var rect = node.getBoundingClientRect();
@@ -127,7 +180,7 @@ function SaveBoundingRectCoordinates(node)
 		// consolePrint('JSDEBUG: fixed coords: '+rect.top+' '+rect.left+' '+rect.bottom+' '+rect.right);
 
 		// Adjust rectangle to zoom factor
-		var coords = AdjustRectToZoom(rect);
+		// var coords = AdjustRectToZoom(rect);
 
 		// Add empty 1D array to 2D array, if needed
 		while(window.fixed_coordinates.length <= id)
@@ -139,11 +192,11 @@ function SaveBoundingRectCoordinates(node)
 
 		// TODO: Union function for union of parent rect with all its children's rects
 
-		// for(i=0, n=node.children.length; i < n; i++)
+		// for(var i=0, var n=node.children.length; i < n; i++)
 		// {
 		// 	if(node.children[i].style.position == 'relative')
 		// 		consolePrint('Relative child found');
-			
+
 		// 	if(node.children[i].nodeType == 1) // && node.children[i].style.position == 'relative')
 		// 	{
 			
@@ -161,13 +214,11 @@ function SaveBoundingRectCoordinates(node)
 		// 	}
 		// }
 
+		TraverseChildrenForBoundingRectUnion(node, id);
+
 		// Assign coordinates as 1D array to specified position in 2D array
-		window.fixed_coordinates[id] = coords;
+		// window.fixed_coordinates[id] = coords;
 
-
-		// var out = '';
-		// for(i=0, n=coords.length; i < n; i++) out+=(coords[i]+' ');
-		// consolePrint('JSDEBUG: fixed coords: '+out);
 		// consolePrint('JSDEBUG: '+coords);
 	}
 }
@@ -253,7 +304,7 @@ var observer = new MutationObserver(
 	  			{
 		  			var nodes = mutation.addedNodes;
 
-		  			for(i=0, n=nodes.length; i < n; i++)
+		  			for(var i=0, n=nodes.length; i < n; i++)
 		  			{
 		  				node = nodes[i]; // TODO: lots of data copying here??
 		  				var rect;
