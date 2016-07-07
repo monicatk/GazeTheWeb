@@ -104,40 +104,6 @@ function AddFixedElement(node)
 	consolePrint('#fixElem#add#'+zero+id);
 }
 
-// parent & child are 1D arrays of length 4
-function ComputeBoundingRect(parent, child)
-{
-	return [Math.min(parent[0], child[0]),
-			Math.min(parent[1], child[1]),
-			Math.max(parent[2], child[2]),
-			Math.max(parent[3], child[3])];
-}
-
-function ComputeBoundingRectOfAllChilds(node)
-{
-	// Check if node's bounding rectangle is outside of the current union of rectangles in |window.fixed_coordinates[id]|
-	if(node.nodeType == 1) // 1 == ELEMENT_NODE
-	{
-		// Compare nodes to current bounding rectangle of all child nodes
-		var rect_coords = AdjustRectToZoom(node.getBoundingClientRect());
-
-		// Traverse all child nodes
-		if(node.children && node.children.length > 0)
-		{
-			var n = node.children.length;
-
-			for(var i=0; i < n ; i++)
-			{		
-				// Compare previously computed bounding rectangle with the one computed by traversing the child node
-				rect_coords = ComputeBoundingRect(
-					rect_coords,
-					ComputeBoundingRectOfAllChilds(node.children.item(i), rect_coords)
-					);
-			}
-		}
-		return rect_coords;
-	}
-}
 
 function SaveBoundingRectCoordinates(node)
 {
@@ -146,8 +112,10 @@ function SaveBoundingRectCoordinates(node)
 	if(rect.width && rect.height)
 	{
 		var id = node.getAttribute('fixedID');
+
 		// 1D array with top, left, bottom, right values of bounding rectangle
 		var rect_coords = AdjustRectToZoom(node.getBoundingClientRect());
+
 		// Add empty 1D array to 2D array, if needed
 		while(window.fixed_coordinates.length <= id)
 		{
@@ -156,14 +124,72 @@ function SaveBoundingRectCoordinates(node)
 		// Add rect coordinates to list of fixed coordinates at position |id|
 		window.fixed_coordinates[id] = rect_coords;
 
-		// Compute and save a bounding rectangle coordinates at |id|, also containing all child nodes rects
-		window.fixed_coordinates[id] = window.fixed_coordinates[id].append(
-												ComputeBoundingRectOfAllChilds(node)
-											);
-		consolePrint(window.fixed_coordinates[id]);
+		// Compute bounding rect containing all child nodes
+		var tree_rect_coords = ComputeBoundingRectOfAllChilds(node, 0);
 
+		// Save tree rect, if different than fixed nodes bounding rect
+		var equal = true;
+		for(var i = 0; i < 4; i++)
+		{
+			equal &= (rect_coords[i] == tree_rect_coords[i]);
+		}
+		if(!equal)
+		{
+			window.fixed_coordinates[id] = window.fixed_coordinates[id].concat(
+												tree_rect_coords
+											);
+		}
 	}
 }
+
+// parent & child are 1D arrays of length 4
+function ComputeBoundingRect(parent, child)
+{
+	// if(parent == [-1,-1,-1,-1])
+	// 	return child;
+
+	return [Math.min(parent[0], child[0]),
+			Math.min(parent[1], child[1]),
+			Math.max(parent[2], child[2]),
+			Math.max(parent[3], child[3])];
+}
+
+function ComputeBoundingRectOfAllChilds(node, depth)
+{
+	// Check if node's bounding rectangle is outside of the current union of rectangles in |window.fixed_coordinates[id]|
+	if(node.nodeType == 1) // 1 == ELEMENT_NODE
+	{
+		var rect = node.getBoundingClientRect();
+
+		// Compare nodes to current bounding rectangle of all child nodes
+		var rect_coords = AdjustRectToZoom(rect);
+
+
+		var out = 'No children';
+		// Traverse all child nodes
+		if(node.children && node.children.length > 0)
+		{
+			var n = node.children.length;
+
+			for(var i=0; i < n ; i++)
+			{		
+				// Compare previously computed bounding rectangle with the one computed by traversing the child node
+				rect_coords = 
+					ComputeBoundingRect(
+						rect_coords,
+						ComputeBoundingRectOfAllChilds(node.children.item(i), depth+1)
+					);
+			}
+		}
+
+
+		return rect_coords;
+	}
+
+	// Error case
+	return [-1,-1,-1,-1]; // TODO: nodeType != 1 possible? May ruin the whole computation
+}
+
 
 function RemoveFixedElement(node)
 {
@@ -321,43 +347,3 @@ var config = { attributes: true, childList: true, characterData: true, subtree: 
 // eigentliche Observierung starten und Zielnode und Konfiguration übergeben
 observer.observe(target, config);
 consolePrint('MutationObserver successfully created!');
-
-
-// (function (global) {
-//     "use strict";
-
-//     if (typeof global.MutationObserver !== "function") {
-//         global.MutationObserver = global.WebKitMutationObserver || global.MozMutationObserver;
-//     }
-
-//     var watch = document.getElementById("watch");
-
-//     function whenClicked() {
-//         var li = document.createElement("li");
-
-//         li.textContent = "List element";
-//         watch.appendChild(li);
-//     }
-
-//     document.getElementById("button").addEventListener("click", whenClicked, false);
-
-//     if (typeof global.MutationObserver !== "function") {
-//         watch.addEventListener("DOMNodeInserted", function (evt) {
-//             console.log("New element detected", evt.target);
-//         }, false);
-//     } else {
-//         var observer = new global.MutationObserver(function (mutations) {
-//             mutations.forEach(function (mutation) {
-//                 if (mutation.type === 'childList') {
-//                     console.log("New element detected", mutation.addedNodes[0]);
-//                 }
-//             });
-//         });
-
-//         observer.observe(watch, {
-//             childList: true,
-//             characterData: true,
-//             subtree: true
-//         });
-//     }
-// }(window));
