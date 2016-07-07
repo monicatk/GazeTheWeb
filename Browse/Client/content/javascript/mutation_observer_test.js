@@ -61,6 +61,7 @@ var target = document.documentElement;
 
 // node.fixedID defines position, where to store bounding rectangle coordinates in |window.fixed_coordinates|
 window.elements = [];
+
 window.fixed_elements = new Set();
 window.fixed_IDlist = [];				// Position |i| contains boolean information if ID |i| is currently used
 window.fixed_coordinates = [[]];		// 2D list of bounding rectangle coordinates, fill with bounding rect coordinates of fixed node and its children (if position == 'relative')
@@ -104,68 +105,37 @@ function AddFixedElement(node)
 }
 
 // parent & child are 1D arrays of length 4
-function CompareRectangles(parent, child)
+function ComputeBoundingRect(parent, child)
 {
-
-
-	return [0,0,0,0]; // child lies completely in parent
+	return [Math.min(parent[0], child[0]),
+			Math.min(parent[1], child[1]),
+			Math.max(parent[2], child[2]),
+			Math.max(parent[3], child[3])];
 }
 
-function TraverseChildrenForBoundingRectUnion(node, id)
+function ComputeBoundingRectOfAllChilds(node)
 {
 	// Check if node's bounding rectangle is outside of the current union of rectangles in |window.fixed_coordinates[id]|
-
-
-	if(node.children && node.children.length > 0)
+	if(node.nodeType == 1) // 1 == ELEMENT_NODE
 	{
-		// consolePrint('Starting to check all children');
-		var new_bounds = bounds;
-		var n = node.children.length;
-		for(var i=0; i < n ; i++)
+		// Compare nodes to current bounding rectangle of all child nodes
+		var rect_coords = AdjustRectToZoom(node.getBoundingClientRect());
+
+		// Traverse all child nodes
+		if(node.children && node.children.length > 0)
 		{
-		
-			var child = node.children.item(i);
-			
+			var n = node.children.length;
 
-			if(child.nodeType == 1)
-			{
-				// var out = ('depth: '+depth+' ('+(i+1)+'/'+node.childElementCount+'); ');
-
-				// if(child.style.position)
-				// 	out += ('position: '+child.style.position+'; ');
-
-				var rect = child.getBoundingClientRect();
-				// out+= ('rect: '+rect.top+', '+rect.left+', '+rect.bottom+', '+rect.right+'; id: '+child.id+'; ');
-
-				// if(child.tagName)
-				// 	out += ('tagname: '+child.tagName+'; ');
-
-				var childBounds = AdjustRectToZoom(rect);
-				// // Compare bounds
-				// if(bounds[0] > childBounds[0] || bounds[1] > childBounds[1] || bounds[2] < childBounds[2] || bounds[3] < childBounds[3])
-				// {
-				// 	consolePrint('Child outside of parent rect! Child: '+childBounds+'; parent: '+bounds);
-				// 	new_bounds = [Math.min(new_bounds[0], childBounds[0]), Math.min(new_bounds[1], childBounds[1]), Math.max(new_bounds[2], childBounds[2]), Math.max(new_bounds[3], childBounds[3])];
-				// }
-
+			for(var i=0; i < n ; i++)
+			{		
+				// Compare previously computed bounding rectangle with the one computed by traversing the child node
+				rect_coords = ComputeBoundingRect(
+					rect_coords,
+					ComputeBoundingRectOfAllChilds(node.children.item(i), rect_coords)
+					);
 			}
-			else
-				out += 'No Element.';
-
-
-
-			consolePrint(out);
-			// consolePrint('i:'+i+', n:'+n+', child#:'+child.children.length);
 		}
-
-		consolePrint('New bounds: '+new_bounds);
-
-		for(var i=0; i < n; i++)
-		{
-			var child = node.children.item(i);
-
-			TraverseChildrenForBoundingRectUnion(child, id);
-		}
+		return rect_coords;
 	}
 }
 
@@ -176,50 +146,22 @@ function SaveBoundingRectCoordinates(node)
 	if(rect.width && rect.height)
 	{
 		var id = node.getAttribute('fixedID');
-
-		// consolePrint('JSDEBUG: fixed coords: '+rect.top+' '+rect.left+' '+rect.bottom+' '+rect.right);
-
-		// Adjust rectangle to zoom factor
-		// var coords = AdjustRectToZoom(rect);
-
+		// 1D array with top, left, bottom, right values of bounding rectangle
+		var rect_coords = AdjustRectToZoom(node.getBoundingClientRect());
 		// Add empty 1D array to 2D array, if needed
 		while(window.fixed_coordinates.length <= id)
 		{
 			window.fixed_coordinates.push([]);
 		}
+		// Add rect coordinates to list of fixed coordinates at position |id|
+		window.fixed_coordinates[id] = rect_coords;
 
+		// Compute and save a bounding rectangle coordinates at |id|, also containing all child nodes rects
+		window.fixed_coordinates[id] = window.fixed_coordinates[id].append(
+												ComputeBoundingRectOfAllChilds(node)
+											);
+		consolePrint(window.fixed_coordinates[id]);
 
-
-		// TODO: Union function for union of parent rect with all its children's rects
-
-		// for(var i=0, var n=node.children.length; i < n; i++)
-		// {
-		// 	if(node.children[i].style.position == 'relative')
-		// 		consolePrint('Relative child found');
-
-		// 	if(node.children[i].nodeType == 1) // && node.children[i].style.position == 'relative')
-		// 	{
-			
-
-		// 		var childRect = node.children[i].getBoundingClientRect();
-		// 		// Size must not be zero
-		// 		if(childRect.width && childRect.height)
-		// 		{
-		// 			// Child rect not wholly contained in parent rect
-		// 			if(childRect.top < rect.top || childRect.left < rect.left || childRect.bottom > rect.bottom || childRect.right > rect.right)
-		// 			{
-		// 				coords = coords.concat(AdjustRectToZoom(childRect));				
-		// 			}
-		// 		}
-		// 	}
-		// }
-
-		TraverseChildrenForBoundingRectUnion(node, id);
-
-		// Assign coordinates as 1D array to specified position in 2D array
-		// window.fixed_coordinates[id] = coords;
-
-		// consolePrint('JSDEBUG: '+coords);
 	}
 }
 
@@ -260,10 +202,10 @@ var observer = new MutationObserver(
 
 	  			if(mutation.type == 'attributes')
 	  			{
+	  				node = mutation.target;
 	  				// TODO: How to identify node whose attributes changed? --> mutation.target?
-	  				if(mutation.target.nodeType == 1) // 1 == ELEMENT_NODE
+	  				if(node.nodeType == 1) // 1 == ELEMENT_NODE
 	  				{
-	  					node = mutation.target;
 	  					attr = mutation.attributeName;
 
 	  					// usage example: observe changes in input field text
@@ -275,7 +217,7 @@ var observer = new MutationObserver(
 	  						// alert('attr: \''+attr+'\' value: \''+node.getAttribute(attr)+'\' oldvalue: \''+mutation.oldValue+'\'');
 	  						if(node.style.position && node.style.position == 'fixed')
 	  						{
-	  							if(!window.fixed_elements.has(node))
+	  							if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
 	  							{
 	  								AddFixedElement(node);
 	  							}
