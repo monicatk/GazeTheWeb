@@ -41,23 +41,23 @@ public:
     int GetWindowHeight() const { return _height; }
 
     // Get time provided by GLFW
-	double GetTime() const;
+    double GetTime() const;
 
     // Exit
-	void Exit();
+    void Exit();
 
     // Set gaze visualization
     void SetGazeVisualization(bool show) { eyegui::setGazeVisualizationDrawing(_pGUI, show); }
 
     // Set show descriptions
     void SetShowDescriptions(bool show)
-	{
-		eyegui::setDescriptionVisibility(
-			_pGUI,
-			(show ?
-				eyegui::DescriptionVisibility::ON_PENETRATION
-				: eyegui::DescriptionVisibility::HIDDEN));
-	}
+    {
+        eyegui::setDescriptionVisibility(
+            _pGUI,
+            (show ?
+                eyegui::DescriptionVisibility::ON_PENETRATION
+                : eyegui::DescriptionVisibility::HIDDEN));
+    }
 
     // Get id of dictionary
     unsigned int GetDictionary() const { return _dictonaryId; }

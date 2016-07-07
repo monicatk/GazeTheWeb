@@ -8,7 +8,11 @@
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
 #include "submodules/glfw/include/GLFW/glfw3.h"
+#include "submodules/text-csv/include/text/csv/ostream.hpp"
 #include <functional>
+
+// Namespace for text-csv
+namespace csv = ::text::csv;
 
 Master::Master(CefMediator* pCefMediator)
 {
@@ -87,7 +91,7 @@ Master::Master(CefMediator* pCefMediator)
     // Set content path
     eyegui::setRootFilepath(CONTENT_PATH);
 
-    // Set callbacks
+    // Set print callbacks
     std::function<void(std::string)> printGUICallback = [&](std::string message) { this->GUIPrintCallback(message); };
     eyegui::setErrorCallback(printGUICallback);
     eyegui::setWarningCallback(printGUICallback);
@@ -115,6 +119,36 @@ Master::Master(CefMediator* pCefMediator)
 
     // Load dictionary
     _dictonaryId = eyegui::addDictionary(_pGUI, "dictionaries/EnglishUS.dic");
+
+    // ### INTERACTION LOGGING ###
+
+    // New CSV file for interaction logging
+    if(setup::LOG_INTERACTIONS)
+    {
+		// Name of file
+		std::string filename = std::string(INTERACTION_FILE_NAME) + ".csv";
+
+		// Title line
+        LogInfo("Create file for interaction logging...");
+		LogInfo("File named: ", filename);
+        std::ofstream fs(filename, std::ios_base::out); // overwrite existing
+        csv::csv_ostream csvs(fs);
+        csvs << "Timestamp" << "Layout" << "ElementType" << "ElementId" << "InteractionType" << "InteractionInfoA" << csv::endl;
+        LogInfo("..done.");
+
+        // Listen to eyeGUI
+        eyegui::setInteractionCallback([this, filename](
+			std::string layout,
+			std::string elementType,
+			std::string elementId,
+			std::string interactionType,
+			std::string interactionInfoA)
+		{
+			std::ofstream fs(filename, std::ios_base::app | std::ios_base::out); // append to existing
+			csv::csv_ostream csvs(fs);
+			csvs << std::to_string(this->GetTime()) << layout << elementType << elementId << interactionType << interactionInfoA << csv::endl;
+		});
+    }
 
     // ### STATES ###
 
@@ -158,8 +192,8 @@ Master::Master(CefMediator* pCefMediator)
     // Time
     _lastTime = glfwGetTime();
 
-	// Connection to LabStreamingLayer
-	_upLabStream = std::unique_ptr<LabStream>(new LabStream);
+    // Connection to LabStreamingLayer
+    _upLabStream = std::unique_ptr<LabStream>(new LabStream);
 }
 
 Master::~Master()
@@ -182,12 +216,12 @@ void Master::Run()
 
 double Master::GetTime() const
 {
-	return glfwGetTime();
+    return glfwGetTime();
 }
 
 void Master::Exit()
 {
-	glfwSetWindowShouldClose(_pWindow, GL_TRUE);
+    glfwSetWindowShouldClose(_pWindow, GL_TRUE);
 }
 
 eyegui::Layout* Master::AddLayout(std::string filepath, int layer, bool visible)
@@ -218,12 +252,12 @@ void Master::Loop()
             _timeUntilInput -= tpf;
         }
 
-		// Poll lab streaming layer communication (TODO: testing)
-		auto labStreamInput = _upLabStream->Poll();
-		for (const std::string& rEvent : labStreamInput)
-		{
-			LogInfo("Master: LabStreamInput = ", rEvent);
-		}	
+        // Poll lab streaming layer communication (TODO: testing)
+        auto labStreamInput = _upLabStream->Poll();
+        for (const std::string& rEvent : labStreamInput)
+        {
+            LogInfo("Master: LabStreamInput = ", rEvent);
+        }
 
         // Clearing of buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -359,7 +393,7 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_ESCAPE: { glfwSetWindowShouldClose(_pWindow, GL_TRUE); break; }
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; }
-			case GLFW_KEY_S: { _upLabStream->Send("42");  } // TODO: testing
+            case GLFW_KEY_S: { _upLabStream->Send("42");  } // TODO: testing
         }
     }
 }
@@ -410,7 +444,7 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
     if(pLayout == _pMaster->_pSuperLayout)
     {
         _pMaster->_paused = true;
-		eyegui::setDescriptionVisibility(_pMaster->_pGUI, eyegui::DescriptionVisibility::VISIBLE);
+        eyegui::setDescriptionVisibility(_pMaster->_pGUI, eyegui::DescriptionVisibility::VISIBLE);
     }
 }
 
@@ -419,6 +453,6 @@ void Master::MasterButtonListener::up(eyegui::Layout* pLayout, std::string id)
     if(pLayout == _pMaster->_pSuperLayout)
     {
         _pMaster->_paused = false;
-		eyegui::setDescriptionVisibility(_pMaster->_pGUI, eyegui::DescriptionVisibility::ON_PENETRATION); // TODO look up in Settings for set value
+        eyegui::setDescriptionVisibility(_pMaster->_pGUI, eyegui::DescriptionVisibility::ON_PENETRATION); // TODO look up in Settings for set value
     }
 }

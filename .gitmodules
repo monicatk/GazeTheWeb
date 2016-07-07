@@ -11,3 +11,6 @@
 [submodule "Browse/Client/submodules/glm"]
 	path = Browse/Client/submodules/glm
 	url = https://github.com/g-truc/glm.git
+[submodule "Browse/Client/submodules/text-csv"]
+	path = Browse/Client/submodules/text-csv
+	url = https://github.com/roman-kashitsyn/text-csv

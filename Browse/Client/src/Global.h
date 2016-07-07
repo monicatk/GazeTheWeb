@@ -7,7 +7,7 @@
 #ifndef GLOBAL_H_
 #define GLOBAL_H_
 
-#include "submodules/GLM/glm/glm.hpp"
+#include "submodules/glm/glm/glm.hpp"
 #include <string>
 
 static const int EYEGUI_WEB_URLINPUT_LAYER = -1; // in default GUI...
@@ -33,6 +33,7 @@ static const float EYEINPUT_MOUSE_OVERRIDE_STOP_DURATION = 3.f; // duration unti
 static const int EYETRACKER_SAMPLE_COLLECTION_COUNT = 120;
 static const int EYETRACKER_AVERAGE_SAMPLE_COUNT = 5;
 static const std::string LOG_FILE_NAME = "log";
+static const std::string INTERACTION_FILE_NAME = "interaction";
 static const int LOG_FILE_MAX_SIZE = 1024 * 1024;
 static const int LOG_FILE_COUNT = 5;
 static const float MOUSE_CURSOR_RELATIVE_SIZE = 0.1f;

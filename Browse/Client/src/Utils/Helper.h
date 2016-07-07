@@ -7,7 +7,7 @@
 #ifndef HELPER_H_
 #define HELPER_H_
 
-#include "submodules/GLM/glm/glm.hpp"
+#include "submodules/glm/glm/glm.hpp"
 
 #include <string>
 

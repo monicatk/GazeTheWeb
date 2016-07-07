@@ -47,6 +47,7 @@ All necessary dependencies are provided in the _externals_ or _submodules_ folde
 * spdlog: https://github.com/gabime/spdlog
 * liblsl: https://github.com/sccn/labstreaminglayer
   * Boost: https://github.com/boostorg/boost
+* text-csv: https://github.com/roman-kashitsyn/text-csv
 
 ## License
 >Copyright 2016 Raphael Menges and Daniel Müller

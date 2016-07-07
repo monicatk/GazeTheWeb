@@ -4,7 +4,7 @@
 //============================================================================
 
 #include "Shader.h"
-#include "submodules/GLM/glm/gtc/type_ptr.hpp"
+#include "submodules/glm/glm/gtc/type_ptr.hpp"
 
 Shader::Shader(std::string vertSource, std::string fragSource)
 {

@@ -10,7 +10,7 @@
 
 #include "src/State/Web/Tab/Pipelines/Actions/ActionData.h"
 #include "src/Typedefs.h"
-#include "submodules/GLM/glm/glm.hpp"
+#include "submodules/glm/glm/glm.hpp"
 #include <map>
 
 class ActionDataMap

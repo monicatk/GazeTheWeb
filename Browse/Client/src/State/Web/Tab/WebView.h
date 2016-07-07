@@ -10,7 +10,7 @@
 #include "src/State/Web/Tab/WebViewParameters.h"
 #include "src/Utils/RenderItem.h"
 #include "externals/OGL/gl_core_3_3.h"
-#include "submodules/GLM/glm/glm.hpp"
+#include "submodules/glm/glm/glm.hpp"
 #include <memory>
 
 // Forward declarations

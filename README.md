@@ -10,7 +10,7 @@ git clone https://github.com/MAMEM/GazeTheWeb
 git submodule init
 git submodule update
 ```
-When submodules are updated, one has to execute `git submodule update` again.
+When submodules are updated, one has to execute that again.
 
 ## Projects
 
