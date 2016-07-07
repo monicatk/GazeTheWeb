@@ -1,0 +1,25 @@
+Other
+- Scrolling with sub windows (GMail, Facebook)
+
+Daniel Roadmap
+- Rectangle for fixed elements (with and without children) (later polygon)
+- Polling (frame based by master call and context based at calls from Tab)
+  - Add delay whose duration is defined in Global.h
+  - Use for updating rectangles (if not observable)
+- DOMNode creation using observer (InputFields, Links, Buttons, Images)
+- Open new windows in Tabs
+-- Until August
+- Find out when elements are scrollable
+- Refactoring
+- CSS injection
+
+Raphael Roadmap
+- Master polling the CefMediator
+- Show tab count in icon
+- Overlay keyboard
+- Navigation / Link clicking
+- Intraction Logging
+
+Aims
+- Use GMail
+- Faster navigation
