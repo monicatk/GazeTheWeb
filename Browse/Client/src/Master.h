@@ -103,12 +103,6 @@ private:
     void GLFWResizeCallback(int width, int height);
     void GUIResizeCallback(int width, int height);
     void GUIPrintCallback(std::string message) const;
-    void GUIInteractionCallback(
-        std::string layout,
-        std::string elementType,
-        std::string elementId,
-        std::string interactionType,
-        std::string interactionInfoA) const;
 
     // States
     std::unique_ptr<Web> _upWeb;

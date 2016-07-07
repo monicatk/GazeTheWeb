@@ -8,7 +8,7 @@
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
 #include "submodules/glfw/include/GLFW/glfw3.h"
-#include "submodules/text-csv/include/text/csv/ostream.hpp""
+#include "submodules/text-csv/include/text/csv/ostream.hpp"
 #include <functional>
 
 // Namespace for text-csv
@@ -125,35 +125,30 @@ Master::Master(CefMediator* pCefMediator)
     // New CSV file for interaction logging
     if(setup::LOG_INTERACTIONS)
     {
+		// Name of file
+		std::string filename = std::string(INTERACTION_FILE_NAME) + ".csv";
+
+		// Title line
         LogInfo("Create file for interaction logging...");
-        std::ofstream fs(std::string(INTERACTION_FILE_NAME) + ".csv", std::ios_base::out);
+		LogInfo("File named: ", filename);
+        std::ofstream fs(filename, std::ios_base::out); // overwrite existing
         csv::csv_ostream csvs(fs);
         csvs << "Timestamp" << "Layout" << "ElementType" << "ElementId" << "InteractionType" << "InteractionInfoA" << csv::endl;
         LogInfo("..done.");
 
-        // Listen to eyeGUIg
-        std::function<void(
-        std::string,
-        std::string,
-        std::string,
-        std::string,
-        std::string)> interactGUICallback = [&](
-            std::string layout,
-            std::string elementType,
-            std::string elementId,
-            std::string interactionType,
-            std::string interactionInfoA)
-            {
-                this->GUIInteractionCallback(
-                    layout,
-                    elementType,
-                    elementId,
-                    interactionType,
-                    interactionInfoA);
-            };
-        eyegui::setInteractionCallback(interactGUICallback);
+        // Listen to eyeGUI
+        eyegui::setInteractionCallback([this, filename](
+			std::string layout,
+			std::string elementType,
+			std::string elementId,
+			std::string interactionType,
+			std::string interactionInfoA)
+		{
+			std::ofstream fs(filename, std::ios_base::app | std::ios_base::out); // append to existing
+			csv::csv_ostream csvs(fs);
+			csvs << std::to_string(this->GetTime()) << layout << elementType << elementId << interactionType << interactionInfoA << csv::endl;
+		});
     }
-
 
     // ### STATES ###
 
@@ -442,21 +437,6 @@ void Master::GUIResizeCallback(int width, int height)
 void Master::GUIPrintCallback(std::string message) const
 {
     LogInfo("eyeGUI: ", message);
-}
-
-void Master::GUIInteractionCallback(
-    std::string layout,
-    std::string elementType,
-    std::string elementId,
-    std::string interactionType,
-    std::string interactionInfoA) const
-{
-    if(setup::LOG_INTERACTIONS)
-    {
-        std::ofstream fs(std::string(INTERACTION_FILE_NAME) + ".csv", std::ios_base::app | std::ios_base::out);
-        csv::csv_ostream csvs(fs);
-        csvs << std::to_string(this->GetTime()) << layout << elementType << elementId << interactionType << interactionInfoA << csv::endl;
-    }
 }
 
 void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
