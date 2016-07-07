@@ -1,5 +1,3 @@
-- utf8rewind.h -> see new inclusion for linux. merge it to eyeGUI dev branch
-
 - Settings: Icons on the left which indicate status of setting
 - Class for TabOverview? (InnerState?)
 - TabOverview preview: seems that preview textures are clamped and not cut
@@ -11,5 +9,4 @@
 - ScrollingSensors are not correct until reload (sometimes on 9gag for example)
 - ActionData Map stuff with templates
 - Much more settings (all the eyeGUI stuff)
-- Show descriptions in Pause
 - Tobii EyeX seems to connect event when there is no...
