@@ -359,6 +359,14 @@ void CefMediator::Poll(float tpf)
     // TODO Daniel
 }
 
+void CefMediator::OnTabTitleChange(CefRefPtr<CefBrowser> browser, std::string title)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		pTab->SetTitle(title);
+	}
+}
+
 TabCEFInterface* CefMediator::GetTab(CefRefPtr<CefBrowser> browser) const
 {
     int browserID = browser->GetIdentifier();

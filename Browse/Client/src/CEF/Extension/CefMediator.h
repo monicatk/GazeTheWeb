@@ -92,6 +92,9 @@ public:
     // Called by master, only. Quite similar to a update method
     void Poll(float tpf);
 
+	// Update Tab's title when title change callback is received
+	void OnTabTitleChange(CefRefPtr<CefBrowser> browser, std::string title);
+
 protected:
 
     /* MEMBERS */

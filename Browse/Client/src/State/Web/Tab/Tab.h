@@ -203,6 +203,9 @@ public:
 	virtual void SetFixedElementsCoordinates(int id, std::vector<glm::vec4> elements);
 	virtual void RemoveFixedElement(int id);
 
+	// Set Tab's title text
+	void SetTitle(std::string title);
+
 
 private:
 
@@ -392,6 +395,8 @@ private:
     bool _canGoBack = false;
     bool _canGoForward = false;
 
+	// Title of current website
+	std::string _title;
 };
 
 #endif // TAB_H_

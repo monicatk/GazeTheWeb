@@ -521,3 +521,9 @@ void Handler::OnFaviconURLChange(CefRefPtr<CefBrowser> browser,
     // New image incoming, delete the last one
     _pMediator->ResetFavicon(browser);
 }
+
+void Handler::OnTitleChange(CefRefPtr<CefBrowser> browser,
+	const CefString& title)
+{
+	_pMediator->OnTabTitleChange(browser, title.ToString());
+}

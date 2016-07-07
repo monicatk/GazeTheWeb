@@ -100,6 +100,8 @@ public:
 	// CefDisplayHandler callbacks
 	void OnFaviconURLChange(CefRefPtr<CefBrowser> browser,
 		const std::vector<CefString>& icon_urls) OVERRIDE;
+	void OnTitleChange(CefRefPtr<CefBrowser> browser,
+		const CefString& title) OVERRIDE;
 
 private:
 

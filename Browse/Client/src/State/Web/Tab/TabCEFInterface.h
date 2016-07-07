@@ -59,6 +59,9 @@ public:
     // Fixed elements' coordinates
     virtual void SetFixedElementsCoordinates(int id, std::vector<glm::vec4> elements) = 0;
 	virtual void RemoveFixedElement(int id) = 0;
+
+	// Set Tab's title text
+	virtual void SetTitle(std::string title) = 0;
 };
 
 #endif // TABCEFINTERFACE_H_

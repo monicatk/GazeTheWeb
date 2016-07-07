@@ -1001,3 +1001,8 @@ void Tab::TabOverlayWordSuggestListener::chosen(eyegui::Layout* pLayout, std::st
         iter->second(value);
     }
 }
+
+void Tab::SetTitle(std::string title)
+{
+	_title = title;
+}
