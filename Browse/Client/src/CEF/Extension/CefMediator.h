@@ -70,7 +70,7 @@ public:
     void SetURL(CefRefPtr<CefBrowser> browser);
 
     void ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
-	void ResetFavicon(CefRefPtr<CefBrowser> browser);
+    void ResetFavicon(CefRefPtr<CefBrowser> browser);
 
     void SetCanGoBack(CefRefPtr<CefBrowser> browser, bool canGoBack);
     void SetCanGoForward(CefRefPtr<CefBrowser> browser, bool canGoForward);
@@ -87,7 +87,10 @@ public:
     void GetPageResolution(TabCEFInterface* pTab);
 
     void ReceiveFixedElements(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
-	void RemoveFixedElement(CefRefPtr<CefBrowser> browser, int id);
+    void RemoveFixedElement(CefRefPtr<CefBrowser> browser, int id);
+
+    // Called by master, only. Quite similar to a update method
+    void Poll(float tpf);
 
 protected:
 

@@ -176,17 +176,17 @@ void CefMediator::ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, Cef
             const int width = args->GetInt(index++);
             const int height = args->GetInt(index++);
 
-			if (width <= 0 || height <= 0)
+            if (width <= 0 || height <= 0)
             {
                 LogDebug("CefMediator: Received favicon width or height less than zero!");
 
                 if (TabCEFInterface* pInnerTab = GetTab(browser))
                 {
                     // Inform Tab anyway
-					pInnerTab->ReceiveFaviconBytes(nullptr, width, height);
+                    pInnerTab->ReceiveFaviconBytes(nullptr, width, height);
                 }
             }
-            else 
+            else
             {
                 LogDebug("CefMediator: Copying favicon bytes to Tab... (w= ", width, ", h=", height,")");
 
@@ -206,8 +206,8 @@ void CefMediator::ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, Cef
                 // Pipe extracted information to Tab
                 pTab->ReceiveFaviconBytes(std::move(upData), width, height);
 
-				// Save new favicon URL in Tab
-				//pTab->SetFavIconURL(iconUrl);	// TODO: With favicon callback, saving favicon URL in Tab really neccessary? I don't think so.
+                // Save new favicon URL in Tab
+                //pTab->SetFavIconURL(iconUrl);	// TODO: With favicon callback, saving favicon URL in Tab really neccessary? I don't think so.
             }
 
         }
@@ -216,10 +216,10 @@ void CefMediator::ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, Cef
 
 void CefMediator::ResetFavicon(CefRefPtr<CefBrowser> browser)
 {
-	if (TabCEFInterface* pTab = GetTab(browser))
-	{
-		pTab->ResetFaviconBytes();
-	}
+    if (TabCEFInterface* pTab = GetTab(browser))
+    {
+        pTab->ResetFaviconBytes();
+    }
 }
 
 void CefMediator::CreateDOMNode(CefRefPtr<CefBrowser> browser, std::shared_ptr<DOMNode> spNode)
@@ -321,7 +321,7 @@ void CefMediator::GetPageResolution(TabCEFInterface * pTab)
 void CefMediator::ReceiveFixedElements(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
 {
     CefRefPtr<CefListValue> args = msg->GetArgumentList();
-	int id = args->GetInt(0);
+    int id = args->GetInt(0);
     std::vector<glm::vec4> fixedCoords = {};
     for (int i = 1; i < (int)args->GetSize(); i+=4)
     {
@@ -347,13 +347,17 @@ void CefMediator::ReceiveFixedElements(CefRefPtr<CefBrowser> browser, CefRefPtr<
 
 void CefMediator::RemoveFixedElement(CefRefPtr<CefBrowser> browser, int id)
 {
-	if (TabCEFInterface* pTab = GetTab(browser))
-	{
-		LogDebug("CefMediator: Removing fixed element with id=", id, " from Tab.");
-		pTab->RemoveFixedElement(id);
-	}
+    if (TabCEFInterface* pTab = GetTab(browser))
+    {
+        LogDebug("CefMediator: Removing fixed element with id=", id, " from Tab.");
+        pTab->RemoveFixedElement(id);
+    }
 }
 
+void CefMediator::Poll(float tpf)
+{
+    // TODO Daniel
+}
 
 TabCEFInterface* CefMediator::GetTab(CefRefPtr<CefBrowser> browser) const
 {

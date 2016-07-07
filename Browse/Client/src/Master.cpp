@@ -10,6 +10,11 @@
 #include "submodules/glfw/include/GLFW/glfw3.h"
 #include "submodules/text-csv/include/text/csv/ostream.hpp"
 #include <functional>
+#include <chrono>
+#include <ctime>
+#include <sstream>
+#include <iomanip>
+#include <string>
 
 // Namespace for text-csv
 namespace csv = ::text::csv;
@@ -125,29 +130,58 @@ Master::Master(CefMediator* pCefMediator)
     // New CSV file for interaction logging
     if(setup::LOG_INTERACTIONS)
     {
-		// Name of file
-		std::string filename = std::string(INTERACTION_FILE_NAME) + ".csv";
+        // Name of file
+        std::string filename = std::string(INTERACTION_FILE_NAME) + ".csv";
 
-		// Title line
+        // Title line
         LogInfo("Create file for interaction logging...");
-		LogInfo("File named: ", filename);
+        LogInfo("File named: ", filename);
         std::ofstream fs(filename, std::ios_base::out); // overwrite existing
         csv::csv_ostream csvs(fs);
-        csvs << "Timestamp" << "Layout" << "ElementType" << "ElementId" << "InteractionType" << "InteractionInfoA" << csv::endl;
+        csvs << "Timestamp" << "Layout" << "GazeCoordinate" << "ElementType" << "ElementId" << "ElementRect" << "ElementActivity" << "InteractionType" << "InteractionInfoA" << csv::endl;
         LogInfo("..done.");
 
         // Listen to eyeGUI
-        eyegui::setInteractionCallback([this, filename](
-			std::string layout,
-			std::string elementType,
-			std::string elementId,
-			std::string interactionType,
-			std::string interactionInfoA)
-		{
-			std::ofstream fs(filename, std::ios_base::app | std::ios_base::out); // append to existing
-			csv::csv_ostream csvs(fs);
-			csvs << std::to_string(this->GetTime()) << layout << elementType << elementId << interactionType << interactionInfoA << csv::endl;
-		});
+        eyegui::setInteractionCallback([filename](
+            std::string layout,
+            std::string gazeCoordinate,
+            std::string elementType,
+            std::string elementId,
+            std::string elementRect,
+            std::string elementActivity,
+            std::string interactionType,
+            std::string interactionInfoA)
+        {
+            // Get current date and time
+            const auto currentTime = std::chrono::system_clock::now();
+            auto time = std::chrono::system_clock::to_time_t(currentTime);
+            std::stringstream ss;
+            ss << std::put_time(std::localtime(&time), "%Y-%m-%d %X");
+
+            // Get current miliseconds
+            auto currentTimeRounded = std::chrono::system_clock::from_time_t(time);
+            if(currentTimeRounded > currentTime)
+            {
+                --time;
+                currentTimeRounded -= std::chrono::seconds(1);
+            }
+            int milliseconds = std::chrono::duration_cast<std::chrono::duration<int,std::milli> >(currentTime - currentTimeRounded).count();
+
+            // Write everything to file
+            std::ofstream fs(filename, std::ios_base::app | std::ios_base::out); // append to existing
+            csv::csv_ostream csvs(fs);
+            csvs
+            << ss.str() + ":" + std::to_string(milliseconds)
+            << layout
+            << gazeCoordinate
+            << elementType
+            << elementId
+            << elementRect
+            << elementActivity
+            << interactionType
+            << interactionInfoA
+            << csv::endl;
+        });
     }
 
     // ### STATES ###
@@ -258,6 +292,9 @@ void Master::Loop()
         {
             LogInfo("Master: LabStreamInput = ", rEvent);
         }
+
+        // Poll CefMediator
+        _pCefMediator->Poll(tpf);
 
         // Clearing of buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
