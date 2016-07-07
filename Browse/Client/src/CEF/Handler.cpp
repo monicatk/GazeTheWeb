@@ -527,3 +527,20 @@ void Handler::OnTitleChange(CefRefPtr<CefBrowser> browser,
 {
 	_pMediator->OnTabTitleChange(browser, title.ToString());
 }
+
+bool Handler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
+	CefRefPtr<CefFrame> frame,
+	const CefString& target_url,
+	const CefString& target_frame_name,
+	WindowOpenDisposition target_disposition,
+	bool user_gesture,
+	const CefPopupFeatures& popupFeatures,
+	CefWindowInfo& windowInfo,
+	CefRefPtr<CefClient>& client,
+	CefBrowserSettings& settings,
+	bool* no_javascript_access)
+{
+	LogInfo("Handler: Suppressed popup from opening a new window, url=", target_url.ToString(), ", TODO: Open new Tab instead.");
+
+	return true;
+}

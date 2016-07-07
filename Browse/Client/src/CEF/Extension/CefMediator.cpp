@@ -98,6 +98,11 @@ void CefMediator::GoForward(TabCEFInterface * pTab)
     }
 }
 
+void CefMediator::OpenNewTab(std::string url)
+{
+
+}
+
 void CefMediator::DoMessageLoopWork()
 {
     CefDoMessageLoopWork();

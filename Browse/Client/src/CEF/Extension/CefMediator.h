@@ -37,6 +37,7 @@ public:
     void ReloadTab(TabCEFInterface* pTab);
     void GoBack(TabCEFInterface* pTab);
     void GoForward(TabCEFInterface* pTab);
+	void OpenNewTab(std::string url);
 
     // Renderer::OnPaint calls this method in order to receive corresponding Texture
     std::weak_ptr<Texture> GetTexture(CefRefPtr<CefBrowser> browser);
