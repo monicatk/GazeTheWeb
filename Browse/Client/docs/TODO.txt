@@ -14,11 +14,11 @@ Daniel Roadmap
 - CSS injection
 
 Raphael Roadmap
-- Master polling the CefMediator
 - Show tab count in icon
 - Overlay keyboard
 - Navigation / Link clicking
-- Intraction Logging
+- Interaction Logging
+  - Send also from browser or only from eyeGUI?
 
 Aims
 - Use GMail

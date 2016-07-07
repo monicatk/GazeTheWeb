@@ -293,6 +293,9 @@ void Master::Loop()
             LogInfo("Master: LabStreamInput = ", rEvent);
         }
 
+        // Poll CefMediator
+        _pCefMediator->Poll(tpf);
+
         // Clearing of buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
