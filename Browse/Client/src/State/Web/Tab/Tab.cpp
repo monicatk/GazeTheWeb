@@ -187,9 +187,28 @@ void Tab::Update(float tpf, Input& rInput)
         eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpFrameIndex, showScrollUp, false, true);
         eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownFrameIndex, showScrollDown, false, true);
 
+		// Check, that gaze is not upon a fixed element
+		bool gazeUponFixed = false;
+		for (const auto& rElements : _fixedElements)
+		{
+			for (const auto& rElement : rElements)
+			{
+				// Simple box test (TODO: replace those vectors with nice struct)
+				if (tabInput.webViewGazeX > rElement.x
+					&& tabInput.webViewGazeY > rElement.y
+					&& tabInput.webViewGazeY < rElement.z
+					&& tabInput.webViewGazeX < rElement.w)
+				{
+					gazeUponFixed = true;
+					break;
+				}
+			}
+			if (gazeUponFixed) { break; }
+		}
+
         // Automatic scrolling. Check whether gaze is available inside webview
-        if(_autoScrolling && !tabInput.gazeUsed && tabInput.insideWebView)
-        {
+        if(_autoScrolling && !tabInput.gazeUsed && tabInput.insideWebView && !gazeUponFixed)
+		{
             // Only vertical scrolling supported, yet (TODO: parameters)
             float yOffset = - tabInput.webViewGazeRelativeY + 0.5f;
             yOffset *= 2; // [-1..1]
@@ -495,12 +514,8 @@ void Tab::SetPageResolution(double width, double height)
 
 void Tab::SetFixedElementsCoordinates(int id, std::vector<glm::vec4> elements)
 {
-	// Fill 2D vector with new empty 1D vector, if needed
-	while ((int)_fixedElements.size() < id+1)
-	{
-		_fixedElements.push_back(std::vector<glm::vec4>{});
-	}
 	// Assign list of fixed element coordinates to given position
+	_fixedElements.resize(id + 1);
     _fixedElements[id] = elements;
 }
 
@@ -511,7 +526,6 @@ void Tab::RemoveFixedElement(int id)
 		_fixedElements[id].clear();
 	}
 }
-
 
 void Tab::SetContentOfTextBlock(std::string id, std::u16string content)
 {
