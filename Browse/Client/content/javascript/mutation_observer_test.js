@@ -229,6 +229,13 @@ var observer = new MutationObserver(
 	  			if(mutation.type == 'attributes')
 	  			{
 	  				node = mutation.target;
+
+	  				//DEBUG
+	  				if(node.id == 'social-floater')
+	  				{
+	  					consolePrint('Attribute changes in social floater');
+	  				}
+
 	  				// TODO: How to identify node whose attributes changed? --> mutation.target?
 	  				if(node.nodeType == 1) // 1 == ELEMENT_NODE
 	  				{
@@ -245,6 +252,7 @@ var observer = new MutationObserver(
 	  						{
 	  							if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
 	  							{
+	  								alert('Found fixed element!');
 	  								AddFixedElement(node);
 	  							}
 	  						}
@@ -254,6 +262,9 @@ var observer = new MutationObserver(
 	  							if(window.fixed_elements.has(node))
 	  							{
 	  								RemoveFixedElement(node);
+
+	  								// TODO: case fixed element like accepting cookies: node may disappear and no attribute changes!
+	  								// Observe node removals and check if it was a fixed element
 	  							}
 	  						}
 	  					}
@@ -268,7 +279,7 @@ var observer = new MutationObserver(
 
 	  			}
 
-	  			if(mutation.type == 'childList')
+	  			if(mutation.type == 'childList') // TODO: Called upon each appending of a child node??
 	  			{
 		  			var nodes = mutation.addedNodes;
 
@@ -286,10 +297,22 @@ var observer = new MutationObserver(
 		  				// var target = nodes[i].target;
 
 		  				// nodes[i].nodeValue = nodes[i].id;
-
+		  				if(node.id && node.id == 'social-floater')
+		  				{
+		  					consolePrint('Social floater was added!');
+		  				}
 
 		  				if(node.nodeType == 1) // 1 == ELEMENT_NODE
 		  				{
+		  					if(node.style.position && node.style.position == 'fixed')
+	  						{
+	  							consolePrint('position: '+node.style.position);
+	  							if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
+	  							{
+	  								alert('Found fixed element! (node added to DOM tree)');
+	  								AddFixedElement(node);
+	  							}
+	  						}
 
 		  					if(node.tagName == 'INPUT' && (node.type == 'text' || node.type == 'search' || node.type == 'email' || node.type == 'password') )
 		  					{
