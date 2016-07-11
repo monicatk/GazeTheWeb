@@ -722,7 +722,7 @@ void Tab::SetTitle(std::string title)
 void Tab::AddTabAfter(std::string URL)
 {
     // TODO
-    LogDebug("New Tab should be opened: ", URL);
+    LogDebug("Tab (TODO): New Tab should be opened: ", URL);
 }
 
 eyegui::AbsolutePositionAndSize Tab::CalculateWebViewPositionAndSize() const

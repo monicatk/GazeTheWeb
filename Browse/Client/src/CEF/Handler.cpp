@@ -540,7 +540,9 @@ bool Handler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
 	CefBrowserSettings& settings,
 	bool* no_javascript_access)
 {
-	LogInfo("Handler: Suppressed popup from opening a new window, url=", target_url.ToString(), ", TODO: Open new Tab instead.");
+	LogInfo("Handler: Suppressed popup from opening a new window");
+
+	_pMediator->OpenPopupTab(browser, target_url);
 
 	return true;
 }

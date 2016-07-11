@@ -372,6 +372,14 @@ void CefMediator::OnTabTitleChange(CefRefPtr<CefBrowser> browser, std::string ti
 	}
 }
 
+void CefMediator::OpenPopupTab(CefRefPtr<CefBrowser> browser, std::string url)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		pTab->AddTabAfter(url);
+	}
+}
+
 TabCEFInterface* CefMediator::GetTab(CefRefPtr<CefBrowser> browser) const
 {
     int browserID = browser->GetIdentifier();
