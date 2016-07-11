@@ -35,7 +35,7 @@ public:
 
     // Receive favicon bytes as char vector ordered in RGBA
     virtual void ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upData, int width, int height) = 0;
-	virtual void ResetFaviconBytes() = 0;
+    virtual void ResetFaviconBytes() = 0;
 
     // Get weak pointer to texture of web view
     virtual std::weak_ptr<Texture> GetWebViewTexture() = 0;
@@ -58,10 +58,13 @@ public:
 
     // Fixed elements' coordinates
     virtual void SetFixedElementsCoordinates(int id, std::vector<glm::vec4> elements) = 0;
-	virtual void RemoveFixedElement(int id) = 0;
+    virtual void RemoveFixedElement(int id) = 0;
 
-	// Set Tab's title text
-	virtual void SetTitle(std::string title) = 0;
+    // Set Tab's title text
+    virtual void SetTitle(std::string title) = 0;
+
+    // Add new Tab after that one
+    virtual void AddTabAfter(std::string URL) = 0;
 };
 
 #endif // TABCEFINTERFACE_H_

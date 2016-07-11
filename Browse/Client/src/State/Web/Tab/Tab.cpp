@@ -187,28 +187,28 @@ void Tab::Update(float tpf, Input& rInput)
         eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpFrameIndex, showScrollUp, false, true);
         eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownFrameIndex, showScrollDown, false, true);
 
-		// Check, that gaze is not upon a fixed element
-		bool gazeUponFixed = false;
-		for (const auto& rElements : _fixedElements)
-		{
-			for (const auto& rElement : rElements)
-			{
-				// Simple box test (TODO: replace those vectors with nice struct)
-				if (tabInput.webViewGazeX > rElement.x
-					&& tabInput.webViewGazeY > rElement.y
-					&& tabInput.webViewGazeY < rElement.z
-					&& tabInput.webViewGazeX < rElement.w)
-				{
-					gazeUponFixed = true;
-					break;
-				}
-			}
-			if (gazeUponFixed) { break; }
-		}
+        // Check, that gaze is not upon a fixed element
+        bool gazeUponFixed = false;
+        for (const auto& rElements : _fixedElements)
+        {
+            for (const auto& rElement : rElements)
+            {
+                // Simple box test (TODO: replace those vectors with nice struct)
+                if (tabInput.webViewGazeX > rElement.x
+                    && tabInput.webViewGazeY > rElement.y
+                    && tabInput.webViewGazeY < rElement.z
+                    && tabInput.webViewGazeX < rElement.w)
+                {
+                    gazeUponFixed = true;
+                    break;
+                }
+            }
+            if (gazeUponFixed) { break; }
+        }
 
         // Automatic scrolling. Check whether gaze is available inside webview
         if(_autoScrolling && !tabInput.gazeUsed && tabInput.insideWebView && !gazeUponFixed)
-		{
+        {
             // Only vertical scrolling supported, yet (TODO: parameters)
             float yOffset = - tabInput.webViewGazeRelativeY + 0.5f;
             yOffset *= 2; // [-1..1]
@@ -514,17 +514,17 @@ void Tab::SetPageResolution(double width, double height)
 
 void Tab::SetFixedElementsCoordinates(int id, std::vector<glm::vec4> elements)
 {
-	// Assign list of fixed element coordinates to given position
-	_fixedElements.resize(id + 1);
+    // Assign list of fixed element coordinates to given position
+    _fixedElements.resize(id + 1);
     _fixedElements[id] = elements;
 }
 
 void Tab::RemoveFixedElement(int id)
 {
-	if ((int)_fixedElements.size() > id)
-	{
-		_fixedElements[id].clear();
-	}
+    if ((int)_fixedElements.size() > id)
+    {
+        _fixedElements[id].clear();
+    }
 }
 
 void Tab::SetContentOfTextBlock(std::string id, std::u16string content)
@@ -662,7 +662,7 @@ void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upDa
 
 void Tab::ResetFaviconBytes()
 {
-	// TODO
+    // TODO
 }
 
 std::weak_ptr<Texture> Tab::GetWebViewTexture()
@@ -712,6 +712,17 @@ void Tab::SetScrollingOffset(double x, double y)
 
     _scrollingOffsetX = x;
     _scrollingOffsetY = y;
+}
+
+void Tab::SetTitle(std::string title)
+{
+    _title = title;
+}
+
+void Tab::AddTabAfter(std::string URL)
+{
+    // TODO
+    LogDebug("New Tab should be opened: ", URL);
 }
 
 eyegui::AbsolutePositionAndSize Tab::CalculateWebViewPositionAndSize() const
@@ -1014,9 +1025,4 @@ void Tab::TabOverlayWordSuggestListener::chosen(eyegui::Layout* pLayout, std::st
         // Execute callback
         iter->second(value);
     }
-}
-
-void Tab::SetTitle(std::string title)
-{
-	_title = title;
 }
