@@ -179,7 +179,7 @@ public:
 
     // Receive favicon bytes as char vector ordered in RGBA. Accepts also NULL for upData!
     virtual void ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upData, int width, int height);
-	virtual void ResetFaviconBytes(); // TODO
+    virtual void ResetFaviconBytes(); // TODO
 
     // Get weak pointer to texture of web view
     virtual std::weak_ptr<Texture> GetWebViewTexture();
@@ -200,11 +200,14 @@ public:
     // Set page resolution from Cef Mediator
     virtual void SetPageResolution(double width, double height);
 
-	virtual void SetFixedElementsCoordinates(int id, std::vector<glm::vec4> elements);
-	virtual void RemoveFixedElement(int id);
+    virtual void SetFixedElementsCoordinates(int id, std::vector<glm::vec4> elements);
+    virtual void RemoveFixedElement(int id);
 
-	// Set Tab's title text
-	void SetTitle(std::string title);
+    // Set Tab's title text
+    virtual void SetTitle(std::string title);
+
+    // Add new Tab after that one
+    virtual void AddTabAfter(std::string URL);
 
 
 private:
@@ -382,7 +385,7 @@ private:
 
     // Coordinates of current fixed elements on site, vec4 = (top, left, bottom, right)
     std::vector<std::vector<glm::vec4>> _fixedElements;
- 
+
 
     // URL of current favIcon
     std::string _favIconUrl;
@@ -395,8 +398,8 @@ private:
     bool _canGoBack = false;
     bool _canGoForward = false;
 
-	// Title of current website
-	std::string _title;
+    // Title of current website
+    std::string _title;
 };
 
 #endif // TAB_H_
