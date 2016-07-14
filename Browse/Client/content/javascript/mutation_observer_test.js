@@ -66,6 +66,9 @@ window.fixed_elements = new Set();
 window.fixed_IDlist = [];				// Position |i| contains boolean information if ID |i| is currently used
 window.fixed_coordinates = [[]];		// 2D list of bounding rectangle coordinates, fill with bounding rect coordinates of fixed node and its children (if position == 'relative')
 
+// DEBUG
+window.debug_node;
+
 // Iterate over Set of already used fixedIDs to find the next ID not yet used and assign it to node as attribute
 function AddFixedElement(node)
 {
@@ -231,28 +234,45 @@ var observer = new MutationObserver(
 	  				node = mutation.target;
 
 	  				//DEBUG
-	  				if(node.id == 'social-floater')
-	  				{
-	  					consolePrint('Attribute changes in social floater');
-	  				}
+	  				// if(node.id == 'social-floater' || node.id == 'header')
+	  				// {
+	  				// 	consolePrint('Attribute changes in '+node.id+'; position: '+node.style.getPropertyValue('position'));
+
+	  				// 	var headerNode = node;
+	  				// 	if(headerNode)
+	  				// 	{
+	  				// 		consolePrint('getComputedStyle: '+window.getComputedStyle(headerNode, null).getPropertyValue('position'));
+	  				// 	}
+	  				// 	else
+	  				// 		consolePrint('Could not find header by id!');
+	  				// }
+	  				// window.debug_node.style.setProperty('position', 'absolute');
+	  				/*onsolePrint(window.debug_node.id+' position: '+window.debug_node.style.getPropertyValue('position'));*/
 
 	  				// TODO: How to identify node whose attributes changed? --> mutation.target?
 	  				if(node.nodeType == 1) // 1 == ELEMENT_NODE
 	  				{
 	  					attr = mutation.attributeName;
 
+	  					// DEBUG
+	  					// if(node.id == 'header')
+	  					// {
+	  					// 	consolePrint('attribute '+attr+' changed');
+	  					// }
+
 	  					// usage example: observe changes in input field text
 	  					// if (node.tagName == 'INPUT' && node.type == 'text')
 	  					// 	alert('tagname: \''+node.tagName+'\' attr: \''+attr+'\' value: \''+node.getAttribute(attr)+'\' oldvalue: \''+mutation.oldValue+'\'');
 
-	  					if(attr == 'style')
+	  					if(attr == 'style' || attr == 'class') // TODO: example: uni-koblenz.de - node.id='header': class changes from 'container' to 'container fixed'
 	  					{
 	  						// alert('attr: \''+attr+'\' value: \''+node.getAttribute(attr)+'\' oldvalue: \''+mutation.oldValue+'\'');
-	  						if(node.style.position && node.style.position == 'fixed')
+	  						if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
+	  						// if(node.style.position && node.style.position == 'fixed')
 	  						{
 	  							if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
 	  							{
-	  								alert('Found fixed element!');
+	  								// alert('Found fixed element!');
 	  								AddFixedElement(node);
 	  							}
 	  						}
@@ -297,19 +317,22 @@ var observer = new MutationObserver(
 		  				// var target = nodes[i].target;
 
 		  				// nodes[i].nodeValue = nodes[i].id;
-		  				if(node.id && node.id == 'social-floater')
-		  				{
-		  					consolePrint('Social floater was added!');
-		  				}
+		  				// if(node.id && node.id == 'social-floater')
+		  				// {
+		  				// 	consolePrint('Social floater was added! id: '+node.id);
+		  				// 	window.debug_node = node;
+
+		  				// }
 
 		  				if(node.nodeType == 1) // 1 == ELEMENT_NODE
 		  				{
-		  					if(node.style.position && node.style.position == 'fixed')
+		  					// if(node.style.position && node.style.position == 'fixed')
+	  						if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
 	  						{
-	  							consolePrint('position: '+node.style.position);
+	  							// consolePrint('position: '+node.style.position);
 	  							if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
 	  							{
-	  								alert('Found fixed element! (node added to DOM tree)');
+	  								// alert('Found fixed element! (node added to DOM tree)');
 	  								AddFixedElement(node);
 	  							}
 	  						}

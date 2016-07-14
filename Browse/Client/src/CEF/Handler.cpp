@@ -140,12 +140,6 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
         // Add own ID + false to loading frame map
         _loadingMainFrames.emplace(std::make_pair(frame->GetIdentifier(), true));
 
-        //LogDebug("Handler: Updating favicon URL and image information via Javascript");
-        //frame->ExecuteJavaScript(_js_favicon_get_url_and_resolution, frame->GetURL(), 0);
-
-        
-
-
     }
     else // Current frame is not the main frame
     {
@@ -190,8 +184,6 @@ void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame
             LogDebug("Handler: Main frame removed its ID from loading main frame map.");
         }
 
-        // EXPERIMENTAL
-        //GetFixedElements(browser);
     }
 
 }
@@ -219,9 +211,6 @@ void Handler::OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
 
         // Write page resolution to V8 variables, read them and update Tab
         UpdatePageResolution(browser);
-
-        // EXPERIMENTAL
-        //RequestFaviconBytes(browser); // OLD APPROACH
 
     }
 }
@@ -432,15 +421,6 @@ void Handler::UpdatePageResolution(CefRefPtr<CefBrowser> browser)
     // Tell renderer process to get V8 values, where page sizes were written to
     CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("GetPageResolution");
     browser->SendProcessMessage(PID_RENDERER, msg);
-}
-
-// EXPERIMENTAL
-void Handler::GetFixedElements(CefRefPtr<CefBrowser> browser)
-{
-    //LogDebug("Handler: Searching for fixed elements on page.");
-    //browser->GetMainFrame()->ExecuteJavaScript(_js_fixed_element_search, browser->GetMainFrame()->GetURL(), 0);
-    //CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("GetFixedElements");
-    //browser->SendProcessMessage(PID_RENDERER, msg);
 }
 
 void Handler::IPCLogRenderer(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
