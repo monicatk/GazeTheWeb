@@ -1,6 +1,6 @@
 # GazeTheWeb
 
-Software developed by Institute for Web Science and Technologies at University of Koblenz Landau in the context of the project Horizon 2020, MAMEM, for accessing the web using eye-tracking.
+Software developed by Institute for Web Science and Technologies at University of Koblenz Landau in the context of the project Horizon 2020, MAMEM, for accessing the web using eye-tracking. Visit the [**wiki**](https://github.com/MAMEM/GazeTheWeb/wiki) for troubleshooting.
 
 ## Cloning
 
