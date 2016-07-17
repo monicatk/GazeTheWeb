@@ -325,6 +325,11 @@ void Handler::EmulateLeftMouseButtonClick(CefRefPtr<CefBrowser> browser, double 
     LogDebug("Handler: Emulating left mouse button click on position (", x, ", ", y, "), browserID = ", browser->GetIdentifier());
     browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, false, 1);	// press
     browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, true, 1);	// release
+
+	// DEBUG
+	//browser->GetMainFrame()->ExecuteJavaScript("consolePrint('BLABLABLA');StillObserving();", "", 0);
+	//browser->GetMainFrame()->ExecuteJavaScript("ContextTest();", "", 0);
+	//browser->GetMainFrame()->ExecuteJavaScript("StartObserving();", "", 0);
 }
 
 void Handler::EmulateMouseWheelScrolling(CefRefPtr<CefBrowser> browser, double deltaX, double deltaY)
@@ -334,6 +339,8 @@ void Handler::EmulateMouseWheelScrolling(CefRefPtr<CefBrowser> browser, double d
     event.y = 0;
     //DLOG(INFO) << "Emulating mouse wheel, browserID=" << browser->GetIdentifier();
     browser->GetHost()->SendMouseWheelEvent(event, deltaX, deltaY);
+
+	// TODO: Is this method executed ALL THE TIME? Try console output here.. oO
 
 }
 

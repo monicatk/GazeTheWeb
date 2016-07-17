@@ -55,9 +55,6 @@ function AdjustRectToZoom(rect)
 }
 
 
-// zu überwachende Zielnode (target) auswählen
-var target = document.documentElement;
- 
 
 // node.fixedID defines position, where to store bounding rectangle coordinates in |window.fixed_coordinates|
 window.elements = [];
@@ -98,6 +95,10 @@ function AddFixedElement(node)
 	// Create attribute in node and store ID there
 	node.setAttribute('fixedID', id);
 
+	// TODO: Add attribute 'fixedID' to every child node
+
+
+
 	// Write node's (and its children's) bounding rectangle coordinates to List
 	SaveBoundingRectCoordinates(node);
 
@@ -128,7 +129,7 @@ function SaveBoundingRectCoordinates(node)
 		window.fixed_coordinates[id] = rect_coords;
 
 		// Compute bounding rect containing all child nodes
-		var tree_rect_coords = ComputeBoundingRectOfAllChilds(node, 0);
+		var tree_rect_coords = ComputeBoundingRectOfAllChilds(node, 0, id);
 
 		// Save tree rect, if different than fixed nodes bounding rect
 		var equal = true;
@@ -157,18 +158,23 @@ function ComputeBoundingRect(parent, child)
 			Math.max(parent[3], child[3])];
 }
 
-function ComputeBoundingRectOfAllChilds(node, depth)
+function ComputeBoundingRectOfAllChilds(node, depth, fixedID)
 {
 	// Check if node's bounding rectangle is outside of the current union of rectangles in |window.fixed_coordinates[id]|
 	if(node.nodeType == 1) // 1 == ELEMENT_NODE
 	{
+
+		// Add attribute 'fixedID' in order to indicate being a child of a fixed node
+		if(!node.hasAttribute('fixedID'))
+		{
+			node.setAttribute('fixedID', fixedID);
+		}
+
 		var rect = node.getBoundingClientRect();
 
 		// Compare nodes to current bounding rectangle of all child nodes
 		var rect_coords = AdjustRectToZoom(rect);
 
-
-		var out = 'No children';
 		// Traverse all child nodes
 		if(node.children && node.children.length > 0)
 		{
@@ -180,7 +186,7 @@ function ComputeBoundingRectOfAllChilds(node, depth)
 				rect_coords = 
 					ComputeBoundingRect(
 						rect_coords,
-						ComputeBoundingRectOfAllChilds(node.children.item(i), depth+1)
+						ComputeBoundingRectOfAllChilds(node.children.item(i), depth+1, fixedID)
 					);
 			}
 		}
@@ -217,179 +223,278 @@ function RemoveFixedElement(node)
 	}
 }
 
+// NOT IN USE
+function UpdateBoundingRects()
+{
+	consolePrint('UpdateBoundingRects()');
+	for (var node of fixed_elements)
+	{
+		var id = node.getAttribute('fixedID');
+
+		consolePrint('Checking #'+id+' for updates...');
+
+		// Read out old rectangle coordinates
+		var old_coords = window.fixed_coordinates[id];
+		// Update bounding rectangles
+		SaveBoundingRectCoordinates(node);
+		// Read out updated rectangle coordinates in order to compare old and new
+		var new_coords = window.fixed_coordinates[id];
+
+		consolePrint('new: '+new_coords);
+		consolePrint('old: '+old_coords);
+
+		// Inform CEF that coordinates have to be updated
+		if(new_coords.length !== old_coords.length)
+		{
+			// alert('new: '+new_coords+'; old: '+old_coords);
+
+			var zero = '';
+			if(id < 10) zero = '0';
+			// Tell CEF that fixed node's coordinates were updated
+			consolePrint('#fixElem#add#'+zero+id);
+		}
+
+
+	}
+}
+
+// Traverse subtree starting with given childNode as root
+function UpdateSubtreesBoundingRect(childNode)
+{
+
+	var id = childNode.getAttribute('fixedID');
+
+	// consolePrint('Checking #'+id+' for updates...');
+
+	// Read out old rectangle coordinates
+	var old_coords = window.fixed_coordinates[id];
+	// Update bounding rectangles (only for subtree, starting with node where changes happend)
+	var child_coords = ComputeBoundingRectOfAllChilds(childNode, 0, id);
+
+	// consolePrint('child: '+child_coords);
+	// consolePrint('old  : '+old_coords);
+	var inform_about_changes = false;
+	var parent_rect = old_coords.slice(0, 4);
+
+	// Parent rect hasn't been containing all child rects
+	if(old_coords.length > 4)
+	{
+		var old_child_rect = old_coords.slice(4, 8);
+
+		// Inform CEF that coordinates have to be updated
+		if(!CompareArrays(child_coords, parent_rect) && !CompareArrays(child_coords, old_child_rect))
+		{
+
+			// Update childrens' combined bounding rect 
+			window.fixed_coordinates[id] = parent_rect.concat(child_coords);
+			// alert('new: '+new_coords+'; old: '+old_coords);
+			// consolePrint("Updated subtree's bounding rect: "+window.fixed_coordinates[id]);
+
+			inform_about_changes = true;
+		}
+	}
+	else // Parent rect has been containing all child rects
+	{
+		// Check if new child rect is contained in parent rect
+		child_coords = ComputeBoundingRect(parent_rect, child_coords);
+		if(!CompareArrays(parent_rect, child_coords))
+		{
+			window.fixed_coordinates[id] = parent_rect.concat(child_coords);
+
+			inform_about_changes = true;
+		}
+		// else: Parent rect still contains updated child rect
+	}
+
+
+	if(inform_about_changes)
+	{
+		var zero = '';
+		if(id < 10) zero = '0';
+		// Tell CEF that fixed node's coordinates were updated
+		consolePrint('#fixElem#add#'+zero+id);
+	}
+
+}
+
+function CompareArrays(array1, array2)
+{
+	if(array1.length != array2.length)
+		return false;
+
+	for(var i = 0, n = array1.length; i < n; i++)
+	{
+		if(array1[i] != array2[i])
+			return false;
+	}
+
+	return true;
+}
+
+// TODO: Better: Add EventListener?
+// document.onclick = function(){ UpdateBoundingRects(); };
+
 // alert(window.elements.length);
 // eine Instanz des Observers erzeugen
-var observer = new MutationObserver(
-	function(mutations) {
-	  	mutations.forEach(
-	  		function(mutation)
-	  		{
-	  		// for(j = 0; j < mutations.length; j++)
-	  			// var mutation = mutations[j];
-		  		var node;
-		  		var attr; // attribute name of attribute which has changed
+function MutationObserverInit()
+{ 
+	consolePrint('Trying to initialize Mutation Observer ... ');
 
-	  			if(mutation.type == 'attributes')
-	  			{
-	  				node = mutation.target;
+	window.observer = new MutationObserver(
+		function(mutations) {
+		  	mutations.forEach(
+		  		function(mutation)
+		  		{
+			  		var node;
 
-	  				//DEBUG
-	  				// if(node.id == 'social-floater' || node.id == 'header')
-	  				// {
-	  				// 	consolePrint('Attribute changes in '+node.id+'; position: '+node.style.getPropertyValue('position'));
-
-	  				// 	var headerNode = node;
-	  				// 	if(headerNode)
-	  				// 	{
-	  				// 		consolePrint('getComputedStyle: '+window.getComputedStyle(headerNode, null).getPropertyValue('position'));
-	  				// 	}
-	  				// 	else
-	  				// 		consolePrint('Could not find header by id!');
-	  				// }
-	  				// window.debug_node.style.setProperty('position', 'absolute');
-	  				/*onsolePrint(window.debug_node.id+' position: '+window.debug_node.style.getPropertyValue('position'));*/
-
-	  				// TODO: How to identify node whose attributes changed? --> mutation.target?
-	  				if(node.nodeType == 1) // 1 == ELEMENT_NODE
-	  				{
-	  					attr = mutation.attributeName;
-
-	  					// DEBUG
-	  					// if(node.id == 'header')
-	  					// {
-	  					// 	consolePrint('attribute '+attr+' changed');
-	  					// }
-
-	  					// usage example: observe changes in input field text
-	  					// if (node.tagName == 'INPUT' && node.type == 'text')
-	  					// 	alert('tagname: \''+node.tagName+'\' attr: \''+attr+'\' value: \''+node.getAttribute(attr)+'\' oldvalue: \''+mutation.oldValue+'\'');
-
-	  					if(attr == 'style' || attr == 'class') // TODO: example: uni-koblenz.de - node.id='header': class changes from 'container' to 'container fixed'
-	  					{
-	  						// alert('attr: \''+attr+'\' value: \''+node.getAttribute(attr)+'\' oldvalue: \''+mutation.oldValue+'\'');
-	  						if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
-	  						// if(node.style.position && node.style.position == 'fixed')
-	  						{
-	  							if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
-	  							{
-	  								// alert('Found fixed element!');
-	  								AddFixedElement(node);
-	  							}
-	  						}
-	  						else // case: style.position not fixed
-	  						{
-	  							// If contained, remove node from set of fixed elements
-	  							if(window.fixed_elements.has(node))
-	  							{
-	  								RemoveFixedElement(node);
-
-	  								// TODO: case fixed element like accepting cookies: node may disappear and no attribute changes!
-	  								// Observe node removals and check if it was a fixed element
-	  							}
-	  						}
-	  					}
-
-						// // if(node.style && node.style.position && node.style.position =='fixed')
-		  		// // 		{
-		  		// // 			alert('Found fixed element '+node.tagName+' '+node.type);
-						// // 		// var rect = node.getBoundingClientRect();
-						// // 		// alert('Found fixed element! top: '+rect.top+', left: '+rect.left+', bottom: '+rect.bottom+', right: '+rect.right);
-						// // }
-	  				}
-
-	  			}
-
-	  			if(mutation.type == 'childList') // TODO: Called upon each appending of a child node??
-	  			{
-		  			var nodes = mutation.addedNodes;
-
-		  			for(var i=0, n=nodes.length; i < n; i++)
+		  			if(mutation.type == 'attributes')
 		  			{
-		  				node = nodes[i]; // TODO: lots of data copying here??
-		  				var rect;
+		  				node = mutation.target;
+			  			var attr; // attribute name of attribute which has changed
+
+		  				// TODO: How to identify node whose attributes changed? --> mutation.target?
+		  				if(node.nodeType == 1) // 1 == ELEMENT_NODE
+		  				{
+		  					attr = mutation.attributeName;
+
+		  					// usage example: observe changes in input field text
+		  					// if (node.tagName == 'INPUT' && node.type == 'text')
+		  					// 	alert('tagname: \''+node.tagName+'\' attr: \''+attr+'\' value: \''+node.getAttribute(attr)+'\' oldvalue: \''+mutation.oldValue+'\'');
+
+		  					if(attr == 'style' || attr == 'class') // TODO: example: uni-koblenz.de - node.id='header': class changes from 'container' to 'container fixed'
+		  					{
+		  						// alert('attr: \''+attr+'\' value: \''+node.getAttribute(attr)+'\' oldvalue: \''+mutation.oldValue+'\'');
+		  						if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
+		  						// if(node.style.position && node.style.position == 'fixed')
+		  						{
+		  							if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
+		  							{
+		  								// alert('Found fixed element!');
+		  								AddFixedElement(node);
+		  							}
+		  				
+		  						}
+		  						else // case: style.position not fixed
+		  						{
+		  							// If contained, remove node from set of fixed elements
+		  							if(window.fixed_elements.has(node))
+		  							{
+		  								RemoveFixedElement(node);
+		  							}
+		  						}
+		  					}
+
+		  					// Changes in attribute 'class' may indicate that bounding rect update is needed, if node is child node of a fixed element
+		  					if(attr == 'class')
+		  					{
+		  						if(node.hasAttribute('fixedID'))
+		  						{
+		  							UpdateSubtreesBoundingRect(node);
+		  							// TODO: Triggered quite often... (while scrolling)
+		  						}
+		  					}
+
+		  				}
+
+		  			}
+
+
+
+
+
+		  			if(mutation.type == 'childList') // TODO: Called upon each appending of a child node??
+		  			{
+		  				// Check if fixed nodes have been added as child nodes
+			  			var nodes = mutation.addedNodes;
+
+			  			for(var i=0, n=nodes.length; i < n; i++)
+			  			{
+			  				node = nodes[i]; // TODO: lots of data copying here??
+			  				var rect;
+
+			  				if(node.nodeType == 1) // 1 == ELEMENT_NODE
+			  				{
+			  					// if(node.style.position && node.style.position == 'fixed')
+		  						if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
+		  						{
+		  							// consolePrint('position: '+node.style.position);
+		  							if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
+		  							{
+		  								// alert('Found fixed element! (node added to DOM tree)');
+		  								AddFixedElement(node);
+		  							}
+		  						}
+
+			  				}
+			  			}
+
+
+
+
+
+			  			// Check if fixed nodes have been removed as child nodes and if yes, delete them from list of fixed elements
+			  			var removed_nodes = mutation.removedNodes;
+			  			for(var i=0, n=removed_nodes.length; i < n; i++)
+			  			{
+			  				node = removed_nodes[i];
+
+			  				if(node.nodeType == 1)
+			  				{
+			  					// DEBUG
+			  					// if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
+			  					// 	alert('Observed removal of fixed child node!');
+
+			  					RemoveFixedElement(node);
+			  				}
+			  			}
+
+		  			}
+
+		  		} // end of function(){...}
+
+
+		 	);    
+		}
+	);
+
+
+
+	// TODO:
+
+	// characterData vs. attributes - one of those not neccessary?
+
+	// attributeFilter -
+	// Mit dieser Eigenschaft kann ein Array mit lokalen Attributnamen angegeben werden (ohne Namespace), wenn nicht alle Attribute beobachtet werden sollen.
+	// --> nur relevante Attribute beobachten!
+
+	consolePrint('MutationObserver successfully created! Telling him what to observe... ');
+	consolePrint('Trying to start observing... ');
+		
+	// Konfiguration des Observers: alles melden - Änderungen an Daten, Kindelementen und Attributen
+	var config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: false, attributeOldValue: false};
+	
+	// eigentliche Observierung starten und Zielnode und Konfiguration übergeben
+	window.observer.observe(window.document, config);
+
+	consolePrint(' MutationObserver was told what to observe.');
+	
+} // END OF MutationObserverInit()
+
+function MutationObserverShutdown()
+{
+	window.observer.disconnect(); 
+
+	delete window.observer;
+
+	consolePrint('Disconnected and deleted MutationObserver! ');
+}
 
 		  				// https://developer.mozilla.org/de/docs/Web/API/Node
 		  				// https://developer.mozilla.org/de/docs/Web/API/Element
 		  				// http://stackoverflow.com/questions/9979172/difference-between-node-object-and-element-object
 		  				// read also: http://www.backalleycoder.com/2013/03/18/cross-browser-event-based-element-resize-detection/
 
-		  				// GOAL: map Node to Element?
-		  				// var target = nodes[i].target;
+		  												// offtopic: check if attributes exist
+								// if(nodes[i].hasOwnProperty('style'))
 
-		  				// nodes[i].nodeValue = nodes[i].id;
-		  				// if(node.id && node.id == 'social-floater')
-		  				// {
-		  				// 	consolePrint('Social floater was added! id: '+node.id);
-		  				// 	window.debug_node = node;
-
-		  				// }
-
-		  				if(node.nodeType == 1) // 1 == ELEMENT_NODE
-		  				{
-		  					// if(node.style.position && node.style.position == 'fixed')
-	  						if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
-	  						{
-	  							// consolePrint('position: '+node.style.position);
-	  							if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
-	  							{
-	  								// alert('Found fixed element! (node added to DOM tree)');
-	  								AddFixedElement(node);
-	  							}
-	  						}
-
-		  					if(node.tagName == 'INPUT' && (node.type == 'text' || node.type == 'search' || node.type == 'email' || node.type == 'password') )
-		  					{
-		  						// node.value = node.type;
-
-
-		  						// var rect = node.getBoundingClientRect();
-		  						// alert('input! top: '+rect.top+', left: '+rect.left+', bottom: '+rect.bottom+', right: '+rect.right);
-		  				// 		rect = node.getBoundingClientRect();
-								// alert('Found input field! top: '+rect.top+', left: '+rect.left+', bottom: '+rect.bottom+', right: '+right);
-		  					}
-		  					// nodes[i].value = nodes[i].tagName;
-		  					// elements.push(nodes[i].tagName);
-		  					// alert(window.elements.length);
-
-		  					// http://ryanmorr.com/understanding-scope-and-context-in-javascript/
-
-
-		  			// 		/* Fixed element observation */
-		  			// 		if(node.style && node.style.position && node.style.position =='fixed')
-		  			// 		{
-		  			// 			alert('Found fixed element '+node.tagName+' '+node.type);
-							// 	// var rect = node.getBoundingClientRect();
-							// 	// alert('Found fixed element! top: '+rect.top+', left: '+rect.left+', bottom: '+rect.bottom+', right: '+rect.right);
-							// }
-
-							// offtopic: check if attributes exist
-							// if(nodes[i].hasOwnProperty('style'))
-
-		  				}
-
-		  			}
-	  			}
-	  			// else if(mutation.type == 'attributes')
-	  			// {
-	  			// 	// TODO: Wie heißt das geaenderte Attribut?
-	  				
-	  			// 	alert('attributName: '+mutation.attributeName+', attributeNamespace: '+mutation.attributeNamespace+'');
-	  			// }
-	  			// else if(mutation.type == 'characterData')
-	  			// {
-	  			// 	alert('vorher: '+mutation.target.oldValue+', nachher: '+mutation.target.nodeValue);
-	  			// }
-	  		}
-	  	// 	function(mutation) {
-	   //  		alert('target: '+mutation.target.type+', type: '+mutation.type);
-	  	// 	}
-	 	);    
-	}
-);
-
-// Konfiguration des Observers: alles melden - Änderungen an Daten, Kindelementen und Attributen
-var config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: true, attributeOldValue:true};
- 
-// eigentliche Observierung starten und Zielnode und Konfiguration übergeben
-observer.observe(target, config);
-consolePrint('MutationObserver successfully created!');
+			  					// http://ryanmorr.com/understanding-scope-and-context-in-javascript/

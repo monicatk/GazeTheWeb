@@ -214,6 +214,11 @@ void RenderProcessHandler::OnContextCreated(
     // Variables here contain the amount of needed objects in order to allocate arrays, which are just big enough
         if (context->Enter())
         {
+			// DEBUG
+			debug++;
+
+			// DEBUG
+			IPCLogDebug(browser, "### Context created for main frame. ###");
 
             // Retrieve the context's window object.
             CefRefPtr<CefV8Value> globalObj = context->GetGlobal();
@@ -232,6 +237,12 @@ void RenderProcessHandler::OnContextCreated(
             frame->ExecuteJavaScript(_js_favicon_create_img, frame->GetURL(), 0);
 
 			frame->ExecuteJavaScript(_js_mutation_observer_test, "", 0);
+			frame->ExecuteJavaScript("MutationObserverInit();", "", 0);
+
+			// DEBUG
+			//frame->ExecuteJavaScript("function ContextTest(){alert(" + std::to_string(debug) + ");}", "", 0);
+
+			
 
             context->Exit();
         }
@@ -251,6 +262,8 @@ void RenderProcessHandler::OnContextReleased(CefRefPtr<CefBrowser> browser,
 
     if (frame->IsMain())
     {
+		IPCLogDebug(browser, "### Context released for main frame. ###");
+
         // Release all created V8 values, when context is released
         CefRefPtr<CefV8Value> globalObj = context->GetGlobal();
 
@@ -262,6 +275,9 @@ void RenderProcessHandler::OnContextReleased(CefRefPtr<CefBrowser> browser,
 
         globalObj->DeleteValue("favIconHeight");
         globalObj->DeleteValue("favIconWidth");
+
+		// DEBUG
+		frame->ExecuteJavaScript("MutationObserverShutdown()", "", 0);
     }
 }
 

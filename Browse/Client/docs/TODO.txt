@@ -1,5 +1,6 @@
 Other
 - Scrolling with sub windows (GMail, Facebook)
+- Show loading status with e.g. a loading symbol
 
 Daniel Roadmap
 - Rectangle for fixed elements (with and without children) (later polygon)
