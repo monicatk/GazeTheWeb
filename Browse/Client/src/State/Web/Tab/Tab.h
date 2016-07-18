@@ -318,6 +318,9 @@ private:
     void ActivateCursorMode();
     void DeactivateCursorMode();
 
+	// Draw debugging overlay
+	void DrawDebuggingOverlay() const;
+
     // Current URL
     std::string _url = "";
 
@@ -362,6 +365,9 @@ private:
 
     // Pointer to mediator
     CefMediator* _pCefMediator;
+
+	// RenderItem used for debug rendering
+	std::unique_ptr<RenderItem> _upDebugRenderItem;
 
     // Frame indices of scroll up and down overlays
     unsigned int _scrollUpFrameIndex = 0;

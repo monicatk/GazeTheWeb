@@ -15,6 +15,28 @@
 #include "src/State/Web/Tab/Pipelines/TestPipeline.h"
 #include "src/State/Web/Tab/Pipelines/ZoomClickPipeline.h"
 #include "src/Utils/Logger.h"
+#include "submodules/glm/glm/gtc/matrix_transform.hpp" // TODO: move to debug rendering class
+
+// Shaders (For debugging)
+const std::string vertexShaderSource =
+"#version 330 core\n"
+"in vec3 posAttr;\n"
+"in vec2 uvAttr;\n"
+"out vec2 uv;\n"
+"uniform mat4 matrix;\n"
+"void main() {\n"
+"   uv = uvAttr;\n"
+"   gl_Position = matrix * vec4(posAttr, 1);\n"
+"}\n";
+
+const std::string fragmentShaderSource =
+"#version 330 core\n"
+"in vec2 uv;\n"
+"out vec4 fragColor;\n"
+"uniform vec3 color;\n"
+"void main() {\n"
+"   fragColor = vec4(color,1);\n"
+"}\n";
 
 Tab::Tab(Master* pMaster, CefMediator* pCefMediator, std::string url)
 {
@@ -75,6 +97,9 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, std::string url)
 
     // Register itself and painted texture in mediator to receive DOMNodes
     _pCefMediator->RegisterTab(this);
+
+	// Prepare debug rendering
+	_upDebugRenderItem = std::unique_ptr<RenderItem>(new RenderItem(vertexShaderSource, fragmentShaderSource));
 }
 
 Tab::~Tab()
@@ -296,6 +321,12 @@ void Tab::Draw() const
             break;
         }
     }
+
+	// Draw debug overlay
+	if (setup::DRAW_DEBUG_OVERLAY)
+	{
+		DrawDebuggingOverlay();
+	}
 }
 
 void Tab::Activate()
@@ -909,6 +940,33 @@ void Tab::ActivateCursorMode()
 void Tab::DeactivateCursorMode()
 {
     // TODO
+}
+
+void Tab::DrawDebuggingOverlay() const
+{
+	// Bind debug render item
+	_upDebugRenderItem->Bind();
+
+	// Projection
+	glm::mat4 projection = glm::ortho(0, 1, 0, 1);
+
+	// Calculate model matrix
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::scale(model, glm::vec3(1.f / _pMaster->GetWindowWidth(), 1.f / _pMaster->GetWindowHeight(), 1.f));
+	model = glm::translate(model, glm::vec3(100, 100, 1));
+	model = glm::scale(model, glm::vec3(100, 100, 0));
+
+	// Render all triggers etc. TODO
+
+	// Combine matrics
+	glm::mat4 matrix = projection * model;
+
+	// Fill uniforms
+	_upDebugRenderItem->GetShader()->UpdateValue("matrix", matrix);
+	_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(0,1,1));
+	
+	// Render rectangle
+	_upDebugRenderItem->Draw(GL_LINE_STRIP);
 }
 
 void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
