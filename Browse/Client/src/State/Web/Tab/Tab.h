@@ -390,8 +390,7 @@ private:
     double _pageWidth = 0, _pageHeight = 0;
 
     // Coordinates of current fixed elements on site, vec4 = (top, left, bottom, right)
-    std::vector<std::vector<glm::vec4>> _fixedElements;
-
+	std::vector<std::vector<glm::vec4>> _fixedElements;
 
     // URL of current favIcon
     std::string _favIconUrl;
