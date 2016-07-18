@@ -8,6 +8,7 @@
 #define DOMNODE_H_
 
 #include "src/Typedefs.h"
+#include "src/Utils/Rect.h"
 #include "submodules/glm/glm/glm.hpp"
 #include <vector>
 #include <string>
@@ -23,24 +24,24 @@ class DOMNode
         DOMNodeType GetType() const { return _type; }
         int64 GetFrameID() const { return _frameID; }
         int GetNodeID() const { return _nodeID; };
-        glm::vec4 GetCoordinates() const { return _coordinates; };
+        Rect GetRect() const { return _rect; };
         glm::vec2 GetCenter() const;
 
 
     protected:
 
-        DOMNode(DOMNodeType type, int64 frameID, int nodeID, glm::vec4 coordinates)
+        DOMNode(DOMNodeType type, int64 frameID, int nodeID, Rect rect)
         {
             _type = type;
             _frameID = frameID;
             _nodeID = nodeID;
-            _coordinates = coordinates;
+            _rect = rect;
         }
 
         DOMNodeType _type;
         int64 _frameID;
         int _nodeID;			// Node's position in Javascript's list of nodes of the same type
-        glm::vec4 _coordinates;	// two 2D vectors: top-left & bottom right vertices
+        Rect _rect;	// two 2D vectors: top-left & bottom right vertices
 
 
 };
@@ -53,7 +54,7 @@ class DOMTextInput : public DOMNode
         DOMTextInput(	DOMNodeType type,
                         int64 frameID,
                         int nodeID,
-                        glm::vec4 coordinates,
+                        Rect rect,
                         std::string value		);
 
         std::string GetValue() const { return _value; }
@@ -71,7 +72,7 @@ class DOMTextLink : public DOMNode
         DOMTextLink(	DOMNodeType type,
                         int64 frameID,
                         int nodeID,
-                        glm::vec4 coordinates,
+                        Rect rect,
                         std::string value,
                         std::string url			);
 

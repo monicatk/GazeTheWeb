@@ -1,6 +1,6 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel M�ller (muellerd@uni-koblenz.de)
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
 //============================================================================
 
 #include "DOMNode.h"
@@ -12,22 +12,22 @@
 /* DOMNode methods*/
 glm::vec2 DOMNode::GetCenter() const
 {
-    return glm::vec2((_coordinates.y + _coordinates.w) / 2.f, (_coordinates.x + _coordinates.z) / 2.f);
+	return _rect.center();
 }
 
 /* DOMTextInput methods*/
 DOMTextInput::DOMTextInput(	DOMNodeType type,
                             int64 frameID,
                             int nodeID,
-                            glm::vec4 coordinates,
-                            std::string value = "") : DOMNode(type, frameID, nodeID, coordinates)
+                            Rect rect,
+                            std::string value = "") : DOMNode(type, frameID, nodeID, rect)
 {
     _value = value;
 
     LogDebug("DOMTextInput constructed", "\n" ,
     "\tFrameID: ", _frameID, "\n",
     "\tnodeID: ", _nodeID, "\n",
-    "\tcoordinates: (", _coordinates.x, ", ", _coordinates.y, ", ", _coordinates.z, ", ", _coordinates.w, ")\n",
+    "\tcoordinates: (", _rect.top, ", ", _rect.left, ", ", _rect.bottom,", ", _rect.right, ")\n",
     "\tvalue: ", _value);
 }
 
@@ -36,9 +36,9 @@ DOMTextInput::DOMTextInput(	DOMNodeType type,
 DOMTextLink::DOMTextLink(	DOMNodeType type,
                             int64 frameID,
                             int nodeID,
-                            glm::vec4 coordinates,
+                            Rect rect,
                             std::string value,
-                            std::string url) : DOMNode(type, frameID, nodeID, coordinates)
+                            std::string url) : DOMNode(type, frameID, nodeID, rect)
 {
     _value = value;
     _url = url;

@@ -148,14 +148,14 @@ void CefMediator::ReceiveIPCMessageforDOM(CefRefPtr<CefBrowser> browser, CefRefP
                     ) -> void
             {
                 // Define where attributes and their values are expected according to scheme
-                glm::vec4 coordinates = { doubles[0], doubles[1], doubles[2], doubles[3] };
+                Rect rect = Rect(doubles[0], doubles[1], doubles[2], doubles[3]);
 
                 std::string value = strings[0];
 
                 // LogDebug("CefMediator: Creating DOM node.");
 
                 // Add DOM node to Tab
-                target->AddDOMNode(std::make_shared<DOMTextInput>(DOMNodeType::TextInput, frameID, nodeID, coordinates, value));
+                target->AddDOMNode(std::make_shared<DOMTextInput>(DOMNodeType::TextInput, frameID, nodeID, rect, value));
 
             };
 
