@@ -318,6 +318,9 @@ private:
     void ActivateCursorMode();
     void DeactivateCursorMode();
 
+	// Draw debugging overlay
+	void DrawDebuggingOverlay() const;
+
     // Current URL
     std::string _url = "";
 
@@ -363,6 +366,9 @@ private:
     // Pointer to mediator
     CefMediator* _pCefMediator;
 
+	// RenderItem used for debug rendering
+	std::unique_ptr<RenderItem> _upDebugRenderItem;
+
     // Frame indices of scroll up and down overlays
     unsigned int _scrollUpFrameIndex = 0;
     unsigned int _scrollDownFrameIndex = 0;
@@ -384,8 +390,7 @@ private:
     double _pageWidth = 0, _pageHeight = 0;
 
     // Coordinates of current fixed elements on site, vec4 = (top, left, bottom, right)
-    std::vector<std::vector<glm::vec4>> _fixedElements;
-
+	std::vector<std::vector<glm::vec4>> _fixedElements;
 
     // URL of current favIcon
     std::string _favIconUrl;

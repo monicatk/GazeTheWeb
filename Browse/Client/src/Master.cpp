@@ -364,6 +364,9 @@ void Master::Loop()
         // Create input struct for own framework
         Input input(usedEyeGUIInput.gazeX, usedEyeGUIInput.gazeY, usedEyeGUIInput.gazeUsed);
 
+		// Disable depth test for drawing
+		glDisable(GL_DEPTH_TEST);
+
         // Update current state (one should use here pointer instead of switch case)
         StateType nextState = StateType::WEB;
         switch (_currentState)
@@ -406,6 +409,9 @@ void Master::Loop()
             // Remember state
             _currentState = nextState;
         }
+
+		// Enable depth test again
+		glEnable(GL_DEPTH_TEST);
 
         // Draw eyeGUI on top
         eyegui::drawGUI(_pGUI);
