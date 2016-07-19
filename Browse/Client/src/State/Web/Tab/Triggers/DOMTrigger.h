@@ -52,7 +52,7 @@ private:
     std::string _overlayButtonId;
 
     // Size of overlay button
-    float _size = 0.1f;
+    float _size = 0.15f;
 
     // Bool to remember that it was triggered
     bool _triggered = false;

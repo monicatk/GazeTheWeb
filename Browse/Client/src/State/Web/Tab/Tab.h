@@ -209,7 +209,6 @@ public:
     // Add new Tab after that one
     virtual void AddTabAfter(std::string URL);
 
-
 private:
 
     // Give listener full access
