@@ -218,11 +218,11 @@ void Tab::Update(float tpf, Input& rInput)
         {
             for (const auto& rElement : rElements)
             {
-                // Simple box test (TODO: replace those vectors with nice struct)
-                if (tabInput.webViewGazeX > rElement.x
-                    && tabInput.webViewGazeY > rElement.y
-                    && tabInput.webViewGazeY < rElement.z
-                    && tabInput.webViewGazeX < rElement.w)
+                // Simple box test
+                if (tabInput.webViewGazeX > rElement.left
+                    && tabInput.webViewGazeY > rElement.top
+                    && tabInput.webViewGazeY < rElement.bottom
+                    && tabInput.webViewGazeX < rElement.right)
                 {
                     gazeUponFixed = true;
                     break;
@@ -543,7 +543,7 @@ void Tab::SetPageResolution(double width, double height)
     _pageHeight = height;
 }
 
-void Tab::SetFixedElementsCoordinates(int id, std::vector<glm::vec4> elements)
+void Tab::AddFixedElementsCoordinates(int id, std::vector<Rect> elements)
 {
     // Assign list of fixed element coordinates to given position
     _fixedElements.resize(id + 1);
@@ -955,12 +955,20 @@ void Tab::DrawDebuggingOverlay() const
 	glm::mat4 projection = glm::ortho(0, 1, 0, 1);
 
 	// Define render function
-	std::function<void(Rect)> renderRect = [&](Rect rect)
+	std::function<void(Rect, bool)> renderRect = [&](Rect rect, bool fixed)
 	{
+		// Fixed or not
+		float scrollX, scrollY = 0;
+		if (!fixed)
+		{
+			scrollX = _scrollingOffsetX;
+			scrollY = _scrollingOffsetY;
+		}
+
 		// Calculate model matrix
 		model = glm::mat4(1.0f);
 		model = glm::scale(model, glm::vec3(1.f / _pMaster->GetWindowWidth(), 1.f / _pMaster->GetWindowHeight(), 1.f));
-		model = glm::translate(model, glm::vec3(webViewX + rect.left - _scrollingOffsetX, webViewHeight - (rect.bottom - _scrollingOffsetY), 1));
+		model = glm::translate(model, glm::vec3(webViewX + rect.left - scrollX, webViewHeight - (rect.bottom - scrollY), 1));
 		model = glm::scale(model, glm::vec3(rect.width(), rect.height(), 0));
 
 		// Combine matrics
@@ -985,22 +993,24 @@ void Tab::DrawDebuggingOverlay() const
 	for (const auto& rDOMTrigger : _DOMTriggers)
 	{
 		// Render rect
-		renderRect(rDOMTrigger->GetDOMRect());
+		renderRect(rDOMTrigger->GetDOMRect(), false);
 	}
 
-	/*
 	// ### FIXED ELEMENTS ###
 
 	// Set rendering up for fixed element
 	_upDebugRenderItem->GetShader()->UpdateValue("color", FIXED_ELEMENT_DEBUG_COLOR);
 
-	// Go over all fixed elements
-	for (const auto& rFixedElement : _fixedElements)
+	// Go over all fixed elements vectors
+	for (const auto& rFixedElements : _fixedElements)
 	{
-		// Render rect
-		renderRect(rFixedElement.);
+		// Go over fixed elements
+		for (const auto& rFixedElement : rFixedElements)
+		{
+			// Render rect
+			renderRect(rFixedElement, true);
+		}
 	}
-	*/
 }
 
 void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)

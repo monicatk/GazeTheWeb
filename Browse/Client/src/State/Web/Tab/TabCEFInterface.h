@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <vector>
+#include "src/Utils/Rect.h"
 #include "submodules/glm/glm/glm.hpp"
 
 // Forward declaration
@@ -57,7 +58,7 @@ public:
     virtual void SetPageResolution(double width, double height) = 0;
 
     // Fixed elements' coordinates
-    virtual void SetFixedElementsCoordinates(int id, std::vector<glm::vec4> elements) = 0;
+    virtual void AddFixedElementsCoordinates(int id, std::vector<Rect> elements) = 0;
     virtual void RemoveFixedElement(int id) = 0;
 
     // Set Tab's title text

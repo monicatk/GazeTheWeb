@@ -200,7 +200,7 @@ public:
     // Set page resolution from Cef Mediator
     virtual void SetPageResolution(double width, double height);
 
-    virtual void SetFixedElementsCoordinates(int id, std::vector<glm::vec4> elements);
+    virtual void AddFixedElementsCoordinates(int id, std::vector<Rect> elements);
     virtual void RemoveFixedElement(int id);
 
     // Set Tab's title text
@@ -389,8 +389,8 @@ private:
     // Current page size
     double _pageWidth = 0, _pageHeight = 0;
 
-    // Coordinates of current fixed elements on site, vec4 = (top, left, bottom, right)
-	std::vector<std::vector<glm::vec4>> _fixedElements;
+    // Coordinates of current fixed elements on site
+	std::vector<std::vector<Rect>> _fixedElements;
 
     // URL of current favIcon
     std::string _favIconUrl;

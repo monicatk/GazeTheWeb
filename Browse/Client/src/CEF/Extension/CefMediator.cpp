@@ -327,15 +327,15 @@ void CefMediator::ReceiveFixedElements(CefRefPtr<CefBrowser> browser, CefRefPtr<
 {
     CefRefPtr<CefListValue> args = msg->GetArgumentList();
     int id = args->GetInt(0);
-    std::vector<glm::vec4> fixedCoords = {};
+    std::vector<Rect> fixedCoords = {};
     for (int i = 1; i < (int)args->GetSize(); i+=4)
     {
         fixedCoords.push_back(
-            glm::vec4(
-                args->GetDouble(i),
-                args->GetDouble(i + 1),
-                args->GetDouble(i + 2),
-                args->GetDouble(i + 3)
+            Rect(
+                args->GetDouble(i), // top
+                args->GetDouble(i + 1), // left
+                args->GetDouble(i + 2), // bottom
+                args->GetDouble(i + 3) // right
                 )
             );
     }
@@ -344,9 +344,9 @@ void CefMediator::ReceiveFixedElements(CefRefPtr<CefBrowser> browser, CefRefPtr<
         LogDebug("CefMediator: Sending ", fixedCoords.size(), " fixed element coordinate tupel(s) to Tab.");
         for (int i = 0; i < (int)fixedCoords.size(); i++)
         {
-             LogDebug("\t-->", fixedCoords[i].x, ", ", fixedCoords[i].y, ", ", fixedCoords[i].z, ", ", fixedCoords[i].w);
+             LogDebug("\t-->", fixedCoords[i].top, ", ", fixedCoords[i].left, ", ", fixedCoords[i].bottom, ", ", fixedCoords[i].right);
         }
-        pTab->SetFixedElementsCoordinates(id, fixedCoords);
+        pTab->AddFixedElementsCoordinates(id, fixedCoords);
     }
 }
 
