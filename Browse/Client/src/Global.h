@@ -37,5 +37,7 @@ static const std::string INTERACTION_FILE_NAME = "interaction";
 static const int LOG_FILE_MAX_SIZE = 1024 * 1024;
 static const int LOG_FILE_COUNT = 5;
 static const float MOUSE_CURSOR_RELATIVE_SIZE = 0.1f;
+static const glm::vec3 DOM_TRIGGER_DEBUG_COLOR = glm::vec3(0, 1, 0);
+static const glm::vec3 FIXED_ELEMENT_DEBUG_COLOR = glm::vec3(1, 0, 0);
 
 #endif // GLOBAL_H_

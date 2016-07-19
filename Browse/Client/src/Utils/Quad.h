@@ -2,7 +2,7 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// Quad to render with OpenGL.
+// Quad to render with OpenGL. Coordinates are from 0 to 1.
 
 #ifndef QUAD_H_
 #define QUAD_H_

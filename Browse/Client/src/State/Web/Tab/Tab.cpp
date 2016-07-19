@@ -320,13 +320,13 @@ void Tab::Draw() const
         case TabMode::CURSOR:
             break;
         }
-    }
 
-	// Draw debug overlay
-	if (setup::DRAW_DEBUG_OVERLAY)
-	{
-		DrawDebuggingOverlay();
-	}
+		// Draw debug overlay (do not so while pipeline is rendered)
+		if (setup::DRAW_DEBUG_OVERLAY)
+		{
+			DrawDebuggingOverlay();
+		}
+    }
 }
 
 void Tab::Activate()
@@ -944,29 +944,63 @@ void Tab::DeactivateCursorMode()
 
 void Tab::DrawDebuggingOverlay() const
 {
-	// Bind debug render item
-	_upDebugRenderItem->Bind();
+	// Reserve variables
+	glm::mat4 model, matrix;
+
+	// WebView coordinats
+	int webViewX, webViewY, webViewWidth, webViewHeight = 0;
+	this->CalculateWebViewPositionAndSize(webViewX, webViewY, webViewWidth, webViewHeight);
 
 	// Projection
 	glm::mat4 projection = glm::ortho(0, 1, 0, 1);
 
-	// Calculate model matrix
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::scale(model, glm::vec3(1.f / _pMaster->GetWindowWidth(), 1.f / _pMaster->GetWindowHeight(), 1.f));
-	model = glm::translate(model, glm::vec3(100, 100, 1));
-	model = glm::scale(model, glm::vec3(100, 100, 0));
+	// Define render function
+	std::function<void(Rect)> renderRect = [&](Rect rect)
+	{
+		// Calculate model matrix
+		model = glm::mat4(1.0f);
+		model = glm::scale(model, glm::vec3(1.f / _pMaster->GetWindowWidth(), 1.f / _pMaster->GetWindowHeight(), 1.f));
+		model = glm::translate(model, glm::vec3(webViewX + rect.left - _scrollingOffsetX, webViewHeight - (rect.bottom - _scrollingOffsetY), 1));
+		model = glm::scale(model, glm::vec3(rect.width(), rect.height(), 0));
 
-	// Render all triggers etc. TODO
+		// Combine matrics
+		matrix = projection * model;
 
-	// Combine matrics
-	glm::mat4 matrix = projection * model;
+		// Fill uniform with matrix (no need for Bind() since bound in called context)
+		_upDebugRenderItem->GetShader()->UpdateValue("matrix", matrix);
 
-	// Fill uniforms
-	_upDebugRenderItem->GetShader()->UpdateValue("matrix", matrix);
-	_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(0,1,1));
-	
-	// Render rectangle
-	_upDebugRenderItem->Draw(GL_LINE_STRIP);
+		// Render rectangle
+		_upDebugRenderItem->Draw(GL_LINE_STRIP);
+	};
+
+	// Bind debug render item
+	_upDebugRenderItem->Bind();
+
+	// ### DOMTRIGGER ###
+
+	// Set rendering up for DOMTrigger
+	_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_TRIGGER_DEBUG_COLOR);
+
+	// Go over all DOMTriggers
+	for (const auto& rDOMTrigger : _DOMTriggers)
+	{
+		// Render rect
+		renderRect(rDOMTrigger->GetDOMRect());
+	}
+
+	/*
+	// ### FIXED ELEMENTS ###
+
+	// Set rendering up for fixed element
+	_upDebugRenderItem->GetShader()->UpdateValue("color", FIXED_ELEMENT_DEBUG_COLOR);
+
+	// Go over all fixed elements
+	for (const auto& rFixedElement : _fixedElements)
+	{
+		// Render rect
+		renderRect(rFixedElement.);
+	}
+	*/
 }
 
 void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)

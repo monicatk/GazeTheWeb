@@ -34,6 +34,9 @@ public:
     // Deactivate
     virtual void Deactivate();
 
+	// Get rect of DOMNode
+	Rect GetDOMRect() { return _spNode->GetRect(); }
+
 private:
 
     // Calculate position of overlay button
