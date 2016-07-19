@@ -195,7 +195,8 @@ Master::Master(CefMediator* pCefMediator)
     _upWeb->Activate();
 
     // ### HOMEPAGE ###
-    _upWeb->AddTab("https://www.uni-koblenz.de");
+    //_upWeb->AddTab("https://www.uni-koblenz.de");
+	_upWeb->AddTab("https://www.9gag.com");
 
     // ### SUPER LAYOUT ###
 

@@ -18,6 +18,7 @@
 #include "src/State/Web/Tab/Triggers/DOMTrigger.h"
 #include "src/Utils/Input.h"
 #include "src/Global.h"
+#include "src/State/Web/WebTabInterface.h"
 #include "submodules/glm/glm/glm.hpp"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 #include <vector>
@@ -36,7 +37,7 @@ class Tab : public TabInteractionInterface, public TabCEFInterface
 public:
 
     // Constructor
-    Tab(Master* pMaster, CefMediator* pCefMediator, std::string url);
+    Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std::string url);
 
     // Destructor
     virtual ~Tab();
@@ -329,8 +330,11 @@ private:
     // Web view in which website is rendered and displayed
     std::unique_ptr<WebView> _upWebView;
 
-    // Pointer to master.
+    // Pointer to master
     Master* _pMaster;
+
+	// Pointer to web (that object whom this Tab belongs)
+	WebTabInterface* _pWeb;
 
     // Pipelines which shall be executed
     std::deque<std::unique_ptr<Pipeline> > _pipelines;

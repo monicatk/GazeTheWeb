@@ -11,3 +11,4 @@
 - Much more settings (all the eyeGUI stuff)
 - Tobii EyeX seems to connect event when there is no...
 - Prefetch complete icon folder
+- Switch to DejaVu font

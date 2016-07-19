@@ -38,12 +38,13 @@ const std::string fragmentShaderSource =
 "   fragColor = vec4(color,1);\n"
 "}\n";
 
-Tab::Tab(Master* pMaster, CefMediator* pCefMediator, std::string url)
+Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std::string url)
 {
     // Fill members
     _pMaster = pMaster;
     _pCefMediator = pCefMediator;
-    _url = url;
+	_pWeb = pWeb;
+	_url = url;
 
     // Create layouts for Tab (overlay at first, because behind other layouts)
     _pOverlayLayout = _pMaster->AddLayout("layouts/Overlay.xeyegui", EYEGUI_TAB_LAYER, false);
@@ -752,8 +753,7 @@ void Tab::SetTitle(std::string title)
 
 void Tab::AddTabAfter(std::string URL)
 {
-    // TODO
-    LogDebug("Tab (TODO): New Tab should be opened: ", URL);
+	_pWeb->AddTabAfter(this, URL);
 }
 
 eyegui::AbsolutePositionAndSize Tab::CalculateWebViewPositionAndSize() const
@@ -948,7 +948,10 @@ void Tab::DrawDebuggingOverlay() const
 	glm::mat4 model, matrix;
 
 	// WebView coordinats
-	int webViewX, webViewY, webViewWidth, webViewHeight = 0;
+	int webViewX = 0;
+	int webViewY = 0;
+	int webViewWidth = 0;
+	int webViewHeight = 0;
 	this->CalculateWebViewPositionAndSize(webViewX, webViewY, webViewWidth, webViewHeight);
 
 	// Projection
@@ -958,7 +961,8 @@ void Tab::DrawDebuggingOverlay() const
 	std::function<void(Rect, bool)> renderRect = [&](Rect rect, bool fixed)
 	{
 		// Fixed or not
-		float scrollX, scrollY = 0;
+		float scrollX = 0;
+		float scrollY = 0;
 		if (!fixed)
 		{
 			scrollX = _scrollingOffsetX;

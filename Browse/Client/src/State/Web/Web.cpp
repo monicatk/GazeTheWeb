@@ -42,7 +42,7 @@ Web::~Web()
     // TODO: Delete layouts?
 }
 
-int Web::AddTab(std::string url, bool show)
+int Web::AddTab(std::string URL, bool show)
 {
     // Go over existing pairs and determine first free id
     int id = 0;
@@ -65,7 +65,7 @@ int Web::AddTab(std::string url, bool show)
 
     // Create tab
     std::unique_ptr<Tab> upTab =
-        std::unique_ptr<Tab>(new Tab(_pMaster, _pCefMediator, url));
+        std::unique_ptr<Tab>(new Tab(_pMaster, _pCefMediator, this, URL));
 
     // Put tab in map
     _tabs.emplace(id, std::move(upTab));
@@ -309,6 +309,30 @@ void Web::Deactivate()
     }
 
     ShowTabOverview(false);
+}
+
+void Web::AddTabAfter(Tab* caller, std::string URL)
+{
+	// Go through tabs and search for caller
+	int id = -1;
+	for (const auto& rPair : _tabs)
+	{
+		// Found it!
+		if (rPair.second.get() == caller)
+		{
+			id = rPair.first;
+		}
+	}
+
+	// Open new tab after that tab
+	if (id >= 0)
+	{
+		// TODO: move after caller!!!
+		// TODO: think about how to: one should do some job queue because maybe the
+		// function is called during a update of tabs which destroys the iteration
+		// queue
+		//this->AddTab(URL, false);
+	}
 }
 
 int Web::GetIndexOfTabInOrderVector(int id) const

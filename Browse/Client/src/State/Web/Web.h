@@ -17,7 +17,7 @@
 // Forward declaration
 class CefMediator;
 
-class Web : public State
+class Web : public State, public WebTabInterface
 {
 public:
 
@@ -28,7 +28,7 @@ public:
     virtual ~Web();
 
     // Add Tab and return id of it
-    int AddTab(std::string url, bool show = true);
+    int AddTab(std::string URL, bool show = true);
 
     // Remove Tab
     void RemoveTab(int id);
@@ -63,6 +63,13 @@ public:
 
     // Deactivate
     virtual void Deactivate();
+
+	// #########################
+	// ### WEB TAB INTERFACE ###
+	// #########################
+
+	// Add tab after that tab
+	virtual void AddTabAfter(Tab* caller, std::string URL);
 
 private:
 
