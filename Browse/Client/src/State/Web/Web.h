@@ -46,7 +46,7 @@ public:
     bool SwitchToPreviousTab();
 
     // Opens URL in tab. Returns whether successful
-    bool OpenURLInOfTab(int id, std::string URL);
+    bool OpenURLInTab(int id, std::string URL);
 
     // #############
     // ### STATE ###
@@ -98,6 +98,9 @@ private:
 
     // Calculate page cound for tab overview
     int CalculatePageCountOfTabOverview() const;
+
+	// Update icon of tab overview
+	void UpdateTabOverviewIcon();
 
     // Maps id to Tab
     std::map<int, std::unique_ptr<Tab> > _tabs;

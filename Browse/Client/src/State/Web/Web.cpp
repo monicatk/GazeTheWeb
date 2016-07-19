@@ -80,6 +80,9 @@ int Web::AddTab(std::string url, bool show)
         SwitchToTab(id);
     }
 
+	// Update icon of tab overview button
+	UpdateTabOverviewIcon();
+
     // Retun id of tab
     return id;
 }
@@ -88,30 +91,33 @@ void Web::RemoveTab(int id)
 {
     // Verify that id exists
     auto iter = _tabs.find(id);
-    if(iter != _tabs.end())
-    {
-        // Remove from order vector
-        _tabIdOrder.erase(std::remove(_tabIdOrder.begin(), _tabIdOrder.end(), id), _tabIdOrder.end());
+	if (iter != _tabs.end())
+	{
+		// Remove from order vector
+		_tabIdOrder.erase(std::remove(_tabIdOrder.begin(), _tabIdOrder.end(), id), _tabIdOrder.end());
 
-        // Check whether it is current tab
-        if(id == _currentTabId)
-        {
-            // Try to switch to next tab
-            if(!SwitchToNextTab())
-            {
-                // No next was available, try first in order
-                if(_tabIdOrder.empty() || !SwitchToTab(_tabIdOrder.at(0)))
-                {
-                    // Nothing helps, do not display anything
-                    _currentTabId = -1;
-                }
-            }
-        }
+		// Check whether it is current tab
+		if (id == _currentTabId)
+		{
+			// Try to switch to next tab
+			if (!SwitchToNextTab())
+			{
+				// No next was available, try first in order
+				if (_tabIdOrder.empty() || !SwitchToTab(_tabIdOrder.at(0)))
+				{
+					// Nothing helps, do not display anything
+					_currentTabId = -1;
+				}
+			}
+		}
 
-        // Deactivate and remove from map
-        _tabs.at(id)->Deactivate(); // should be already done but second time should not hurt
-        _tabs.erase(id);
-    }
+		// Deactivate and remove from map
+		_tabs.at(id)->Deactivate(); // should be already done but second time should not hurt
+		_tabs.erase(id);
+
+		// Update icon of tab overview button
+		UpdateTabOverviewIcon();
+	}
 }
 
 bool Web::SwitchToTab(int id)
@@ -194,7 +200,7 @@ bool Web::SwitchToPreviousTab()
     return false;
 }
 
-bool Web::OpenURLInOfTab(int id, std::string URL)
+bool Web::OpenURLInTab(int id, std::string URL)
 {
     // Verify that id exists
     auto iter = _tabs.find(id);
@@ -539,6 +545,21 @@ void Web::UpdateTabOverview()
 int Web::CalculatePageCountOfTabOverview() const
 {
     return ((int)_tabs.size() / SLOTS_PER_TAB_OVERVIEW_PAGE) + 1;
+}
+
+void Web::UpdateTabOverviewIcon()
+{
+	unsigned int tabCount = _tabs.size();
+	std::string iconFilepath = "";
+	if (tabCount < 10)
+	{
+		iconFilepath = "icons/TabOverview_" + std::to_string(tabCount) + ".svg";
+	}
+	else
+	{
+		iconFilepath = "icons/TabOverview_9+.svg";
+	}
+	eyegui::setIconOfIconElement(_pWebLayout, "tab_overview", iconFilepath);
 }
 
 void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
