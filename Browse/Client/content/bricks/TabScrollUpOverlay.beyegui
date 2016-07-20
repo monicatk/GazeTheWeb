@@ -1,2 +1,2 @@
 <?xml version="1.0"?>
-<sensor icon="icons/ScrollUp.svg" desckey="tab:scroll_up" id="scroll_up" style="tab_overlay" dimming="true"/>
+<sensor icon="icons/ScrollUp.png" desckey="tab:scroll_up" id="scroll_up" style="tab_overlay" dimming="true"/>

@@ -7,16 +7,16 @@
 					<row size="100%">
 						<column size="10%"/>
 						<column size="15%">
-							<circlebutton id="close" desckey="url_input:close" icon="icons/Cross.svg" border="10%"/>
+							<circlebutton id="close" desckey="url_input:close" icon="icons/Cross.png" border="10%"/>
 						</column>
 						<column size="10%">
-							<circlebutton id="delete" desckey="url_input:delete" icon="icons/DeleteCharacter.svg" border="10%"/>
+							<circlebutton id="delete" desckey="url_input:delete" icon="icons/DeleteCharacter.png" border="10%"/>
 						</column>
 						<column size="50%">
 							<textblock id="text_block" alignment="center" verticalalignment="center" fontsize="tall"/>
 						</column>
 						<column size="15%">
-							<circlebutton id="complete" desckey="url_input:complete" icon="icons/Forward.svg" border="10%"/>
+							<circlebutton id="complete" desckey="url_input:complete" icon="icons/Forward.png" border="10%"/>
 						</column>
 					</row>
 				</grid>

@@ -29,6 +29,9 @@ static const std::string LAB_STREAM_INPUT_NAME = "MiddlewareStream"; // may be s
 ## Validation
 A file named _log.txt_ is created at binary folder containing information about current and last runs. If anything wents not as expected, one should take a look into it.
 
+## Issues
+* eyeGUI / nanoSVG rendering of SVGs is not working correctly unter Ubuntu 16.04 in combination with Chromium Embedded Framework
+
 ## Screenshots
 ![Duckduckgo](media/Screenshot-A.png)
 

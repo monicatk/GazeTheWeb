@@ -3,8 +3,8 @@
 	<grid showbackground="true" style="pause_background">
 		<row size="16%">
 			<column size="9%">
-				<stack showbackground="true" style="default_noback" backgroundsrc="graphics/PauseBackground.svg" backgroundalignment="stretched">
-					<circlebutton border="7%" switch="true" icon="icons/Pause.svg" desckey="pause:pause" id="pause" style="pause"/>
+				<stack showbackground="true" style="default_noback" backgroundsrc="graphics/PauseBackground.png" backgroundalignment="stretched">
+					<circlebutton border="7%" switch="true" icon="icons/Pause.png" desckey="pause:pause" id="pause" style="pause"/>
 				</stack>
 			</column>
 			<column size="91%"/>

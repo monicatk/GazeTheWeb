@@ -6,15 +6,15 @@
 	<row size="25%">
 		<column size="100%">
 			<stack>
-				<circlebutton border="10%" id="delete_character" icon="icons/DeleteCharacter.svg" desckey="action_keyboard:delete"/>
+				<circlebutton border="10%" id="delete_character" icon="icons/DeleteCharacter.png" desckey="action_keyboard:delete"/>
 				<textblock style="tab_overlay_noback" id="text_block" alignment="center" verticalalignment="center" fontsize="medium" relativescale="250%"/>
 				<grid relativescale="125%">
 					<row size="100%">
 						<column size="55%">
-							<circlebutton border="10%" id="complete" icon="icons/Ok.svg" desckey="action_keyboard:complete"/>
+							<circlebutton border="10%" id="complete" icon="icons/Ok.png" desckey="action_keyboard:complete"/>
 						</column>
 						<column size="45%">
-							<circlebutton border="10%" id="submit" icon="icons/Forward.svg" desckey="action_keyboard:submit"/>
+							<circlebutton border="10%" id="submit" icon="icons/Forward.png" desckey="action_keyboard:submit"/>
 						</column>
 					</row>
 				</grid>			
@@ -34,11 +34,11 @@
 	<row size="10%">
 		<column size="5%"/>
 		<column size="15%">
-			<boxbutton switch="true" icon="icons/Shift.svg" id="shift" desckey="action_keyboard:shift"/>
+			<boxbutton switch="true" icon="icons/Shift.png" id="shift" desckey="action_keyboard:shift"/>
 		</column>
 		<column size="5%"/>
 		<column size="50%">
-			<boxbutton id="space" icon="icons/Empty.svg" desckey="action_keyboard:space"/>
+			<boxbutton id="space" icon="icons/Empty.png" desckey="action_keyboard:space"/>
 		</column>
 		<column size="25%"/>
 	</row>

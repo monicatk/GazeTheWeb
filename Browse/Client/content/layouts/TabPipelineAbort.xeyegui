@@ -13,7 +13,7 @@
     					</column>
     					<column size="10%">
 	    					<stack showbackground="true" innerborder="10%">
-			    				<circlebutton id="abort" desckey="pipeline_abort:abort" icon="icons/Cross.svg" style="tab_panel"/>
+			    				<circlebutton id="abort" desckey="pipeline_abort:abort" icon="icons/Cross.png" style="tab_panel"/>
     						</stack>
     					</column>
     				</row>

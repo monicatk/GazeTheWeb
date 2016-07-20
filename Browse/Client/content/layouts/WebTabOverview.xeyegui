@@ -4,7 +4,7 @@
 			<row size="80%">
 				<column size="15%">
 					<stack style="dark_panel" showbackground="true">
-						<circlebutton icon="icons/Cross.svg" desckey="tab_overview:close" id="close" border="15%"/>
+						<circlebutton icon="icons/Cross.png" desckey="tab_overview:close" id="close" border="15%"/>
 					</stack>
 				</column>
 				<column size="70%">
@@ -36,22 +36,22 @@
 				</column>
 				<column size="15%">
 					<stack style="dark_panel" showbackground="true">
-						<circlebutton icon="icons/EditTabURL.svg" desckey="tab_overview:edit_url" id="edit_url" border="15%"/>
-						<circlebutton icon="icons/ReloadTab.svg" desckey="tab_overview:reload_tab" id="reload_tab" border="15%"/>
-						<circlebutton icon="icons/CloseTab.svg" desckey="tab_overview:close_tab" id="close_tab" border="15%"/>
+						<circlebutton icon="icons/EditTabURL.png" desckey="tab_overview:edit_url" id="edit_url" border="15%"/>
+						<circlebutton icon="icons/ReloadTab.png" desckey="tab_overview:reload_tab" id="reload_tab" border="15%"/>
+						<circlebutton icon="icons/CloseTab.png" desckey="tab_overview:close_tab" id="close_tab" border="15%"/>
 					</stack>
 				</column>
 			</row>
 			<row size="20%">
 				<column size="100%">
 					<stack style="default" showbackground="true">
-						<circlebutton relativescale="75%" icon="icons/Back.svg" desckey="tab_overview:back" id="back" border="10%"/>
+						<circlebutton relativescale="75%" icon="icons/Back.png" desckey="tab_overview:back" id="back" border="10%"/>
 						<block id="tab_0"/>
 						<block id="tab_1"/>
 						<block id="tab_2"/>
 						<block id="tab_3"/>
 						<block id="tab_4"/>
-						<circlebutton relativescale="75%" icon="icons/Forward.svg" desckey="tab_overview:forward" id="forward" border="10%"/>
+						<circlebutton relativescale="75%" icon="icons/Forward.png" desckey="tab_overview:forward" id="forward" border="10%"/>
 					</stack>
 				</column>
 			</row>

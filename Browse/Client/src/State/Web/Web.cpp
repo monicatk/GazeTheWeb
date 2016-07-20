@@ -557,7 +557,7 @@ void Web::UpdateTabOverview()
         eyegui::setContentOfTextBlock(_pTabOverviewLayout, "url", " ");
 
         // Show placeholder in preview
-        eyegui::replaceElementWithPicture(_pTabOverviewLayout, "preview", "icons/Nothing.svg", eyegui::ImageAlignment::ZOOMED, true);
+        eyegui::replaceElementWithPicture(_pTabOverviewLayout, "preview", "icons/Nothing.png", eyegui::ImageAlignment::ZOOMED, true);
 
         // Deactivate buttons
         eyegui::setElementActivity(_pTabOverviewLayout, "edit_url", false, true);
@@ -577,11 +577,11 @@ void Web::UpdateTabOverviewIcon()
 	std::string iconFilepath = "";
 	if (tabCount < 10)
 	{
-		iconFilepath = "icons/TabOverview_" + std::to_string(tabCount) + ".svg";
+		iconFilepath = "icons/TabOverview_" + std::to_string(tabCount) + ".png";
 	}
 	else
 	{
-		iconFilepath = "icons/TabOverview_9+.svg";
+		iconFilepath = "icons/TabOverview_9+.png";
 	}
 	eyegui::setIconOfIconElement(_pWebLayout, "tab_overview", iconFilepath);
 }
