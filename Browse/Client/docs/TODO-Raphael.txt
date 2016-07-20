@@ -12,3 +12,4 @@
 - Tobii EyeX seems to connect event when there is no...
 - Prefetch complete icon folder
 - Switch to DejaVu font
+- While removing a tab, the preview textures switch to the FontAtlas texture for a short time?!

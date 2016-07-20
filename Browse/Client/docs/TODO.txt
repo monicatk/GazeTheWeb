@@ -15,7 +15,6 @@ Daniel Roadmap
 - CSS injection
 
 Raphael Roadmap
-- Add tab after method
 - Overlay keyboard
 - Navigation / Link clicking
 - Interaction Logging
