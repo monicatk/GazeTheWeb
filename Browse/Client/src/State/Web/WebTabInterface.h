@@ -21,4 +21,4 @@ public:
 
 };
 
-#endif WEBTABINTERFACE_H_
+#endif // WEBTABINTERFACE_H_
