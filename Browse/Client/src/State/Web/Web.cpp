@@ -87,6 +87,76 @@ int Web::AddTab(std::string URL, bool show)
     return id;
 }
 
+int Web::AddTabAfter(Tab *other, std::string URL, bool show)
+{
+    // Find other tab
+    int otherId = -1;
+    int i = 0;
+    for(const auto& rPair : _tabs)
+    {
+        if(rPair.second.get() == other)
+        {
+            otherId = i;
+            break;
+        }
+        i++;
+    }
+
+    // Add new tab
+    int id = AddTab(URL, show);
+
+    // If the other tab exists, move created one after that
+    if(otherId >= 0)
+    {
+        // Find tab id of other in order
+        int otherOrderIndex = -1;
+        for(int i = 0; i < (int)_tabIdOrder.size(); i++) { if(_tabIdOrder.at(i) == otherId) { otherOrderIndex = i; } }
+
+        // Find tab id of new in order
+        int orderIndex = -1;
+        for(int i = 0; i < (int)_tabIdOrder.size(); i++) { if(_tabIdOrder.at(i) == id) { orderIndex = i; } }
+
+        // Create new order
+        auto newTabIdOrder = std::vector<int>();
+        newTabIdOrder.reserve(_tabIdOrder.size());
+
+        if(otherOrderIndex >= 0 && orderIndex >= 0)
+        {
+            // Add all tabs including other to order
+            int oldIndex = 0;
+            for(int i = 0; i <= otherOrderIndex; i++)
+            {
+                int currentId = _tabIdOrder.at(i);
+                if(currentId != orderIndex)
+                {
+                    // Do not push back the new tab's id
+                    newTabIdOrder.push_back(currentId);
+                    oldIndex++;
+                }
+            }
+
+            // Add new tab's id
+            newTabIdOrder.push_back(orderIndex);
+
+            // Add tail
+            for(; oldIndex < (int)_tabIdOrder.size(); oldIndex++)
+            {
+                int currentId = _tabIdOrder.at(oldIndex);
+                if(currentId != orderIndex)
+                {
+                    // Do not push back the new tab's id
+                    newTabIdOrder.push_back(currentId);
+                }
+            }
+
+            // Remember the vector
+            _tabIdOrder = newTabIdOrder;
+        }
+    }
+
+    return id;
+}
+
 void Web::RemoveTab(int id)
 {
     // Verify that id exists
@@ -216,6 +286,14 @@ bool Web::OpenURLInTab(int id, std::string URL)
 
 StateType Web::Update(float tpf, Input& rInput)
 {
+    // Process jobs first
+    while(!_jobs.empty())
+    {
+        auto upJob = std::move(_jobs.top());
+        _jobs.pop();
+        upJob->Execute(this);
+    }
+
     // URL input
     if (_upURLInput->IsActive())
     {
@@ -311,28 +389,9 @@ void Web::Deactivate()
     ShowTabOverview(false);
 }
 
-void Web::AddTabAfter(Tab* caller, std::string URL)
+void Web::PushAddTabAfterJob(Tab* pCaller, std::string URL)
 {
-	// Go through tabs and search for caller
-	int id = -1;
-	for (const auto& rPair : _tabs)
-	{
-		// Found it!
-		if (rPair.second.get() == caller)
-		{
-			id = rPair.first;
-		}
-	}
-
-	// Open new tab after that tab
-	if (id >= 0)
-	{
-		// TODO: move after caller!!!
-		// TODO: think about how to: one should do some job queue because maybe the
-		// function is called during a update of tabs which destroys the iteration
-		// queue
-		//this->AddTab(URL, false);
-	}
+    _jobs.push(std::unique_ptr<TabJob>(new AddTabAfterJob(pCaller, URL, true)));
 }
 
 int Web::GetIndexOfTabInOrderVector(int id) const
@@ -584,6 +643,22 @@ void Web::UpdateTabOverviewIcon()
 		iconFilepath = "icons/TabOverview_9+.png";
 	}
 	eyegui::setIconOfIconElement(_pWebLayout, "tab_overview", iconFilepath);
+}
+
+Web::TabJob::TabJob(Tab* pCaller)
+{
+    _pCaller = pCaller;
+}
+
+Web::AddTabAfterJob::AddTabAfterJob(Tab* pCaller, std::string URL, bool show) : TabJob(pCaller)
+{
+    _URL = URL;
+    _show = show;
+}
+
+void Web::AddTabAfterJob::Execute(Web* pCallee)
+{
+    pCallee->AddTabAfter(_pCaller, _URL, _show);
 }
 
 void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)

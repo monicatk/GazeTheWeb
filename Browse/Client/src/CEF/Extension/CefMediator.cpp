@@ -100,7 +100,7 @@ void CefMediator::GoForward(TabCEFInterface * pTab)
 
 void CefMediator::OpenNewTab(std::string url)
 {
-
+    // TODO? When is it called (asks Raphael)
 }
 
 void CefMediator::DoMessageLoopWork()
@@ -376,7 +376,7 @@ void CefMediator::OpenPopupTab(CefRefPtr<CefBrowser> browser, std::string url)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
-		pTab->AddTabAfter(url);
+        pTab->AddTabAfter(url);
 	}
 }
 

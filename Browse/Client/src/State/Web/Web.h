@@ -13,6 +13,7 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <stack>
 
 // Forward declaration
 class CefMediator;
@@ -29,6 +30,9 @@ public:
 
     // Add Tab and return id of it
     int AddTab(std::string URL, bool show = true);
+
+    // Add Tab after another
+    int AddTabAfter(Tab* other, std::string URL, bool show = true);
 
     // Remove Tab
     void RemoveTab(int id);
@@ -69,9 +73,43 @@ public:
 	// #########################
 
 	// Add tab after that tab
-	virtual void AddTabAfter(Tab* caller, std::string URL);
+    virtual void PushAddTabAfterJob(Tab* pCaller, std::string URL);
 
 private:
+
+    // Jobs given by Tab over WebTabInterface
+    class TabJob
+    {
+    public:
+
+        // Constructor
+        TabJob(Tab* pCaller);
+
+        // Execute
+        virtual void Execute(Web* pCallee) = 0;
+
+    protected:
+
+        // Members
+        Tab* _pCaller;
+    };
+
+    class AddTabAfterJob : public TabJob
+    {
+    public:
+
+        // Constructor
+        AddTabAfterJob(Tab* pCaller, std::string URL, bool show);
+
+        // Execute
+        virtual void Execute(Web* pCallee);
+
+    protected:
+
+        // Members
+        std::string _URL;
+        bool _show;
+    };
 
     // Give listener full access
     friend class WebButtonListener;
@@ -112,7 +150,7 @@ private:
     // Maps id to Tab
     std::map<int, std::unique_ptr<Tab> > _tabs;
 
-    // Order of tabs
+    // Order of tabs, saving ids in vector
     std::vector<int> _tabIdOrder;
 
     // Current tab is indicated with index of vector (-1 means, that no tab is currently displayed)
@@ -133,6 +171,9 @@ private:
 
     // Bool to remind it should be switched to settings
     bool _goToSettings = false;
+
+    // List of jobs which have to be executed
+    std::stack<std::unique_ptr<TabJob> > _jobs;
 };
 
 #endif // WEB_H_

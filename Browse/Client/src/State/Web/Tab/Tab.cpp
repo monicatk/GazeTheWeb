@@ -753,7 +753,7 @@ void Tab::SetTitle(std::string title)
 
 void Tab::AddTabAfter(std::string URL)
 {
-	_pWeb->AddTabAfter(this, URL);
+    _pWeb->PushAddTabAfterJob(this, URL);
 }
 
 eyegui::AbsolutePositionAndSize Tab::CalculateWebViewPositionAndSize() const
