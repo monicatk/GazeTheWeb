@@ -17,6 +17,7 @@ public:
 
     // Constructor
     Shader(std::string vertSource, std::string fragSource);
+    Shader(std::string vertSource, std::string geomSource, std::string fragSource);
 
     // Destructor
     virtual ~Shader();
@@ -33,7 +34,7 @@ public:
     void UpdateValue(std::string name, const glm::mat4& rValue) const;
 
     // Get program handle
-    GLuint getProgram() const { return _program; }
+    GLuint GetProgram() const { return _program; }
 
 private:
 

@@ -18,13 +18,13 @@ RenderItem::RenderItem(std::string vertSource, std::string fragSource)
     glBindVertexArray(_vao);
 
     // Vertices
-    int posAttr = glGetAttribLocation(_upShader->getProgram(), "posAttr");
+    int posAttr = glGetAttribLocation(_upShader->GetProgram(), "posAttr");
     glEnableVertexAttribArray(posAttr);
     glBindBuffer(GL_ARRAY_BUFFER, _upQuad->GetVBO());
     glVertexAttribPointer(posAttr, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
     // Texture coordinates
-    int uvAttrib = glGetAttribLocation(_upShader->getProgram(), "uvAttr");
+    int uvAttrib = glGetAttribLocation(_upShader->GetProgram(), "uvAttr");
     glEnableVertexAttribArray(uvAttrib);
     glBindBuffer(GL_ARRAY_BUFFER, _upQuad->GetUVBO());
     glVertexAttribPointer(uvAttrib, 2, GL_FLOAT, GL_FALSE, 0, NULL);

@@ -19,6 +19,65 @@
 // Namespace for text-csv
 namespace csv = ::text::csv;
 
+// Shaders for screen filling rendering
+const std::string vertexShaderSource =
+"#version 330 core\n"
+"void main() {\n"
+"}\n";
+
+const std::string geometryShaderSource =
+"#version 330 core\n"
+"layout(points) in;\n"
+"layout(triangle_strip, max_vertices = 4) out;\n"
+"out vec2 uv;\n"
+"void main() {\n"
+"    gl_Position = vec4(1.0, 1.0, 0.5, 1.0);\n"
+"    uv = vec2(1.0, 1.0);\n"
+"    EmitVertex();\n"
+"    gl_Position = vec4(-1.0, 1.0, 0.5, 1.0);\n"
+"    uv = vec2(0.0, 1.0);\n"
+"    EmitVertex();\n"
+"    gl_Position = vec4(1.0, -1.0, 0.5, 1.0);\n"
+"    uv = vec2(1.0, 0.0);\n"
+"    EmitVertex();\n"
+"    gl_Position = vec4(-1.0, -1.0, 0.5, 1.0);\n"
+"    uv = vec2(0.0, 0.0);\n"
+"    EmitVertex();\n"
+"    EndPrimitive();\n"
+"}\n";
+
+// TODO: Separate x and y blurring and maybe use gaussian
+const std::string blurFragmentShaderSource =
+"#version 330 core\n"
+"in vec2 uv;\n"
+"out vec4 fragColor;\n"
+"uniform sampler2D tex;\n"
+"uniform vec2 focusPixelPosition;\n"
+"uniform float focusPixelRadius;\n"
+"void main() {\n"
+"   vec2 texSize = textureSize(tex, 0);\n"
+"   vec4 acc = vec4(0,0,0,0);\n"
+"   float strength = min(distance(focusPixelPosition, gl_FragCoord.xy) / focusPixelRadius, 1.0);\n"
+"   int sampleRadius = int(5.0 * strength);\n" // TODO: depending on resolution...
+"   for(int x = -sampleRadius; x <= sampleRadius; x++) {\n"
+"       for(int y = -sampleRadius; y <= sampleRadius; y++) {\n"
+"           acc += texture(tex, (gl_FragCoord.xy + vec2(x,y)) / texSize);\n"
+"       }\n"
+"   }\n"
+"   int count = ((2 * sampleRadius) + 1);\n"
+"   count = count * count;\n"
+"   fragColor = acc / count;\n"
+"}\n";
+
+const std::string simpleFragmentShaderSource =
+"#version 330 core\n"
+"in vec2 uv;\n"
+"out vec4 fragColor;\n"
+"uniform sampler2D tex;\n"
+"void main() {\n"
+"   fragColor = texture(tex, uv);\n"
+"}\n";
+
 Master::Master(CefMediator* pCefMediator)
 {
     // Save members
@@ -222,6 +281,15 @@ Master::Master(CefMediator* pCefMediator)
     // ### INPUT ###
     _upEyeInput = std::unique_ptr<EyeInput>(new EyeInput);
 
+    // ### FRAMEBUFFER ###
+    _upFramebuffer = std::unique_ptr<Framebuffer>(new Framebuffer(_width, _height));
+    _upFramebuffer->AddAttachment(Framebuffer::ColorFormat::RGB);
+    _upScreenFillingQuad = std::unique_ptr<Shader>(
+        new Shader(
+            vertexShaderSource,
+            geometryShaderSource,
+            setup::BLUR_PERIPHERY ? blurFragmentShaderSource : simpleFragmentShaderSource));
+
     // ### OTHER ###
 
     // Time
@@ -275,7 +343,7 @@ void Master::RemoveLayout(eyegui::Layout* pLayout)
 void Master::Loop()
 {
     while (!glfwWindowShouldClose(_pWindow))
-    {
+    {    
         // Time per frame
         double currentTime = glfwGetTime();
         float tpf = std::min((float) (currentTime - _lastTime), 0.25f); // everything breaks when tpf too big
@@ -296,9 +364,6 @@ void Master::Loop()
 
         // Poll CefMediator
         _pCefMediator->Poll(tpf);
-
-        // Clearing of buffers
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Get cursor coordinates
         double currentMouseX;
@@ -365,6 +430,12 @@ void Master::Loop()
         // Create input struct for own framework
         Input input(usedEyeGUIInput.gazeX, usedEyeGUIInput.gazeY, usedEyeGUIInput.gazeUsed);
 
+        // Bind framebuffer
+        _upFramebuffer->Bind();
+
+        // Clearing of buffers
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		// Disable depth test for drawing
 		glDisable(GL_DEPTH_TEST);
 
@@ -418,6 +489,28 @@ void Master::Loop()
         eyegui::drawGUI(_pGUI);
         eyegui::drawGUI(_pSuperGUI);
 
+        // Bind standard framebuffer
+        _upFramebuffer->Unbind();
+
+        // Clearing of buffers
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Bind framebuffer as texture
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _upFramebuffer->GetAttachment(0));
+
+        // Render screen filling quad
+        _upScreenFillingQuad->Bind();
+
+        // Fill uniforms when necessary
+        if(setup::BLUR_PERIPHERY)
+        {
+            _upScreenFillingQuad->UpdateValue("focusPixelPosition", glm::vec2(usedEyeGUIInput.gazeX, _height - usedEyeGUIInput.gazeY)); // OpenGL coordinate system
+            _upScreenFillingQuad->UpdateValue("focusPixelRadius", (float)glm::min(_width, _height) * BLUR_FOCUS_RELATIVE_RADIUS);
+        }
+
+        glDrawArrays(GL_POINTS, 0, 1);
+
         // Reset reminder BEFORE POLLING
         _leftMouseButtonPressed = false;
         _enterKeyPressed = false;
@@ -466,7 +559,11 @@ void Master::GLFWResizeCallback(int width, int height)
     eyegui::resizeGUI(_pSuperGUI, _width, _height);
 
     // Set viewport (can be set here, untouched/rescued by eyeGUI)
+    // Independent from bound framebuffer
     glViewport(0, 0, _width, _height);
+
+    // Tell framebuffer about new window size
+    _upFramebuffer->Resize(_width, _height);
 
     // CEF mediator is told to resize tabs via GUI callback
 }

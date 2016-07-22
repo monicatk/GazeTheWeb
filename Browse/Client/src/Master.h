@@ -15,6 +15,7 @@
 #include "src/Input/EyeInput.h"
 #include "src/Setup.h"
 #include "src/Utils/LerpValue.h"
+#include "src/Utils/Framebuffer.h"
 #include "externals/OGL/gl_core_3_3.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 
@@ -158,6 +159,12 @@ private:
 
     // Communication with LabStreamingLayer
     std::unique_ptr<LabStream> _upLabStream;
+
+    // Framebuffer for complete rendering
+    std::unique_ptr<Framebuffer> _upFramebuffer;
+
+    // Shader to render screenfilling quad
+    std::unique_ptr<Shader> _upScreenFillingQuad;
 };
 
 #endif // MASTER_H_
