@@ -46,27 +46,46 @@ const std::string geometryShaderSource =
 "    EndPrimitive();\n"
 "}\n";
 
-// TODO: Separate x and y blurring and maybe use gaussian
 const std::string blurFragmentShaderSource =
 "#version 330 core\n"
+"const float offset = 1.9;\n" // TODO: maybe use resolution here
 "in vec2 uv;\n"
 "out vec4 fragColor;\n"
 "uniform sampler2D tex;\n"
 "uniform vec2 focusPixelPosition;\n"
 "uniform float focusPixelRadius;\n"
+"uniform float peripheryMultiplier;\n"
 "void main() {\n"
+// Preparation
+"   vec4 color = texture(tex, uv);\n"
+"   float mask = min(distance(focusPixelPosition, gl_FragCoord.xy) / focusPixelRadius, 1.0);\n"
 "   vec2 texSize = textureSize(tex, 0);\n"
-"   vec4 acc = vec4(0,0,0,0);\n"
-"   float strength = min(distance(focusPixelPosition, gl_FragCoord.xy) / focusPixelRadius, 1.0);\n"
-"   int sampleRadius = int(5.0 * strength);\n" // TODO: depending on resolution...
-"   for(int x = -sampleRadius; x <= sampleRadius; x++) {\n"
-"       for(int y = -sampleRadius; y <= sampleRadius; y++) {\n"
-"           acc += texture(tex, (gl_FragCoord.xy + vec2(x,y)) / texSize);\n"
+"   vec4 blur = vec4(0,0,0,0);\n"
+// x and y not zero
+"   for(int x = 1; x <= 2; x++) {\n"
+"       for(int y = 1; y <= 2; y++) {\n"
+"           blur += texture(tex, (gl_FragCoord.xy + (offset * vec2(x, y))) / texSize);\n"
+"           blur += texture(tex, (gl_FragCoord.xy + (offset * vec2(-x, y))) / texSize);\n"
+"           blur += texture(tex, (gl_FragCoord.xy + (offset * vec2(x, -y))) / texSize);\n"
+"           blur += texture(tex, (gl_FragCoord.xy + (offset * vec2(-x, -y))) / texSize);\n"
 "       }\n"
 "   }\n"
-"   int count = ((2 * sampleRadius) + 1);\n"
-"   count = count * count;\n"
-"   fragColor = acc / count;\n"
+// x is zero
+"   for(int y = 1; y <= 2; y++) {\n"
+"       blur += texture(tex, (gl_FragCoord.xy + (offset * vec2(0, y))) / texSize);\n"
+"       blur += texture(tex, (gl_FragCoord.xy + (offset * vec2(0, -y))) / texSize);\n"
+"   }\n"
+// y is zero
+"   for(int x = 1; x <= 2; x++) {\n"
+"       blur += texture(tex, (gl_FragCoord.xy + (offset * vec2(x, 0))) / texSize);\n"
+"       blur += texture(tex, (gl_FragCoord.xy + (offset * vec2(-x, 0))) / texSize);\n"
+"   }\n"
+// Both is zero
+"   blur += color;\n"
+// Do composition
+"   blur /= 25;\n"
+"   color = mix(color, peripheryMultiplier * blur, mask);\n"
+"   fragColor = vec4(color.rgb, 1.0);\n"
 "}\n";
 
 const std::string simpleFragmentShaderSource =
@@ -507,6 +526,7 @@ void Master::Loop()
         {
             _upScreenFillingQuad->UpdateValue("focusPixelPosition", glm::vec2(usedEyeGUIInput.gazeX, _height - usedEyeGUIInput.gazeY)); // OpenGL coordinate system
             _upScreenFillingQuad->UpdateValue("focusPixelRadius", (float)glm::min(_width, _height) * BLUR_FOCUS_RELATIVE_RADIUS);
+            _upScreenFillingQuad->UpdateValue("peripheryMultiplier", BLUR_PERIPHERY_MULTIPLIER);
         }
 
         glDrawArrays(GL_POINTS, 0, 1);
