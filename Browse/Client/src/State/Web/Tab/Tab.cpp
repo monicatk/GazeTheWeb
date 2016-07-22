@@ -53,18 +53,36 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
     _pPipelineAbortLayout = _pMaster->AddLayout("layouts/TabPipelineAbort.xeyegui", EYEGUI_TAB_LAYER, false);
 
     // Create scroll up and down floating frames in special overlay layout which always on top of standard overlay
-    _scrollUpFrameIndex = eyegui::addFloatingFrameWithBrick(
+    _scrollUpProgressFrameIndex = eyegui::addFloatingFrameWithBrick(
         _pScrollingOverlayLayout,
-        "bricks/TabScrollUpOverlay.beyegui",
+        "bricks/TabScrollUpProgress.beyegui",
         0.5f - (TAB_SCROLLING_SENSOR_WIDTH / 2.f),
         TAB_SCROLLING_SENSOR_PADDING,
         TAB_SCROLLING_SENSOR_WIDTH,
         TAB_SCROLLING_SENSOR_HEIGHT,
         false,
         false);
-    _scrollDownFrameIndex = eyegui::addFloatingFrameWithBrick(
+    _scrollDownProgressFrameIndex = eyegui::addFloatingFrameWithBrick(
         _pScrollingOverlayLayout,
-        "bricks/TabScrollDownOverlay.beyegui",
+        "bricks/TabScrollDownProgress.beyegui",
+        0.5f - (TAB_SCROLLING_SENSOR_WIDTH / 2.f),
+         1.f - TAB_SCROLLING_SENSOR_PADDING - TAB_SCROLLING_SENSOR_HEIGHT,
+         TAB_SCROLLING_SENSOR_WIDTH,
+         TAB_SCROLLING_SENSOR_HEIGHT,
+        false,
+        false);
+    _scrollUpSensorFrameIndex = eyegui::addFloatingFrameWithBrick(
+        _pScrollingOverlayLayout,
+        "bricks/TabScrollUpSensor.beyegui",
+        0.5f - (TAB_SCROLLING_SENSOR_WIDTH / 2.f),
+        TAB_SCROLLING_SENSOR_PADDING,
+        TAB_SCROLLING_SENSOR_WIDTH,
+        TAB_SCROLLING_SENSOR_HEIGHT,
+        false,
+        false);
+    _scrollDownSensorFrameIndex = eyegui::addFloatingFrameWithBrick(
+        _pScrollingOverlayLayout,
+        "bricks/TabScrollDownSensor.beyegui",
          0.5f - (TAB_SCROLLING_SENSOR_WIDTH / 2.f),
          1.f - TAB_SCROLLING_SENSOR_PADDING - TAB_SCROLLING_SENSOR_HEIGHT,
          TAB_SCROLLING_SENSOR_WIDTH,
@@ -80,8 +98,8 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
     eyegui::registerButtonListener(_pPanelLayout, "scroll_to_top", _spTabButtonListener);
     eyegui::registerButtonListener(_pPanelLayout, "zoom", _spTabButtonListener);
     eyegui::registerButtonListener(_pPipelineAbortLayout, "abort", _spTabButtonListener);
-    eyegui::registerSensorListener(_pScrollingOverlayLayout, "scroll_up", _spTabSensorListener);
-    eyegui::registerSensorListener(_pScrollingOverlayLayout, "scroll_down", _spTabSensorListener);
+    eyegui::registerSensorListener(_pScrollingOverlayLayout, "scroll_up_sensor", _spTabSensorListener);
+    eyegui::registerSensorListener(_pScrollingOverlayLayout, "scroll_down_sensor", _spTabSensorListener);
 
     // Create listener for overlay
     _spTabOverlayButtonListener = std::shared_ptr<TabOverlayButtonListener>(new TabOverlayButtonListener(this));
@@ -210,8 +228,24 @@ void Tab::Update(float tpf, Input& rInput)
                 showScrollDown = true;
             }
         }
-        eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpFrameIndex, showScrollUp, false, true);
-        eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownFrameIndex, showScrollDown, false, true);
+
+        // Set progress of scrolling
+        float scrollableHeight = (_pageHeight-1) - webViewPositionAndSize.height;
+        float progressUp = 1.f;
+        float progressDown = 1.f;
+        if(scrollableHeight > 0)
+        {
+            progressDown = _scrollingOffsetY / scrollableHeight;
+            progressUp = 1.f - progressDown;
+        }
+        eyegui::setProgress(_pScrollingOverlayLayout, "scroll_up_progress", progressUp);
+        eyegui::setProgress(_pScrollingOverlayLayout, "scroll_down_progress", progressDown);
+
+        // Set visibility of scroll elements
+        eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpProgressFrameIndex, showScrollUp, false, true);
+        eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownProgressFrameIndex, showScrollDown, false, true);
+        eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpSensorFrameIndex, showScrollUp, false, true);
+        eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownSensorFrameIndex, showScrollDown, false, true);
 
         // Check, that gaze is not upon a fixed element
         bool gazeUponFixed = false;
@@ -354,8 +388,10 @@ void Tab::Deactivate()
     eyegui::setVisibilityOfLayout(_pPanelLayout, false, true, false);
 
     // TODO: THIS SHOULD NOT BE NECESSARY SINCE _pScrollingOverlayLayout IS HIDDEN! WHY?
-    eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpFrameIndex, false, false, true);
-    eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownFrameIndex, false, false, true);
+    eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpProgressFrameIndex, false, false, true);
+    eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownProgressFrameIndex, false, false, true);
+    eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpSensorFrameIndex, false, false, true);
+    eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownSensorFrameIndex, false, false, true);
 
     // Abort pipeline, which also hides GUI for manual abortion
     AbortAndClearPipelines();
@@ -822,6 +858,20 @@ void Tab::UpdateAccentColor(float tpf)
         colorAccent.b * panelBackgroundMultiplier,
         colorAccent.a);
 
+    // Create transparent colors
+    float alpha = 0.75f;
+    float backgroundAlpha = 0.25f;
+    glm::vec4 transparentColorAccent = glm::vec4(
+        colorAccent.r,
+        colorAccent.g,
+        colorAccent.b,
+        colorAccent.a * alpha);
+    glm::vec4 transparentBackgroundColorAccent = glm::vec4(
+        backgroundAccentColor.r,
+        backgroundAccentColor.g,
+        backgroundAccentColor.b,
+        backgroundAccentColor.a * backgroundAlpha);
+
     // Set color of tab_panel style in pipeline abort overlay
     eyegui::setValueOfStyleAttribute(
         _pPipelineAbortLayout,
@@ -878,6 +928,18 @@ void Tab::UpdateAccentColor(float tpf)
         "tab_overlay",
         "color",
         RGBAToHexString(colorAccent));
+
+    // Set color and background of tab_overlay_scroll_progress style in scrolling overlay layout
+    eyegui::setValueOfStyleAttribute(
+        _pScrollingOverlayLayout,
+        "tab_overlay_scroll_progress",
+        "color",
+        RGBAToHexString(transparentColorAccent));
+    eyegui::setValueOfStyleAttribute(
+        _pScrollingOverlayLayout,
+        "tab_overlay_scroll_progress",
+        "background-color",
+        RGBAToHexString(transparentBackgroundColorAccent));
 }
 
 void Tab::ActivateMode(TabMode mode)
@@ -1078,11 +1140,11 @@ void Tab::TabSensorListener::penetrated(eyegui::Layout* pLayout, std::string id,
 {
     if(pLayout == _pTab->_pScrollingOverlayLayout)
     {
-        if(id == "scroll_up")
+        if(id == "scroll_up_sensor")
         {
             _pTab->_pCefMediator->EmulateMouseWheelScrolling(_pTab, 0, amount * 20.f);
         }
-        else if(id == "scroll_down")
+        else if(id == "scroll_down_sensor")
         {
             _pTab->_pCefMediator->EmulateMouseWheelScrolling(_pTab, 0, amount * -20.f);
         }
