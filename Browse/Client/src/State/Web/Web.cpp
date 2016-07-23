@@ -633,6 +633,9 @@ void Web::UpdateTabOverview()
         // Show placeholder in preview
         eyegui::replaceElementWithPicture(_pTabOverviewLayout, "preview", "icons/Nothing.png", eyegui::ImageAlignment::ZOOMED, true);
 
+		// Reset icon of bookmark tab button
+		eyegui::setIconOfIconElement(_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_false.png");
+
         // Deactivate buttons
 		eyegui::setElementActivity(_pTabOverviewLayout, "edit_url", false, true);
 		eyegui::setElementActivity(_pTabOverviewLayout, "bookmark_tab", false, true);

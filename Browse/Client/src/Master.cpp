@@ -302,7 +302,9 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
 
     // ### FRAMEBUFFER ###
     _upFramebuffer = std::unique_ptr<Framebuffer>(new Framebuffer(_width, _height));
+	_upFramebuffer->Bind();
     _upFramebuffer->AddAttachment(Framebuffer::ColorFormat::RGB);
+	_upFramebuffer->Unbind();
     _upScreenFillingQuad = std::unique_ptr<Shader>(
         new Shader(
             vertexShaderSource,
@@ -583,7 +585,7 @@ void Master::GLFWResizeCallback(int width, int height)
     glViewport(0, 0, _width, _height);
 
     // Tell framebuffer about new window size
-    _upFramebuffer->Resize(_width, _height);
+    //_upFramebuffer->Resize(_width, _height);
 
     // CEF mediator is told to resize tabs via GUI callback
 }
