@@ -614,6 +614,16 @@ void Web::UpdateTabOverview()
 		eyegui::setElementActivity(_pTabOverviewLayout, "bookmark_tab", true, true);
         eyegui::setElementActivity(_pTabOverviewLayout, "reload_tab", true, true);
         eyegui::setElementActivity(_pTabOverviewLayout, "close_tab", true, true);
+
+		// Set icon of bookmark button
+		if (_upBookmarkManager->IsBookmark(_tabs.at(_currentTabId)->GetURL()))
+		{
+			eyegui::setIconOfIconElement(_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_true.png");
+		}
+		else
+		{
+			eyegui::setIconOfIconElement(_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_false.png");
+		}
     }
     else
     {
@@ -714,7 +724,14 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			int currentTab = _pWeb->_currentTabId;
 			if (currentTab >= 0)
 			{
-				_pWeb->_upBookmarkManager->AddBookmark(_pWeb->_tabs.at(currentTab)->GetURL());
+				// Add as bookmark
+				bool success = _pWeb->_upBookmarkManager->AddBookmark(_pWeb->_tabs.at(currentTab)->GetURL());
+
+				// If successful, display it to user
+				if (success)
+				{
+					eyegui::setIconOfIconElement(_pWeb->_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_true.png");
+				}
 			}
 		}
         else if (id == "reload_tab")

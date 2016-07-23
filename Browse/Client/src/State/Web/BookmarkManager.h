@@ -29,6 +29,9 @@ public:
 	// Get unsorted bookmarks
 	std::set<std::string> GetBookmarks() const;
 
+	// Check for existence
+	bool IsBookmark(std::string URL) const;
+
 private:
 
 	// Save bookmarks to hard disk. Returns whether successful

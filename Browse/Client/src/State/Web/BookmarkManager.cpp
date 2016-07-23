@@ -61,6 +61,11 @@ std::set<std::string> BookmarkManager::GetBookmarks() const
 	return _bookmarks;
 }
 
+bool BookmarkManager::IsBookmark(std::string URL) const
+{
+	return _bookmarks.find(URL) != _bookmarks.end();
+}
+
 bool BookmarkManager::SaveBoomarks() const
 {
 	// Create document
