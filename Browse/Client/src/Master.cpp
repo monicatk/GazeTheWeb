@@ -185,7 +185,7 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
     eyegui::GUIBuilder guiBuilder;
     guiBuilder.width = _width;
     guiBuilder.height = _height;
-    guiBuilder.fontFilepath = "fonts/tauri/Tauri-Regular.ttf";
+    guiBuilder.fontFilepath = "fonts/dejavu-sans/ttf/DejaVuSans.ttf";
     guiBuilder.characterSet = eyegui::CharacterSet::US_ENGLISH;
     guiBuilder.localizationFilepath = "localizations/English.leyegui";
     guiBuilder.fontTallSize = 0.07f;
