@@ -35,10 +35,16 @@ public:
     // Deactivate
     virtual void Deactivate();
 
+	// Get homepage URL
+	std::string GetHomepage() const { return _webSetup.homepage; }
+
+	// Set homepage URL
+	void SetHomepage(std::string URL) { _webSetup.homepage = URL; ApplySettings(true); }
+
 private:
 
-	// Apply and save settings
-	void ApplyAndSaveSettings();
+	// Apply and maybe save settings
+	void ApplySettings(bool save = true);
 
 	// Save settings to hard disk. Returns whether successful
 	bool SaveSettings() const;
@@ -81,7 +87,7 @@ private:
 	{
 	public:
 
-		// TODO like WebView resolution multiplier etc.
+		std::string homepage = "https://duckduckgo.com";
 	};
 
     // Layouts

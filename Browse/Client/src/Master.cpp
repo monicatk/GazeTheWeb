@@ -274,8 +274,7 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
     _upWeb->Activate();
 
     // ### HOMEPAGE ###
-    //_upWeb->AddTab("https://www.uni-koblenz.de");
-	_upWeb->AddTab("https://www.9gag.com");
+	_upWeb->AddTab(_upSettings->GetHomepage());
 
     // ### SUPER LAYOUT ###
 

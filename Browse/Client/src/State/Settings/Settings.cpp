@@ -15,8 +15,13 @@ Settings::Settings(Master* pMaster) : State(pMaster)
 	_fullpathSettings = pMaster->GetUserDirectory() + SETTINGS_FILE;
 
 	// Load settings and apply them
-	if (!LoadSettings()) { LogInfo("Settings: No settings file found or parsing error"); }
-	ApplyAndSaveSettings();
+	bool saveSettings = false;
+	if (!LoadSettings())
+	{
+		LogInfo("Settings: No settings file found or parsing error");
+		saveSettings = true;
+	}
+	ApplySettings(saveSettings);
 
 	// Create layouts
 	_pSettingsLayout = _pMaster->AddLayout("layouts/Settings.xeyegui", EYEGUI_SETTINGS_LAYER, false);
@@ -109,6 +114,11 @@ bool Settings::SaveSettings() const
 	// Create environment for web setup
 	tinyxml2::XMLNode* pWeb = doc.NewElement("web");
 	pRoot->InsertAfterChild(pGlobal, pWeb);
+
+	// Homepage
+	tinyxml2::XMLElement* pHomepage = doc.NewElement("homepage");
+	pHomepage->SetAttribute("url", _webSetup.homepage.c_str());
+	pWeb->InsertFirstChild(pHomepage);
 	
 	// Try to save file
 	tinyxml2::XMLError result = doc.SaveFile(_fullpathSettings.c_str());
@@ -117,14 +127,17 @@ bool Settings::SaveSettings() const
 	return (result == tinyxml2::XMLError::XML_SUCCESS);
 }
 
-void Settings::ApplyAndSaveSettings()
+void Settings::ApplySettings(bool save)
 {
 	// Global
 	_pMaster->SetShowDescriptions(_globalSetup.showDescriptions);
 	_pMaster->SetGazeVisualization(_globalSetup.showGazeVisualization);
 
 	// Save it
-	if (!SaveSettings()) { LogInfo("Settings: Failed to save settings"); }
+	if (save)
+	{
+		if (!SaveSettings()) { LogInfo("Settings: Failed to save settings"); }
+	}
 }
 
 // Load settings from hard disk. Returns whether successful
@@ -162,6 +175,18 @@ bool Settings::LoadSettings()
 	// Fetch web setup
 	tinyxml2::XMLNode* pWeb = pGlobal->NextSibling();
 	if (pWeb == NULL) { return false; }
+
+	// Homepage
+	tinyxml2::XMLElement* pHomepage = pWeb->FirstChildElement("homepage");
+	if (pHomepage != NULL)
+	{
+		const char * pURL = NULL;
+		pURL = pHomepage->Attribute("url");
+		if (pURL != NULL)
+		{
+			_webSetup.homepage = std::string(pURL);
+		}
+	}
 
 	// When you came to here no real errors occured
 	return true;
@@ -206,7 +231,7 @@ void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string
 		}
 
 		// Apply and save
-		_pSettings->ApplyAndSaveSettings();
+		_pSettings->ApplySettings(true);
 	}
 	else if (pLayout == _pSettings->_pInfoLayout)
 	{

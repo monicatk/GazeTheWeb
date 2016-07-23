@@ -14,3 +14,5 @@
 - Prefetch complete icon folder
 - While removing a tab, the preview textures switch to the FontAtlas texture for a short time?!
 - Bookmark Manager GUI
+- Implement TabModes
+- GUI for settings homepage

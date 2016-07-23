@@ -74,6 +74,11 @@ public:
     // Remove layout from eyeGUI
     void RemoveLayout(eyegui::Layout* pLayout);
 
+	// ### SETTINGS ACCESS ###
+
+	// Set homepage URL in settings
+	void SetHomepage(std::string URL) { _upSettings->SetHomepage(URL); }
+
 private:
 
     // Give listener full access
