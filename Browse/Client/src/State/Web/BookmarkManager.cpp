@@ -14,7 +14,7 @@ BookmarkManager::BookmarkManager(std::string userDirectory)
 	_fullpathBookmarks = userDirectory + BOOKMARKS_FILE;
 
 	// Load existing bookmarks
-	if (!LoadBookmarks()) { LogInfo("No bookmarks file found or parsing error"); }
+	if (!LoadBookmarks()) { LogInfo("BookmarkManager: No bookmarks file found or parsing error"); }
 }
 
 BookmarkManager::~BookmarkManager()
@@ -30,7 +30,7 @@ bool BookmarkManager::AddBookmark(std::string URL)
 	// Check wether element was new for the set
 	if (result.second) // second element in pair indicates whether value was new
 	{
-		if (!SaveBoomarks()) { LogInfo("Failed to save bookmarks"); }
+		if (!SaveBoomarks()) { LogInfo("BookmarkManager: Failed to save bookmarks"); }
 		return true;
 	}
 	else
@@ -47,7 +47,7 @@ bool BookmarkManager::RemoveBookmark(std::string URL)
 	// Check wether element was new for the set
 	if (result > 0) // erase returns count of erased elements
 	{
-		if (!SaveBoomarks()) { LogInfo("Failed to save bookmarks"); }
+		if (!SaveBoomarks()) { LogInfo("BookmarkManager: Failed to save bookmarks"); }
 		return true;
 	}
 	else
@@ -97,10 +97,10 @@ bool BookmarkManager::SaveBoomarks() const
 		lastChild = pElement;
 	}
 
-
 	// Try to save file
 	tinyxml2::XMLError result = doc.SaveFile(_fullpathBookmarks.c_str());
 
+	// Return whether successful
 	return (result == tinyxml2::XMLError::XML_SUCCESS);
 }
 
@@ -144,5 +144,6 @@ bool BookmarkManager::LoadBookmarks()
 		}	
 	}
 
+	// When you came to here no real errors occured
 	return true;
 }

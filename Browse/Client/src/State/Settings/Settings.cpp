@@ -6,12 +6,17 @@
 #include "Settings.h"
 #include "src/Master.h"
 #include "src/Global.h"
+#include "src/Utils/Logger.h"
+#include "submodules/eyeGUI/externals/TinyXML2/tinyxml2.h"
 
 Settings::Settings(Master* pMaster) : State(pMaster)
 {
-	// Intial setup
-	_pMaster->SetShowDescriptions(_globalSetup._showDescriptions);
-	_pMaster->SetGazeVisualization(_globalSetup._showGazeVisualization);
+	// Initialize members
+	_fullpathSettings = pMaster->GetUserDirectory() + SETTINGS_FILE;
+
+	// Load settings and apply them
+	if (!LoadSettings()) { LogInfo("Settings: No settings file found or parsing error"); }
+	ApplyAndSaveSettings();
 
 	// Create layouts
 	_pSettingsLayout = _pMaster->AddLayout("layouts/Settings.xeyegui", EYEGUI_SETTINGS_LAYER, false);
@@ -77,6 +82,91 @@ void Settings::Deactivate()
 	eyegui::setVisibilityOfLayout(_pSettingsLayout, false, false, true);
 }
 
+// Save settings to hard disk. Returns whether successful
+bool Settings::SaveSettings() const
+{
+	// Create document
+	tinyxml2::XMLDocument doc;
+
+	// Create and insert root
+	tinyxml2::XMLNode* pRoot = doc.NewElement("settings");
+	doc.InsertFirstChild(pRoot);
+
+	// Create environment for global setup
+	tinyxml2::XMLNode* pGlobal = doc.NewElement("global");
+	pRoot->InsertFirstChild(pGlobal);
+
+	// Descriptions
+	tinyxml2::XMLElement* pDescriptions = doc.NewElement("descriptions");
+	pDescriptions->SetAttribute("visible", _globalSetup.showDescriptions ? "true" : "false");
+	pGlobal->InsertFirstChild(pDescriptions);
+
+	// Gaze visualization
+	tinyxml2::XMLElement* pGazeVisualization = doc.NewElement("gazevisualization");
+	pGazeVisualization->SetAttribute("visible", _globalSetup.showGazeVisualization ? "true" : "false");
+	pGlobal->InsertAfterChild(pDescriptions, pGazeVisualization);
+
+	// Create environment for web setup
+	tinyxml2::XMLNode* pWeb = doc.NewElement("web");
+	pRoot->InsertAfterChild(pGlobal, pWeb);
+	
+	// Try to save file
+	tinyxml2::XMLError result = doc.SaveFile(_fullpathSettings.c_str());
+
+	// Return whether successful
+	return (result == tinyxml2::XMLError::XML_SUCCESS);
+}
+
+void Settings::ApplyAndSaveSettings()
+{
+	// Global
+	_pMaster->SetShowDescriptions(_globalSetup.showDescriptions);
+	_pMaster->SetGazeVisualization(_globalSetup.showGazeVisualization);
+
+	// Save it
+	if (!SaveSettings()) { LogInfo("Settings: Failed to save settings"); }
+}
+
+// Load settings from hard disk. Returns whether successful
+bool Settings::LoadSettings()
+{
+	// Open document
+	tinyxml2::XMLDocument doc;
+	tinyxml2::XMLError result = doc.LoadFile(_fullpathSettings.c_str());
+
+	// Check result of opening 
+	if (result != tinyxml2::XMLError::XML_SUCCESS) { return false; }
+
+	// Fetch root
+	tinyxml2::XMLNode* pRoot = doc.FirstChild();
+	if (pRoot == NULL) { return false; }
+
+	// Fetch global
+	tinyxml2::XMLNode* pGlobal = pRoot->FirstChild();
+	if (pGlobal == NULL) { return false; }
+
+	// Descriptions
+	tinyxml2::XMLElement* pDescriptions = pGlobal->FirstChildElement("descriptions");
+	if (pDescriptions != NULL)
+	{
+		_globalSetup.showDescriptions = pDescriptions->BoolAttribute("visible");
+	}
+
+	// Gaze visualization
+	tinyxml2::XMLElement* pGazeVisualization = pGlobal->FirstChildElement("gazevisualization");
+	if (pGazeVisualization != NULL)
+	{
+		_globalSetup.showGazeVisualization = pGazeVisualization->BoolAttribute("visible");
+	}
+
+	// Fetch web setup
+	tinyxml2::XMLNode* pWeb = pGlobal->NextSibling();
+	if (pWeb == NULL) { return false; }
+
+	// When you came to here no real errors occured
+	return true;
+}
+
 void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string id)
 {
 	if (pLayout == _pSettings->_pSettingsLayout)
@@ -108,14 +198,15 @@ void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string
 		}
 		else if (id == "toggle_descriptions")
 		{
-			_pSettings->_globalSetup._showDescriptions = !_pSettings->_globalSetup._showDescriptions;
-			_pSettings->_pMaster->SetShowDescriptions(_pSettings->_globalSetup._showDescriptions);
+			_pSettings->_globalSetup.showDescriptions = !_pSettings->_globalSetup.showDescriptions;
 		}
 		else if (id == "toggle_gaze_visualization")
 		{
-			_pSettings->_globalSetup._showGazeVisualization = !_pSettings->_globalSetup._showGazeVisualization;
-			_pSettings->_pMaster->SetGazeVisualization(_pSettings->_globalSetup._showGazeVisualization);
+			_pSettings->_globalSetup.showGazeVisualization = !_pSettings->_globalSetup.showGazeVisualization;
 		}
+
+		// Apply and save
+		_pSettings->ApplyAndSaveSettings();
 	}
 	else if (pLayout == _pSettings->_pInfoLayout)
 	{

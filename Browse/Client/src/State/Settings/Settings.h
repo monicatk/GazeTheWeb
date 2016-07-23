@@ -37,6 +37,15 @@ public:
 
 private:
 
+	// Apply and save settings
+	void ApplyAndSaveSettings();
+
+	// Save settings to hard disk. Returns whether successful
+	bool SaveSettings() const;
+
+	// Load settings from hard disk. Returns whether successful
+	bool LoadSettings();
+
     // Give listener full access
     friend class SettingsButtonListener;
 
@@ -63,8 +72,8 @@ private:
     {
     public:
 
-        bool _showDescriptions = true;
-        bool _showGazeVisualization = false;
+        bool showDescriptions = true;
+        bool showGazeVisualization = false;
     };
 
 	// Setupt of web settings
@@ -86,6 +95,9 @@ private:
     // Setups
 	GlobalSetup _globalSetup;
 	WebSetup _webSetup;
+
+	// Fullpath to settings file
+	std::string _fullpathSettings;
 };
 
 #endif // SETTINGS_H_

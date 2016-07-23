@@ -1,4 +1,4 @@
-
+- Bookmark selection via GUI
 - Free scaling for webview (some refactoring of size stuff necessary then...)
 - Web should have class "TabManager" which handles also TabOverview
 - Settings: Icons on the left which indicate status of setting
@@ -13,3 +13,4 @@
 - Tobii EyeX seems to connect event when there is no...
 - Prefetch complete icon folder
 - While removing a tab, the preview textures switch to the FontAtlas texture for a short time?!
+- Bookmark Manager GUI
