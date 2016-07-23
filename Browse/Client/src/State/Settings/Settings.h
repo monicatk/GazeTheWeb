@@ -58,14 +58,22 @@ private:
     // Instance of listener
     std::shared_ptr<SettingsButtonListener> _spSettingsButtonListener;
 
-    // Setup
-    class Setup
+    // Setup of global settings
+    class GlobalSetup
     {
     public:
 
         bool _showDescriptions = true;
         bool _showGazeVisualization = false;
     };
+
+	// Setupt of web settings
+	class WebSetup
+	{
+	public:
+
+		// TODO like WebView resolution multiplier etc.
+	};
 
     // Layouts
     eyegui::Layout* _pSettingsLayout;
@@ -75,8 +83,9 @@ private:
     // Bool to remember whether to switch to Web in next frame
     bool _goToWeb = false;
 
-    // Setup
-    Setup _setup;
+    // Setups
+	GlobalSetup _globalSetup;
+	WebSetup _webSetup;
 };
 
 #endif // SETTINGS_H_

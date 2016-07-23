@@ -9,6 +9,10 @@
 
 Settings::Settings(Master* pMaster) : State(pMaster)
 {
+	// Intial setup
+	_pMaster->SetShowDescriptions(_globalSetup._showDescriptions);
+	_pMaster->SetGazeVisualization(_globalSetup._showGazeVisualization);
+
 	// Create layouts
 	_pSettingsLayout = _pMaster->AddLayout("layouts/Settings.xeyegui", EYEGUI_SETTINGS_LAYER, false);
 	_pGeneralLayout = _pMaster->AddLayout("layouts/SettingsGeneral.xeyegui", EYEGUI_SETTINGS_LAYER, false);
@@ -24,10 +28,6 @@ Settings::Settings(Master* pMaster) : State(pMaster)
 	eyegui::registerButtonListener(_pGeneralLayout, "toggle_gaze_visualization", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pGeneralLayout, "back", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pInfoLayout, "back", _spSettingsButtonListener);
-
-	// Intial setup
-	_pMaster->SetShowDescriptions(_setup._showDescriptions);
-	_pMaster->SetGazeVisualization(_setup._showGazeVisualization);
 
 	// Deactivate buttons which are not used, yet
 	eyegui::setElementActivity(_pSettingsLayout, "privacy", false, false);
@@ -108,13 +108,13 @@ void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string
 		}
 		else if (id == "toggle_descriptions")
 		{
-			_pSettings->_setup._showDescriptions = !_pSettings->_setup._showDescriptions;
-			_pSettings->_pMaster->SetShowDescriptions(_pSettings->_setup._showDescriptions);
+			_pSettings->_globalSetup._showDescriptions = !_pSettings->_globalSetup._showDescriptions;
+			_pSettings->_pMaster->SetShowDescriptions(_pSettings->_globalSetup._showDescriptions);
 		}
 		else if (id == "toggle_gaze_visualization")
 		{
-			_pSettings->_setup._showGazeVisualization = !_pSettings->_setup._showGazeVisualization;
-			_pSettings->_pMaster->SetGazeVisualization(_pSettings->_setup._showGazeVisualization);
+			_pSettings->_globalSetup._showGazeVisualization = !_pSettings->_globalSetup._showGazeVisualization;
+			_pSettings->_pMaster->SetGazeVisualization(_pSettings->_globalSetup._showGazeVisualization);
 		}
 	}
 	else if (pLayout == _pSettings->_pInfoLayout)
