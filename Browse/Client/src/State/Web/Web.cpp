@@ -110,11 +110,11 @@ int Web::AddTabAfter(Tab *other, std::string URL, bool show)
     {
         // Find tab id of other in order
         int otherOrderIndex = -1;
-        for(int i = 0; i < (int)_tabIdOrder.size(); i++) { if(_tabIdOrder.at(i) == otherId) { otherOrderIndex = i; } }
+        for(int j = 0; j < (int)_tabIdOrder.size(); j++) { if(_tabIdOrder.at(j) == otherId) { otherOrderIndex = j; } }
 
         // Find tab id of new in order
         int orderIndex = -1;
-        for(int i = 0; i < (int)_tabIdOrder.size(); i++) { if(_tabIdOrder.at(i) == id) { orderIndex = i; } }
+        for(int j = 0; j < (int)_tabIdOrder.size(); j++) { if(_tabIdOrder.at(j) == id) { orderIndex = j; } }
 
         // Create new order
         auto newTabIdOrder = std::vector<int>();
@@ -124,9 +124,9 @@ int Web::AddTabAfter(Tab *other, std::string URL, bool show)
         {
             // Add all tabs including other to order
             int oldIndex = 0;
-            for(int i = 0; i <= otherOrderIndex; i++)
+            for(int j = 0; j <= otherOrderIndex; j++)
             {
-                int currentId = _tabIdOrder.at(i);
+                int currentId = _tabIdOrder.at(j);
                 if(currentId != orderIndex)
                 {
                     // Do not push back the new tab's id
