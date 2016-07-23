@@ -37,6 +37,7 @@
 				<column size="15%">
 					<stack style="dark_panel" showbackground="true">
 						<circlebutton icon="icons/EditTabURL.png" desckey="tab_overview:edit_url" id="edit_url" border="15%"/>
+						<circlebutton icon="icons/BookmarkTab_false.png" desckey="tab_overview:bookmark_tab" id="bookmark_tab" border="15%"/>
 						<circlebutton icon="icons/ReloadTab.png" desckey="tab_overview:reload_tab" id="reload_tab" border="15%"/>
 						<circlebutton icon="icons/CloseTab.png" desckey="tab_overview:close_tab" id="close_tab" border="15%"/>
 					</stack>

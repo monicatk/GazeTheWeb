@@ -14,6 +14,7 @@ tab_overview:close=Close
 tab_overview:new_tab=New Tab
 tab_overview:open_tab=Open Tab
 tab_overview:edit_url=Edit URL
+tab_overview:bookmark_tab=Bookmark Tab
 tab_overview:reload_tab=Reload Tab
 tab_overview:close_tab=Remove Tab
 pipeline_abort:abort=Abort Action

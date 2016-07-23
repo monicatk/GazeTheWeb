@@ -38,6 +38,7 @@ Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)
     eyegui::registerButtonListener(_pTabOverviewLayout, "close_tab", _spWebButtonListener);
     eyegui::registerButtonListener(_pTabOverviewLayout, "reload_tab", _spWebButtonListener);
     eyegui::registerButtonListener(_pTabOverviewLayout, "edit_url", _spWebButtonListener);
+	eyegui::registerButtonListener(_pTabOverviewLayout, "bookmark_tab", _spWebButtonListener);
 }
 
 Web::~Web()
@@ -610,6 +611,7 @@ void Web::UpdateTabOverview()
 
         // Activate buttons
         eyegui::setElementActivity(_pTabOverviewLayout, "edit_url", true, true);
+		eyegui::setElementActivity(_pTabOverviewLayout, "bookmark_tab", true, true);
         eyegui::setElementActivity(_pTabOverviewLayout, "reload_tab", true, true);
         eyegui::setElementActivity(_pTabOverviewLayout, "close_tab", true, true);
     }
@@ -622,7 +624,8 @@ void Web::UpdateTabOverview()
         eyegui::replaceElementWithPicture(_pTabOverviewLayout, "preview", "icons/Nothing.png", eyegui::ImageAlignment::ZOOMED, true);
 
         // Deactivate buttons
-        eyegui::setElementActivity(_pTabOverviewLayout, "edit_url", false, true);
+		eyegui::setElementActivity(_pTabOverviewLayout, "edit_url", false, true);
+		eyegui::setElementActivity(_pTabOverviewLayout, "bookmark_tab", false, true);
         eyegui::setElementActivity(_pTabOverviewLayout, "reload_tab", false, true);
         eyegui::setElementActivity(_pTabOverviewLayout, "close_tab", false, true);
     }
@@ -706,6 +709,14 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
             _pWeb->ShowTabOverview(false);
             _pWeb->_upURLInput->Activate(_pWeb->_currentTabId);
         }
+		else if (id == "bookmark_tab")
+		{
+			int currentTab = _pWeb->_currentTabId;
+			if (currentTab >= 0)
+			{
+				_pWeb->_upBookmarkManager->AddBookmark(_pWeb->_tabs.at(currentTab)->GetURL());
+			}
+		}
         else if (id == "reload_tab")
         {
             int tabId = _pWeb->_currentTabId;
