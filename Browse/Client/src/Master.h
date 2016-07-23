@@ -29,7 +29,7 @@ class Master
 public:
 
     // Constructor takes pointer to CefMediator
-    Master(CefMediator* pCefMediator);
+    Master(CefMediator* pCefMediator, std::string userDirectory);
 
     // Destructor
     virtual ~Master();
@@ -62,6 +62,9 @@ public:
 
     // Get id of dictionary
     unsigned int GetDictionary() const { return _dictonaryId; }
+
+	// Get user directory location
+	std::string GetUserDirectory() const { return _userDirectory; }
 
     // ### EYEGUI DELEGATION ###
 
@@ -165,6 +168,9 @@ private:
 
     // Shader to render screenfilling quad
     std::unique_ptr<Shader> _upScreenFillingQuad;
+
+	// Directory for bookmarks etc
+	std::string _userDirectory;
 };
 
 #endif // MASTER_H_

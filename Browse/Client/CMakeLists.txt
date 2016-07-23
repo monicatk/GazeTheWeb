@@ -59,12 +59,6 @@ include_directories(externals/OGL)
 # LabStreamingLayer directory and include
 set(LIBLSL_DIRECTORY "${EXTERNALS_DIR}/liblsl")
 include_directories("${LIBLSL_DIRECTORY}/include")
-
-# Collect all code
-set(ALL_CODE
-	${SOURCES}
-	${HEADERS}
-	${OGL})
 	
 ### SUBMODULES #################################################################
 
@@ -95,6 +89,11 @@ include_directories("${SUBMODULES_DIR}/GLM")
 # spdlog
 include_directories("${SUBMODULES_DIR}/spdlog/include")
 
+# spdlog
+include_directories("${SUBMODULES_DIR}/spdlog/include")
+
+# TinyXML2 already included in eyeGUI
+	
 # Find libraries
 if(OS_WINDOWS) # Windows
 
@@ -132,6 +131,12 @@ find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 
 ### CREATION AND LINKING #######################################################
+
+# Collect all code
+set(ALL_CODE
+	${SOURCES}
+	${HEADERS}
+	${OGL})
 
 # Logical target used to link the libcef library
 ADD_LOGICAL_TARGET("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")

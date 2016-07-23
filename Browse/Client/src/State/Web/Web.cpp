@@ -16,6 +16,12 @@ Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)
     // Save member
     _pCefMediator = pCefMediator;
 
+	// Create URL input
+	_upURLInput = std::unique_ptr<URLInput>(new URLInput(_pMaster));
+
+	// Create bookmark manager
+	_upBookmarkManager = std::unique_ptr<BookmarkManager>(new BookmarkManager(pMaster->GetUserDirectory()));
+
     // Create own layout
     _pWebLayout = _pMaster->AddLayout("layouts/Web.xeyegui", EYEGUI_WEB_LAYER, false);
     _pTabOverviewLayout = _pMaster->AddLayout("layouts/WebTabOverview.xeyegui", EYEGUI_WEB_LAYER, false);
@@ -32,9 +38,6 @@ Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)
     eyegui::registerButtonListener(_pTabOverviewLayout, "close_tab", _spWebButtonListener);
     eyegui::registerButtonListener(_pTabOverviewLayout, "reload_tab", _spWebButtonListener);
     eyegui::registerButtonListener(_pTabOverviewLayout, "edit_url", _spWebButtonListener);
-
-    // Create URL input
-    _upURLInput = std::unique_ptr<URLInput>(new URLInput(_pMaster));
 }
 
 Web::~Web()

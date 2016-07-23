@@ -15,10 +15,10 @@
 #include "src/Utils/Logger.h"
 
 // Execute function to have Master object on stack which might be faster than on heap
-void Execute(CefRefPtr<App> app)
+void Execute(CefRefPtr<App> app, std::string userDirectory)
 {
     // Initialize master
-    Master master(app.get());
+    Master master(app.get(), userDirectory);
 
     // Run master which communicates with CEF over mediator
     master.Run();
@@ -27,13 +27,8 @@ void Execute(CefRefPtr<App> app)
 }
 
 // Common main for linux and windows
-int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app, void* windows_sandbox_info)
+int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app, void* windows_sandbox_info, std::string userDirectory)
 {
-    LogInfo("####################################################");
-    LogInfo("Welcome to GazeTheWeb - Browse!");
-
-    // Turn on offscreen rendering.
-    settings.windowless_rendering_enabled = true;
 
 #ifndef DEPLOYMENT
 #ifdef _WIN32
@@ -45,13 +40,20 @@ int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app
 #endif
 #endif
 
+	LogInfo("####################################################");
+	LogInfo("Welcome to GazeTheWeb - Browse!");
+	LogInfo("Personal files are saved in: ", userDirectory);
+
+	// Turn on offscreen rendering.
+	settings.windowless_rendering_enabled = true;
+
     // Initialize CEF
     LogInfo("Initializing CEF...");
     CefInitialize(args, settings, app.get(), windows_sandbox_info);
     LogInfo("..done.");
 
     // Execute our code
-    Execute(app);
+    Execute(app, userDirectory);
 
     // Shutdown CEF
     LogInfo("Shutdown CEF...");

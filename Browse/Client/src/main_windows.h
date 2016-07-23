@@ -8,7 +8,7 @@
 #endif
 
 // Forward declaration of common main
-int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app, void* windows_sandbox_info);
+int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app, void* windows_sandbox_info, std::string userDirectory);
 
 // Following taken out of CefSimple example of Chromium Embedded Framework!
 
@@ -56,6 +56,43 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 	settings.no_sandbox = true;
 #endif
 
+	// Fetch directory for saving bookmarks etc.
+	char *pValue;
+	size_t len;
+	errno_t err = _dupenv_s(&pValue, &len, "APPDATA");
+	std::string userDirectory(pValue, len - 1);
+
+	// Super project name
+	userDirectory.append("\\GazeTheWeb");
+
+	// Create directory
+	if (CreateDirectoryA(userDirectory.c_str(), NULL) ||
+		ERROR_ALREADY_EXISTS == GetLastError())
+	{
+		// TODO
+	}
+	else
+	{
+		// TODO
+	}
+
+	// Project name
+	userDirectory.append("\\Browse");
+
+	// Create directory
+	if (CreateDirectoryA(userDirectory.c_str(), NULL) ||
+		ERROR_ALREADY_EXISTS == GetLastError())
+	{
+		// TODO
+	}
+	else
+	{
+		// TODO
+	}
+
+	// Append another slash for easier usage of path
+	userDirectory.append("\\");
+
 	// Use common main now.
-	return CommonMain(main_args, settings, app, sandbox_info);
+	return CommonMain(main_args, settings, app, sandbox_info, userDirectory);
 }
