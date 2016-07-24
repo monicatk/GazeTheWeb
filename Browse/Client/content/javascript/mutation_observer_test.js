@@ -149,8 +149,9 @@ function SaveBoundingRectCoordinates(node)
 // parent & child are 1D arrays of length 4
 function ComputeBoundingRect(parent, child)
 {
-	// if(parent == [-1,-1,-1,-1])
-	// 	return child;
+	// if(parent.height == 0 || parent.width == 0)
+	if(parent[2]-parent[0] == 0 || parent[3]-parent[1] == 0)
+		return child;
 
 	return [Math.min(parent[0], child[0]),
 			Math.min(parent[1], child[1]),
