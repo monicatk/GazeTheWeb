@@ -47,10 +47,10 @@ public:
     // Exit
     void Exit();
 
-    // Set gaze visualization
-    void SetGazeVisualization(bool show) { eyegui::setGazeVisualizationDrawing(_pGUI, show); }
+    // Set gaze visualization (of super GUI)
+    void SetGazeVisualization(bool show) { eyegui::setGazeVisualizationDrawing(_pSuperGUI, show); }
 
-    // Set show descriptions
+    // Set show descriptions (of standard GUI)
     void SetShowDescriptions(bool show)
     {
         eyegui::setDescriptionVisibility(
