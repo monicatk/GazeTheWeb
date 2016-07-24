@@ -15,6 +15,7 @@
 #include "src/Input/EyeInput.h"
 #include "src/Setup.h"
 #include "src/Utils/LerpValue.h"
+#include "src/Utils/Framebuffer.h"
 #include "externals/OGL/gl_core_3_3.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 
@@ -28,7 +29,7 @@ class Master
 public:
 
     // Constructor takes pointer to CefMediator
-    Master(CefMediator* pCefMediator);
+    Master(CefMediator* pCefMediator, std::string userDirectory);
 
     // Destructor
     virtual ~Master();
@@ -62,6 +63,9 @@ public:
     // Get id of dictionary
     unsigned int GetDictionary() const { return _dictonaryId; }
 
+	// Get user directory location
+	std::string GetUserDirectory() const { return _userDirectory; }
+
     // ### EYEGUI DELEGATION ###
 
     // Add layout to eyeGUI
@@ -69,6 +73,11 @@ public:
 
     // Remove layout from eyeGUI
     void RemoveLayout(eyegui::Layout* pLayout);
+
+	// ### SETTINGS ACCESS ###
+
+	// Set homepage URL in settings
+	void SetHomepage(std::string URL) { _upSettings->SetHomepage(URL); }
 
 private:
 
@@ -158,6 +167,15 @@ private:
 
     // Communication with LabStreamingLayer
     std::unique_ptr<LabStream> _upLabStream;
+
+    // Framebuffer for complete rendering
+    std::unique_ptr<Framebuffer> _upFramebuffer;
+
+    // Shader to render screenfilling quad
+    std::unique_ptr<Shader> _upScreenFillingQuad;
+
+	// Directory for bookmarks etc
+	std::string _userDirectory;
 };
 
 #endif // MASTER_H_

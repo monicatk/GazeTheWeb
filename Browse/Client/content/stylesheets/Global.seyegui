@@ -48,6 +48,12 @@ tab_overlay : default
 	color = 0x607d8bFF
 }
 
+tab_overlay_scroll_progress : tab_overlay
+{
+	color = 0x607d8b80
+	background-color = 0x50565980
+}
+
 tab_overlay_noback : default
 {
 	background-color = 0x00000000
@@ -65,5 +71,11 @@ pause
 
 pause_background
 {
+	background-color = 0x00000000
+}
+
+invisible_but_icon : default
+{
+	color = 0x00000000
 	background-color = 0x00000000
 }

@@ -19,10 +19,89 @@
 // Namespace for text-csv
 namespace csv = ::text::csv;
 
-Master::Master(CefMediator* pCefMediator)
+// Shaders for screen filling rendering
+const std::string vertexShaderSource =
+"#version 330 core\n"
+"void main() {\n"
+"}\n";
+
+const std::string geometryShaderSource =
+"#version 330 core\n"
+"layout(points) in;\n"
+"layout(triangle_strip, max_vertices = 4) out;\n"
+"out vec2 uv;\n"
+"void main() {\n"
+"    gl_Position = vec4(1.0, 1.0, 0.5, 1.0);\n"
+"    uv = vec2(1.0, 1.0);\n"
+"    EmitVertex();\n"
+"    gl_Position = vec4(-1.0, 1.0, 0.5, 1.0);\n"
+"    uv = vec2(0.0, 1.0);\n"
+"    EmitVertex();\n"
+"    gl_Position = vec4(1.0, -1.0, 0.5, 1.0);\n"
+"    uv = vec2(1.0, 0.0);\n"
+"    EmitVertex();\n"
+"    gl_Position = vec4(-1.0, -1.0, 0.5, 1.0);\n"
+"    uv = vec2(0.0, 0.0);\n"
+"    EmitVertex();\n"
+"    EndPrimitive();\n"
+"}\n";
+
+const std::string blurFragmentShaderSource =
+"#version 330 core\n"
+"const float offset = 1.9;\n" // TODO: maybe use resolution here
+"in vec2 uv;\n"
+"out vec4 fragColor;\n"
+"uniform sampler2D tex;\n"
+"uniform vec2 focusPixelPosition;\n"
+"uniform float focusPixelRadius;\n"
+"uniform float peripheryMultiplier;\n"
+"void main() {\n"
+// Preparation
+"   vec4 color = texture(tex, uv);\n"
+"   float mask = min(distance(focusPixelPosition, gl_FragCoord.xy) / focusPixelRadius, 1.0);\n"
+"   vec2 texSize = textureSize(tex, 0);\n"
+"   vec4 blur = vec4(0,0,0,0);\n"
+// x and y not zero
+"   for(int x = 1; x <= 2; x++) {\n"
+"       for(int y = 1; y <= 2; y++) {\n"
+"           blur += texture(tex, (gl_FragCoord.xy + (offset * vec2(x, y))) / texSize);\n"
+"           blur += texture(tex, (gl_FragCoord.xy + (offset * vec2(-x, y))) / texSize);\n"
+"           blur += texture(tex, (gl_FragCoord.xy + (offset * vec2(x, -y))) / texSize);\n"
+"           blur += texture(tex, (gl_FragCoord.xy + (offset * vec2(-x, -y))) / texSize);\n"
+"       }\n"
+"   }\n"
+// x is zero
+"   for(int y = 1; y <= 2; y++) {\n"
+"       blur += texture(tex, (gl_FragCoord.xy + (offset * vec2(0, y))) / texSize);\n"
+"       blur += texture(tex, (gl_FragCoord.xy + (offset * vec2(0, -y))) / texSize);\n"
+"   }\n"
+// y is zero
+"   for(int x = 1; x <= 2; x++) {\n"
+"       blur += texture(tex, (gl_FragCoord.xy + (offset * vec2(x, 0))) / texSize);\n"
+"       blur += texture(tex, (gl_FragCoord.xy + (offset * vec2(-x, 0))) / texSize);\n"
+"   }\n"
+// Both is zero
+"   blur += color;\n"
+// Do composition
+"   blur /= 25;\n"
+"   color = mix(color, peripheryMultiplier * blur, mask);\n"
+"   fragColor = vec4(color.rgb, 1.0);\n"
+"}\n";
+
+const std::string simpleFragmentShaderSource =
+"#version 330 core\n"
+"in vec2 uv;\n"
+"out vec4 fragColor;\n"
+"uniform sampler2D tex;\n"
+"void main() {\n"
+"   fragColor = texture(tex, uv);\n"
+"}\n";
+
+Master::Master(CefMediator* pCefMediator, std::string userDirectory)
 {
     // Save members
     _pCefMediator = pCefMediator;
+	_userDirectory = userDirectory;
 
     // ### GLFW AND OPENGL ###
 
@@ -106,7 +185,7 @@ Master::Master(CefMediator* pCefMediator)
     eyegui::GUIBuilder guiBuilder;
     guiBuilder.width = _width;
     guiBuilder.height = _height;
-    guiBuilder.fontFilepath = "fonts/tauri/Tauri-Regular.ttf";
+    guiBuilder.fontFilepath = "fonts/dejavu-sans/ttf/DejaVuSans.ttf";
     guiBuilder.characterSet = eyegui::CharacterSet::US_ENGLISH;
     guiBuilder.localizationFilepath = "localizations/English.leyegui";
     guiBuilder.fontTallSize = 0.07f;
@@ -195,8 +274,7 @@ Master::Master(CefMediator* pCefMediator)
     _upWeb->Activate();
 
     // ### HOMEPAGE ###
-    //_upWeb->AddTab("https://www.uni-koblenz.de");
-	_upWeb->AddTab("https://www.duckduckgo.com");
+	_upWeb->AddTab(_upSettings->GetHomepage());
 
     // ### SUPER LAYOUT ###
 
@@ -221,6 +299,17 @@ Master::Master(CefMediator* pCefMediator)
 
     // ### INPUT ###
     _upEyeInput = std::unique_ptr<EyeInput>(new EyeInput);
+
+    // ### FRAMEBUFFER ###
+    _upFramebuffer = std::unique_ptr<Framebuffer>(new Framebuffer(_width, _height));
+	_upFramebuffer->Bind();
+    _upFramebuffer->AddAttachment(Framebuffer::ColorFormat::RGB);
+	_upFramebuffer->Unbind();
+    _upScreenFillingQuad = std::unique_ptr<Shader>(
+        new Shader(
+            vertexShaderSource,
+            geometryShaderSource,
+            setup::BLUR_PERIPHERY ? blurFragmentShaderSource : simpleFragmentShaderSource));
 
     // ### OTHER ###
 
@@ -275,7 +364,7 @@ void Master::RemoveLayout(eyegui::Layout* pLayout)
 void Master::Loop()
 {
     while (!glfwWindowShouldClose(_pWindow))
-    {
+    {    
         // Time per frame
         double currentTime = glfwGetTime();
         float tpf = std::min((float) (currentTime - _lastTime), 0.25f); // everything breaks when tpf too big
@@ -296,9 +385,6 @@ void Master::Loop()
 
         // Poll CefMediator
         _pCefMediator->Poll(tpf);
-
-        // Clearing of buffers
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Get cursor coordinates
         double currentMouseX;
@@ -365,6 +451,12 @@ void Master::Loop()
         // Create input struct for own framework
         Input input(usedEyeGUIInput.gazeX, usedEyeGUIInput.gazeY, usedEyeGUIInput.gazeUsed);
 
+        // Bind framebuffer
+        _upFramebuffer->Bind();
+
+        // Clearing of buffers
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		// Disable depth test for drawing
 		glDisable(GL_DEPTH_TEST);
 
@@ -418,6 +510,29 @@ void Master::Loop()
         eyegui::drawGUI(_pGUI);
         eyegui::drawGUI(_pSuperGUI);
 
+        // Bind standard framebuffer
+        _upFramebuffer->Unbind();
+
+        // Clearing of buffers
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Bind framebuffer as texture
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _upFramebuffer->GetAttachment(0));
+
+        // Render screen filling quad
+        _upScreenFillingQuad->Bind();
+
+        // Fill uniforms when necessary
+        if(setup::BLUR_PERIPHERY)
+        {
+            _upScreenFillingQuad->UpdateValue("focusPixelPosition", glm::vec2(usedEyeGUIInput.gazeX, _height - usedEyeGUIInput.gazeY)); // OpenGL coordinate system
+            _upScreenFillingQuad->UpdateValue("focusPixelRadius", (float)glm::min(_width, _height) * BLUR_FOCUS_RELATIVE_RADIUS);
+            _upScreenFillingQuad->UpdateValue("peripheryMultiplier", BLUR_PERIPHERY_MULTIPLIER);
+        }
+
+        glDrawArrays(GL_POINTS, 0, 1);
+
         // Reset reminder BEFORE POLLING
         _leftMouseButtonPressed = false;
         _enterKeyPressed = false;
@@ -466,7 +581,11 @@ void Master::GLFWResizeCallback(int width, int height)
     eyegui::resizeGUI(_pSuperGUI, _width, _height);
 
     // Set viewport (can be set here, untouched/rescued by eyeGUI)
+    // Independent from bound framebuffer
     glViewport(0, 0, _width, _height);
+
+    // Tell framebuffer about new window size
+    _upFramebuffer->Resize(_width, _height);
 
     // CEF mediator is told to resize tabs via GUI callback
 }

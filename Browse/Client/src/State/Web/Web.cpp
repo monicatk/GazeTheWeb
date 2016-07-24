@@ -16,6 +16,12 @@ Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)
     // Save member
     _pCefMediator = pCefMediator;
 
+	// Create URL input
+	_upURLInput = std::unique_ptr<URLInput>(new URLInput(_pMaster));
+
+	// Create bookmark manager
+	_upBookmarkManager = std::unique_ptr<BookmarkManager>(new BookmarkManager(pMaster->GetUserDirectory()));
+
     // Create own layout
     _pWebLayout = _pMaster->AddLayout("layouts/Web.xeyegui", EYEGUI_WEB_LAYER, false);
     _pTabOverviewLayout = _pMaster->AddLayout("layouts/WebTabOverview.xeyegui", EYEGUI_WEB_LAYER, false);
@@ -32,9 +38,7 @@ Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)
     eyegui::registerButtonListener(_pTabOverviewLayout, "close_tab", _spWebButtonListener);
     eyegui::registerButtonListener(_pTabOverviewLayout, "reload_tab", _spWebButtonListener);
     eyegui::registerButtonListener(_pTabOverviewLayout, "edit_url", _spWebButtonListener);
-
-    // Create URL input
-    _upURLInput = std::unique_ptr<URLInput>(new URLInput(_pMaster));
+	eyegui::registerButtonListener(_pTabOverviewLayout, "bookmark_tab", _spWebButtonListener);
 }
 
 Web::~Web()
@@ -110,11 +114,11 @@ int Web::AddTabAfter(Tab *other, std::string URL, bool show)
     {
         // Find tab id of other in order
         int otherOrderIndex = -1;
-        for(int i = 0; i < (int)_tabIdOrder.size(); i++) { if(_tabIdOrder.at(i) == otherId) { otherOrderIndex = i; } }
+        for(int j = 0; j < (int)_tabIdOrder.size(); j++) { if(_tabIdOrder.at(j) == otherId) { otherOrderIndex = j; } }
 
         // Find tab id of new in order
         int orderIndex = -1;
-        for(int i = 0; i < (int)_tabIdOrder.size(); i++) { if(_tabIdOrder.at(i) == id) { orderIndex = i; } }
+        for(int j = 0; j < (int)_tabIdOrder.size(); j++) { if(_tabIdOrder.at(j) == id) { orderIndex = j; } }
 
         // Create new order
         auto newTabIdOrder = std::vector<int>();
@@ -124,9 +128,9 @@ int Web::AddTabAfter(Tab *other, std::string URL, bool show)
         {
             // Add all tabs including other to order
             int oldIndex = 0;
-            for(int i = 0; i <= otherOrderIndex; i++)
+            for(int j = 0; j <= otherOrderIndex; j++)
             {
-                int currentId = _tabIdOrder.at(i);
+                int currentId = _tabIdOrder.at(j);
                 if(currentId != orderIndex)
                 {
                     // Do not push back the new tab's id
@@ -607,8 +611,19 @@ void Web::UpdateTabOverview()
 
         // Activate buttons
         eyegui::setElementActivity(_pTabOverviewLayout, "edit_url", true, true);
+		eyegui::setElementActivity(_pTabOverviewLayout, "bookmark_tab", true, true);
         eyegui::setElementActivity(_pTabOverviewLayout, "reload_tab", true, true);
         eyegui::setElementActivity(_pTabOverviewLayout, "close_tab", true, true);
+
+		// Set icon of bookmark button
+		if (_upBookmarkManager->IsBookmark(_tabs.at(_currentTabId)->GetURL()))
+		{
+			eyegui::setIconOfIconElement(_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_true.png");
+		}
+		else
+		{
+			eyegui::setIconOfIconElement(_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_false.png");
+		}
     }
     else
     {
@@ -618,8 +633,12 @@ void Web::UpdateTabOverview()
         // Show placeholder in preview
         eyegui::replaceElementWithPicture(_pTabOverviewLayout, "preview", "icons/Nothing.png", eyegui::ImageAlignment::ZOOMED, true);
 
+		// Reset icon of bookmark tab button
+		eyegui::setIconOfIconElement(_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_false.png");
+
         // Deactivate buttons
-        eyegui::setElementActivity(_pTabOverviewLayout, "edit_url", false, true);
+		eyegui::setElementActivity(_pTabOverviewLayout, "edit_url", false, true);
+		eyegui::setElementActivity(_pTabOverviewLayout, "bookmark_tab", false, true);
         eyegui::setElementActivity(_pTabOverviewLayout, "reload_tab", false, true);
         eyegui::setElementActivity(_pTabOverviewLayout, "close_tab", false, true);
     }
@@ -703,6 +722,21 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
             _pWeb->ShowTabOverview(false);
             _pWeb->_upURLInput->Activate(_pWeb->_currentTabId);
         }
+		else if (id == "bookmark_tab")
+		{
+			int currentTab = _pWeb->_currentTabId;
+			if (currentTab >= 0)
+			{
+				// Add as bookmark
+				bool success = _pWeb->_upBookmarkManager->AddBookmark(_pWeb->_tabs.at(currentTab)->GetURL());
+
+				// If successful, display it to user
+				if (success)
+				{
+					eyegui::setIconOfIconElement(_pWeb->_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_true.png");
+				}
+			}
+		}
         else if (id == "reload_tab")
         {
             int tabId = _pWeb->_currentTabId;

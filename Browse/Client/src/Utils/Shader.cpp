@@ -6,13 +6,28 @@
 #include "Shader.h"
 #include "submodules/glm/glm/gtc/type_ptr.hpp"
 
-Shader::Shader(std::string vertSource, std::string fragSource)
+Shader::Shader(std::string vertSource, std::string fragSource) : Shader(vertSource, "", fragSource)
+{
+    // Nothing to do
+}
+
+Shader::Shader(std::string vertSource, std::string geomSource, std::string fragSource)
 {
     // Vertex shader
     int vertexShader = glCreateShader(GL_VERTEX_SHADER);
     char const * pVertSource = vertSource.c_str();
     glShaderSource(vertexShader, 1, &pVertSource, NULL);
     glCompileShader(vertexShader);
+
+    // Geometry shader
+    int geometryShader = -1;
+    if(!geomSource.empty())
+    {
+        geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+        char const * pGeomSource = geomSource.c_str();
+        glShaderSource(geometryShader, 1, &pGeomSource, NULL);
+        glCompileShader(geometryShader);
+    }
 
     // Fragment shader
     int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -23,11 +38,13 @@ Shader::Shader(std::string vertSource, std::string fragSource)
     // Create program
     _program = glCreateProgram();
     glAttachShader(_program, vertexShader);
+    if(geometryShader >= 0) { glAttachShader(_program, geometryShader); }
     glAttachShader(_program, fragmentShader);
     glLinkProgram(_program);
 
     // Delete shaders
     glDeleteShader(vertexShader);
+    if(geometryShader >= 0) { glDeleteShader(geometryShader); }
     glDeleteShader(fragmentShader);
 }
 

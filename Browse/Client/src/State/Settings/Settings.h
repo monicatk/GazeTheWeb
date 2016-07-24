@@ -35,7 +35,22 @@ public:
     // Deactivate
     virtual void Deactivate();
 
+	// Get homepage URL
+	std::string GetHomepage() const { return _webSetup.homepage; }
+
+	// Set homepage URL
+	void SetHomepage(std::string URL) { _webSetup.homepage = URL; ApplySettings(true); }
+
 private:
+
+	// Apply and maybe save settings
+	void ApplySettings(bool save = true);
+
+	// Save settings to hard disk. Returns whether successful
+	bool SaveSettings() const;
+
+	// Load settings from hard disk. Returns whether successful
+	bool LoadSettings();
 
     // Give listener full access
     friend class SettingsButtonListener;
@@ -58,14 +73,22 @@ private:
     // Instance of listener
     std::shared_ptr<SettingsButtonListener> _spSettingsButtonListener;
 
-    // Setup
-    class Setup
+    // Setup of global settings
+    class GlobalSetup
     {
     public:
 
-        bool _showDescriptions = true;
-        bool _showGazeVisualization = false;
+        bool showDescriptions = true;
+        bool showGazeVisualization = false;
     };
+
+	// Setupt of web settings
+	class WebSetup
+	{
+	public:
+
+		std::string homepage = "https://duckduckgo.com";
+	};
 
     // Layouts
     eyegui::Layout* _pSettingsLayout;
@@ -75,8 +98,12 @@ private:
     // Bool to remember whether to switch to Web in next frame
     bool _goToWeb = false;
 
-    // Setup
-    Setup _setup;
+    // Setups
+	GlobalSetup _globalSetup;
+	WebSetup _webSetup;
+
+	// Fullpath to settings file
+	std::string _fullpathSettings;
 };
 
 #endif // SETTINGS_H_

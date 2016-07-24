@@ -51,6 +51,7 @@ All necessary dependencies are provided in the _externals_ or _submodules_ folde
 * liblsl: https://github.com/sccn/labstreaminglayer
   * Boost: https://github.com/boostorg/boost
 * text-csv: https://github.com/roman-kashitsyn/text-csv
+* TinyXML2 (used one from eyeGUI library): https://github.com/leethomason/tinyxml2
 
 ## License
 >Copyright 2016 Raphael Menges and Daniel Müller

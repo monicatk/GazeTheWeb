@@ -10,6 +10,7 @@
 #include "src/State/State.h"
 #include "src/State/Web/Tab/Tab.h"
 #include "src/State/Web/URLInput.h"
+#include "src/State/Web/BookmarkManager.h"
 #include <map>
 #include <vector>
 #include <memory>
@@ -174,6 +175,9 @@ private:
 
     // List of jobs which have to be executed
     std::stack<std::unique_ptr<TabJob> > _jobs;
+
+	// Bookmark manager
+	std::unique_ptr<BookmarkManager> _upBookmarkManager;
 };
 
 #endif // WEB_H_

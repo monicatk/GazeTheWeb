@@ -373,8 +373,10 @@ private:
 	std::unique_ptr<RenderItem> _upDebugRenderItem;
 
     // Frame indices of scroll up and down overlays
-    unsigned int _scrollUpFrameIndex = 0;
-    unsigned int _scrollDownFrameIndex = 0;
+    unsigned int _scrollUpProgressFrameIndex = 0;
+    unsigned int _scrollDownProgressFrameIndex = 0;
+    unsigned int _scrollUpSensorFrameIndex = 0;
+    unsigned int _scrollDownSensorFrameIndex = 0;
 
     // Ids of elements in overlay (added / removed by triggers or actions)
     std::map<std::string, std::function<void(void)> > _overlayButtonDownCallbacks;
