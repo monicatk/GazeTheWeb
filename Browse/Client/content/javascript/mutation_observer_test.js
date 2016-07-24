@@ -1,7 +1,7 @@
 // https://developer.mozilla.org/de/docs/Web/API/MutationObserver
 
 
-// DEBUG - Helper function for console output
+// Helper function for console output
 function consolePrint(msg)
 {
 	window.cefQuery({ request: msg, persistent : false, onSuccess : function(response) {}, onFailure : function(error_code, error_message){} });
@@ -69,38 +69,52 @@ window.debug_node;
 // Iterate over Set of already used fixedIDs to find the next ID not yet used and assign it to node as attribute
 function AddFixedElement(node)
 {
-	// Add node to set of fixed elements, if position is fixed
-	window.fixed_elements.add(node);
-
-	// Find smallest ID not yet in use
+	// Determine fixed element ID
 	var id;
-	var found = false;
-	for(var i=0, n=window.fixed_IDlist.length; i < n; i++)
-	{
-		if(!window.fixed_IDlist[i])
-		{
-			window.fixed_IDlist[i] = true;
-			id = i;
-			found = true;
-		}
-	}
-	if(!found)
-	{
-		// Extend ID list by one entry
-		window.fixed_IDlist.push(true);
-		// Use new last position as ID
-		id = window.fixed_IDlist.length-1;
-	}
 
-	// Create attribute in node and store ID there
-	node.setAttribute('fixedID', id);
+	if(node.hasAttribute('fixedID'))
+	{
+		// node already in set, use existing ID
+		id = node.getAttribute('fixedID');
+
+		// Check if bounding Rect changes happened
+		UpdateSubtreesBoundingRect(node);
+	}
+	else
+	{
+		// Add node to set of fixed elements, if position is fixed
+		window.fixed_elements.add(node);
+
+		// Find smallest ID not yet in use
+
+		var found = false;
+		for(var i=0, n=window.fixed_IDlist.length; i < n; i++)
+		{
+			if(!window.fixed_IDlist[i])
+			{
+				window.fixed_IDlist[i] = true;
+				id = i;
+				found = true;
+			}
+		}
+		if(!found)
+		{
+			// Extend ID list by one entry
+			window.fixed_IDlist.push(true);
+			// Use new last position as ID
+			id = window.fixed_IDlist.length-1;
+		}
+
+		// Create attribute in node and store ID there
+		node.setAttribute('fixedID', id);
+
+		// Write node's (and its children's) bounding rectangle coordinates to List
+		SaveBoundingRectCoordinates(node);
+	}
 
 	// TODO: Add attribute 'fixedID' to every child node
 
 
-
-	// Write node's (and its children's) bounding rectangle coordinates to List
-	SaveBoundingRectCoordinates(node);
 
 	var zero = '';
 	if(id < 10) zero = '0';
@@ -113,44 +127,45 @@ function SaveBoundingRectCoordinates(node)
 {
 	var rect = node.getBoundingClientRect();
 	// Only add coordinates if width and height are greater zero
-	if(rect.width && rect.height)
+	// if(rect.width && rect.height)
+	// {
+	var id = node.getAttribute('fixedID');
+
+	// 1D array with top, left, bottom, right values of bounding rectangle
+	var rect_coords = AdjustRectToZoom(node.getBoundingClientRect());
+
+	// Add empty 1D array to 2D array, if needed
+	while(window.fixed_coordinates.length <= id)
 	{
-		var id = node.getAttribute('fixedID');
-
-		// 1D array with top, left, bottom, right values of bounding rectangle
-		var rect_coords = AdjustRectToZoom(node.getBoundingClientRect());
-
-		// Add empty 1D array to 2D array, if needed
-		while(window.fixed_coordinates.length <= id)
-		{
-			window.fixed_coordinates.push([]);
-		}
-		// Add rect coordinates to list of fixed coordinates at position |id|
-		window.fixed_coordinates[id] = rect_coords;
-
-		// Compute bounding rect containing all child nodes
-		var tree_rect_coords = ComputeBoundingRectOfAllChilds(node, 0, id);
-
-		// Save tree rect, if different than fixed nodes bounding rect
-		var equal = true;
-		for(var i = 0; i < 4; i++)
-		{
-			equal &= (rect_coords[i] == tree_rect_coords[i]);
-		}
-		if(!equal)
-		{
-			window.fixed_coordinates[id] = window.fixed_coordinates[id].concat(
-												tree_rect_coords
-											);
-		}
+		window.fixed_coordinates.push([]);
 	}
+	// Add rect coordinates to list of fixed coordinates at position |id|
+	window.fixed_coordinates[id] = rect_coords;
+
+	// Compute bounding rect containing all child nodes
+	var tree_rect_coords = ComputeBoundingRectOfAllChilds(node, 0, id);
+
+	// Save tree rect, if different than fixed nodes bounding rect
+	var equal = true;
+	for(var i = 0; i < 4; i++)
+	{
+		equal &= (rect_coords[i] == tree_rect_coords[i]);
+	}
+	if(!equal)
+	{
+		window.fixed_coordinates[id] = window.fixed_coordinates[id].concat(
+											ComputeBoundingRect(rect_coords, tree_rect_coords)
+										);
+	}
+	// }
 }
 
 // parent & child are 1D arrays of length 4
 function ComputeBoundingRect(parent, child)
 {
-	// if(parent == [-1,-1,-1,-1])
-	// 	return child;
+	// if(parent.height == 0 || parent.width == 0)
+	if(parent[2]-parent[0] == 0 || parent[3]-parent[1] == 0)
+		return child;
 
 	return [Math.min(parent[0], child[0]),
 			Math.min(parent[1], child[1]),
@@ -313,6 +328,8 @@ function UpdateSubtreesBoundingRect(childNode)
 		if(id < 10) zero = '0';
 		// Tell CEF that fixed node's coordinates were updated
 		consolePrint('#fixElem#add#'+zero+id);
+		// DEBUG
+		// consolePrint("UpdateSubtreesBoundingRect()");
 	}
 
 }
@@ -369,7 +386,9 @@ function MutationObserverInit()
 		  						{
 		  							if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
 		  							{
-		  								// alert('Found fixed element!');
+		  								//DEBUG
+		  								consolePrint("Attribut "+attr+" changed, calling AddFixedElement");
+
 		  								AddFixedElement(node);
 		  							}
 		  				
@@ -389,7 +408,12 @@ function MutationObserverInit()
 		  					{
 		  						if(node.hasAttribute('fixedID'))
 		  						{
+		  							//DEBUG
+		  							// consolePrint("class changed, updating subtree");
+
 		  							UpdateSubtreesBoundingRect(node);
+
+
 		  							// TODO: Triggered quite often... (while scrolling)
 		  						}
 		  					}
@@ -420,7 +444,9 @@ function MutationObserverInit()
 		  							// consolePrint('position: '+node.style.position);
 		  							if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
 		  							{
-		  								// alert('Found fixed element! (node added to DOM tree)');
+		  								//DEBUG
+		  								// consolePrint("New fixed node added to DOM tree");
+
 		  								AddFixedElement(node);
 		  							}
 		  						}

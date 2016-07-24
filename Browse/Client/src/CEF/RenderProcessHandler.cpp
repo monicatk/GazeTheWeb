@@ -181,6 +181,12 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			{
 				args->SetDouble(i+1, coordsArray->GetValue(i)->GetDoubleValue());
 			}
+
+			// DEBUG
+			if (n == 0)
+			{
+				IPCLogDebug(browser, "No Rect coordinates available for fixedID="+std::to_string(fixedID));
+			}
       
 			// Send response
 			browser->SendProcessMessage(PID_BROWSER, msg);
