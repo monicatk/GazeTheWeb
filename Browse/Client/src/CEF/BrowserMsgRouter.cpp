@@ -79,6 +79,19 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		
 	}
 
+	// Get informed that DOMTextLink was added and how to access it
+	if ((requestName.compare(0, 9, "#DOMLink#") == 0))
+	{
+		const std::string id = requestName.substr(9, requestName.size());
+		//LogDebug("BrowserMsgRouter: DOMTextLink id=", id);
+
+		CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("FetchDOMTextLink");
+		msg->GetArgumentList()->SetInt(0, atoi(id.c_str()));
+		browser->SendProcessMessage(PID_RENDERER, msg);
+
+		return true;
+	}
+
 	// Print message to console and withdraw callback
 	LogDebug("MsgHandler: ", requestName);
 	callback->Failure(0, "");

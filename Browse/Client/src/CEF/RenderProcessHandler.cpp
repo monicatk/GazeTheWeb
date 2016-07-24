@@ -195,6 +195,53 @@ bool RenderProcessHandler::OnProcessMessageReceived(
         }
     }
 
+	if (msgName == "FetchDOMTextLink")
+	{
+		CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
+
+		if (context->Enter())
+		{
+			int id = msg->GetArgumentList()->GetInt(0);
+
+			CefRefPtr<CefV8Value> global = context->GetGlobal();
+			CefRefPtr<CefV8Value> domLinkNode = global->GetValue("dom_links")->GetValue(id);
+			CefRefPtr<CefV8Value> domLinkRect = global->GetValue("dom_links_rect")->GetValue(id);
+
+			const std::string text = domLinkNode->GetValue("text")->GetStringValue();
+			const std::string url = domLinkNode->GetValue("href")->GetStringValue();
+
+			//IPCLogDebug(browser, "DOMTextLink#" + std::to_string(id) + " text=" + text);
+			//IPCLogDebug(browser, "DOMTextLink#" + std::to_string(id) + " url=" + url);
+			std::string coord_str = "";
+
+			std::vector<double> coords;
+			for (int i = 0; i < domLinkRect->GetArrayLength(); i++)
+			{
+				coords.push_back(domLinkRect->GetValue(i)->GetDoubleValue());
+				//coord_str += (std::to_string(i) + ": " + std::to_string(coords[i])+" ");
+			}
+
+			//IPCLogDebug(browser, "DOMTextLink#" + std::to_string(id) + " coords=" + coord_str);
+
+			msg = CefProcessMessage::Create("CreateDOMTextLink");
+			CefRefPtr<CefListValue> args = msg->GetArgumentList();
+
+			int index = 0;
+			args->SetInt(index++, id);
+			args->SetString(index++, text);
+			args->SetString(index++, url);
+
+			for (int i = 0; i < coords.size(); i++)
+			{
+				args->SetDouble(index++, coords[i]);
+			}
+
+			browser->SendProcessMessage(PID_BROWSER, msg);
+
+			context->Exit();
+		}
+	}
+
     // If no suitable handling was found, try message router
     return _msgRouter->OnProcessMessageReceived(browser, sourceProcess, msg);
 }

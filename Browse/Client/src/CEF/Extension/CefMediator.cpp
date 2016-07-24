@@ -380,6 +380,22 @@ void CefMediator::OpenPopupTab(CefRefPtr<CefBrowser> browser, std::string url)
 	}
 }
 
+void CefMediator::CreateDOMTextLink(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		CefRefPtr<CefListValue> args = msg->GetArgumentList();
+		int64 frameID = browser->GetMainFrame()->GetIdentifier();
+		int nodeID = args->GetInt(0);
+		const std::string text = args->GetString(1);
+		const std::string url = args->GetString(2);
+		double top = args->GetDouble(3), left = args->GetDouble(4), bottom = args->GetDouble(5), right = args->GetDouble(6);
+		Rect rect = Rect(top, left, bottom, right);
+
+		pTab->AddDOMNode(std::make_shared<DOMTextLink>(DOMNodeType::TextLink, frameID, nodeID, rect, text, url));
+	}
+}
+
 TabCEFInterface* CefMediator::GetTab(CefRefPtr<CefBrowser> browser) const
 {
     int browserID = browser->GetIdentifier();
