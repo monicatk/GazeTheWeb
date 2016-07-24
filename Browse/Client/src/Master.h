@@ -174,6 +174,9 @@ private:
     // Shader to render screenfilling quad
     std::unique_ptr<Shader> _upScreenFillingQuad;
 
+	// Empty vertex array for screen filling quad
+	unsigned int _screenFillingVAO;
+
 	// Directory for bookmarks etc
 	std::string _userDirectory;
 };

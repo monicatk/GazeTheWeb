@@ -301,6 +301,7 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
     _upEyeInput = std::unique_ptr<EyeInput>(new EyeInput);
 
     // ### FRAMEBUFFER ###
+	glGenVertexArrays(1, &_screenFillingVAO);
     _upFramebuffer = std::unique_ptr<Framebuffer>(new Framebuffer(_width, _height));
 	_upFramebuffer->Bind();
     _upFramebuffer->AddAttachment(Framebuffer::ColorFormat::RGB);
@@ -322,6 +323,9 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
 
 Master::~Master()
 {
+	// Delete vertex array of screen filling quad
+	glDeleteVertexArrays(1, &_screenFillingVAO);
+
     // Manual destruction of Web. Otherwise there are errors in CEF at shutdown (TODO: understand why)
     _upWeb.reset();
 
@@ -522,6 +526,7 @@ void Master::Loop()
 
         // Render screen filling quad
         _upScreenFillingQuad->Bind();
+		glBindVertexArray(_screenFillingVAO);
 
         // Fill uniforms when necessary
         if(setup::BLUR_PERIPHERY)
@@ -532,6 +537,7 @@ void Master::Loop()
         }
 
         glDrawArrays(GL_POINTS, 0, 1);
+		glBindVertexArray(0);
 
         // Reset reminder BEFORE POLLING
         _leftMouseButtonPressed = false;
