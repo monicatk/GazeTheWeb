@@ -7,6 +7,7 @@
 #include "src/Global.h"
 #include "src/Utils/Logger.h"
 #include "submodules/eyeGUI/externals/TinyXML2/tinyxml2.h"
+#include <iterator>
 
 BookmarkManager::BookmarkManager(std::string userDirectory)
 {
@@ -59,6 +60,14 @@ bool BookmarkManager::RemoveBookmark(std::string URL)
 std::set<std::string> BookmarkManager::GetBookmarks() const
 {
 	return _bookmarks;
+}
+
+std::vector<std::string> BookmarkManager::GetSortedBookmarks() const
+{
+	// TODO: sort somehow
+	std::vector<std::string> result;
+	std::copy(_bookmarks.begin(), _bookmarks.end(), std::back_inserter(result));
+	return result;
 }
 
 bool BookmarkManager::IsBookmark(std::string URL) const

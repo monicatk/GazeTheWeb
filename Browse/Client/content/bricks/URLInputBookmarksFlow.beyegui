@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<flow space="100%" direction="vertical" id="bookmarks_flow">
+	<stack id="bookmark_stack" direction="vertical">
+		<blank relativeScale="0%"/>
+	</stack>
+</flow>

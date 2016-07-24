@@ -1,30 +1,45 @@
 <?xml version="1.0"?>
 <layout stylesheet="stylesheets/Global.seyegui">
-	<grid showbackground="true">
-		<row size="30%">
-			<column size="100%">
-				<grid showbackground="true" style="panel">
-					<row size="100%">
-						<column size="10%"/>
-						<column size="15%">
-							<circlebutton id="close" desckey="url_input:close" icon="icons/Cross.png" border="10%"/>
+	<grid showbackground="true" style="panel">
+		<row size="100%">
+			<column size="10%">
+				<stack style="dark_panel" showbackground="true">
+					<circlebutton icon="icons/Cross.png" desckey="url_input:close" id="close" border="5%"/>
+				</stack>
+			</column>
+			<column size="90%">
+				<grid>
+					<row size="10%">
+						<column size="100%">
+							<blank/>
 						</column>
-						<column size="10%">
-							<circlebutton id="delete" desckey="url_input:delete" icon="icons/DeleteCharacter.png" border="10%"/>
+					</row>
+					<row size="20%">
+						<column size="100">
+							<grid showbackground="true" style="default">
+								<row size="100">
+									<column size="12%">
+										<circlebutton id="bookmarks" desckey="url_input:bookmarks" icon="icons/Bookmarks.png" border="10%"/>
+									</column>
+									<column size="12%">
+										<circlebutton id="delete" desckey="url_input:delete" icon="icons/DeleteCharacter.png" border="10%"/>
+									</column>
+									<column size="64%">
+										<textblock id="text_block" alignment="center" verticalalignment="center" fontsize="tall"/>
+									</column>
+									<column size="12%">
+										<circlebutton id="complete" desckey="url_input:complete" icon="icons/Select.png" border="10%"/>
+									</column>
+								</row>
+							</grid>
 						</column>
-						<column size="50%">
-							<textblock id="text_block" alignment="center" verticalalignment="center" fontsize="tall"/>
-						</column>
-						<column size="15%">
-							<circlebutton id="complete" desckey="url_input:complete" icon="icons/Forward.png" border="10%"/>
+					</row>
+					<row size="70%">>
+						<column size="100%">
+							<keyboard id="keyboard"/>
 						</column>
 					</row>
 				</grid>
-			</column>
-		</row>
-		<row size="70%">
-			<column size="100%">
-				<keyboard id="keyboard"/>
 			</column>
 		</row>
 	</grid>
