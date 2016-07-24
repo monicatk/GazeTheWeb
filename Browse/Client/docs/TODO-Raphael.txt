@@ -1,6 +1,3 @@
-BUGS:
-- When no tab is in Web, everything goes black. But only when framebuffer is used...
-
 - Bookmark selection via GUI
 - Free scaling for webview (some refactoring of size stuff necessary then...)
 - Web should have class "TabManager" which handles also TabOverview

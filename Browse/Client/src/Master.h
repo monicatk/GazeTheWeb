@@ -47,10 +47,10 @@ public:
     // Exit
     void Exit();
 
-    // Set gaze visualization
-    void SetGazeVisualization(bool show) { eyegui::setGazeVisualizationDrawing(_pGUI, show); }
+    // Set gaze visualization (of super GUI)
+    void SetGazeVisualization(bool show) { eyegui::setGazeVisualizationDrawing(_pSuperGUI, show); }
 
-    // Set show descriptions
+    // Set show descriptions (of standard GUI)
     void SetShowDescriptions(bool show)
     {
         eyegui::setDescriptionVisibility(
@@ -173,6 +173,9 @@ private:
 
     // Shader to render screenfilling quad
     std::unique_ptr<Shader> _upScreenFillingQuad;
+
+	// Empty vertex array for screen filling quad
+	unsigned int _screenFillingVAO;
 
 	// Directory for bookmarks etc
 	std::string _userDirectory;
