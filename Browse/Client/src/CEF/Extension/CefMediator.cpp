@@ -341,7 +341,7 @@ void CefMediator::ReceiveFixedElements(CefRefPtr<CefBrowser> browser, CefRefPtr<
     }
     if (TabCEFInterface* pTab = GetTab(browser))
     {
-        LogDebug("CefMediator: Sending ", fixedCoords.size(), " fixed element coordinate tupel(s) to Tab.");
+        LogDebug("CefMediator: Sending ", fixedCoords.size(), " fixed element coordinate tupel(s) to Tab for fixedID=", id, ".");
         for (int i = 0; i < (int)fixedCoords.size(); i++)
         {
              LogDebug("\t-->", fixedCoords[i].top, ", ", fixedCoords[i].left, ", ", fixedCoords[i].bottom, ", ", fixedCoords[i].right);
