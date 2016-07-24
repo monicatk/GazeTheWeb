@@ -677,7 +677,11 @@ Web::AddTabAfterJob::AddTabAfterJob(Tab* pCaller, std::string URL, bool show) : 
 
 void Web::AddTabAfterJob::Execute(Web* pCallee)
 {
+	// Add tab after caller
     pCallee->AddTabAfter(_pCaller, _URL, _show);
+
+	// Flash tab overview button to indicate, that new tab was created by application
+	eyegui::flash(pCallee->_pWebLayout, "tab_overview");
 }
 
 void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
