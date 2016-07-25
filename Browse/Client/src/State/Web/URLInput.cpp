@@ -103,8 +103,7 @@ void URLInput::ShowBookmarks()
 		false);
 
 	// Set space of flow
-	const int bookmarksOnScreen = 8;
-	float space = ((float)_bookmarks.size() / (float)bookmarksOnScreen);
+	float space = ((float)(_bookmarks.size() + 1) / (float)URL_INPUT_BOOKMARKS_ROWS_ON_SCREEN); // size + 1 for title
 	space = space < 1.f ? 1.f : space;
 	eyegui::setSpaceOfFlow(_pBookmarksLayout, "bookmarks_flow", space);
 

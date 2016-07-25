@@ -1,5 +1,3 @@
-- eyeGUI: make possible to give stack NO child and get rid of blank in URLInput bookmarks
-
 - Free scaling for webview (some refactoring of size stuff necessary then...)
 - Web should have class "TabManager" which handles also TabOverview
 - Settings: Icons on the left which indicate status of setting

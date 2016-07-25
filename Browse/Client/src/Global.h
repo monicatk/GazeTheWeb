@@ -43,5 +43,6 @@ static const float BLUR_FOCUS_RELATIVE_RADIUS = 0.25f; // relative to smaller of
 static const float BLUR_PERIPHERY_MULTIPLIER = 0.7f;
 static const std::string BOOKMARKS_FILE = "bookmarks.xml";
 static const std::string SETTINGS_FILE = "settings.xml";
+static const int URL_INPUT_BOOKMARKS_ROWS_ON_SCREEN = 6;
 
 #endif // GLOBAL_H_
