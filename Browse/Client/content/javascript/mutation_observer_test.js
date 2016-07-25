@@ -63,6 +63,13 @@ window.fixed_elements = new Set();
 window.fixed_IDlist = [];				// Position |i| contains boolean information if ID |i| is currently used
 window.fixed_coordinates = [[]];		// 2D list of bounding rectangle coordinates, fill with bounding rect coordinates of fixed node and its children (if position == 'relative')
 
+window.dom_links = [];
+window.dom_links_rect = [[]];
+
+// Used to get coordinates as array of size 4 in RenderProcessHandler
+// function GetRect(node){ return AdjustRectCoordinatesToWindow(node.getBoundingClientRect()); }
+
+
 // DEBUG
 window.debug_node;
 
@@ -348,6 +355,27 @@ function CompareArrays(array1, array2)
 	return true;
 }
 
+function AddDOMTextLink(node)
+{
+	var rect = node.getBoundingClientRect(node);
+
+	// Only add DOMTextLinks which are visible and contain an URL
+	if(rect.width && rect.height && node.href)
+	{
+		window.dom_links.push(node);
+		// window.dom_links_rect.push(AdjustRectCoordinatesToWindow(node));
+		var coords = AdjustRectCoordinatesToWindow(rect); //[rect.top, rect.left, rect.bottom, rect.right];
+		window.dom_links_rect.push(coords);
+
+		// DEBUG
+		// consolePrint("Added DOMTextLink #"+(window.dom_links.length-1)+", coords: "+coords);
+		
+		// Tell CEF message router, that DOM Link was added
+		consolePrint('#DOMLink#'+(window.dom_links.length-1));
+	}
+	
+}
+
 // TODO: Better: Add EventListener?
 // document.onclick = function(){ UpdateBoundingRects(); };
 
@@ -438,6 +466,7 @@ function MutationObserverInit()
 
 			  				if(node.nodeType == 1) // 1 == ELEMENT_NODE
 			  				{
+
 			  					// if(node.style.position && node.style.position == 'fixed')
 		  						if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
 		  						{
@@ -450,6 +479,19 @@ function MutationObserverInit()
 		  								AddFixedElement(node);
 		  							}
 		  						}
+
+
+		  						// EXPERIMENTAL
+		  						// Find text links
+		  						if(node.tagName == 'A')
+		  						{
+		  							AddDOMTextLink(node);
+
+		  						}
+
+		  						// node.text = node.tagName;
+		  						// EXPERIMENTAL END
+
 
 			  				}
 			  			}

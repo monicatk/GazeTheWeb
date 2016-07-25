@@ -73,14 +73,14 @@ class DOMTextLink : public DOMNode
                         int64 frameID,
                         int nodeID,
                         Rect rect,
-                        std::string value,
+                        std::string text,
                         std::string url			);
 
-        std::string GetValue() const { return _value; }
+        std::string GetText() const { return _text; }
         std::string GetURL() const { return _url; }
 
     private:
-        std::string _value;
+        std::string _text;
         std::string _url;
 };
 

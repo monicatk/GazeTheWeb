@@ -281,6 +281,10 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
     {
         IPCLogRenderer(browser, msg);
     }
+	if (msgName == "CreateDOMTextLink")
+	{
+		_pMediator->CreateDOMTextLink(browser, msg);
+	}
 
     return _msgRouter->OnProcessMessageReceived(browser, source_process, msg);
 }

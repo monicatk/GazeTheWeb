@@ -37,9 +37,9 @@ DOMTextLink::DOMTextLink(	DOMNodeType type,
                             int64 frameID,
                             int nodeID,
                             Rect rect,
-                            std::string value,
+                            std::string text,
                             std::string url) : DOMNode(type, frameID, nodeID, rect)
 {
-    _value = value;
+    _text = text;
     _url = url;
 }

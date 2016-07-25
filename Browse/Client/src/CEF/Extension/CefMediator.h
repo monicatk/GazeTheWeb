@@ -99,6 +99,8 @@ public:
 	// Add new Tab with given URL at the position after the current Tab (in context of Tab overview)
 	void OpenPopupTab(CefRefPtr<CefBrowser> browser, std::string url);
 
+	void CreateDOMTextLink(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
+
 protected:
 
     /* MEMBERS */
