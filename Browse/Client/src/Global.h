@@ -44,5 +44,9 @@ static const float BLUR_PERIPHERY_MULTIPLIER = 0.7f;
 static const std::string BOOKMARKS_FILE = "bookmarks.xml";
 static const std::string SETTINGS_FILE = "settings.xml";
 static const int URL_INPUT_BOOKMARKS_ROWS_ON_SCREEN = 6;
+static const float NOTIFICATION_WIDTH = 0.3f;
+static const float NOTIFICATION_Y = 0.0075f;
+static const float NOTIFICATION_HEIGHT = 0.03f;
+static const float NOTIFICATION_DISPLAY_DURATION = 3.f;
 
 #endif // GLOBAL_H_

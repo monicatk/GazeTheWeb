@@ -734,11 +734,19 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				// Add as bookmark
 				bool success = _pWeb->_upBookmarkManager->AddBookmark(_pWeb->_tabs.at(currentTab)->GetURL());
 
-				// If successful, display it to user
+				// Display it on icon. Even if not successful, because that means it was already a bookmark
+				eyegui::setIconOfIconElement(_pWeb->_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_true.png");
+
+				// Display notification
 				if (success)
 				{
-					eyegui::setIconOfIconElement(_pWeb->_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_true.png");
+					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_success");
 				}
+				else
+				{
+					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_existing");
+				}
+				
 			}
 		}
         else if (id == "reload_tab")

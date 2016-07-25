@@ -281,7 +281,7 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
     // Load layout (deleted at eyeGUI termination)
     _pSuperLayout = eyegui::addLayout(_pSuperGUI, "layouts/Super.xeyegui", EYEGUI_SUPER_LAYER, true);
 
-    // Button listener
+    // Button listener for pause
     _spMasterButtonListener = std::shared_ptr<MasterButtonListener>(new MasterButtonListener(this));
     eyegui::registerButtonListener(_pSuperLayout, "pause", _spMasterButtonListener);
 
@@ -291,6 +291,19 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
         eyegui::buttonDown(_pSuperLayout, "pause", true);
     }
     _pausedDimming.setValue(0);
+
+	// Add floating frame for notification
+	_notificationFrameIndex = eyegui::addFloatingFrameWithBrick(
+		_pSuperLayout,
+		"bricks/Notification.beyegui",
+		(1.f - NOTIFICATION_WIDTH) / 2.f,
+		NOTIFICATION_Y,
+		NOTIFICATION_WIDTH,
+		NOTIFICATION_HEIGHT,
+		false,
+		false);
+	
+	// ### CURSOR LAYOUT ###
 
     // Add floating frame on empty layout for cursor
     _pCursorLayout = eyegui::addLayout(_pSuperGUI, "layouts/Empty.xeyegui", EYEGUI_CURSOR_LAYER, true);
@@ -352,6 +365,16 @@ void Master::Exit()
     glfwSetWindowShouldClose(_pWindow, GL_TRUE);
 }
 
+void Master::PushNotification(std::u16string content)
+{
+	_notificationStack.push(content);
+}
+
+void Master::PushNotificationByKey(std::string key)
+{
+	_notificationStack.push(eyegui::fetchLocalization(_pGUI, key));
+}
+
 eyegui::Layout* Master::AddLayout(std::string filepath, int layer, bool visible)
 {
     // Add layout
@@ -367,28 +390,60 @@ void Master::RemoveLayout(eyegui::Layout* pLayout)
 
 void Master::Loop()
 {
-    while (!glfwWindowShouldClose(_pWindow))
-    {    
-        // Time per frame
-        double currentTime = glfwGetTime();
-        float tpf = std::min((float) (currentTime - _lastTime), 0.25f); // everything breaks when tpf too big
-        _lastTime = currentTime;
+	while (!glfwWindowShouldClose(_pWindow))
+	{
+		// Time per frame
+		double currentTime = glfwGetTime();
+		float tpf = std::min((float)(currentTime - _lastTime), 0.25f); // everything breaks when tpf too big
+		_lastTime = currentTime;
 
-        // Decrement time until input is accepted
-        if (_timeUntilInput > 0)
-        {
-            _timeUntilInput -= tpf;
-        }
+		// Decrement time until input is accepted
+		if (_timeUntilInput > 0)
+		{
+			_timeUntilInput -= tpf;
+		}
 
-        // Poll lab streaming layer communication (TODO: testing)
-        auto labStreamInput = _upLabStream->Poll();
-        for (const std::string& rEvent : labStreamInput)
-        {
-            LogInfo("Master: LabStreamInput = ", rEvent);
-        }
+		// Poll lab streaming layer communication (TODO: testing)
+		auto labStreamInput = _upLabStream->Poll();
+		for (const std::string& rEvent : labStreamInput)
+		{
+			LogInfo("Master: LabStreamInput = ", rEvent);
+		}
 
-        // Poll CefMediator
-        _pCefMediator->Poll(tpf);
+		// Poll CefMediator
+		_pCefMediator->Poll(tpf);
+
+		// Notification handling
+		if (_notificationTime <= 0)
+		{
+			// Show next notification
+			if (!_notificationStack.empty())
+			{
+				// Set content
+				auto content = _notificationStack.front();
+				eyegui::setContentOfTextBlock(
+					_pSuperLayout,
+					"notification",
+					content);
+				_notificationStack.pop();
+
+				// Make floating frame visible
+				eyegui::setVisibilityOFloatingFrame(_pSuperLayout, _notificationFrameIndex, true, false, true);
+
+				// Reset time
+				_notificationTime = NOTIFICATION_DISPLAY_DURATION;
+			}
+			else
+			{
+				// Hide notification display
+				eyegui::setVisibilityOFloatingFrame(_pSuperLayout, _notificationFrameIndex, false, false, true);
+			}
+		}
+		else
+		{
+			_notificationTime -= tpf;
+			_notificationTime = glm::max(0.f, _notificationTime);
+		}
 
         // Get cursor coordinates
         double currentMouseX;
@@ -557,8 +612,8 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
         {
             case GLFW_KEY_ESCAPE: { glfwSetWindowShouldClose(_pWindow, GL_TRUE); break; }
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
-            case GLFW_KEY_ENTER: { _enterKeyPressed = true; }
-            case GLFW_KEY_S: { _upLabStream->Send("42");  } // TODO: testing
+            case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
+            case GLFW_KEY_S: { _upLabStream->Send("42"); break; } // TODO: testing
         }
     }
 }
