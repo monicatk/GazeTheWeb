@@ -740,17 +740,33 @@ std::weak_ptr<Texture> Tab::GetWebViewTexture()
 
 void Tab::AddDOMNode(std::shared_ptr<DOMNode> spNode)
 {
-    // Create DOMTrigger
-    std::unique_ptr<DOMTrigger> upDOMTrigger = std::unique_ptr<DOMTrigger>(new DOMTrigger(this, spNode));
+	// Decide what to do with node
+	switch (spNode->GetType())
+	{
+	case DOMNodeType::TextInput:
+	{
+		// Create DOMTrigger
+		std::unique_ptr<DOMTrigger> upDOMTrigger = std::unique_ptr<DOMTrigger>(new DOMTrigger(this, spNode));
 
-    // Activate trigger
-    if (!_pipelineActive)
-    {
-        upDOMTrigger->Activate();
-    }
+		// Activate trigger
+		if (!_pipelineActive)
+		{
+			upDOMTrigger->Activate();
+		}
 
-    // Push it to vector
-    _DOMTriggers.push_back(std::move(upDOMTrigger));
+		// Push it to vector
+		_DOMTriggers.push_back(std::move(upDOMTrigger));
+	}
+	break;
+
+	case DOMNodeType::TextLink:
+	{
+		// Just add it to vector
+		_DOMTextLinks.push_back(spNode);
+	}
+	break;
+	}
+   
 }
 
 void Tab::ClearDOMNodes()
@@ -761,8 +777,11 @@ void Tab::ClearDOMNodes()
         upDOMTrigger->Deactivate();
     }
 
-    // Clear the vector with them
+    // Clear vector with triggers
    _DOMTriggers.clear();
+
+	// Clear vector with text links
+   _DOMTextLinks.clear();
 }
 
 void Tab::SetScrollingOffset(double x, double y)
@@ -1060,6 +1079,18 @@ void Tab::DrawDebuggingOverlay() const
 	{
 		// Render rect
 		renderRect(rDOMTrigger->GetDOMRect(), false);
+	}
+
+	// ### DOMTEXTLINKS ###
+
+	// Set rendering up for DOMTextLink
+	_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_TEXT_LINKS_DEBUG_COLOR);
+
+	// Go over all DOMTextLinks
+	for (const auto& rDOMTextLinks : _DOMTextLinks)
+	{
+		// Render rect
+		renderRect(rDOMTextLinks->GetRect(), false);
 	}
 
 	// ### FIXED ELEMENTS ###
