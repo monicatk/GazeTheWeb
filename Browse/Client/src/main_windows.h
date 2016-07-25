@@ -1,5 +1,4 @@
 #include <windows.h>
-
 #include "src/CEF/App.h"
 #include "include/cef_sandbox_win.h"
 
@@ -10,7 +9,7 @@
 // Forward declaration of common main
 int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app, void* windows_sandbox_info, std::string userDirectory);
 
-// Following taken out of CefSimple example of Chromium Embedded Framework!
+// Following taken partly out of CefSimple example of Chromium Embedded Framework!
 
 // Entry point function for all processes.
 int APIENTRY wWinMain(HINSTANCE hInstance,
@@ -62,35 +61,31 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 	errno_t err = _dupenv_s(&pValue, &len, "APPDATA");
 	std::string userDirectory(pValue, len - 1);
 
-	// Super project name
+    // Create project folder.
 	userDirectory.append("\\GazeTheWeb");
-
-	// Create directory
 	if (CreateDirectoryA(userDirectory.c_str(), NULL) ||
 		ERROR_ALREADY_EXISTS == GetLastError())
 	{
-		// TODO
+        // Everything ok.
 	}
 	else
 	{
-		// TODO
+        // Folder could not be created.
 	}
 
-	// Project name
+    // Create application folder.
 	userDirectory.append("\\Browse");
-
-	// Create directory
 	if (CreateDirectoryA(userDirectory.c_str(), NULL) ||
 		ERROR_ALREADY_EXISTS == GetLastError())
 	{
-		// TODO
+        // Everything ok.
 	}
 	else
 	{
-		// TODO
+        // Folder could not be created.
 	}
 
-	// Append another slash for easier usage of path
+    // Append another slash for easier usage of that path.
 	userDirectory.append("\\");
 
 	// Use common main now.
