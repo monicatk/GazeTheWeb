@@ -21,12 +21,15 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
     {
         if (tabInput.insideWebView)
         {
-            // Calculate current raw position
-            glm::vec2 newCoordinate(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY);
-            newCoordinate += _coordinateCenterOffset;
+			// Calculate current raw position
+			glm::vec2 newCoordinate(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY);
+			newCoordinate += _coordinateCenterOffset;
 
             // Speed of zooming
             float zoomSpeed;
+
+			// Update deviation value (fade away deviation)
+			_deviation = glm::max(0.f, _deviation - (tpf * 0.25f));
 
             // Update coordinate
             if (!_firstUpdate)
@@ -34,8 +37,12 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
                 // Delta of new position
                 glm::vec2 delta = newCoordinate - _coordinate;
 
+				// Add length of delta to deviation
+				// TODO: X and Y are not equally scaled, since relative values are used...
+				_deviation += glm::length(delta) * tpf;
+
                 // The bigger the distance, the slower the zoom
-                zoomSpeed = 0.5 * ( 1.f - glm::length(delta));
+                zoomSpeed = 0.5 * (1.f - glm::length(delta));
 
                 // Move to new click position (weighted by zoom level for more smoohtness at higher zoom)
                 float coordinateInterpolationSpeed = 5.f;
@@ -73,7 +80,9 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
         _pTab->SetWebViewParameters(webViewParameters);
 
         // Check, whether click is done
-        if (_logZoom <= 0.075f)
+		if (
+			_logZoom <= 0.075f // just zoomed so far into that coordinate is used
+			|| (_logZoom <= 0.5f && _deviation < 0.02f)) // coordinate seems to be quite fixed, just do it
         {
             SetOutputValue("coordinate", _coordinate);
             return true;
