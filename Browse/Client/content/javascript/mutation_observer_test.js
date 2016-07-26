@@ -384,11 +384,11 @@ function AddDOMTextLink(node)
 // DEBUG
 document.onreadystatechange = function()
 {
-	consolePrint("### DOCUMENT STATECHANGE! ###");
+	// consolePrint("### DOCUMENT STATECHANGE! ###");
 
-	if(document.readyState == 'complete')
+	if(document.readyState == 'interactive')
 	{
-		consolePrint("### Updating Link Rects ###");
+		consolePrint("### document.readyState == interactive ---> Updating Link Rects ###");
 
 		for(var i = 0, n = window.dom_links.length; i < n; i++)
 		{
