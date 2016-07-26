@@ -26,7 +26,7 @@ URLInput::URLInput(Master* pMaster, BookmarkManager const * pBookmarkManager)
 	eyegui::registerButtonListener(_pLayout, "bookmarks", _spURLButtonListener);
     eyegui::registerButtonListener(_pLayout, "delete", _spURLButtonListener);
     eyegui::registerButtonListener(_pLayout, "complete", _spURLButtonListener);
-	eyegui::registerButtonListener(_pBookmarksLayout, "close", _spURLButtonListener);
+	eyegui::registerButtonListener(_pBookmarksLayout, "back", _spURLButtonListener);
 }
 
 URLInput::~URLInput()
@@ -186,7 +186,7 @@ void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
 	else
 	{
 		// Bookmarks layout
-		if (id == "close")
+		if (id == "back")
 		{
 			eyegui::setVisibilityOfLayout(_pURLInput->_pBookmarksLayout, false, false, true);
 		}

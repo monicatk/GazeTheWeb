@@ -4,7 +4,7 @@
 		<row size="100%">
 			<column size="10%">
 				<stack style="dark_panel" showbackground="true">
-					<circlebutton icon="icons/Cross.png" desckey="url_input_bookmarks:close" id="close" border="5%"/>
+					<circlebutton icon="icons/Deselect.png" desckey="url_input_bookmarks:back" id="back" border="5%"/>
 				</stack>
 			</column>
 			<column size="5%">
