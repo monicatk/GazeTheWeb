@@ -38,10 +38,16 @@ static const int LOG_FILE_MAX_SIZE = 1024 * 1024;
 static const int LOG_FILE_COUNT = 5;
 static const float MOUSE_CURSOR_RELATIVE_SIZE = 0.1f;
 static const glm::vec3 DOM_TRIGGER_DEBUG_COLOR = glm::vec3(0, 1, 0);
+static const glm::vec3 DOM_TEXT_LINKS_DEBUG_COLOR = glm::vec3(0, 0, 1);
 static const glm::vec3 FIXED_ELEMENT_DEBUG_COLOR = glm::vec3(1, 0, 0);
 static const float BLUR_FOCUS_RELATIVE_RADIUS = 0.25f; // relative to smaller of both width or height
 static const float BLUR_PERIPHERY_MULTIPLIER = 0.7f;
 static const std::string BOOKMARKS_FILE = "bookmarks.xml";
 static const std::string SETTINGS_FILE = "settings.xml";
+static const int URL_INPUT_BOOKMARKS_ROWS_ON_SCREEN = 6;
+static const float NOTIFICATION_WIDTH = 0.3f;
+static const float NOTIFICATION_Y = 0.0075f;
+static const float NOTIFICATION_HEIGHT = 0.03f;
+static const float NOTIFICATION_DISPLAY_DURATION = 3.f;
 
 #endif // GLOBAL_H_

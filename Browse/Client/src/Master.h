@@ -18,6 +18,7 @@
 #include "src/Utils/Framebuffer.h"
 #include "externals/OGL/gl_core_3_3.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
+#include <queue>
 
 // Forward declaration
 class Texture;
@@ -65,6 +66,12 @@ public:
 
 	// Get user directory location
 	std::string GetUserDirectory() const { return _userDirectory; }
+
+	// Push notification to display
+	void PushNotification(std::u16string content);
+
+	// Push notification to display taken from localization file
+	void PushNotificationByKey(std::string key);
 
     // ### EYEGUI DELEGATION ###
 
@@ -179,6 +186,15 @@ private:
 
 	// Directory for bookmarks etc
 	std::string _userDirectory;
+
+	// Frame index of notification message
+	unsigned int _notificationFrameIndex = 0;
+
+	// Stack with content for notifications
+	std::queue<std::u16string> _notificationStack;
+
+	// Time of notification displaying
+	float _notificationTime;
 };
 
 #endif // MASTER_H_

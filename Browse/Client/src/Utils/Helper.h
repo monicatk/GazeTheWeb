@@ -20,4 +20,7 @@ std::string ShortenURL(std::string URL);
 // Calculate maximal level of mip map
 int MaximalMipMapLevel(int width, int height);
 
+// Helper to extract float from string
+float StringToFloat(std::string value);
+
 #endif // HELPER_H_

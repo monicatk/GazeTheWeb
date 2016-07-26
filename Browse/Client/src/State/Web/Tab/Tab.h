@@ -324,8 +324,11 @@ private:
     // Current URL
     std::string _url = "";
 
-    // Vector with DOMTriggers
+    // Vector with DOMTriggers (take DOM input node as input...)
     std::vector<std::unique_ptr<DOMTrigger> >_DOMTriggers;
+
+	// Vector with DOMTextLinks
+	std::vector<std::shared_ptr<DOMNode> >_DOMTextLinks;
 
     // Web view in which website is rendered and displayed
     std::unique_ptr<WebView> _upWebView;

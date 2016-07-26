@@ -16,11 +16,11 @@ Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)
     // Save member
     _pCefMediator = pCefMediator;
 
-	// Create URL input
-	_upURLInput = std::unique_ptr<URLInput>(new URLInput(_pMaster));
-
 	// Create bookmark manager
 	_upBookmarkManager = std::unique_ptr<BookmarkManager>(new BookmarkManager(pMaster->GetUserDirectory()));
+
+	// Create URL input
+	_upURLInput = std::unique_ptr<URLInput>(new URLInput(_pMaster, _upBookmarkManager.get()));
 
     // Create own layout
     _pWebLayout = _pMaster->AddLayout("layouts/Web.xeyegui", EYEGUI_WEB_LAYER, false);
@@ -677,7 +677,11 @@ Web::AddTabAfterJob::AddTabAfterJob(Tab* pCaller, std::string URL, bool show) : 
 
 void Web::AddTabAfterJob::Execute(Web* pCallee)
 {
+	// Add tab after caller
     pCallee->AddTabAfter(_pCaller, _URL, _show);
+
+	// Flash tab overview button to indicate, that new tab was created by application
+	eyegui::flash(pCallee->_pWebLayout, "tab_overview");
 }
 
 void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
@@ -730,11 +734,19 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				// Add as bookmark
 				bool success = _pWeb->_upBookmarkManager->AddBookmark(_pWeb->_tabs.at(currentTab)->GetURL());
 
-				// If successful, display it to user
+				// Display it on icon. Even if not successful, because that means it was already a bookmark
+				eyegui::setIconOfIconElement(_pWeb->_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_true.png");
+
+				// Display notification
 				if (success)
 				{
-					eyegui::setIconOfIconElement(_pWeb->_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_true.png");
+					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_success");
 				}
+				else
+				{
+					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_existing");
+				}
+				
 			}
 		}
         else if (id == "reload_tab")

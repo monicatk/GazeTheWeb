@@ -73,7 +73,16 @@ EyeInput::~EyeInput()
     }
 }
 
-bool EyeInput::Update(float tpf,  double mouseX, double mouseY, double& rGazeX, double& rGazeY)
+bool EyeInput::Update(
+	float tpf,
+	double mouseX,
+	double mouseY,
+	double& rGazeX,
+	double& rGazeY,
+	int windowX,
+	int windowY,
+	int windowWidth,
+	int windowHeight)
 {
     // Mouse override of eyetracker
     if(_mouseOverride)
@@ -138,7 +147,7 @@ bool EyeInput::Update(float tpf,  double mouseX, double mouseY, double& rGazeX, 
     // Update eyetracker if available
     if (_upEyetracker != NULL)
     {
-        _upEyetracker->Update(tpf);
+        _upEyetracker->Update(tpf, windowX, windowY, windowWidth, windowHeight);
     }
 
     // Bool to indicate mouse usage

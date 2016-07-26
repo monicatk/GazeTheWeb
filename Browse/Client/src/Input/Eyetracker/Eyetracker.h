@@ -21,7 +21,12 @@ public:
     bool Disconnect();
 
     // Update (for filtering input)
-    void Update(float tpf);
+    void Update(
+		float tpf,
+		int windowX,
+		int windowY,
+		int windowWidth,
+		int windowHeight);
 
     // Getter for gaze coordinates
     double GetGazeX() const;

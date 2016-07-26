@@ -52,6 +52,9 @@ protected:
 
     // Bool to indicate first update
     bool _firstUpdate = true;
+
+	// Deviation (relative coordiantes, no pixels!)
+	float _deviation = 0;
 };
 
 #endif // ZOOMCOORDINATEACTION_H_

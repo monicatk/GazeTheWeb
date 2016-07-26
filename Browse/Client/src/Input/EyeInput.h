@@ -24,7 +24,17 @@ public:
     virtual ~EyeInput();
 
     // Update. Returns whether gaze is currently used (or mouse when false)
-    bool Update(float tpf, double mouseX, double mouseY, double& rGazeX, double& rGazeY);
+	// Taking information about window to enable eyetracking in windowed mode
+	bool Update(
+		float tpf,
+		double mouseX,
+		double mouseY,
+		double& rGazeX,
+		double& rGazeY,
+		int windowX,
+		int windowY,
+		int windowWidth,
+		int windowHeight);
 
 private:
 

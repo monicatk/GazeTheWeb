@@ -9,6 +9,7 @@
 
 #include <string>
 #include <set>
+#include <vector>
 
 class BookmarkManager
 {
@@ -28,6 +29,9 @@ public:
 
 	// Get unsorted bookmarks
 	std::set<std::string> GetBookmarks() const;
+
+	// Get sorted bookmarks
+	std::vector<std::string> GetSortedBookmarks() const;
 
 	// Check for existence
 	bool IsBookmark(std::string URL) const;
