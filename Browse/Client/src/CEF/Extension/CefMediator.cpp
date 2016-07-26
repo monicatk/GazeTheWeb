@@ -242,6 +242,7 @@ void CefMediator::ClearDOMNodes(CefRefPtr<CefBrowser> browser)
     {
         // clear corresponding Tabs DOM Node list (implicitly destroy all DOM Node objects)
         pTab->ClearDOMNodes();
+		//LogDebug("CefMediator: ### DISABLED DOM CLEARING FOR LINK TESTING ###");
         LogDebug("CefMediator: Cleared all DOM nodes belonging to browserID = ", browser->GetIdentifier());
     }
 }

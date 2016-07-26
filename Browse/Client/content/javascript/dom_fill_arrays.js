@@ -29,7 +29,7 @@ function updateOffsets()
 	if(document.body.style.zoom)
 	{
 		zoomFactor = document.body.style.zoom;
-	};
+	}
 }
 
 updateOffsets();

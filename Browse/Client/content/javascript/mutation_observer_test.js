@@ -26,7 +26,7 @@ function AdjustRectCoordinatesToWindow(rect)
 	if(document.body.style.zoom)
 	{
 		zoomFactor = document.body.style.zoom;
-	};
+	}
 
 	var output = [];
 	output.push(rect.top*zoomFactor + offsetY);
@@ -365,7 +365,8 @@ function AddDOMTextLink(node)
 	{
 		window.dom_links.push(node);
 		// window.dom_links_rect.push(AdjustRectCoordinatesToWindow(node));
-		var coords = AdjustRectCoordinatesToWindow(rect); //[rect.top, rect.left, rect.bottom, rect.right];
+		// var coords = AdjustRectCoordinatesToWindow(rect); //[rect.top, rect.left, rect.bottom, rect.right];
+		var coords = [rect.top, rect.left, rect.bottom, rect.right];
 		window.dom_links_rect.push(coords);
 
 		// DEBUG
@@ -379,6 +380,23 @@ function AddDOMTextLink(node)
 
 // TODO: Better: Add EventListener?
 // document.onclick = function(){ UpdateBoundingRects(); };
+
+// DEBUG
+document.onreadystatechange = function()
+{
+	consolePrint("### DOCUMENT STATECHANGE! ###");
+
+	if(document.readyState == 'complete')
+	{
+		consolePrint("### Updating Link Rects ###");
+
+		for(var i = 0, n = window.dom_links.length; i < n; i++)
+		{
+			var node = window.dom_links[i];
+			AddDOMTextLink(node);
+		}
+	}
+}
 
 // alert(window.elements.length);
 // eine Instanz des Observers erzeugen
@@ -447,6 +465,12 @@ function MutationObserverInit()
 		  						}
 		  					}
 
+		  					// if(attr == 'href')
+		  					// {
+		  					// 	AddFixedElement(node);
+		  					// 	consolePrint("Changes in attribute |href|, adding link..");
+		  					// }
+
 		  				}
 
 		  			}
@@ -486,7 +510,10 @@ function MutationObserverInit()
 		  						// Find text links
 		  						if(node.tagName == 'A')
 		  						{
-		  							AddDOMTextLink(node);
+		  							// AddDOMTextLink(node);
+		  							// DEBUG
+		  							window.dom_links.push(node);
+		  							window.dom_links_rect.push([0,0,0,0]);
 
 		  						}
 
