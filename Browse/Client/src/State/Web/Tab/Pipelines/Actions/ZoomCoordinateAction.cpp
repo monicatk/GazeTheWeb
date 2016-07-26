@@ -82,7 +82,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
         // Check, whether click is done
 		if (
 			_logZoom <= 0.075f // just zoomed so far into that coordinate is used
-			|| (_logZoom <= 0.5f && _deviation < 0.02f)) // coordinate seems to be quite fixed, just do it
+			|| (_logZoom <= 0.25f && _deviation < 0.02f)) // coordinate seems to be quite fixed, just do it
         {
             SetOutputValue("coordinate", _coordinate);
             return true;
