@@ -28,6 +28,10 @@ Settings::Settings(Master* pMaster) : State(pMaster)
 	_pGeneralLayout = _pMaster->AddLayout("layouts/SettingsGeneral.xeyegui", EYEGUI_SETTINGS_LAYER, false);
 	_pInfoLayout = _pMaster->AddLayout("layouts/SettingsInfo.xeyegui", EYEGUI_SETTINGS_LAYER, false);
 
+    // Set state of switches before registering listerners to avoid unnecessary saving
+    if(_globalSetup.showDescriptions) { eyegui::buttonDown(_pGeneralLayout, "toggle_descriptions", true); }
+    if(_globalSetup.showGazeVisualization) { eyegui::buttonDown(_pGeneralLayout, "toggle_gaze_visualization", true); }
+
 	// Button listener
 	_spSettingsButtonListener = std::shared_ptr<SettingsButtonListener>(new SettingsButtonListener(this));
 	eyegui::registerButtonListener(_pSettingsLayout, "close", _spSettingsButtonListener);
@@ -51,7 +55,7 @@ Settings::~Settings()
 
 StateType Settings::Update(float tpf, Input& rInput)
 {
-	if (_goToWeb)
+    if (_goToWeb)
 	{
 		return StateType::WEB;
 	}
@@ -223,11 +227,11 @@ void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string
 		}
 		else if (id == "toggle_descriptions")
 		{
-			_pSettings->_globalSetup.showDescriptions = !_pSettings->_globalSetup.showDescriptions;
+            _pSettings->_globalSetup.showDescriptions = true;
 		}
 		else if (id == "toggle_gaze_visualization")
 		{
-			_pSettings->_globalSetup.showGazeVisualization = !_pSettings->_globalSetup.showGazeVisualization;
+            _pSettings->_globalSetup.showGazeVisualization = true;
 		}
 
 		// Apply and save
@@ -241,4 +245,23 @@ void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string
 			eyegui::setVisibilityOfLayout(_pSettings->_pInfoLayout, false, false, true);
 		}
 	}
+}
+
+void Settings::SettingsButtonListener::up(eyegui::Layout* pLayout, std::string id)
+{
+    if (pLayout == _pSettings->_pGeneralLayout)
+    {
+        // ### General layout ###
+        if (id == "toggle_descriptions")
+        {
+            _pSettings->_globalSetup.showDescriptions = false;
+        }
+        else if (id == "toggle_gaze_visualization")
+        {
+            _pSettings->_globalSetup.showGazeVisualization = false;
+        }
+
+        // Apply and save
+        _pSettings->ApplySettings(true);
+    }
 }

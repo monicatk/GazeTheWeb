@@ -63,7 +63,7 @@ private:
         SettingsButtonListener(Settings* pSettings) { _pSettings = pSettings; }
         virtual void hit(eyegui::Layout* pLayout, std::string id) {}
         virtual void down(eyegui::Layout* pLayout, std::string id);
-        virtual void up(eyegui::Layout* pLayout, std::string id) {}
+        virtual void up(eyegui::Layout* pLayout, std::string id);
 
     private:
 
