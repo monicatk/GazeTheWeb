@@ -451,9 +451,21 @@ void Master::Loop()
         glfwGetCursorPos(_pWindow, &currentMouseX, &currentMouseY);
 
         // Update eye input
+		int windowX = 0;
+		int windowY = 0;
+		glfwGetWindowPos(_pWindow, &windowX, &windowY);
         double gazeX;
         double gazeY;
-        bool gazeUsed = _upEyeInput->Update(tpf, currentMouseX, currentMouseY, gazeX, gazeY);
+        bool gazeUsed = _upEyeInput->Update(
+			tpf,
+			currentMouseX,
+			currentMouseY,
+			gazeX,
+			gazeY,
+			windowX,
+			windowY,
+			_width,
+			_height);
 
         // Update cursor
         eyegui::setVisibilityOfLayout(_pCursorLayout, !gazeUsed, false, true);

@@ -37,23 +37,46 @@ bool Eyetracker::Disconnect()
 	}
 }
 
-void Eyetracker::Update(float tpf)
+void Eyetracker::Update(
+	float tpf,
+	int windowX,
+	int windowY,
+	int windowWidth,
+	int windowHeight)
 {
 	// Collect k or less valid samples
 	std::vector<double> gazeXSamples, gazeYSamples;
 	eyetracker_global::GetKOrLessValidRawGazeEntries(EYETRACKER_AVERAGE_SAMPLE_COUNT, gazeXSamples, gazeYSamples);
 
+	// TODO: maybe use something like queue to collect raw data, clamp it and then add it to a buffer. Then
+	// every sample is clamped with the correct (or at least more corresponding) window coordinates. At the moment,
+	// All collected samples are clamped with the current window coordinates
+
+	// Convert parameters to double
+	double windowXDouble = (double)windowX;
+	double windowYDouble = (double)windowY;
+	double windowWidthDouble = (double)windowWidth;
+	double windowHeightDouble = (double)windowHeight;
+
 	// Average the given samples
 	double sum = 0;
 	for (double x : gazeXSamples)
 	{
-		sum += x;
+		// Do some clamping according to window coordinates
+		double clampedX = x - windowXDouble;
+		clampedX = clampedX > 0.0 ? clampedX : 0.0;
+		clampedX = clampedX < windowWidthDouble ? clampedX : windowWidthDouble;
+		sum += clampedX;
 	}
 	_gazeX = sum / gazeXSamples.size();
 	sum = 0;
 	for (double y : gazeYSamples)
 	{
-		sum += y;
+		// Do some clamping according to window coordinates
+		double clampedY = y - windowYDouble;
+		clampedY = clampedY > 0.0 ? clampedY : 0.0;
+		clampedY = clampedY < windowHeightDouble ? clampedY : windowHeightDouble;
+		sum += clampedY;
 	}
 	_gazeY = sum / gazeYSamples.size();
 }
