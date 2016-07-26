@@ -42,5 +42,5 @@ action_keyboard:submit=Submit
 action_keyboard:space=Space
 action_keyboard:shift=Shift
 pause:pause=Pause
-notification:bookmark_added_success=Added Bookmark Successfully
+notification:bookmark_added_success=Successfully Added Bookmark
 notification:bookmark_added_existing=Bookmark Already Existed
