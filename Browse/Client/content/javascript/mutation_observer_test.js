@@ -37,6 +37,7 @@ function AdjustRectCoordinatesToWindow(rect)
 	return output;
 }
 
+// Only used for fixed elements
 function AdjustRectToZoom(rect)
 {
 	var zoomFactor = 1;
@@ -369,9 +370,9 @@ function AddDOMTextLink(node)
 
 		// DEBUG
 		// consolePrint("Added DOMTextLink #"+(window.dom_links.length-1)+", coords: "+coords);
-		
+
 		// Tell CEF message router, that DOM Link was added
-		consolePrint('#DOMLink#'+(window.dom_links.length-1));
+		consolePrint('#DOMLink#'+(window.dom_links.length-1)); // TODO: #DOMLink#add/rem?
 	}
 	
 }
@@ -415,7 +416,7 @@ function MutationObserverInit()
 		  							if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
 		  							{
 		  								//DEBUG
-		  								consolePrint("Attribut "+attr+" changed, calling AddFixedElement");
+		  								// consolePrint("Attribut "+attr+" changed, calling AddFixedElement");
 
 		  								AddFixedElement(node);
 		  							}
@@ -544,7 +545,7 @@ function MutationObserverInit()
 	// eigentliche Observierung starten und Zielnode und Konfiguration übergeben
 	window.observer.observe(window.document, config);
 
-	consolePrint(' MutationObserver was told what to observe.');
+	consolePrint('MutationObserver was told what to observe.');
 	
 } // END OF MutationObserverInit()
 
