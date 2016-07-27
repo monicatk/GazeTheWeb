@@ -217,7 +217,8 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
         LogInfo("File named: ", filename);
         std::ofstream fs(filename, std::ios_base::out); // overwrite existing
         csv::csv_ostream csvs(fs);
-        csvs << "Timestamp" << "Layout" << "GazeCoordinate" << "ElementType" << "ElementId" << "ElementRect" << "ElementActivity" << "InteractionType" << "InteractionInfoA" << csv::endl;
+        csvs << "Timestamp" << "Layout" << "GazeCoordinate" << "ElementType" << "ElementId" << "ElementRect" << "ElementActivity" << "InteractionType" << "InteractionInfoA";
+		fs << std::endl;
         LogInfo("..done.");
 
         // Listen to eyeGUI
@@ -249,17 +250,17 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
             // Write everything to file
             std::ofstream fs(filename, std::ios_base::app | std::ios_base::out); // append to existing
             csv::csv_ostream csvs(fs);
-            csvs
-            << ss.str() + ":" + std::to_string(milliseconds)
-            << layout
-            << gazeCoordinate
-            << elementType
-            << elementId
-            << elementRect
-            << elementActivity
-            << interactionType
-            << interactionInfoA
-            << csv::endl;
+			csvs
+				<< ss.str() + ":" + std::to_string(milliseconds)
+				<< layout
+				<< gazeCoordinate
+				<< elementType
+				<< elementId
+				<< elementRect
+				<< elementActivity
+				<< interactionType
+				<< interactionInfoA;
+			fs << std::endl;
         });
     }
 
