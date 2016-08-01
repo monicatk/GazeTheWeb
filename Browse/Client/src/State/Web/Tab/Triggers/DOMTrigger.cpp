@@ -99,9 +99,13 @@ void DOMTrigger::CalculatePositionOfOverlayButton(float& rRelativePositionX, flo
     int windowWidth, windowHeight;
     _pTab->GetWindowSize(windowWidth, windowHeight);
 
-    // Scrolling offset
-    double scrollingOffsetX, scrollingOffsetY;
-    _pTab->GetScrollingOffset(scrollingOffsetX, scrollingOffsetY);
+    // Scrolling offset only when not fixed
+	double scrollingOffsetX = 0;
+	double scrollingOffsetY = 0;
+	if (!_spNode->GetFixed())
+	{
+		_pTab->GetScrollingOffset(scrollingOffsetX, scrollingOffsetY);
+	}
 
     // Calculate coordinates and size
     rRelativePositionX = (center.x - scrollingOffsetX + (float)webViewX) / (float)windowWidth;

@@ -26,6 +26,7 @@ class DOMNode
         int GetNodeID() const { return _nodeID; };
         Rect GetRect() const { return _rect; };
         glm::vec2 GetCenter() const;
+		bool GetFixed() const { return _fixed; }
 
 		void UpdateAttribute(int attr, void* data, bool initial=false);
 
