@@ -294,14 +294,14 @@ void Handler::ResizeBrowsers()
 
         bit->get()->GetHost()->WasResized();
 
-        // Clear DOM nodes before updating those
-        _pMediator->ClearDOMNodes(bit->get());			// TODO: Rect Update instead!
-
-        // Send msg to renderer in order to fetch JS variables' values of input field coordinates
-        ReloadDOMNodes(bit->get(), "(browser was resized)");
-
         // Resize may cause change in page size
         UpdatePageResolution(bit->get());
+
+		// TODO / NOTE: 
+		// It might be better to perform that Rect Update not simultaneously on every browser.
+		// Instead save it and execute it when you switch to the target tab
+
+		bit->get()->GetMainFrame()->ExecuteJavaScript("UpdateDOMRects();", "", 0);
 
         // EXPERIMENTAL
         //GetFixedElements(bit->get());
@@ -397,13 +397,13 @@ void Handler::SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged
     if (double zoomLevel = _pMediator->GetZoomLevel(browser))
     {
         LogDebug("Handler: Setting zoom level = ", zoomLevel, " (browserID = ", browser->GetIdentifier(), ").");
-        const std::string setZoomLevel = "document.body.style.zoom="+std::to_string(zoomLevel)+";this.blur();";
+		const std::string setZoomLevel = "document.body.style.zoom=" + std::to_string(zoomLevel) + ";this.blur(); UpdateDOMRects();";
         browser->GetMainFrame()->ExecuteJavaScript(setZoomLevel, "", 0);
 
         if (definitelyChanged)
         {
             // Reload DOM nodes because of changed coordinates due to zooming
-            _pMediator->ClearDOMNodes(browser);			// TODO: Rect update instead!
+            //_pMediator->ClearDOMNodes(browser);			// TODO: Rect update instead!
 
             ReloadDOMNodes(browser);
 

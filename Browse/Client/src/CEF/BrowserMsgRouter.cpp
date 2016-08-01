@@ -80,39 +80,13 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		
 	}
 
-	/* OLD APPROACH
-	// Get informed that DOMTextLink was added and how to access it
-	if ((requestName.compare(0, 9, "#DOMLink#") == 0))
-	{
-		const std::string id = requestName.substr(9, requestName.size());
-		//LogDebug("BrowserMsgRouter: DOMTextLink id=", id);
-
-		CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("FetchDOMTextLink");
-		msg->GetArgumentList()->SetInt(0, atoi(id.c_str()));
-		browser->SendProcessMessage(PID_RENDERER, msg);
-
-		return true;
-	}
-
-	if ((requestName.compare(0, 14, "#DOMTextInput#") == 0))
-	{
-		const std::string id = requestName.substr(14, requestName.size());
-		//LogDebug("BrowserMsgRouter: DOMTextLink id=", id);
-
-		CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("FetchDOMTextInput");
-		msg->GetArgumentList()->SetInt(0, atoi(id.c_str()));
-		browser->SendProcessMessage(PID_RENDERER, msg);
-
-		return true;
-	}
-	* END OF OLD APPROACH
-	*/
-
+	
 
 	/* NOTES
 		Encoding of request strings for DOM node operations:
 
 		DOM#{add | rem | upd}#nodeType#nodeID{#attribute#data}#
+
 
 		Definitions:
 		nodeType	: int
@@ -124,6 +98,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		upd --> update data of an specific node attribute
 		attribute	: int
 			0	: Rect
+			1	: _fixed
 		data	: depends on attribute
 	*/
 
@@ -168,8 +143,9 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					id = std::stoi(bufferStr); break;
 				};
 				case(1) : { 
-					attr = std::stoi(bufferStr); 
-					dataStr = str.substr(i + 1, str.length() - 1)+"#";
+					attr = std::stoi(bufferStr);
+					// Extract data string, interpret it later
+					dataStr = str.substr(i + 1, str.length() - 2);
 					break; 
 				};
 				}
@@ -218,33 +194,46 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			void* data;
 			switch (attr)
 			{
-			// Rect was updated, extract 4 double values
-			case(0) : {
-				std::vector<float> rectData;
-				std::vector<char> buffer;
-				for (int i = 0; i < dataStr.length(); i++)
-				{
-					const char read = dataStr.at(i);
-					if (read != ';' && read != '#')
+				// Rect was updated, extract 4 double values
+				case(0) : {
+					std::vector<float> rectData;
+					std::vector<char> buffer;
+					for (int i = 0; i < dataStr.length(); i++)
 					{
-						buffer.push_back(read);
-					}
-					else if (buffer.size() > 0)
-					{
-						const std::string bufferStr(buffer.begin(), buffer.end());
-						rectData.push_back(std::stod(bufferStr));
+						const char read = dataStr.at(i);
+						if (read != ';' && read != '#')
+						{
+							buffer.push_back(read);
+						}
+						else if (buffer.size() > 0)
+						{
+							const std::string bufferStr(buffer.begin(), buffer.end());
+							rectData.push_back(std::stod(bufferStr));
 
-						// DEBUG
-						//LogDebug("MsgRouter: Read ", bufferStr, " converted it to ", std::stod(bufferStr));
+							// DEBUG
+							//LogDebug("MsgRouter: Read ", bufferStr, " converted it to ", std::stod(bufferStr));
 
-						buffer.clear();
+							buffer.clear();
+						}
 					}
-				}
-				Rect rect = Rect(rectData);
-				// Assign extracted data to |data|
-				data = (void*) &rect;
-				break;
-			};
+					Rect rect = Rect(rectData);
+					// Assign extracted data to |data|
+					data = (void*) &rect;
+					break;
+				};
+
+				// Nodes fixation status changed
+				case(1) : {
+					//LogDebug("request= ", requestName);
+					//LogDebug("dataStr= ", dataStr);
+				
+					bool boolVal = dataStr.at(0) != '0';
+					// Assign extracted data to |data|
+					data = (bool*)&(boolVal);
+
+					//LogDebug("data= ", *(bool*)data);
+					break;
+				};
 			}
 			// Pass decoded update information to Tab via CefMediator
 			_pMsgRouter->GetMediator()->UpdateDOMNode(browser, type, id, attr, data);

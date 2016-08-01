@@ -30,6 +30,11 @@ void DOMNode::UpdateAttribute(int attr, void * data, bool initial)
 
 			break;
 		}
+		case(1) : {
+			_fixed = *(bool*)data;
+			//LogDebug("_fixed=", _fixed);
+			break;
+		}
 	}
 	// TODO: More cases for other attributes
 }

@@ -1,5 +1,20 @@
 // https://developer.mozilla.org/de/docs/Web/API/MutationObserver
 
+// Global variables in which DOM relevant information is stored
+window.fixed_elements = new Set();
+window.fixed_IDlist = [];				// Position |i| contains boolean information if ID |i| is currently used
+window.fixed_coordinates = [[]];		// 2D list of bounding rectangle coordinates, fill with bounding rect coordinates of fixed node and its children (if position == 'relative')
+
+window.dom_links = [];
+window.dom_links_rect = [[]];
+
+window.dom_textinputs = [];
+window.dom_textinputs_rect = [[]];
+
+
+
+
+
 
 // Helper function for console output
 function consolePrint(msg)
@@ -56,19 +71,6 @@ function AdjustRectToZoom(rect)
 }
 
 
-
-// node.fixedID defines position, where to store bounding rectangle coordinates in |window.fixed_coordinates|
-window.elements = [];
-
-window.fixed_elements = new Set();
-window.fixed_IDlist = [];				// Position |i| contains boolean information if ID |i| is currently used
-window.fixed_coordinates = [[]];		// 2D list of bounding rectangle coordinates, fill with bounding rect coordinates of fixed node and its children (if position == 'relative')
-
-window.dom_links = [];
-window.dom_links_rect = [[]];
-
-window.dom_textinputs = [];
-window.dom_textinputs_rect = [[]];
 
 // Used to get coordinates as array of size 4 in RenderProcessHandler
 // function GetRect(node){ return AdjustRectCoordinatesToWindow(node.getBoundingClientRect()); }
@@ -153,6 +155,10 @@ function AddDOMTextInput(node)
 			node.getBoundingClientRect()
 		)
 	);
+
+	// Add attribute in order to recognize already discovered DOM nodes later
+	node.setAttribute('nodeType', '0');
+	node.setAttribute('nodeID', (window.dom_textinputs.length-1));
 
 	// Inform CEF, that new text input is available
 	var node_amount = window.dom_textinputs.length - 1;
@@ -256,6 +262,24 @@ function SaveBoundingRectCoordinates(node)
 	// }
 }
 
+// Inform CEF about the current fication status of a already known node
+function SetFixationStatus(node, status)
+{
+	var type = node.getAttribute('nodeType');
+	var id = node.getAttribute('nodeID');
+
+	if(type && id)
+	{
+		// Inform about updates in node's attribute |1| aka |_fixed : bool|
+		// _fixed = status;
+		var intStatus = (status) ? 1 : 0;
+		consolePrint('DOM#upd#'+type+'#'+id+'#1#'+intStatus+'#');
+
+		//DEBUG
+		//consolePrint('Setting fixation status to '+intStatus);
+	}
+}
+
 // parent & child are 1D arrays of length 4
 function ComputeBoundingRect(parent, child)
 {
@@ -279,6 +303,12 @@ function ComputeBoundingRectOfAllChilds(node, depth, fixedID)
 		if(!node.hasAttribute('fixedID'))
 		{
 			node.setAttribute('fixedID', fixedID);
+		}
+
+		// Inform CEF that DOM node is child of a fixed element
+		if(node.hasAttribute('nodeType'))
+		{
+			SetFixationStatus(node, true);
 		}
 
 		var rect = node.getBoundingClientRect();
@@ -310,8 +340,9 @@ function ComputeBoundingRectOfAllChilds(node, depth, fixedID)
 	return [-1,-1,-1,-1]; // TODO: nodeType != 1 possible? May ruin the whole computation
 }
 
-
-function RemoveFixedElement(node)
+// If resetChildren=true, traverse through all child nodes and remove attribute 'fixedID'
+// May not be neccessary if node (and its children) were completely removed from DOM tree
+function RemoveFixedElement(node, resetChildren)
 {
 	// Remove node from Set of fixed elements
 	window.fixed_elements.delete(node);
@@ -331,6 +362,25 @@ function RemoveFixedElement(node)
 		consolePrint('#fixElem#rem#'+zero+id);
 		// Remove 'fixedID' attribute
 		node.removeAttribute('fixedID');
+
+		if(resetChildren && node.children)
+		{
+			UnfixChildNodes(node.children);
+		}
+	}
+}
+
+function UnfixChildNodes(childNodes)
+{
+	for(var i = 0, n = childNodes.length; i < n; i++)
+	{
+		childNodes[i].removeAttribute('fixedID');
+		SetFixationStatus(childNodes[i], false);
+
+		if(childNodes[i].children)
+		{
+			UnfixChildNodes(childNodes[i].children);
+		}
 	}
 }
 
@@ -449,17 +499,16 @@ function AddDOMTextLink(node)
 	// DEBUG
 	//consolePrint("START adding text link");
 
-	var rect = node.getBoundingClientRect(node);
-
-
 	window.dom_links.push(node);
-	// window.dom_links_rect.push(AdjustRectCoordinatesToWindow(node));
-	// var coords = AdjustRectCoordinatesToWindow(rect); //[rect.top, rect.left, rect.bottom, rect.right];
-	var coords = [rect.top, rect.left, rect.bottom, rect.right];
+
+	var rect = node.getBoundingClientRect(node);
+	var coords = AdjustRectCoordinatesToWindow(rect); //[rect.top, rect.left, rect.bottom, rect.right];
 	window.dom_links_rect.push(coords);
 
-	// DEBUG
-	// consolePrint("Added DOMTextLink #"+(window.dom_links.length-1)+", coords: "+coords);
+
+	// Add attribute in order to recognize already discovered DOM nodes later
+	node.setAttribute('nodeType', '1');
+	node.setAttribute('nodeID', (window.dom_links.length-1));
 
 	// Tell CEF message router, that DOM Link was added
 	consolePrint('DOM#add#1#'+(window.dom_links.length-1)+'#');
@@ -468,10 +517,7 @@ function AddDOMTextLink(node)
 	//consolePrint("END adding text link");
 }
 
-// TODO: Better: Add EventListener?
-// document.onclick = function(){ UpdateBoundingRects(); };
-
-// DEBUG
+// Trigger DOM data update on changing document loading status
 document.onreadystatechange = function()
 {
 	// consolePrint("### DOCUMENT STATECHANGE! ###");
@@ -498,11 +544,18 @@ document.onreadystatechange = function()
 	}
 }
 
-// alert(window.elements.length);
-// eine Instanz des Observers erzeugen
+window.onresize = function()
+{
+	UpdateDOMRects();
+	// TODO: Update fixed elements' Rects too?
+	consolePrint("Javascript detected window resize.");
+}
+
+
+// Instantiate and initialize the MutationObserver
 function MutationObserverInit()
 { 
-	consolePrint('Trying to initialize Mutation Observer ... ');
+	consolePrint('Initializing Mutation Observer ... ');
 
 	window.observer = new MutationObserver(
 		function(mutations) {
@@ -528,13 +581,14 @@ function MutationObserverInit()
 		  					// if (node.tagName == 'INPUT' && node.type == 'text')
 		  					// 	alert('tagname: \''+node.tagName+'\' attr: \''+attr+'\' value: \''+node.getAttribute(attr)+'\' oldvalue: \''+mutation.oldValue+'\'');
 
-		  					if(attr == 'style' || attr == 'class') // TODO: example: uni-koblenz.de - node.id='header': class changes from 'container' to 'container fixed'
+		  					if(attr == 'style' || 
+							   (document.readyState != 'loading' && attr == 'class') ) // TODO: example: uni-koblenz.de - node.id='header': class changes from 'container' to 'container fixed'
 		  					{
 		  						// alert('attr: \''+attr+'\' value: \''+node.getAttribute(attr)+'\' oldvalue: \''+mutation.oldValue+'\'');
 		  						if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
 		  						// if(node.style.position && node.style.position == 'fixed')
 		  						{
-		  							if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
+		  							if(!window.fixed_elements.has(node))
 		  							{
 		  								//DEBUG
 		  								// consolePrint("Attribut "+attr+" changed, calling AddFixedElement");
@@ -548,9 +602,10 @@ function MutationObserverInit()
 		  							// If contained, remove node from set of fixed elements
 		  							if(window.fixed_elements.has(node))
 		  							{
-		  								RemoveFixedElement(node);
+		  								RemoveFixedElement(node, true);
 		  							}
 		  						}
+
 		  					}
 
 		  					// Changes in attribute 'class' may indicate that bounding rect update is needed, if node is child node of a fixed element
@@ -560,8 +615,11 @@ function MutationObserverInit()
 		  						{
 		  							//DEBUG
 		  							// consolePrint("class changed, updating subtree");
+									UpdateDOMRects();
 
 		  							UpdateSubtreesBoundingRect(node);
+
+									
 
 
 		  							// TODO: Triggered quite often... (while scrolling)
@@ -652,7 +710,7 @@ function MutationObserverInit()
 			  					// if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
 			  					// 	alert('Observed removal of fixed child node!');
 
-			  					RemoveFixedElement(node);
+			  					RemoveFixedElement(node, false);
 			  				}
 			  			}
 
@@ -689,6 +747,37 @@ function MutationObserverInit()
 	consolePrint('MutationObserver was told what to observe.');
 
 	// TODO: Tweak MutationObserver by defining a more specific configuration
+
+
+
+
+	/*
+	documentObserver = new MutationObserver(
+		function(mutations) {
+		  	mutations.forEach(
+		  		function(mutation)
+		  		{
+					// DEBUG
+					//consolePrint("START Mutation occured...");
+
+			  		//var node;
+					
+		  			if(mutation.type == 'attributes')
+		  			{
+		  				var attr = mutation.attributeName;
+						consolePrint('DOCUMENT OBSERVER!   '+attr);
+
+					}
+				}
+			);
+		}
+	);
+
+	var config = { attributes: true, childList: false, characterData: true, subtree: false, characterDataOldValue: false, attributeOldValue: false};
+	
+	// eigentliche Observierung starten und Zielnode und Konfiguration übergeben
+	documentObserver.observe(window.document.documentElement, config);
+	*/
 	
 } // END OF MutationObserverInit()
 

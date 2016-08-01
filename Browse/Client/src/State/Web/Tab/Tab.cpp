@@ -798,6 +798,9 @@ void Tab::ClearDOMNodes()
    // Clear ID->node maps
    _TextLinkMap.clear();
    _TextInputMap.clear();
+
+   // Clear fixed elements
+   _fixedElements.clear();
 }
 
 void Tab::UpdateDOMNode(DOMNodeType type, int nodeID, int attr, void * data, bool initial)
