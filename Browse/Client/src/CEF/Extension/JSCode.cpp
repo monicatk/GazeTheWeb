@@ -54,7 +54,7 @@ std::string GetJSCode(JSFile file)
 
 std::string jsInputTextData(int inputID, std::string text, bool submit)
 {
-    std::string code = "var input = textInput[" + std::to_string(inputID) + "];\
+    std::string code = "var input = window.dom_textinputs[" + std::to_string(inputID) + "];\
                         input.setAttribute('value','" + text + "');"
     ;
 

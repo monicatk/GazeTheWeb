@@ -227,7 +227,7 @@ void CefMediator::ResetFavicon(CefRefPtr<CefBrowser> browser)
     }
 }
 
-void CefMediator::CreateDOMNode(CefRefPtr<CefBrowser> browser, std::shared_ptr<DOMNode> spNode)
+void CefMediator::AddDOMNode(CefRefPtr<CefBrowser> browser, std::shared_ptr<DOMNode> spNode)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
     {
@@ -381,20 +381,37 @@ void CefMediator::OpenPopupTab(CefRefPtr<CefBrowser> browser, std::string url)
 	}
 }
 
-void CefMediator::CreateDOMTextLink(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
+void CefMediator::UpdateDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID, int attr, void * data)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
-		CefRefPtr<CefListValue> args = msg->GetArgumentList();
-		int64 frameID = browser->GetMainFrame()->GetIdentifier();
-		int nodeID = args->GetInt(0);
-		const std::string text = args->GetString(1);
-		const std::string url = args->GetString(2);
-		double top = args->GetDouble(3), left = args->GetDouble(4), bottom = args->GetDouble(5), right = args->GetDouble(6);
-		Rect rect = Rect(top, left, bottom, right);
-
-		pTab->AddDOMNode(std::make_shared<DOMTextLink>(DOMNodeType::TextLink, frameID, nodeID, rect, text, url));
+		pTab->UpdateDOMNode(type, nodeID, attr, data);
 	}
+}
+
+void CefMediator::RemoveDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		pTab->RemoveDOMNode(type, nodeID);
+	}
+}
+
+void CefMediator::HandleDOMNodeIPCMsg(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
+{
+	int index = 0;
+	CefRefPtr<CefListValue> args = msg->GetArgumentList();
+	int type = args->GetInt(index++);
+	int nodeID = args->GetInt(index++);
+
+	std::vector<float> rectData;
+	for (int i = 0; i < 4; i++)
+	{
+		rectData.push_back(args->GetDouble(index++));
+	}
+	Rect rect = Rect(rectData);
+
+
 }
 
 TabCEFInterface* CefMediator::GetTab(CefRefPtr<CefBrowser> browser) const

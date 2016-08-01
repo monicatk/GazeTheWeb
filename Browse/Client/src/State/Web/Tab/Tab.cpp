@@ -740,11 +740,16 @@ std::weak_ptr<Texture> Tab::GetWebViewTexture()
 
 void Tab::AddDOMNode(std::shared_ptr<DOMNode> spNode)
 {
+	//LogDebug("Tab: Adding new DOM node with id=", spNode->GetNodeID(), " & type=", spNode->GetType());
+
 	// Decide what to do with node
 	switch (spNode->GetType())
 	{
 	case DOMNodeType::TextInput:
 	{
+		// Add node to ID->node map
+		_TextInputMap.emplace(spNode->GetNodeID(), spNode);
+
 		// Create DOMTrigger
 		std::unique_ptr<DOMTrigger> upDOMTrigger = std::unique_ptr<DOMTrigger>(new DOMTrigger(this, spNode));
 
@@ -756,15 +761,22 @@ void Tab::AddDOMNode(std::shared_ptr<DOMNode> spNode)
 
 		// Push it to vector
 		_DOMTriggers.push_back(std::move(upDOMTrigger));
+
+		break;
 	}
-	break;
+
 
 	case DOMNodeType::TextLink:
 	{
 		// Just add it to vector
 		_DOMTextLinks.push_back(spNode);
+
+		// Add node to ID->node map
+		_TextLinkMap.emplace(spNode->GetNodeID(), spNode);
+
+		break;
 	}
-	break;
+
 	}
    
 }
@@ -782,6 +794,69 @@ void Tab::ClearDOMNodes()
 
 	// Clear vector with text links
    _DOMTextLinks.clear();
+
+   // Clear ID->node maps
+   _TextLinkMap.clear();
+   _TextInputMap.clear();
+}
+
+void Tab::UpdateDOMNode(DOMNodeType type, int nodeID, int attr, void * data, bool initial)
+{
+	// Determine which map to access
+	std::map<int, std::shared_ptr<DOMNode> >* map;
+
+	switch (type)
+	{
+	case(DOMNodeType::TextInput) :	{ map = &_TextInputMap; break; }
+	case(DOMNodeType::TextLink) :	{ map = &_TextLinkMap; break; }
+	}
+
+	if (map->find(nodeID) != map->end())
+	{
+		// Determine target node
+		std::shared_ptr<DOMNode> node = map->at(nodeID);
+
+		// Handle attribute update internally
+		node->UpdateAttribute(attr, data);
+	}
+	else
+	{
+		LogDebug("Tab: Tried to update DOM node data, but nodeID=", nodeID," with type=", type, " was not found!");
+	}
+}
+
+void Tab::RemoveDOMNode(DOMNodeType type, int nodeID)
+{
+	
+	std::map<int, std::shared_ptr<DOMNode> >* map;
+	std::vector<std::shared_ptr<DOMNode> >* list;
+
+	switch (type)
+	{
+		case(DOMNodeType::TextInput) : { map = &_TextInputMap; break; }
+		case(DOMNodeType::TextLink) : { map = &_TextLinkMap; list = &_DOMTextLinks; break; }
+	}
+
+	// Remove node's ID from map
+	if (map->find(nodeID) != map->end())
+	{
+		map->erase(nodeID);
+	}
+	
+	// TODO: List for all types of nodes?
+	// TODO (maybe Raphael): Remove one specific DOMTrigger belonging to input field with id= nodeID
+	if (list) 
+	{
+		// Remove node from list of all nodes, if condition holds
+		std::remove_if(
+			list->begin(),
+			list->end(),
+			[nodeID](const std::shared_ptr<DOMNode>& node){
+				return node->GetNodeID() == nodeID;
+			}
+		);
+	}
+
 }
 
 void Tab::SetScrollingOffset(double x, double y)

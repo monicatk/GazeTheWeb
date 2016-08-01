@@ -188,6 +188,8 @@ public:
     // Used by DOMMapping interface
     virtual void AddDOMNode(std::shared_ptr<DOMNode> spNode);
     virtual void ClearDOMNodes();
+	virtual void UpdateDOMNode(DOMNodeType type, int nodeID, int attr, void* data, bool initial=false);
+	virtual void RemoveDOMNode(DOMNodeType type, int nodeID);
 
     // Receive callbacks from CefMediator upon scrolling offset changes
     virtual void SetScrollingOffset(double x, double y);
@@ -329,6 +331,9 @@ private:
 
 	// Vector with DOMTextLinks
 	std::vector<std::shared_ptr<DOMNode> >_DOMTextLinks;
+	// Map nodeID to node itself, in order to access it when it has to be updated
+	std::map<int, std::shared_ptr<DOMNode> > _TextLinkMap;
+	std::map<int, std::shared_ptr<DOMNode> > _TextInputMap;
 
     // Web view in which website is rendered and displayed
     std::unique_ptr<WebView> _upWebView;

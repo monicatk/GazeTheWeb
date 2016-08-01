@@ -15,7 +15,7 @@
 
 enum DOMNodeType
 {
-    TextInput, TextLink
+    TextInput = 0, TextLink = 1
 };
 
 class DOMNode
@@ -27,21 +27,23 @@ class DOMNode
         Rect GetRect() const { return _rect; };
         glm::vec2 GetCenter() const;
 
+		void UpdateAttribute(int attr, void* data, bool initial=false);
+
+
+		DOMNode(DOMNodeType type, int64 frameID, int nodeID, Rect rect)
+		{
+			_type = type;
+			_frameID = frameID;
+			_nodeID = nodeID;
+			_rect = rect;
+		}
 
     protected:
-
-        DOMNode(DOMNodeType type, int64 frameID, int nodeID, Rect rect)
-        {
-            _type = type;
-            _frameID = frameID;
-            _nodeID = nodeID;
-            _rect = rect;
-        }
 
         DOMNodeType _type;
         int64 _frameID;
         int _nodeID;			// Node's position in Javascript's list of nodes of the same type
-        Rect _rect;	// two 2D vectors: top-left & bottom right vertices
+        Rect _rect;				
 
 
 };

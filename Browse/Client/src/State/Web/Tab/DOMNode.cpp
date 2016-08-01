@@ -15,6 +15,27 @@ glm::vec2 DOMNode::GetCenter() const
 	return _rect.center();
 }
 
+void DOMNode::UpdateAttribute(int attr, void * data, bool initial)
+{
+	switch (attr)
+	{
+		// Update Rect
+		case(0) : {
+			// TODO: There might be a problem, when initial data from Renderer arrives after an update
+			// --> bool attribute for node if Renderer data already received instead?
+			if (!initial || _rect.isZero())
+			{
+				_rect = *(Rect*)data;
+			}
+
+			break;
+		}
+	}
+	// TODO: More cases for other attributes
+}
+
+
+
 /* DOMTextInput methods*/
 DOMTextInput::DOMTextInput(	DOMNodeType type,
                             int64 frameID,

@@ -210,18 +210,11 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			const std::string text = domLinkNode->GetValue("text")->GetStringValue();
 			const std::string url = domLinkNode->GetValue("href")->GetStringValue();
 
-			//IPCLogDebug(browser, "DOMTextLink#" + std::to_string(id) + " text=" + text);
-			//IPCLogDebug(browser, "DOMTextLink#" + std::to_string(id) + " url=" + url);
-			std::string coord_str = "";
-
 			std::vector<double> coords;
 			for (int i = 0; i < domLinkRect->GetArrayLength(); i++)
 			{
 				coords.push_back(domLinkRect->GetValue(i)->GetDoubleValue());
-				//coord_str += (std::to_string(i) + ": " + std::to_string(coords[i])+" ");
 			}
-
-			//IPCLogDebug(browser, "DOMTextLink#" + std::to_string(id) + " coords=" + coord_str);
 
 			msg = CefProcessMessage::Create("CreateDOMTextLink");
 			CefRefPtr<CefListValue> args = msg->GetArgumentList();
@@ -242,6 +235,118 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 		}
 	}
 
+	if (msgName == "FetchDOMTextInput")
+	{
+		CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
+
+		if (context->Enter())
+		{
+			int id = msg->GetArgumentList()->GetInt(0);
+
+			CefRefPtr<CefV8Value> global = context->GetGlobal();
+			CefRefPtr<CefV8Value> domLinkNode = global->GetValue("dom_textinputs")->GetValue(id);
+			CefRefPtr<CefV8Value> domLinkRect = global->GetValue("dom_textinputs_rect")->GetValue(id);
+
+			const std::string text = domLinkNode->GetValue("text")->GetStringValue();
+
+			std::vector<double> coords;
+			for (int i = 0; i < domLinkRect->GetArrayLength(); i++)
+			{
+				coords.push_back(domLinkRect->GetValue(i)->GetDoubleValue());
+			}
+
+			msg = CefProcessMessage::Create("CreateDOMTextInput");
+			CefRefPtr<CefListValue> args = msg->GetArgumentList();
+
+			int index = 0;
+			args->SetInt(index++, id);
+			args->SetString(index++, text);
+
+			for (int i = 0; i < coords.size(); i++)
+			{
+				args->SetDouble(index++, coords[i]);
+			}
+
+			browser->SendProcessMessage(PID_BROWSER, msg);
+
+			context->Exit();
+		}
+	}
+
+	if (msgName == "LoadDOMNodeData")
+	{
+		//IPCLogDebug(browser, "Received 'LoadDOMNodeData' msg...");
+
+		// Generic fetching of node data of 'nodeID' for a specific node type 'type'
+		CefRefPtr<CefListValue> args = msg->GetArgumentList();
+		int type = args->GetInt(0);
+		int nodeID = args->GetInt(1);
+
+		std::string nodeArray;
+		std::string rectArray;
+
+		switch (type)
+		{
+		case 0:
+		{
+			nodeArray = "dom_textinputs";
+			rectArray = "dom_textinputs_rect";
+			break;
+		}
+		case 1:
+			nodeArray = "dom_links";
+			rectArray = "dom_links_rect";
+			break;
+		default:
+		{
+			IPCLog(browser, "Unknown node type in 'LoadDOMNodeData' msg routine!");
+			return false;
+		}
+		}
+
+		CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
+
+		if (context->Enter())
+		{
+			CefRefPtr<CefV8Value> global = context->GetGlobal();
+			CefRefPtr<CefV8Value> node = global->GetValue(nodeArray)->GetValue(nodeID);
+			CefRefPtr<CefV8Value> rect = global->GetValue(rectArray)->GetValue(nodeID);
+
+
+			// Read out Rect data from V8 array
+			std::vector<double> rectData;
+			for (int i = 0; i < 4; i++)
+			{
+				rectData.push_back(rect->GetValue(i)->GetDoubleValue());
+			}
+
+
+			// TODO: Read more attributes (in the future)
+
+			// Redefine msg for a response, containing read node data
+			msg = CefProcessMessage::Create("SendDOMNodeData");
+			args = msg->GetArgumentList();
+			// Wrtite node type, id, Rect data, etc. to IPC message
+			int index = 0;
+			args->SetInt(index++, type);
+			args->SetInt(index++, nodeID);
+			for (int i = 0; i < 4; i++)
+			{
+				args->SetDouble(index++, rectData[i]);
+			}
+
+			// Send IPC message to browser process (receive it in Handler, work with it in CefMediator)
+			browser->SendProcessMessage(PID_BROWSER, msg);
+
+			context->Exit();
+		}
+
+	
+
+		//IPCLogDebug(browser, "End of 'LoadDOMNodeData' msg work");
+
+
+	}
     // If no suitable handling was found, try message router
     return _msgRouter->OnProcessMessageReceived(browser, sourceProcess, msg);
 }
@@ -263,13 +368,15 @@ void RenderProcessHandler::OnContextCreated(
 
     if (frame->IsMain())
     {
+		// Tell browser thread that context was created to discard all previous registered DOM nodes
+		CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("OnContextCreated");
+		browser->SendProcessMessage(PID_BROWSER, msg);
+
+
     // Create variables in Javascript which are to be read after page finished loading.
     // Variables here contain the amount of needed objects in order to allocate arrays, which are just big enough
         if (context->Enter())
         {
-			// DEBUG
-			debug++;
-
 			// DEBUG
 			IPCLogDebug(browser, "### Context created for main frame. ###");
 

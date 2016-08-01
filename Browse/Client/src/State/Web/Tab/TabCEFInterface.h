@@ -15,6 +15,7 @@
 // Forward declaration
 class Texture;
 class DOMNode;
+enum DOMNodeType;
 
 class TabCEFInterface
 {
@@ -44,6 +45,8 @@ public:
     // Used by DOMMapping interface
     virtual void AddDOMNode(std::shared_ptr<DOMNode> spNode) = 0;
     virtual void ClearDOMNodes() = 0;
+	virtual void UpdateDOMNode(DOMNodeType type, int nodeID, int attr, void* data, bool initial=false) = 0;
+	virtual void RemoveDOMNode(DOMNodeType type, int nodeID) = 0;
 
     // Receive callbacks from CefMediator upon scrolling offset changes
     virtual void SetScrollingOffset(double x, double y) = 0;

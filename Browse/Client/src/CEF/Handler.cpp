@@ -134,8 +134,8 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
         // Inject Javascript to hide scrollbar
         frame->ExecuteJavaScript(_js_remove_css_scrollbar, frame->GetURL(), 0);
 
-        // Clear all previous DOM nodes in corresponding Tab when new main frame is loading
-        _pMediator->ClearDOMNodes(browser);
+        //// Clear all previous DOM nodes in corresponding Tab when new main frame is loading
+        //_pMediator->ClearDOMNodes(browser);	// now triggered when context is created in Renderer
 
         // Add own ID + false to loading frame map
         _loadingMainFrames.emplace(std::make_pair(frame->GetIdentifier(), true));
@@ -145,20 +145,6 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
     {
         int64 mainFrameID = frame->GetParent()->GetIdentifier();
 
-        // Check if parent main frame's ID is already as key in map
-        if (_loadingMainFrames.find(mainFrameID) != _loadingMainFrames.end())
-		{
-            // Corresponding value=true, set to false and start loading DOM node information in renderer process
-            if (_loadingMainFrames.at(mainFrameID))
-            {
-                // Set value to false, so other subframes do not request further update of DOM nodes
-                _loadingMainFrames.at(mainFrameID) = false;
-
-                LogDebug("Handler: Subframe will request DOM node data update (subframeID = ", frame->GetIdentifier(), ").");
-
-                ReloadDOMNodes(browser, "(on subframe request)");
-            }
-        }
     }
 }
 
@@ -174,16 +160,6 @@ void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame
     {
         // Set zoom level according to Tab's settings
         SetZoomLevel(browser, false);
-
-        // Main frame finished loading, stop subframes from requesting update of DOM nodes
-        int64 frameID = frame->GetIdentifier();
-        if (_loadingMainFrames.find(frameID) != _loadingMainFrames.end())
-        {
-            // Remove own ID from map
-            _loadingMainFrames.erase(frame->GetIdentifier());
-            LogDebug("Handler: Main frame removed its ID from loading main frame map.");
-        }
-
     }
 
 }
@@ -201,13 +177,13 @@ void Handler::OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
     if (!isLoading)
     {
         // Clear list of DOM nodes and recreate all DOM node instances
-        _pMediator->ClearDOMNodes(browser);
+        //_pMediator->ClearDOMNodes(browser);		// TODO: Delete this, because of MutationObserver
 
         // Set zoom level again at load end, in case it was written over again
         SetZoomLevel(browser, false);
 
         // Load DOM data one final time
-        ReloadDOMNodes(browser, "(OnLoadingStateChange, loading finished)");
+        //ReloadDOMNodes(browser, "(OnLoadingStateChange, loading finished)");	// TODO: Delete this, because of MutationObserver
 
         // Write page resolution to V8 variables, read them and update Tab
         UpdatePageResolution(browser);
@@ -281,9 +257,27 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
     {
         IPCLogRenderer(browser, msg);
     }
+
+
 	if (msgName == "CreateDOMTextLink")
 	{
-		_pMediator->CreateDOMTextLink(browser, msg);
+		//_pMediator->CreateDOMTextLink(browser, msg);
+		LogDebug("Handler: (TODO) 'CreateDOMTextLink' IPC msg not used any more!");
+	}
+	if (msgName == "CreateDOMTextInput")
+	{
+		//_pMediator->CreateDOMTextInput(browser, msg);
+		LogDebug("Handler: (TODO) 'CreateDOMTextInput' IPC msg not used any more!");
+	}
+
+
+	if (msgName == "OnContextCreated")
+	{
+		_pMediator->ClearDOMNodes(browser);
+	}
+	if (msgName == "SendDOMNodeData")
+	{
+		_pMediator->HandleDOMNodeIPCMsg(browser, msg);
 	}
 
     return _msgRouter->OnProcessMessageReceived(browser, source_process, msg);
@@ -301,7 +295,7 @@ void Handler::ResizeBrowsers()
         bit->get()->GetHost()->WasResized();
 
         // Clear DOM nodes before updating those
-        _pMediator->ClearDOMNodes(bit->get());
+        _pMediator->ClearDOMNodes(bit->get());			// TODO: Rect Update instead!
 
         // Send msg to renderer in order to fetch JS variables' values of input field coordinates
         ReloadDOMNodes(bit->get(), "(browser was resized)");
@@ -389,10 +383,12 @@ void Handler::ResetMainFramesScrolling(CefRefPtr<CefBrowser> browser)
 
 void Handler::ReloadDOMNodes(CefRefPtr<CefBrowser> browser, std::string debug_info)
 {
-    CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("GetDOMElements");
-    msg->GetArgumentList()->SetDouble(0, (double)browser->GetMainFrame()->GetIdentifier());	// Cast int64 frameID  to (64bit) double, int only has 32
-    browser->SendProcessMessage(PID_RENDERER, msg);
-    LogDebug("Handler: Sent \"GetDOMElements\" msg to renderer, if any listed node type exists ", debug_info);
+    //CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("GetDOMElements");
+    //msg->GetArgumentList()->SetDouble(0, (double)browser->GetMainFrame()->GetIdentifier());	// Cast int64 frameID  to (64bit) double, int only has 32
+    //browser->SendProcessMessage(PID_RENDERER, msg);
+    //LogDebug("Handler: Sent \"GetDOMElements\" msg to renderer, if any listed node type exists ", debug_info);
+
+	// TODO: Delete this method because of MutationObserver
 }
 
 void Handler::SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged)
@@ -407,11 +403,11 @@ void Handler::SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged
         if (definitelyChanged)
         {
             // Reload DOM nodes because of changed coordinates due to zooming
-            _pMediator->ClearDOMNodes(browser);
+            _pMediator->ClearDOMNodes(browser);			// TODO: Rect update instead!
 
             ReloadDOMNodes(browser);
 
-            UpdatePageResolution(browser);
+            UpdatePageResolution(browser);				// TODO: Does a JS event exist for this?
 
             // EXPERIMENTAL
             //GetFixedElements(browser);

@@ -23,6 +23,7 @@
 class TabCEFInterface;
 class Texture;
 class DOMNode;
+enum DOMNodeType;
 
 typedef int BrowserID;
 
@@ -58,13 +59,6 @@ public:
     void EmulateLeftMouseButtonClick(TabCEFInterface* pTab, double x, double y);
     void EmulateMouseWheelScrolling(TabCEFInterface* pTab, double deltaX, double deltaY);
 
-    // DOM relevant methods
-    void ReceiveIPCMessageforDOM(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
-    void CreateDOMNode(CefRefPtr<CefBrowser> browser, std::shared_ptr<DOMNode> spNode);
-    void ClearDOMNodes(CefRefPtr<CefBrowser> browser);
-
-    bool InputTextData(TabCEFInterface* tab, int64 frameID, int nodeID, std::string text, bool submit = false);
-
     void ResetScrolling(TabCEFInterface* pTab);
 
     // Sets Tab's URL attribute, called by Handler when main frame starts loading a page
@@ -99,7 +93,22 @@ public:
 	// Add new Tab with given URL at the position after the current Tab (in context of Tab overview)
 	void OpenPopupTab(CefRefPtr<CefBrowser> browser, std::string url);
 
-	void CreateDOMTextLink(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
+
+
+	// DOM relevant methods
+	void ReceiveIPCMessageforDOM(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
+
+	void AddDOMNode(CefRefPtr<CefBrowser> browser, std::shared_ptr<DOMNode> spNode);
+	void ClearDOMNodes(CefRefPtr<CefBrowser> browser);
+
+	bool InputTextData(TabCEFInterface* tab, int64 frameID, int nodeID, std::string text, bool submit = false);
+
+	// Called by BrowserMsgRouter to pass update information to Tab
+	void UpdateDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID, int attr, void* data);
+
+	void RemoveDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID);
+
+	void HandleDOMNodeIPCMsg(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
 
 protected:
 

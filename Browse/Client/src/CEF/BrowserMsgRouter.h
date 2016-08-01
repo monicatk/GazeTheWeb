@@ -7,6 +7,7 @@
 #define CEF_BROWSERMSGROUTER_H_
 
 #include "include/wrapper/cef_message_router.h"
+#include <functional>
 
 class CefMediator;		// Forward declaration
 class BrowserMsgRouter; // Forward declaration

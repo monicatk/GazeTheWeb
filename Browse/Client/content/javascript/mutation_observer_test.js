@@ -67,12 +67,100 @@ window.fixed_coordinates = [[]];		// 2D list of bounding rectangle coordinates, 
 window.dom_links = [];
 window.dom_links_rect = [[]];
 
+window.dom_textinputs = [];
+window.dom_textinputs_rect = [[]];
+
 // Used to get coordinates as array of size 4 in RenderProcessHandler
 // function GetRect(node){ return AdjustRectCoordinatesToWindow(node.getBoundingClientRect()); }
 
 
-// DEBUG
-window.debug_node;
+function CompareRectData(node_list, rect_list, NotificationFunc)
+{
+	var n = node_list.length;
+
+	for(var i = 0; i < n; i++)
+	{
+		var new_rect = AdjustRectCoordinatesToWindow(
+			node_list[i].getBoundingClientRect()
+		);
+
+		var old_rect = rect_list[i];
+
+		if(new_rect[0] != old_rect[0] || new_rect[1] != old_rect[1] || new_rect[2] != old_rect[2] || new_rect[3] != old_rect[3])
+		{
+			NotificationFunc(i, new_rect);
+		}
+
+	}
+}
+
+// being lazy
+function RectToString(rect)
+{
+	return ''+rect[0]+';'+rect[1]+';'+rect[2]+';'+rect[3];
+}
+
+	/* NOTES
+		Encoding of request strings for DOM node operations:
+
+		DOM#{add | rem | upd}#nodeType#nodeID{#attribute#data}#
+
+		Definitions:
+		nodeType	: int
+			0 : TextInput
+			1 : TextLink
+		nodeID		: int
+		add --> send process message to Renderer to fetch V8 data
+		rem --> request removal of given node
+		upd --> update data of an specific node attribute
+		attribute	: int
+			0	: Rect
+		data	: depends on attribute
+	*/
+
+function UpdateDOMRects()
+{
+	// Compare node's current Rect with data in Rect list
+	CompareRectData(
+		window.dom_links, 
+		window.dom_links_rect, 
+		function Notify(i, rect) { 
+			consolePrint('DOM#upd#1#'+i+'#0#'+RectToString(rect)+'#');
+		} 
+	);
+
+	CompareRectData(
+		window.dom_textinputs, 
+		window.dom_textinputs_rect, 
+		function Notify(i, rect) { 
+			consolePrint('DOM#upd#0#'+i+'#0#'+RectToString(rect)+'#');
+		} 
+	);
+
+}
+
+function AddDOMTextInput(node)
+{
+	// DEBUG
+	//consolePrint("START adding text input");
+
+	// Add text input node to list of text inputs
+	window.dom_textinputs.push(node);
+
+	// Add text input's Rect to list
+	window.dom_textinputs_rect.push(
+		AdjustRectCoordinatesToWindow(
+			node.getBoundingClientRect()
+		)
+	);
+
+	// Inform CEF, that new text input is available
+	var node_amount = window.dom_textinputs.length - 1;
+	consolePrint('DOM#add#0#'+node_amount+'#');
+
+	// DEBUG
+	//consolePrint("END adding text input");
+}
 
 // Iterate over Set of already used fixedIDs to find the next ID not yet used and assign it to node as attribute
 function AddFixedElement(node)
@@ -358,24 +446,26 @@ function CompareArrays(array1, array2)
 
 function AddDOMTextLink(node)
 {
+	// DEBUG
+	//consolePrint("START adding text link");
+
 	var rect = node.getBoundingClientRect(node);
 
-	// Only add DOMTextLinks which are visible and contain an URL
-	if(rect.width && rect.height && node.href)
-	{
-		window.dom_links.push(node);
-		// window.dom_links_rect.push(AdjustRectCoordinatesToWindow(node));
-		// var coords = AdjustRectCoordinatesToWindow(rect); //[rect.top, rect.left, rect.bottom, rect.right];
-		var coords = [rect.top, rect.left, rect.bottom, rect.right];
-		window.dom_links_rect.push(coords);
+
+	window.dom_links.push(node);
+	// window.dom_links_rect.push(AdjustRectCoordinatesToWindow(node));
+	// var coords = AdjustRectCoordinatesToWindow(rect); //[rect.top, rect.left, rect.bottom, rect.right];
+	var coords = [rect.top, rect.left, rect.bottom, rect.right];
+	window.dom_links_rect.push(coords);
+
+	// DEBUG
+	// consolePrint("Added DOMTextLink #"+(window.dom_links.length-1)+", coords: "+coords);
+
+	// Tell CEF message router, that DOM Link was added
+	consolePrint('DOM#add#1#'+(window.dom_links.length-1)+'#');
 
 		// DEBUG
-		// consolePrint("Added DOMTextLink #"+(window.dom_links.length-1)+", coords: "+coords);
-
-		// Tell CEF message router, that DOM Link was added
-		consolePrint('#DOMLink#'+(window.dom_links.length-1)); // TODO: #DOMLink#add/rem?
-	}
-	
+	//consolePrint("END adding text link");
 }
 
 // TODO: Better: Add EventListener?
@@ -386,15 +476,25 @@ document.onreadystatechange = function()
 {
 	// consolePrint("### DOCUMENT STATECHANGE! ###");
 
+	if(document.readyState == 'loading')
+	{
+		consolePrint('### document.readyState == loading ###'); // Never triggered
+	}
+
 	if(document.readyState == 'interactive')
 	{
-		consolePrint("### document.readyState == interactive ---> Updating Link Rects ###");
+		//consolePrint("document reached interactive state: Updating DOM Rects...");
 
-		for(var i = 0, n = window.dom_links.length; i < n; i++)
-		{
-			var node = window.dom_links[i];
-			AddDOMTextLink(node);
-		}
+		UpdateDOMRects();
+
+		//consolePrint("... done with Updating DOM Rects.");
+	}
+
+	if(document.readyState == 'complete')
+	{
+		UpdateDOMRects();
+		consolePrint('Page fully loaded. #TextInputs='+window.dom_textinputs.length+', #TextLinks='+window.dom_links.length);
+		
 	}
 }
 
@@ -409,8 +509,11 @@ function MutationObserverInit()
 		  	mutations.forEach(
 		  		function(mutation)
 		  		{
-			  		var node;
+					// DEBUG
+					//consolePrint("START Mutation occured...");
 
+			  		var node;
+					
 		  			if(mutation.type == 'attributes')
 		  			{
 		  				node = mutation.target;
@@ -510,15 +613,24 @@ function MutationObserverInit()
 		  						// Find text links
 		  						if(node.tagName == 'A')
 		  						{
-		  							// AddDOMTextLink(node);
+		  							AddDOMTextLink(node);
 		  							// DEBUG
-		  							window.dom_links.push(node);
-		  							window.dom_links_rect.push([0,0,0,0]);
+		  							//window.dom_links.push(node);
+		  							//window.dom_links_rect.push([0,0,0,0]);
 
 		  						}
 
 		  						// node.text = node.tagName;
 		  						// EXPERIMENTAL END
+
+		  						if(node.tagName == 'INPUT')
+		  						{
+		  							// Identify text input fields
+		  							if(node.type == 'text' || node.type == 'search' || node.type == 'email' || node.type == 'password')
+		  							{
+		  								AddDOMTextInput(node);
+		  							}
+		  						}
 
 
 			  				}
@@ -546,6 +658,8 @@ function MutationObserverInit()
 
 		  			}
 
+					// DEBUG
+					//consolePrint("END Mutation occured...");
 		  		} // end of function(){...}
 
 
@@ -573,6 +687,8 @@ function MutationObserverInit()
 	window.observer.observe(window.document, config);
 
 	consolePrint('MutationObserver was told what to observe.');
+
+	// TODO: Tweak MutationObserver by defining a more specific configuration
 	
 } // END OF MutationObserverInit()
 
