@@ -10,7 +10,7 @@
 #include <memory>
 #include <vector>
 #include "src/Utils/Rect.h"
-#include "submodules/glm/glm/glm.hpp"
+#include "src/Utils/glmWrapper.h"
 
 // Forward declaration
 class Texture;

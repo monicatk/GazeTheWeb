@@ -8,7 +8,7 @@
 #define FRAMEBUFFER_H
 
 #include "externals/OGL/gl_core_3_3.h"
-#include "submodules/glm/glm/glm.hpp"
+#include "src/Utils/glmWrapper.h"
 #include <vector>
 
 class Framebuffer

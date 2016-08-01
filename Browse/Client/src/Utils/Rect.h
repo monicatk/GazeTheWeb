@@ -6,7 +6,7 @@
 #ifndef RECT_H_
 #define RECT_H_
 
-#include "submodules/glm/glm/glm.hpp"
+#include "src/Utils/glmWrapper.h"
 #include <vector>
 
 class Rect

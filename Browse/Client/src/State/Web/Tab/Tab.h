@@ -19,7 +19,7 @@
 #include "src/Utils/Input.h"
 #include "src/Global.h"
 #include "src/State/Web/WebTabInterface.h"
-#include "submodules/glm/glm/glm.hpp"
+#include "src/Utils/glmWrapper.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 #include <vector>
 #include <deque>

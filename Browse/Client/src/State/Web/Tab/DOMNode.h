@@ -9,7 +9,7 @@
 
 #include "src/Typedefs.h"
 #include "src/Utils/Rect.h"
-#include "submodules/glm/glm/glm.hpp"
+#include "src/Utils/glmWrapper.h"
 #include <vector>
 #include <string>
 

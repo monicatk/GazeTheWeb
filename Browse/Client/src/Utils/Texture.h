@@ -12,7 +12,7 @@
 #define TEXTURE_H_
 
 #include "externals/OGL/gl_core_3_3.h"
-#include "submodules/glm/glm/glm.hpp"
+#include "src/Utils/glmWrapper.h"
 #include <string>
 #include <vector>
 

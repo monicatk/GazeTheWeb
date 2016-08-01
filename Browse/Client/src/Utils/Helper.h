@@ -7,7 +7,7 @@
 #ifndef HELPER_H_
 #define HELPER_H_
 
-#include "submodules/glm/glm/glm.hpp"
+#include "src/Utils/glmWrapper.h"
 
 #include <string>
 

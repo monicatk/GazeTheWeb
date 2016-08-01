@@ -7,7 +7,7 @@
 #ifndef LERP_VALUE_H_
 #define LERP_VALUE_H_
 
-#include "submodules/glm/glm/glm.hpp"
+#include "src/Utils/glmWrapper.h"
 
 class LerpValue
 {
