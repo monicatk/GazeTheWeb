@@ -1157,7 +1157,7 @@ void Tab::DrawDebuggingOverlay() const
 	for (const auto& rDOMTrigger : _DOMTriggers)
 	{
 		// Render rect
-		renderRect(rDOMTrigger->GetDOMRect(), false);
+        renderRect(rDOMTrigger->GetDOMRect(), rDOMTrigger->GetDOMFixed());
 	}
 
 	// ### DOMTEXTLINKS ###
@@ -1169,7 +1169,7 @@ void Tab::DrawDebuggingOverlay() const
 	for (const auto& rDOMTextLinks : _DOMTextLinks)
 	{
 		// Render rect
-		renderRect(rDOMTextLinks->GetRect(), false);
+        renderRect(rDOMTextLinks->GetRect(), rDOMTextLinks->GetFixed());
 	}
 
 	// ### FIXED ELEMENTS ###
