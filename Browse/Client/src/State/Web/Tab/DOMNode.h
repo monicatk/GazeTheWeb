@@ -45,7 +45,7 @@ class DOMNode
         int64 _frameID;
         int _nodeID;			// Node's position in Javascript's list of nodes of the same type
         Rect _rect;				
-		bool _fixed;
+		bool _fixed = false;
 
 
 };

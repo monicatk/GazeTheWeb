@@ -86,6 +86,15 @@ function CompareRectData(node_list, rect_list, NotificationFunc)
 			node_list[i].getBoundingClientRect()
 		);
 
+		// Adjust coordinates to fixed screen position if needed
+		if(node_list[i].hasAttribute('fixedID'))
+		{
+			new_rect[0] -= window.scrollY;
+			new_rect[1] -= window.scrollX;
+			new_rect[2] -= window.scrollY;
+			new_rect[3] -= window.scrollX;
+		}
+
 		var old_rect = rect_list[i];
 
 		if(new_rect[0] != old_rect[0] || new_rect[1] != old_rect[1] || new_rect[2] != old_rect[2] || new_rect[3] != old_rect[3])

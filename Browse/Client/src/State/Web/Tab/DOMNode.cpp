@@ -26,13 +26,19 @@ void DOMNode::UpdateAttribute(int attr, void * data, bool initial)
 			if (!initial || _rect.isZero())
 			{
 				_rect = *(Rect*)data;
+
+				//if (_rect.width() > 0 && _rect.height() > 0)
+				//	LogDebug("type=", _type, "; id=", _nodeID, "; _fixed=", _fixed, "; rect= ", _rect.toString());
 			}
 
 			break;
 		}
 		case(1) : {
 			_fixed = *(bool*)data;
-			//LogDebug("_fixed=", _fixed);
+			
+			//if (_rect.width() > 0 && _rect.height() > 0)
+			//	LogDebug("type=", _type, "; id=", _nodeID, "; _fixed=", _fixed, "; rect= ", _rect.toString());
+			
 			break;
 		}
 	}
