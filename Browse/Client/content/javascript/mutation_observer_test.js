@@ -89,10 +89,7 @@ function CompareRectData(node_list, rect_list, NotificationFunc)
 		// Adjust coordinates to fixed screen position if needed
 		if(node_list[i].hasAttribute('fixedID'))
 		{
-			new_rect[0] -= window.scrollY;
-			new_rect[1] -= window.scrollX;
-			new_rect[2] -= window.scrollY;
-			new_rect[3] -= window.scrollX;
+			SubstractScrollingOffset(new_rect);
 		}
 
 		var old_rect = rect_list[i];
@@ -147,6 +144,41 @@ function UpdateDOMRects()
 			consolePrint('DOM#upd#0#'+i+'#0#'+RectToString(rect)+'#');
 		} 
 	);
+}
+
+function UpdateFixedElementRects()
+{
+	window.fixed_elements.forEach(
+		function (node){
+			var id = node.getAttribute('fixedID');
+
+			var preUpdate = window.fixed_coordinates[id];
+
+			window.fixed_coordinates[id] = AdjustRectToZoom(
+				node.getBoundingClientRect()
+			);
+
+			UpdateSubtreesBoundingRect(node);
+
+			// UpdateSubtreesBoundingRects only informs CEF if child nodes' Rect exists or changes
+			// So, check if updates took place has to be done here
+			var equal = (preUpdate.length == window.fixed_coordinates.length);
+			for(var i = 0, n = preUpdate.length; i < n && equal; i++)
+			{
+				equal &= (preUpdate[i] == window.fixed_coordinates[i]);
+			}
+			
+			if(!equal)
+			{
+				var zero = '';
+				if(id < 10) zero = '0';
+				// Tell CEF that fixed node was updated
+				consolePrint('#fixElem#add#'+zero+id);	// TODO: Change String encoding, get rid of 'zero'
+			}
+
+		}
+	);
+
 
 }
 
@@ -175,6 +207,16 @@ function AddDOMTextInput(node)
 
 	// DEBUG
 	//consolePrint("END adding text input");
+}
+
+function SubstractScrollingOffset(rectData)
+{
+	// Translate rectData by (-scrollX, -scrollY)
+	rectData[0] -= window.scrollY;
+	rectData[1] -= window.scrollX;
+	rectData[2] -= window.scrollY;
+	rectData[3] -= window.scrollX;
+	return rectData;
 }
 
 // Iterate over Set of already used fixedIDs to find the next ID not yet used and assign it to node as attribute
@@ -242,14 +284,18 @@ function SaveBoundingRectCoordinates(node)
 	// {
 	var id = node.getAttribute('fixedID');
 
-	// 1D array with top, left, bottom, right values of bounding rectangle
-	var rect_coords = AdjustRectToZoom(node.getBoundingClientRect());
-
+	
 	// Add empty 1D array to 2D array, if needed
 	while(window.fixed_coordinates.length <= id)
 	{
 		window.fixed_coordinates.push([]);
 	}
+
+	// 1D array with top, left, bottom, right values of bounding rectangle
+	var rect_coords = AdjustRectToZoom(
+		node.getBoundingClientRect()
+	);
+	
 	// Add rect coordinates to list of fixed coordinates at position |id|
 	window.fixed_coordinates[id] = rect_coords;
 
@@ -258,17 +304,17 @@ function SaveBoundingRectCoordinates(node)
 
 	// Save tree rect, if different than fixed nodes bounding rect
 	var equal = true;
-	for(var i = 0; i < 4; i++)
+	for(var i = 0; i < 4 && equal; i++)
 	{
 		equal &= (rect_coords[i] == tree_rect_coords[i]);
 	}
 	if(!equal)
 	{
-		window.fixed_coordinates[id] = window.fixed_coordinates[id].concat(
-											ComputeBoundingRect(rect_coords, tree_rect_coords)
-										);
+		window.fixed_coordinates[id] = 
+			window.fixed_coordinates[id].concat(
+				ComputeBoundingRect(rect_coords, tree_rect_coords)
+			);
 	}
-	// }
 }
 
 // Inform CEF about the current fication status of a already known node
@@ -393,41 +439,6 @@ function UnfixChildNodes(childNodes)
 	}
 }
 
-// NOT IN USE
-function UpdateBoundingRects()
-{
-	consolePrint('UpdateBoundingRects()');
-	for (var node of fixed_elements)
-	{
-		var id = node.getAttribute('fixedID');
-
-		consolePrint('Checking #'+id+' for updates...');
-
-		// Read out old rectangle coordinates
-		var old_coords = window.fixed_coordinates[id];
-		// Update bounding rectangles
-		SaveBoundingRectCoordinates(node);
-		// Read out updated rectangle coordinates in order to compare old and new
-		var new_coords = window.fixed_coordinates[id];
-
-		consolePrint('new: '+new_coords);
-		consolePrint('old: '+old_coords);
-
-		// Inform CEF that coordinates have to be updated
-		if(new_coords.length !== old_coords.length)
-		{
-			// alert('new: '+new_coords+'; old: '+old_coords);
-
-			var zero = '';
-			if(id < 10) zero = '0';
-			// Tell CEF that fixed node's coordinates were updated
-			consolePrint('#fixElem#add#'+zero+id);
-		}
-
-
-	}
-}
-
 // Traverse subtree starting with given childNode as root
 function UpdateSubtreesBoundingRect(childNode)
 {
@@ -483,6 +494,15 @@ function UpdateSubtreesBoundingRect(childNode)
 		if(id < 10) zero = '0';
 		// Tell CEF that fixed node's coordinates were updated
 		consolePrint('#fixElem#add#'+zero+id);
+
+		//DEBUG
+		consolePrint('Updated a fixed element');
+		for(var i = 0, n = window.fixed_coordinates.length; i < n ; i++)
+		{
+			var str = (i == id) ? '<---' : '';
+			consolePrint(i+': '+window.fixed_coordinates[i]+str);
+		}
+
 		// DEBUG
 		// consolePrint("UpdateSubtreesBoundingRect()");
 	}
@@ -555,9 +575,11 @@ document.onreadystatechange = function()
 
 window.onresize = function()
 {
-	UpdateDOMRects();
+	//UpdateDOMRects();
 	// TODO: Update fixed elements' Rects too?
-	consolePrint("Javascript detected window resize.");
+	consolePrint("Javascript detected window resize, update of fixed element Rects.");
+
+	UpdateFixedElementRects();
 }
 
 

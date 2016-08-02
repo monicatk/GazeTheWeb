@@ -57,7 +57,7 @@ public:
 	float height() const { return bottom - top; }
 	glm::vec2 center() const { return glm::vec2(left + (width() / 2.f), top + (height() / 2.f)); }
 
-	bool isZero() const { return (width() && height()); }
+	bool isZero() const { return (width() <= 0 || height() <= 0); }
 	std::string toString() const {
 		return "(" + std::to_string(top) + ", " + std::to_string(left) + ", "
 			+ std::to_string(bottom) + ", " + std::to_string(right) + ")";

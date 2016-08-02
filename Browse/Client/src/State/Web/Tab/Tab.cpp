@@ -584,12 +584,34 @@ void Tab::SetPageResolution(double width, double height)
 void Tab::AddFixedElementsCoordinates(int id, std::vector<Rect> elements)
 {
     // Assign list of fixed element coordinates to given position
-    _fixedElements.resize(id + 1);
-    _fixedElements[id] = elements;
+	if (_fixedElements.size() <= id)
+	{
+		_fixedElements.resize(id + 1);
+	}
+	_fixedElements[id] = elements;
+
+	// DEBUG
+	//LogDebug("#fixedElements: ", _fixedElements.size());
+	//for (int i = 0; i < _fixedElements.size(); i++)
+	//{
+	//	if (_fixedElements[i].empty())
+	//	{
+	//		LogDebug(i, ": {}");
+	//	}
+	//	else if (_fixedElements[i][0].isZero())
+	//	{
+	//		LogDebug(i, ": 0");
+	//	}
+	//	else 
+	//		LogDebug(i, ": ", _fixedElements[i][0].toString());
+	//}
 }
 
 void Tab::RemoveFixedElement(int id)
 {
+	// DEBUG
+	LogDebug("Tab: Remove fixed element id=", id);
+
     if ((int)_fixedElements.size() > id)
     {
         _fixedElements[id].clear();
