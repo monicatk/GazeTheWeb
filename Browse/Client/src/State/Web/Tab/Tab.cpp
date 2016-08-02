@@ -16,6 +16,7 @@
 #include "src/State/Web/Tab/Pipelines/ZoomClickPipeline.h"
 #include "src/Utils/Logger.h"
 #include "submodules/glm/glm/gtc/matrix_transform.hpp" // TODO: move to debug rendering class
+#include <algorithm>
 
 // Shaders (For debugging)
 const std::string vertexShaderSource =
