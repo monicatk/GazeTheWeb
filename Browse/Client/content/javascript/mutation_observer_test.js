@@ -430,6 +430,7 @@ function UnfixChildNodes(childNodes)
 	for(var i = 0, n = childNodes.length; i < n; i++)
 	{
 		childNodes[i].removeAttribute('fixedID');
+		
 		SetFixationStatus(childNodes[i], false);
 
 		if(childNodes[i].children)
@@ -634,6 +635,8 @@ function MutationObserverInit()
 		  							if(window.fixed_elements.has(node))
 		  							{
 		  								RemoveFixedElement(node, true);
+
+										UpdateDOMRects();
 		  							}
 		  						}
 
@@ -694,6 +697,8 @@ function MutationObserverInit()
 		  								// consolePrint("New fixed node added to DOM tree");
 
 		  								AddFixedElement(node);
+
+										UpdateDOMRects();
 		  							}
 		  						}
 
@@ -737,11 +742,14 @@ function MutationObserverInit()
 
 			  				if(node.nodeType == 1)
 			  				{
-			  					// DEBUG
-			  					// if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
-			  					// 	alert('Observed removal of fixed child node!');
+								if(window.fixed_elements.has(node))
+								{
+									RemoveFixedElement(node, false);
 
-			  					RemoveFixedElement(node, false);
+									UpdateDOMRects();
+								}
+
+								// TODO: Removal of relevant DOM node types??
 			  				}
 			  			}
 
