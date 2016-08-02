@@ -11,11 +11,11 @@
 #include <vector>
 #include "src/Utils/Rect.h"
 #include "src/Utils/glmWrapper.h"
+#include "src/State/Web/Tab/DOMNodeType.h"
 
 // Forward declaration
 class Texture;
 class DOMNode;
-enum DOMNodeType;
 
 class TabCEFInterface
 {

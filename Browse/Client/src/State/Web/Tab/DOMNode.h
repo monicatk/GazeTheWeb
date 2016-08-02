@@ -10,13 +10,9 @@
 #include "src/Typedefs.h"
 #include "src/Utils/Rect.h"
 #include "src/Utils/glmWrapper.h"
+#include "src/State/Web/Tab/DOMNodeType.h"
 #include <vector>
 #include <string>
-
-enum DOMNodeType
-{
-    TextInput = 0, TextLink = 1
-};
 
 class DOMNode
 {

@@ -16,6 +16,7 @@
 #include "src/State/Web/Tab/Pipelines/ZoomClickPipeline.h"
 #include "src/Utils/Logger.h"
 #include "submodules/glm/glm/gtc/matrix_transform.hpp" // TODO: move to debug rendering class
+#include <algorithm>
 
 // Shaders (For debugging)
 const std::string vertexShaderSource =
@@ -1156,7 +1157,7 @@ void Tab::DrawDebuggingOverlay() const
 	for (const auto& rDOMTrigger : _DOMTriggers)
 	{
 		// Render rect
-		renderRect(rDOMTrigger->GetDOMRect(), false);
+        renderRect(rDOMTrigger->GetDOMRect(), rDOMTrigger->GetDOMFixed());
 	}
 
 	// ### DOMTEXTLINKS ###
@@ -1168,7 +1169,7 @@ void Tab::DrawDebuggingOverlay() const
 	for (const auto& rDOMTextLinks : _DOMTextLinks)
 	{
 		// Render rect
-		renderRect(rDOMTextLinks->GetRect(), false);
+        renderRect(rDOMTextLinks->GetRect(), rDOMTextLinks->GetFixed());
 	}
 
 	// ### FIXED ELEMENTS ###
