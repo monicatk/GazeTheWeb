@@ -11,6 +11,7 @@
 #include "src/Utils/RenderItem.h"
 #include "src/Utils/Rect.h"
 #include "src/Utils/glmWrapper.h"
+#include "src/Utils/Framebuffer.h"
 #include "externals/OGL/gl_core_3_3.h"
 #include <memory>
 #include <vector>
@@ -29,8 +30,7 @@ public:
     // Destructor
     virtual ~WebView();
 
-    // Update values. Coordinates in pixels
-    // TODO: y is here in which coordinate syste? Seems to be calles in eyeGUI' but expected in OpenGL
+    // Update values. Coordinates in pixels, origin is upper left corner
     void Update(
         int x,
         int y,
@@ -52,7 +52,8 @@ private:
     std::shared_ptr<Texture> _spTexture;
 
     // Render item
-    std::unique_ptr<RenderItem> _upRenderItem;
+    std::unique_ptr<RenderItem> _upSimpleRenderItem;
+    std::unique_ptr<RenderItem> _upCompositeRenderItem;
 
     // Current values
     int _x = 0;
@@ -62,6 +63,9 @@ private:
 
     // Vector with rects used for highlighting
     std::vector<Rect> _rects;
+
+    // Framebuffer to render highlights etc on webpage and later zoom in
+    std::unique_ptr<Framebuffer> _upFramebuffer;
 };
 
 #endif // WEBVIEW_H_

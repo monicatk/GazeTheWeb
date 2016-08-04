@@ -112,12 +112,6 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
     GetWebRenderResolution(webRenderWidth, webRenderHeight);
     _upWebView = std::unique_ptr<WebView>(new WebView(webRenderWidth, webRenderHeight));
 
-    // TODO: testing
-    std::vector<Rect> rects;
-    Rect rect(0, 100, 100, 200);
-    rects.push_back(rect);
-    _upWebView->SetHighlightRects(rects);
-
     // Activate current mode
     ActivateMode(_mode);
 
@@ -167,6 +161,17 @@ void Tab::Update(float tpf, Input& rInput)
         webViewGazeY,
         webViewGazeRelativeX,
         webViewGazeRelativeY);
+
+    // Update highlight rectangle of webview
+    if(true) // TODO: do it only when necessary
+    {
+        std::vector<Rect> rects;
+        for(const auto& rDOMNode : _DOMTextLinks)
+        {
+            rects.push_back(rDOMNode->GetRect());
+        }
+        _upWebView->SetHighlightRects(rects);
+    }
 
     // ### UPDATE COLOR OF GUI ###
 

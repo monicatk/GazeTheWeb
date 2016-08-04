@@ -653,7 +653,9 @@ void Master::GLFWResizeCallback(int width, int height)
     glViewport(0, 0, _width, _height);
 
     // Tell framebuffer about new window size
+    _upFramebuffer->Bind();
     _upFramebuffer->Resize(_width, _height);
+    _upFramebuffer->Unbind();
 
     // CEF mediator is told to resize tabs via GUI callback
 }

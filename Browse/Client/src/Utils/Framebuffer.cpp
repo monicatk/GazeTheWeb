@@ -5,6 +5,9 @@
 
 #include "Framebuffer.h"
 
+// Define stack
+std::stack<GLuint> Framebuffer::_handleStack;
+
 Framebuffer::Framebuffer(int width, int height)
 {
     // Generate framebuffer and renderbuffer for depth and stencil tests
@@ -34,12 +37,42 @@ Framebuffer::~Framebuffer()
 
 void Framebuffer::Bind() const
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+    if(_handleStack.empty() || (_handleStack.top() != _framebuffer))
+    {
+        _handleStack.push(_framebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+    }
 }
 
 void Framebuffer::Unbind() const
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // Check for empty stack
+    if(_handleStack.empty())
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+    else
+    {
+        // Check whether this is on top
+        if(_handleStack.top() == _framebuffer)
+        {
+            _handleStack.pop();
+
+            // Decide whether to bind fallback or next on stack
+            if(_handleStack.empty())
+            {
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            }
+            else
+            {
+                glBindFramebuffer(GL_FRAMEBUFFER, _handleStack.top());
+            }
+        }
+        else
+        {
+            // Do nothing about it
+        }
+    }
 }
 
 void Framebuffer::Resize(int width, int height)
