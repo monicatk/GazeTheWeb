@@ -10,13 +10,29 @@
 // Shaders
 const std::string vertexShaderSource =
 "#version 330 core\n"
-"in vec3 posAttr;\n"
-"in vec2 uvAttr;\n"
-"out vec2 uv;\n"
-"uniform mat4 matrix;\n"
 "void main() {\n"
-"   uv = uvAttr;\n"
-"   gl_Position = matrix * vec4(posAttr, 1);\n"
+"}\n";
+
+const std::string geometryShaderSource =
+"#version 330 core\n"
+"layout(points) in;\n"
+"layout(triangle_strip, max_vertices = 4) out;\n"
+"out vec2 uv;\n"
+"uniform vec4 position;\n" // minX, minY, maxX, maxY. OpenGL coordinate system!
+"void main() {\n"
+"    gl_Position = vec4(position.zw, 0.0, 1.0);\n"
+"    uv = vec2(1.0, 1.0);\n"
+"    EmitVertex();\n"
+"    gl_Position = vec4(position.xw, 0.0, 1.0);\n"
+"    uv = vec2(0.0, 1.0);\n"
+"    EmitVertex();\n"
+"    gl_Position = vec4(position.zy, 0.0, 1.0);\n"
+"    uv = vec2(1.0, 0.0);\n"
+"    EmitVertex();\n"
+"    gl_Position = vec4(position.xy, 0.0, 1.0);\n"
+"    uv = vec2(0.0, 0.0);\n"
+"    EmitVertex();\n"
+"    EndPrimitive();\n"
 "}\n";
 
 const std::string fragmentShaderSource =
@@ -44,7 +60,7 @@ WebView::WebView(int renderWidth, int renderHeight)
     _spTexture = std::shared_ptr<Texture>(new Texture(renderWidth, renderHeight, GL_RGBA, Texture::Filter::LINEAR, Texture::Wrap::BORDER));
 
     // Render item
-    _upRenderItem = std::unique_ptr<RenderItem>(new RenderItem(vertexShaderSource, fragmentShaderSource));
+    _upRenderItem = std::unique_ptr<RenderItem>(new RenderItem(vertexShaderSource, geometryShaderSource, fragmentShaderSource));
 }
 
 WebView::~WebView()
@@ -68,20 +84,15 @@ void WebView::Draw(const WebViewParameters& parameters, int windowWidth, int win
 {
     _upRenderItem->Bind();
 
-    // Calculate model matrix
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::scale(model, glm::vec3(1.f / windowWidth, 1.f / windowHeight, 1.f));
-    model = glm::translate(model, glm::vec3(_x, _y, 0));
-    model = glm::scale(model, glm::vec3(_width, _height, 1));
-
-    // Projection
-    glm::mat4 projection = glm::ortho(0, 1, 0, 1);
-
-    // Combine matrics
-    glm::mat4 matrix = projection * model;
+    // Calculate positions of vertices (OpenGL system)
+    glm::vec4 position;
+    position.x = (((float)_x / (float)windowWidth) * 2.f) - 1.f; // minX
+    position.y = (((float)_y / (float)windowHeight) * 2.f) - 1.f; // minY
+    position.z = (((float)(_x + _width) / (float)windowWidth) * 2.f) - 1.f; // maxX
+    position.w = (((float)(_y + _height) / (float)windowHeight) * 2.f) - 1.f;; // maxY
 
     // Fill uniforms
-    _upRenderItem->GetShader()->UpdateValue("matrix", matrix);
+    _upRenderItem->GetShader()->UpdateValue("position", position); // normalized device coordinates
     _upRenderItem->GetShader()->UpdateValue("centerOffset", parameters.centerOffset);
     _upRenderItem->GetShader()->UpdateValue("zoomPosition", parameters.zoomPosition);
     _upRenderItem->GetShader()->UpdateValue("zoom", parameters.zoom);
@@ -91,10 +102,25 @@ void WebView::Draw(const WebViewParameters& parameters, int windowWidth, int win
     _spTexture->Bind();
 
     // Draw quad
-   _upRenderItem->Draw();
+   _upRenderItem->Draw(GL_POINTS);
+
+    // Render highlighting
+    if(parameters.highlight > 0)
+    {
+        // Go over rects and render them
+        for(const Rect& rRect : _rects)
+        {
+            // rRect.
+        }
+    }
 }
 
 std::weak_ptr<Texture> WebView::GetTexture()
 {
     return _spTexture;
+}
+
+void WebView::SetHighlightRects(std::vector<Rect> rects)
+{
+    _rects = rects;
 }

@@ -112,6 +112,12 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
     GetWebRenderResolution(webRenderWidth, webRenderHeight);
     _upWebView = std::unique_ptr<WebView>(new WebView(webRenderWidth, webRenderHeight));
 
+    // TODO: testing
+    std::vector<Rect> rects;
+    Rect rect(0.25f, 0.25, 0.75, 0.75);
+    rects.push_back(rect);
+    _upWebView->SetHighlightRects(rects);
+
     // Activate current mode
     ActivateMode(_mode);
 
@@ -801,7 +807,6 @@ void Tab::AddDOMNode(std::shared_ptr<DOMNode> spNode)
 	}
 
 	}
-   
 }
 
 void Tab::ClearDOMNodes()

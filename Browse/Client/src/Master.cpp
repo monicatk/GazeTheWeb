@@ -31,16 +31,16 @@ const std::string geometryShaderSource =
 "layout(triangle_strip, max_vertices = 4) out;\n"
 "out vec2 uv;\n"
 "void main() {\n"
-"    gl_Position = vec4(1.0, 1.0, 0.5, 1.0);\n"
+"    gl_Position = vec4(1.0, 1.0, 0.0, 1.0);\n"
 "    uv = vec2(1.0, 1.0);\n"
 "    EmitVertex();\n"
-"    gl_Position = vec4(-1.0, 1.0, 0.5, 1.0);\n"
+"    gl_Position = vec4(-1.0, 1.0, 0.0, 1.0);\n"
 "    uv = vec2(0.0, 1.0);\n"
 "    EmitVertex();\n"
-"    gl_Position = vec4(1.0, -1.0, 0.5, 1.0);\n"
+"    gl_Position = vec4(1.0, -1.0, 0.0, 1.0);\n"
 "    uv = vec2(1.0, 0.0);\n"
 "    EmitVertex();\n"
-"    gl_Position = vec4(-1.0, -1.0, 0.5, 1.0);\n"
+"    gl_Position = vec4(-1.0, -1.0, 0.0, 1.0);\n"
 "    uv = vec2(0.0, 0.0);\n"
 "    EmitVertex();\n"
 "    EndPrimitive();\n"
@@ -315,13 +315,12 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
     _upEyeInput = std::unique_ptr<EyeInput>(new EyeInput);
 
     // ### FRAMEBUFFER ###
-	glGenVertexArrays(1, &_screenFillingVAO);
     _upFramebuffer = std::unique_ptr<Framebuffer>(new Framebuffer(_width, _height));
 	_upFramebuffer->Bind();
     _upFramebuffer->AddAttachment(Framebuffer::ColorFormat::RGB);
 	_upFramebuffer->Unbind();
-    _upScreenFillingQuad = std::unique_ptr<Shader>(
-        new Shader(
+    _upScreenFillingQuad = std::unique_ptr<RenderItem>(
+        new RenderItem(
             vertexShaderSource,
             geometryShaderSource,
             setup::BLUR_PERIPHERY ? blurFragmentShaderSource : simpleFragmentShaderSource));
@@ -337,9 +336,6 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
 
 Master::~Master()
 {
-	// Delete vertex array of screen filling quad
-	glDeleteVertexArrays(1, &_screenFillingVAO);
-
     // Manual destruction of Web. Otherwise there are errors in CEF at shutdown (TODO: understand why)
     _upWeb.reset();
 
@@ -594,18 +590,16 @@ void Master::Loop()
 
         // Render screen filling quad
         _upScreenFillingQuad->Bind();
-		glBindVertexArray(_screenFillingVAO);
 
         // Fill uniforms when necessary
         if(setup::BLUR_PERIPHERY)
         {
-            _upScreenFillingQuad->UpdateValue("focusPixelPosition", glm::vec2(usedEyeGUIInput.gazeX, _height - usedEyeGUIInput.gazeY)); // OpenGL coordinate system
-            _upScreenFillingQuad->UpdateValue("focusPixelRadius", (float)glm::min(_width, _height) * BLUR_FOCUS_RELATIVE_RADIUS);
-            _upScreenFillingQuad->UpdateValue("peripheryMultiplier", BLUR_PERIPHERY_MULTIPLIER);
+            _upScreenFillingQuad->GetShader()->UpdateValue("focusPixelPosition", glm::vec2(usedEyeGUIInput.gazeX, _height - usedEyeGUIInput.gazeY)); // OpenGL coordinate system
+            _upScreenFillingQuad->GetShader()->UpdateValue("focusPixelRadius", (float)glm::min(_width, _height) * BLUR_FOCUS_RELATIVE_RADIUS);
+            _upScreenFillingQuad->GetShader()->UpdateValue("peripheryMultiplier", BLUR_PERIPHERY_MULTIPLIER);
         }
 
-        glDrawArrays(GL_POINTS, 0, 1);
-		glBindVertexArray(0);
+         _upScreenFillingQuad->Draw(GL_POINTS);
 
         // Reset reminder BEFORE POLLING
         _leftMouseButtonPressed = false;

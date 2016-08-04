@@ -16,6 +16,7 @@
 #include "src/Setup.h"
 #include "src/Utils/LerpValue.h"
 #include "src/Utils/Framebuffer.h"
+#include "src/Utils/RenderItem.h"
 #include "externals/OGL/gl_core_3_3.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 #include <queue>
@@ -178,11 +179,8 @@ private:
     // Framebuffer for complete rendering
     std::unique_ptr<Framebuffer> _upFramebuffer;
 
-    // Shader to render screenfilling quad
-    std::unique_ptr<Shader> _upScreenFillingQuad;
-
-	// Empty vertex array for screen filling quad
-	unsigned int _screenFillingVAO;
+    // Render item to render screenfilling quad
+    std::unique_ptr<RenderItem> _upScreenFillingQuad;
 
 	// Directory for bookmarks etc
 	std::string _userDirectory;

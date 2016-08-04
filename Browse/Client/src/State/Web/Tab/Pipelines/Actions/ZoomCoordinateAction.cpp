@@ -77,6 +77,8 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
         webViewParameters.centerOffset = _coordinateCenterOffset;
         webViewParameters.zoom = _logZoom;
         webViewParameters.zoomPosition = _coordinate;
+        webViewParameters.dim = 0.5f;
+        webViewParameters.highlight = 1.f;
         _pTab->SetWebViewParameters(webViewParameters);
 
         // Check, whether click is done

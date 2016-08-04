@@ -9,9 +9,11 @@
 
 #include "src/State/Web/Tab/WebViewParameters.h"
 #include "src/Utils/RenderItem.h"
-#include "externals/OGL/gl_core_3_3.h"
+#include "src/Utils/Rect.h"
 #include "src/Utils/glmWrapper.h"
+#include "externals/OGL/gl_core_3_3.h"
 #include <memory>
+#include <vector>
 
 // Forward declarations
 class Texture;
@@ -40,6 +42,9 @@ public:
     // Getter for weak pointer of texture
     std::weak_ptr<Texture> GetTexture();
 
+    // Set rects which can be highlighted
+    void SetHighlightRects(std::vector<Rect> rects);
+
 private:
 
     // Texture object which belongs here but filled by CEF and read maybe by other
@@ -53,6 +58,9 @@ private:
     int _y = 0;
     int _width = 0;
     int _height = 0;
+
+    // Vector with rects used for highlighting
+    std::vector<Rect> _rects;
 };
 
 #endif // WEBVIEW_H_

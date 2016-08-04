@@ -10,25 +10,17 @@ RenderItem::RenderItem(std::string vertSource, std::string fragSource)
     // Create shader
     _upShader = std::unique_ptr<Shader>(new Shader(vertSource, fragSource));
 
-    // Create mesh
-    _upQuad = std::unique_ptr<Quad>(new Quad);
-
-    // Bring both with vertex array buffer together
+    // Just create a vertex array buffer
     glGenVertexArrays(1, &_vao);
-    glBindVertexArray(_vao);
+}
 
-    // Vertices
-    int posAttr = glGetAttribLocation(_upShader->GetProgram(), "posAttr");
-    glEnableVertexAttribArray(posAttr);
-    glBindBuffer(GL_ARRAY_BUFFER, _upQuad->GetVBO());
-    glVertexAttribPointer(posAttr, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+RenderItem::RenderItem(std::string vertSource, std::string geomSource, std::string fragSource)
+{
+    // Create shader
+    _upShader = std::unique_ptr<Shader>(new Shader(vertSource, geomSource, fragSource));
 
-    // Texture coordinates
-    int uvAttrib = glGetAttribLocation(_upShader->GetProgram(), "uvAttr");
-    glEnableVertexAttribArray(uvAttrib);
-    glBindBuffer(GL_ARRAY_BUFFER, _upQuad->GetUVBO());
-    glVertexAttribPointer(uvAttrib, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-
+    // Just create a vertex array buffer
+    glGenVertexArrays(1, &_vao);
 }
 
 RenderItem::~RenderItem()
@@ -44,6 +36,6 @@ void RenderItem::Bind() const
 
 void RenderItem::Draw(GLenum mode) const
 {
-    glDrawArrays(mode, 0, _upQuad->GetVertexCount());
+    glDrawArrays(mode, 0, 1);
 }
 
