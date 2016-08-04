@@ -236,8 +236,8 @@ void Tab::Update(float tpf, Input& rInput)
         float progressDown = 1.f;
         if(scrollableHeight > 0)
         {
-            progressDown = _scrollingOffsetY / scrollableHeight;
-            progressUp = 1.f - progressDown;
+            progressUp = _scrollingOffsetY / scrollableHeight;
+            progressDown = 1.f - progressUp;
         }
         eyegui::setProgress(_pScrollingOverlayLayout, "scroll_up_progress", progressUp);
         eyegui::setProgress(_pScrollingOverlayLayout, "scroll_down_progress", progressDown);
@@ -980,7 +980,7 @@ void Tab::UpdateAccentColor(float tpf)
 
     // Create transparent colors
     float alpha = 0.75f;
-    float backgroundAlpha = 0.25f;
+    float backgroundAlpha = 0.5f;
     glm::vec4 transparentColorAccent = glm::vec4(
         colorAccent.r,
         colorAccent.g,
