@@ -30,6 +30,7 @@ public:
     virtual ~WebView();
 
     // Update values. Coordinates in pixels
+    // TODO: y is here in which coordinate syste? Seems to be calles in eyeGUI' but expected in OpenGL
     void Update(
         int x,
         int y,

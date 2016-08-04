@@ -82,35 +82,54 @@ void WebView::Update(
 
 void WebView::Draw(const WebViewParameters& parameters, int windowWidth, int windowHeight) const
 {
+    // Bind render item
     _upRenderItem->Bind();
 
-    // Calculate positions of vertices (OpenGL system)
-    glm::vec4 position;
-    position.x = (((float)_x / (float)windowWidth) * 2.f) - 1.f; // minX
-    position.y = (((float)_y / (float)windowHeight) * 2.f) - 1.f; // minY
-    position.z = (((float)(_x + _width) / (float)windowWidth) * 2.f) - 1.f; // maxX
-    position.w = (((float)(_y + _height) / (float)windowHeight) * 2.f) - 1.f;; // maxY
+    // Bind texture with rendered web page
+    _spTexture->Bind();
+
+    // Create function to compute position vector for shader (OpenGL coordinates)
+    std::function<glm::vec4(float, float, float, float)> posCalc = [&](float x, float y, float width, float height)
+    {
+        glm::vec4 position;
+        position.x = ((x / (float)windowWidth) * 2.f) - 1.f; // minX
+        position.y = ((y / (float)windowHeight) * 2.f) - 1.f; // minY
+        position.z = (((x + width) / (float)windowWidth) * 2.f) - 1.f; // maxX
+        position.w = (((y + height) / (float)windowHeight) * 2.f) - 1.f;; // maxY
+        return position;
+    };
 
     // Fill uniforms
-    _upRenderItem->GetShader()->UpdateValue("position", position); // normalized device coordinates
+    _upRenderItem->GetShader()->UpdateValue("position", posCalc(_x, _y, _width, _height)); // normalized device coordinates
     _upRenderItem->GetShader()->UpdateValue("centerOffset", parameters.centerOffset);
     _upRenderItem->GetShader()->UpdateValue("zoomPosition", parameters.zoomPosition);
     _upRenderItem->GetShader()->UpdateValue("zoom", parameters.zoom);
     _upRenderItem->GetShader()->UpdateValue("dim", parameters.dim);
 
-    // Bind texture with rendered web page
-    _spTexture->Bind();
-
     // Draw quad
-   _upRenderItem->Draw(GL_POINTS);
+    _upRenderItem->Draw(GL_POINTS);
 
     // Render highlighting
     if(parameters.highlight > 0)
     {
+        // TODO: use value from highlight or so
+        // For now: just reset dimming to zero for the rect rendering
+        _upRenderItem->GetShader()->UpdateValue("dim", 0.f);
+
         // Go over rects and render them
         for(const Rect& rRect : _rects)
         {
-            // rRect.
+            // Setup position
+            _upRenderItem->GetShader()->UpdateValue(
+                "position",
+                posCalc(
+                    rRect.left,
+                    rRect.bottom,
+                    rRect.width(),
+                    rRect.height())); // normalized device coordinates
+
+            // Draw the quad
+            _upRenderItem->Draw(GL_POINTS);
         }
     }
 }

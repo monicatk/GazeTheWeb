@@ -114,7 +114,7 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
 
     // TODO: testing
     std::vector<Rect> rects;
-    Rect rect(0.25f, 0.25, 0.75, 0.75);
+    Rect rect(0, 100, 100, 200);
     rects.push_back(rect);
     _upWebView->SetHighlightRects(rects);
 
