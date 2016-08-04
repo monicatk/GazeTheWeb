@@ -79,7 +79,7 @@ WebView::WebView(int renderWidth, int renderHeight)
     _upFramebuffer->AddAttachment(Framebuffer::ColorFormat::RGB);
     _upFramebuffer->Unbind();
 
-    // TODO: why not setting _width and _height here?
+    // _x, _y, _width and _height are set at first update
 }
 
 WebView::~WebView()
@@ -115,6 +115,11 @@ void WebView::Draw(const WebViewParameters& parameters, int windowWidth, int win
     // Just render to framebuffer
     _upFramebuffer->Bind();
 
+    // Rescue current viewport and set own which fits rendered webpage
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    glViewport(0, 0, _width, _height);
+
     // Bind render item
     _upSimpleRenderItem->Bind();
 
@@ -122,14 +127,14 @@ void WebView::Draw(const WebViewParameters& parameters, int windowWidth, int win
     _spTexture->Bind();
 
     // Fill uniforms
-    _upSimpleRenderItem->GetShader()->UpdateValue("position", glm::vec4(-1.f, -1.f, 1.0f, 1.f)); // normalized device coordinates
+    _upSimpleRenderItem->GetShader()->UpdateValue("position", glm::vec4(-1.f, -1.f, 1.f, 1.f)); // normalized device coordinates
     _upSimpleRenderItem->GetShader()->UpdateValue("textureCoordinate", glm::vec4(0.f, 0.f, 1.f, 1.f));
     _upSimpleRenderItem->GetShader()->UpdateValue("dim", parameters.dim);
 
     // Draw webpage completely into framebuffer
     _upSimpleRenderItem->Draw(GL_POINTS);
 
-    /* TODO
+    /*
     // Render highlighting
     if(parameters.highlight > 0)
     {
@@ -141,7 +146,8 @@ void WebView::Draw(const WebViewParameters& parameters, int windowWidth, int win
         for(const Rect& rRect : _rects)
         {
             // Setup position
-            _upSimpleRenderItem->GetShader()->UpdateValue("position",
+            _upSimpleRenderItem->GetShader()->UpdateValue(
+                "position",
                 glm::vec4(
                     (((float)rRect.left / (float)_width) * 2.f) - 1.f,
                     ((((float)(_height - rRect.bottom)) / (float)_height) * 2.f) - 1.f,
@@ -162,6 +168,9 @@ void WebView::Draw(const WebViewParameters& parameters, int windowWidth, int win
         }
     }
     */
+
+    // Restore old viewport
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
     // Unbind framebuffer
     _upFramebuffer->Unbind();

@@ -15,13 +15,13 @@ Framebuffer::Framebuffer(int width, int height)
     glGenRenderbuffers(1, &_depthStencil);
 
     // Bind framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+    Bind();
 
     // Create render buffer for depth and stencil and save width and height
     Resize(width, height);
 
     // Unbind framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    Unbind();
 }
 
 Framebuffer::~Framebuffer()
