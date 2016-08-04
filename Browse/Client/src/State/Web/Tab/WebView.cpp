@@ -56,7 +56,7 @@ const std::string compositionFragmentShaderSource =
 "uniform vec2 zoomPosition;\n"
 "uniform float zoom;\n"
 "void main() {\n"
-"   vec2 coords = vec2(uv.s, 1.0 - uv.t);\n"
+"   vec2 coords = uv;\n"
 "   coords += centerOffset;" // Move towards center
 "   coords -= zoomPosition;" // Move zoom position to origin
 "   coords *= zoom;" // Scale coords
@@ -128,13 +128,12 @@ void WebView::Draw(const WebViewParameters& parameters, int windowWidth, int win
 
     // Fill uniforms
     _upSimpleRenderItem->GetShader()->UpdateValue("position", glm::vec4(-1.f, -1.f, 1.f, 1.f)); // normalized device coordinates
-    _upSimpleRenderItem->GetShader()->UpdateValue("textureCoordinate", glm::vec4(0.f, 0.f, 1.f, 1.f));
+    _upSimpleRenderItem->GetShader()->UpdateValue("textureCoordinate", glm::vec4(0.f, 1.f, 1.f, 0.f)); // using texture coordinates to flip image in v direction
     _upSimpleRenderItem->GetShader()->UpdateValue("dim", parameters.dim);
 
     // Draw webpage completely into framebuffer
     _upSimpleRenderItem->Draw(GL_POINTS);
 
-    /*
     // Render highlighting
     if(parameters.highlight > 0)
     {
@@ -145,29 +144,30 @@ void WebView::Draw(const WebViewParameters& parameters, int windowWidth, int win
         // Go over rects and render them
         for(const Rect& rRect : _rects)
         {
+            // TODO: implement scrolling
+
             // Setup position
             _upSimpleRenderItem->GetShader()->UpdateValue(
                 "position",
                 glm::vec4(
                     (((float)rRect.left / (float)_width) * 2.f) - 1.f,
                     ((((float)(_height - rRect.bottom)) / (float)_height) * 2.f) - 1.f,
-                    ((float)rRect.width() * 2.f) - 1.f,
-                    ((float)rRect.height() * 2.f) - 1.f)); // normalized device coordinates
+                    (((float)rRect.right / (float)_width) * 2.f) - 1.f,
+                    ((((float)(_height - rRect.top)) / (float)_height) * 2.f) - 1.f)); // normalized device coordinates
 
             // Setup texture coordinate
             _upSimpleRenderItem->GetShader()->UpdateValue(
                 "textureCoordinate",
                 glm::vec4(
                     (float)rRect.left / (float)_width,
-                    (float)(_height - rRect.bottom) / (float)_height,
+                    1.f - (float)(_height - rRect.bottom) / (float)_height,
                     (float)rRect.right / (float)_width,
-                    (float)(_height - rRect.top) / (float)_height));
+                    1.f - (float)(_height - rRect.top) / (float)_height)); // using texture coordinates to flip image in v direction
 
             // Draw the quad
             _upSimpleRenderItem->Draw(GL_POINTS);
         }
     }
-    */
 
     // Restore old viewport
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
@@ -193,9 +193,9 @@ void WebView::Draw(const WebViewParameters& parameters, int windowWidth, int win
             (((_x + _width) / (float)windowWidth) * 2.f) - 1.f, // maxX
             (((_y + _height) / (float)windowHeight) * 2.f) - 1.f // maxY
             )); // normalized device coordinates
-    _upCompositeRenderItem->GetShader()->UpdateValue("textureCoordinate", glm::vec4(0.f, 0.f, 1.f, 1.f));
-    _upCompositeRenderItem->GetShader()->UpdateValue("centerOffset", parameters.centerOffset);
-    _upCompositeRenderItem->GetShader()->UpdateValue("zoomPosition", parameters.zoomPosition);
+    _upCompositeRenderItem->GetShader()->UpdateValue("textureCoordinate", glm::vec4(0.f, 0.f, 1.f, 1.f)); // everything is rendered correctly into framebuffer, just display it
+    _upCompositeRenderItem->GetShader()->UpdateValue("centerOffset", glm::vec2(parameters.centerOffset.x, parameters.centerOffset.y)); // change origin from upper left to lower left
+    _upCompositeRenderItem->GetShader()->UpdateValue("zoomPosition", glm::vec2(parameters.zoomPosition.x, parameters.zoomPosition.y)); // change origin from upper left to lower left
     _upCompositeRenderItem->GetShader()->UpdateValue("zoom", parameters.zoom);
     _upCompositeRenderItem->Draw(GL_POINTS);
 }

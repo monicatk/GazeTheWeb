@@ -3,6 +3,7 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // View on web which has Texture and renders it onto OpenGL quad.
+// All input is assumed to have origin in upper left corner.
 
 #ifndef WEBVIEW_H_
 #define WEBVIEW_H_
