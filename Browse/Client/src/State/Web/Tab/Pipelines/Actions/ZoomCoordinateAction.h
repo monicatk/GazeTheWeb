@@ -44,6 +44,9 @@ protected:
 	// Dimming value
 	const float _dimmingValue = 0.25f;
 
+	// Click position center offset weight
+	const float _clickPositionCenterOffsetWeight = 0.5f;
+
     // Coordinate which is updated and output
     glm::vec2 _coordinate;
 
