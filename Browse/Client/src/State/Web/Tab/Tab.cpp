@@ -164,15 +164,13 @@ void Tab::Update(float tpf, Input& rInput)
         webViewGazeRelativeY);
 
     // Update highlight rectangle of webview
-    if(true) // TODO: do it only when necessary
+	// TODO: alternative: give webview shared pointer to DOM nodes
+    std::vector<Rect> rects;
+    for(const auto& rDOMNode : _DOMTextLinks)
     {
-        std::vector<Rect> rects;
-        for(const auto& rDOMNode : _DOMTextLinks)
-        {
-            rects.push_back(rDOMNode->GetRect());
-        }
-        _upWebView->SetHighlightRects(rects);
+        rects.push_back(rDOMNode->GetRect());
     }
+    _upWebView->SetHighlightRects(rects);
 
     // ### UPDATE COLOR OF GUI ###
 
