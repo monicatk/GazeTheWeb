@@ -15,7 +15,6 @@ struct WebViewParameters
     glm::vec2 zoomPosition = glm::vec2(0, 0);
     float zoom = 1.f;
     float dim = 0.f;
-    float highlight = 0.f;
 };
 
 #endif // WEBVIEWPARAMETERS_H_

@@ -140,7 +140,7 @@ void WebView::Draw(
     _upSimpleRenderItem->Draw(GL_POINTS);
 
     // Render highlighting
-    if(parameters.highlight > 0)
+    if(parameters.dim > 0.f)
     {
         // TODO: use value from highlight or so
         // For now: just reset dimming to zero for the rect rendering

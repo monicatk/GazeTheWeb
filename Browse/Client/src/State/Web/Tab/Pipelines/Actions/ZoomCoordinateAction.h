@@ -38,6 +38,12 @@ public:
 
 protected:
 
+	// Dimming duration
+	const float _dimmingDuration = 0.5f; // seconds until it is dimmed
+
+	// Dimming value
+	const float _dimmingValue = 0.25f;
+
     // Coordinate which is updated and output
     glm::vec2 _coordinate;
 
@@ -55,6 +61,9 @@ protected:
 
 	// Deviation (relative coordiantes, no pixels!)
 	float _deviation = 0;
+
+	// Dimming
+	float _dimming = 0.f;
 };
 
 #endif // ZOOMCOORDINATEACTION_H_

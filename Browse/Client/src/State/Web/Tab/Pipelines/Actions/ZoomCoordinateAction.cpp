@@ -70,16 +70,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
         _coordinateCenterOffset = clickPositionCenterOffsetWeight * (1.0f - _logZoom) * (_coordinate - 0.5f);
 
         // Make zoom better with log function (and remember it for coordiante interpolation in next iteration)
-        _logZoom = 1.0f - std::log(_linZoom);
-
-        // Tell web view about zoom
-        WebViewParameters webViewParameters;
-        webViewParameters.centerOffset = _coordinateCenterOffset;
-        webViewParameters.zoom = _logZoom;
-        webViewParameters.zoomPosition = _coordinate;
-        webViewParameters.dim = 0.5f;
-        webViewParameters.highlight = 1.f;
-        _pTab->SetWebViewParameters(webViewParameters);
+        _logZoom = 1.0f - std::log(_linZoom);      
 
         // Check, whether click is done
 		if (
@@ -90,6 +81,18 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
             return true;
         }
     }
+
+	// Decrement dimming
+	_dimming += tpf;
+	_dimming = glm::min(_dimming, _dimmingDuration);
+
+	// Tell web view about zoom
+	WebViewParameters webViewParameters;
+	webViewParameters.centerOffset = _coordinateCenterOffset;
+	webViewParameters.zoom = _logZoom;
+	webViewParameters.zoomPosition = _coordinate;
+	webViewParameters.dim = _dimmingValue * (_dimming / _dimmingDuration);
+	_pTab->SetWebViewParameters(webViewParameters);
 
     // Not finished, yet
     return false;
