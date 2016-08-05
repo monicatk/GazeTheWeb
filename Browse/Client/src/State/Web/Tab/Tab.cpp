@@ -15,6 +15,7 @@
 #include "src/State/Web/Tab/Pipelines/TestPipeline.h"
 #include "src/State/Web/Tab/Pipelines/ZoomClickPipeline.h"
 #include "src/Utils/Logger.h"
+#include "src/Utils/QuadRenderItem.h"
 #include "submodules/glm/glm/gtc/matrix_transform.hpp" // TODO: move to debug rendering class
 #include <algorithm>
 
@@ -119,7 +120,7 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
     _pCefMediator->RegisterTab(this);
 
 	// Prepare debug rendering
-	_upDebugRenderItem = std::unique_ptr<RenderItem>(new RenderItem(vertexShaderSource, fragmentShaderSource));
+	_upDebugRenderItem = std::unique_ptr<RenderItem>(new QuadRenderItem(vertexShaderSource, fragmentShaderSource));
 }
 
 Tab::~Tab()
