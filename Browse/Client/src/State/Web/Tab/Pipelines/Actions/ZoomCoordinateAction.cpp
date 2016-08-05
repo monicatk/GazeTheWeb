@@ -19,18 +19,25 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 {
     if(!tabInput.gazeUsed && tabInput.insideWebView) // TODO: gazeUsed really good idea here? Maybe later null pointer?
     {
-		// Calculate current raw position (TODO: x and y are not equally scaled, because webview is not rectangular)
+		// Calculate current raw position
 		glm::vec2 newCoordinate(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY);
 		newCoordinate += _coordinateCenterOffset;
 
-		// Aspect ration correction (assuming wider than higher web view)
+		// Aspect ration correction
 		int webViewWidth = 0;
 		int webViewHeight = 0;
 		_pTab->GetWebViewTextureResolution(webViewWidth, webViewHeight);
-		float aspectRatioCorrection = 1.f;
+		glm::vec2 aspectRatioCorrection(1.f, 1.f);
 		if (webViewWidth != 0 && webViewHeight != 0)
 		{
-			aspectRatioCorrection = (float)webViewWidth / (float)webViewHeight;
+			if (webViewWidth > webViewHeight)
+			{
+				aspectRatioCorrection.x = (float)webViewWidth / (float)webViewHeight;
+			}
+			else
+			{
+				aspectRatioCorrection.y = (float)webViewHeight / (float)webViewWidth;
+			}
 		}
 
         // Speed of zooming
@@ -46,16 +53,16 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
             glm::vec2 delta = newCoordinate - _coordinate;
 
 			// Do aspect correction for delta
-			delta.x = delta.x / aspectRatioCorrection;
+			delta = delta / aspectRatioCorrection;
 
 			// Add length of delta to deviation
 			_deviation += glm::length(delta) * tpf;
 
             // The bigger the distance, the slower the zoom
-            zoomSpeed = 0.6f * (1.f - glm::min(1.f, glm::length(delta))); // [0, 0.75]
+            zoomSpeed = 0.6f * (1.f - glm::min(1.f, glm::length(delta))); // [0, 0.6]
 
 			// If at the moment a high deviation is given, try to zoom out to give user more overview
-			zoomSpeed = zoomSpeed - glm::min(1.f, 50.f * _deviation); // [-0.25, 0.75]
+			zoomSpeed = zoomSpeed - glm::min(1.f, 50.f * _deviation); // [-0.4, 0.6]
 
             // Move to new click position (weighted by zoom level for more smoohtness at higher zoom)
             float coordinateInterpolationSpeed = 5.f;
