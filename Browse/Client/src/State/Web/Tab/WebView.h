@@ -39,12 +39,17 @@ public:
         int height);
 
     // Draw
-    void Draw(const WebViewParameters& parameters, int windowWidth, int windowHeight) const;
+    void Draw(
+		const WebViewParameters& parameters,
+		int windowWidth,
+		int windowHeight,
+		double scrollingOffsetX,
+		double scrollingOffsetY) const;
 
     // Getter for weak pointer of texture
     std::weak_ptr<Texture> GetTexture();
 
-    // Set rects which can be highlighted
+    // Set rects which are not dimmed
     void SetHighlightRects(std::vector<Rect> rects);
 
 private:

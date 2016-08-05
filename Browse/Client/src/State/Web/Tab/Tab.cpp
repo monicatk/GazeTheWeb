@@ -342,7 +342,12 @@ void Tab::Update(float tpf, Input& rInput)
 void Tab::Draw() const
 {
     // Draw WebView
-    _upWebView->Draw(_webViewParameters, _pMaster->GetWindowWidth(), _pMaster->GetWindowHeight());
+    _upWebView->Draw(
+		_webViewParameters,
+		_pMaster->GetWindowWidth(),
+		_pMaster->GetWindowHeight(),
+		_scrollingOffsetX,
+		_scrollingOffsetY);
 
     // Decide what to draw
     if (_pipelineActive)

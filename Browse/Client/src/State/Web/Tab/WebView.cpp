@@ -108,7 +108,12 @@ void WebView::Update(
     _height = height;
 }
 
-void WebView::Draw(const WebViewParameters& parameters, int windowWidth, int windowHeight) const
+void WebView::Draw(
+	const WebViewParameters& parameters,
+	int windowWidth,
+	int windowHeight,
+	double scrollingOffsetX,
+	double scrollingOffsetY) const
 {
     // ### FILL FRAMEBUFFER ###
 
@@ -142,27 +147,31 @@ void WebView::Draw(const WebViewParameters& parameters, int windowWidth, int win
         _upSimpleRenderItem->GetShader()->UpdateValue("dim", 0.f);
 
         // Go over rects and render them
-        for(const Rect& rRect : _rects)
+        for(Rect rect : _rects)
         {
-            // TODO: implement scrolling
+			// Move rect by scrolling
+			rect.left -= scrollingOffsetX;
+			rect.right -= scrollingOffsetX;
+			rect.bottom -= scrollingOffsetY;
+			rect.top -= scrollingOffsetY;
 
             // Setup position
             _upSimpleRenderItem->GetShader()->UpdateValue(
                 "position",
                 glm::vec4(
-                    (((float)rRect.left / (float)_width) * 2.f) - 1.f,
-                    ((((float)(_height - rRect.bottom)) / (float)_height) * 2.f) - 1.f,
-                    (((float)rRect.right / (float)_width) * 2.f) - 1.f,
-                    ((((float)(_height - rRect.top)) / (float)_height) * 2.f) - 1.f)); // normalized device coordinates
+                    (((float)rect.left / (float)_width) * 2.f) - 1.f,
+                    ((((float)(_height - rect.bottom)) / (float)_height) * 2.f) - 1.f,
+                    (((float)(rect.right) / (float)_width) * 2.f) - 1.f,
+                    ((((float)(_height - rect.top)) / (float)_height) * 2.f) - 1.f)); // normalized device coordinates
 
             // Setup texture coordinate
             _upSimpleRenderItem->GetShader()->UpdateValue(
                 "textureCoordinate",
                 glm::vec4(
-                    (float)rRect.left / (float)_width,
-                    1.f - (float)(_height - rRect.bottom) / (float)_height,
-                    (float)rRect.right / (float)_width,
-                    1.f - (float)(_height - rRect.top) / (float)_height)); // using texture coordinates to flip image in v direction
+                    (float)rect.left / (float)_width,
+                    1.f - (float)(_height - rect.bottom) / (float)_height,
+                    (float)rect.right / (float)_width,
+                    1.f - (float)(_height - rect.top) / (float)_height)); // using texture coordinates to flip image in v direction
 
             // Draw the quad
             _upSimpleRenderItem->Draw(GL_POINTS);
