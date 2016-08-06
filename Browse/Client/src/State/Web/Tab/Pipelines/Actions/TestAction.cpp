@@ -4,7 +4,7 @@
 //============================================================================
 
 #include "TestAction.h"
-#include "src/State/Web/Tab/TabInteractionInterface.h"
+#include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 
 TestAction::TestAction(TabInteractionInterface *pTab) : Action(pTab)
 {

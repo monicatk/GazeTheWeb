@@ -4,7 +4,7 @@
 //============================================================================
 
 #include "TextInputPipeline.h"
-#include "src/State/Web/Tab/TabInteractionInterface.h"
+#include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 #include "src/State/Web/Tab/Pipelines/Actions/KeyboardAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/TextInputAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/LeftMouseButtonClickAction.h"

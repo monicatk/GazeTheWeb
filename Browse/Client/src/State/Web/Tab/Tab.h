@@ -10,16 +10,16 @@
 #ifndef TAB_H_
 #define TAB_H_
 
-#include "src/State/Web/Tab/TabInteractionInterface.h"
-#include "src/State/Web/Tab/TabCEFInterface.h"
+#include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
+#include "src/State/Web/Tab/Interface/TabCEFInterface.h"
+#include "src/State/Web/WebTabInterface.h"
 #include "src/State/Web/Tab/DOMNode.h"
 #include "src/State/Web/Tab/WebView.h"
 #include "src/State/Web/Tab/Pipelines/Pipeline.h"
 #include "src/State/Web/Tab/Triggers/DOMTrigger.h"
+#include "src/Utils/glmWrapper.h"
 #include "src/Utils/Input.h"
 #include "src/Global.h"
-#include "src/State/Web/WebTabInterface.h"
-#include "src/Utils/glmWrapper.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 #include <vector>
 #include <deque>

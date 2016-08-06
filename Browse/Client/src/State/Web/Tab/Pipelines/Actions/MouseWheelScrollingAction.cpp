@@ -4,7 +4,7 @@
 //============================================================================
 
 #include "MouseWheelScrollingAction.h"
-#include "src/State/Web/Tab/TabInteractionInterface.h"
+#include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 
 MouseWheelScrollingAction::MouseWheelScrollingAction(TabInteractionInterface* pTab) : Action(pTab)
 {

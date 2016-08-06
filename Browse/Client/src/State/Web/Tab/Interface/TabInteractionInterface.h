@@ -7,8 +7,8 @@
 #ifndef TABINTERACTIONINTERFACE_H_
 #define TABINTERACTIONINTERFACE_H_
 
-#include "src/State/Web/Tab/TabActionInterface.h"
-#include "src/State/Web/Tab/TabOverlayInterface.h"
+#include "src/State/Web/Tab/Interface/TabActionInterface.h"
+#include "src/State/Web/Tab/Interface/TabOverlayInterface.h"
 
 // Combination of Action and Overlay interface since both have different functionalities but are used in same classes
 

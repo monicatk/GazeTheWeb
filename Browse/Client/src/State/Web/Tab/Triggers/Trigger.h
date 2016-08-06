@@ -8,7 +8,7 @@
 #define TRIGGER_H_
 
 #include "src/Utils/TabInput.h"
-#include "src/State/Web/Tab/TabInteractionInterface.h"
+#include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 
 class Trigger
 {

@@ -4,7 +4,7 @@
 //============================================================================
 
 #include "LeftMouseButtonClickAction.h"
-#include "src/State/Web/Tab/TabInteractionInterface.h"
+#include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 
 LeftMouseButtonClickAction::LeftMouseButtonClickAction(TabInteractionInterface* pTab) : Action(pTab)
 {

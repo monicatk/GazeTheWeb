@@ -4,7 +4,7 @@
 //============================================================================
 
 #include "KeyboardAction.h"
-#include "src/State/Web/Tab/TabInteractionInterface.h"
+#include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 
 KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 {

@@ -4,7 +4,7 @@
 //============================================================================
 
 #include "Pipeline.h"
-#include "src/State/Web/Tab/TabInteractionInterface.h"
+#include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 
 Pipeline::Pipeline(TabInteractionInterface* pTab)
 {
