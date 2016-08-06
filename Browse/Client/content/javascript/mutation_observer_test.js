@@ -564,6 +564,33 @@ document.onreadystatechange = function()
 		UpdateDOMRects();
 
 		//consolePrint("... done with Updating DOM Rects.");
+
+		for(var i = 0, n = window.dom_links.length; i < n; i++)
+		{
+			var node = window.dom_links[i];
+
+			var linkText = node.textContent;
+			var parent = node.parentNode;
+			// Line break may occure if those chars are part of string
+			if(parent.tagName == 'P' && (linkText.includes(' ') || linkText.includes('-')) )
+			{
+				var firstNode = node.cloneNode();
+				var lastNode = node.cloneNode();
+
+				firstNode.textContent = linkText[0];
+				lastNode.textContent = linkText[linkText.length-1];
+				node.textContent = linkText.substring(1,linkText.length-1);
+
+				// Insert new nodes in DOM tree
+				parent.insertBefore(firstNode, node);
+				parent.insertBefore(lastNode, node.nextSibling);
+
+				// AddDOMTextLink(firstNode);
+				// AddDOMTextLink(lastNode);
+
+			}
+		}
+
 	}
 
 	if(document.readyState == 'complete')
@@ -707,7 +734,7 @@ function MutationObserverInit()
 		  						// Find text links
 		  						if(node.tagName == 'A')
 		  						{
-		  							AddDOMTextLink(node);
+									AddDOMTextLink(node);
 		  							// DEBUG
 		  							//window.dom_links.push(node);
 		  							//window.dom_links_rect.push([0,0,0,0]);
