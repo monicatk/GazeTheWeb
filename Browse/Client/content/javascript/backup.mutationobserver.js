@@ -102,6 +102,36 @@ function CompareRectData(node_list, rect_list, NotificationFunc)
 	}
 }
 
+// Modified version for text link normalization
+function CompareRectData2(node_list, rect_list, NotificationFunc)
+{
+	var n = node_list.length;
+
+	for(var i = 0; i < n; i++)
+	{
+		var new_rect = GetNormalizedLinkRect(node_list[i]);
+
+		// Adjust coordinates to fixed screen position if needed
+		if(node_list[i].hasAttribute('fixedID'))
+		{
+			// TODO: Handle more than 1 Rect (aka more than array of length 4)
+			// for(var j = 0, m = new_rect.length / 4; j++)
+			// {
+				SubstractScrollingOffset(new_rect);
+			// }
+			
+		}
+
+		var old_rect = rect_list[i];
+
+		if(new_rect[0] != old_rect[0] || new_rect[1] != old_rect[1] || new_rect[2] != old_rect[2] || new_rect[3] != old_rect[3])
+		{
+			NotificationFunc(i, new_rect);
+		}
+
+	}
+}
+
 // being lazy
 function RectToString(rect)
 {
@@ -137,13 +167,14 @@ function UpdateDOMRects()
 		} 
 	);
 
-	CompareRectData(
+	CompareRectData2(
 		window.dom_textinputs, 
 		window.dom_textinputs_rect, 
 		function Notify(i, rect) { 
 			consolePrint('DOM#upd#0#'+i+'#0#'+RectToString(rect)+'#');
 		} 
 	);
+
 }
 
 function UpdateFixedElementRects()
@@ -531,9 +562,9 @@ function AddDOMTextLink(node)
 
 	window.dom_links.push(node);
 
-	var rect = node.getBoundingClientRect(node);
-	var coords = AdjustRectCoordinatesToWindow(rect); //[rect.top, rect.left, rect.bottom, rect.right];
-	window.dom_links_rect.push(coords);
+	var rectData = GetNormalizedLinkRect(node);
+	// var coords = AdjustRectCoordinatesToWindow(rect); //[rect.top, rect.left, rect.bottom, rect.right];
+	window.dom_links_rect.push(rectData);
 
 
 	// Add attribute in order to recognize already discovered DOM nodes later
@@ -565,49 +596,112 @@ document.onreadystatechange = function()
 
 		//consolePrint("... done with Updating DOM Rects.");
 
-		for(var i = 0, n = window.dom_links.length; i < n; i++)
-		{
-			var node = window.dom_links[i];
-
-			var linkText = node.textContent;
-			var parent = node.parentNode;
-			// Line break may occure if those chars are part of string
-			if(parent.tagName == 'P' && (linkText.includes(' ') || linkText.includes('-')) )
-			{
-				var firstNode = node.cloneNode();
-				var lastNode = node.cloneNode();
-
-				firstNode.textContent = linkText[0];
-				lastNode.textContent = linkText[linkText.length-1];
-				node.textContent = linkText.substring(1,linkText.length-1);
-
-				// Insert new nodes in DOM tree
-				parent.insertBefore(firstNode, node);
-				parent.insertBefore(lastNode, node.nextSibling);
-
-				// AddDOMTextLink(firstNode);
-				// AddDOMTextLink(lastNode);
-
-			}
-		}
-
 	}
 
 	if(document.readyState == 'complete')
 	{
 		UpdateDOMRects();
 		consolePrint('Page fully loaded. #TextInputs='+window.dom_textinputs.length+', #TextLinks='+window.dom_links.length);
+
+			consolePrint("Normalizing link Rects...");
+		// NormalizeLinkRects();
+
 		
 	}
 }
+
+function GetNormalizedLinkRect(node)
+{
+	var linkText = node.textContent;
+
+	// Only text links with a ' ' or '-' may be cause a line break
+	if(linkText.includes(' ') || linkText.includes('-'))
+	{
+		var rectData = AdjustRectCoordinatesToWindow(node.getBoundingClientRect());
+		var parent = node.parentNode;
+
+		var firstChar = node.textContent[0];
+		var lastChar = node.textContent[node.textContent.length-1];
+
+		// Set up two new nodes for text beginning and ending
+		var firstNode = node.cloneNode(node);
+		firstNode.textContent = firstChar;
+		var lastNode = node.cloneNode(node);
+		lastNode.textContent = lastChar;
+
+		// Adjust text of current text link node, remove first and last char
+		node.textContent = node.textContent.substring(1,node.textContent.length-1);
+
+		// Insert new nodes before and after targeted link node
+		parent.insertBefore(firstNode, node);
+		parent.insertBefore(lastNode, node.nextSibling);
+
+		// Get bounding Rects of first/last char
+		var firstRectData = AdjustRectCoordinatesToWindow(firstNode.getBoundingClientRect());
+		var lastRectData = AdjustRectCoordinatesToWindow(lastNode.getBoundingClientRect());
+
+		var rectResult;
+
+		// Detect line break
+		if( (firstRectData[2]-firstRectData[0]) * 1.8 < (rectData[2]-rectData[0]) && (firstRectData[2]-firstRectData[0]) > 0 )
+		{
+			// consolePrint(linkText);
+			// consolePrint('rect  h: '+ (rectData[2]-rectData[0]) );
+			// consolePrint('first h: '+ (firstRectData[2]-firstRectData[0]) );
+			// consolePrint('last  h: '+ (lastRectData[2]-lastRectData[0]) ) ;
+
+			// AddDOMTextLink(lastNode);
+			// AddDOMTextLink(firstNode);
+
+			// Bounding Rect before line break
+			rectResult = [firstRectData[0], firstRectData[1], firstRectData[2], rectData[3]];
+
+			// consolePrint('new rect: '+window.dom_links_rect[i]);
+
+			// consolePrint('Link #'+linkText+'# was split, because of a line break');
+			
+			// Bounding Rect after line break
+			// var rectExtension = [lastRectData[0], rectData[1], lastRectData[2], lastRectData[3]];
+			// for(var j = 0; j < 4; j++)
+			// {
+			// 	window.dom_links_rect.push(rectExtension[i]);
+			// }
+			
+
+			// TODO: Extend C++ DOMTextLink by second Rect attribute
+		
+			// TODO: Add HTML attribute, which identifies that DOM node was split
+			
+		}
+		else
+		{
+			rectResult = rectData;	
+		}
+
+		// Clean-up all DOM tree changes
+		parent.removeChild(firstNode);
+		parent.removeChild(lastNode);
+		node.textContent = linkText;
+
+		return rectResult;
+
+	}
+	else
+	{
+		return AdjustRectCoordinatesToWindow(node.getBoundingClientRect());
+	}
+	
+
+}
+
 
 window.onresize = function()
 {
 	//UpdateDOMRects();
 	// TODO: Update fixed elements' Rects too?
-	consolePrint("Javascript detected window resize, update of fixed element Rects.");
+	// consolePrint("Javascript detected window resize, update of fixed element Rects.");
 
-	UpdateFixedElementRects();
+	// UpdateFixedElementRects();
 }
 
 
@@ -730,20 +824,51 @@ function MutationObserverInit()
 		  						}
 
 
-		  						// EXPERIMENTAL
 		  						// Find text links
 		  						if(node.tagName == 'A')
-		  						{
-									AddDOMTextLink(node);
-		  							// DEBUG
-		  							//window.dom_links.push(node);
-		  							//window.dom_links_rect.push([0,0,0,0]);
+		  						{	
+									// DEBUG
+									var nope = false;
+									var parent = node.parentNode;
+									var myTitle = 'Bundesamt für Ausrüstung, Informationstechnik und Nutzung der Bundeswehr';
+									
+									if(parent && parent.tagName == 'P' &&
+									 node.getAttribute('title') == myTitle)
+									{
+										// if(parent && node.text && parent.tagName)
+										// 	consolePrint('link: '+node.text+ '; title: '+node.title+'; parent.tagName='+parent.tagName);
+										// alert('Found specific link on wikipedia!');
+										// AddDOMTextLink(parent); // worked!
+										
+										// node.text = 'random text für den node';
+										consolePrint("tricky rect: "+AdjustRectCoordinatesToWindow(node.getBoundingClientRect()));
+										// var childs = parent.childNodes;
+										// consolePrint("Found "+childs.length+" possible string children");
+										// for(var i = 0, n = childs.length; i < n; i++)
+										// {
+										// 	var rect = [-1,-1,-1,-1];
+											
+										// 	consolePrint(i+": #"+childs[i].textContent+" rect: "+rect);
+										// 	// // Note: Beware! No DOM Elements anymore!
+										// 	// if (childs[i].textContent == myTitle)
+										// 	// {
+												
+										// 	// 	consolePrint("Found myTitle as textContent");
+										// 	// 	nope = true;
+										// 	// }
+											
+										// }
 
+
+									}
+
+									if(!nope)
+										AddDOMTextLink(node);
+									
 		  						}
 
-		  						// node.text = node.tagName;
-		  						// EXPERIMENTAL END
 
+								// Find input fields
 		  						if(node.tagName == 'INPUT')
 		  						{
 		  							// Identify text input fields
