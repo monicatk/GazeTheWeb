@@ -5,6 +5,7 @@
 
 #include "ZoomCoordinateAction.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
+#include <iostream>
 
 ZoomCoordinateAction::ZoomCoordinateAction(TabInteractionInterface* pTab) : Action(pTab)
 {
@@ -17,12 +18,12 @@ ZoomCoordinateAction::ZoomCoordinateAction(TabInteractionInterface* pTab) : Acti
 
 bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 {
+	// Speed of zooming
+	float zoomSpeed;
+
+	// Only allow zoom in when gaz upon web view
     if(!tabInput.gazeUsed && tabInput.insideWebView) // TODO: gazeUsed really good idea here? Maybe later null pointer?
     {
-		// Calculate current raw position
-		glm::vec2 newCoordinate(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY);
-		newCoordinate += _coordinateCenterOffset;
-
 		// Aspect ration correction
 		int webViewWidth = 0;
 		int webViewHeight = 0;
@@ -40,33 +41,33 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			}
 		}
 
-        // Speed of zooming
-        float zoomSpeed;
+		// Calculate current raw position in web view relative coordinates
+		glm::vec2 newCoordinate(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY);
+		newCoordinate += _coordinateCenterOffset;
 
 		// Update deviation value (fade away deviation)
-		_deviation = glm::clamp(_deviation - (tpf * 0.125f), 0.f, 1.f);
+		_deviation = glm::max(_deviation - (tpf / DEVIATION_FADING_DURATION), 0.f);
 
         // Update coordinate
         if (!_firstUpdate)
         {
             // Delta of new relative position
-            glm::vec2 delta = newCoordinate - _coordinate;
+            glm::vec2 rawDelta = newCoordinate - _coordinate;
 
 			// Do aspect correction for delta
-			delta = delta / aspectRatioCorrection;
+			glm::vec2 delta = rawDelta / aspectRatioCorrection;
 
-			// Add length of delta to deviation
-			_deviation += glm::length(delta) * tpf;
+			// Set length of delta to deviation if bigger than current deviation
+			_deviation = glm::max(glm::length(delta), _deviation);
 
             // The bigger the distance, the slower the zoom
             zoomSpeed = 0.6f * (1.f - glm::min(1.f, glm::length(delta))); // [0, 0.6]
 
 			// If at the moment a high deviation is given, try to zoom out to give user more overview
-			zoomSpeed = zoomSpeed - glm::min(1.f, 50.f * _deviation); // [-0.4, 0.6]
+			zoomSpeed = zoomSpeed - glm::min(1.f, 3.f * _deviation); // [-0.4, 0.6]
 
-            // Move to new click position (weighted by zoom level for more smoohtness at higher zoom)
-            float coordinateInterpolationSpeed = 5.f;
-            _coordinate = _coordinate + delta * glm::min(1.0f, _logZoom * coordinateInterpolationSpeed * tpf);
+            // Move to new click position (weighted by zoom level for more smoothness at higher zoom, since zoom value gets smaller at higher zoom)
+            _coordinate += delta * glm::min(1.0f, 5.f * _logZoom) * tpf;
         }
         else
         {
@@ -75,24 +76,27 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
             zoomSpeed = 0.0f;
             _firstUpdate = false;
         }
-
-        // Calculate zoom
-        _linZoom += tpf * zoomSpeed;
 	}
 	else
 	{
 		// Zoom out when gaze not upon web view
-		_linZoom -= 0.5f * tpf;
+		zoomSpeed = -0.5f;
 	}
+
+	// Update linear zoom
+	_linZoom += tpf * zoomSpeed;
 
 	// Clamp linear zoom (one is standard, everything higher is zoomed)
 	_linZoom = glm::max(_linZoom, 1.f);
 
-	// Click position to center offset
-	_coordinateCenterOffset = _clickPositionCenterOffsetWeight * (1.0f - _logZoom) * (_coordinate - 0.5f);
+	// Click position to center offset.
+	_coordinateCenterOffset =
+		CENTER_OFFSET_MULTIPLIER
+		* (1.f - _logZoom) // weight with zoom (starting at zero) to have more centered version at higher zoom level
+		* (_coordinate - 0.5f); // vector from current zoom coordinate to center of web view center
 
-	// Make zoom better with log function (and remember it for coordiante interpolation in next iteration)
-	_logZoom = 1.0f - std::log(_linZoom);
+	// Make zoom better with log function
+	_logZoom = 1.f - std::log(_linZoom); // log zooming is starting at one and getting smaller with smaller _linZoom
 
 	// Check, whether click is done
 	if (
@@ -105,14 +109,14 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 
 	// Decrement dimming
 	_dimming += tpf;
-	_dimming = glm::min(_dimming, _dimmingDuration);
+	_dimming = glm::min(_dimming, DIMMING_DURATION);
 
 	// Tell web view about zoom
 	WebViewParameters webViewParameters;
 	webViewParameters.centerOffset = _coordinateCenterOffset;
 	webViewParameters.zoom = _logZoom;
 	webViewParameters.zoomPosition = _coordinate;
-	webViewParameters.dim = _dimmingValue * (_dimming / _dimmingDuration);
+	webViewParameters.dim = DIMMING_VALUE * (_dimming / DIMMING_DURATION);
 	_pTab->SetWebViewParameters(webViewParameters);
 
     // Not finished, yet

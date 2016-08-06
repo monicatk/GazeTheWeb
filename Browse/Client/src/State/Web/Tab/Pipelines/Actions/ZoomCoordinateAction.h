@@ -39,21 +39,26 @@ public:
 protected:
 
 	// Dimming duration
-	const float _dimmingDuration = 0.5f; // seconds until it is dimmed
+	const float DIMMING_DURATION = 0.5f; // seconds until it is dimmed
 
 	// Dimming value
-	const float _dimmingValue = 0.25f;
+	const float DIMMING_VALUE = 0.25f;
 
-	// Click position center offset weight
-	const float _clickPositionCenterOffsetWeight = 0.5f;
+	// Deviation fading duration (how many seconds until full deviation is back to zero)
+	const float DEVIATION_FADING_DURATION = 0.25f;
+
+	// Multiplier of movement towards center
+	const float CENTER_OFFSET_MULTIPLIER = 0.5f;
 
     // Coordinate which is updated and output
     glm::vec2 _coordinate;
 
     // Log zooming amount (used for rendering)
+	// Calculated as 1.f - log(_linZoom), so becoming smaller at higher zoom levels
     float _logZoom = 1.f;
 
     // Linear zooming amout (used for calculations)
+	// Increasing while zooming
     float _linZoom = 1.f;
 
     // Offset to center of webview
@@ -62,8 +67,8 @@ protected:
     // Bool to indicate first update
     bool _firstUpdate = true;
 
-	// Deviation (relative coordiantes, no pixels!)
-	float _deviation = 0;
+	// Deviation of coordinate (not of gaze!; relative coordiantes, no pixels!)
+	float _deviation = 0; // [0..1]
 
 	// Dimming
 	float _dimming = 0.f;
