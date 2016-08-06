@@ -10,6 +10,10 @@ LeftMouseButtonClickAction::LeftMouseButtonClickAction(TabInteractionInterface* 
 {
     // Add in- and output data slots
     AddVec2InputSlot("coordinate");
+	AddIntInputSlot("visualize");
+
+	// Set defaults (TODO: maybe directly at slot creation?)
+	SetInputValue("visualize", 1);
 }
 
 bool LeftMouseButtonClickAction::Update(float tpf, TabInput tabInput)
@@ -22,10 +26,14 @@ bool LeftMouseButtonClickAction::Update(float tpf, TabInput tabInput)
     glm::vec2 coordinate;
     GetInputValue("coordinate", coordinate);
 
+	// Get whether should be visualized
+	int visualize;
+	GetInputValue("visualize", visualize);
+
     // Emulate left mouse button click
     if (width > 0 && height > 0)
     {
-        _pTab->EmulateLeftMouseButtonClick((double)(coordinate.x * width), (double)(coordinate.y * height));
+        _pTab->EmulateLeftMouseButtonClick((double)(coordinate.x * width), (double)(coordinate.y * height), visualize > 0);
     }
 
     return true;

@@ -21,13 +21,16 @@ void Tab::PushBackPipeline(std::unique_ptr<Pipeline> upPipeline)
 	}
 }
 
-void Tab::EmulateLeftMouseButtonClick(double x, double y)
+void Tab::EmulateLeftMouseButtonClick(double x, double y, bool visualize)
 {
 	// Tell mediator about the click
 	_pCefMediator->EmulateLeftMouseButtonClick(this, x, y);
 
 	// Add some visualization for the user
-	AddClickVisualization(x, y);
+	if (visualize)
+	{
+		AddClickVisualization(x, y);
+	}
 }
 
 void Tab::EmulateMouseWheelScrolling(double deltaX, double deltaY)

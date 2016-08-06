@@ -6,6 +6,7 @@
 
 // Notes
 // - Input: vec2 coordinate
+// - Input: int visualize (0 if not, else visualize; default here is 1)
 // - Output: none
 
 #ifndef LEFTMOUSEBUTTONCLICKACTION_H_

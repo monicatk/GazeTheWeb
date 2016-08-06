@@ -26,7 +26,7 @@ public:
     virtual void PushBackPipeline(std::unique_ptr<Pipeline> upPipeline) = 0;
 
     // Emulate click in tab
-    virtual void EmulateLeftMouseButtonClick(double x, double y) = 0;
+    virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true) = 0;
 
     // Emulate mouse wheel scrolling
     virtual void EmulateMouseWheelScrolling(double deltaX, double deltaY) = 0;

@@ -159,7 +159,7 @@ public:
     virtual void PushBackPipeline(std::unique_ptr<Pipeline> upPipeline);
 
     // Emulate left mouse button click
-    virtual void EmulateLeftMouseButtonClick(double x, double y);
+    virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true);
 
     // Emulate mouse wheel scrolling
     virtual void EmulateMouseWheelScrolling(double deltaX, double deltaY);

@@ -36,6 +36,7 @@ TextInputPipeline::TextInputPipeline(TabInteractionInterface* pTab, std::shared_
     clickCoordinates.x /= (float)webViewWidth; // to relative coordinates
     clickCoordinates.y /= (float)webViewHeight; // to relative coordinates
     pLeftMouseButtonClickAction->SetInputValue("coordinate", clickCoordinates);
+	pLeftMouseButtonClickAction->SetInputValue("visualize", 0);
     pTextInputAction->SetInputValue("frameId", spNode->GetFrameID());
     pTextInputAction->SetInputValue("nodeId", spNode->GetNodeID());
 
