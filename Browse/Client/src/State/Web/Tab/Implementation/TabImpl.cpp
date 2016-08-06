@@ -198,7 +198,10 @@ void Tab::Update(float tpf, Input& rInput)
 	std::vector<Rect> rects;
 	for (const auto& rDOMNode : _DOMTextLinks)
 	{
-		rects.push_back(rDOMNode->GetRects());
+		for (const auto& rRect : rDOMNode->GetRects())
+		{
+			rects.push_back(rRect);
+		}
 	}
 	_upWebView->SetHighlightRects(rects);
 
@@ -738,8 +741,11 @@ void Tab::DrawDebuggingOverlay() const
 	// Go over all DOMTriggers
 	for (const auto& rDOMTrigger : _DOMTriggers)
 	{
-		// Render rect
-		renderRect(rDOMTrigger->GetDOMRect(), rDOMTrigger->GetDOMFixed());
+		// Render rects
+		for (const auto rRect : rDOMTrigger->GetDOMRects())
+		{
+			renderRect(rRect, rDOMTrigger->GetDOMFixed());
+		}
 	}
 
 	// ### DOMTEXTLINKS ###
@@ -748,10 +754,13 @@ void Tab::DrawDebuggingOverlay() const
 	_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_TEXT_LINKS_DEBUG_COLOR);
 
 	// Go over all DOMTextLinks
-	for (const auto& rDOMTextLinks : _DOMTextLinks)
+	for (const auto& rDOMTextLink : _DOMTextLinks)
 	{
-		// Render rect
-		renderRect(rDOMTextLinks->GetRect(), rDOMTextLinks->GetFixed());
+		// Render rects
+		for (const auto rRect : rDOMTextLink->GetRects())
+		{
+			renderRect(rRect, rDOMTextLink->GetFixed());
+		}
 	}
 
 	// ### FIXED ELEMENTS ###

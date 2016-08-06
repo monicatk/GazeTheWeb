@@ -371,6 +371,7 @@ private:
 
 	// Vector with DOMTextLinks
 	std::vector<std::shared_ptr<DOMNode> >_DOMTextLinks;
+
 	// Map nodeID to node itself, in order to access it when it has to be updated
 	std::map<int, std::shared_ptr<DOMNode> > _TextLinkMap;
 	std::map<int, std::shared_ptr<DOMNode> > _TextInputMap;
@@ -438,15 +439,11 @@ private:
 	// Vector with click visualizations, holding pairs of frame index and fading
 	std::vector<ClickVisualization> _clickVisualizations;
 
-    // ################################
-    // ### ONLY SET BY CEF MEDIATOR ###
-    // ################################
-
     // Current page size
     double _pageWidth = 0, _pageHeight = 0;
 
     // Coordinates of current fixed elements on site
-	std::vector<std::vector<Rect>> _fixedElements;
+	std::vector<std::vector<Rect> > _fixedElements;
 
     // URL of current favIcon
     std::string _favIconUrl;

@@ -22,6 +22,7 @@ class DOMNode
         int GetNodeID() const { return _nodeID; };
         std::vector<Rect> GetRects() const { return _rects; };
 		std::vector<glm::vec2> GetCenters() const;
+		glm::vec2 GetCenter() const;
 		bool GetFixed() const { return _fixed; }
 
 		void AddRect(Rect rect) { _rects.push_back(rect); }

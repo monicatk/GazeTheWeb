@@ -22,6 +22,20 @@ std::vector<glm::vec2> DOMNode::GetCenters() const
 	return std::vector<glm::vec2>();
 }
 
+glm::vec2 DOMNode::GetCenter() const
+{
+	glm::vec2 center(0,0);
+	if (_rects.size() > 0)
+	{
+		for (int i = 0; i < _rects.size(); i++)
+		{
+			center += _rects[i].center();
+		}
+		center /= _rects.size();
+	}
+	return center;
+}
+
 void DOMNode::UpdateAttribute(int attr, void * data, bool initial)
 {
 	switch (attr)
