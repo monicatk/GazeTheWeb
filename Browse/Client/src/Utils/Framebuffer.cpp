@@ -111,7 +111,7 @@ void Framebuffer::Resize(int width, int height)
         }
 }
 
-void Framebuffer::AddAttachment(ColorFormat colorFormat)
+void Framebuffer::AddAttachment(ColorFormat colorFormat, bool clampToBorder)
 {
     // Generate new texture
     GLuint texture = 0;
@@ -121,8 +121,8 @@ void Framebuffer::AddAttachment(ColorFormat colorFormat)
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, clampToBorder ? GL_CLAMP_TO_BORDER : GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, clampToBorder ? GL_CLAMP_TO_BORDER : GL_CLAMP_TO_EDGE);
 
     // Reserve space for texture
     glTexImage2D(

@@ -76,7 +76,7 @@ WebView::WebView(int renderWidth, int renderHeight)
     // Framebuffer
     _upFramebuffer = std::unique_ptr<Framebuffer>(new Framebuffer(renderWidth, renderHeight));
     _upFramebuffer->Bind();
-    _upFramebuffer->AddAttachment(Framebuffer::ColorFormat::RGB);
+    _upFramebuffer->AddAttachment(Framebuffer::ColorFormat::RGB, true);
     _upFramebuffer->Unbind();
 
     // _x, _y, _width and _height are set at first update

@@ -38,7 +38,7 @@ public:
     void Resize(int width, int height);
 
     // Add attachment (needs bound framebuffer)
-    void AddAttachment(ColorFormat colorFormat);
+	void AddAttachment(ColorFormat colorFormat, bool clampToBorder = false);
 
     // Get texture handle of color attachment
     GLuint GetAttachment(int number) const { return _colorAttachments.at(number).first; }
