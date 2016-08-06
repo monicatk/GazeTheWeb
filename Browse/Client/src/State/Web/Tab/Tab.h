@@ -36,6 +36,10 @@ class Tab : public TabInteractionInterface, public TabCEFInterface
 {
 public:
 
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	// >>> Implemented in TabImpl.cpp >>>
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
     // Constructor
     Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std::string url);
 
@@ -76,6 +80,9 @@ public:
     // #################################
     // ### TAB INTERACTIVE INTERFACE ###
     // #################################
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	// >>> Implemented in TabInteractionImpl.cpp >>>
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Calculate position and size of web view
     virtual void CalculateWebViewPositionAndSize(int& rX, int& rY, int& rWidth, int& rHeight) const;
@@ -86,6 +93,9 @@ public:
     // #############################
     // ### TAB OVERLAY INTERFACE ###
     // #############################
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	// >>> Implemented in TabOverlayImpl.cpp >>>
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Add floating frame from overlay (not visible after creation)
     virtual int AddFloatingFrameToOverlay(
@@ -141,6 +151,9 @@ public:
     // ############################
     // ### TAB ACTION INTERFACE ###
     // ############################
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	// >>> Implemented in TabActionImpl.cpp >>>
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Push back an pipeline
     virtual void PushBackPipeline(std::unique_ptr<Pipeline> upPipeline);
@@ -163,6 +176,9 @@ public:
     // #########################
     // ### TAB CEF INTERFACE ###
     // #########################
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	// >>> Implemented in TabCEFImpl.cpp >>>
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Tell CEF callback which resolution web view texture should have
     virtual void GetWebRenderResolution(int& rWidth, int& rHeight) const;
@@ -172,7 +188,7 @@ public:
     virtual void SetFavIconURL(std::string url) { _favIconUrl = url; }
 
     // Setter of URL. Does not load it. Should be called by CefMediator only
-    virtual void SetURL(std::string URL);
+	virtual void SetURL(std::string URL) { _url = URL; }
 
     // Setter for can go back / go forward
     virtual void SetCanGoBack(bool canGoBack) { _canGoBack = canGoBack;	}
@@ -183,7 +199,7 @@ public:
     virtual void ResetFaviconBytes(); // TODO
 
     // Get weak pointer to texture of web view
-    virtual std::weak_ptr<Texture> GetWebViewTexture();
+    virtual std::weak_ptr<Texture> GetWebViewTexture() { return _upWebView->GetTexture(); }
 
     // Used by DOMMapping interface
     virtual void AddDOMNode(std::shared_ptr<DOMNode> spNode);
@@ -207,10 +223,10 @@ public:
     virtual void RemoveFixedElement(int id);
 
     // Set Tab's title text
-    virtual void SetTitle(std::string title);
+	virtual void SetTitle(std::string title) { _title = title; }
 
     // Add new Tab after that one
-    virtual void AddTabAfter(std::string URL);
+	virtual void AddTabAfter(std::string URL) { _pWeb->PushAddTabAfterJob(this, URL); }
 
 private:
 
@@ -227,6 +243,10 @@ private:
     friend class TabButtonListener;
     friend class TabSensorListener;
     friend class TabOverlayButtonListener;
+
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	// >>> Implemented in TabGUIImpl.cpp >>>
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Listener for GUI
     class TabButtonListener: public eyegui::ButtonListener
@@ -302,6 +322,10 @@ private:
     std::shared_ptr<TabOverlayKeyboardListener> _spTabOverlayKeyboardListener;
     std::shared_ptr<TabOverlayWordSuggestListener> _spTabOverlayWordSuggestListener;
 
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	// >>> Implemented in TabImpl.cpp >>>
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
     // Get reserved space for WebView in eyeGUI layout
     eyegui::AbsolutePositionAndSize CalculateWebViewPositionAndSize() const;
 
@@ -334,6 +358,10 @@ private:
 
 	// Add click visualization which fades out. X and y are in pixels
 	void AddClickVisualization(double x, double y);
+
+	// ###############
+	// ### MEMBERS ###
+	// ###############
 
     // Current URL
     std::string _url = "";
