@@ -214,6 +214,15 @@ public:
 
 private:
 
+	// Struct for click visulizations
+	struct ClickVisualization
+	{
+		float x; // x pixel position of click (in web view coordinates)
+		float y; // y pixel position of click (in web view coordinates)
+		unsigned int frameIndex;
+		float fading; // at start this is CLICK_VISUALIZATION_DURATION and decrements to zero
+	};
+
     // Give listener full access
     friend class TabButtonListener;
     friend class TabSensorListener;
@@ -323,6 +332,9 @@ private:
 	// Draw debugging overlay
 	void DrawDebuggingOverlay() const;
 
+	// Add click visualization which fades out. X and y are in pixels
+	void AddClickVisualization(double x, double y);
+
     // Current URL
     std::string _url = "";
 
@@ -394,6 +406,9 @@ private:
 
     // Time until Cef is asked for page resolution
     float _timeUntilGetPageResolution = TAB_GET_PAGE_RES_INTERVAL;
+
+	// Vector with click visualizations, holding pairs of frame index and fading
+	std::vector<ClickVisualization> _clickVisualizations;
 
     // ################################
     // ### ONLY SET BY CEF MEDIATOR ###

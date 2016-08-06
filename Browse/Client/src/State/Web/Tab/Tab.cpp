@@ -147,6 +147,44 @@ void Tab::Update(float tpf, Input& rInput)
         webViewPositionAndSize.width,
         webViewPositionAndSize.height);
 
+	// ### UPDATE OVERLAY ###
+
+	// Update click visualization
+	for (int i = 0; i < (int)_clickVisualizations.size(); i++)
+	{
+		// Decrement visibility
+		_clickVisualizations.at(i).fading -= tpf;
+		
+		// If fading done, remove from layout
+		if (_clickVisualizations.at(i).fading <= 0)
+		{
+			eyegui::removeFloatingFrame(_pOverlayLayout, _clickVisualizations.at(i).frameIndex, false);
+		}
+		else
+		{
+			// Fade it by making it smaller
+			float relativeSize = (_clickVisualizations.at(i).fading / CLICK_VISUALIZATION_DURATION) * CLICK_VISUALIZATION_RELATIVE_SIZE;
+
+			// Position of floating frame
+			float relativePositionX = (webViewPositionAndSize.x + _clickVisualizations.at(i).x) / (float)_pMaster->GetWindowWidth();
+			float relativePositionY = (webViewPositionAndSize.y + _clickVisualizations.at(i).y) / (float)_pMaster->GetWindowHeight();
+			relativePositionX -= relativeSize / 2.f;
+			relativePositionY -= relativeSize / 2.f;
+
+			// Tell eyeGUI about position and size of floating frame
+			eyegui::setPositionOfFloatingFrame(_pOverlayLayout, _clickVisualizations.at(i).frameIndex, relativePositionX, relativePositionY);
+			eyegui::setSizeOfFloatingFrame(_pOverlayLayout, _clickVisualizations.at(i).frameIndex, relativeSize, relativeSize);
+		}
+	}
+
+	// Erase visualizations which are no more in layout
+	_clickVisualizations.erase(
+		std::remove_if(
+			_clickVisualizations.begin(),
+			_clickVisualizations.end(),
+			[](const auto& i) { return i.fading <= 0; }),
+		_clickVisualizations.end());
+
     // ### TAB INPUT STRUCT ###
 
     // Create tab input structure (like standard input but in addition with input coordinates in web view space)
@@ -599,7 +637,7 @@ void Tab::SetPageResolution(double width, double height)
 void Tab::AddFixedElementsCoordinates(int id, std::vector<Rect> elements)
 {
     // Assign list of fixed element coordinates to given position
-	if (_fixedElements.size() <= id)
+	if ((int)_fixedElements.size() <= id)
 	{
 		_fixedElements.resize(id + 1);
 	}
@@ -653,7 +691,11 @@ void Tab::PushBackPipeline(std::unique_ptr<Pipeline> upPipeline)
 
 void Tab::EmulateLeftMouseButtonClick(double x, double y)
 {
+	// Tell mediator about the click
     _pCefMediator->EmulateLeftMouseButtonClick(this, x, y);
+
+	// Add some visualization for the user
+	AddClickVisualization(x, y);
 }
 
 void Tab::EmulateMouseWheelScrolling(double deltaX, double deltaY)
@@ -1223,6 +1265,38 @@ void Tab::DrawDebuggingOverlay() const
 			renderRect(rFixedElement, true);
 		}
 	}
+}
+
+void Tab::AddClickVisualization(double x, double y)
+{
+	// Coordinates of web view
+	auto webViewCoordinates = CalculateWebViewPositionAndSize();
+
+	// Structure for click visulization
+	ClickVisualization clickVisualization;
+	clickVisualization.x = x;
+	clickVisualization.y = y;
+	clickVisualization.fading = CLICK_VISUALIZATION_DURATION;
+
+	// Position of floating frame
+	float relativePositionX = (webViewCoordinates.x + x) / (float)_pMaster->GetWindowWidth();
+	float relativePositionY = (webViewCoordinates.y + y) / (float)_pMaster->GetWindowHeight();
+	relativePositionX -= CLICK_VISUALIZATION_RELATIVE_SIZE / 2.f;
+	relativePositionY -= CLICK_VISUALIZATION_RELATIVE_SIZE / 2.f;
+
+	// Add floating frame to overlay
+	clickVisualization.frameIndex = eyegui::addFloatingFrameWithBrick(
+		_pOverlayLayout,
+		"bricks/TabClickVisualization.beyegui",
+		relativePositionX,
+		relativePositionY,
+		CLICK_VISUALIZATION_RELATIVE_SIZE,
+		CLICK_VISUALIZATION_RELATIVE_SIZE,
+		true,
+		false);
+
+	// Add to vector which is updated per frame
+	_clickVisualizations.push_back(clickVisualization);
 }
 
 void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
