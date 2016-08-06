@@ -58,16 +58,13 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			glm::vec2 delta = rawDelta / aspectRatioCorrection;
 
 			// Set length of delta to deviation if bigger than current deviation
-			_deviation = glm::max(glm::length(delta), _deviation);
-
-            // The bigger the distance, the slower the zoom
-            zoomSpeed = 0.6f * (1.f - glm::min(1.f, glm::length(delta))); // [0, 0.6]
-
-			// If at the moment a high deviation is given, try to zoom out to give user more overview
-			zoomSpeed = zoomSpeed - glm::min(1.f, 3.f * _deviation); // [-0.4, 0.6]
+			_deviation = glm::max(glm::length(delta), _deviation);			
 
             // Move to new click position (weighted by zoom level for more smoothness at higher zoom, since zoom value gets smaller at higher zoom)
-            _coordinate += delta * glm::min(1.0f, 5.f * _logZoom) * tpf;
+            _coordinate += delta * tpf * _logZoom;
+
+			// If at the moment a high deviation is given, try to zoom out to give user more overview
+			zoomSpeed = ZOOM_SPEED - glm::min(1.f, 3.f * _deviation); // [-0.5, 0.5]
         }
         else
         {
@@ -80,7 +77,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	else
 	{
 		// Zoom out when gaze not upon web view
-		zoomSpeed = -0.5f;
+		zoomSpeed = -0.5f * ZOOM_SPEED;
 	}
 
 	// Update linear zoom
@@ -101,7 +98,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	// Check, whether click is done
 	if (
 		_logZoom <= 0.075f // just zoomed so far into that coordinate is used
-		|| (_logZoom <= 0.25f && _deviation < 0.02f)) // coordinate seems to be quite fixed, just do it
+		|| (_logZoom <= 0.3f && _deviation < 0.03f)) // coordinate seems to be quite fixed, just do it
 	{
 		SetOutputValue("coordinate", _coordinate);
 		return true;

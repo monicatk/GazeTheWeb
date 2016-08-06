@@ -50,6 +50,9 @@ protected:
 	// Multiplier of movement towards center
 	const float CENTER_OFFSET_MULTIPLIER = 0.5f;
 
+	// Speed of zoom
+	const float ZOOM_SPEED = 0.5f;
+
     // Coordinate which is updated and output
     glm::vec2 _coordinate;
 
