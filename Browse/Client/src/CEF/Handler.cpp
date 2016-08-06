@@ -144,7 +144,6 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
     else // Current frame is not the main frame
     {
         int64 mainFrameID = frame->GetParent()->GetIdentifier();
-
     }
 }
 

@@ -121,7 +121,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		const std::string str = requestName.substr(10, requestName.length() - 1);
 		std::vector<char> buffer;
 		int amount_separators = 0;
-		for (int i = 0; i < str.length(); i++)
+		for (int i = 0; i < (int)str.length(); i++)
 		{
 			const char read = str.at(i);
 			if (read != '#')
@@ -191,14 +191,14 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		// Node was updated
 		if (requestName.compare(4, 3, "upd") == 0)
 		{
-			void* data;
+			void* data = nullptr;
 			switch (attr)
 			{
 				// Rect was updated, extract 4 double values
 				case(0) : {
 					std::vector<float> rectData;
 					std::vector<char> buffer;
-					for (int i = 0; i < dataStr.length(); i++)
+					for (int i = 0; i < (int)dataStr.length(); i++)
 					{
 						const char read = dataStr.at(i);
 						if (read != ';' && read != '#')

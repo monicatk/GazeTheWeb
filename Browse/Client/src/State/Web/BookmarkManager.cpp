@@ -145,7 +145,7 @@ bool BookmarkManager::LoadBookmarks()
 	while ((pElement = pElement->NextSiblingElement("bookmark")) != NULL)
 	{
 		// Query URL string from attribute
-		const char * pURL = NULL;
+		pURL = NULL;
 		pURL = pElement->Attribute("url");
 		if (pURL != NULL)
 		{

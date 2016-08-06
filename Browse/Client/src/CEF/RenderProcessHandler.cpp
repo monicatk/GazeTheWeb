@@ -224,7 +224,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			args->SetString(index++, text);
 			args->SetString(index++, url);
 
-			for (int i = 0; i < coords.size(); i++)
+			for (int i = 0; i < (int)coords.size(); i++)
 			{
 				args->SetDouble(index++, coords[i]);
 			}
@@ -262,7 +262,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			args->SetInt(index++, id);
 			args->SetString(index++, text);
 
-			for (int i = 0; i < coords.size(); i++)
+			for (int i = 0; i < (int)coords.size(); i++)
 			{
 				args->SetDouble(index++, coords[i]);
 			}

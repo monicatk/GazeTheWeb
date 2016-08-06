@@ -153,9 +153,9 @@ float StringToFloat(std::string value)
 	int numbersCount = numbers.size();
 	if (dotIndex < 0) { dotIndex = numbersCount; }
 	float result = 0;
-	for (int i = numbersCount - 1; i >= 0; i--)
+	for (int j = numbersCount - 1; j >= 0; j--)
 	{
-		result += glm::pow(10.f, dotIndex - i - 1) * numbers.at(i);
+		result += glm::pow(10.f, dotIndex - j - 1) * numbers.at(j);
 	}
 
 	// Make it negative if necessary
