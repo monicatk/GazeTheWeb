@@ -2,7 +2,7 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// Input struct.
+// Input struct. Origin in upper left display corner.
 
 #ifndef INPUT_H_
 #define INPUT_H_

@@ -15,6 +15,7 @@
 #include "src/State/Web/Tab/Pipelines/TestPipeline.h"
 #include "src/State/Web/Tab/Pipelines/ZoomClickPipeline.h"
 #include "src/Utils/Logger.h"
+#include "src/Utils/QuadRenderItem.h"
 #include "submodules/glm/glm/gtc/matrix_transform.hpp" // TODO: move to debug rendering class
 #include <algorithm>
 
@@ -119,7 +120,7 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
     _pCefMediator->RegisterTab(this);
 
 	// Prepare debug rendering
-	_upDebugRenderItem = std::unique_ptr<RenderItem>(new RenderItem(vertexShaderSource, fragmentShaderSource));
+	_upDebugRenderItem = std::unique_ptr<RenderItem>(new QuadRenderItem(vertexShaderSource, fragmentShaderSource));
 }
 
 Tab::~Tab()
@@ -161,6 +162,15 @@ void Tab::Update(float tpf, Input& rInput)
         webViewGazeY,
         webViewGazeRelativeX,
         webViewGazeRelativeY);
+
+    // Update highlight rectangle of webview
+	// TODO: alternative: give webview shared pointer to DOM nodes
+    std::vector<Rect> rects;
+    for(const auto& rDOMNode : _DOMTextLinks)
+    {
+        rects.push_back(rDOMNode->GetRect());
+    }
+    _upWebView->SetHighlightRects(rects);
 
     // ### UPDATE COLOR OF GUI ###
 
@@ -236,8 +246,8 @@ void Tab::Update(float tpf, Input& rInput)
         float progressDown = 1.f;
         if(scrollableHeight > 0)
         {
-            progressDown = _scrollingOffsetY / scrollableHeight;
-            progressUp = 1.f - progressDown;
+            progressUp = _scrollingOffsetY / scrollableHeight;
+            progressDown = 1.f - progressUp;
         }
         eyegui::setProgress(_pScrollingOverlayLayout, "scroll_up_progress", progressUp);
         eyegui::setProgress(_pScrollingOverlayLayout, "scroll_down_progress", progressDown);
@@ -330,7 +340,12 @@ void Tab::Update(float tpf, Input& rInput)
 void Tab::Draw() const
 {
     // Draw WebView
-    _upWebView->Draw(_webViewParameters, _pMaster->GetWindowWidth(), _pMaster->GetWindowHeight());
+    _upWebView->Draw(
+		_webViewParameters,
+		_pMaster->GetWindowWidth(),
+		_pMaster->GetWindowHeight(),
+		_scrollingOffsetX,
+		_scrollingOffsetY);
 
     // Decide what to draw
     if (_pipelineActive)
@@ -801,7 +816,6 @@ void Tab::AddDOMNode(std::shared_ptr<DOMNode> spNode)
 	}
 
 	}
-   
 }
 
 void Tab::ClearDOMNodes()
@@ -980,7 +994,7 @@ void Tab::UpdateAccentColor(float tpf)
 
     // Create transparent colors
     float alpha = 0.75f;
-    float backgroundAlpha = 0.25f;
+    float backgroundAlpha = 0.5f;
     glm::vec4 transparentColorAccent = glm::vec4(
         colorAccent.r,
         colorAccent.g,

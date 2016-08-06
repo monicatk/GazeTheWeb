@@ -10,6 +10,7 @@
 #include "externals/OGL/gl_core_3_3.h"
 #include "src/Utils/glmWrapper.h"
 #include <vector>
+#include <stack>
 
 class Framebuffer
 {
@@ -43,6 +44,9 @@ public:
     GLuint GetAttachment(int number) const { return _colorAttachments.at(number).first; }
 
 private:
+
+    // Static stack for framebuffer handles which is used by bind and unbind
+    static std::stack<GLuint> _handleStack;
 
     // Pair of color format and texture handle
     typedef std::pair<GLuint, ColorFormat> ColorAttachment;

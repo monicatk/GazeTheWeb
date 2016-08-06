@@ -17,77 +17,103 @@ ZoomCoordinateAction::ZoomCoordinateAction(TabInteractionInterface* pTab) : Acti
 
 bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 {
-    if(!tabInput.gazeUsed) // TODO: gazeUsed really good idea here? Maybe later null pointer?
+    if(!tabInput.gazeUsed && tabInput.insideWebView) // TODO: gazeUsed really good idea here? Maybe later null pointer?
     {
-        if (tabInput.insideWebView)
+		// Calculate current raw position
+		glm::vec2 newCoordinate(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY);
+		newCoordinate += _coordinateCenterOffset;
+
+		// Aspect ration correction
+		int webViewWidth = 0;
+		int webViewHeight = 0;
+		_pTab->GetWebViewTextureResolution(webViewWidth, webViewHeight);
+		glm::vec2 aspectRatioCorrection(1.f, 1.f);
+		if (webViewWidth != 0 && webViewHeight != 0)
+		{
+			if (webViewWidth > webViewHeight)
+			{
+				aspectRatioCorrection.x = (float)webViewWidth / (float)webViewHeight;
+			}
+			else
+			{
+				aspectRatioCorrection.y = (float)webViewHeight / (float)webViewWidth;
+			}
+		}
+
+        // Speed of zooming
+        float zoomSpeed;
+
+		// Update deviation value (fade away deviation)
+		_deviation = glm::clamp(_deviation - (tpf * 0.125f), 0.f, 1.f);
+
+        // Update coordinate
+        if (!_firstUpdate)
         {
-			// Calculate current raw position
-			glm::vec2 newCoordinate(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY);
-			newCoordinate += _coordinateCenterOffset;
+            // Delta of new relative position
+            glm::vec2 delta = newCoordinate - _coordinate;
 
-            // Speed of zooming
-            float zoomSpeed;
+			// Do aspect correction for delta
+			delta = delta / aspectRatioCorrection;
 
-			// Update deviation value (fade away deviation)
-			_deviation = glm::max(0.f, _deviation - (tpf * 0.25f));
+			// Add length of delta to deviation
+			_deviation += glm::length(delta) * tpf;
 
-            // Update coordinate
-            if (!_firstUpdate)
-            {
-                // Delta of new position
-                glm::vec2 delta = newCoordinate - _coordinate;
+            // The bigger the distance, the slower the zoom
+            zoomSpeed = 0.6f * (1.f - glm::min(1.f, glm::length(delta))); // [0, 0.6]
 
-				// Add length of delta to deviation
-				// TODO: X and Y are not equally scaled, since relative values are used...
-				_deviation += glm::length(delta) * tpf;
+			// If at the moment a high deviation is given, try to zoom out to give user more overview
+			zoomSpeed = zoomSpeed - glm::min(1.f, 50.f * _deviation); // [-0.4, 0.6]
 
-                // The bigger the distance, the slower the zoom
-                zoomSpeed = 0.5 * (1.f - glm::length(delta));
-
-                // Move to new click position (weighted by zoom level for more smoohtness at higher zoom)
-                float coordinateInterpolationSpeed = 5.f;
-                _coordinate = _coordinate + delta * glm::min(1.0f, _logZoom * coordinateInterpolationSpeed * tpf);
-            }
-            else
-            {
-                // First frame of new click
-                _coordinate = newCoordinate;
-                zoomSpeed = 0.0f;
-                _firstUpdate = false;
-            }
-
-            // Calculate zoom
-            _linZoom += tpf * zoomSpeed;
+            // Move to new click position (weighted by zoom level for more smoohtness at higher zoom)
+            float coordinateInterpolationSpeed = 5.f;
+            _coordinate = _coordinate + delta * glm::min(1.0f, _logZoom * coordinateInterpolationSpeed * tpf);
         }
         else
         {
-            _linZoom -= 0.5f * tpf;
-            _linZoom = glm::max(1.f, _linZoom);
+            // First frame of new click
+            _coordinate = newCoordinate;
+            zoomSpeed = 0.0f;
+            _firstUpdate = false;
         }
 
-        // Click position to center offset
-        float clickPositionCenterOffsetWeight = 0.5f;
-        _coordinateCenterOffset = clickPositionCenterOffsetWeight * (1.0f - _logZoom) * (_coordinate - 0.5f);
+        // Calculate zoom
+        _linZoom += tpf * zoomSpeed;
+	}
+	else
+	{
+		// Zoom out when gaze not upon web view
+		_linZoom -= 0.5f * tpf;
+	}
 
-        // Make zoom better with log function (and remember it for coordiante interpolation in next iteration)
-        _logZoom = 1.0f - std::log(_linZoom);
+	// Clamp linear zoom (one is standard, everything higher is zoomed)
+	_linZoom = glm::max(_linZoom, 1.f);
 
-        // Tell web view about zoom
-        WebViewParameters webViewParameters;
-        webViewParameters.centerOffset = _coordinateCenterOffset;
-        webViewParameters.zoom = _logZoom;
-        webViewParameters.zoomPosition = _coordinate;
-        _pTab->SetWebViewParameters(webViewParameters);
+	// Click position to center offset
+	_coordinateCenterOffset = _clickPositionCenterOffsetWeight * (1.0f - _logZoom) * (_coordinate - 0.5f);
 
-        // Check, whether click is done
-		if (
-			_logZoom <= 0.075f // just zoomed so far into that coordinate is used
-			|| (_logZoom <= 0.25f && _deviation < 0.02f)) // coordinate seems to be quite fixed, just do it
-        {
-            SetOutputValue("coordinate", _coordinate);
-            return true;
-        }
-    }
+	// Make zoom better with log function (and remember it for coordiante interpolation in next iteration)
+	_logZoom = 1.0f - std::log(_linZoom);
+
+	// Check, whether click is done
+	if (
+		_logZoom <= 0.075f // just zoomed so far into that coordinate is used
+		|| (_logZoom <= 0.25f && _deviation < 0.02f)) // coordinate seems to be quite fixed, just do it
+	{
+		SetOutputValue("coordinate", _coordinate);
+		return true;
+	}
+
+	// Decrement dimming
+	_dimming += tpf;
+	_dimming = glm::min(_dimming, _dimmingDuration);
+
+	// Tell web view about zoom
+	WebViewParameters webViewParameters;
+	webViewParameters.centerOffset = _coordinateCenterOffset;
+	webViewParameters.zoom = _logZoom;
+	webViewParameters.zoomPosition = _coordinate;
+	webViewParameters.dim = _dimmingValue * (_dimming / _dimmingDuration);
+	_pTab->SetWebViewParameters(webViewParameters);
 
     // Not finished, yet
     return false;

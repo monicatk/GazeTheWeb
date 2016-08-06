@@ -3,6 +3,7 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Input structure for tab which holds coordinates in web view space.
+// Origin in upper left corner.
 
 #ifndef TABINPUT_H_
 #define TABINPUT_H_
