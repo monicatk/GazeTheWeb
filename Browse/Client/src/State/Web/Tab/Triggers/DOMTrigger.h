@@ -35,7 +35,7 @@ public:
     virtual void Deactivate();
 
 	// Get rect of DOMNode
-    Rect GetDOMRect() const { return _spNode->GetRect(); }
+    std::vector<Rect> GetDOMRect() const { return _spNode->GetRects(); }
 
     // Get whether DOMNode is marked as fixed
     bool GetDOMFixed() const { return _spNode->GetFixed(); }

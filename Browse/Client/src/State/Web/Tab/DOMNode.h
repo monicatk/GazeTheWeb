@@ -20,19 +20,30 @@ class DOMNode
         DOMNodeType GetType() const { return _type; }
         int64 GetFrameID() const { return _frameID; }
         int GetNodeID() const { return _nodeID; };
-        Rect GetRect() const { return _rect; };
-        glm::vec2 GetCenter() const;
+        std::vector<Rect> GetRects() const { return _rects; };
+		std::vector<glm::vec2> GetCenters() const;
 		bool GetFixed() const { return _fixed; }
+
+		void AddRect(Rect rect) { _rects.push_back(rect); }
 
 		void UpdateAttribute(int attr, void* data, bool initial=false);
 
 
+		DOMNode(DOMNodeType type, int64 frameID, int nodeID, std::vector<Rect> rects)
+		{
+			_type = type;
+			_frameID = frameID;
+			_nodeID = nodeID;
+			_rects = rects;
+		}
+
+		// Constructor for nodes with single Rect
 		DOMNode(DOMNodeType type, int64 frameID, int nodeID, Rect rect)
 		{
 			_type = type;
 			_frameID = frameID;
 			_nodeID = nodeID;
-			_rect = rect;
+			_rects = { rect };
 		}
 
     protected:
@@ -40,7 +51,7 @@ class DOMNode
         DOMNodeType _type;
         int64 _frameID;
         int _nodeID;			// Node's position in Javascript's list of nodes of the same type
-        Rect _rect;				
+        std::vector<Rect> _rects;				
 		bool _fixed = false;
 
 
@@ -66,15 +77,26 @@ class DOMTextInput : public DOMNode
 
 
 
-class DOMTextLink : public DOMNode
+class DOMLink : public DOMNode
 {
     public:
-        DOMTextLink(	DOMNodeType type,
-                        int64 frameID,
-                        int nodeID,
-                        Rect rect,
-                        std::string text,
-                        std::string url			);
+        DOMLink(	
+			DOMNodeType type,
+            int64 frameID,
+            int nodeID,
+			Rect rect,
+			std::string text,
+            std::string url			
+		);
+
+		DOMLink(
+			DOMNodeType type,
+			int64 frameID,
+			int nodeID,
+			std::vector<Rect> rects,
+			std::string text,
+			std::string url
+		);
 
         std::string GetText() const { return _text; }
         std::string GetURL() const { return _url; }

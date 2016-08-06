@@ -10,9 +10,16 @@
 #include "src/Utils//Logger.h"
 
 /* DOMNode methods*/
-glm::vec2 DOMNode::GetCenter() const
+
+// Get list of center points as vec2 of all Rects in list
+std::vector<glm::vec2> DOMNode::GetCenters() const
 {
-	return _rect.center();
+	std::vector<glm::vec2> centers;
+	for (int i = 0; i < _rects.size(); i++)
+	{
+		centers.push_back(_rects[i].center());
+	}
+	return std::vector<glm::vec2>();
 }
 
 void DOMNode::UpdateAttribute(int attr, void * data, bool initial)
@@ -23,9 +30,9 @@ void DOMNode::UpdateAttribute(int attr, void * data, bool initial)
 		case(0) : {
 			// TODO: There might be a problem, when initial data from Renderer arrives after an update
 			// --> bool attribute for node if Renderer data already received instead?
-			if (!initial || _rect.isZero())
+			if (!initial || _rects[0].isZero())
 			{
-				_rect = *(Rect*)data;
+				_rects[0] = *(Rect*)data;
 
 				//if (_rect.width() > 0 && _rect.height() > 0)
 				//	LogDebug("type=", _type, "; id=", _nodeID, "; _fixed=", _fixed, "; rect= ", _rect.toString());
@@ -41,6 +48,11 @@ void DOMNode::UpdateAttribute(int attr, void * data, bool initial)
 			
 			break;
 		}
+		// Add new Rect (atm only for DOMLinks)
+		case(2): {
+			AddRect(*(Rect*)data);
+		}
+
 	}
 	// TODO: More cases for other attributes
 }
@@ -59,13 +71,13 @@ DOMTextInput::DOMTextInput(	DOMNodeType type,
     LogDebug("DOMTextInput constructed", "\n" ,
     "\tFrameID: ", _frameID, "\n",
     "\tnodeID: ", _nodeID, "\n",
-    "\tcoordinates: (", _rect.top, ", ", _rect.left, ", ", _rect.bottom,", ", _rect.right, ")\n",
+    "\tcoordinates: ", _rects[0].toString(), "\n",
     "\tvalue: ", _value);
 }
 
 
 /* DOMTextLink methods */
-DOMTextLink::DOMTextLink(	DOMNodeType type,
+DOMLink::DOMLink(	DOMNodeType type,
                             int64 frameID,
                             int nodeID,
                             Rect rect,
@@ -74,4 +86,16 @@ DOMTextLink::DOMTextLink(	DOMNodeType type,
 {
     _text = text;
     _url = url;
+}
+
+DOMLink::DOMLink(
+	DOMNodeType type, 
+	int64 frameID, 
+	int nodeID, 
+	std::vector<Rect> rects, 
+	std::string text, 
+	std::string url) : DOMNode(type, frameID, nodeID, rects)
+{
+	_text = text;
+	_url = url;
 }
