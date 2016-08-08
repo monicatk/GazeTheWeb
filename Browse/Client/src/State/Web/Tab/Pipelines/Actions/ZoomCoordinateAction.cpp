@@ -18,6 +18,16 @@ ZoomCoordinateAction::ZoomCoordinateAction(TabInteractionInterface* pTab) : Acti
 
 bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 {
+    // TODO: Sketch of idea to correct minor errors in gaze recognition
+    // - Collect gaze coordinates, zoom coordinates and zoom in combination with tpf in query
+    // - Increment all entries of query by tpf and throw them out after certain amount of time
+    // - At click execution, take look at first element in query
+    //   - Subtract difference of zoom coordinates from gaze vector to get gaze drift
+    //   - Use zoom on both times and calculate,in which radius the change would be the same as length of gaze drift
+    //   - Normalize gaze drift to get pure direction
+    // - Use result of length and direction to correct click coordinate
+
+
 	// Speed of zooming
 	float zoomSpeed;
 
