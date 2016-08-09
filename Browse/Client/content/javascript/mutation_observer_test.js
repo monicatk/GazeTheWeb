@@ -12,12 +12,13 @@ window.dom_textinputs = [];
 window.dom_textinputs_rect = [[]];
 
 
-
+// TESTING CEF V8 ExecuteFunction
+window.myObject = {val: '8', called: '0', getVal: function(){ConsolePrint('Objects function called!'); return 7;} };
 
 
 
 // Helper function for console output
-function consolePrint(msg)
+function ConsolePrint(msg)
 {
 	window.cefQuery({ request: msg, persistent : false, onSuccess : function(response) {}, onFailure : function(error_code, error_message){} });
 }
@@ -133,7 +134,7 @@ function UpdateDOMRects()
 		window.dom_links, 
 		window.dom_links_rect, 
 		function Notify(i, rect) { 
-			consolePrint('DOM#upd#1#'+i+'#0#'+RectToString(rect)+'#');
+			ConsolePrint('DOM#upd#1#'+i+'#0#'+RectToString(rect)+'#');
 		} 
 	);
 
@@ -141,7 +142,7 @@ function UpdateDOMRects()
 		window.dom_textinputs, 
 		window.dom_textinputs_rect, 
 		function Notify(i, rect) { 
-			consolePrint('DOM#upd#0#'+i+'#0#'+RectToString(rect)+'#');
+			ConsolePrint('DOM#upd#0#'+i+'#0#'+RectToString(rect)+'#');
 		} 
 	);
 }
@@ -173,7 +174,7 @@ function UpdateFixedElementRects()
 				var zero = '';
 				if(id < 10) zero = '0';
 				// Tell CEF that fixed node was updated
-				consolePrint('#fixElem#add#'+zero+id);	// TODO: Change String encoding, get rid of 'zero'
+				ConsolePrint('#fixElem#add#'+zero+id);	// TODO: Change String encoding, get rid of 'zero'
 			}
 
 		}
@@ -185,7 +186,7 @@ function UpdateFixedElementRects()
 function AddDOMTextInput(node)
 {
 	// DEBUG
-	//consolePrint("START adding text input");
+	//ConsolePrint("START adding text input");
 
 	// Add text input node to list of text inputs
 	window.dom_textinputs.push(node);
@@ -203,10 +204,10 @@ function AddDOMTextInput(node)
 
 	// Inform CEF, that new text input is available
 	var node_amount = window.dom_textinputs.length - 1;
-	consolePrint('DOM#add#0#'+node_amount+'#');
+	ConsolePrint('DOM#add#0#'+node_amount+'#');
 
 	// DEBUG
-	//consolePrint("END adding text input");
+	//ConsolePrint("END adding text input");
 }
 
 function SubstractScrollingOffset(rectData)
@@ -272,7 +273,7 @@ function AddFixedElement(node)
 	var zero = '';
 	if(id < 10) zero = '0';
 	// Tell CEF that fixed node was added
-	consolePrint('#fixElem#add#'+zero+id);
+	ConsolePrint('#fixElem#add#'+zero+id);
 }
 
 
@@ -328,10 +329,10 @@ function SetFixationStatus(node, status)
 		// Inform about updates in node's attribute |1| aka |_fixed : bool|
 		// _fixed = status;
 		var intStatus = (status) ? 1 : 0;
-		consolePrint('DOM#upd#'+type+'#'+id+'#1#'+intStatus+'#');
+		ConsolePrint('DOM#upd#'+type+'#'+id+'#1#'+intStatus+'#');
 
 		//DEBUG
-		//consolePrint('Setting fixation status to '+intStatus);
+		//ConsolePrint('Setting fixation status to '+intStatus);
 	}
 }
 
@@ -414,7 +415,7 @@ function RemoveFixedElement(node, resetChildren)
 		if(id < 10) zero = '0';
 
 		// Tell CEF that fixed node with ID was removed
-		consolePrint('#fixElem#rem#'+zero+id);
+		ConsolePrint('#fixElem#rem#'+zero+id);
 		// Remove 'fixedID' attribute
 		node.removeAttribute('fixedID');
 
@@ -440,21 +441,21 @@ function UnfixChildNodes(childNodes)
 	}
 }
 
-// Traverse subtree starting with given childNode as root
+// For fixed elements: Traverse subtree starting with given childNode as root
 function UpdateSubtreesBoundingRect(childNode)
 {
 
 	var id = childNode.getAttribute('fixedID');
 
-	// consolePrint('Checking #'+id+' for updates...');
+	// ConsolePrint('Checking #'+id+' for updates...');
 
 	// Read out old rectangle coordinates
 	var old_coords = window.fixed_coordinates[id];
 	// Update bounding rectangles (only for subtree, starting with node where changes happend)
 	var child_coords = ComputeBoundingRectOfAllChilds(childNode, 0, id);
 
-	// consolePrint('child: '+child_coords);
-	// consolePrint('old  : '+old_coords);
+	// ConsolePrint('child: '+child_coords);
+	// ConsolePrint('old  : '+old_coords);
 	var inform_about_changes = false;
 	var parent_rect = old_coords.slice(0, 4);
 
@@ -470,7 +471,7 @@ function UpdateSubtreesBoundingRect(childNode)
 			// Update childrens' combined bounding rect 
 			window.fixed_coordinates[id] = parent_rect.concat(child_coords);
 			// alert('new: '+new_coords+'; old: '+old_coords);
-			// consolePrint("Updated subtree's bounding rect: "+window.fixed_coordinates[id]);
+			// ConsolePrint("Updated subtree's bounding rect: "+window.fixed_coordinates[id]);
 
 			inform_about_changes = true;
 		}
@@ -494,28 +495,30 @@ function UpdateSubtreesBoundingRect(childNode)
 		var zero = '';
 		if(id < 10) zero = '0';
 		// Tell CEF that fixed node's coordinates were updated
-		consolePrint('#fixElem#add#'+zero+id);
+		ConsolePrint('#fixElem#add#'+zero+id);
 
 		//DEBUG
-		consolePrint('Updated a fixed element');
+		ConsolePrint('Updated a fixed element');
 		for(var i = 0, n = window.fixed_coordinates.length; i < n ; i++)
 		{
 			var str = (i == id) ? '<---' : '';
-			consolePrint(i+': '+window.fixed_coordinates[i]+str);
+			ConsolePrint(i+': '+window.fixed_coordinates[i]+str);
 		}
 
 		// DEBUG
-		// consolePrint("UpdateSubtreesBoundingRect()");
+		// ConsolePrint("UpdateSubtreesBoundingRect()");
 	}
 
 }
 
 function CompareArrays(array1, array2)
 {
-	if(array1.length != array2.length)
+	var n = array1.length;
+
+	if(n != array2.length)
 		return false;
 
-	for(var i = 0, n = array1.length; i < n; i++)
+	for(var i = 0; i < n; i++)
 	{
 		if(array1[i] != array2[i])
 			return false;
@@ -524,10 +527,11 @@ function CompareArrays(array1, array2)
 	return true;
 }
 
+// OLD APPROACH
 function AddDOMTextLink(node)
 {
 	// DEBUG
-	//consolePrint("START adding text link");
+	//ConsolePrint("START adding text link");
 
 	window.dom_links.push(node);
 
@@ -541,62 +545,36 @@ function AddDOMTextLink(node)
 	node.setAttribute('nodeID', (window.dom_links.length-1));
 
 	// Tell CEF message router, that DOM Link was added
-	consolePrint('DOM#add#1#'+(window.dom_links.length-1)+'#');
+	ConsolePrint('DOM#add#1#'+(window.dom_links.length-1)+'#');
 
 		// DEBUG
-	//consolePrint("END adding text link");
+	//ConsolePrint("END adding text link");
 }
 
 // Trigger DOM data update on changing document loading status
 document.onreadystatechange = function()
 {
-	// consolePrint("### DOCUMENT STATECHANGE! ###");
+	// ConsolePrint("### DOCUMENT STATECHANGE! ###");
 
 	if(document.readyState == 'loading')
 	{
-		consolePrint('### document.readyState == loading ###'); // Never triggered
+		ConsolePrint('### document.readyState == loading ###'); // Never triggered
 	}
 
 	if(document.readyState == 'interactive')
 	{
-		//consolePrint("document reached interactive state: Updating DOM Rects...");
+		//ConsolePrint("document reached interactive state: Updating DOM Rects...");
 
 		UpdateDOMRects();
 
-		//consolePrint("... done with Updating DOM Rects.");
-
-		for(var i = 0, n = window.dom_links.length; i < n; i++)
-		{
-			var node = window.dom_links[i];
-
-			var linkText = node.textContent;
-			var parent = node.parentNode;
-			// Line break may occure if those chars are part of string
-			if(parent.tagName == 'P' && (linkText.includes(' ') || linkText.includes('-')) )
-			{
-				var firstNode = node.cloneNode();
-				var lastNode = node.cloneNode();
-
-				firstNode.textContent = linkText[0];
-				lastNode.textContent = linkText[linkText.length-1];
-				node.textContent = linkText.substring(1,linkText.length-1);
-
-				// Insert new nodes in DOM tree
-				parent.insertBefore(firstNode, node);
-				parent.insertBefore(lastNode, node.nextSibling);
-
-				// AddDOMTextLink(firstNode);
-				// AddDOMTextLink(lastNode);
-
-			}
-		}
+		//ConsolePrint("... done with Updating DOM Rects.");
 
 	}
 
 	if(document.readyState == 'complete')
 	{
 		UpdateDOMRects();
-		consolePrint('Page fully loaded. #TextInputs='+window.dom_textinputs.length+', #TextLinks='+window.dom_links.length);
+		ConsolePrint('Page fully loaded. #TextInputs='+window.dom_textinputs.length+', #TextLinks='+window.dom_links.length);
 		
 	}
 }
@@ -605,16 +583,16 @@ window.onresize = function()
 {
 	//UpdateDOMRects();
 	// TODO: Update fixed elements' Rects too?
-	consolePrint("Javascript detected window resize, update of fixed element Rects.");
+	ConsolePrint("Javascript detected window resize, update of fixed element Rects.");
 
-	UpdateFixedElementRects();
+	UpdateFixedElementRects(); // TODO: Already triggered by CEF's JS injection?
 }
 
 
 // Instantiate and initialize the MutationObserver
 function MutationObserverInit()
 { 
-	consolePrint('Initializing Mutation Observer ... ');
+	ConsolePrint('Initializing Mutation Observer ... ');
 
 	window.observer = new MutationObserver(
 		function(mutations) {
@@ -622,7 +600,7 @@ function MutationObserverInit()
 		  		function(mutation)
 		  		{
 					// DEBUG
-					//consolePrint("START Mutation occured...");
+					//ConsolePrint("START Mutation occured...");
 
 			  		var node;
 					
@@ -650,7 +628,7 @@ function MutationObserverInit()
 		  							if(!window.fixed_elements.has(node))
 		  							{
 		  								//DEBUG
-		  								// consolePrint("Attribut "+attr+" changed, calling AddFixedElement");
+		  								// ConsolePrint("Attribut "+attr+" changed, calling AddFixedElement");
 
 		  								AddFixedElement(node);
 		  							}
@@ -675,7 +653,7 @@ function MutationObserverInit()
 		  						if(node.hasAttribute('fixedID'))
 		  						{
 		  							//DEBUG
-		  							// consolePrint("class changed, updating subtree");
+		  							// ConsolePrint("class changed, updating subtree");
 									UpdateDOMRects();
 
 		  							UpdateSubtreesBoundingRect(node);
@@ -690,7 +668,7 @@ function MutationObserverInit()
 		  					// if(attr == 'href')
 		  					// {
 		  					// 	AddFixedElement(node);
-		  					// 	consolePrint("Changes in attribute |href|, adding link..");
+		  					// 	ConsolePrint("Changes in attribute |href|, adding link..");
 		  					// }
 
 		  				}
@@ -717,11 +695,11 @@ function MutationObserverInit()
 			  					// if(node.style.position && node.style.position == 'fixed')
 		  						if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
 		  						{
-		  							// consolePrint('position: '+node.style.position);
+		  							// ConsolePrint('position: '+node.style.position);
 		  							if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
 		  							{
 		  								//DEBUG
-		  								// consolePrint("New fixed node added to DOM tree");
+		  								// ConsolePrint("New fixed node added to DOM tree");
 
 		  								AddFixedElement(node);
 
@@ -735,6 +713,10 @@ function MutationObserverInit()
 		  						if(node.tagName == 'A')
 		  						{
 									AddDOMTextLink(node);
+
+									// New approach
+									CreateDOMLink(node);
+
 		  							// DEBUG
 		  							//window.dom_links.push(node);
 		  							//window.dom_links_rect.push([0,0,0,0]);
@@ -750,6 +732,9 @@ function MutationObserverInit()
 		  							if(node.type == 'text' || node.type == 'search' || node.type == 'email' || node.type == 'password')
 		  							{
 		  								AddDOMTextInput(node);
+
+										// New approach
+										CreateDOMTextInput(node);
 		  							}
 		  						}
 
@@ -783,7 +768,7 @@ function MutationObserverInit()
 		  			}
 
 					// DEBUG
-					//consolePrint("END Mutation occured...");
+					//ConsolePrint("END Mutation occured...");
 		  		} // end of function(){...}
 
 
@@ -801,8 +786,8 @@ function MutationObserverInit()
 	// Mit dieser Eigenschaft kann ein Array mit lokalen Attributnamen angegeben werden (ohne Namespace), wenn nicht alle Attribute beobachtet werden sollen.
 	// --> nur relevante Attribute beobachten!
 
-	consolePrint('MutationObserver successfully created! Telling him what to observe... ');
-	consolePrint('Trying to start observing... ');
+	ConsolePrint('MutationObserver successfully created! Telling him what to observe... ');
+	ConsolePrint('Trying to start observing... ');
 		
 	// Konfiguration des Observers: alles melden - Änderungen an Daten, Kindelementen und Attributen
 	var config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: false, attributeOldValue: false};
@@ -810,7 +795,7 @@ function MutationObserverInit()
 	// eigentliche Observierung starten und Zielnode und Konfiguration übergeben
 	window.observer.observe(window.document, config);
 
-	consolePrint('MutationObserver was told what to observe.');
+	ConsolePrint('MutationObserver was told what to observe.');
 
 	// TODO: Tweak MutationObserver by defining a more specific configuration
 
@@ -824,14 +809,14 @@ function MutationObserverInit()
 		  		function(mutation)
 		  		{
 					// DEBUG
-					//consolePrint("START Mutation occured...");
+					//ConsolePrint("START Mutation occured...");
 
 			  		//var node;
 					
 		  			if(mutation.type == 'attributes')
 		  			{
 		  				var attr = mutation.attributeName;
-						consolePrint('DOCUMENT OBSERVER!   '+attr);
+						ConsolePrint('DOCUMENT OBSERVER!   '+attr);
 
 					}
 				}
@@ -853,7 +838,7 @@ function MutationObserverShutdown()
 
 	delete window.observer;
 
-	consolePrint('Disconnected and deleted MutationObserver! ');
+	ConsolePrint('Disconnected and deleted MutationObserver! ');
 }
 
 		  				// https://developer.mozilla.org/de/docs/Web/API/Node

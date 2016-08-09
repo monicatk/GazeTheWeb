@@ -381,7 +381,8 @@ void RenderProcessHandler::OnContextCreated(
 			IPCLogDebug(browser, "### Context created for main frame. ###");
 
             // Retrieve the context's window object.
-            CefRefPtr<CefV8Value> globalObj = context->GetGlobal();
+			CefRefPtr<CefV8Value> globalObj = context->GetGlobal();
+
 
             // Add attributes with their pre-set values to JS object |window|
             globalObj->SetValue("_pageWidth", CefV8Value::CreateDouble(-1), V8_PROPERTY_ATTRIBUTE_NONE);
@@ -396,13 +397,32 @@ void RenderProcessHandler::OnContextCreated(
 			// Create an image object, which will later contain favicon image 
             frame->ExecuteJavaScript(_js_favicon_create_img, frame->GetURL(), 0);
 
+			frame->ExecuteJavaScript(_js_dom_mutationobserver, "", 0);
 			frame->ExecuteJavaScript(_js_mutation_observer_test, "", 0);
 			frame->ExecuteJavaScript("MutationObserverInit();", "", 0);
 
-			// DEBUG
-			//frame->ExecuteJavaScript("function ContextTest(){alert(" + std::to_string(debug) + ");}", "", 0);
+			// TESTING
+		/*	CefRefPtr<CefV8Value> myObj = globalObj->GetValue("myObject");
+			CefV8ValueList args;
+			if (myObj->GetValue("getVal")->IsFunction())
+			{
+				IPCLogDebug(browser, "IsFunction!");
+				CefRefPtr<CefV8Value> returned = myObj->GetValue("getVal")->ExecuteFunctionWithContext(context, myObj, args);
+				if (returned)
+				{
+					if (returned->IsInt())
+						IPCLogDebug(browser, "Return value is an int");
+					if (returned->IsUndefined())
+						IPCLogDebug(browser, "Return value is undefined");
+					if (returned->IsNull())
+						IPCLogDebug(browser, "Return value is NULL");
+				}
 
-			
+			}
+			else
+			{
+				IPCLogDebug(browser, "Is NOT a function!");
+			}*/
 
             context->Exit();
         }

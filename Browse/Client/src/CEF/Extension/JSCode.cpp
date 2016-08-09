@@ -18,7 +18,8 @@ const std::map<JSFile, std::string> findJSFile =
     std::make_pair<JSFile, std::string>(FAVICON_COPY_IMG_BYTES_TO_V8ARRAY, src + "favicon_copy_img_bytes_to_v8array.js"),
     std::make_pair<JSFile, std::string>(MUTATION_OBSERVER_TEST, src + "mutation_observer_test.js"),
     std::make_pair<JSFile, std::string>(FIXED_ELEMENT_SEARCH, src + "fixed_element_search.js"),
-    std::make_pair<JSFile, std::string>(FIXED_ELEMENT_READ_OUT, src + "fixed_element_read_out.js")
+    std::make_pair<JSFile, std::string>(FIXED_ELEMENT_READ_OUT, src + "fixed_element_read_out.js"),
+	std::make_pair<JSFile, std::string>(DOM_MUTATIONOBSERVER, src + "dom_mutationobserver.js"
 };
 
 std::string GetJSCode(JSFile file)
@@ -52,6 +53,7 @@ std::string GetJSCode(JSFile file)
     }
 }
 
+// TODO: Delete this method and use CefV8Value::ExecuteFunction(WithContext)? Possible in Browser Thread without context->Enter()?
 std::string jsInputTextData(int inputID, std::string text, bool submit)
 {
     std::string code = "var input = window.dom_textinputs[" + std::to_string(inputID) + "];\
