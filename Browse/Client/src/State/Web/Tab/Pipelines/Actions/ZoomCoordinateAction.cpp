@@ -117,7 +117,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 		|| (_logZoom <= 0.3f && _deviation < 0.03f)) // coordinate seems to be quite fixed, just do it
 	{
 		// Try some calibration error compensation if data is available
-		if (!_zoomDataQueue.empty())
+		/* if (!_zoomDataQueue.empty())
 		{
 			// Get oldest valid zoom data set
 			ZoomData old = _zoomDataQueue.front();
@@ -157,7 +157,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 
 			// TODO: Somehow using the current coordinate would be better since more exact
 		}
-		else
+		else */
 		{
 			// Set coordinate in output value 
 			SetOutputValue("coordinate", glm::vec2(_coordinate.x * webViewWidth, _coordinate.y * webViewHeight));
