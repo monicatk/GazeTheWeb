@@ -95,20 +95,22 @@ public:
 
 
 
-	// DOM relevant methods
-	void ReceiveIPCMessageforDOM(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
+	/* DOM relevant methods */
 
+	// Used by BrowserMsgRouter to pass blank DOMNodes to Tab
 	void AddDOMNode(CefRefPtr<CefBrowser> browser, std::shared_ptr<DOMNode> spNode);
-	void ClearDOMNodes(CefRefPtr<CefBrowser> browser);
 
-	bool InputTextData(TabCEFInterface* tab, int64 frameID, int nodeID, std::string text, bool submit = false);
+	void ClearDOMNodes(CefRefPtr<CefBrowser> browser);
 
 	// Called by BrowserMsgRouter to pass update information to Tab
 	void UpdateDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID, int attr, void* data);
+	// Used to fill blank DOMNodes with data
+	void UpdateDOMNode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
 
 	void RemoveDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID);
 
-	void HandleDOMNodeIPCMsg(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
+	// TODO: Call Javascript function instead of injecting more JS code
+	bool InputTextData(TabCEFInterface* tab, int64 frameID, int nodeID, std::string text, bool submit = false);
 
 protected:
 

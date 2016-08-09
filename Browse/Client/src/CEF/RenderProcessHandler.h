@@ -42,6 +42,12 @@ public:
         CefRefPtr<CefFrame> frame,
         CefRefPtr<CefV8Context> context) OVERRIDE;
 
+
+	/* FETCHING DOM NODE DATA */
+	CefRefPtr<CefV8Value> FetchDOMObject(CefRefPtr<CefV8Context> context, int nodeType, int nodeID);
+	CefRefPtr<CefProcessMessage> UnwrapDOMTextInput(CefRefPtr<CefV8Context> context, CefRefPtr<CefV8Value> domObj, int nodeID);
+	CefRefPtr<CefProcessMessage> UnwrapDOMLink(CefRefPtr<CefV8Context> context, CefRefPtr<CefV8Value> domObj, int nodeID);
+
 private:
     // Send text to be logged to browser process, otherwise logging won't work
     void IPCLog(CefRefPtr<CefBrowser> browser, std::string text, bool debugLog=false);

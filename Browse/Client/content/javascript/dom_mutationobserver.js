@@ -10,6 +10,57 @@ window.domTextInputs = [];
 */
 
 /**
+ * Constructor
+ */
+function DOMObject(node, nodeType)
+{
+    /* Attributes */
+        this.node = node;
+        this.nodeType = nodeType;
+        this.rects = AdjustClientRects(this.node.getClientRects());
+        this.visible = true;
+        this.fixed = false;
+
+    /* Methods */ 
+        // Update member variable for Rects and return if an update has occured 
+        this.updateRects = function(){
+            var updatedRectsData = AdjustClientRects(this.node.getClientRects());
+            if(this.fixed)
+            {
+                updatedRects.map( function(rectData){rectData = SubstractScrollingOffset(rectData);} );
+            }
+
+            var equal = CompareClientRectsData(updatedRectsData, this.rects);
+
+            if(!equal)
+            {
+                this.rects = updatedRectsData;
+                InformCEF(this, ['update', 'rects']); 
+            }
+            // ConsolePrint(''+this.rects)
+            
+            return !equal;
+        };
+
+        // Returns float[4] for each Rect with adjusted coordinates
+        this.getRects = function(){
+            // Update rects if changes occured
+            // this.updateRects();
+
+            // Return rects as list of float lists with adjusted coordinates
+            return this.rects;
+        };
+
+        this.setFixed = function(fixed){
+            this.fixed = fixed;
+            // DEBUG
+            ConsolePrint("Informing CEF about fixation status change...");
+            InformCEF(this, ['update', 'fixed']);
+        };
+
+}
+
+/**
  * Create a DOMObject of given type for node and add it to the global list
  * Also, automatically inform CEF about added node and in case of Rect updates
  * 
@@ -18,59 +69,46 @@ window.domTextInputs = [];
  */
 function CreateDOMObject(node, nodeType)
 {
-    // Create DOMObject, which encapsulates the given DOM node
-	var domObject = {
-    /* Attributes */
-		_node: node,
-		_nodeType: nodeType,
-		_rects: node.getClientRects(),
-		_visible: true,
+    // Only add DOMObject for node if there doesn't exist one yet
+    if(!node.hasAttribute('nodeID'))
+    {
+        // Create DOMObject, which encapsulates the given DOM node
+        var domObj = new DOMObject(node, nodeType);
 
-    /* Methods */ 
-		// Update member variable for Rects and return if an update has occured 
-		updateRects: function(){
-			var fetchRects = this._node.getClientRects();
-			var equal = CompareClientRects(fetchRects, this._rects);
+        // Push to list and determined by DOMObjects position in type specific list
+        var domObjList = GetDOMObjectList(nodeType);
+        if(domObjList != undefined)
+        {
+            domObjList.push(domObj);
+            var nodeID = domObjList.length - 1;
 
-			if(!equal)
-            {
-                this._rects = rects;
-                InformCEF(this, ['update', 'rects']); 
-            }
-			
-			return !equal;
-		},
+            // Add attributes to given DOM node
+            node.setAttribute('nodeID', nodeID);
+            node.setAttribute('nodeType', nodeType);
 
-		// Returns float[4] for each Rect with adjusted coordinates
-		getRects: function(){
-			// Update _rects if changes occured
-			this.updateRects();
-			// Return _rects as list of float lists with adjusted coordinates
-			return AdjustClientRects(this._rects);
-		},
-	};
+            InformCEF(domObj, ['added']);
+        }
+        else
+        {
+            ConsolePrint("ERROR: No DOMObjectList found for adding node with type="+nodeType+"!");
+        }
 
-    // Push to list and determined by DOMObjects position in type specific list
-    var domObjList = GetDOMObjectList(nodeType);
-    domObjList.push(domObj);
-    var nodeID = domObjList.length - 1;
-
-    // Add attributes to given DOM node
-    node.setAttribute('nodeID', nodeID);
-    node.setAttribute('nodeType', nodeType);
-
-    InformCEF(this, ['added']);
+    }
+    else
+    {
+        ConsolePrint("Useless call of CreateDOMObject");
+    }
 }
 
-function CreateDOMTextInput(node) { CreateDOMObject(node, 0); }
-function CreateDOMLink(node) { CreateDOMLink(node, 1); }
+function CreateDOMTextInput(node) { ConsolePrint("CreateDOMTextInput called!"); CreateDOMObject(node, 0); }
+function CreateDOMLink(node) { CreateDOMObject(node, 1); }
 
 
 /**
  * Adjusts given DOMRects to window properties in order to get screen coordinates
  * 
  * args:    rects : [DOMRect]
- * return:  [float] - top, left, bottom, right coordinates of each DOMRect in rects
+ * return:  [[float]] - top, left, bottom, right coordinates of each DOMRect in rects
  */
 function AdjustClientRects(rects)
 {
@@ -79,7 +117,9 @@ function AdjustClientRects(rects)
 	var lists = [];
 	for(var i = 0, n = rects.length; i < n; i++)
 	{
-		lists.push(RectToFloatList(rects[i]));
+		lists.push(
+            AdjustRectCoordinatesToWindow(rects[i])
+        );
 	}
 
 	// TODO!: Adjust coordinates to window settings
@@ -119,6 +159,32 @@ function CompareClientRects(rects1, rects2)
 }
 
 /**
+ * Compares two lists of type [[float]] and returns true if all values are equal
+ * 
+ * args:    rects1, rects2 : [[float]]
+ * returns: bool
+ */
+function CompareClientRectsData(rects1, rects2)
+{
+    var n = rects1.length;
+
+	if(n != rects2.length)
+		return false;
+
+	// Check if width and height of each Rect are identical
+	for(var i = 0; i < n; i++)
+	{
+		for(var j = 0; j < 4; j++)
+        {
+            if(rects1[i][j] != rects2[i][j])
+             return false;
+        }
+	}
+
+	return true;
+}
+
+/**
  * Triggers update of DOMRects of each DOMObject by using DOMObjects updateRects() method
  * 
  * args:    -/-
@@ -126,6 +192,9 @@ function CompareClientRects(rects1, rects2)
  */
 function UpdateDOMRects()
 {
+    // DEBUG
+    ConsolePrint("UpdateDOMRects() called");
+
     // Trigger update of Rects for every domObject
     window.domTextInputs.forEach(
         function (domObj) { domObj.updateRects(); }
@@ -143,41 +212,52 @@ function UpdateDOMRects()
  */
 function InformCEF(domObj, operation)
 {
-    var id = domObj._node.getAttribute('noteID');
-    var type = domObj._nodeType;
+    var id = domObj.node.getAttribute('nodeID');
+    var type = domObj.nodeType;
 
-    // Encoding uses only first 3 chars of natural language operation
-    var op = operation[0].substring(0,3);
-
-    var encodedCommand = 'DOM#'+op+'#'+type+'#'+id+'#';
-
-    if(op == 'upd')
+    if(id != undefined && type != undefined)
     {
-        if(operation[1] == 'rect')
+        // Encoding uses only first 3 chars of natural language operation
+        var op = operation[0].substring(0,3);
+
+        var encodedCommand = 'DOM#'+op+'#'+type+'#'+id+'#';
+
+        if(op == 'upd')
         {
-            var rectsData = domObj.getRects();
-            // Encode changes in 'rect' as attribute '0'
-            encodedCommand += '1#';
-            // Encode list of floats to strings, each value separated by ';'
-            for(var i = 0, n = rectsData.length; i < n; i++)
+            if(operation[1] == 'rects')
             {
-                encodedCommand += (rectsData[i]+';');
+                var rectsData = domObj.getRects();
+                // Encode changes in 'rect' as attribute '0'
+                encodedCommand += '0#';
+                // Encode list of floats to strings, each value separated by ';'
+                for(var i = 0, n = rectsData.length; i < n; i++)
+                {
+                    for(var j = 0; j < 4; j++)
+                    {
+                        encodedCommand += (rectsData[i][j]+';');
+                    }
+                }
+                // Add '#' at the end to mark ending of encoded command
+                encodedCommand = encodedCommand.substr(0,encodedCommand.length-1)+'#';
             }
-            // Add '#' at the end to mark ending of encoded command
-            encodedCommand += '#';
+
+            if(operation[1] == 'fixed')
+            {
+                // If fixed attribute doesn't exist, node is not fixed
+                var status = (domObj.node.getAttribute('fixedID') != undefined) ? 1 : 0;
+                // Encode changes in 'fixed' as attribute '1'
+                encodedCommand += ('1#'+status+'#');
+
+                // DEBUG
+                ConsolePrint('command: '+encodedCommand);
+            }
         }
 
-        if(operation[i] == 'fixed')
-        {
-            // If fixed attribute doesn't exist, node is not fixed
-            var status = (domObj._node.getAttribute('fixedID')) ? 1 : 0;
-            // Encode changes in 'fixed' as attribute '1'
-            encodedCommand += ('1#'+status+'#');
-        }
+
+
+        // Send encoded command to CEF
+        ConsolePrint(encodedCommand);
     }
-
-    // Send encoded command to CEF
-    ConsolePrint(encodedCommand);
 }
 
 /**
@@ -188,10 +268,13 @@ function InformCEF(domObj, operation)
  */
 function GetDOMObjectList(nodeType)
 {
+
     switch(nodeType)
     {
-        case 0: { return window.domTextInputs; };
-        case 1: { return window.domLinks; };
+        case 0:
+        case '0': { return window.domTextInputs; };
+        case 1:
+        case '1': { return window.domLinks; };
         // NOTE: Add more cases if new nodeTypes are added
         default:
         {
@@ -200,6 +283,7 @@ function GetDOMObjectList(nodeType)
         }
     }
 }
+
 
 /**
  * Get DOMObject by using node's type and ID
@@ -221,19 +305,21 @@ function GetDOMObject(nodeType, nodeID)
     return targetList[nodeID];
 }
 
-/**
- * Get corresponding DOMObject to a given node, if it doesn't exist 'undefined' is returned
- * 
- * args:    node : DOMNode
- * return:  DOMObject
- */
-function GetDOMObject(node)
-{
-    var id = node.getAttribute('nodeID');
-    var type = node.getAttribute('nodeType');
+// ATTENTION: V8 doesn't seem to work with polymorphism of functions!
 
-    if(!id || !type)
-        return undefined;
+// /**
+//  * Get corresponding DOMObject to a given node, if it doesn't exist 'undefined' is returned
+//  * 
+//  * args:    node : DOMNode
+//  * return:  DOMObject
+//  */
+// function GetDOMObject(node)
+// {
+//     var id = node.getAttribute('nodeID');
+//     var type = node.getAttribute('nodeType');
 
-    return GetDOMObject(type, id);
-}
+//     if(!id || !type)
+//         return undefined;
+
+//     return GetDOMObject(type, id);
+// }

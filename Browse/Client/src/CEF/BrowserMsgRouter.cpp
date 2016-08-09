@@ -243,7 +243,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	}
 
 	// Print message to console and withdraw callback
-	LogDebug("MsgHandler: ", requestName);
+	LogDebug("Javascript: ", requestName);
 	callback->Failure(0, "");
 
 	return false;

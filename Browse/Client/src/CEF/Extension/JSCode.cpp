@@ -19,7 +19,7 @@ const std::map<JSFile, std::string> findJSFile =
     std::make_pair<JSFile, std::string>(MUTATION_OBSERVER_TEST, src + "mutation_observer_test.js"),
     std::make_pair<JSFile, std::string>(FIXED_ELEMENT_SEARCH, src + "fixed_element_search.js"),
     std::make_pair<JSFile, std::string>(FIXED_ELEMENT_READ_OUT, src + "fixed_element_read_out.js"),
-	std::make_pair<JSFile, std::string>(DOM_MUTATIONOBSERVER, src + "dom_mutationobserver.js"
+	std::make_pair<JSFile, std::string>(DOM_MUTATIONOBSERVER, src + "dom_mutationobserver.js")
 };
 
 std::string GetJSCode(JSFile file)

@@ -232,12 +232,12 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 
     if (msgName == "ReceiveDOMElements")
     {
-        LogDebug("Handler: ReceiveDOMElements msg received -> redirect to CefMediator.");
+        LogDebug("Handler: OLD APPROACH! DELETE! ... ReceiveDOMElements msg received -> redirect to CefMediator.");
 
         //_pMediator->ClearDOMNodes(browser);
 
         // Pipe IPC message to CefMediator in order to create DOM nodes
-        _pMediator->ReceiveIPCMessageforDOM(browser, msg);
+       /* _pMediator->ReceiveIPCMessageforDOM(browser, msg);*/
         return true;
     }
     if (msgName == "ReceiveFavIconBytes")
@@ -276,7 +276,13 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 	}
 	if (msgName == "SendDOMNodeData")
 	{
-		_pMediator->HandleDOMNodeIPCMsg(browser, msg);
+		//_pMediator->HandleDOMNodeIPCMsg(browser, msg);
+		LogDebug("Handler: Received old IPC msg 'SendDOMNodeData'!");
+	}
+
+	if (msgName.substr(0, 9) == "CreateDOM")
+	{
+		_pMediator->UpdateDOMNode(browser, msg);
 	}
 
     return _msgRouter->OnProcessMessageReceived(browser, source_process, msg);

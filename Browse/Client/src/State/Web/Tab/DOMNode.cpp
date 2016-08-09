@@ -19,7 +19,7 @@ std::vector<glm::vec2> DOMNode::GetCenters() const
 	{
 		centers.push_back(_rects[i].center());
 	}
-	return std::vector<glm::vec2>();
+	return centers;
 }
 
 glm::vec2 DOMNode::GetCenter() const
@@ -65,6 +65,20 @@ void DOMNode::UpdateAttribute(int attr, void * data, bool initial)
 		// Add new Rect (atm only for DOMLinks)
 		case(2): {
 			AddRect(*(Rect*)data);
+			break;
+		}
+		case(3) : {
+			_rects = *(std::vector<Rect>*) data;
+
+			//for (int i = 0; i < _rects.size(); i++)
+			//{
+			//	LogDebug("DOMNode: ",i, ": ", _rects[i].toString());
+			//}
+
+			break;
+		}
+		default: {
+			LogDebug("DOMNode: Update for attribute=", attr, " is not yet defined!");
 		}
 
 	}

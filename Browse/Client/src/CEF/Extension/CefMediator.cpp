@@ -127,47 +127,6 @@ void CefMediator::EmulateMouseWheelScrolling(TabCEFInterface * pTab, double delt
     }
 }
 
-void CefMediator::ReceiveIPCMessageforDOM(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
-{
-
-    const std::string& msgName = msg->GetName().ToString();
-
-    if (msgName == "ReceiveDOMElements")
-    {
-        // Get Tab to which future DOM nodes belong
-        if (TabCEFInterface* target = GetTab(browser))
-        {
-            // Define function, which gets read data from IPC msg and creates DOM nodes according to container scheme (see Container.h)
-            auto createDOMTextInputs = [target]
-                    (
-                    std::vector<int> integers,
-                    std::vector<double> doubles,
-                    std::vector<std::string> strings,
-                    int64 frameID,
-                    int nodeID
-                    ) -> void
-            {
-                // Define where attributes and their values are expected according to scheme
-                Rect rect = Rect(doubles[0], doubles[1], doubles[2], doubles[3]);
-
-                std::string value = strings[0];
-
-                // LogDebug("CefMediator: Creating DOM node.");
-
-                // Add DOM node to Tab
-                target->AddDOMNode(std::make_shared<DOMTextInput>(DOMNodeType::TextInput, frameID, nodeID, rect, value));
-
-            };
-
-            IPC_Container ipcContainer(domNodeScheme);
-            ipcContainer.GetObjectsFromIPC(
-                msg,
-                std::vector< std::function< void(std::vector<int>, std::vector<double>, std::vector<std::string>, int64, int)> >{createDOMTextInputs}
-            );
-        }
-    }
-}
-
 void CefMediator::ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
 {
     const std::string& msgName = msg->GetName().ToString();
@@ -231,7 +190,7 @@ void CefMediator::AddDOMNode(CefRefPtr<CefBrowser> browser, std::shared_ptr<DOMN
 {
     if (TabCEFInterface* pTab = GetTab(browser))
     {
-        // find corresponding Tab and add DOM Node to its list of nodes
+        // Find corresponding Tab and add DOM Node to its list of nodes
         pTab->AddDOMNode(spNode);
     }
 }
@@ -240,7 +199,7 @@ void CefMediator::ClearDOMNodes(CefRefPtr<CefBrowser> browser)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
     {
-        // clear corresponding Tabs DOM Node list (implicitly destroy all DOM Node objects)
+        // Clear corresponding Tabs DOM Node list (implicitly destroy all DOM Node objects)
         pTab->ClearDOMNodes();
 		//LogDebug("CefMediator: ### DISABLED DOM CLEARING FOR LINK TESTING ###");
         LogDebug("CefMediator: Cleared all DOM nodes belonging to browserID = ", browser->GetIdentifier());
@@ -389,6 +348,36 @@ void CefMediator::UpdateDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type,
 	}
 }
 
+void CefMediator::UpdateDOMNode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		int index = 0;
+		CefRefPtr<CefListValue> args = msg->GetArgumentList();
+		int type = args->GetInt(index++);
+		int nodeID = args->GetInt(index++);
+
+		// TODO(in the future): Call an update of different attributes for different node types
+
+		// Read out multiple Rects
+		std::vector<Rect> rects;
+
+		for (int i = index; i + 3 < args->GetSize(); i += 4)
+		{
+			rects.push_back(
+				Rect(
+					args->GetDouble(i),
+					args->GetDouble(i+1),
+					args->GetDouble(i+2),
+					args->GetDouble(i+3)
+					)
+				);
+		}
+		// Update all Rects of this given DOMNode
+		pTab->UpdateDOMNode((DOMNodeType) type, nodeID, 3, &rects);
+	}
+}
+
 void CefMediator::RemoveDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
@@ -397,22 +386,6 @@ void CefMediator::RemoveDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type,
 	}
 }
 
-void CefMediator::HandleDOMNodeIPCMsg(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
-{
-	int index = 0;
-	CefRefPtr<CefListValue> args = msg->GetArgumentList();
-	int type = args->GetInt(index++);
-	int nodeID = args->GetInt(index++);
-
-	std::vector<float> rectData;
-	for (int i = 0; i < 4; i++)
-	{
-		rectData.push_back(args->GetDouble(index++));
-	}
-	Rect rect = Rect(rectData);
-
-
-}
 
 TabCEFInterface* CefMediator::GetTab(CefRefPtr<CefBrowser> browser) const
 {

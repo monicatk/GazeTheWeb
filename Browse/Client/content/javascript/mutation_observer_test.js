@@ -77,37 +77,37 @@ function AdjustRectToZoom(rect)
 // function GetRect(node){ return AdjustRectCoordinatesToWindow(node.getBoundingClientRect()); }
 
 
-function CompareRectData(node_list, rect_list, NotificationFunc)
-{
-	var n = node_list.length;
+// function CompareRectData(node_list, rect_list, NotificationFunc)
+// {
+// 	var n = node_list.length;
 
-	for(var i = 0; i < n; i++)
-	{
-		var new_rect = AdjustRectCoordinatesToWindow(
-			node_list[i].getBoundingClientRect()
-		);
+// 	for(var i = 0; i < n; i++)
+// 	{
+// 		var new_rect = AdjustRectCoordinatesToWindow(
+// 			node_list[i].getBoundingClientRect()
+// 		);
 
-		// Adjust coordinates to fixed screen position if needed
-		if(node_list[i].hasAttribute('fixedID'))
-		{
-			SubstractScrollingOffset(new_rect);
-		}
+// 		// Adjust coordinates to fixed screen position if needed
+// 		if(node_list[i].hasAttribute('fixedID'))
+// 		{
+// 			SubstractScrollingOffset(new_rect);
+// 		}
 
-		var old_rect = rect_list[i];
+// 		var old_rect = rect_list[i];
 
-		if(new_rect[0] != old_rect[0] || new_rect[1] != old_rect[1] || new_rect[2] != old_rect[2] || new_rect[3] != old_rect[3])
-		{
-			NotificationFunc(i, new_rect);
-		}
+// 		if(new_rect[0] != old_rect[0] || new_rect[1] != old_rect[1] || new_rect[2] != old_rect[2] || new_rect[3] != old_rect[3])
+// 		{
+// 			NotificationFunc(i, new_rect);
+// 		}
 
-	}
-}
+// 	}
+// }
 
-// being lazy
-function RectToString(rect)
-{
-	return ''+rect[0]+';'+rect[1]+';'+rect[2]+';'+rect[3];
-}
+// // being lazy
+// function RectToString(rect)
+// {
+// 	return ''+rect[0]+';'+rect[1]+';'+rect[2]+';'+rect[3];
+// }
 
 	/* NOTES
 		Encoding of request strings for DOM node operations:
@@ -127,25 +127,26 @@ function RectToString(rect)
 		data	: depends on attribute
 	*/
 
-function UpdateDOMRects()
-{
-	// Compare node's current Rect with data in Rect list
-	CompareRectData(
-		window.dom_links, 
-		window.dom_links_rect, 
-		function Notify(i, rect) { 
-			ConsolePrint('DOM#upd#1#'+i+'#0#'+RectToString(rect)+'#');
-		} 
-	);
+// function UpdateDOMRects()
+// {
+// 	ConsolePrint("OLD UpdateDOMRects() function called!");
+// 	// // Compare node's current Rect with data in Rect list
+// 	// CompareRectData(
+// 	// 	window.dom_links, 
+// 	// 	window.dom_links_rect, 
+// 	// 	function Notify(i, rect) { 
+// 	// 		ConsolePrint('DOM#upd#1#'+i+'#0#'+RectToString(rect)+'#');
+// 	// 	} 
+// 	// );
 
-	CompareRectData(
-		window.dom_textinputs, 
-		window.dom_textinputs_rect, 
-		function Notify(i, rect) { 
-			ConsolePrint('DOM#upd#0#'+i+'#0#'+RectToString(rect)+'#');
-		} 
-	);
-}
+// 	// CompareRectData(
+// 	// 	window.dom_textinputs, 
+// 	// 	window.dom_textinputs_rect, 
+// 	// 	function Notify(i, rect) { 
+// 	// 		ConsolePrint('DOM#upd#0#'+i+'#0#'+RectToString(rect)+'#');
+// 	// 	} 
+// 	// );
+// }
 
 function UpdateFixedElementRects()
 {
@@ -186,25 +187,25 @@ function UpdateFixedElementRects()
 function AddDOMTextInput(node)
 {
 	// DEBUG
-	//ConsolePrint("START adding text input");
+	ConsolePrint("AddDOMTextInput should not be called anymore!");
 
-	// Add text input node to list of text inputs
-	window.dom_textinputs.push(node);
+	// // Add text input node to list of text inputs
+	// window.dom_textinputs.push(node);
 
-	// Add text input's Rect to list
-	window.dom_textinputs_rect.push(
-		AdjustRectCoordinatesToWindow(
-			node.getBoundingClientRect()
-		)
-	);
+	// // Add text input's Rect to list
+	// window.dom_textinputs_rect.push(
+	// 	AdjustRectCoordinatesToWindow(
+	// 		node.getBoundingClientRect()
+	// 	)
+	// );
 
-	// Add attribute in order to recognize already discovered DOM nodes later
-	node.setAttribute('nodeType', '0');
-	node.setAttribute('nodeID', (window.dom_textinputs.length-1));
+	// // Add attribute in order to recognize already discovered DOM nodes later
+	// node.setAttribute('nodeType', '0');
+	// node.setAttribute('nodeID', (window.dom_textinputs.length-1));
 
-	// Inform CEF, that new text input is available
-	var node_amount = window.dom_textinputs.length - 1;
-	ConsolePrint('DOM#add#0#'+node_amount+'#');
+	// // Inform CEF, that new text input is available
+	// var node_amount = window.dom_textinputs.length - 1;
+	// ConsolePrint('DOM#add#0#'+node_amount+'#');
 
 	// DEBUG
 	//ConsolePrint("END adding text input");
@@ -262,6 +263,9 @@ function AddFixedElement(node)
 		// Create attribute in node and store ID there
 		node.setAttribute('fixedID', id);
 
+		// DEBUG
+		ConsolePrint("Adding fixed node #"+id);
+
 		// Write node's (and its children's) bounding rectangle coordinates to List
 		SaveBoundingRectCoordinates(node);
 	}
@@ -279,6 +283,9 @@ function AddFixedElement(node)
 
 function SaveBoundingRectCoordinates(node)
 {
+	// DEBUG
+	ConsolePrint('Start of SaveBoundingRectCoordinates...');
+
 	var rect = node.getBoundingClientRect();
 	// Only add coordinates if width and height are greater zero
 	// if(rect.width && rect.height)
@@ -300,8 +307,14 @@ function SaveBoundingRectCoordinates(node)
 	// Add rect coordinates to list of fixed coordinates at position |id|
 	window.fixed_coordinates[id] = rect_coords;
 
+	// DEBUG
+	ConsolePrint('Start of ComputeBoundingRectOfAllChilds...');
+
 	// Compute bounding rect containing all child nodes
 	var tree_rect_coords = ComputeBoundingRectOfAllChilds(node, 0, id);
+
+		// DEBUG
+	ConsolePrint('End of ComputeBoundingRectOfAllChilds.');
 
 	// Save tree rect, if different than fixed nodes bounding rect
 	var equal = true;
@@ -309,6 +322,7 @@ function SaveBoundingRectCoordinates(node)
 	{
 		equal &= (rect_coords[i] == tree_rect_coords[i]);
 	}
+
 	if(!equal)
 	{
 		window.fixed_coordinates[id] = 
@@ -316,6 +330,10 @@ function SaveBoundingRectCoordinates(node)
 				ComputeBoundingRect(rect_coords, tree_rect_coords)
 			);
 	}
+	 ConsolePrint('Computed fixed#'+id+": "+window.fixed_coordinates[id]);
+
+	 // DEBUG
+	ConsolePrint('End of SaveBoundingRectCoordinates.');
 }
 
 // Inform CEF about the current fication status of a already known node
@@ -326,13 +344,23 @@ function SetFixationStatus(node, status)
 
 	if(type && id)
 	{
-		// Inform about updates in node's attribute |1| aka |_fixed : bool|
-		// _fixed = status;
-		var intStatus = (status) ? 1 : 0;
-		ConsolePrint('DOM#upd#'+type+'#'+id+'#1#'+intStatus+'#');
+		// DEBUG
+		ConsolePrint("Getting DOMObject...");
+		
+		var domObj = GetDOMObject(type, id);
+		if(domObj)
+		{
+			domObj.setFixed(status);
+		}
+		// DEBUG
+		ConsolePrint("Done with getting DOMObject.");
+		// // Inform about updates in node's attribute |1| aka |_fixed : bool|
+		// // _fixed = status;
+		// var intStatus = (status) ? 1 : 0;
+		// ConsolePrint('DOM#upd#'+type+'#'+id+'#1#'+intStatus+'#');
 
-		//DEBUG
-		//ConsolePrint('Setting fixation status to '+intStatus);
+		// //DEBUG
+		// //ConsolePrint('Setting fixation status to '+intStatus);
 	}
 }
 
@@ -574,7 +602,8 @@ document.onreadystatechange = function()
 	if(document.readyState == 'complete')
 	{
 		UpdateDOMRects();
-		ConsolePrint('Page fully loaded. #TextInputs='+window.dom_textinputs.length+', #TextLinks='+window.dom_links.length);
+
+		ConsolePrint('Page fully loaded. #TextInputs='+window.domTextInputs.length+', #TextLinks='+window.domLinks.length);
 		
 	}
 }
@@ -585,7 +614,7 @@ window.onresize = function()
 	// TODO: Update fixed elements' Rects too?
 	ConsolePrint("Javascript detected window resize, update of fixed element Rects.");
 
-	UpdateFixedElementRects(); // TODO: Already triggered by CEF's JS injection?
+	// UpdateFixedElementRects(); // TODO: Already triggered by CEF's JS injection?
 }
 
 
@@ -628,9 +657,11 @@ function MutationObserverInit()
 		  							if(!window.fixed_elements.has(node))
 		  							{
 		  								//DEBUG
-		  								// ConsolePrint("Attribut "+attr+" changed, calling AddFixedElement");
+		  								ConsolePrint("Attribut "+attr+" changed, calling AddFixedElement");
 
 		  								AddFixedElement(node);
+										
+										UpdateDOMRects();
 		  							}
 		  				
 		  						}
@@ -712,7 +743,7 @@ function MutationObserverInit()
 		  						// Find text links
 		  						if(node.tagName == 'A')
 		  						{
-									AddDOMTextLink(node);
+									// AddDOMTextLink(node); // OLD
 
 									// New approach
 									CreateDOMLink(node);
@@ -731,7 +762,7 @@ function MutationObserverInit()
 		  							// Identify text input fields
 		  							if(node.type == 'text' || node.type == 'search' || node.type == 'email' || node.type == 'password')
 		  							{
-		  								AddDOMTextInput(node);
+		  								// AddDOMTextInput(node); // OLD
 
 										// New approach
 										CreateDOMTextInput(node);
