@@ -6,13 +6,14 @@
 
 // Notes
 // - Input: none
-// - Output: vec2 coordinate
+// - Output: vec2 coordinate in pixels
 
 #ifndef ZOOMCOORDINATEACTION_H_
 #define ZOOMCOORDINATEACTION_H_
 
 #include "Action.h"
 #include "src/Utils/LerpValue.h"
+#include <deque>
 
 class ZoomCoordinateAction : public Action
 {
@@ -38,6 +39,16 @@ public:
 
 protected:
 
+	// Struct which is used to record data while execution
+	struct ZoomData
+	{
+		float lifetime = 0.f; // time since data was created
+		glm::vec2 gaze; // gaze data
+		glm::vec2 coordinate; // coordinate of zooming
+		glm::vec2 coordinateCenterOffset; // offset of zoom coordinate from center
+		float logZoom; // value of log zoom at that time
+	};
+
 	// Dimming duration
 	const float DIMMING_DURATION = 0.5f; // seconds until it is dimmed
 
@@ -52,6 +63,9 @@ protected:
 
 	// Speed of zoom
 	const float ZOOM_SPEED = 0.7f;
+
+	// Maximal time which is looked back at compensation of calibration errors
+	const float LOOK_BACK_TIME = 0.5f;
 
     // Coordinate which is updated and output
     glm::vec2 _coordinate;
@@ -75,6 +89,9 @@ protected:
 
 	// Dimming
 	float _dimming = 0.f;
+
+	// Queue for recording data which is used as click to compensate calibration errors
+	std::deque<ZoomData> _zoomDataQueue;
 };
 
 #endif // ZOOMCOORDINATEACTION_H_

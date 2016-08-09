@@ -58,6 +58,7 @@ void Eyetracker::Update(
 	double windowWidthDouble = (double)windowWidth;
 	double windowHeightDouble = (double)windowHeight;
 
+	// TODO: queues may be empty! Then devision through 0 occurs
 	// Average the given samples
 	double sum = 0;
 	for (double x : gazeXSamples)

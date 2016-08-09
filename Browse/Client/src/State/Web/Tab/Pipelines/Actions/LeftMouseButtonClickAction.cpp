@@ -18,10 +18,6 @@ LeftMouseButtonClickAction::LeftMouseButtonClickAction(TabInteractionInterface* 
 
 bool LeftMouseButtonClickAction::Update(float tpf, TabInput tabInput)
 {
-    // Extract size of webview to calculate pixel coordinates
-    int width, height;
-    _pTab->GetWebViewTextureResolution(width, height);
-
     // Get coordinate from input slot
     glm::vec2 coordinate;
     GetInputValue("coordinate", coordinate);
@@ -31,10 +27,7 @@ bool LeftMouseButtonClickAction::Update(float tpf, TabInput tabInput)
 	GetInputValue("visualize", visualize);
 
     // Emulate left mouse button click
-    if (width > 0 && height > 0)
-    {
-        _pTab->EmulateLeftMouseButtonClick((double)(coordinate.x * width), (double)(coordinate.y * height), visualize > 0);
-    }
+    _pTab->EmulateLeftMouseButtonClick((double)(coordinate.x), (double)(coordinate.y), visualize > 0);
 
     return true;
 }
