@@ -42,16 +42,16 @@ protected:
 	const float DIMMING_DURATION = 0.5f; // seconds until it is dimmed
 
 	// Dimming value
-	const float DIMMING_VALUE = 0.25f;
+	const float DIMMING_VALUE = 0.3f;
 
 	// Deviation fading duration (how many seconds until full deviation is back to zero)
-	const float DEVIATION_FADING_DURATION = 0.25f;
+	const float DEVIATION_FADING_DURATION = 0.4f;
 
 	// Multiplier of movement towards center
 	const float CENTER_OFFSET_MULTIPLIER = 0.5f;
 
 	// Speed of zoom
-	const float ZOOM_SPEED = 0.5f;
+	const float ZOOM_SPEED = 0.7f;
 
     // Coordinate which is updated and output
     glm::vec2 _coordinate;

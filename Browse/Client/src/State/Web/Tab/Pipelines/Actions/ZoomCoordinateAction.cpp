@@ -86,8 +86,8 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	}
 	else
 	{
-		// Zoom out when gaze not upon web view
-		zoomSpeed = -0.5f * ZOOM_SPEED;
+		// Stop zooming when gaze either not in web view or used otherwise
+		zoomSpeed = 0;
 	}
 
 	// Update linear zoom
