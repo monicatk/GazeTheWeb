@@ -216,6 +216,41 @@ bool CefMediator::InputTextData(TabCEFInterface* tab, int64 frameID, int nodeID,
     return false;
 }
 
+void CefMediator::FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		int index = 0;
+		CefRefPtr<CefListValue> args = msg->GetArgumentList();
+		int type = args->GetInt(index++);
+		int nodeID = args->GetInt(index++);
+
+		// TODO(in the future): Call an update of different attributes for different node types
+
+		// Read out multiple Rects
+		std::vector<Rect> rects;
+
+		for (int i = index; i + 3 < args->GetSize(); i += 4)
+		{
+			rects.push_back(
+				Rect(
+					args->GetDouble(i),
+					args->GetDouble(i + 1),
+					args->GetDouble(i + 2),
+					args->GetDouble(i + 3)
+					)
+				);
+		}
+
+		// Receive weak_ptr to target node and use it as shared_ptr targetNode
+		if (auto targetNode = pTab->GetDOMNode((DOMNodeType) type, nodeID).lock())
+		{
+			// Update target nodes Rects
+			targetNode->SetRects(std::make_shared<std::vector<Rect>>(rects));
+		}
+	}
+}
+
 void CefMediator::ResetScrolling(TabCEFInterface * pTab)
 {
     if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
@@ -340,49 +375,20 @@ void CefMediator::OpenPopupTab(CefRefPtr<CefBrowser> browser, std::string url)
 	}
 }
 
-void CefMediator::UpdateDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID, int attr, void * data)
-{
-	if (TabCEFInterface* pTab = GetTab(browser))
-	{
-		pTab->UpdateDOMNode(type, nodeID, attr, data);
-	}
-}
-
-void CefMediator::UpdateDOMNode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
-{
-	if (TabCEFInterface* pTab = GetTab(browser))
-	{
-		int index = 0;
-		CefRefPtr<CefListValue> args = msg->GetArgumentList();
-		int type = args->GetInt(index++);
-		int nodeID = args->GetInt(index++);
-
-		// TODO(in the future): Call an update of different attributes for different node types
-
-		// Read out multiple Rects
-		std::vector<Rect> rects;
-
-		for (int i = index; i + 3 < args->GetSize(); i += 4)
-		{
-			rects.push_back(
-				Rect(
-					args->GetDouble(i),
-					args->GetDouble(i+1),
-					args->GetDouble(i+2),
-					args->GetDouble(i+3)
-					)
-				);
-		}
-		// Update all Rects of this given DOMNode
-		pTab->UpdateDOMNode((DOMNodeType) type, nodeID, 3, &rects);
-	}
-}
 
 void CefMediator::RemoveDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
 		pTab->RemoveDOMNode(type, nodeID);
+	}
+}
+
+std::weak_ptr<DOMNode> CefMediator::GetDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		return pTab->GetDOMNode(type, nodeID);
 	}
 }
 

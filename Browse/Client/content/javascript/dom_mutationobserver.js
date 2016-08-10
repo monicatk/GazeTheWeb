@@ -38,37 +38,6 @@ function DOMObject(node, nodeType)
             // Compare new and old Rect data
             var equal = CompareClientRectsData(updatedRectsData, this.rects);
 
-            // if(updatedRectsData.length == 0)
-            //     ConsolePrint("equal="+equal+", old_rect[0]="+this.rects[0]+", Could not adjust Rect for element "+this.node.textContent);
-
-            // if(updatedRectsData.length == undefined)
-            //     ConsolePrint("equal="+equal+", old_rect[0]="+this.rects[0]+", undefined RectData for element "+this.node.textContent);
-
-
-            // DEBUGGING
-            // if(this.node.textContent == "1.3 Stadtgliederung" || this.node.textContent == "1.4 Klima")
-            // {
-            //     this.setFixed(true);
-            //     ConsolePrint("##### DEBUGGING ####");
-            //     ConsolePrint(this.node.textContent);
-            //     var rect = this.node.getClientRects()[0];
-            //     ConsolePrint("rect: "+rect.top+", "+rect.left+", "+rect.bottom+", "+rect.right);
-            //     ConsolePrint("old: "+this.rects[0]);
-            //     if(updatedRectsData.length > 0)
-            //         ConsolePrint("new: "+updatedRectsData[0]);
-            //     else 
-            //     {
-            //         ConsolePrint("new: [length == 0]");
-            //         ConsolePrint('Schould be: '+AdjustRectCoordinatesToWindow(rect));
-            //     }
-
-            //     var bbrect = this.node.getBoundingClientRect();
-            //     ConsolePrint("bbrect: "+bbrect.top+", "+bbrect.left+", "+bbrect.bottom+", "+bbrect.right);
-            //     ConsolePrint("#### END OF DEBUGGING ####");
-            // }
-
-
-
             // Rect updates occured and new Rect data is accessible
             if(!equal && updatedRectsData != undefined && updatedRectsData.length > 0)
             {
@@ -94,6 +63,34 @@ function DOMObject(node, nodeType)
                 this.fixed = fixed;
                 InformCEF(this, ['update', 'fixed']);
                 this.updateRects();
+            }
+        };
+
+        this.setTextInput = function(text, submit){
+            ConsolePrint("domObj.setTextInput called!");
+            // Only executable if DOMNode is TextInput field
+            if(this.nodeType == 0)
+            {
+                this.node.setAttribute('value', text);
+                ConsolePrint("Input text was set!");
+
+                if(submit)
+                {
+                    var parent = this.node.parentNode;
+                    while(parent.nodeName != 'FORM')
+                    {
+                        parent = parent.parentNode;
+                        if(parent === document.documentElement)
+                        {
+                            alert('Button is no child of any form! Can not submit anything.');
+                            break;
+                        }
+                    }
+                    var parent_element = document.getElementById(parent.id);
+                    parent_element.submit();
+                    ConsolePrint("Input text was submitted!");
+                }
+
             }
         };
 

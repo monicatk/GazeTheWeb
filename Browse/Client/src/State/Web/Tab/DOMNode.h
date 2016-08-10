@@ -13,6 +13,7 @@
 #include "src/State/Web/Tab/DOMNodeType.h"
 #include <vector>
 #include <string>
+#include <memory>
 
 class DOMNode
 {
@@ -27,7 +28,9 @@ class DOMNode
 
 		void AddRect(Rect rect) { _rects.push_back(rect); }
 
-		void UpdateAttribute(int attr, void* data, bool initial=false);
+		void SetRects(std::shared_ptr<std::vector<Rect>> rects);
+		void SetFixed(bool fixed) { _fixed = fixed; }
+
 
 
 		DOMNode(DOMNodeType type, int64 frameID, int nodeID, std::vector<Rect> rects)

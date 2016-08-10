@@ -102,15 +102,15 @@ public:
 
 	void ClearDOMNodes(CefRefPtr<CefBrowser> browser);
 
-	// Called by BrowserMsgRouter to pass update information to Tab
-	void UpdateDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID, int attr, void* data);
-	// Used to fill blank DOMNodes with data
-	void UpdateDOMNode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
-
 	void RemoveDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID);
+
+	// Used by BrowserMsgRouter
+	std::weak_ptr<DOMNode> GetDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID);
 
 	// TODO: Call Javascript function instead of injecting more JS code
 	bool InputTextData(TabCEFInterface* tab, int64 frameID, int nodeID, std::string text, bool submit = false);
+
+	void FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
 
 protected:
 

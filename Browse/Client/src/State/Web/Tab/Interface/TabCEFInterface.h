@@ -42,11 +42,12 @@ public:
     // Get weak pointer to texture of web view
     virtual std::weak_ptr<Texture> GetWebViewTexture() = 0;
 
-    // Used by DOMMapping interface
+	// Add, remove and update Tab's current DOMNodes
     virtual void AddDOMNode(std::shared_ptr<DOMNode> spNode) = 0;
+	virtual std::weak_ptr<DOMNode> GetDOMNode(DOMNodeType type, int nodeID) = 0;
     virtual void ClearDOMNodes() = 0;
-	virtual void UpdateDOMNode(DOMNodeType type, int nodeID, int attr, void* data, bool initial=false) = 0;
 	virtual void RemoveDOMNode(DOMNodeType type, int nodeID) = 0;
+
 
     // Receive callbacks from CefMediator upon scrolling offset changes
     virtual void SetScrollingOffset(double x, double y) = 0;

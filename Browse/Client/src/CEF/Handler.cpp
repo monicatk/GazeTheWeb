@@ -282,7 +282,7 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 
 	if (msgName.substr(0, 9) == "CreateDOM")
 	{
-		_pMediator->UpdateDOMNode(browser, msg);
+		_pMediator->FillDOMNodeWithData(browser, msg);
 	}
 
     return _msgRouter->OnProcessMessageReceived(browser, source_process, msg);
@@ -355,6 +355,7 @@ bool Handler::InputTextData(CefRefPtr<CefBrowser> browser, int64 frameID, int no
     if (frame->IsValid())
     {
         frame->ExecuteJavaScript(jsInputTextData(nodeID, text, submit), frame->GetURL(), 0);
+
         return true;
     }
     else

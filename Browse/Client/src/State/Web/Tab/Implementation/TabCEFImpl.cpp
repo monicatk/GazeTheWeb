@@ -156,31 +156,6 @@ void Tab::ClearDOMNodes()
 	_fixedElements.clear();
 }
 
-void Tab::UpdateDOMNode(DOMNodeType type, int nodeID, int attr, void * data, bool initial)
-{
-	// Determine which map to access
-	std::map<int, std::shared_ptr<DOMNode> >* map;
-
-	switch (type)
-	{
-	case(DOMNodeType::TextInput) : { map = &_TextInputMap; break; }
-	case(DOMNodeType::TextLink) : { map = &_TextLinkMap; break; }
-	}
-
-	if (map->find(nodeID) != map->end())
-	{
-		// Determine target node
-		std::shared_ptr<DOMNode> node = map->at(nodeID);
-
-		// Handle attribute update internally
-		node->UpdateAttribute(attr, data);
-	}
-	else
-	{
-		LogDebug("Tab: Tried to update DOM node data, but nodeID=", nodeID, " with type=", type, " was not found!");
-	}
-}
-
 void Tab::RemoveDOMNode(DOMNodeType type, int nodeID)
 {
 
@@ -212,6 +187,20 @@ void Tab::RemoveDOMNode(DOMNodeType type, int nodeID)
 		}
 		);
 	}
+}
+
+std::weak_ptr<DOMNode> Tab::GetDOMNode(DOMNodeType type, int nodeID)
+{
+	switch (type)
+	{
+		case DOMNodeType::TextInput: { 
+			return (_TextInputMap.find(nodeID) != _TextInputMap.end()) ? _TextInputMap.at(nodeID) : std::weak_ptr<DOMNode>(); 
+		}
+		case DOMNodeType::TextLink: {
+			return (_TextLinkMap.find(nodeID) != _TextLinkMap.end()) ? _TextLinkMap.at(nodeID) : std::weak_ptr<DOMNode>();
+		}
+	}
+	return std::weak_ptr<DOMNode>();
 }
 
 void Tab::SetScrollingOffset(double x, double y)
