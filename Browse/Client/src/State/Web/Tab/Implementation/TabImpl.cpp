@@ -764,6 +764,15 @@ void Tab::DrawDebuggingOverlay() const
 		}
 	}
 
+	// DEBUG
+	_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(1.f, 0.f, 1.f));
+	for (const auto& rDOMTextLink : _DOMTextLinks)
+	{
+		if(rDOMTextLink->GetRects().size() == 2)
+			renderRect(rDOMTextLink->GetRects()[1], rDOMTextLink->GetFixed());
+	}
+
+
 	// ### FIXED ELEMENTS ###
 
 	// Set rendering up for fixed element

@@ -28,13 +28,6 @@ function DOMObject(node, nodeType)
             // Get new Rect data
             var updatedRectsData = AdjustClientRects(this.node.getClientRects());
 
-            // DEBUG
-            var bbrect = AdjustRectCoordinatesToWindow(this.node.getBoundingClientRect());
-            for(var i = 0; i < 4 && updatedRectsData.length == 1; i++)
-                if(updatedRectsData[0][i] != bbrect[i])
-                    ConsolePrint(i+': bbrect='+bbrect[i]+' -- rect='+updatedRectsData[0][i]);
-
-
             if(this.fixed)
             {
                 //  updatedRectsData = updatedRectsData.map( function(rectData){ rectData = SubstractScrollingOffset(rectData);} );

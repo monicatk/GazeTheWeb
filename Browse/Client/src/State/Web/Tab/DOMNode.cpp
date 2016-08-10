@@ -38,6 +38,7 @@ glm::vec2 DOMNode::GetCenter() const
 
 void DOMNode::UpdateAttribute(int attr, void * data, bool initial)
 {
+	LogDebug("DOMNode::UpdateAttribute called for attr=", attr);
 	switch (attr)
 	{
 		// Update Rect
@@ -70,10 +71,17 @@ void DOMNode::UpdateAttribute(int attr, void * data, bool initial)
 		case(3) : {
 			_rects = *(std::vector<Rect>*) data;
 
-			//for (int i = 0; i < _rects.size(); i++)
-			//{
-			//	LogDebug("DOMNode: ",i, ": ", _rects[i].toString());
-			//}
+			LogDebug("_rects.size() = ", _rects.size());
+			if (_rects.size() > 0)
+			{
+				//if(_rects[1].top - _rects[0].bottom  > (_rects[0].bottom - _rects[0].top))
+				LogDebug("DOMNode: id=", _nodeID, ", type=", _type);
+					for (int i = 0; i < _rects.size(); i++)
+					{
+						LogDebug("DOMNode: ", i, ": ", _rects[i].toString());
+					}
+			}
+			
 
 			break;
 		}

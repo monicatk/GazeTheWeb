@@ -194,7 +194,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			void* data = nullptr;
 			switch (attr)
 			{
-				// Rect was updated, extract 4 double values
+				// Rect was updated, extract 4 double values OLD
 				case(0) : {
 					std::vector<float> rectData;
 					std::vector<char> buffer;
@@ -216,9 +216,27 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 							buffer.clear();
 						}
 					}
-					Rect rect = Rect(rectData);
+					// TODO: shared_ptr anstatt void* !
+
+					std::vector<Rect> rects;
+					LogDebug("Str encoding of node id=", id, ", type=", type);
+					for (int i = 0; i < rectData.size(); i++)
+						LogDebug(i, ": ", rectData[i]);
+					for (int i = 0; i + 3 < rectData.size(); i+= 4)
+					{
+						//Rect rect = Rect(std::vector<float>(rectData.data() + i, rectData.data() + i + 3));
+						Rect rect = Rect(rectData[i], rectData[i + 1], rectData[i + 2], rectData[i + 3]);
+						rects.push_back(rect);
+						LogDebug(i, ": " + rect.toString());
+					}
+					//Rect rect = Rect(rectData);
 					// Assign extracted data to |data|
-					data = (void*) &rect;
+					LogDebug("size rects: ", rects.size());
+					data = (void*) &rects;
+
+					// TODO: Einheitliche Kodierung einführen!
+					attr = 3;
+
 					break;
 				};
 
@@ -235,6 +253,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					break;
 				};
 			}
+
 			// Pass decoded update information to Tab via CefMediator
 			_pMsgRouter->GetMediator()->UpdateDOMNode(browser, type, id, attr, data);
 		} // End of node update
