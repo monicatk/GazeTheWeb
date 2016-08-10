@@ -204,6 +204,25 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
     // Load dictionary
     _dictonaryId = eyegui::addDictionary(_pGUI, "dictionaries/EnglishUS.dic");
 
+	// ### WINDOW ICON ###
+
+	// Load window icons for GLFW
+	std::vector<unsigned char> iconData;
+	int iconWidth, iconHeight, iconChannelCount;
+	eyegui_helper::loadImage("resources/Icon_64.png", iconData, iconWidth, iconHeight, iconChannelCount);
+
+	// Create GLFWImage
+	GLFWimage iconImage;
+	iconImage.width = iconWidth;
+	iconImage.height = iconHeight;
+	iconImage.pixels = iconData.data();
+
+	// Set window icon
+	glfwSetWindowIcon(
+		_pWindow,
+		1,
+		&iconImage);
+
     // ### INTERACTION LOGGING ###
 
     // New CSV file for interaction logging
