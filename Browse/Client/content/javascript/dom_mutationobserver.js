@@ -22,17 +22,27 @@ function DOMObject(node, nodeType)
         this.fixed = false;
 
     /* Methods */ 
-        // Update member variable for Rects and return if an update has occured 
+        // Update member variable for Rects and return true if an update has occured 
         this.updateRects = function(){
 
+            // Get new Rect data
             var updatedRectsData = AdjustClientRects(this.node.getClientRects());
+
+            // DEBUG
+            var bbrect = AdjustRectCoordinatesToWindow(this.node.getBoundingClientRect());
+            for(var i = 0; i < 4 && updatedRectsData.length == 1; i++)
+                if(updatedRectsData[0][i] != bbrect[i])
+                    ConsolePrint(i+': bbrect='+bbrect[i]+' -- rect='+updatedRectsData[0][i]);
+
 
             if(this.fixed)
             {
                 //  updatedRectsData = updatedRectsData.map( function(rectData){ rectData = SubstractScrollingOffset(rectData);} );
+                // NOTE: Not sure if this works like intended
                 updatedRectsData.map( function(rectData){ rectData = SubstractScrollingOffset(rectData);} );
             }
 
+            // Compare new and old Rect data
             var equal = CompareClientRectsData(updatedRectsData, this.rects);
 
             // if(updatedRectsData.length == 0)
@@ -72,8 +82,6 @@ function DOMObject(node, nodeType)
                 this.rects = updatedRectsData;
                 InformCEF(this, ['update', 'rects']); 
             }
-
-
             
             return !equal;
         };
@@ -91,8 +99,8 @@ function DOMObject(node, nodeType)
             if(this.fixed != fixed)
             {
                 this.fixed = fixed;
-                this.updateRects();
                 InformCEF(this, ['update', 'fixed']);
+                this.updateRects();
             }
         };
 
