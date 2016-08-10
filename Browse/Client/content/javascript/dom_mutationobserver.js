@@ -24,20 +24,56 @@ function DOMObject(node, nodeType)
     /* Methods */ 
         // Update member variable for Rects and return if an update has occured 
         this.updateRects = function(){
+
             var updatedRectsData = AdjustClientRects(this.node.getClientRects());
+
             if(this.fixed)
             {
-                updatedRects.map( function(rectData){rectData = SubstractScrollingOffset(rectData);} );
+                //  updatedRectsData = updatedRectsData.map( function(rectData){ rectData = SubstractScrollingOffset(rectData);} );
+                updatedRectsData.map( function(rectData){ rectData = SubstractScrollingOffset(rectData);} );
             }
 
             var equal = CompareClientRectsData(updatedRectsData, this.rects);
 
-            if(!equal)
+            // if(updatedRectsData.length == 0)
+            //     ConsolePrint("equal="+equal+", old_rect[0]="+this.rects[0]+", Could not adjust Rect for element "+this.node.textContent);
+
+            // if(updatedRectsData.length == undefined)
+            //     ConsolePrint("equal="+equal+", old_rect[0]="+this.rects[0]+", undefined RectData for element "+this.node.textContent);
+
+
+            // DEBUGGING
+            // if(this.node.textContent == "1.3 Stadtgliederung" || this.node.textContent == "1.4 Klima")
+            // {
+            //     this.setFixed(true);
+            //     ConsolePrint("##### DEBUGGING ####");
+            //     ConsolePrint(this.node.textContent);
+            //     var rect = this.node.getClientRects()[0];
+            //     ConsolePrint("rect: "+rect.top+", "+rect.left+", "+rect.bottom+", "+rect.right);
+            //     ConsolePrint("old: "+this.rects[0]);
+            //     if(updatedRectsData.length > 0)
+            //         ConsolePrint("new: "+updatedRectsData[0]);
+            //     else 
+            //     {
+            //         ConsolePrint("new: [length == 0]");
+            //         ConsolePrint('Schould be: '+AdjustRectCoordinatesToWindow(rect));
+            //     }
+
+            //     var bbrect = this.node.getBoundingClientRect();
+            //     ConsolePrint("bbrect: "+bbrect.top+", "+bbrect.left+", "+bbrect.bottom+", "+bbrect.right);
+            //     ConsolePrint("#### END OF DEBUGGING ####");
+            // }
+
+
+
+            // Rect updates occured and new Rect data is accessible
+            if(!equal && updatedRectsData != undefined && updatedRectsData.length > 0)
             {
                 this.rects = updatedRectsData;
                 InformCEF(this, ['update', 'rects']); 
             }
-            // ConsolePrint(''+this.rects)
+
+
             
             return !equal;
         };
@@ -52,10 +88,12 @@ function DOMObject(node, nodeType)
         };
 
         this.setFixed = function(fixed){
-            this.fixed = fixed;
-            // DEBUG
-            ConsolePrint("Informing CEF about fixation status change...");
-            InformCEF(this, ['update', 'fixed']);
+            if(this.fixed != fixed)
+            {
+                this.fixed = fixed;
+                this.updateRects();
+                InformCEF(this, ['update', 'fixed']);
+            }
         };
 
 }
@@ -100,7 +138,7 @@ function CreateDOMObject(node, nodeType)
     }
 }
 
-function CreateDOMTextInput(node) { ConsolePrint("CreateDOMTextInput called!"); CreateDOMObject(node, 0); }
+function CreateDOMTextInput(node) { CreateDOMObject(node, 0); }
 function CreateDOMLink(node) { CreateDOMObject(node, 1); }
 
 
@@ -114,17 +152,15 @@ function AdjustClientRects(rects)
 {
 	function RectToFloatList(rect){ return [rect.top, rect.left, rect.bottom, rect.right]; };
 
-	var lists = [];
-	for(var i = 0, n = rects.length; i < n; i++)
-	{
-		lists.push(
+    var adjRects = [];
+    for(var i = 0, n = rects.length; i < n; i++)
+    {
+        adjRects.push(
             AdjustRectCoordinatesToWindow(rects[i])
         );
-	}
+    }
 
-	// TODO!: Adjust coordinates to window settings
-
-	return lists;
+    return adjRects;
 }
 
 /**
@@ -166,6 +202,9 @@ function CompareClientRects(rects1, rects2)
  */
 function CompareClientRectsData(rects1, rects2)
 {
+    if(rects2 == undefined)
+        return false;
+
     var n = rects1.length;
 
 	if(n != rects2.length)

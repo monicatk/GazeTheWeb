@@ -251,7 +251,7 @@ void Tab::AddFixedElementsCoordinates(int id, std::vector<Rect> elements)
 	_fixedElements[id] = elements;
 
 	 //DEBUG
-	LogDebug("Added fixed element with id=", id);
+	/*LogDebug("Added fixed element with id=", id);
 	LogDebug("#fixedElements: ", _fixedElements.size());
 	for (int i = 0; i < _fixedElements.size(); i++)
 	{
@@ -265,20 +265,20 @@ void Tab::AddFixedElementsCoordinates(int id, std::vector<Rect> elements)
 		}
 		else 
 			LogDebug(i, ": ", _fixedElements[i][0].toString());
-	}
+	}*/
 }
 
 void Tab::RemoveFixedElement(int id)
 {
 	// DEBUG
-	LogDebug("Tab: Remove fixed element id=", id);
+	//LogDebug("Tab: Remove fixed element id=", id);
 
 	if ((int)_fixedElements.size() > id)
 	{
 		_fixedElements[id].clear();
 	}
-	else
-	{
-		LogDebug("Tab: Fixed element with id=", id, " wasn't in list...");
-	}
+	//else
+	//{
+	//	LogDebug("Tab: Fixed element with id=", id, " wasn't in list...");
+	//}
 }

@@ -13,7 +13,7 @@ window.dom_textinputs_rect = [[]];
 
 
 // TESTING CEF V8 ExecuteFunction
-window.myObject = {val: '8', called: '0', getVal: function(){ConsolePrint('Objects function called!'); return 7;} };
+// window.myObject = {val: '8', called: '0', getVal: function(){ConsolePrint('Objects function called!'); return 7;} };
 
 
 
@@ -32,12 +32,15 @@ function ConsolePrint(msg)
 */
 function AdjustRectCoordinatesToWindow(rect)
 {
+	if(rect == undefined)
+		ConsolePrint("WARNING: rect == undefined in AdjustRectCoordinatesToWindow!");
+
 	var doc = document.documentElement;
 	var zoomFactor = 1;
 	var offsetX = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0); 
 	var offsetY = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0); 
 
-	var docRect = document.body.getBoundingClientRect();
+	// var docRect = document.body.getBoundingClientRect(); // not used
 
 	if(document.body.style.zoom)
 	{
@@ -264,7 +267,7 @@ function AddFixedElement(node)
 		node.setAttribute('fixedID', id);
 
 		// DEBUG
-		ConsolePrint("Adding fixed node #"+id);
+		// ConsolePrint("Adding fixed node #"+id);
 
 		// Write node's (and its children's) bounding rectangle coordinates to List
 		SaveBoundingRectCoordinates(node);
@@ -284,7 +287,7 @@ function AddFixedElement(node)
 function SaveBoundingRectCoordinates(node)
 {
 	// DEBUG
-	ConsolePrint('Start of SaveBoundingRectCoordinates...');
+	// ConsolePrint('Start of SaveBoundingRectCoordinates...');
 
 	var rect = node.getBoundingClientRect();
 	// Only add coordinates if width and height are greater zero
@@ -308,13 +311,13 @@ function SaveBoundingRectCoordinates(node)
 	window.fixed_coordinates[id] = rect_coords;
 
 	// DEBUG
-	ConsolePrint('Start of ComputeBoundingRectOfAllChilds...');
+	// ConsolePrint('Start of ComputeBoundingRectOfAllChilds...');
 
 	// Compute bounding rect containing all child nodes
 	var tree_rect_coords = ComputeBoundingRectOfAllChilds(node, 0, id);
 
 		// DEBUG
-	ConsolePrint('End of ComputeBoundingRectOfAllChilds.');
+	// ConsolePrint('End of ComputeBoundingRectOfAllChilds.');
 
 	// Save tree rect, if different than fixed nodes bounding rect
 	var equal = true;
@@ -333,7 +336,7 @@ function SaveBoundingRectCoordinates(node)
 	 ConsolePrint('Computed fixed#'+id+": "+window.fixed_coordinates[id]);
 
 	 // DEBUG
-	ConsolePrint('End of SaveBoundingRectCoordinates.');
+	// ConsolePrint('End of SaveBoundingRectCoordinates.');
 }
 
 // Inform CEF about the current fication status of a already known node
@@ -345,7 +348,7 @@ function SetFixationStatus(node, status)
 	if(type && id)
 	{
 		// DEBUG
-		ConsolePrint("Getting DOMObject...");
+		// ConsolePrint("Getting DOMObject...");
 		
 		var domObj = GetDOMObject(type, id);
 		if(domObj)
@@ -353,7 +356,7 @@ function SetFixationStatus(node, status)
 			domObj.setFixed(status);
 		}
 		// DEBUG
-		ConsolePrint("Done with getting DOMObject.");
+		// ConsolePrint("Done with getting & configuring DOMObject.");
 		// // Inform about updates in node's attribute |1| aka |_fixed : bool|
 		// // _fixed = status;
 		// var intStatus = (status) ? 1 : 0;
@@ -577,6 +580,12 @@ function AddDOMTextLink(node)
 
 		// DEBUG
 	//ConsolePrint("END adding text link");
+}
+
+// TESTING PURPOSE
+document.onclick = function(){
+	ConsolePrint("### document.onclick() triggered! ###");
+	UpdateDOMRects();
 }
 
 // Trigger DOM data update on changing document loading status
