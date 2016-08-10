@@ -50,6 +50,6 @@ static const float NOTIFICATION_Y = 0.0075f;
 static const float NOTIFICATION_HEIGHT = 0.03f;
 static const float NOTIFICATION_DISPLAY_DURATION = 3.f;
 static const float CLICK_VISUALIZATION_DURATION = 0.75f;
-static const float CLICK_VISUALIZATION_RELATIVE_SIZE = 0.3f;
+static const float CLICK_VISUALIZATION_RELATIVE_SIZE = 0.4f;
 
 #endif // GLOBAL_H_

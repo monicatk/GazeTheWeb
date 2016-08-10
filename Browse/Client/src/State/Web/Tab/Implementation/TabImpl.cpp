@@ -10,6 +10,7 @@
 #include "src/Utils/QuadRenderItem.h"
 #include "src/Utils/Helper.h"
 #include "submodules/glm/glm/gtc/matrix_transform.hpp" // TODO: move to debug rendering class
+#include <algorithm>
 
 // Shaders (For debugging rectangles)
 const std::string vertexShaderSource =
@@ -174,7 +175,7 @@ void Tab::Update(float tpf, Input& rInput)
 		std::remove_if(
 			_clickVisualizations.begin(),
 			_clickVisualizations.end(),
-			[](const auto& i) { return i.fading <= 0; }),
+            [](const ClickVisualization& i) { return i.fading <= 0; }),
 		_clickVisualizations.end());
 
 	// ### TAB INPUT STRUCT ###
