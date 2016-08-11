@@ -207,21 +207,36 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
 	// ### WINDOW ICON ###
 
 	// Load window icons for GLFW
-	std::vector<unsigned char> iconData;
-	int iconWidth, iconHeight, iconChannelCount;
-	eyegui_helper::loadImage("resources/Icon_64.png", iconData, iconWidth, iconHeight, iconChannelCount);
+    std::vector<unsigned char> icon16Data;
+    int icon16Width, icon16Height, icon16ChannelCount;
+    eyegui_helper::loadImage("resources/Icon_16.png", icon16Data, icon16Width, icon16Height, icon16ChannelCount);
 
-	// Create GLFWImage
-	GLFWimage iconImage;
-	iconImage.width = iconWidth;
-	iconImage.height = iconHeight;
-	iconImage.pixels = iconData.data();
+    std::vector<unsigned char> icon32Data;
+    int icon32Width, icon32Height, icon32ChannelCount;
+    eyegui_helper::loadImage("resources/Icon_32.png", icon32Data, icon32Width, icon32Height, icon32ChannelCount);
+
+    std::vector<unsigned char> icon64Data;
+    int icon64Width, icon64Height, icon64ChannelCount;
+    eyegui_helper::loadImage("resources/Icon_64.png", icon64Data, icon64Width, icon64Height, icon64ChannelCount);
+
+    // Create GLFWImages
+    std::vector<GLFWimage> icons;
+    icons.resize(3);
+    icons.at(0).width = icon16Width;
+    icons.at(0).height = icon16Height;
+    icons.at(0).pixels = icon16Data.data();
+    icons.at(1).width = icon32Width;
+    icons.at(1).height = icon32Height;
+    icons.at(1).pixels = icon32Data.data();
+    icons.at(2).width = icon64Width;
+    icons.at(2).height = icon64Height;
+    icons.at(2).pixels = icon64Data.data();
 
 	// Set window icon
 	glfwSetWindowIcon(
 		_pWindow,
-		1,
-		&iconImage);
+        (int)icons.size(),
+        icons.data());
 
     // ### INTERACTION LOGGING ###
 
