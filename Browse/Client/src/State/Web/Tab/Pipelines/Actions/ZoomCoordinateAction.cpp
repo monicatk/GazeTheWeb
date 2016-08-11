@@ -117,7 +117,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 		|| (_logZoom <= 0.3f && _deviation < 0.03f)) // coordinate seems to be quite fixed, just do it
 	{
 		// Try some calibration error compensation if data is available
-		/* if (!_zoomDataQueue.empty())
+        /*if (!_zoomDataQueue.empty())
 		{
 			// Get oldest valid zoom data set
 			ZoomData old = _zoomDataQueue.front();
@@ -140,24 +140,23 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 
 			// Calculate drift of gaze
 			glm::vec2 gazeDrift = gazeCoordinate - oldGazeCoordinate; // drift of gaze coordinates
-			gazeDrift -= _coordinate - old.coordinate; // subtract movement of zoom coordinate
+            float pixelGazeDriftLength = glm::length(glm::vec2(gazeDrift.x * webViewWidth, gazeDrift.y * webViewHeight)); // length of drift in pixels
 
-			// Lenght of gaze drift in pixels (correction of aspect ratio inclusive)
-			glm::vec2 pixelGazeDrift = glm::vec2(gazeDrift.x * webViewWidth, gazeDrift.y * webViewHeight);
-			float pixelGazeDriftLength = glm::length(pixelGazeDrift);
+            // Subtract distance between zoom coordinates
+            pixelGazeDriftLength -= glm::length(glm::vec2(webViewWidth, webViewHeight) * (_coordinate - old.coordinate));
 
-			// Get radius at which focused point is positioned at time of old zoom data creation
-			float radius = pixelGazeDriftLength / (old.logZoom - _logZoom);
+            // Radius around old zoom coordinate where actual fixation point should be
+            float pixelRadius = pixelGazeDriftLength / (old.logZoom - _logZoom);
 
-			// Now we have radius where focused point was at old time and direction of gaze drift
-			glm::vec2 pixelFocusCoordinate = glm::vec2(old.coordinate.x * webViewWidth, old.coordinate.y * webViewHeight) + (radius * glm::normalize(gazeDrift));
+            // TODO: compare vector of zoom coordinate movement and gaze movement to have quality measurement for results
+
+            // Calculate fixation coordinates
+            glm::vec2 pixelFixationCoordinate = (glm::normalize(gazeDrift) * pixelRadius) + old.coordinate;
 
 			// Set coordinate in output value 
-			SetOutputValue("coordinate", pixelFocusCoordinate);
-
-			// TODO: Somehow using the current coordinate would be better since more exact
+            SetOutputValue("coordinate", pixelFixationCoordinate);
 		}
-		else */
+        else*/
 		{
 			// Set coordinate in output value 
 			SetOutputValue("coordinate", glm::vec2(_coordinate.x * webViewWidth, _coordinate.y * webViewHeight));
