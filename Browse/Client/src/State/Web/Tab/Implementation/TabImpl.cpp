@@ -280,8 +280,8 @@ void Tab::Update(float tpf, Input& rInput)
 		float progressDown = 1.f;
 		if (scrollableHeight > 0)
 		{
-			progressUp = _scrollingOffsetY / scrollableHeight;
-			progressDown = 1.f - progressUp;
+            progressUp = _scrollingOffsetY / scrollableHeight;
+            progressDown = 1.f - progressUp;
 		}
 		eyegui::setProgress(_pScrollingOverlayLayout, "scroll_up_progress", progressUp);
 		eyegui::setProgress(_pScrollingOverlayLayout, "scroll_down_progress", progressDown);
