@@ -5,6 +5,7 @@
 
 #include "ZoomCoordinateAction.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
+#include "submodules/glm/glm/gtx/vector_angle.hpp"
 #include <algorithm>
 
 // TODO: Testing
@@ -114,55 +115,72 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
     // Vector with web view pixel resolution
     glm::vec2 webViewPixels(webViewWidth, webViewHeight);
 
+	// Calculate coordinate for current gaze value
+	glm::vec2 pixelGazeCoordinate =
+		glm::vec2(
+			tabInput.webViewGazeRelativeX,
+			tabInput.webViewGazeRelativeY)
+		+ _coordinateCenterOffset; // add center offset
+	pixelGazeCoordinate -= _coordinate; // move zoom position to origin
+	pixelGazeCoordinate *= _logZoom; // apply zoom
+	pixelGazeCoordinate += _coordinate; // move back
+	pixelGazeCoordinate *= webViewPixels; // into pixel space
+
 	// Check, whether click is done
 	if (
 		_logZoom <= 0.075f // just zoomed so far into that coordinate is used
 		|| (_logZoom <= 0.3f && _deviation < 0.03f)) // coordinate seems to be quite fixed, just do it
 	{
-		// Try some calibration error compensation if data is available
-        /*if (!_zoomDataQueue.empty())
+		int zoomDataIndex = -1;
+
+		// Find zoom data where user starts to calm down gaze
+		int i = 0;
+		if (!_zoomDataQueue.empty())
 		{
-			// Get oldest valid zoom data set
-			ZoomData old = _zoomDataQueue.front();
+			for (const auto& rZoomData : _zoomDataQueue)
+			{
+				// Compare gaze drift with zoom coordinate drift
+				glm::vec2 pixelGazeDrift = pixelGazeCoordinate - rZoomData.pixelGazeCoordinate;
+				glm::vec2 pixelCoordinateDrift = (_coordinate * webViewPixels) - rZoomData.pixelZoomCoordinate;
 
-			// Calculate coordinate for old gaze value (looks similar to pixel shader in web view class)
-			glm::vec2 oldGazeCoordinate = old.gaze + old.coordinateCenterOffset; // add center offset
-			oldGazeCoordinate -= old.coordinate; // move zoom position to origin
-			oldGazeCoordinate *= old.logZoom; // apply zoom
-			oldGazeCoordinate += old.coordinate; // move back
+				// Test angle between vectors
+				if (glm::degrees(glm::angle(glm::normalize(pixelGazeDrift), glm::normalize(pixelCoordinateDrift))) <= DRIFT_MAX_ANGLE_DEGREE)
+				{
+					zoomDataIndex = i;
+					break;
+				}
 
-			// Calculate coordinate for current gaze value
-			glm::vec2 gazeCoordinate =
-				glm::vec2(
-					tabInput.webViewGazeRelativeX,
-					tabInput.webViewGazeRelativeY)
-				+ _coordinateCenterOffset; // add center offset
-			gazeCoordinate -= _coordinate; // move zoom position to origin
-			gazeCoordinate *= _logZoom; // apply zoom
-			gazeCoordinate += _coordinate; // move back
+				// Increment index counter
+				i++;
+			}
+		}
+
+		// Try some calibration error compensation if available data is good enough
+        /*if (zoomDataIndex >= 0)
+		{
+			// Get valid zoom data set with good quality
+			ZoomData old = _zoomDataQueue.at(zoomDataIndex);
 
 			// Calculate drift of gaze
-			glm::vec2 gazeDrift = gazeCoordinate - oldGazeCoordinate; // drift of gaze coordinates
-            float pixelGazeDriftLength = glm::length(gazeDrift * webViewPixels); // length of drift in pixels
+			glm::vec2 pixelGazeDrift = pixelGazeCoordinate - old.pixelGazeCoordinate; // drift of gaze coordinates
+            float pixelGazeDriftLength = glm::length(pixelGazeDrift); // length of drift in pixels
 
             // Calculate drift of zoom coordinates
-            glm::vec2 coordinateDrift = _coordinate - old.coordinate;
+            glm::vec2 pixelCoordinateDrift = (_coordinate * webViewPixels) - old.pixelZoomCoordinate;
 
             // Subtract distance between zoom coordinates
-            pixelGazeDriftLength -= glm::length(coordinateDrift * webViewPixels);
+            pixelGazeDriftLength -= glm::length(pixelCoordinateDrift);
 
             // Radius around old zoom coordinate where actual fixation point should be
             float pixelRadius = pixelGazeDriftLength / (old.logZoom - _logZoom);
 
-            // TODO: compare vector of zoom coordinate movement and gaze movement to have quality measurement for results
-
             // Calculate fixation coordinates
-            glm::vec2 pixelFixationCoordinate = (-glm::normalize(coordinateDrift) * pixelRadius) + (old.coordinate * webViewPixels);
+            glm::vec2 pixelFixationCoordinate = (glm::normalize(pixelCoordinateDrift) * pixelRadius) + old.pixelZoomCoordinate;
 
 			// Set coordinate in output value 
             SetOutputValue("coordinate", pixelFixationCoordinate);
 		}
-        else */
+        else*/
 		{
 			// Set coordinate in output value 
             SetOutputValue("coordinate", glm::vec2(_coordinate * webViewPixels));
@@ -186,9 +204,8 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 
 	// Save values in queue
 	ZoomData zoomData;
-	zoomData.gaze = glm::vec2(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY);
-	zoomData.coordinate = _coordinate;
-	zoomData.coordinateCenterOffset = _coordinateCenterOffset;
+	zoomData.pixelGazeCoordinate = pixelGazeCoordinate; // use already calculated one
+	zoomData.pixelZoomCoordinate = _coordinate * webViewPixels; // into pixel space
 	zoomData.logZoom = _logZoom;
 	_zoomDataQueue.push_back(zoomData);
 
