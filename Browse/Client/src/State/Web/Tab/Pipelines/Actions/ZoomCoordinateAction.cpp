@@ -111,6 +111,9 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	// Make zoom better with log function
 	_logZoom = 1.f - std::log(_linZoom); // log zooming is starting at one and getting smaller with smaller _linZoom
 
+    // Vector with web view pixel resolution
+    glm::vec2 webViewPixels(webViewWidth, webViewHeight);
+
 	// Check, whether click is done
 	if (
 		_logZoom <= 0.075f // just zoomed so far into that coordinate is used
@@ -140,10 +143,13 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 
 			// Calculate drift of gaze
 			glm::vec2 gazeDrift = gazeCoordinate - oldGazeCoordinate; // drift of gaze coordinates
-            float pixelGazeDriftLength = glm::length(glm::vec2(gazeDrift.x * webViewWidth, gazeDrift.y * webViewHeight)); // length of drift in pixels
+            float pixelGazeDriftLength = glm::length(gazeDrift * webViewPixels); // length of drift in pixels
+
+            // Calculate drift of zoom coordinates
+            glm::vec2 coordinateDrift = _coordinate - old.coordinate;
 
             // Subtract distance between zoom coordinates
-            pixelGazeDriftLength -= glm::length(glm::vec2(webViewWidth, webViewHeight) * (_coordinate - old.coordinate));
+            pixelGazeDriftLength -= glm::length(coordinateDrift * webViewPixels);
 
             // Radius around old zoom coordinate where actual fixation point should be
             float pixelRadius = pixelGazeDriftLength / (old.logZoom - _logZoom);
@@ -151,15 +157,15 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
             // TODO: compare vector of zoom coordinate movement and gaze movement to have quality measurement for results
 
             // Calculate fixation coordinates
-            glm::vec2 pixelFixationCoordinate = (glm::normalize(gazeDrift) * pixelRadius) + old.coordinate;
+            glm::vec2 pixelFixationCoordinate = (-glm::normalize(coordinateDrift) * pixelRadius) + (old.coordinate * webViewPixels);
 
 			// Set coordinate in output value 
             SetOutputValue("coordinate", pixelFixationCoordinate);
 		}
-        else*/
+        else */
 		{
 			// Set coordinate in output value 
-			SetOutputValue("coordinate", glm::vec2(_coordinate.x * webViewWidth, _coordinate.y * webViewHeight));
+            SetOutputValue("coordinate", glm::vec2(_coordinate * webViewPixels));
 		}
 
 		// Return success
