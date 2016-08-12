@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <layout stylesheet="stylesheets/Global.seyegui">
-    <grid style="tab_panel">
+    <grid style="tab_debug">
     	<row size="100%">
     		<column size="9.375%">
     			<blank/> <!-- reserved for Web -->

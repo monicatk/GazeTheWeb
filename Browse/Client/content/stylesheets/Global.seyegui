@@ -64,6 +64,12 @@ tab_overlay_panel : panel
 	background-color = 0x1e2021FF
 }
 
+tab_debug : default
+{
+	background-color = 0x000000FF
+	font-color = 0x00FF00FF
+}
+
 pause
 {
 	color = 0x505659FF
