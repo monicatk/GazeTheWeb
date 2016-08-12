@@ -214,7 +214,13 @@ void Tab::Update(float tpf, Input& rInput)
 
     // ### UPDATE DEBUG LAYOUT ###
 
-    eyegui::setContentOfTextBlock(_pDebugLayout, "web_view_coordinate", "WebView:\n" + std::to_string(webViewGazeX) + ", " + std::to_string(webViewGazeY));
+    eyegui::setContentOfTextBlock(
+        _pDebugLayout,
+        "web_view_coordinate",
+        "Fixed:\n"
+        + std::to_string(webViewGazeX) + ", " + std::to_string(webViewGazeY) + "\n"
+        + "Scrolled:\n"
+        + std::to_string((int)(webViewGazeX + _scrollingOffsetX)) + ", " + std::to_string((int)(webViewGazeY + _scrollingOffsetY)));
 
 	// ### UPDATE PIPELINES OR MODE ###
 
