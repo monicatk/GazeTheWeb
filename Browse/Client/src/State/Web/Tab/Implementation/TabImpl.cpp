@@ -46,6 +46,7 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
 	_pScrollingOverlayLayout = _pMaster->AddLayout("layouts/Overlay.xeyegui", EYEGUI_TAB_LAYER, false);
 	_pPanelLayout = _pMaster->AddLayout("layouts/Tab.xeyegui", EYEGUI_TAB_LAYER, false);
 	_pPipelineAbortLayout = _pMaster->AddLayout("layouts/TabPipelineAbort.xeyegui", EYEGUI_TAB_LAYER, false);
+    _pDebugLayout = _pMaster->AddLayout("layouts/TabDebug.xeyegui", EYEGUI_TAB_LAYER, false);
 
 	// Create scroll up and down floating frames in special overlay layout which always on top of standard overlay
 	_scrollUpProgressFrameIndex = eyegui::addFloatingFrameWithBrick(
@@ -126,6 +127,7 @@ Tab::~Tab()
 	_pMaster->RemoveLayout(_pPipelineAbortLayout);
 	_pMaster->RemoveLayout(_pOverlayLayout);
 	_pMaster->RemoveLayout(_pScrollingOverlayLayout);
+    _pMaster->RemoveLayout(_pDebugLayout);
 }
 
 void Tab::Update(float tpf, Input& rInput)
@@ -209,6 +211,10 @@ void Tab::Update(float tpf, Input& rInput)
 	// ### UPDATE COLOR OF GUI ###
 
 	UpdateAccentColor(tpf);
+
+    // ### UPDATE DEBUG LAYOUT ###
+
+    eyegui::setContentOfTextBlock(_pDebugLayout, "web_view_coordinate", "WebView:\n" + std::to_string(webViewGazeX) + ", " + std::to_string(webViewGazeY));
 
 	// ### UPDATE PIPELINES OR MODE ###
 
@@ -420,6 +426,7 @@ void Tab::Activate()
 	eyegui::setVisibilityOfLayout(_pOverlayLayout, true, true, false);
 	eyegui::setVisibilityOfLayout(_pScrollingOverlayLayout, true, true, false);
 	eyegui::setVisibilityOfLayout(_pPanelLayout, true, true, false);
+    eyegui::setVisibilityOfLayout(_pDebugLayout, setup::DRAW_DEBUG_OVERLAY, true, false);
 
 	// Setup switches
 	if (_autoScrolling) { eyegui::buttonDown(_pPanelLayout, "auto_scrolling", true); }
@@ -436,6 +443,7 @@ void Tab::Deactivate()
 	eyegui::setVisibilityOfLayout(_pOverlayLayout, false, true, false);
 	eyegui::setVisibilityOfLayout(_pScrollingOverlayLayout, false, true, false);
 	eyegui::setVisibilityOfLayout(_pPanelLayout, false, true, false);
+    eyegui::setVisibilityOfLayout(_pDebugLayout, false, true, false);
 
 	// TODO: THIS SHOULD NOT BE NECESSARY SINCE _pScrollingOverlayLayout IS HIDDEN! WHY?
 	eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpProgressFrameIndex, false, false, true);
@@ -781,7 +789,7 @@ void Tab::DrawDebuggingOverlay() const
 	}
 }
 
-void Tab::AddClickVisualization(double x, double y)
+void Tab::PushBackClickVisualization(double x, double y)
 {
 	// Coordinates of web view
 	auto webViewCoordinates = CalculateWebViewPositionAndSize();

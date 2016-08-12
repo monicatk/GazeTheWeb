@@ -356,8 +356,8 @@ private:
 	// Draw debugging overlay
 	void DrawDebuggingOverlay() const;
 
-	// Add click visualization which fades out. X and y are in pixels
-	void AddClickVisualization(double x, double y);
+    // Pushes back click visualization which fades out. X and y are in pixels
+    void PushBackClickVisualization(double x, double y);
 
 	// ###############
 	// ### MEMBERS ###
@@ -393,6 +393,7 @@ private:
     eyegui::Layout* _pPipelineAbortLayout;
     eyegui::Layout* _pOverlayLayout;
     eyegui::Layout* _pScrollingOverlayLayout;
+    eyegui::Layout* _pDebugLayout;
 
     // Parameters for WebView
     WebViewParameters _webViewParameters;
