@@ -29,7 +29,7 @@ void Tab::EmulateLeftMouseButtonClick(double x, double y, bool visualize)
 	// Add some visualization for the user
 	if (visualize)
 	{
-		AddClickVisualization(x, y);
+        PushBackClickVisualization(x, y);
 	}
 }
 

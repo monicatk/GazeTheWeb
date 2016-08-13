@@ -529,7 +529,7 @@ set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CEF_LINKER_FLAGS_RELEASE} ${CEF_SHARED_
 
 # Edited by Raphael Menges
 add_subdirectory(libcef_dll)
-add_subdirectory(Prototype)
+#add_subdirectory(Prototype) # uncomment this line in order to build the prototype, too.
 add_subdirectory(Client)
 # End of edit
 

@@ -43,9 +43,8 @@ protected:
 	struct ZoomData
 	{
 		float lifetime = 0.f; // time since data was created
-		glm::vec2 gaze; // gaze data
-		glm::vec2 coordinate; // coordinate of zooming
-		glm::vec2 coordinateCenterOffset; // offset of zoom coordinate from center
+		glm::vec2 pixelGazeCoordinate; // gaze on web view in pixels. Already free of zooming and center moving offset
+		glm::vec2 pixelZoomCoordinate; // coordinate of zooming in pixels
 		float logZoom; // value of log zoom at that time
 	};
 
@@ -56,16 +55,19 @@ protected:
 	const float DIMMING_VALUE = 0.3f;
 
 	// Deviation fading duration (how many seconds until full deviation is back to zero)
-	const float DEVIATION_FADING_DURATION = 0.4f;
+	const float DEVIATION_FADING_DURATION = 0.3f;
 
 	// Multiplier of movement towards center
 	const float CENTER_OFFSET_MULTIPLIER = 0.5f;
 
 	// Speed of zoom
-	const float ZOOM_SPEED = 0.7f;
+	const float ZOOM_SPEED = 0.6f;
 
 	// Maximal time which is looked back at compensation of calibration errors
 	const float LOOK_BACK_TIME = 0.5f;
+
+	// Maximal angle between gaze drift and zoom coordinate drift in degree
+	const float DRIFT_MAX_ANGLE_DEGREE = 10.f;
 
     // Coordinate which is updated and output
     glm::vec2 _coordinate;
