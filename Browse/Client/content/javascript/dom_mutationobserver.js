@@ -18,12 +18,15 @@ function DOMObject(node, nodeType)
         this.node = node;
         this.nodeType = nodeType;
         this.rects = AdjustClientRects(this.node.getClientRects());
-        this.visible = true;
+        this.visible = true;    // default value, call DOMObj.checkVisibility() after object is created!
         this.fixed = false;
+        this.overflowParent = undefined;
 
     /* Methods */ 
         // Update member variable for Rects and return true if an update has occured 
         this.updateRects = function(){
+
+            this.checkVisibility();
 
             // Get new Rect data
             var updatedRectsData = AdjustClientRects(this.node.getClientRects());
@@ -67,30 +70,76 @@ function DOMObject(node, nodeType)
         };
 
         this.setVisibility = function(visible){
-            ConsolePrint("DOMObj.node.setVisibility("+visible+")");
-
             if(this.visible != visible)
             {
                 this.visible = visible;
                 InformCEF(this, ['update', 'visible']);
-                ConsolePrint("DEBUG: Informed CEF about visibility change to: "+visible);
-                if(visible)
-                {
-                    this.updateRects();
-                }
+                if(visible) this.updateRects();
             }
         };
 
-        this.readOutVisibility = function(){
+        this.checkVisibility = function(){
             var visibility = window.getComputedStyle(this.node, null).getPropertyValue('visibility');
-            ConsolePrint("Creating node.. its visibility from CSS is: "+visibility);
 
             switch(visibility)
             {
-                case 'hidden': { this.setVisibility(false); break;}
-                case 'visible':
+                case 'hidden': { this.setVisibility(false); return; }
+                case '':
+                case 'visible': { /*this.setVisibility(true);*/ break; }
                 default:
-                { this.setVisibility(true);}
+                { 
+                    ConsolePrint("DOMObj.checkVisibility() - visibility="+visibility+" currently handled as 'visible'.");
+                    // this.setVisibility(true);
+                }
+            }
+
+            if(this.overflowParent)
+            {
+                var overflowRect = this.overflowParent.getBoundingClientRect();
+                var nodeRect = this.node.getBoundingClientRect();
+
+                // DEBUG
+                // ConsolePrint("Comparing node's bounding box with overflow parent's bounding box...");
+                // ConsolePrint("overflow box: "+overflowRect.top+","+overflowRect.left+","+overflowRect.bottom+","+overflowRect.right);
+                // ConsolePrint("node's   box: "+nodeRect.top+","+nodeRect.left+","+nodeRect.bottom+","+nodeRect.right);
+
+                // Test if overflow box is more than a thin line
+                if( (overflowRect.height > 0 && overflowRect.width > 0) &&
+                    // Test if node's Rect lies completely inside of overflow Rect, then node is visible
+                    !(overflowRect.left <= nodeRect.left && overflowRect.right >= nodeRect.right && 
+                    overflowRect.top <= nodeRect.top && overflowRect.bottom >= nodeRect.bottom))
+                    {
+                        this.setVisibility(false);
+                        // DEBUG
+                        // ConsolePrint("Node's box is outside, so it's not visible!");
+                        return;
+                    }
+                // ConsolePrint("Node's box is inside, so node is visible!");
+
+            }
+            this.setVisibility(true);
+
+        }
+
+        this.searchOverflows = function (){
+            // NOTE: Assuming there aren't a any overflows in an overflow
+            var parent = this.node.parentNode;
+            while(parent != null || parent === document.documentElement)
+            {
+                if(parent.nodeType == 1)
+                {
+                    // style.overflow = {visible|hidden|scroll|auto|initial|inherit}
+                    var overflowProp = window.getComputedStyle(parent, null).getPropertyValue('overflow');
+                    if(overflowProp == 'hidden')
+                    {
+                        // Add node as overflow parent and compute own visibility with Rect of overflow parent
+                        this.overflowParent = parent;
+                        // DEBUG
+                        // ConsolePrint("Found an overflow parent!");
+                        return;
+                    }
+                }
+                parent = parent.parentNode;
             }
         }
 
@@ -153,7 +202,8 @@ function CreateDOMObject(node, nodeType)
             node.setAttribute('nodeType', nodeType);
 
             // Setup of attributes
-            domObj.readOutVisibility();
+            domObj.checkVisibility();
+            domObj.searchOverflows();
 
 
             InformCEF(domObj, ['added']);
@@ -276,6 +326,15 @@ function UpdateDOMRects()
 
     ConsolePrint("Also, update fixed element Rects");
     UpdateFixedElementRects();
+
+    ConsolePrint("And visibility!");
+    // Trigger update of Rects for every domObject
+    window.domTextInputs.forEach(
+        function (domObj) { domObj.searchOverflows(); domObj.checkVisibility(); }
+    );
+    window.domLinks.forEach(
+        function (domObj) { domObj.searchOverflows(); domObj.checkVisibility(); }
+    );
 }
 
 /**
@@ -326,11 +385,10 @@ function InformCEF(domObj, operation)
 
             if(operation[1] == 'visible')
             {
-                // TODO: there is more than visible and hidden as visibility!
                 var status = (domObj.visible) ? 1 : 0;
                 
                 encodedCommand += ('2#'+status+'#');
-                ConsolePrint("encodedCommand: "+encodedCommand);
+                // ConsolePrint("encodedCommand: "+encodedCommand);
             }
         }
 

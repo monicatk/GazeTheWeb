@@ -58,7 +58,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		if (requestName.compare(9, 4, "rem#") == 0)
 		{
 			std::string id = requestName.substr(13, 2);
-			LogDebug("BrowserMsgRouter: Fixed element #", id, " was removed.");
+			//LogDebug("BrowserMsgRouter: Fixed element #", id, " was removed.");
 
 			// Notify Tab via CefMediator, that a fixed element was removed
 			_pMsgRouter->GetMediator()->RemoveFixedElement(browser, atoi(id.c_str()));
@@ -68,7 +68,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		if (requestName.compare(9, 4, "add#") == 0)
 		{
 			std::string id = requestName.substr(13, 2);
-			LogDebug("BrowserMsgRouter: Fixed element #", id, " was added.");
+			//LogDebug("BrowserMsgRouter: Fixed element #", id, " was added.");
 
 			// Tell Renderer to read out bounding rectangle coordinates belonging to the given ID
 			CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("FetchFixedElements");
@@ -252,7 +252,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
 					{
 						targetNode->SetVisibility(boolVal);
-						LogDebug("MsgHandler: Changed node's visibilty to: ", boolVal);
+						//LogDebug("MsgHandler: Changed node's visibilty to: ", boolVal);
 					}
 
 					break;

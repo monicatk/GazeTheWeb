@@ -730,38 +730,34 @@ function MutationObserverInit()
 										}
 									}
 
-									var id = node.getAttribute('nodeID');
-									// Current node is already known to C++
-									if(id)
-									{
-										var type = node.getAttribute('nodeType');
-										var domObj = GetDOMObject(type, id);
-										// And there really exists a corresponding DOMObject
-										if(domObj)
-										{	
-											// Detect changes in node's visibility
-											var visibility = window.getComputedStyle(node, null).getPropertyValue('visibility');
-											ConsolePrint("mutation in node.style... visibility from CSS: "+visibility);
-											ConsolePrint("currently node.visible? "+domObj.visible);
-											if(visibility == 'hidden')
-											{
-												domObj.setVisibility(false);
-												ConsolePrint("DEBUG: Node is now hidden!");
-											}
-											else if(visibility == 'visible')
-											{
-												domObj.setVisibility(true);
-												ConsolePrint("DEBUG: Node is now visible!");
-											} 
-											else
-											{
-												ConsolePrint("Currently not handled change in visibility to:"+visibility);
+
+									// Visibility a): style.visibility of given node (and its children)
+									// Check visibility of all children, only top most node called because of changes in node.style?
+									function CheckVisibility(child){
+										var id = child.getAttribute('nodeID');
+										// Current node is already known to C++, so check visibility
+										if(id)
+										{
+											var type = child.getAttribute('nodeType');
+											var domObj = GetDOMObject(type, id);
+											// And there really exists a corresponding DOMObject
+											if(domObj)
+											{	
+												domObj.checkVisibility();
 											}
 
 										}
-
+										// Call function for all children
+										var children = child.children, n = children.length;
+										for(var i = 0; i < n; i++)
+										{
+											CheckVisibility(children[i]);
+										}
 									}
-
+									// Call recursively for all child nodes
+									CheckVisibility(node);
+								
+									// Visibility b): caused by an overflow
 
 
 		  					}
