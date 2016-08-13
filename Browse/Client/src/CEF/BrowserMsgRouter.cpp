@@ -230,7 +230,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					break;
 				};
 
-				// Nodes fixation status changed
+				// Node's fixation status changed
 				case(1) : {
 					bool boolVal = dataStr.at(0) != '0';
 
@@ -242,6 +242,22 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 
 					break;
 				};
+
+				// Node's visibility has changed
+				case (2) : {
+					LogDebug("MsgHandler: Updating node's visibility...");
+					bool boolVal = dataStr.at(0) != '0';
+
+					// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
+					if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
+					{
+						targetNode->SetVisibility(boolVal);
+						LogDebug("MsgHandler: Changed node's visibilty to: ", boolVal);
+					}
+
+					break;
+
+				}
 				default: {
 					LogDebug("MsgHandler: Received Javascript 'update' request of DOMNode attribute=", attr, ", which is not yet defined.");
 				}

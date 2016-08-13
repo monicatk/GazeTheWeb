@@ -66,13 +66,41 @@ function DOMObject(node, nodeType)
             }
         };
 
+        this.setVisibility = function(visible){
+            ConsolePrint("DOMObj.node.setVisibility("+visible+")");
+
+            if(this.visible != visible)
+            {
+                this.visible = visible;
+                InformCEF(this, ['update', 'visible']);
+                ConsolePrint("DEBUG: Informed CEF about visibility change to: "+visible);
+                if(visible)
+                {
+                    this.updateRects();
+                }
+            }
+        };
+
+        this.readOutVisibility = function(){
+            var visibility = window.getComputedStyle(this.node, null).getPropertyValue('visibility');
+            ConsolePrint("Creating node.. its visibility from CSS is: "+visibility);
+
+            switch(visibility)
+            {
+                case 'hidden': { this.setVisibility(false); break;}
+                case 'visible':
+                default:
+                { this.setVisibility(true);}
+            }
+        }
+
         this.setTextInput = function(text, submit){
-            ConsolePrint("domObj.setTextInput called!");
+
             // Only executable if DOMNode is TextInput field
             if(this.nodeType == 0)
             {
                 this.node.setAttribute('value', text);
-                ConsolePrint("Input text was set!");
+                // ConsolePrint("Input text was set!");
 
                 if(submit)
                 {
@@ -86,9 +114,8 @@ function DOMObject(node, nodeType)
                             break;
                         }
                     }
-                    var parent_element = document.getElementById(parent.id);
-                    parent_element.submit();
-                    ConsolePrint("Input text was submitted!");
+                    parent.submit();
+                    // ConsolePrint("Input text was submitted!");
                 }
 
             }
@@ -113,6 +140,9 @@ function CreateDOMObject(node, nodeType)
 
         // Push to list and determined by DOMObjects position in type specific list
         var domObjList = GetDOMObjectList(nodeType);
+
+
+
         if(domObjList != undefined)
         {
             domObjList.push(domObj);
@@ -121,6 +151,10 @@ function CreateDOMObject(node, nodeType)
             // Add attributes to given DOM node
             node.setAttribute('nodeID', nodeID);
             node.setAttribute('nodeType', nodeType);
+
+            // Setup of attributes
+            domObj.readOutVisibility();
+
 
             InformCEF(domObj, ['added']);
         }
@@ -239,6 +273,9 @@ function UpdateDOMRects()
     window.domLinks.forEach(
         function (domObj) { domObj.updateRects(); }
     );
+
+    ConsolePrint("Also, update fixed element Rects");
+    UpdateFixedElementRects();
 }
 
 /**
@@ -285,8 +322,15 @@ function InformCEF(domObj, operation)
                 // Encode changes in 'fixed' as attribute '1'
                 encodedCommand += ('1#'+status+'#');
 
-                // DEBUG
-                ConsolePrint('command: '+encodedCommand);
+            }
+
+            if(operation[1] == 'visible')
+            {
+                // TODO: there is more than visible and hidden as visibility!
+                var status = (domObj.visible) ? 1 : 0;
+                
+                encodedCommand += ('2#'+status+'#');
+                ConsolePrint("encodedCommand: "+encodedCommand);
             }
         }
 
@@ -294,6 +338,10 @@ function InformCEF(domObj, operation)
 
         // Send encoded command to CEF
         ConsolePrint(encodedCommand);
+    }
+    else
+    {
+        ConsolePrint("ERROR: No DOMObject given to perform informing of CEF!");
     }
 }
 

@@ -224,6 +224,7 @@ void CefMediator::FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<C
 		CefRefPtr<CefListValue> args = msg->GetArgumentList();
 		int type = args->GetInt(index++);
 		int nodeID = args->GetInt(index++);
+		bool visible = args->GetBool(index++);
 
 		// TODO(in the future): Call an update of different attributes for different node types
 
@@ -247,6 +248,14 @@ void CefMediator::FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<C
 		{
 			// Update target nodes Rects
 			targetNode->SetRects(std::make_shared<std::vector<Rect>>(rects));
+
+			// Set target node's visibility
+			targetNode->SetVisibility(visible);
+			if (!visible) LogDebug("CefMediator: Set node's visibility to false after its creation");
+		}
+		else
+		{
+			LogDebug("CefMediator: Trying to update node information but DOMNode object doesn't seem to exist!");
 		}
 	}
 }
@@ -336,11 +345,11 @@ void CefMediator::ReceiveFixedElements(CefRefPtr<CefBrowser> browser, CefRefPtr<
     }
     if (TabCEFInterface* pTab = GetTab(browser))
     {
-        LogDebug("CefMediator: Sending ", fixedCoords.size(), " fixed element coordinate tupel(s) to Tab for fixedID=", id, ".");
+      /*  LogDebug("CefMediator: Sending ", fixedCoords.size(), " fixed element coordinate tupel(s) to Tab for fixedID=", id, ".");
         for (int i = 0; i < (int)fixedCoords.size(); i++)
         {
              LogDebug("\t-->", fixedCoords[i].top, ", ", fixedCoords[i].left, ", ", fixedCoords[i].bottom, ", ", fixedCoords[i].right);
-        }
+        }*/
         pTab->AddFixedElementsCoordinates(id, fixedCoords);
     }
 }
@@ -349,7 +358,7 @@ void CefMediator::RemoveFixedElement(CefRefPtr<CefBrowser> browser, int id)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
     {
-        LogDebug("CefMediator: Removing fixed element with id=", id, " from Tab.");
+        //LogDebug("CefMediator: Removing fixed element with id=", id, " from Tab.");
         pTab->RemoveFixedElement(id);
     }
 }

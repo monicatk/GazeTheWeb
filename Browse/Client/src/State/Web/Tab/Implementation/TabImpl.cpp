@@ -745,7 +745,8 @@ void Tab::DrawDebuggingOverlay() const
 		// Render rects
 		for (const auto rRect : rDOMTrigger->GetDOMRects())
 		{
-			renderRect(rRect, rDOMTrigger->GetDOMFixed());
+			if(rDOMTrigger->GetDOMVisibility())
+				renderRect(rRect, rDOMTrigger->GetDOMFixed());
 		}
 	}
 
@@ -760,7 +761,14 @@ void Tab::DrawDebuggingOverlay() const
 		// Render rects
 		for (const auto rRect : rDOMTextLink->GetRects())
 		{
-			renderRect(rRect, rDOMTextLink->GetFixed());
+			if(rDOMTextLink->GetVisibility())
+				renderRect(rRect, rDOMTextLink->GetFixed());
+			else
+			{
+				_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(0.7, 0.5f, 0.f));
+				renderRect(rRect, rDOMTextLink->GetFixed());
+				_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_TEXT_LINKS_DEBUG_COLOR);
+			}
 		}
 	}
 
@@ -768,7 +776,7 @@ void Tab::DrawDebuggingOverlay() const
 	_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(1.f, 0.f, 1.f));
 	for (const auto& rDOMTextLink : _DOMTextLinks)
 	{
-		if(rDOMTextLink->GetRects().size() == 2)
+		if(rDOMTextLink->GetRects().size() == 2 && rDOMTextLink->GetVisibility())
 			renderRect(rDOMTextLink->GetRects()[1], rDOMTextLink->GetFixed());
 	}
 
@@ -785,7 +793,8 @@ void Tab::DrawDebuggingOverlay() const
 		for (const auto& rFixedElement : rFixedElements)
 		{
 			// Render rect
-			renderRect(rFixedElement, true);
+			if(rFixedElement.height() > 0 && rFixedElement.width() > 0)
+				renderRect(rFixedElement, true);
 		}
 	}
 }

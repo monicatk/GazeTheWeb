@@ -586,6 +586,36 @@ function AddDOMTextLink(node)
 document.onclick = function(){
 	ConsolePrint("### document.onclick() triggered! ###");
 	UpdateDOMRects();
+	// UpdateFixedElementRects();
+
+	// var divs = document.getElementsByTagName('DIV');
+	// ConsolePrint("Found "+divs.length+" <DIV> elements");
+	// for(var i = 0, n = divs.length; i < n; i++)
+	// {
+	// 	var node = divs[i];
+	// 	// ConsolePrint("role? "+node.style.role+" -- "+window.getComputedStyle(node, null).getPropertyValue('role'));
+
+	// 	if(node.style.role == 'textbox' || window.getComputedStyle(node, null).getPropertyValue('role') == 'textbox') 
+	// 	{
+	// 		ConsolePrint("Found DIV that behaves like a textbox");
+	// 		CreateDOMTextInput(node);
+	// 	}
+
+	// 	if(node.style.role == 'button' || window.getComputedStyle(node, null).getPropertyValue('role') == 'button') 
+	// 	{
+	// 		ConsolePrint("Found DIV that behaves like a button");
+	// 		CreateDOMLink(node);
+	// 	}
+	// }
+
+	// var textareas = document.getElementsByTagName('TEXTAREA');
+	// ConsolePrint("Found "+textareas.length+" <textarea> elements");
+	// for (var i = 0, n = textareas.length; i < n; i++)
+	// {
+	// 	ConsolePrint("textarea#"+i+": "+textareas[i].tagName);
+	// 	CreateDOMTextInput(textareas[i]);
+	// }
+	
 }
 
 // Trigger DOM data update on changing document loading status
@@ -612,7 +642,22 @@ document.onreadystatechange = function()
 	{
 		UpdateDOMRects();
 
-		ConsolePrint('Page fully loaded. #TextInputs='+window.domTextInputs.length+', #TextLinks='+window.domLinks.length);
+		ConsolePrint('Page fully loaded. #TextInputs='+window.domTextInputs.length+', #Links='+window.domLinks.length);
+
+		var links = document.getElementsByTagName('A');
+		ConsolePrint('Found '+links.length+' links on an alternative way...');
+		// var additional = 0;
+		// for(var i = 0, n = links.length; i < n; i++){
+		// 	// ConsolePrint(links[i].textContent+' -- ELEMENT_NODE? '+(links[i].nodeType == 1));
+		// 	if( links[i].nodeType == 1 && !links[i].hasAttribute('nodeID'))
+		// 	{
+		// 		CreateDOMLink(links[i]);
+		// 		additional++;
+		// 	}
+		// }
+		// ConsolePrint("Added "+additional+" additional Link nodes!");
+
+		
 		
 	}
 }
@@ -659,31 +704,65 @@ function MutationObserverInit()
 		  					if(attr == 'style' || 
 							   (document.readyState != 'loading' && attr == 'class') ) // TODO: example: uni-koblenz.de - node.id='header': class changes from 'container' to 'container fixed'
 		  					{
-		  						// alert('attr: \''+attr+'\' value: \''+node.getAttribute(attr)+'\' oldvalue: \''+mutation.oldValue+'\'');
-		  						if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
-		  						// if(node.style.position && node.style.position == 'fixed')
-		  						{
-		  							if(!window.fixed_elements.has(node))
-		  							{
-		  								//DEBUG
-		  								ConsolePrint("Attribut "+attr+" changed, calling AddFixedElement");
+									// alert('attr: \''+attr+'\' value: \''+node.getAttribute(attr)+'\' oldvalue: \''+mutation.oldValue+'\'');
+									if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
+									// if(node.style.position && node.style.position == 'fixed')
+									{
+										if(!window.fixed_elements.has(node))
+										{
+											//DEBUG
+											ConsolePrint("Attribut "+attr+" changed, calling AddFixedElement");
 
-		  								AddFixedElement(node);
-										
-										UpdateDOMRects();
-		  							}
-		  				
-		  						}
-		  						else // case: style.position not fixed
-		  						{
-		  							// If contained, remove node from set of fixed elements
-		  							if(window.fixed_elements.has(node))
-		  							{
-		  								RemoveFixedElement(node, true);
+											AddFixedElement(node);
+											
+											UpdateDOMRects();
+										}
+							
+									}
+									else // case: style.position not fixed
+									{
+										// If contained, remove node from set of fixed elements
+										if(window.fixed_elements.has(node))
+										{
+											RemoveFixedElement(node, true);
 
-										UpdateDOMRects();
-		  							}
-		  						}
+											UpdateDOMRects();
+										}
+									}
+
+									var id = node.getAttribute('nodeID');
+									// Current node is already known to C++
+									if(id)
+									{
+										var type = node.getAttribute('nodeType');
+										var domObj = GetDOMObject(type, id);
+										// And there really exists a corresponding DOMObject
+										if(domObj)
+										{	
+											// Detect changes in node's visibility
+											var visibility = window.getComputedStyle(node, null).getPropertyValue('visibility');
+											ConsolePrint("mutation in node.style... visibility from CSS: "+visibility);
+											ConsolePrint("currently node.visible? "+domObj.visible);
+											if(visibility == 'hidden')
+											{
+												domObj.setVisibility(false);
+												ConsolePrint("DEBUG: Node is now hidden!");
+											}
+											else if(visibility == 'visible')
+											{
+												domObj.setVisibility(true);
+												ConsolePrint("DEBUG: Node is now visible!");
+											} 
+											else
+											{
+												ConsolePrint("Currently not handled change in visibility to:"+visibility);
+											}
+
+										}
+
+									}
+
+
 
 		  					}
 
@@ -705,11 +784,11 @@ function MutationObserverInit()
 		  						}
 		  					}
 
-		  					// if(attr == 'href')
-		  					// {
-		  					// 	AddFixedElement(node);
-		  					// 	ConsolePrint("Changes in attribute |href|, adding link..");
-		  					// }
+		  					if(attr == 'href')
+		  					{
+		  						CreateDOMLink(node);
+		  						ConsolePrint("Changes in attribute |href|, adding link..");
+		  					}
 
 		  				}
 
@@ -722,18 +801,31 @@ function MutationObserverInit()
 		  			if(mutation.type == 'childList') // TODO: Called upon each appending of a child node??
 		  			{
 		  				// Check if fixed nodes have been added as child nodes
-			  			var nodes = mutation.addedNodes;
+			  			var nodes = mutation.addedNodes; // concat(mutation.target.childNodes);
+						//   var nodes = Array.prototype.slice.call(mutation.addedNodes).concat(mutation.target.childNodes);
+						//   ConsolePrint("#addedNodes: "+mutation.addedNodes.length+", new: "+nodes.length);
+
+						// DEBUGGING
+						// var parent = mutation.target;
+						// if(parent.className == "tag-home__wrapper")
+						// {
+						// 	ConsolePrint("Added child nodes: "+nodes.length);
+						// 	for(var i=0, n = nodes.length; i < n; i++)
+						// 		ConsolePrint(nodes[i].textContent+"# with "+nodes[i].childNodes.length+" additional children #"+nodes[i].childNodes[0].textContent);
+							
+								
+						// } 
+
 
 			  			for(var i=0, n=nodes.length; i < n; i++)
 			  			{
 			  				node = nodes[i]; // TODO: lots of data copying here??
-			  				var rect;
 
 			  				if(node.nodeType == 1) // 1 == ELEMENT_NODE
 			  				{
 
 			  					// if(node.style.position && node.style.position == 'fixed')
-		  						if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
+		  						if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed') 
 		  						{
 		  							// ConsolePrint('position: '+node.style.position);
 		  							if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
@@ -741,7 +833,7 @@ function MutationObserverInit()
 		  								//DEBUG
 		  								// ConsolePrint("New fixed node added to DOM tree");
 
-		  								AddFixedElement(node);
+										AddFixedElement(node);
 
 										UpdateDOMRects();
 		  							}
@@ -750,10 +842,10 @@ function MutationObserverInit()
 
 		  						// EXPERIMENTAL
 		  						// Find text links
-		  						if(node.tagName == 'A')
+		  						if(node.tagName == 'A' )
 		  						{
 									// AddDOMTextLink(node); // OLD
-
+									// ConsolePrint("Found link: "+node.textContent);
 									// New approach
 									CreateDOMLink(node);
 
@@ -766,7 +858,10 @@ function MutationObserverInit()
 		  						// node.text = node.tagName;
 		  						// EXPERIMENTAL END
 
-		  						if(node.tagName == 'INPUT')
+		  						if(node.tagName == 'INPUT' || 
+								//   node.role == 'textbox' || 
+								  node.tagName == 'TEXTAREA' ||
+								  (node.tagName == 'DIV' && window.getComputedStyle(node, null).getPropertyValue('role') == 'textbox') )
 		  						{
 		  							// Identify text input fields
 		  							if(node.type == 'text' || node.type == 'search' || node.type == 'email' || node.type == 'password')
@@ -777,6 +872,16 @@ function MutationObserverInit()
 										CreateDOMTextInput(node);
 		  							}
 		  						}
+
+								// NEW: Buttons
+								if(node.tagName == 'INPUT'  || (node.tagName == 'DIV' && window.getComputedStyle(node, null).getPropertyValue('role') == 'button'))
+								{
+									if(node.type == 'button' || node.type == 'submit' || node.type == 'reset' || !node.hasAttribute('type'))
+									{
+										// TODO: CreateDOMButton!
+										CreateDOMLink(node);
+									}
+								}
 
 
 			  				}

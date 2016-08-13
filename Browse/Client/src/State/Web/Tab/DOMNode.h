@@ -25,11 +25,13 @@ class DOMNode
 		std::vector<glm::vec2> GetCenters() const;
 		glm::vec2 GetCenter() const;
 		bool GetFixed() const { return _fixed; }
+		bool GetVisibility() const { return _visible; }
 
 		void AddRect(Rect rect) { _rects.push_back(rect); }
 
 		void SetRects(std::shared_ptr<std::vector<Rect>> rects);
 		void SetFixed(bool fixed) { _fixed = fixed; }
+		void SetVisibility(bool visible) { _visible = visible; }
 
 
 
@@ -57,6 +59,7 @@ class DOMNode
         int _nodeID;			// Node's position in Javascript's list of nodes of the same type
         std::vector<Rect> _rects;				
 		bool _fixed = false;
+		bool _visible = true;
 
 
 };

@@ -477,6 +477,7 @@ CefRefPtr<CefProcessMessage> RenderProcessHandler::UnwrapDOMTextInput(
 			int index = 0;
 			args->SetInt(index++, 0);	// nodeType = 0 for DOMTextInput
 			args->SetInt(index++, nodeID);
+			args->SetBool(index++, domObj->GetValue("visible")->GetBoolValue());
 
 			// Get V8 list of floats, representing all Rect coordinates of the given domObj
 			CefRefPtr<CefV8Value> rectsData = domObj->GetValue("getRects")->ExecuteFunction(domObj, {});
@@ -514,6 +515,7 @@ CefRefPtr<CefProcessMessage> RenderProcessHandler::UnwrapDOMLink(
 			int index = 0;
 			args->SetInt(index++, 1);	// nodeType = 1 for DOMLinks
 			args->SetInt(index++, nodeID);
+			args->SetBool(index++, domObj->GetValue("visible")->GetBoolValue());
 
 			// Get V8 list of floats, representing all Rect coordinates of the given domObj
 			CefRefPtr<CefV8Value> rectsData = domObj->GetValue("getRects")->ExecuteFunction(domObj, {});
