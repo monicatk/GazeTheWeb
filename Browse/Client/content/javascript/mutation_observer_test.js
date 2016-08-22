@@ -11,6 +11,8 @@ window.dom_links_rect = [[]];
 window.dom_textinputs = [];
 window.dom_textinputs_rect = [[]];
 
+window.checkChildrens = new Set();
+
 
 // TESTING CEF V8 ExecuteFunction
 // window.myObject = {val: '8', called: '0', getVal: function(){ConsolePrint('Objects function called!'); return 7;} };
@@ -493,7 +495,10 @@ function UpdateSubtreesBoundingRect(childNode)
 	// Parent rect hasn't been containing all child rects
 	if(old_coords.length > 4)
 	{
-		var old_child_rect = old_coords.slice(4, 8);
+		var old_child_rect = old_coords.slice(4);
+
+		// Check if new child rect is contained in parent rect
+		child_coords = ComputeBoundingRect(parent_rect, child_coords);
 
 		// Inform CEF that coordinates have to be updated
 		if(!CompareArrays(child_coords, parent_rect) && !CompareArrays(child_coords, old_child_rect))
@@ -511,6 +516,7 @@ function UpdateSubtreesBoundingRect(childNode)
 	{
 		// Check if new child rect is contained in parent rect
 		child_coords = ComputeBoundingRect(parent_rect, child_coords);
+
 		if(!CompareArrays(parent_rect, child_coords))
 		{
 			window.fixed_coordinates[id] = parent_rect.concat(child_coords);
@@ -518,6 +524,9 @@ function UpdateSubtreesBoundingRect(childNode)
 			inform_about_changes = true;
 		}
 		// else: Parent rect still contains updated child rect
+
+
+		// TODO: Rewrite code here.. confusing af. Also, it seems to inform_about_changes, although none have taken place!
 	}
 
 
@@ -528,13 +537,13 @@ function UpdateSubtreesBoundingRect(childNode)
 		// Tell CEF that fixed node's coordinates were updated
 		ConsolePrint('#fixElem#add#'+zero+id);
 
-		//DEBUG
-		ConsolePrint('Updated a fixed element');
-		for(var i = 0, n = window.fixed_coordinates.length; i < n ; i++)
-		{
-			var str = (i == id) ? '<---' : '';
-			ConsolePrint(i+': '+window.fixed_coordinates[i]+str);
-		}
+		// //DEBUG
+		// ConsolePrint('Updated a fixed element');
+		// for(var i = 0, n = window.fixed_coordinates.length; i < n ; i++)
+		// {
+		// 	var str = (i == id) ? '<---' : '';
+		// 	ConsolePrint(i+': '+window.fixed_coordinates[i]+str);
+		// }
 
 		// DEBUG
 		// ConsolePrint("UpdateSubtreesBoundingRect()");
@@ -588,35 +597,42 @@ document.onclick = function(){
 	UpdateDOMRects();
 	// UpdateFixedElementRects();
 
-	// var divs = document.getElementsByTagName('DIV');
-	// ConsolePrint("Found "+divs.length+" <DIV> elements");
-	// for(var i = 0, n = divs.length; i < n; i++)
-	// {
-	// 	var node = divs[i];
-	// 	// ConsolePrint("role? "+node.style.role+" -- "+window.getComputedStyle(node, null).getPropertyValue('role'));
-
-	// 	if(node.style.role == 'textbox' || window.getComputedStyle(node, null).getPropertyValue('role') == 'textbox') 
-	// 	{
-	// 		ConsolePrint("Found DIV that behaves like a textbox");
-	// 		CreateDOMTextInput(node);
-	// 	}
-
-	// 	if(node.style.role == 'button' || window.getComputedStyle(node, null).getPropertyValue('role') == 'button') 
-	// 	{
-	// 		ConsolePrint("Found DIV that behaves like a button");
-	// 		CreateDOMLink(node);
-	// 	}
-	// }
-
-	// var textareas = document.getElementsByTagName('TEXTAREA');
-	// ConsolePrint("Found "+textareas.length+" <textarea> elements");
-	// for (var i = 0, n = textareas.length; i < n; i++)
-	// {
-	// 	ConsolePrint("textarea#"+i+": "+textareas[i].tagName);
-	// 	CreateDOMTextInput(textareas[i]);
-	// }
+		// var divs = document.getElementsByTagName('DIV');
+		// for (var i = 0, n = divs.length; i < n; i++)
+		// {
+		// 	var role = divs[i].getAttribute('role');
+		// 	ConsolePrint('role: '+role);
+		// 	if(role == 'button')
+		// 	{
+		// 		ConsolePrint("Found DIV which behaves as Button!");
+		// 		CreateDOMLink(divs[i]);
+		// 	}
+		// 	if(role == 'textbox')
+		// 	{
+		// 		ConsolePrint("Found DIV which behaves as Textbox!");
+		// 		CreateDOMTextInput(divs[i]);
+		// 	}
+		// }
 	
 }
+
+window.maxDepth = 0;
+function UpdateMaxDepth(node)
+{
+	ConsolePrint("UpdateMaxDepth...");
+	var depth = 0;
+	var current = node;
+	while(current != document.documentElement)
+	{
+		ConsolePrint("depth: "+depth);
+		current = current.parentNode;
+		if(current) depth++;
+	}
+	ConsolePrint('Result: depth='+depth);
+	window.maxDepth = Math.max(window.maxDepth, depth);
+}
+
+var targetNode;
 
 // Trigger DOM data update on changing document loading status
 document.onreadystatechange = function()
@@ -636,16 +652,9 @@ document.onreadystatechange = function()
 
 		//ConsolePrint("... done with Updating DOM Rects.");
 
-	}
-
-	if(document.readyState == 'complete')
-	{
-		UpdateDOMRects();
-
-		ConsolePrint('Page fully loaded. #TextInputs='+window.domTextInputs.length+', #Links='+window.domLinks.length);
-
 		var links = document.getElementsByTagName('A');
 		ConsolePrint('Found '+links.length+' links on an alternative way...');
+
 		// var additional = 0;
 		// for(var i = 0, n = links.length; i < n; i++){
 		// 	// ConsolePrint(links[i].textContent+' -- ELEMENT_NODE? '+(links[i].nodeType == 1));
@@ -657,10 +666,118 @@ document.onreadystatechange = function()
 		// }
 		// ConsolePrint("Added "+additional+" additional Link nodes!");
 
+
+	}
+
+	if(document.readyState == 'complete')
+	{
+		UpdateDOMRects();
+
+		ConsolePrint('Page fully loaded. #TextInputs='+window.domTextInputs.length+', #Links='+window.domLinks.length);
+
+		var links = document.getElementsByTagName('A');
+		ConsolePrint('Found '+links.length+' links on an alternative way...');
+
+		// ConsolePrint("DEBUGGING: maxDepth="+window.maxDepth);
+		// var additional = 0;
+		// for(var i = 0, n = links.length; i < n; i++){
+		// 	// ConsolePrint(links[i].textContent+' -- ELEMENT_NODE? '+(links[i].nodeType == 1));
+		// 	if( links[i].nodeType == 1 && !links[i].hasAttribute('nodeID'))
+		// 	{
+		// 		CreateDOMLink(links[i]);
+		// 		additional++;
+		// 	}
+		// }
+		// ConsolePrint("Added "+additional+" additional Link nodes!");
+
+		if(targetNode)
+		{
+			ConsolePrint("innerHTML: "+targetNode.innerHTML);
+		}
+
+
+		var divs = document.getElementsByTagName('DIV');
+		
+		/* Experimenting with CSS events */
+
+		// forEach extension for NodeList divs
+		Array.prototype.forEach.call(divs, function(node){
+				if(window.getComputedStyle(node, null).getPropertyValue('transition-property') == 'opacity')
+				{
+					node.addEventListener('webkitTransitionEnd', function(event)
+					{
+						ConsolePrint('Added event listener: Transition!');
+						// ConsolePrint("Transition ended: opacity="+window.getComputedStyle(node, null).getPropertyValue('opacity'));
+					}, false);
+					// ConsolePrint("EventListener for transition end added!");
+				}	
+
+				if(window.getComputedStyle(node, null).getPropertyValue('overflow') == 'hidden')
+				{
+					node.addEventListener('overflow', function(event)
+					{
+						ConsolePrint('Added event listener: Overflow!');
+						// ConsolePrint("Transition ended: opacity="+window.getComputedStyle(node, null).getPropertyValue('opacity'));
+					}, false);
+					// ConsolePrint("EventListener for overflow end added!");
+
+					node.addEventListener('underflow', function(event)
+					{
+						ConsolePrint('Added event listener: Underflow!');
+						// ConsolePrint("Transition ended: opacity="+window.getComputedStyle(node, null).getPropertyValue('opacity'));
+					}, false);
+					// ConsolePrint("EventListener for underflow end added!");
+				}
+			}
+		);
+
+
+		ConsolePrint("Amount of nodes, whose children have to be checked on another way: "+window.checkChildrens.size);
+		window.checkChildrens.forEach(function(node){
+			ConsolePrint("class: "+node.getAttribute('class')+" tag: "+node.tagName);
+		});
+
+		// TODO: >> WHEN << to check not observed child nodes??
 		
 		
 	}
 }
+
+// http://stackoverflow.com/questions/18323757/how-do-you-detect-that-a-script-was-loaded-and-executed-in-a-chrome-extension
+document.addEventListener('beforeload', function(event) {
+    var target = event.target;
+    if (target.nodeName.toUpperCase() !== 'SCRIPT') return;
+    var dispatchEvent = function(name, bubbles, cancelable) {
+        var evt = new CustomEvent(name, {
+            bubbles: bubbles,
+            cancelable: cancelable
+        });
+        target.dispatchEvent(evt);
+        if (evt.defaultPrevented) {
+            event.preventDefault();
+        }
+    };
+    var onload = function() {
+        cleanup();
+        dispatchEvent('afterscriptexecute', true, false);
+    };
+    var cleanup = function() {
+        target.removeEventListener('load', onload, true);
+        target.removeEventListener('error', cleanup, true);
+    }
+    target.addEventListener('error', cleanup, true);
+    target.addEventListener('load', onload, true);
+
+    dispatchEvent('beforescriptexecute', true, true);
+}, true);
+
+document.addEventListener('beforescriptexecute', function() {
+    ConsolePrint("beforescriptexecute fired!");
+});
+document.addEventListener('afterscriptexecute', function() {
+    ConsolePrint("afterscriptexecute fired!");
+});
+
 
 window.onresize = function()
 {
@@ -671,6 +788,9 @@ window.onresize = function()
 	// UpdateFixedElementRects(); // TODO: Already triggered by CEF's JS injection?
 }
 
+window.scriptExecuting = false;
+window.executedScript;
+var scriptOrder = 0;
 
 // Instantiate and initialize the MutationObserver
 function MutationObserverInit()
@@ -683,19 +803,27 @@ function MutationObserverInit()
 		  		function(mutation)
 		  		{
 					// DEBUG
-					//ConsolePrint("START Mutation occured...");
+					// ConsolePrint("Mutation occured..."+mutation.type);
 
 			  		var node;
 					
 		  			if(mutation.type == 'attributes')
 		  			{
 		  				node = mutation.target;
+
+						//   UpdateMaxDepth(node);
+
 			  			var attr; // attribute name of attribute which has changed
 
 		  				// TODO: How to identify node whose attributes changed? --> mutation.target?
 		  				if(node.nodeType == 1) // 1 == ELEMENT_NODE
 		  				{
 		  					attr = mutation.attributeName;
+
+							  if(node === document.documentElement && attr == 'style')
+							  {
+								//   ConsolePrint("DEBUG: zoom = "+window.getComputedStyle(document.documentElement, null).getPropertyValue('zoom'));
+							  }
 
 		  					// usage example: observe changes in input field text
 		  					// if (node.tagName == 'INPUT' && node.type == 'text')
@@ -757,36 +885,71 @@ function MutationObserverInit()
 									// Call recursively for all child nodes
 									CheckVisibility(node);
 								
-									// Visibility b): caused by an overflow
-
-
-		  					}
-
-		  					// Changes in attribute 'class' may indicate that bounding rect update is needed, if node is child node of a fixed element
-		  					if(attr == 'class')
-		  					{
-		  						if(node.hasAttribute('fixedID'))
-		  						{
-		  							//DEBUG
-		  							// ConsolePrint("class changed, updating subtree");
-									UpdateDOMRects();
-
-		  							UpdateSubtreesBoundingRect(node);
-
 									
 
 
-		  							// TODO: Triggered quite often... (while scrolling)
-		  						}
 		  					}
 
-		  					if(attr == 'href')
-		  					{
-		  						CreateDOMLink(node);
-		  						ConsolePrint("Changes in attribute |href|, adding link..");
-		  					}
+								// Changes in attribute 'class' may indicate that bounding rect update is needed, if node is child node of a fixed element
+								if(attr == 'class')
+								{
+									if(node.hasAttribute('fixedID'))
+									{
+										//DEBUG
+										// ConsolePrint("class changed, updating subtree");
+										UpdateDOMRects();
 
+										UpdateSubtreesBoundingRect(node);
+
+										
+
+
+										// TODO: Triggered quite often... (while scrolling)
+									}
+
+									// Testing: GMail, username entered, pw field appears, Rects not in place...
+									UpdateDOMRects();
+								}
+
+
+  
+								if(attr == 'href')
+								{
+									CreateDOMLink(node);
+									ConsolePrint("Changes in attribute |href|, adding link..");
+								}
+
+
+
+								if(attr == 'role')
+								{
+									var attrVal = node.getAttribute('role');
+									if(attrVal == 'button')
+									{
+										ConsolePrint("Found DIV with role = button, by observing attribute role");
+										CreateDOMLink(node);
+									}
+									if(attrVal == 'textbox')
+									{
+										ConsolePrint("Found DIV with role = textbox, by observing attribute role");
+										CreateDOMTextInput(node);
+									}
+								}
+
+								if(attr == 'innerHTML')
+								{
+									ConsolePrint("innerHTML changed!");
+									// ConsolePrint('----------------------------------');
+									// ConsolePrint('old.innerHTML: '+mutation.oldValue);
+									// ConsolePrint('new.innerHTML: '+node.innerHTML);
+									
+								}
+
+
+							
 		  				}
+						
+					
 
 		  			}
 
@@ -810,15 +973,140 @@ function MutationObserverInit()
 						// 		ConsolePrint(nodes[i].textContent+"# with "+nodes[i].childNodes.length+" additional children #"+nodes[i].childNodes[0].textContent);
 							
 								
-						// } 
+						// // } 
+						// ConsolePrint("Childs added for node: class="+mutation.target.getAttribute('class'));
+						// if(mutation.target.getAttribute('class') == "tag-home__wrapper")
+						// // if(mutation.target.getAttribute('class') == 'tag-home__item  js-tag-item')
+						// {
+						// 	ConsolePrint("Undetected Link should be appended right now... (#childs: "+nodes.length+")");
+						// 	for(var i = 0, n = nodes.length; i < n; i++)
+						// 	{
+						// 		ConsolePrint(i+": tagName="+nodes[i].tagName+"   class: "+nodes[i].getAttribute('class'));
+						// 	}
+						// 	ConsolePrint("Other childs (not added): ");
+						// 	for(var i = 0, n = mutation.target.childNodes.length; i < n; i++)
+						// }
 
 
 			  			for(var i=0, n=nodes.length; i < n; i++)
 			  			{
 			  				node = nodes[i]; // TODO: lots of data copying here??
+							// if(node.style) node.style.backgroundColor = 'red';
 
+							//   UpdateMaxDepth(node);
+
+							// if(node === document.documentElement)
+							// {
+							// 	// ConsolePrint("### documentElement found!");
+
+							// 	// Set up eventListener for nodeInserted CSS event
+							// 	document.addEventListener(
+							// 		"webkitAnimationStart", 
+							// 		function(event){
+							// 			if(event.animationName == "nodeInserted")
+							// 			{
+							// 				ConsolePrint(event.target.tagName+" was inserted in DOM");
+							// 			}
+							// 		}, 
+							// 		false); 
+							// 	ConsolePrint("EventListener for CSS 'nodeInserted' events was successfully set up!");
+
+							// 	// Add style with CSS keyFrame, defining pseudo-animation in order to detect node insertion via CSS events
+							// 	var keyFrame = document.createElement("STYLE");
+							// 	keyFrame.appendChild(
+							// 		document.createTextNode(
+							// 			"@keyframes nodeInserted {\
+							// 				from { opacity: 0.999; }\
+							// 				to { opacity: 1; }\
+							// 			}"
+							// 		)
+							// 	);
+							// 	document.head.appendChild(keyFrame);
+							// 	ConsolePrint("Added CSS keyframe in order to fire 'nodeInserted' CSS events.");
+
+							// 	document.documentElement.style.WebkitAnimation = "nodeInserted 10s 1";
+							// 	ConsolePrint("Added CSS animation to document's root node!");
+							// }
+
+
+						
 			  				if(node.nodeType == 1) // 1 == ELEMENT_NODE
 			  				{
+								  var parent = mutation.target;
+								//   // Remove parent from list of nodes, whose children have to be checked on another way
+								//   window.checkChildrens.delete(parent);
+							
+								//   // Keep in mind which added nodes have children for which a childList mutation has to be detected in the future
+								//   // otherwise, those child nodes have to be checked on another way
+								//   if(node.children.length > 0)
+								//   {
+								// 	  window.checkChildrens.add(node);
+								//   }
+
+								//   if (window.scriptExecuting && node !== window.executedScript)
+								//   {
+								// 	//   window.scriptExecuting = false;
+								// 	//   ConsolePrint("Script finished!")// tag: "+node.tagName+" class: "+node.getAttribute('class')+" text: "+node.textContent);
+								//   }
+								//   if(node.tagName == "SCRIPT")
+								//   {
+								// 	//   node.text = '';
+								// 	//   ConsolePrint("Appending Script!");
+								// 	//   node.onload = function(){ConsolePrint(scriptOrder+" Script's onload!");};
+								// 	// //   node.load = function(){ConsolePrint("Script's load!");};
+								// 	  node.text = "ConsolePrint('"+scriptOrder+" hrhr, code start');" + node.text + "ConsolePrint('"+scriptOrder+" hrhr, code end');";
+								// 	scriptOrder++;
+								// 	//   window.scriptExecuting = true;
+								// 	//   window.executedScript = node;
+								//   }
+								//   function depth(node){
+								// 	  var curr = node;
+								// 	  var depth = 0;
+								// 	  while(curr !== document.documentElement)
+								// 	  {
+								// 		  depth++;
+								// 		  curr = curr.parentNode;
+								// 	  }
+								// 	  return depth;
+								// 	}
+								// 	var str = node.tagName+" depth: "+depth(node);
+								// 	if(node.tagName == 'SCRIPT') str = (scriptOrder-1)+" "+str;//+node.text.substr(0,100);
+								// ConsolePrint(str);//+"   siblings: "+parent.childNodes.length+" shadowRoot? "+node.shadowRoot);
+								  
+								//   if(parent.getAttribute('class') == "tag-home  tag-home--slide  no-js__hide  js-tag-home") ConsolePrint("This ONE node...");
+
+								//   	// if(parent.nodeType == 1 && parent.getAttribute('class') == "tag-home  tag-home--slide  no-js__hide  js-tag-home")
+								// 	// {
+								// 	// 	ConsolePrint("Child has "+node.children.length);
+								// 	// }
+								// 	// {
+								// 	// 	targetNode = node;
+								// 	// 	ConsolePrint('Found target node!');
+								// 	// 	ConsolePrint("innerHTML: "+node.innerHTML);
+								// 	// }
+
+								// 	// if(mutation.target.nodeType == 1 && mutation.target.getAttribute('class') == "tag-home  tag-home--slide  no-js__hide  js-tag-home")
+								// 	// {
+								// 	// 	ConsolePrint('Found target node as new parent! #children: '+targetNode.childNodes.length+', legally added: '+nodes.length);
+								// 	// 	ConsolePrint("innerHTML: "+mutation.target.innerHTML);
+								// 	// 	ConsolePrint('Children of only child: '+node.childNodes.length);
+										
+								// 	// }
+								// 	// if(mutation.target.nodeType == 1 && mutation.target.getAttribute('class') == "tag-home__wrapper")
+								// 	// {
+								// 	// 	ConsolePrint("Only-child used as parent! #childs: "+nodes.length);
+								// 	// 	ConsolePrint("child: "+mutation.target.innerHTML);
+								// 	// 	ConsolePrint("child-child: "+nodes[0].innerHTML);
+								// 	// 	ConsolePrint("But real childs: "+mutation.target.childNodes.length);
+								// 	// }
+
+								// 	// if((node.getAttribute('class') == 'tag-home__item  js-tag-item') ||
+								// 	// (mutation.target.nodeType == 1 && mutation.target.getAttribute('class') == 'tag-home__item  js-tag-item'))
+								// 	// {
+								// 	// 	ConsolePrint("Those are the nodes I am looking for.");
+								// 	// }
+
+
 
 			  					// if(node.style.position && node.style.position == 'fixed')
 		  						if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed') 
@@ -857,7 +1145,7 @@ function MutationObserverInit()
 		  						if(node.tagName == 'INPUT' || 
 								//   node.role == 'textbox' || 
 								  node.tagName == 'TEXTAREA' ||
-								  (node.tagName == 'DIV' && window.getComputedStyle(node, null).getPropertyValue('role') == 'textbox') )
+								  (node.tagName == 'DIV' && node.getAttribute('role') == 'textbox') )
 		  						{
 		  							// Identify text input fields
 		  							if(node.type == 'text' || node.type == 'search' || node.type == 'email' || node.type == 'password')
@@ -870,7 +1158,7 @@ function MutationObserverInit()
 		  						}
 
 								// NEW: Buttons
-								if(node.tagName == 'INPUT'  || (node.tagName == 'DIV' && window.getComputedStyle(node, null).getPropertyValue('role') == 'button'))
+								if(node.tagName == 'INPUT'  || (node.tagName == 'DIV' && node.getAttribute('role') == 'button'))
 								{
 									if(node.type == 'button' || node.type == 'submit' || node.type == 'reset' || !node.hasAttribute('type'))
 									{
@@ -931,16 +1219,45 @@ function MutationObserverInit()
 	ConsolePrint('Trying to start observing... ');
 		
 	// Konfiguration des Observers: alles melden - Änderungen an Daten, Kindelementen und Attributen
-	var config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: false, attributeOldValue: false};
+	var config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: false, attributeOldValue: true};
 	
 	// eigentliche Observierung starten und Zielnode und Konfiguration übergeben
-	window.observer.observe(window.document, config);
+	window.observer.observe(document, config);
 
 	ConsolePrint('MutationObserver was told what to observe.');
 
 	// TODO: Tweak MutationObserver by defining a more specific configuration
 
 
+	// document.documentElement.addEventListener(
+	// 	"webkitAnimationStart", 
+	// 	function(event){
+	// 		if(event.animationName == "nodeInserted")
+	// 		{
+	// 			ConsolePrint(this.tagName+" noticed: "+event.target.tagName+" was inserted in DOM");
+	// 		}
+	// 	}, 
+	// 	false); 
+	// ConsolePrint("EventListener for CSS 'nodeInserted' events was successfully set up!");
+
+	// // Add style with CSS keyFrame, defining pseudo-animation in order to detect node insertion via CSS events
+	// var keyFrame = document.createElement("STYLE");
+	// keyFrame.appendChild(
+	// 	document.createTextNode(
+	// 		// "@-webkit-keyframes nodeInserted {\
+	// 		"@keyframes nodeInserted {\
+	// 			from { opacity: 0; }\
+	// 			to { opacity: 1; }\
+	// 		}"
+	// 	)
+	// );
+	// document.head.appendChild(keyFrame);
+	// ConsolePrint("Added CSS keyframe in order to fire 'nodeInserted' CSS events.");
+
+	// document.documentElement.style.WebkitAnimation = "nodeInserted 3s infinite";
+	// // document.documentElement.style.webkitAnimation = "nodeInserted";
+	// // document.documentElement.style.webkitDuration = "5s";
+	// ConsolePrint("Added CSS animation to document's root node!");
 
 
 	/*

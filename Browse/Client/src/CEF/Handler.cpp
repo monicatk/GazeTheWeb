@@ -257,19 +257,6 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
         IPCLogRenderer(browser, msg);
     }
 
-
-	if (msgName == "CreateDOMTextLink")
-	{
-		//_pMediator->CreateDOMTextLink(browser, msg);
-		LogDebug("Handler: (TODO) 'CreateDOMTextLink' IPC msg not used any more!");
-	}
-	if (msgName == "CreateDOMTextInput")
-	{
-		//_pMediator->CreateDOMTextInput(browser, msg);
-		LogDebug("Handler: (TODO) 'CreateDOMTextInput' IPC msg not used any more!");
-	}
-
-
 	if (msgName == "OnContextCreated")
 	{
 		_pMediator->ClearDOMNodes(browser);

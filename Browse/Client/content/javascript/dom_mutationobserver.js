@@ -148,7 +148,8 @@ function DOMObject(node, nodeType)
             // Only executable if DOMNode is TextInput field
             if(this.nodeType == 0)
             {
-                this.node.setAttribute('value', text);
+                var attr = (this.node.tagName == 'INPUT') ? 'value' : 'textContent';
+                this.node.setAttribute(attr, text);
                 // ConsolePrint("Input text was set!");
 
                 if(submit)
@@ -169,6 +170,7 @@ function DOMObject(node, nodeType)
 
             }
         };
+
 
 }
 
@@ -204,6 +206,7 @@ function CreateDOMObject(node, nodeType)
             // Setup of attributes
             domObj.checkVisibility();
             domObj.searchOverflows();
+ 
 
 
             InformCEF(domObj, ['added']);
@@ -314,7 +317,7 @@ function CompareClientRectsData(rects1, rects2)
 function UpdateDOMRects()
 {
     // DEBUG
-    ConsolePrint("UpdateDOMRects() called");
+    // ConsolePrint("UpdateDOMRects() called");
 
     // Trigger update of Rects for every domObject
     window.domTextInputs.forEach(
@@ -324,10 +327,10 @@ function UpdateDOMRects()
         function (domObj) { domObj.updateRects(); }
     );
 
-    ConsolePrint("Also, update fixed element Rects");
+    // ConsolePrint("Also, update fixed element Rects");
     UpdateFixedElementRects();
 
-    ConsolePrint("And visibility!");
+    // ConsolePrint("And visibility!");
     // Trigger update of Rects for every domObject
     window.domTextInputs.forEach(
         function (domObj) { domObj.searchOverflows(); domObj.checkVisibility(); }
