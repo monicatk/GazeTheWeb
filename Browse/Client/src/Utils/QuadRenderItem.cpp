@@ -5,16 +5,16 @@
 
 #include "QuadRenderItem.h"
 
-QuadRenderItem::QuadRenderItem(std::string vertSource, std::string fragSource)
+QuadRenderItem::QuadRenderItem(std::string vertSource, std::string fragSource, Quad::Type type)
 : RenderItem(vertSource, fragSource)
 {
-    InitQuad();
+    InitQuad(type);
 }
 
-QuadRenderItem::QuadRenderItem(std::string vertSource, std::string geomSource, std::string fragSource)
+QuadRenderItem::QuadRenderItem(std::string vertSource, std::string geomSource, std::string fragSource, Quad::Type type)
 : RenderItem(vertSource, geomSource, fragSource)
 {
-    InitQuad();
+    InitQuad(type);
 }
 
 void QuadRenderItem::Draw(GLenum mode) const
@@ -22,10 +22,10 @@ void QuadRenderItem::Draw(GLenum mode) const
     glDrawArrays(mode, 0, _upQuad->GetVertexCount());
 }
 
-void QuadRenderItem::InitQuad()
+void QuadRenderItem::InitQuad(Quad::Type type)
 {
     // Create mesh
-    _upQuad = std::unique_ptr<Quad>(new Quad);
+    _upQuad = std::unique_ptr<Quad>(new Quad(type));
 
     // Bring both with vertex array buffer together
     glBindVertexArray(_vao);

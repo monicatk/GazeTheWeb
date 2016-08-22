@@ -114,7 +114,11 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
 	_pCefMediator->RegisterTab(this);
 
 	// Prepare debug rendering
-	_upDebugRenderItem = std::unique_ptr<RenderItem>(new QuadRenderItem(vertexShaderSource, fragmentShaderSource));
+	_upDebugRenderItem = std::unique_ptr<RenderItem>(
+		new QuadRenderItem(
+			vertexShaderSource,
+			fragmentShaderSource,
+			Quad::Type::LINES_WITH_DIAGONAL));
 }
 
 Tab::~Tab()
@@ -742,7 +746,7 @@ void Tab::DrawDebuggingOverlay() const
 		_upDebugRenderItem->GetShader()->UpdateValue("matrix", matrix);
 
 		// Render rectangle
-		_upDebugRenderItem->Draw(GL_LINE_STRIP);
+		_upDebugRenderItem->Draw(GL_LINES);
 	};
 
 	// Bind debug render item
