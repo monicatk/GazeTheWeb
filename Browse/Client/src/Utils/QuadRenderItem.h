@@ -14,8 +14,8 @@ class QuadRenderItem : public RenderItem
 public:
 
     // Constructors
-    QuadRenderItem(std::string vertSource, std::string fragSource);
-    QuadRenderItem(std::string vertSource, std::string geomSource, std::string fragSource);
+    QuadRenderItem(std::string vertSource, std::string fragSource, Quad::Type type = Quad::Type::TRIANGLES);
+    QuadRenderItem(std::string vertSource, std::string geomSource, std::string fragSource, Quad::Type type = Quad::Type::TRIANGLES);
 
     // Drawing
     virtual void Draw(GLenum mode = GL_TRIANGLES) const;
@@ -28,7 +28,7 @@ protected:
 private:
 
     // Initialization of quad
-    void InitQuad();
+    void InitQuad(Quad::Type type);
 };
 
 #endif // QUADRENDERITEM_H_

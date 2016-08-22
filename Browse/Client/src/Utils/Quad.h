@@ -13,8 +13,11 @@ class Quad
 {
 public:
 
+	// Enumeration for different quad types
+	enum class Type { TRIANGLES, LINES_WITH_DIAGONAL };
+
     // Constructor
-    Quad();
+    Quad(Type type = Type::TRIANGLES);
 
     // Destructor
     virtual ~Quad();
@@ -24,7 +27,7 @@ public:
     GLuint GetUVBO() const { return _uvbo; }
 
     // Get count of vertices
-    int GetVertexCount() const { return 6; }
+    int GetVertexCount() const { return mVertexCount; }
 
 private:
 
@@ -33,6 +36,9 @@ private:
 
     // Texture coordinates buffer
     GLuint _uvbo = 0;
+
+	// Count of vertices
+	int mVertexCount = 0;
 };
 
 #endif // QUAD_H_
