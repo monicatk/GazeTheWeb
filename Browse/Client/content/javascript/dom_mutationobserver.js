@@ -81,6 +81,10 @@ function DOMObject(node, nodeType)
         this.checkVisibility = function(){
             var visibility = window.getComputedStyle(this.node, null).getPropertyValue('visibility');
 
+            // Set visibility to hidden if bounding box is of resolution is 0 in any direction
+            var bb = this.node.getBoundingClientRect();
+            if(bb.width == 0 || bb.height == 0) { visibility = 'hidden'; }
+
             switch(visibility)
             {
                 case 'hidden': { this.setVisibility(false); return; }
