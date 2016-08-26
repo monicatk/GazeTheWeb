@@ -12,6 +12,9 @@
 // Shared pointer of global logger
 std::shared_ptr<spdlog::logger> GlobalLog;
 
+// Definition of logger path variable
+std::string LogPath;
+
 std::shared_ptr<spdlog::logger> Log()
 {
     if (!GlobalLog) // check for null
@@ -19,7 +22,7 @@ std::shared_ptr<spdlog::logger> Log()
         // Create logger since there is no, yet
         std::vector<spdlog::sink_ptr> sinks;
         sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_st>());
-        sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>(LOG_FILE_NAME, "txt", LOG_FILE_MAX_SIZE, LOG_FILE_COUNT, true));
+        sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>(LogPath + LOG_FILE_NAME, "txt", LOG_FILE_MAX_SIZE, LOG_FILE_COUNT, true));
         GlobalLog = std::make_shared<spdlog::logger>("global_log", begin(sinks), end(sinks));
         GlobalLog->set_pattern("[%D-%T] %l: %v");
 
@@ -32,7 +35,6 @@ std::shared_ptr<spdlog::logger> Log()
 		{
 			GlobalLog->set_level(spdlog::level::info);
 		}
-
     }
     return GlobalLog;
 }
