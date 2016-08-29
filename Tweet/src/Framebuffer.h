@@ -8,7 +8,7 @@
 #define FRAMEBUFFER_H
 
 #include "externals/OGL/gl_core_3_3.h"
-#include "src/Utils/glmWrapper.h"
+#include "externals/eyeGUI-development/externals/GLM/glm/glm.hpp" // using GLM from eyeGUI since no provided by project
 #include <vector>
 #include <stack>
 

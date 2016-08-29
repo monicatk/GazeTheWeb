@@ -39,7 +39,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 */
 int main(int argc, char* argv[]) {
     //Arguments (Windows only)
-    bool fullscreen = false;
     #ifdef _WIN32
         bool console = false;
         for (int i = 0; i < argc; i++) {
@@ -47,9 +46,6 @@ int main(int argc, char* argv[]) {
             std::string arg = argv[i];
             if (arg.compare("-console") == 0) {
                 console = true;
-            }
-            if (arg.compare("-fullscreen") == 0) {
-                fullscreen = true;
             }
         }
 
@@ -61,18 +57,23 @@ int main(int argc, char* argv[]) {
         }
     #endif
 
-    // Window and OpenGL initialization
+    // GLFW
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#ifdef USEEYETRACKER
-    GLFWwindow* window = glfwCreateWindow(1280, 800, "GazeTheWeb - Tweet", glfwGetPrimaryMonitor(), NULL);
-#else
-    GLFWwindow* window = glfwCreateWindow(1280, 800, "GazeTheWeb - Tweet", fullscreen? glfwGetPrimaryMonitor() : NULL, NULL);
-#endif
+
+	// Determine screen resolution
+	const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	int resX = mode->width;
+	int rexY = mode->height;
+
+	// Create window
+    GLFWwindow* window = glfwCreateWindow(resX, rexY, "GazeTheWeb - Tweet", glfwGetPrimaryMonitor(), NULL);
     glfwMakeContextCurrent(window);
+
+	// OpenGL initialization
     ogl_LoadFunctions();
 
     // VSync
