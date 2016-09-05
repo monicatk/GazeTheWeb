@@ -783,9 +783,9 @@ void Tab::DrawDebuggingOverlay() const
 				renderRect(rRect, rDOMTextLink->GetFixed());
 			else
 			{
-				_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(0.7, 0.5f, 0.f));
+				/*_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(0.7, 0.5f, 0.f));
 				renderRect(rRect, rDOMTextLink->GetFixed());
-				_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_TEXT_LINKS_DEBUG_COLOR);
+				_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_TEXT_LINKS_DEBUG_COLOR);*/
 			}
 		}
 	}

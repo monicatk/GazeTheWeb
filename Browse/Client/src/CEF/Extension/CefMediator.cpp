@@ -251,7 +251,7 @@ void CefMediator::FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<C
 
 			// Set target node's visibility
 			targetNode->SetVisibility(visible);
-			if (!visible) LogDebug("CefMediator: Set node's visibility to false after its creation");
+			//if (!visible) LogDebug("CefMediator: Set node's visibility to false after its creation");
 		}
 		else
 		{

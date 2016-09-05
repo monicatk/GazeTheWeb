@@ -1,3 +1,8 @@
+GMail Support:
+	when login in:
+		
+
+
 VISIBILITY
 [ ]	For each DOMNode: Not only save if fixed or not, save ID corresponding to fixed element's ID to check if DOMNode might be not visible because of other fixed elements in front of it
 [X]	Updating visbility of DOMNodes when picture on Wikipedia is clicked and positioned in the page's center by using the fact that BoundingRects of all DOMNodes should be currently 0x0

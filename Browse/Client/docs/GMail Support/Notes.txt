@@ -1,0 +1,14 @@
+00-Login
+	- Pressing (once or twice) corrects Rect position of text input, Sign in button and link "Forgot password?"
+		--> "Sign in with different account" too far low
+
+01-AfterLogin
+	
+02-OnComposeClicked
+
+
+Popup JS Window when text is entered in Mail and user is about to cancel due to e.g. page reload!
+
+Compose->Opens Subwindow->Minimize it by clicking its Bar: Add it as Button or something like that
+
+"Fullscreen" email compose closes when trying to enter input?

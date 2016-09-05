@@ -85,6 +85,19 @@ function DOMObject(node, nodeType)
             var bb = this.node.getBoundingClientRect();
             if(bb.width == 0 || bb.height == 0) { visibility = 'hidden'; }
 
+
+            // Check if any parent node has opacity near zero, if yes, child (this node) might not be visible
+            var root = this.node;
+            while(root !== document.documentElement && root && root !== undefined)
+            {
+                if(window.getComputedStyle(root, null).getPropertyValue('opacity') < 0.0001)
+                {
+                    visibility = 'hidden';
+                    break;
+                }
+                root = root.parentNode;
+            }
+
             switch(visibility)
             {
                 case 'hidden': { this.setVisibility(false); return; }
@@ -152,24 +165,41 @@ function DOMObject(node, nodeType)
             // Only executable if DOMNode is TextInput field
             if(this.nodeType == 0)
             {
-                var attr = (this.node.tagName == 'INPUT') ? 'value' : 'textContent';
-                this.node.setAttribute(attr, text);
+                if (this.node.tagName == 'INPUT')
+                {
+                    // this.node.setAttribute('value', text);
+                    this.node.value = text;
+                }
+                else
+                {
+                    this.node.textContent = text;
+                }
+                
+                
                 // ConsolePrint("Input text was set!");
 
                 if(submit)
                 {
+                    // NOTE: Emulate pressing Enter in input field?
+
                     var parent = this.node.parentNode;
+                    var no_form_found = false;
                     while(parent.nodeName != 'FORM')
                     {
                         parent = parent.parentNode;
                         if(parent === document.documentElement)
                         {
-                            alert('Button is no child of any form! Can not submit anything.');
+                            ConsolePrint('Could not submit text input: No child of any form element.');
+                            no_form_found = true;
                             break;
                         }
                     }
-                    parent.submit();
-                    // ConsolePrint("Input text was submitted!");
+                    if(!no_form_found)
+                    {
+                        parent.submit();
+                        ConsolePrint("Input text was submitted.");
+                    }
+                
                 }
 
             }
@@ -223,7 +253,7 @@ function CreateDOMObject(node, nodeType)
     }
     else
     {
-        ConsolePrint("Useless call of CreateDOMObject");
+        // ConsolePrint("Useless call of CreateDOMObject");
     }
 }
 

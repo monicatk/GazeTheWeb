@@ -245,7 +245,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 
 				// Node's visibility has changed
 				case (2) : {
-					LogDebug("MsgHandler: Updating node's visibility...");
+					//LogDebug("MsgHandler: Updating node's visibility...");
 					bool boolVal = dataStr.at(0) != '0';
 
 					// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
