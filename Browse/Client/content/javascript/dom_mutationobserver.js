@@ -161,19 +161,30 @@ function DOMObject(node, nodeType)
         }
 
         this.setTextInput = function(text, submit){
-            ConsolePrint("setTextInput called with text='"+text+"' and submit="+submit);
+            ConsolePrint("setTextInput called with text='"+text+"' and submit="+submit+ "   domObj.nodeType="+this.nodeType);
 
             // Only executable if DOMNode is TextInput field
-            if(this.nodeType == 0)
+            if(this.nodeType === 0)
             {
                 if (this.node.tagName == 'INPUT')
                 {
                     this.node.value = text;
-                    ConsolePrint("Set input's value to given text");
+                    var inputRect = this.node.getBoundingClientRect();
+                    
+                    window.domTextInputs.forEach(function(domObj){
+                        if(domObj.node.getBoundingClientRect() == inputRect)
+                        {
+                            ConsolePrint("Set text of another input field with equal coordinates");
+                            domObj.node.value = text;
+                        }
+                    }
+
+                    )
                 }
                 else
                 {
                     this.node.textContent = text;
+                    ConsolePrint("Set input's value to given text");
                 }
                 
                 
