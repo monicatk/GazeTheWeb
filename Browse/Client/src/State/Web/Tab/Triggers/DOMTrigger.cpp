@@ -47,10 +47,13 @@ DOMTrigger::~DOMTrigger()
 bool DOMTrigger::Update(float tpf, TabInput& rTabInput)
 {
     // Decide visibility
-    bool visible = _spNode->GetVisibility() && !_spNode->GetRects().empty();
+    bool visible =
+        _spNode->GetVisibility() // DOM node visible
+        && !_spNode->GetRects().empty() // DOM node has rects
+        && _spNode->GetRects().front().width() != 0 && _spNode->GetRects().front().height() != 0; // At least the first rect is bigger than zero
     if(_visible != visible)
     {
-        _visible = _spNode->GetVisibility();
+        _visible = visible;
         _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, _visible);
     }
 
@@ -86,12 +89,12 @@ void DOMTrigger::Draw() const
 
 void DOMTrigger::Activate()
 {
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, true);
+    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, _visible);
 }
 
 void DOMTrigger::Deactivate()
 {
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, false);
+    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, _visible);
 }
 
 void DOMTrigger::CalculatePositionOfOverlayButton(float& rRelativePositionX, float& rRelativePositionY) const
