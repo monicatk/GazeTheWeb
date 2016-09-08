@@ -168,18 +168,24 @@ function DOMObject(node, nodeType)
             {
                 if (this.node.tagName == 'INPUT')
                 {
-                    this.node.value = text;
-                    var inputRect = this.node.getBoundingClientRect();
-                    
-                    window.domTextInputs.forEach(function(domObj){
-                        if(domObj.node.getBoundingClientRect() == inputRect)
+                    // GOOGLE FIX
+                    var inputs = this.node.parentNode.getElementsByTagName("INPUT");
+                    var n = inputs.length;
+                    var zIndex = window.getComputedStyle(this.node, null).getPropertyValue('z-index');
+                    for(var i = 0; i < n && n > 1; i++)
+                    {
+                        if(inputs[i] !== this.node && inputs[i].type == this.node.type)
                         {
-                            ConsolePrint("Set text of another input field with equal coordinates");
-                            domObj.node.value = text;
+                            if(zIndex < window.getComputedStyle(inputs[i], null).getPropertyValue('z-index'))
+                            {
+                                inputs[i].value = text;
+                                ConsolePrint("Set text input on another input field with higher z-index");
+                            }
                         }
                     }
+                    
+                    this.node.value = text;
 
-                    )
                 }
                 else
                 {
