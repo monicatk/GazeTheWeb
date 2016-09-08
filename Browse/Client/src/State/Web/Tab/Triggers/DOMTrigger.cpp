@@ -94,7 +94,7 @@ void DOMTrigger::Activate()
 
 void DOMTrigger::Deactivate()
 {
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, _visible);
+    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, false);
 }
 
 void DOMTrigger::CalculatePositionOfOverlayButton(float& rRelativePositionX, float& rRelativePositionY) const
