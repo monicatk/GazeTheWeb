@@ -36,8 +36,8 @@ bool LinkNavigationAction::Update(float tpf, TabInput tabInput)
     glm::vec2 pageCoordinate = coordinate + scrolling;
     std::weak_ptr<const DOMNode> wpNearestLink = _pTab->GetNearestLink(pageCoordinate, distance);
 
-    // Determine where to click instead
-    if(distance < setup::LINK_CORRECTION_MAX_PIXEL_DISTANCE)
+    // Determine where to click instead, if not too far away or coordinate already valid
+    if(distance < setup::LINK_CORRECTION_MAX_PIXEL_DISTANCE && distance > 0)
     {
         // Try to get value from weak pointer
         if (auto sp = wpNearestLink.lock())
