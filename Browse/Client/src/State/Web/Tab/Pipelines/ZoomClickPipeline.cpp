@@ -5,7 +5,7 @@
 
 #include "ZoomClickPipeline.h"
 #include "src/State/Web/Tab/Pipelines/Actions/ZoomCoordinateAction.h"
-#include "src/State/Web/Tab/Pipelines/Actions/LeftMouseButtonClickAction.h"
+#include "src/State/Web/Tab/Pipelines/Actions/LinkNavigationAction.h"
 
 ZoomClickPipeline::ZoomClickPipeline(TabInteractionInterface* pTab) : Pipeline(pTab)
 {
@@ -15,10 +15,10 @@ ZoomClickPipeline::ZoomClickPipeline(TabInteractionInterface* pTab) : Pipeline(p
     Action* pZoomCoordinateAction = upZoomCoordinateAction.get();
     _actions.push_back(std::move(upZoomCoordinateAction));
 
-    std::unique_ptr<LeftMouseButtonClickAction> upLeftMouseButtonClickAction =
-        std::unique_ptr<LeftMouseButtonClickAction>(new LeftMouseButtonClickAction(_pTab));
-    Action* pLeftMouseButtonClickAction = upLeftMouseButtonClickAction.get();
-    _actions.push_back(std::move(upLeftMouseButtonClickAction));
+    std::unique_ptr<LinkNavigationAction> upLinkNavigationAction =
+        std::unique_ptr<LinkNavigationAction>(new LinkNavigationAction(_pTab));
+    Action* pLeftMouseButtonClickAction = upLinkNavigationAction.get();
+    _actions.push_back(std::move(upLinkNavigationAction));
 
     // Connect those actions
     std::unique_ptr<ActionConnector> upConnector =

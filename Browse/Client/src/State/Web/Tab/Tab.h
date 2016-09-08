@@ -173,6 +173,9 @@ public:
     // Set WebViewParameters for WebView
     virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }
 
+    // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available
+    virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pageCoordinate, float& rDistance) const;
+
     // #########################
     // ### TAB CEF INTERFACE ###
     // #########################
