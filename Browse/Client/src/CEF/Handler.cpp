@@ -332,9 +332,6 @@ void Handler::EmulateMouseWheelScrolling(CefRefPtr<CefBrowser> browser, double d
     event.y = 0;
     //DLOG(INFO) << "Emulating mouse wheel, browserID=" << browser->GetIdentifier();
     browser->GetHost()->SendMouseWheelEvent(event, deltaX, deltaY);
-
-	// TODO: Is this method executed ALL THE TIME? Try console output here.. oO
-
 }
 
 bool Handler::InputTextData(CefRefPtr<CefBrowser> browser, int64 frameID, int nodeID, std::string text, bool submit)

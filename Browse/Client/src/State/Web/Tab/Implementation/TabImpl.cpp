@@ -357,7 +357,10 @@ void Tab::Update(float tpf, Input& rInput)
 		}
 
 		// Use value of auto scrolling to scroll
-		_pCefMediator->EmulateMouseWheelScrolling(this, 0.0, (double)(20.f * _autoScrollingValue));
+        if(_autoScrollingValue != 0.0f)
+        {
+            _pCefMediator->EmulateMouseWheelScrolling(this, 0.0, (double)(20.f * _autoScrollingValue));
+        }
 
 		// Update triggers
 		for (auto& upDOMTrigger : _DOMTriggers)
