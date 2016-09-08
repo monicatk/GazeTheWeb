@@ -10,6 +10,9 @@
 // LogInfo
 void LogInfo(const std::string& content);
 
+// Declaration of output path for log. Should be only set by main.cpp
+extern std::string LogPath;
+
 template<typename... Args>
 void LogInfo(Args const&... args)
 {

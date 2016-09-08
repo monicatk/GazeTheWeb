@@ -30,16 +30,27 @@ void Execute(CefRefPtr<App> app, std::string userDirectory)
 int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app, void* windows_sandbox_info, std::string userDirectory)
 {
 
-#ifndef DEPLOYMENT
+#ifdef DEPLOYMENT
+
+	// Disable logging of CEF
+	settings.log_severity = LOGSEVERITY_DISABLE;
+
+#else
+
+	// Open Windows console for debugging purposes
 #ifdef _WIN32
-    // Open Windows console for debugging purposes
     AllocConsole();
     freopen("conin$", "r", stdin);
     freopen("conout$", "w", stdout);
     freopen("conout$", "w", stderr);
 #endif
+
 #endif
 
+	// Set output path of log file
+	LogPath = userDirectory;
+
+	// Say hello
 	LogInfo("####################################################");
 	LogInfo("Welcome to GazeTheWeb - Browse!");
 	LogInfo("Personal files are saved in: ", userDirectory);

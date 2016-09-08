@@ -14,6 +14,7 @@
 
 // Forward declaration
 class Pipeline;
+class DOMNode;
 
 // Modes
 enum class TabMode { READ, INTERACTION, CURSOR };
@@ -36,6 +37,9 @@ public:
 
     // Get current web view resolution. Sets to 0 if not possible
     virtual void GetWebViewTextureResolution(int& rWidth, int& rHeight) const = 0;
+
+    // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available
+    virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pageCoordinate, float& rDistance) const = 0;
 
     // Set next mode (will be set after pipelines finish)
     virtual void SetNextMode(TabMode mode) { _nextMode = mode; }

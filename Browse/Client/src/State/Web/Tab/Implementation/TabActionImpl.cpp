@@ -56,3 +56,48 @@ void Tab::GetWebViewTextureResolution(int& rWidth, int& rHeight) const
 		rHeight = 0;
 	}
 }
+
+std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pageCoordinate, float& rDistance) const
+{
+    if(_DOMTextLinks.empty())
+    {
+        // No link available
+        rDistance = -1;
+        return std::weak_ptr<DOMNode>();
+    }
+    else
+    {
+        // Get link with minimal distance
+        float minDistance = std::numeric_limits<float>::max();
+        std::weak_ptr<const DOMNode> wpResult;
+
+        // Go over links
+        for(const auto& rLink : _DOMTextLinks)
+        {
+            // Go over rectangles of that link
+            for(const auto& rRect : rLink->GetRects())
+            {
+                glm::vec2 center = rRect.center();
+                float width = rRect.width();
+                float height = rRect.height();
+
+                // Distance
+                float dx = glm::max(glm::abs(pageCoordinate.x - center.x) - (width / 2.f), 0.f);
+                float dy = glm::max(glm::abs(pageCoordinate.y - center.y) - (height / 2.f), 0.f);
+                float distance = glm::sqrt((dx * dx) + (dy * dy));
+
+                // Check whether distance is smaller
+                if(distance < minDistance)
+                {
+                    minDistance = distance;
+                    wpResult = rLink;
+                }
+            }
+        }
+
+        // Return result
+        rDistance = minDistance;
+        return wpResult;
+    }
+
+}
