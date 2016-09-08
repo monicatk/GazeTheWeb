@@ -246,7 +246,6 @@ function AddFixedElement(node)
 		window.fixed_elements.add(node);
 
 		// Find smallest ID not yet in use
-
 		var found = false;
 		for(var i=0, n=window.fixed_IDlist.length; i < n; i++)
 		{
@@ -360,14 +359,32 @@ function SetFixationStatus(node, status)
 // parent & child are 1D arrays of length 4
 function ComputeBoundingRect(parent, child)
 {
-	// if(parent.height == 0 || parent.width == 0)
-	if(parent[2]-parent[0] == 0 || parent[3]-parent[1] == 0)
-		return child;
+	// OLD APPROACH: Minimum Bounding Box for all children and parent
+	// // if(parent.height == 0 || parent.width == 0)
+	// if(parent[2]-parent[0] == 0 || parent[3]-parent[1] == 0)
+	// 	return child;
 
-	return [Math.min(parent[0], child[0]),
-			Math.min(parent[1], child[1]),
-			Math.max(parent[2], child[2]),
-			Math.max(parent[3], child[3])];
+	// return [Math.min(parent[0], child[0]),
+	// 		Math.min(parent[1], child[1]),
+	// 		Math.max(parent[2], child[2]),
+	// 		Math.max(parent[3], child[3])];
+
+	// top, left, bottom, right
+
+	var bbs = [];
+	for(var i = 0, n=child.length/4; i < n; i++)
+	{
+		var _child = [child[i], child[i+1], child[i+2], child[i+3]];
+
+		// // no intersection possible
+		// if(parent[3] <= _child[0] || parent[3] <= _child[1])
+		// 	bbs.push(_child);
+
+		if(_child[2] - _child[0] > 0 && _child[3] - _child[1])
+			bbs.push(_child);
+	}
+
+	return bbs;
 }
 
 function ComputeBoundingRectOfAllChilds(node, depth, fixedID)
@@ -626,97 +643,26 @@ document.onreadystatechange = function()
 {
 	// ConsolePrint("### DOCUMENT STATECHANGE! ###");
 
-	if(document.readyState == 'loading')
-	{
-		ConsolePrint('### document.readyState == loading ###'); // Never triggered
-	}
+	// if(document.readyState == 'loading')
+	// {
+	// 	// ConsolePrint('### document.readyState == loading ###'); // Never triggered
+	// }
 
 	if(document.readyState == 'interactive')
 	{
 		UpdateDOMRects();
 
-		var links = document.getElementsByTagName('A');
-		ConsolePrint('Found '+links.length+' links on an alternative way...');
-
+		ForEveryChild(document.documentElement, AnalyzeNode);
 	}
 
 	if(document.readyState == 'complete')
 	{
 		UpdateDOMRects();
 
-		ConsolePrint('<----- Page fully loaded. #TextInputs='+window.domTextInputs.length+', #Links='+window.domLinks.length);
+		ConsolePrint('<----- Page fully loaded. -------|');
 
-		var links = document.getElementsByTagName('A');
-		ConsolePrint('Found '+links.length+' links on an alternative way...');
-
-
-
-		// ForEveryChild(document.documentElement, AnalyzeNode);
-		
-		/* Experimenting with CSS events */
-
-		// forEach extension for NodeList divs
-		// Array.prototype.forEach.call(divs, function(node){
-		// 		if(window.getComputedStyle(node, null).getPropertyValue('transition-property') == 'opacity')
-		// 		{
-		// 			node.addEventListener('webkitTransitionEnd', function(event)
-		// 			{
-		// 				ConsolePrint('Added event listener: Transition!');
-		// 				// ConsolePrint("Transition ended: opacity="+window.getComputedStyle(node, null).getPropertyValue('opacity'));
-		// 			}, false);
-		// 			// ConsolePrint("EventListener for transition end added!");
-		// 		}	
-
-		// 		if(window.getComputedStyle(node, null).getPropertyValue('overflow') == 'hidden')
-		// 		{
-		// 			node.addEventListener('overflow', function(event)
-		// 			{
-		// 				ConsolePrint('Added event listener: Overflow!');
-		// 				// ConsolePrint("Transition ended: opacity="+window.getComputedStyle(node, null).getPropertyValue('opacity'));
-		// 			}, false);
-		// 			// ConsolePrint("EventListener for overflow end added!");
-
-		// 			node.addEventListener('underflow', function(event)
-		// 			{
-		// 				ConsolePrint('Added event listener: Underflow!');
-		// 				// ConsolePrint("Transition ended: opacity="+window.getComputedStyle(node, null).getPropertyValue('opacity'));
-		// 			}, false);
-		// 			// ConsolePrint("EventListener for underflow end added!");
-		// 		}
-		// 	}
-		// );
-
-		var found_compose_button = false;
-		divSet.forEach(function(div){
-				if(div.getAttribute('class') === "T-I J-J5-Ji T-I-KE L3") 
-					found_compose_button = true;
-			}
-		);
-		if(found_compose_button)
-			ConsolePrint("Found Compose Button as it was appended to its parent.");
-		else
-			ConsolePrint("Could not find Compose Button as it was appended to its parent...");
-
-		var divs = document.getElementsByTagName('DIV');
-		for(var i = 0, n = divs.length; i < n; i++)
-		{
-			if(divs[i].getAttribute('class') === "T-I J-J5-Ji T-I-KE L3") 
-				ConsolePrint("Found Compose Button as part of the finished DOM tree");
-		}
-
-
-		// ConsolePrint("DocFrag Nodes, which where unnoticedly appended to DOM: "+docFragSet.size); //+" (blue background color)");
-		// docFragSet.forEach(function(left){
-		// 	if(left.style) left.style.backgroundColor = '#224499';
-		// 	AnalyzeNode(left);
-		// });
-		// ConsolePrint("Final #SubtreeNodes: "+window.appendedSubtreeRoots.size);
-		// window.appendedSubtreeRoots.forEach(function(root){
-		// 	// ConsolePrint("tag: "+root.tagName+"; id: "+root.id+"; class: "+root.getAttribute('class'));
-		// 	if(root.style) root.style.backgroundColor = '#ffff00';
-		// 	AnalyzeNode(root);
-		// 	ForEveryChild(root, AnalyzeNode);
-		// });
+		// GMail
+		ForEveryChild(document.documentElement, AnalyzeNode);
 		
 	}
 }
@@ -734,24 +680,10 @@ window.onresize = function()
 }
 
 
-// var origInsertBefore = Element.prototype.insertBefore;
-// Element.prototype.insertBefore = function(newNode, refNode)
-// {
-// 	ConsolePrint("### insertBefore called ###");
-// 	return origInsertBefore(newNode, refNode);
-// }
- var origDispatchEvent = EventTarget.prototype.dispatchEvent;
-EventTarget.prototype.dispatchEvent = function(event)
-{
-	ConsolePrint("### Dispatch of event noticed: "+event.type);
-	return origDispatchEvent(event);
-}
-
-var myEvent = new Event("FuckThisShit");
-document.dispatchEvent(myEvent);
-
 document.addEventListener('transitionend', function(event){
-	ConsolePrint(event.target.textContent+" "+window.getComputedStyle(event.target, null).getPropertyValue('opacity'));
+	// TODO: for duckduckgo's shfiting links below search field
+
+	// ConsolePrint(event.target.textContent+" "+window.getComputedStyle(event.target, null).getPropertyValue('opacity'));
 
 		// ForEveryChild(event.target, function(child){
 		// 	var nodeType = child.getAttribute('nodeType');
@@ -770,44 +702,17 @@ document.addEventListener('transitionend', function(event){
 }, false);
 
 
-var divSet = new Set();
+
 var docFrags = [];
 
 /* Modify appendChild in order to get notifications when this function is called */
 var originalAppendChild = Element.prototype.appendChild;
 Element.prototype.appendChild = function(child){
 
-	if(this.nodeType == 1 && this.getAttribute('class') && this.tagName == "DIV")//"cw--c")// "tag-home  tag-home--slide  no-js__hide  js-tag-home")
-		ConsolePrint(this.getAttribute('class'));	
-
-	if(child.nodeType == 11)
-		ConsolePrint("DocumentFragment gets appended to "+this.getAttribute('class'));
-
-
 	// appendChild extension: Check if root is already part of DOM tree
     if(this.nodeType == 1 || this.nodeType > 8)
     {
 		var subtreeRoot = this;
-
-		// DEBUG
-		if(child.nodeType == 1 && child.tagName == "DIV")
-			divSet.add(child);
-
-
-		// NOTE: duckduckgo:
-		// DIV x with class 'tag-home__class' has children, where x.appendChild isn't called for (except for 'tag-home__nav')
-		// For that one other child, x.appendChild is called 
-		// (but: there doesn't seem to be a DocumentFragment, which gets appended to x)
-		// 		indeed: no DocumentFragment seems to be part of any appendChild call, although multiple DocumentFragments are created...
-		// 		--> recognition of DocumentFragments buggy?
-		// --> How do those children get appended to x? Unknown
-		// When x is appended to 'tag-home  tag-home--slide  no-js__hide  js-tag-home', x already has those 5 children
-		// (it's commen that child nodes have children on their appending to their parent)
-
-
-
-		
-		// END OF DEBUG
 
 		// Stop going up the tree when parentNode is documentElement or doesn't exist (null or undefined)
 		while(subtreeRoot !== document.documentElement && subtreeRoot.parentNode && subtreeRoot.parentNode !== undefined)
@@ -820,21 +725,6 @@ Element.prototype.appendChild = function(child){
         if(subtreeRoot !== document.documentElement) 
 		{
 
-			// Delete entry for child if it was subroot node before
-			// window.appendedSubtreeRoots.delete(child); 	// <--------------------------------------
-
-			// NOTE! There are subtree roots which do not seem to be of type Node! Can not use .nodeType, .tagName, etc.
-			// What kind of Object is it?
-			// Can MO even recognize appending of this object to the DOM tree?
-			if(!('nodeType' in subtreeRoot))
-			{
-				ConsolePrint("Found subtreeRoot, which doesn't seem to be a Node object");
-
-				if(subtreeRoot === null) ConsolePrint("... because it's null.");
-				if(subtreeRoot === undefined) ConsolePrint("... because it's undefined.");
-			}
-			// ConsolePrint(""+subtreeRoot.nodeType+" "+(subtreeRoot===this));
-
 			// When DocumentFragments get appended to DOM, they "lose" all their children and only their children are added to DOM
 			if(subtreeRoot.nodeType == 11) // 11 == DocumentFragment
 			{
@@ -842,58 +732,46 @@ Element.prototype.appendChild = function(child){
 				for(var i = 0, n = subtreeRoot.childNodes.length; i < n; i++)
 				{
 					window.appendedSubtreeRoots.add(subtreeRoot.childNodes[i]);
+
 					ForEveryChild(subtreeRoot.childNodes[i], function(childNode){
-						if(childNode.style) childNode.style.backgroundColor = '#0000ff';
+						// if(childNode.style) childNode.style.backgroundColor = '#0000ff';
 					});
 					
 				}
 			}
 			else 
 			{	
-				if(subtreeRoot.style)
-					subtreeRoot.style.backgroundColor = "#ff0000";
+				// if(subtreeRoot.style)
+				// 	subtreeRoot.style.backgroundColor = "#ff0000";
 
 				// Add subtree root to Set of subtree roots
-				window.appendedSubtreeRoots.add(subtreeRoot);
-
-	
+				window.appendedSubtreeRoots.add(subtreeRoot);	
 
 				// Remove children of this subtree root from subtree root set --> prevent double-checking of branches
 				ForEveryChild(subtreeRoot, function(childNode){
-						if(childNode.nodeType == 1 && childNode.style) childNode.style.backgroundColor = '#ffff00';
+						// if(childNode.nodeType == 1 && childNode.style) childNode.style.backgroundColor = '#ffff00';
 						window.appendedSubtreeRoots.delete(childNode);
 					}
 				);
 
 
 			}
-
-
-
 		
 		}
-		else // for debugging
-		{
-			// if(this.getAttribute('class') == "aj9 pp")
-			// 	ConsolePrint("Found 'aj9 pp' and it was parent in the DOM tree.");
-			// if(child.nodeType == 1 && child.getAttribute('class') == "aj9 pp")
-			// 	ConsolePrint("Found 'aj9 pp' and it was added as child to the DOM tree.");
-		}
-					// DEBUG
+
     }  
 
 	// DocumentFragment as parent: children disappear when fragment is appended to DOM tree
-
 	if(child.nodeType === 11)
 	{
-		ConsolePrint("DocumentFragment as child (appendChild)");
+		// ConsolePrint("DocumentFragment as child (appendChild)");
 		for(var i = 0, n = child.childNodes.length; i < n; i++)
 		{
 
 			// COLORING
-			if(child.childNodes[i].style) child.childNodes[i].style.backgroundColor = "#ff0000";
+			// if(child.childNodes[i].style) child.childNodes[i].style.backgroundColor = "#ff0000";
 			ForEveryChild(child.childNodes[i], function(childNode){
-					if(childNode.nodeType == 1 && childNode.style) childNode.style.backgroundColor = '#ff00ff';
+					// if(childNode.nodeType == 1 && childNode.style) childNode.style.backgroundColor = '#ff00ff';
 					window.appendedSubtreeRoots.delete(childNode);
 				}
 			);
@@ -950,15 +828,10 @@ function AnalyzeNode(node)
 {
 	// ConsolePrint("AnalyzeNode called");
 
-	// DocumentFragments
-	if(node.nodeType === 11)
-	{
-		ConsolePrint("### DocumentFragment was added to the DOM");
-	}
 
-	if(node.nodeType == 1 || node.nodeType > 8) // 1 == ELEMENT_NODE
+
+	if((node.nodeType == 1 && !node.hasAttribute("nodeType"))|| node.nodeType > 8) // 1 == ELEMENT_NODE
 	{
-		if(node.nodeType > 8) ConsolePrint(".nodeType > 8 is relevant!");
 		// EXPERIMENTAL
 		// if(node.tagName == 'SCRIPT')
 		// {
@@ -970,7 +843,7 @@ function AnalyzeNode(node)
 		if(window.appendedSubtreeRoots.delete(node))
 		{
 			// ConsolePrint("My children have to be checked separatedly! "+node.tagName+ " class: "+node.getAttribute('class'));
-			node.style.backgroundColor = "#00ff00";
+			// node.style.backgroundColor = "#00ff00";
 
 			// COLOR LEGEND
 			// roots, not found by observer:	red
@@ -978,10 +851,10 @@ function AnalyzeNode(node)
 			// children, not found by observer:	magenta
 			// children, found by observer:		blue-green
 
-			ForEveryChild(node, function(child){ 
-				if(child.nodeType == 1 && 'style' in child) // child.style 
-					child.style.backgroundColor = '#00ffff'; 
-			});
+			// ForEveryChild(node, function(child){ 
+				// if(child.nodeType == 1 && 'style' in child) // child.style 
+			// 		child.style.backgroundColor = '#00ffff'; 
+			// });
 
 
 			ForEveryChild(node, AnalyzeNode);
@@ -1036,54 +909,25 @@ function AnalyzeNode(node)
 		// textareas or DIVs, whole are treated as text fields
 		if(node.tagName == 'TEXTAREA' || (node.tagName == 'DIV' && node.getAttribute('role') == 'textbox'))
 		{
-			if(node.getAttribute('class') == "T-I J-J5-Ji T-I-KE L3") ConsolePrint("Starting adding of Compose button");
 			CreateDOMTextInput(node);
-			if(node.getAttribute('class') == "T-I J-J5-Ji T-I-KE L3") ConsolePrint("Ended adding of Compose button");
 		}
 
 		// NEW: Buttons
 		if(node.tagName == 'DIV' && node.getAttribute('role') == 'button')
 		{
-			if(node.getAttribute('class') == "T-I J-J5-Ji T-I-KE L3") ConsolePrint("Starting adding of Compose button");
 			CreateDOMLink(node);
-			if(node.getAttribute('class') == "T-I J-J5-Ji T-I-KE L3") ConsolePrint("Ended adding of Compose button");
 		}
 
-		//DEBUG
-		// if(node.tagName)
-		// {
-		// 	var nClass = node.getAttribute('class');
-		// 	switch(nClass){
-		// 		case "T-I J-J5-Ji T-I-KE L3":
-		// 		case "z0":
-		// 		case ":4n":
-		// 		case "nM":
-		// 		case ":4o":
-		// 		case "aj9 pp":
-		// 		case "Ls77Lb aZ6":
-		// 		case "nH oy8Mbf nn aeN":
-		// 		case "no":
-		// 		case "nH":
-		// 		{
-		// 			ConsolePrint("### Found: "+nClass); 
-		// 			// node.style.backgroundColor = '#222222';
-		// 			ForEveryChild(node, function(child){
-		// 				if(child.nodeType == 1 && child.getAttribute('class') == "T-I J-J5-Ji T-I-KE L3")
-		// 				{
-		// 					ConsolePrint("class: "+node.getAttribute('class')+" --> Compose button is contained in this node's subtree");
-							
-		// 				}
-		// 			})
-		// 			break;
-		// 		}
-		// 	}
-		// }
+		// GMail
+		if(node.tagName == 'DIV' && node.getAttribute('role') == 'link')
+		{
+			CreateDOMLink(node);
+		}
+		if(node.tagName == "SPAN" && node.hasAttribute('email'))
+		{
+			CreateDOMLink(node);
+		}
 
-		// if(node.tagName == 'DIV')
-		// {
-		// 	if(node.style) node.style.backgroundColor = '#222222';
-		// 	if(node.textContent != "") node.textContent = "### Analyzed ###";
-		// }
 
 
 		if(node.tagName == 'FORM')
@@ -1091,7 +935,7 @@ function AnalyzeNode(node)
 			// Update whole <form> if transition happens in form's subtree
 			// (For shifting elements in form (e.g. Google Login) )
 			node.addEventListener('webkitTransitionEnd', function(event){
-				ConsolePrint("FORM transition event detected"); //DEBUG
+				// ConsolePrint("FORM transition event detected"); //DEBUG
 				ForEveryChild(node, function(child){
 					if(child.nodeType == 1)
 					{
@@ -1149,7 +993,7 @@ function MutationObserverInit()
 									if(!window.fixed_elements.has(node))
 									{
 										//DEBUG
-										ConsolePrint("Attribut "+attr+" changed, calling AddFixedElement");
+										// ConsolePrint("Attribut "+attr+" changed, calling AddFixedElement");
 
 										AddFixedElement(node);
 										
@@ -1231,12 +1075,6 @@ function MutationObserverInit()
 								});
 							}
 
-							if(attr == "innerHTML")
-							{
-								ConsolePrint("### Changes in innerHTML"); // doesn't work
-							}
-
-							
 		  				} // END node.nodeType == 1
 						
 					

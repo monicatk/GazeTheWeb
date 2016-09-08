@@ -161,14 +161,15 @@ function DOMObject(node, nodeType)
         }
 
         this.setTextInput = function(text, submit){
+            ConsolePrint("setTextInput called with text='"+text+"' and submit="+submit);
 
             // Only executable if DOMNode is TextInput field
             if(this.nodeType == 0)
             {
                 if (this.node.tagName == 'INPUT')
                 {
-                    // this.node.setAttribute('value', text);
                     this.node.value = text;
+                    ConsolePrint("Set input's value to given text");
                 }
                 else
                 {

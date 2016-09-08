@@ -357,9 +357,9 @@ void RenderProcessHandler::OnContextCreated(
 			// Create an image object, which will later contain favicon image 
             frame->ExecuteJavaScript(_js_favicon_create_img, frame->GetURL(), 0);
 
-			IPCLogDebug(browser, "DEBUG: Renderer reloads JS code for MutationObserver on EVERY context creation atm!");
-			_js_mutation_observer_test = GetJSCode(MUTATION_OBSERVER_TEST);
-			_js_dom_mutationobserver = GetJSCode(DOM_MUTATIONOBSERVER);
+			//IPCLogDebug(browser, "DEBUG: Renderer reloads JS code for MutationObserver on EVERY context creation atm!");
+			//_js_mutation_observer_test = GetJSCode(MUTATION_OBSERVER_TEST);
+			//_js_dom_mutationobserver = GetJSCode(DOM_MUTATIONOBSERVER);
 
 			frame->ExecuteJavaScript(_js_dom_mutationobserver, "", 0);
 			frame->ExecuteJavaScript(_js_mutation_observer_test, "", 0);
