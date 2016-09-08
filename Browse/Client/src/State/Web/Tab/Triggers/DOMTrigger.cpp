@@ -47,7 +47,8 @@ DOMTrigger::~DOMTrigger()
 bool DOMTrigger::Update(float tpf, TabInput& rTabInput)
 {
     // Decide visibility
-    if(_visible != _spNode->GetVisibility())
+    bool visible = _spNode->GetVisibility() && !_spNode->GetRects().empty();
+    if(_visible != visible)
     {
         _visible = _spNode->GetVisibility();
         _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, _visible);
