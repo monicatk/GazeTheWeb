@@ -4,7 +4,6 @@
 //============================================================================
 
 #include "RenderProcessHandler.h"
-#include "src/CEF/Extension/Container.h"
 #include "include/wrapper/cef_message_router.h"
 #include "include/base/cef_logging.h"
 #include "include/wrapper/cef_helpers.h"
@@ -31,51 +30,52 @@ bool RenderProcessHandler::OnProcessMessageReceived(
     // Handle request of DOM node data
     if (msgName == "GetDOMElements")
     {
-        long long frameID = (long long) msg->GetArgumentList()->GetDouble(0);
-        CefRefPtr<CefFrame> frame = browser->GetFrame(frameID);
+		IPCLogDebug(browser, "Renderer: Reached old code 'GetDOMElements' msg");
+    //    long long frameID = (long long) msg->GetArgumentList()->GetDouble(0);
+    //    CefRefPtr<CefFrame> frame = browser->GetFrame(frameID);
 
-        CefRefPtr<CefV8Context> context = frame->GetV8Context();
-        // Return global object for this context
-        CefRefPtr<CefV8Value> global = context->GetGlobal();
+    //    CefRefPtr<CefV8Context> context = frame->GetV8Context();
+    //    // Return global object for this context
+    //    CefRefPtr<CefV8Value> global = context->GetGlobal();
 
-        // Determine number of each DOM element
-        IPCLogDebug(browser, "Updating size of text input array via Javascript");
-        frame->ExecuteJavaScript(_js_dom_update_sizes, frame->GetURL(), 0);
+    //    // Determine number of each DOM element
+    //    IPCLogDebug(browser, "Updating size of text input array via Javascript");
+    //    frame->ExecuteJavaScript(_js_dom_update_sizes, frame->GetURL(), 0);
 
-        int arraySize = 0;
-        if (context->Enter())
-        {
-            arraySize += global->GetValue("sizeTextInputs")->GetUIntValue();
-            context->Exit();
-        }
-        IPCLogDebug(browser, "Found " + std::to_string(arraySize) + " objects to be packed into IPC msg");
+    //    int arraySize = 0;
+    //    if (context->Enter())
+    //    {
+    //        arraySize += global->GetValue("sizeTextInputs")->GetUIntValue();
+    //        context->Exit();
+    //    }
+    //    IPCLogDebug(browser, "Found " + std::to_string(arraySize) + " objects to be packed into IPC msg");
 
-        if (arraySize > 0)
-        {
-            // Add array of container arrays to JS
-            V8_Container v8Container(domNodeScheme);
-            v8Container.AddContainerArray(context, "TextInputs", arraySize);
+    //    if (arraySize > 0)
+    //    {
+    //        // Add array of container arrays to JS
+    //        V8_Container v8Container(domNodeScheme);
+    //        v8Container.AddContainerArray(context, "TextInputs", arraySize);
 
-            // Fill container array in JS with data
-            frame->ExecuteJavaScript(_js_dom_fill_arrays, frame->GetURL(), 0);
+    //        // Fill container array in JS with data
+    //        frame->ExecuteJavaScript(_js_dom_fill_arrays, frame->GetURL(), 0);
 
-            // Create IPC message, which is to be filled with data
-            CefRefPtr<CefProcessMessage> DOMmsg = CefProcessMessage::Create("ReceiveDOMElements");
+    //        // Create IPC message, which is to be filled with data
+    //        CefRefPtr<CefProcessMessage> DOMmsg = CefProcessMessage::Create("ReceiveDOMElements");
 
-            // Read out data in JS container array and write it to IPC message
-            IPC_Container ipcContainer(domNodeScheme);
-            ipcContainer.ReadContainerObjectsAndWriteToIPCMsg(
-                context,										// Frame's V8 context in order to read out JS variables
-                "TextInputs",									// Container arrays variable name in JS
-                std::vector<int>{ arraySize },					// Amount of each different node types
-                frameID,										// First position in message is frameID
-				DOMmsg);											// Message to be filled with value's from JS container array
+    //        // Read out data in JS container array and write it to IPC message
+    //        IPC_Container ipcContainer(domNodeScheme);
+    //        ipcContainer.ReadContainerObjectsAndWriteToIPCMsg(
+    //            context,										// Frame's V8 context in order to read out JS variables
+    //            "TextInputs",									// Container arrays variable name in JS
+    //            std::vector<int>{ arraySize },					// Amount of each different node types
+    //            frameID,										// First position in message is frameID
+				//DOMmsg);											// Message to be filled with value's from JS container array
 
-            // Send read-out DOM node data to browser process
-            browser->SendProcessMessage(PID_BROWSER, DOMmsg);
-            IPCLogDebug(browser, "Finished reading DOM node data, sending IPC msg to Handler with node information");
-        }
-        return true;
+    //        // Send read-out DOM node data to browser process
+    //        browser->SendProcessMessage(PID_BROWSER, DOMmsg);
+    //        IPCLogDebug(browser, "Finished reading DOM node data, sending IPC msg to Handler with node information");
+    //    }
+    //    return true;
 
     }
 
@@ -357,6 +357,10 @@ void RenderProcessHandler::OnContextCreated(
 			// Create an image object, which will later contain favicon image 
             frame->ExecuteJavaScript(_js_favicon_create_img, frame->GetURL(), 0);
 
+			IPCLogDebug(browser, "DEBUG: Renderer reloads JS code for MutationObserver on EVERY context creation atm!");
+			_js_mutation_observer_test = GetJSCode(MUTATION_OBSERVER_TEST);
+			_js_dom_mutationobserver = GetJSCode(DOM_MUTATIONOBSERVER);
+
 			frame->ExecuteJavaScript(_js_dom_mutationobserver, "", 0);
 			frame->ExecuteJavaScript(_js_mutation_observer_test, "", 0);
 			frame->ExecuteJavaScript("MutationObserverInit();", "", 0);
@@ -477,6 +481,7 @@ CefRefPtr<CefProcessMessage> RenderProcessHandler::UnwrapDOMTextInput(
 			int index = 0;
 			args->SetInt(index++, 0);	// nodeType = 0 for DOMTextInput
 			args->SetInt(index++, nodeID);
+			args->SetBool(index++, domObj->GetValue("visible")->GetBoolValue());
 
 			// Get V8 list of floats, representing all Rect coordinates of the given domObj
 			CefRefPtr<CefV8Value> rectsData = domObj->GetValue("getRects")->ExecuteFunction(domObj, {});
@@ -514,6 +519,7 @@ CefRefPtr<CefProcessMessage> RenderProcessHandler::UnwrapDOMLink(
 			int index = 0;
 			args->SetInt(index++, 1);	// nodeType = 1 for DOMLinks
 			args->SetInt(index++, nodeID);
+			args->SetBool(index++, domObj->GetValue("visible")->GetBoolValue());
 
 			// Get V8 list of floats, representing all Rect coordinates of the given domObj
 			CefRefPtr<CefV8Value> rectsData = domObj->GetValue("getRects")->ExecuteFunction(domObj, {});

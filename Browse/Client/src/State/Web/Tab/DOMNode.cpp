@@ -36,53 +36,9 @@ glm::vec2 DOMNode::GetCenter() const
 	return center;
 }
 
-void DOMNode::UpdateAttribute(int attr, void * data, bool initial)
+void DOMNode::SetRects(std::shared_ptr<std::vector<Rect>> rects)
 {
-	switch (attr)
-	{
-		// Update Rect
-		case(0) : {
-			// TODO: There might be a problem, when initial data from Renderer arrives after an update
-			// --> bool attribute for node if Renderer data already received instead?
-			if (!initial || _rects[0].isZero())
-			{
-				_rects[0] = *(Rect*)data;
-
-				//if (_rect.width() > 0 && _rect.height() > 0)
-				//	LogDebug("type=", _type, "; id=", _nodeID, "; _fixed=", _fixed, "; rect= ", _rect.toString());
-			}
-
-			break;
-		}
-		case(1) : {
-			_fixed = *(bool*)data;
-			
-			//if (_rect.width() > 0 && _rect.height() > 0)
-			//	LogDebug("type=", _type, "; id=", _nodeID, "; _fixed=", _fixed, "; rect= ", _rect.toString());
-			
-			break;
-		}
-		// Add new Rect (atm only for DOMLinks)
-		case(2): {
-			AddRect(*(Rect*)data);
-			break;
-		}
-		case(3) : {
-			_rects = *(std::vector<Rect>*) data;
-
-			//for (int i = 0; i < _rects.size(); i++)
-			//{
-			//	LogDebug("DOMNode: ",i, ": ", _rects[i].toString());
-			//}
-
-			break;
-		}
-		default: {
-			LogDebug("DOMNode: Update for attribute=", attr, " is not yet defined!");
-		}
-
-	}
-	// TODO: More cases for other attributes
+	_rects = *rects.get();
 }
 
 

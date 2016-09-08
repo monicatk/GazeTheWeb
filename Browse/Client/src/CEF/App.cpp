@@ -52,5 +52,5 @@ void App::OnBeforeCommandLineProcessing(const CefString& process_type, CefRefPtr
 
 	// EXPERIMENTAL
 	// Javascript debugging?
-	command_line->AppendArgument("remote-debugging-port=666");
+	//command_line->AppendArgument("remote-debugging-port=666");
 }

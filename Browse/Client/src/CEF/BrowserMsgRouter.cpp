@@ -58,7 +58,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		if (requestName.compare(9, 4, "rem#") == 0)
 		{
 			std::string id = requestName.substr(13, 2);
-			LogDebug("BrowserMsgRouter: Fixed element #", id, " was removed.");
+			//LogDebug("BrowserMsgRouter: Fixed element #", id, " was removed.");
 
 			// Notify Tab via CefMediator, that a fixed element was removed
 			_pMsgRouter->GetMediator()->RemoveFixedElement(browser, atoi(id.c_str()));
@@ -68,7 +68,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		if (requestName.compare(9, 4, "add#") == 0)
 		{
 			std::string id = requestName.substr(13, 2);
-			LogDebug("BrowserMsgRouter: Fixed element #", id, " was added.");
+			//LogDebug("BrowserMsgRouter: Fixed element #", id, " was added.");
 
 			// Tell Renderer to read out bounding rectangle coordinates belonging to the given ID
 			CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("FetchFixedElements");
@@ -133,9 +133,6 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				// Write char buffer to string
 				const std::string bufferStr(buffer.begin(), buffer.end());
 
-				// DEBUG
-				//LogDebug(i, ": bufferStr= ", bufferStr);
-
 				// Identify what information is to be extracted
 				switch (amount_separators)
 				{
@@ -191,10 +188,9 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		// Node was updated
 		if (requestName.compare(4, 3, "upd") == 0)
 		{
-			void* data = nullptr;
 			switch (attr)
 			{
-				// Rect was updated, extract 4 double values
+				// List of Rects were updated
 				case(0) : {
 					std::vector<float> rectData;
 					std::vector<char> buffer;
@@ -203,40 +199,70 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 						const char read = dataStr.at(i);
 						if (read != ';' && read != '#')
 						{
+							// Save each char which is no separator symbol
 							buffer.push_back(read);
 						}
 						else if (buffer.size() > 0)
 						{
+							// vector<char> -> string
 							const std::string bufferStr(buffer.begin(), buffer.end());
-							rectData.push_back(std::stod(bufferStr));
 
-							// DEBUG
-							//LogDebug("MsgRouter: Read ", bufferStr, " converted it to ", std::stod(bufferStr));
+							rectData.push_back(std::stod(bufferStr));
 
 							buffer.clear();
 						}
 					}
-					Rect rect = Rect(rectData);
-					// Assign extracted data to |data|
-					data = (void*) &rect;
+
+					std::vector<Rect> rects;
+					// Read out each 4 float values und create 1 Rect with them
+					for (int i = 0; i + 3 < rectData.size(); i+= 4)
+					{
+						Rect rect = Rect(rectData[i], rectData[i + 1], rectData[i + 2], rectData[i + 3]);
+						rects.push_back(rect);
+					}
+					
+					// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
+					if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
+					{
+						targetNode->SetRects(std::make_shared<std::vector<Rect>>(rects));
+					}
+
 					break;
 				};
 
-				// Nodes fixation status changed
+				// Node's fixation status changed
 				case(1) : {
-					//LogDebug("request= ", requestName);
-					//LogDebug("dataStr= ", dataStr);
-				
 					bool boolVal = dataStr.at(0) != '0';
-					// Assign extracted data to |data|
-					data = (bool*)&(boolVal);
 
-					//LogDebug("data= ", *(bool*)data);
+					// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
+					if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
+					{
+						targetNode->SetFixed(boolVal);
+					}
+
 					break;
 				};
+
+				// Node's visibility has changed
+				case (2) : {
+					//LogDebug("MsgHandler: Updating node's visibility...");
+					bool boolVal = dataStr.at(0) != '0';
+
+					// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
+					if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
+					{
+						targetNode->SetVisibility(boolVal);
+						//LogDebug("MsgHandler: Changed node's visibilty to: ", boolVal);
+					}
+
+					break;
+
+				}
+				default: {
+					LogDebug("MsgHandler: Received Javascript 'update' request of DOMNode attribute=", attr, ", which is not yet defined.");
+				}
 			}
-			// Pass decoded update information to Tab via CefMediator
-			_pMsgRouter->GetMediator()->UpdateDOMNode(browser, type, id, attr, data);
+
 		} // End of node update
 
 		return true;

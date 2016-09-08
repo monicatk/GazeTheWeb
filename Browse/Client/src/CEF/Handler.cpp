@@ -125,6 +125,12 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
 
     if (frame->IsMain())
     {
+/*
+		browser->GetMainFrame()->ExecuteJavaScript(
+			"document.addEventListener('transitionend', function(event){alert(event.target.textContent+' '+window.getComputedStyle(event.target, null).getPropertyValue('opacity'));}, false);",
+			"", 0);*/
+
+
         // Set Tab's URL when page is loading
         _pMediator->SetURL(browser);
 
@@ -180,9 +186,6 @@ void Handler::OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
 
         // Set zoom level again at load end, in case it was written over again
         SetZoomLevel(browser, false);
-
-        // Load DOM data one final time
-        //ReloadDOMNodes(browser, "(OnLoadingStateChange, loading finished)");	// TODO: Delete this, because of MutationObserver
 
         // Write page resolution to V8 variables, read them and update Tab
         UpdatePageResolution(browser);
@@ -257,19 +260,6 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
         IPCLogRenderer(browser, msg);
     }
 
-
-	if (msgName == "CreateDOMTextLink")
-	{
-		//_pMediator->CreateDOMTextLink(browser, msg);
-		LogDebug("Handler: (TODO) 'CreateDOMTextLink' IPC msg not used any more!");
-	}
-	if (msgName == "CreateDOMTextInput")
-	{
-		//_pMediator->CreateDOMTextInput(browser, msg);
-		LogDebug("Handler: (TODO) 'CreateDOMTextInput' IPC msg not used any more!");
-	}
-
-
 	if (msgName == "OnContextCreated")
 	{
 		_pMediator->ClearDOMNodes(browser);
@@ -282,7 +272,7 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 
 	if (msgName.substr(0, 9) == "CreateDOM")
 	{
-		_pMediator->UpdateDOMNode(browser, msg);
+		_pMediator->FillDOMNodeWithData(browser, msg);
 	}
 
     return _msgRouter->OnProcessMessageReceived(browser, source_process, msg);
@@ -355,6 +345,7 @@ bool Handler::InputTextData(CefRefPtr<CefBrowser> browser, int64 frameID, int no
     if (frame->IsValid())
     {
         frame->ExecuteJavaScript(jsInputTextData(nodeID, text, submit), frame->GetURL(), 0);
+
         return true;
     }
     else
@@ -403,7 +394,7 @@ void Handler::SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged
     {
         LogDebug("Handler: Setting zoom level = ", zoomLevel, " (browserID = ", browser->GetIdentifier(), ").");
 		const std::string setZoomLevel = "document.body.style.zoom=" + std::to_string(zoomLevel) + ";this.blur(); UpdateDOMRects(); UpdateFixedElementRects();";
-        browser->GetMainFrame()->ExecuteJavaScript(setZoomLevel, "", 0);
+        browser->GetMainFrame()->ExecuteJavaScript(setZoomLevel, "", 0); 
 
         if (definitelyChanged)
         {
@@ -508,7 +499,7 @@ void Handler::OnFaviconURLChange(CefRefPtr<CefBrowser> browser,
 
     // Trigger favIconImg.onload function by setting image src
     const std::string jscode = "favIconImg.src = '" + iconURL + "';";
-    browser->GetMainFrame()->ExecuteJavaScript(jscode, "", 0);
+    browser->GetMainFrame()->ExecuteJavaScript(jscode, "", 0); 
 
     // New image incoming, delete the last one
     _pMediator->ResetFavicon(browser);

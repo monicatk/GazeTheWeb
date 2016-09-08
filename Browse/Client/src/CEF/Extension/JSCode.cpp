@@ -56,25 +56,9 @@ std::string GetJSCode(JSFile file)
 // TODO: Delete this method and use CefV8Value::ExecuteFunction(WithContext)? Possible in Browser Thread without context->Enter()?
 std::string jsInputTextData(int inputID, std::string text, bool submit)
 {
-    std::string code = "var input = window.dom_textinputs[" + std::to_string(inputID) + "];\
-                        input.setAttribute('value','" + text + "');"
-    ;
+	std::string code = "var domObj = GetDOMObject(0," + std::to_string(inputID) + ");\
+                        domObj.setTextInput('" + text + "'," + std::to_string(submit) + ");";
 
-    if (submit)
-    {
-    code +=	"var parent = input.parentNode;\
-            while(parent.nodeName != 'FORM')\
-            {\
-                parent = parent.parentNode;\
-                if(parent === document.documentElement)\
-                {\
-                    alert('Button is no child of any form! Can not submit anything.');\
-                    break;\
-                }\
-            }\
-            var parent_element = document.getElementById(parent.id); \
-            parent_element.submit();";
-    }
     return code;
 
             /*

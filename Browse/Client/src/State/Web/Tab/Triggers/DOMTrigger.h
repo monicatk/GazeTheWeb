@@ -40,6 +40,9 @@ public:
     // Get whether DOMNode is marked as fixed
     bool GetDOMFixed() const { return _spNode->GetFixed(); }
 
+	// Get whether DOMNode is visible or not
+	bool GetDOMVisibility() const { return _spNode->GetVisibility(); }
+
 private:
 
     // Calculate position of overlay button

@@ -11,6 +11,8 @@ window.dom_links_rect = [[]];
 window.dom_textinputs = [];
 window.dom_textinputs_rect = [[]];
 
+window.appendedSubtreeRoots = new Set();
+
 
 // TESTING CEF V8 ExecuteFunction
 // window.myObject = {val: '8', called: '0', getVal: function(){ConsolePrint('Objects function called!'); return 7;} };
@@ -316,9 +318,6 @@ function SaveBoundingRectCoordinates(node)
 	// Compute bounding rect containing all child nodes
 	var tree_rect_coords = ComputeBoundingRectOfAllChilds(node, 0, id);
 
-		// DEBUG
-	// ConsolePrint('End of ComputeBoundingRectOfAllChilds.');
-
 	// Save tree rect, if different than fixed nodes bounding rect
 	var equal = true;
 	for(var i = 0; i < 4 && equal; i++)
@@ -355,15 +354,6 @@ function SetFixationStatus(node, status)
 		{
 			domObj.setFixed(status);
 		}
-		// DEBUG
-		// ConsolePrint("Done with getting & configuring DOMObject.");
-		// // Inform about updates in node's attribute |1| aka |_fixed : bool|
-		// // _fixed = status;
-		// var intStatus = (status) ? 1 : 0;
-		// ConsolePrint('DOM#upd#'+type+'#'+id+'#1#'+intStatus+'#');
-
-		// //DEBUG
-		// //ConsolePrint('Setting fixation status to '+intStatus);
 	}
 }
 
@@ -493,7 +483,10 @@ function UpdateSubtreesBoundingRect(childNode)
 	// Parent rect hasn't been containing all child rects
 	if(old_coords.length > 4)
 	{
-		var old_child_rect = old_coords.slice(4, 8);
+		var old_child_rect = old_coords.slice(4);
+
+		// Check if new child rect is contained in parent rect
+		child_coords = ComputeBoundingRect(parent_rect, child_coords);
 
 		// Inform CEF that coordinates have to be updated
 		if(!CompareArrays(child_coords, parent_rect) && !CompareArrays(child_coords, old_child_rect))
@@ -511,6 +504,7 @@ function UpdateSubtreesBoundingRect(childNode)
 	{
 		// Check if new child rect is contained in parent rect
 		child_coords = ComputeBoundingRect(parent_rect, child_coords);
+
 		if(!CompareArrays(parent_rect, child_coords))
 		{
 			window.fixed_coordinates[id] = parent_rect.concat(child_coords);
@@ -518,6 +512,9 @@ function UpdateSubtreesBoundingRect(childNode)
 			inform_about_changes = true;
 		}
 		// else: Parent rect still contains updated child rect
+
+
+		// TODO: Rewrite code here.. confusing af. Also, it seems to inform_about_changes, although none have taken place!
 	}
 
 
@@ -528,13 +525,13 @@ function UpdateSubtreesBoundingRect(childNode)
 		// Tell CEF that fixed node's coordinates were updated
 		ConsolePrint('#fixElem#add#'+zero+id);
 
-		//DEBUG
-		ConsolePrint('Updated a fixed element');
-		for(var i = 0, n = window.fixed_coordinates.length; i < n ; i++)
-		{
-			var str = (i == id) ? '<---' : '';
-			ConsolePrint(i+': '+window.fixed_coordinates[i]+str);
-		}
+		// //DEBUG
+		// ConsolePrint('Updated a fixed element');
+		// for(var i = 0, n = window.fixed_coordinates.length; i < n ; i++)
+		// {
+		// 	var str = (i == id) ? '<---' : '';
+		// 	ConsolePrint(i+': '+window.fixed_coordinates[i]+str);
+		// }
 
 		// DEBUG
 		// ConsolePrint("UpdateSubtreesBoundingRect()");
@@ -586,7 +583,43 @@ function AddDOMTextLink(node)
 document.onclick = function(){
 	ConsolePrint("### document.onclick() triggered! ###");
 	UpdateDOMRects();
+	// UpdateFixedElementRects();
+
+		// var divs = document.getElementsByTagName('DIV');
+		// for (var i = 0, n = divs.length; i < n; i++)
+		// {
+		// 	var role = divs[i].getAttribute('role');
+		// 	ConsolePrint('role: '+role);
+		// 	if(role == 'button')
+		// 	{
+		// 		ConsolePrint("Found DIV which behaves as Button!");
+		// 		CreateDOMLink(divs[i]);
+		// 	}
+		// 	if(role == 'textbox')
+		// 	{
+		// 		ConsolePrint("Found DIV which behaves as Textbox!");
+		// 		CreateDOMTextInput(divs[i]);
+		// 	}
+		// }
+	
 }
+
+window.maxDepth = 0;
+function UpdateMaxDepth(node)
+{
+	ConsolePrint("UpdateMaxDepth...");
+	var depth = 0;
+	var current = node;
+	while(current != document.documentElement)
+	{
+		ConsolePrint("depth: "+depth);
+		current = current.parentNode;
+		if(current) depth++;
+	}
+	ConsolePrint('Result: depth='+depth);
+	window.maxDepth = Math.max(window.maxDepth, depth);
+}
+
 
 // Trigger DOM data update on changing document loading status
 document.onreadystatechange = function()
@@ -600,11 +633,10 @@ document.onreadystatechange = function()
 
 	if(document.readyState == 'interactive')
 	{
-		//ConsolePrint("document reached interactive state: Updating DOM Rects...");
-
 		UpdateDOMRects();
 
-		//ConsolePrint("... done with Updating DOM Rects.");
+		var links = document.getElementsByTagName('A');
+		ConsolePrint('Found '+links.length+' links on an alternative way...');
 
 	}
 
@@ -612,10 +644,85 @@ document.onreadystatechange = function()
 	{
 		UpdateDOMRects();
 
-		ConsolePrint('Page fully loaded. #TextInputs='+window.domTextInputs.length+', #TextLinks='+window.domLinks.length);
+		ConsolePrint('<----- Page fully loaded. #TextInputs='+window.domTextInputs.length+', #Links='+window.domLinks.length);
+
+		var links = document.getElementsByTagName('A');
+		ConsolePrint('Found '+links.length+' links on an alternative way...');
+
+
+
+		// ForEveryChild(document.documentElement, AnalyzeNode);
+		
+		/* Experimenting with CSS events */
+
+		// forEach extension for NodeList divs
+		// Array.prototype.forEach.call(divs, function(node){
+		// 		if(window.getComputedStyle(node, null).getPropertyValue('transition-property') == 'opacity')
+		// 		{
+		// 			node.addEventListener('webkitTransitionEnd', function(event)
+		// 			{
+		// 				ConsolePrint('Added event listener: Transition!');
+		// 				// ConsolePrint("Transition ended: opacity="+window.getComputedStyle(node, null).getPropertyValue('opacity'));
+		// 			}, false);
+		// 			// ConsolePrint("EventListener for transition end added!");
+		// 		}	
+
+		// 		if(window.getComputedStyle(node, null).getPropertyValue('overflow') == 'hidden')
+		// 		{
+		// 			node.addEventListener('overflow', function(event)
+		// 			{
+		// 				ConsolePrint('Added event listener: Overflow!');
+		// 				// ConsolePrint("Transition ended: opacity="+window.getComputedStyle(node, null).getPropertyValue('opacity'));
+		// 			}, false);
+		// 			// ConsolePrint("EventListener for overflow end added!");
+
+		// 			node.addEventListener('underflow', function(event)
+		// 			{
+		// 				ConsolePrint('Added event listener: Underflow!');
+		// 				// ConsolePrint("Transition ended: opacity="+window.getComputedStyle(node, null).getPropertyValue('opacity'));
+		// 			}, false);
+		// 			// ConsolePrint("EventListener for underflow end added!");
+		// 		}
+		// 	}
+		// );
+
+		var found_compose_button = false;
+		divSet.forEach(function(div){
+				if(div.getAttribute('class') === "T-I J-J5-Ji T-I-KE L3") 
+					found_compose_button = true;
+			}
+		);
+		if(found_compose_button)
+			ConsolePrint("Found Compose Button as it was appended to its parent.");
+		else
+			ConsolePrint("Could not find Compose Button as it was appended to its parent...");
+
+		var divs = document.getElementsByTagName('DIV');
+		for(var i = 0, n = divs.length; i < n; i++)
+		{
+			if(divs[i].getAttribute('class') === "T-I J-J5-Ji T-I-KE L3") 
+				ConsolePrint("Found Compose Button as part of the finished DOM tree");
+		}
+
+
+		// ConsolePrint("DocFrag Nodes, which where unnoticedly appended to DOM: "+docFragSet.size); //+" (blue background color)");
+		// docFragSet.forEach(function(left){
+		// 	if(left.style) left.style.backgroundColor = '#224499';
+		// 	AnalyzeNode(left);
+		// });
+		// ConsolePrint("Final #SubtreeNodes: "+window.appendedSubtreeRoots.size);
+		// window.appendedSubtreeRoots.forEach(function(root){
+		// 	// ConsolePrint("tag: "+root.tagName+"; id: "+root.id+"; class: "+root.getAttribute('class'));
+		// 	if(root.style) root.style.backgroundColor = '#ffff00';
+		// 	AnalyzeNode(root);
+		// 	ForEveryChild(root, AnalyzeNode);
+		// });
 		
 	}
 }
+
+// http://stackoverflow.com/questions/18323757/how-do-you-detect-that-a-script-was-loaded-and-executed-in-a-chrome-extension
+
 
 window.onresize = function()
 {
@@ -624,6 +731,388 @@ window.onresize = function()
 	ConsolePrint("Javascript detected window resize, update of fixed element Rects.");
 
 	// UpdateFixedElementRects(); // TODO: Already triggered by CEF's JS injection?
+}
+
+
+// var origInsertBefore = Element.prototype.insertBefore;
+// Element.prototype.insertBefore = function(newNode, refNode)
+// {
+// 	ConsolePrint("### insertBefore called ###");
+// 	return origInsertBefore(newNode, refNode);
+// }
+ var origDispatchEvent = EventTarget.prototype.dispatchEvent;
+EventTarget.prototype.dispatchEvent = function(event)
+{
+	ConsolePrint("### Dispatch of event noticed: "+event.type);
+	return origDispatchEvent(event);
+}
+
+var myEvent = new Event("FuckThisShit");
+document.dispatchEvent(myEvent);
+
+document.addEventListener('transitionend', function(event){
+	ConsolePrint(event.target.textContent+" "+window.getComputedStyle(event.target, null).getPropertyValue('opacity'));
+
+		// ForEveryChild(event.target, function(child){
+		// 	var nodeType = child.getAttribute('nodeType');
+		// 	if(nodeType)
+		// 	{
+		// 		var nodeID = child.getAttribute('nodeID');
+		// 		var domObj = GetDOMObject(nodeType, nodeID);
+		// 		if(domObj)
+		// 		{
+		// 			domObj.checkVisibility();
+		// 		}
+		// 	}
+		// });
+	
+	// ConsolePrint("Transition ended: opacity="+window.getComputedStyle(node, null).getPropertyValue('opacity'));
+}, false);
+
+
+var divSet = new Set();
+var docFrags = [];
+
+/* Modify appendChild in order to get notifications when this function is called */
+var originalAppendChild = Element.prototype.appendChild;
+Element.prototype.appendChild = function(child){
+
+	if(this.nodeType == 1 && this.getAttribute('class') && this.tagName == "DIV")//"cw--c")// "tag-home  tag-home--slide  no-js__hide  js-tag-home")
+		ConsolePrint(this.getAttribute('class'));	
+
+	if(child.nodeType == 11)
+		ConsolePrint("DocumentFragment gets appended to "+this.getAttribute('class'));
+
+
+	// appendChild extension: Check if root is already part of DOM tree
+    if(this.nodeType == 1 || this.nodeType > 8)
+    {
+		var subtreeRoot = this;
+
+		// DEBUG
+		if(child.nodeType == 1 && child.tagName == "DIV")
+			divSet.add(child);
+
+
+		// NOTE: duckduckgo:
+		// DIV x with class 'tag-home__class' has children, where x.appendChild isn't called for (except for 'tag-home__nav')
+		// For that one other child, x.appendChild is called 
+		// (but: there doesn't seem to be a DocumentFragment, which gets appended to x)
+		// 		indeed: no DocumentFragment seems to be part of any appendChild call, although multiple DocumentFragments are created...
+		// 		--> recognition of DocumentFragments buggy?
+		// --> How do those children get appended to x? Unknown
+		// When x is appended to 'tag-home  tag-home--slide  no-js__hide  js-tag-home', x already has those 5 children
+		// (it's commen that child nodes have children on their appending to their parent)
+
+
+
+		
+		// END OF DEBUG
+
+		// Stop going up the tree when parentNode is documentElement or doesn't exist (null or undefined)
+		while(subtreeRoot !== document.documentElement && subtreeRoot.parentNode && subtreeRoot.parentNode !== undefined)
+		{
+			subtreeRoot = subtreeRoot.parentNode;
+		}
+
+
+		// Register subtree roots, whose children have to be checked outside of MutationObserver
+        if(subtreeRoot !== document.documentElement) 
+		{
+
+			// Delete entry for child if it was subroot node before
+			// window.appendedSubtreeRoots.delete(child); 	// <--------------------------------------
+
+			// NOTE! There are subtree roots which do not seem to be of type Node! Can not use .nodeType, .tagName, etc.
+			// What kind of Object is it?
+			// Can MO even recognize appending of this object to the DOM tree?
+			if(!('nodeType' in subtreeRoot))
+			{
+				ConsolePrint("Found subtreeRoot, which doesn't seem to be a Node object");
+
+				if(subtreeRoot === null) ConsolePrint("... because it's null.");
+				if(subtreeRoot === undefined) ConsolePrint("... because it's undefined.");
+			}
+			// ConsolePrint(""+subtreeRoot.nodeType+" "+(subtreeRoot===this));
+
+			// When DocumentFragments get appended to DOM, they "lose" all their children and only their children are added to DOM
+			if(subtreeRoot.nodeType == 11) // 11 == DocumentFragment
+			{
+				// Mark all 1st generation child nodes of DocumentFragments as subtree roots
+				for(var i = 0, n = subtreeRoot.childNodes.length; i < n; i++)
+				{
+					window.appendedSubtreeRoots.add(subtreeRoot.childNodes[i]);
+					ForEveryChild(subtreeRoot.childNodes[i], function(childNode){
+						if(childNode.style) childNode.style.backgroundColor = '#0000ff';
+					});
+					
+				}
+			}
+			else 
+			{	
+				if(subtreeRoot.style)
+					subtreeRoot.style.backgroundColor = "#ff0000";
+
+				// Add subtree root to Set of subtree roots
+				window.appendedSubtreeRoots.add(subtreeRoot);
+
+	
+
+				// Remove children of this subtree root from subtree root set --> prevent double-checking of branches
+				ForEveryChild(subtreeRoot, function(childNode){
+						if(childNode.nodeType == 1 && childNode.style) childNode.style.backgroundColor = '#ffff00';
+						window.appendedSubtreeRoots.delete(childNode);
+					}
+				);
+
+
+			}
+
+
+
+		
+		}
+		else // for debugging
+		{
+			// if(this.getAttribute('class') == "aj9 pp")
+			// 	ConsolePrint("Found 'aj9 pp' and it was parent in the DOM tree.");
+			// if(child.nodeType == 1 && child.getAttribute('class') == "aj9 pp")
+			// 	ConsolePrint("Found 'aj9 pp' and it was added as child to the DOM tree.");
+		}
+					// DEBUG
+    }  
+
+	// DocumentFragment as parent: children disappear when fragment is appended to DOM tree
+
+	if(child.nodeType === 11)
+	{
+		ConsolePrint("DocumentFragment as child (appendChild)");
+		for(var i = 0, n = child.childNodes.length; i < n; i++)
+		{
+
+			// COLORING
+			if(child.childNodes[i].style) child.childNodes[i].style.backgroundColor = "#ff0000";
+			ForEveryChild(child.childNodes[i], function(childNode){
+					if(childNode.nodeType == 1 && childNode.style) childNode.style.backgroundColor = '#ff00ff';
+					window.appendedSubtreeRoots.delete(childNode);
+				}
+			);
+
+			window.appendedSubtreeRoots.add(child.childNodes[i]);
+		}
+	}
+
+	// Finally: Execute appendChild
+    return originalAppendChild.apply(this, arguments); // Doesn't work with child, why?? Where does arguments come from?
+};
+
+document.createDocumentFragment = function() {
+	var fragment = new DocumentFragment();
+
+	var config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: false, attributeOldValue: true};
+	window.observer.observe(fragment, config);
+
+	return fragment;
+};
+
+// argument |applyFunction| has to take a node as only parameter
+function ForEveryChild(parentNode, applyFunction)
+{
+	var depth = '-';
+	ForEveryChild(parentNode, applyFunction, depth);
+}
+
+function ForEveryChild(parentNode, applyFunction, depth)
+{
+	var childs = parentNode.childNodes;
+	if(childs && applyFunction)
+	{
+		// ConsolePrint(depth+"Executing ForEveryChild...");
+
+		var n = childs.length;
+		for(var i = 0; i < n; i++)
+		{
+			// ConsolePrint(depth+""+(i+1)+". child...");
+			applyFunction(childs[i]);
+			ForEveryChild(childs[i], applyFunction, (depth+'---'));
+			
+		
+			// ConsolePrint(depth+""+(i+1)+". ... finished");
+		}
+
+		// ConsolePrint(depth+"... finished ForEveryChild");
+	}
+	// else
+		// ConsolePrint(depth+" No children / no function");
+}
+
+function AnalyzeNode(node)
+{
+	// ConsolePrint("AnalyzeNode called");
+
+	// DocumentFragments
+	if(node.nodeType === 11)
+	{
+		ConsolePrint("### DocumentFragment was added to the DOM");
+	}
+
+	if(node.nodeType == 1 || node.nodeType > 8) // 1 == ELEMENT_NODE
+	{
+		if(node.nodeType > 8) ConsolePrint(".nodeType > 8 is relevant!");
+		// EXPERIMENTAL
+		// if(node.tagName == 'SCRIPT')
+		// {
+			// Detect when external scripts start and end execution
+		// 	node.textContent = "ConsolePrint('# Script START #); var f = function(){ "+node.textContent+"}; f(); ConsolePrint('# Script END #');";
+		// }
+
+
+		if(window.appendedSubtreeRoots.delete(node))
+		{
+			// ConsolePrint("My children have to be checked separatedly! "+node.tagName+ " class: "+node.getAttribute('class'));
+			node.style.backgroundColor = "#00ff00";
+
+			// COLOR LEGEND
+			// roots, not found by observer:	red
+			// roots, found by observer:		green
+			// children, not found by observer:	magenta
+			// children, found by observer:		blue-green
+
+			ForEveryChild(node, function(child){ 
+				if(child.nodeType == 1 && 'style' in child) // child.style 
+					child.style.backgroundColor = '#00ffff'; 
+			});
+
+
+			ForEveryChild(node, AnalyzeNode);
+			// DEBUG
+			// ForEveryChild(node.parentNode.parentNode.parentNode, AnalyzeNode);
+			
+
+		
+
+			window.appendedSubtreeRoots.delete(node);
+		}
+
+
+		// Identify fixed elements on appending them to DOM tree
+		if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed') 
+		{
+			// ConsolePrint('position: '+node.style.position);
+			if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
+			{
+				//DEBUG
+				// ConsolePrint("New fixed node added to DOM tree");
+
+				AddFixedElement(node);
+
+				UpdateDOMRects();
+			}
+		}
+
+
+
+		// Find text links
+		if(node.tagName == 'A' )
+		{
+			CreateDOMLink(node);
+		}
+
+		if(node.tagName == 'INPUT')
+		{
+			// Identify text input fields
+			if(node.type == 'text' || node.type == 'search' || node.type == 'email' || node.type == 'password')
+			{
+				CreateDOMTextInput(node);
+			}
+
+			// TODO: Handle other kinds of <input> elements
+			if(node.type == 'button' || node.type == 'submit' || node.type == 'reset' || !node.hasAttribute('type'))
+			{
+				// TODO: CreateDOMButton!
+				CreateDOMLink(node);
+			}
+		}
+		// textareas or DIVs, whole are treated as text fields
+		if(node.tagName == 'TEXTAREA' || (node.tagName == 'DIV' && node.getAttribute('role') == 'textbox'))
+		{
+			if(node.getAttribute('class') == "T-I J-J5-Ji T-I-KE L3") ConsolePrint("Starting adding of Compose button");
+			CreateDOMTextInput(node);
+			if(node.getAttribute('class') == "T-I J-J5-Ji T-I-KE L3") ConsolePrint("Ended adding of Compose button");
+		}
+
+		// NEW: Buttons
+		if(node.tagName == 'DIV' && node.getAttribute('role') == 'button')
+		{
+			if(node.getAttribute('class') == "T-I J-J5-Ji T-I-KE L3") ConsolePrint("Starting adding of Compose button");
+			CreateDOMLink(node);
+			if(node.getAttribute('class') == "T-I J-J5-Ji T-I-KE L3") ConsolePrint("Ended adding of Compose button");
+		}
+
+		//DEBUG
+		// if(node.tagName)
+		// {
+		// 	var nClass = node.getAttribute('class');
+		// 	switch(nClass){
+		// 		case "T-I J-J5-Ji T-I-KE L3":
+		// 		case "z0":
+		// 		case ":4n":
+		// 		case "nM":
+		// 		case ":4o":
+		// 		case "aj9 pp":
+		// 		case "Ls77Lb aZ6":
+		// 		case "nH oy8Mbf nn aeN":
+		// 		case "no":
+		// 		case "nH":
+		// 		{
+		// 			ConsolePrint("### Found: "+nClass); 
+		// 			// node.style.backgroundColor = '#222222';
+		// 			ForEveryChild(node, function(child){
+		// 				if(child.nodeType == 1 && child.getAttribute('class') == "T-I J-J5-Ji T-I-KE L3")
+		// 				{
+		// 					ConsolePrint("class: "+node.getAttribute('class')+" --> Compose button is contained in this node's subtree");
+							
+		// 				}
+		// 			})
+		// 			break;
+		// 		}
+		// 	}
+		// }
+
+		// if(node.tagName == 'DIV')
+		// {
+		// 	if(node.style) node.style.backgroundColor = '#222222';
+		// 	if(node.textContent != "") node.textContent = "### Analyzed ###";
+		// }
+
+
+		if(node.tagName == 'FORM')
+		{
+			// Update whole <form> if transition happens in form's subtree
+			// (For shifting elements in form (e.g. Google Login) )
+			node.addEventListener('webkitTransitionEnd', function(event){
+				ConsolePrint("FORM transition event detected"); //DEBUG
+				ForEveryChild(node, function(child){
+					if(child.nodeType == 1)
+					{
+						var nodeType = child.getAttribute('nodeType');
+						if(nodeType)
+						{
+							var nodeID = child.getAttribute('nodeID');
+							var domObj = GetDOMObject(nodeType, nodeID);
+							if(domObj)
+							{
+								domObj.updateRects();
+							}
+						}
+					}
+					
+				});
+			}, false);
+		}
+
+
+	}
 }
 
 
@@ -638,82 +1127,121 @@ function MutationObserverInit()
 		  		function(mutation)
 		  		{
 					// DEBUG
-					//ConsolePrint("START Mutation occured...");
+					// ConsolePrint("Mutation occured..."+mutation.type);
 
 			  		var node;
 					
 		  			if(mutation.type == 'attributes')
 		  			{
 		  				node = mutation.target;
+
 			  			var attr; // attribute name of attribute which has changed
 
-		  				// TODO: How to identify node whose attributes changed? --> mutation.target?
+
 		  				if(node.nodeType == 1) // 1 == ELEMENT_NODE
 		  				{
 		  					attr = mutation.attributeName;
 
-		  					// usage example: observe changes in input field text
-		  					// if (node.tagName == 'INPUT' && node.type == 'text')
-		  					// 	alert('tagname: \''+node.tagName+'\' attr: \''+attr+'\' value: \''+node.getAttribute(attr)+'\' oldvalue: \''+mutation.oldValue+'\'');
-
-		  					if(attr == 'style' || 
-							   (document.readyState != 'loading' && attr == 'class') ) // TODO: example: uni-koblenz.de - node.id='header': class changes from 'container' to 'container fixed'
+		  					if(attr == 'style' ||  (document.readyState != 'loading' && attr == 'class') )
 		  					{
-		  						// alert('attr: \''+attr+'\' value: \''+node.getAttribute(attr)+'\' oldvalue: \''+mutation.oldValue+'\'');
-		  						if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
-		  						// if(node.style.position && node.style.position == 'fixed')
-		  						{
-		  							if(!window.fixed_elements.has(node))
-		  							{
-		  								//DEBUG
-		  								ConsolePrint("Attribut "+attr+" changed, calling AddFixedElement");
+								if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
+								{
+									if(!window.fixed_elements.has(node))
+									{
+										//DEBUG
+										ConsolePrint("Attribut "+attr+" changed, calling AddFixedElement");
 
-		  								AddFixedElement(node);
+										AddFixedElement(node);
 										
 										UpdateDOMRects();
-		  							}
-		  				
-		  						}
-		  						else // case: style.position not fixed
-		  						{
-		  							// If contained, remove node from set of fixed elements
-		  							if(window.fixed_elements.has(node))
-		  							{
-		  								RemoveFixedElement(node, true);
+									}
+						
+								}
+								else // case: style.position not fixed
+								{
+									// If contained, remove node from set of fixed elements
+									if(window.fixed_elements.has(node))
+									{
+										RemoveFixedElement(node, true);
 
 										UpdateDOMRects();
-		  							}
-		  						}
+									}
+								}
 
-		  					}
 
-		  					// Changes in attribute 'class' may indicate that bounding rect update is needed, if node is child node of a fixed element
-		  					if(attr == 'class')
-		  					{
-		  						if(node.hasAttribute('fixedID'))
-		  						{
-		  							//DEBUG
-		  							// ConsolePrint("class changed, updating subtree");
+								// Visibility a): style.visibility of given node (and its children)
+								// Check visibility of all children, only top most node called because of changes in node.style?
+
+							
+								// ForEveryChild(node, function(child){
+								// 	if(child.nodeType == 1)
+								// 	{	
+								// 		var nodeType = child.getAttribute('nodeType');
+								// 		if(nodeType)
+								// 		{
+								// 			var nodeID = child.getAttribute('nodeID');
+								// 			var domObj = GetDOMObject(nodeType, nodeID);
+								// 			if(domObj)
+								// 			{
+								// 				domObj.checkVisibility();
+								// 			}
+								// 		}
+								// 	}
+								// });
+							
+								
+
+
+		  					} // END attr == 'style'
+
+							// Changes in attribute 'class' may indicate that bounding rect update is needed, if node is child node of a fixed element
+							if(attr == 'class')
+							{
+								if(node.hasAttribute('fixedID'))
+								{
+									//DEBUG
+									// ConsolePrint("class changed, updating subtree");
 									UpdateDOMRects();
 
-		  							UpdateSubtreesBoundingRect(node);
+									UpdateSubtreesBoundingRect(node);
 
 									
 
 
-		  							// TODO: Triggered quite often... (while scrolling)
-		  						}
-		  					}
+									// TODO: Triggered quite often... (while scrolling)
+								}
 
-		  					// if(attr == 'href')
-		  					// {
-		  					// 	AddFixedElement(node);
-		  					// 	ConsolePrint("Changes in attribute |href|, adding link..");
-		  					// }
+								// Testing: GMail, username entered, pw field appears, Rects not in place...
+								UpdateDOMRects(); // TODO: With every class changes? Sounds wayyyy too much
 
-		  				}
+								ForEveryChild(node, function(child){
+									if(child.nodeType == 1)
+									{	
+										var nodeType = child.getAttribute('nodeType');
+										if(nodeType)
+										{
+											var nodeID = child.getAttribute('nodeID');
+											var domObj = GetDOMObject(nodeType, nodeID);
+											if(domObj)
+											{
+												domObj.checkVisibility();
+											}
+										}
+									}
+								});
+							}
 
-		  			}
+							if(attr == "innerHTML")
+							{
+								ConsolePrint("### Changes in innerHTML"); // doesn't work
+							}
+
+							
+		  				} // END node.nodeType == 1
+						
+					
+
+		  			} // END mutation.type == 'attributes'
 
 
 
@@ -722,64 +1250,29 @@ function MutationObserverInit()
 		  			if(mutation.type == 'childList') // TODO: Called upon each appending of a child node??
 		  			{
 		  				// Check if fixed nodes have been added as child nodes
-			  			var nodes = mutation.addedNodes;
-
+			  			var nodes = mutation.addedNodes; // concat(mutation.target.childNodes);
+						
 			  			for(var i=0, n=nodes.length; i < n; i++)
 			  			{
 			  				node = nodes[i]; // TODO: lots of data copying here??
-			  				var rect;
 
-			  				if(node.nodeType == 1) // 1 == ELEMENT_NODE
-			  				{
+							// if(node.nodeType == 1 && node.getAttribute('class') == 'tag-home__wrapper')//'tag-home  tag-home--slide  no-js__hide  js-tag-home')
+							// {
+							// 	ConsolePrint("Observer found shifting root DIV on its appending to DOM");
+							// 	ConsolePrint("Observer: node has "+node.childNodes.length+" already");
+							// }
+						
+							// Mark child nodes of DocumentFragment, in order to analyze their subtrees
+							if(mutation.target.nodeType == 11)
+							{
+								window.appendedSubtreeRoots.add(node);
+								ForEveryChild(node, function(child){ window.appendedSubtreeRoots.delete(child); });
+							}
+							
+			  				AnalyzeNode(node);
 
-			  					// if(node.style.position && node.style.position == 'fixed')
-		  						if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed')
-		  						{
-		  							// ConsolePrint('position: '+node.style.position);
-		  							if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
-		  							{
-		  								//DEBUG
-		  								// ConsolePrint("New fixed node added to DOM tree");
-
-		  								AddFixedElement(node);
-
-										UpdateDOMRects();
-		  							}
-		  						}
-
-
-		  						// EXPERIMENTAL
-		  						// Find text links
-		  						if(node.tagName == 'A')
-		  						{
-									// AddDOMTextLink(node); // OLD
-
-									// New approach
-									CreateDOMLink(node);
-
-		  							// DEBUG
-		  							//window.dom_links.push(node);
-		  							//window.dom_links_rect.push([0,0,0,0]);
-
-		  						}
-
-		  						// node.text = node.tagName;
-		  						// EXPERIMENTAL END
-
-		  						if(node.tagName == 'INPUT')
-		  						{
-		  							// Identify text input fields
-		  							if(node.type == 'text' || node.type == 'search' || node.type == 'email' || node.type == 'password')
-		  							{
-		  								// AddDOMTextInput(node); // OLD
-
-										// New approach
-										CreateDOMTextInput(node);
-		  							}
-		  						}
-
-
-			  				}
+	
+					
 			  			}
 
 
@@ -805,11 +1298,10 @@ function MutationObserverInit()
 			  				}
 			  			}
 
-		  			}
+		  			} // END mutation.type == 'childList'
 
-					// DEBUG
-					//ConsolePrint("END Mutation occured...");
-		  		} // end of function(){...}
+
+		  		} // END forEach mutation
 
 
 		 	);    
@@ -830,10 +1322,10 @@ function MutationObserverInit()
 	ConsolePrint('Trying to start observing... ');
 		
 	// Konfiguration des Observers: alles melden - Änderungen an Daten, Kindelementen und Attributen
-	var config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: false, attributeOldValue: false};
+	var config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: false, attributeOldValue: true};
 	
 	// eigentliche Observierung starten und Zielnode und Konfiguration übergeben
-	window.observer.observe(window.document, config);
+	window.observer.observe(document, config);
 
 	ConsolePrint('MutationObserver was told what to observe.');
 
@@ -841,34 +1333,6 @@ function MutationObserverInit()
 
 
 
-
-	/*
-	documentObserver = new MutationObserver(
-		function(mutations) {
-		  	mutations.forEach(
-		  		function(mutation)
-		  		{
-					// DEBUG
-					//ConsolePrint("START Mutation occured...");
-
-			  		//var node;
-					
-		  			if(mutation.type == 'attributes')
-		  			{
-		  				var attr = mutation.attributeName;
-						ConsolePrint('DOCUMENT OBSERVER!   '+attr);
-
-					}
-				}
-			);
-		}
-	);
-
-	var config = { attributes: true, childList: false, characterData: true, subtree: false, characterDataOldValue: false, attributeOldValue: false};
-	
-	// eigentliche Observierung starten und Zielnode und Konfiguration übergeben
-	documentObserver.observe(window.document.documentElement, config);
-	*/
 	
 } // END OF MutationObserverInit()
 

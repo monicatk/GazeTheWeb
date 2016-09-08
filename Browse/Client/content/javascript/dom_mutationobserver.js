@@ -18,22 +18,18 @@ function DOMObject(node, nodeType)
         this.node = node;
         this.nodeType = nodeType;
         this.rects = AdjustClientRects(this.node.getClientRects());
-        this.visible = true;
+        this.visible = true;    // default value, call DOMObj.checkVisibility() after object is created!
         this.fixed = false;
+        this.overflowParent = undefined;
 
     /* Methods */ 
         // Update member variable for Rects and return true if an update has occured 
         this.updateRects = function(){
 
+            this.checkVisibility();
+
             // Get new Rect data
             var updatedRectsData = AdjustClientRects(this.node.getClientRects());
-
-            // DEBUG
-            var bbrect = AdjustRectCoordinatesToWindow(this.node.getBoundingClientRect());
-            for(var i = 0; i < 4 && updatedRectsData.length == 1; i++)
-                if(updatedRectsData[0][i] != bbrect[i])
-                    ConsolePrint(i+': bbrect='+bbrect[i]+' -- rect='+updatedRectsData[0][i]);
-
 
             if(this.fixed)
             {
@@ -44,37 +40,6 @@ function DOMObject(node, nodeType)
 
             // Compare new and old Rect data
             var equal = CompareClientRectsData(updatedRectsData, this.rects);
-
-            // if(updatedRectsData.length == 0)
-            //     ConsolePrint("equal="+equal+", old_rect[0]="+this.rects[0]+", Could not adjust Rect for element "+this.node.textContent);
-
-            // if(updatedRectsData.length == undefined)
-            //     ConsolePrint("equal="+equal+", old_rect[0]="+this.rects[0]+", undefined RectData for element "+this.node.textContent);
-
-
-            // DEBUGGING
-            // if(this.node.textContent == "1.3 Stadtgliederung" || this.node.textContent == "1.4 Klima")
-            // {
-            //     this.setFixed(true);
-            //     ConsolePrint("##### DEBUGGING ####");
-            //     ConsolePrint(this.node.textContent);
-            //     var rect = this.node.getClientRects()[0];
-            //     ConsolePrint("rect: "+rect.top+", "+rect.left+", "+rect.bottom+", "+rect.right);
-            //     ConsolePrint("old: "+this.rects[0]);
-            //     if(updatedRectsData.length > 0)
-            //         ConsolePrint("new: "+updatedRectsData[0]);
-            //     else 
-            //     {
-            //         ConsolePrint("new: [length == 0]");
-            //         ConsolePrint('Schould be: '+AdjustRectCoordinatesToWindow(rect));
-            //     }
-
-            //     var bbrect = this.node.getBoundingClientRect();
-            //     ConsolePrint("bbrect: "+bbrect.top+", "+bbrect.left+", "+bbrect.bottom+", "+bbrect.right);
-            //     ConsolePrint("#### END OF DEBUGGING ####");
-            // }
-
-
 
             // Rect updates occured and new Rect data is accessible
             if(!equal && updatedRectsData != undefined && updatedRectsData.length > 0)
@@ -104,6 +69,143 @@ function DOMObject(node, nodeType)
             }
         };
 
+        this.setVisibility = function(visible){
+            if(this.visible != visible)
+            {
+                this.visible = visible;
+                InformCEF(this, ['update', 'visible']);
+                if(visible) this.updateRects();
+            }
+        };
+
+        this.checkVisibility = function(){
+            var visibility = window.getComputedStyle(this.node, null).getPropertyValue('visibility');
+
+            // Set visibility to hidden if bounding box is of resolution is 0 in any direction
+            var bb = this.node.getBoundingClientRect();
+            if(bb.width == 0 || bb.height == 0) { visibility = 'hidden'; }
+
+
+            // Check if any parent node has opacity near zero, if yes, child (this node) might not be visible
+            var root = this.node;
+            while(root !== document.documentElement && root && root !== undefined)
+            {
+                if(window.getComputedStyle(root, null).getPropertyValue('opacity') < 0.0001)
+                {
+                    visibility = 'hidden';
+                    break;
+                }
+                root = root.parentNode;
+            }
+
+            switch(visibility)
+            {
+                case 'hidden': { this.setVisibility(false); return; }
+                case '':
+                case 'visible': { /*this.setVisibility(true);*/ break; }
+                default:
+                { 
+                    ConsolePrint("DOMObj.checkVisibility() - visibility="+visibility+" currently handled as 'visible'.");
+                    // this.setVisibility(true);
+                }
+            }
+
+            if(this.overflowParent)
+            {
+                var overflowRect = this.overflowParent.getBoundingClientRect();
+                var nodeRect = this.node.getBoundingClientRect();
+
+                // DEBUG
+                // ConsolePrint("Comparing node's bounding box with overflow parent's bounding box...");
+                // ConsolePrint("overflow box: "+overflowRect.top+","+overflowRect.left+","+overflowRect.bottom+","+overflowRect.right);
+                // ConsolePrint("node's   box: "+nodeRect.top+","+nodeRect.left+","+nodeRect.bottom+","+nodeRect.right);
+
+                // Test if overflow box is more than a thin line
+                if( (overflowRect.height > 0 && overflowRect.width > 0) &&
+                    // Test if node's Rect lies completely inside of overflow Rect, then node is visible
+                    !(overflowRect.left <= nodeRect.left && overflowRect.right >= nodeRect.right && 
+                    overflowRect.top <= nodeRect.top && overflowRect.bottom >= nodeRect.bottom))
+                    {
+                        this.setVisibility(false);
+                        // DEBUG
+                        // ConsolePrint("Node's box is outside, so it's not visible!");
+                        return;
+                    }
+                // ConsolePrint("Node's box is inside, so node is visible!");
+
+            }
+            this.setVisibility(true);
+
+        }
+
+        this.searchOverflows = function (){
+            // NOTE: Assuming there aren't a any overflows in an overflow
+            var parent = this.node.parentNode;
+            while(parent != null || parent === document.documentElement)
+            {
+                if(parent.nodeType == 1)
+                {
+                    // style.overflow = {visible|hidden|scroll|auto|initial|inherit}
+                    var overflowProp = window.getComputedStyle(parent, null).getPropertyValue('overflow');
+                    if(overflowProp == 'hidden')
+                    {
+                        // Add node as overflow parent and compute own visibility with Rect of overflow parent
+                        this.overflowParent = parent;
+                        // DEBUG
+                        // ConsolePrint("Found an overflow parent!");
+                        return;
+                    }
+                }
+                parent = parent.parentNode;
+            }
+        }
+
+        this.setTextInput = function(text, submit){
+
+            // Only executable if DOMNode is TextInput field
+            if(this.nodeType == 0)
+            {
+                if (this.node.tagName == 'INPUT')
+                {
+                    // this.node.setAttribute('value', text);
+                    this.node.value = text;
+                }
+                else
+                {
+                    this.node.textContent = text;
+                }
+                
+                
+                // ConsolePrint("Input text was set!");
+
+                if(submit)
+                {
+                    // NOTE: Emulate pressing Enter in input field?
+
+                    var parent = this.node.parentNode;
+                    var no_form_found = false;
+                    while(parent.nodeName != 'FORM')
+                    {
+                        parent = parent.parentNode;
+                        if(parent === document.documentElement)
+                        {
+                            ConsolePrint('Could not submit text input: No child of any form element.');
+                            no_form_found = true;
+                            break;
+                        }
+                    }
+                    if(!no_form_found)
+                    {
+                        parent.submit();
+                        ConsolePrint("Input text was submitted.");
+                    }
+                
+                }
+
+            }
+        };
+
+
 }
 
 /**
@@ -123,6 +225,9 @@ function CreateDOMObject(node, nodeType)
 
         // Push to list and determined by DOMObjects position in type specific list
         var domObjList = GetDOMObjectList(nodeType);
+
+
+
         if(domObjList != undefined)
         {
             domObjList.push(domObj);
@@ -131,6 +236,12 @@ function CreateDOMObject(node, nodeType)
             // Add attributes to given DOM node
             node.setAttribute('nodeID', nodeID);
             node.setAttribute('nodeType', nodeType);
+
+            // Setup of attributes
+            domObj.checkVisibility();
+            domObj.searchOverflows();
+ 
+
 
             InformCEF(domObj, ['added']);
         }
@@ -142,7 +253,7 @@ function CreateDOMObject(node, nodeType)
     }
     else
     {
-        ConsolePrint("Useless call of CreateDOMObject");
+        // ConsolePrint("Useless call of CreateDOMObject");
     }
 }
 
@@ -240,7 +351,7 @@ function CompareClientRectsData(rects1, rects2)
 function UpdateDOMRects()
 {
     // DEBUG
-    ConsolePrint("UpdateDOMRects() called");
+    // ConsolePrint("UpdateDOMRects() called");
 
     // Trigger update of Rects for every domObject
     window.domTextInputs.forEach(
@@ -248,6 +359,18 @@ function UpdateDOMRects()
     );
     window.domLinks.forEach(
         function (domObj) { domObj.updateRects(); }
+    );
+
+    // ConsolePrint("Also, update fixed element Rects");
+    UpdateFixedElementRects();
+
+    // ConsolePrint("And visibility!");
+    // Trigger update of Rects for every domObject
+    window.domTextInputs.forEach(
+        function (domObj) { domObj.searchOverflows(); domObj.checkVisibility(); }
+    );
+    window.domLinks.forEach(
+        function (domObj) { domObj.searchOverflows(); domObj.checkVisibility(); }
     );
 }
 
@@ -295,8 +418,14 @@ function InformCEF(domObj, operation)
                 // Encode changes in 'fixed' as attribute '1'
                 encodedCommand += ('1#'+status+'#');
 
-                // DEBUG
-                ConsolePrint('command: '+encodedCommand);
+            }
+
+            if(operation[1] == 'visible')
+            {
+                var status = (domObj.visible) ? 1 : 0;
+                
+                encodedCommand += ('2#'+status+'#');
+                // ConsolePrint("encodedCommand: "+encodedCommand);
             }
         }
 
@@ -304,6 +433,10 @@ function InformCEF(domObj, operation)
 
         // Send encoded command to CEF
         ConsolePrint(encodedCommand);
+    }
+    else
+    {
+        ConsolePrint("ERROR: No DOMObject given to perform informing of CEF!");
     }
 }
 
