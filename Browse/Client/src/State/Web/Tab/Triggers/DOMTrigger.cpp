@@ -46,6 +46,13 @@ DOMTrigger::~DOMTrigger()
 
 bool DOMTrigger::Update(float tpf, TabInput& rTabInput)
 {
+    // Decide visibility
+    if(_visible != _spNode->GetVisibility())
+    {
+        _visible = _spNode->GetVisibility();
+        _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, _visible);
+    }
+
     // Calculate position of overlay button
     float x, y;
     CalculatePositionOfOverlayButton(x, y);

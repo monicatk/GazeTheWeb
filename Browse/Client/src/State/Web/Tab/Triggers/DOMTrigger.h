@@ -62,6 +62,9 @@ private:
 
     // Bool to remember that it was triggered
     bool _triggered = false;
+
+    // Visibility of overlay
+    bool _visible = false;
 };
 
 #endif // TRIGGER_H_
