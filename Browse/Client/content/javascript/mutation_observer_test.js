@@ -919,7 +919,7 @@ function AnalyzeNode(node)
 		}
 
 		// GMail
-		if(node.tagName == 'DIV' && node.getAttribute('role') == 'link')
+		if(node.tagName == 'DIV' && (node.getAttribute('role') == 'link' || node.getAttribute('role') == 'tab') )
 		{
 			CreateDOMLink(node);
 		}
