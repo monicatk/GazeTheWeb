@@ -9,9 +9,46 @@
 #include "src/LoginArea/Login.h"
 #include "src/TwitterClient/ImageDownload.h"
 #include "src/Input.h"
+#include "src/Framebuffer.h"
 #include <iostream>
 
 using namespace std;
+
+// Shaders for screen filling rendering
+const std::string vertexShaderSource =
+"#version 330 core\n"
+"void main() {\n"
+"}\n";
+
+const std::string geometryShaderSource =
+"#version 330 core\n"
+"layout(points) in;\n"
+"layout(triangle_strip, max_vertices = 4) out;\n"
+"out vec2 uv;\n"
+"void main() {\n"
+"    gl_Position = vec4(1.0, 1.0, 0.0, 1.0);\n"
+"    uv = vec2(1.0, 1.0);\n"
+"    EmitVertex();\n"
+"    gl_Position = vec4(-1.0, 1.0, 0.0, 1.0);\n"
+"    uv = vec2(0.0, 1.0);\n"
+"    EmitVertex();\n"
+"    gl_Position = vec4(1.0, -1.0, 0.0, 1.0);\n"
+"    uv = vec2(1.0, 0.0);\n"
+"    EmitVertex();\n"
+"    gl_Position = vec4(-1.0, -1.0, 0.0, 1.0);\n"
+"    uv = vec2(0.0, 0.0);\n"
+"    EmitVertex();\n"
+"    EndPrimitive();\n"
+"}\n";
+
+const std::string fragmentShaderSource =
+"#version 330 core\n"
+"in vec2 uv;\n"
+"out vec4 fragColor;\n"
+"uniform sampler2D tex;\n"
+"void main() {\n"
+"   fragColor = texture(tex, uv);\n"
+"}\n";
 
 // Callback to receive information from eyeGUI
 void printCallback(std::string message)
@@ -39,7 +76,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 */
 int main(int argc, char* argv[]) {
     //Arguments (Windows only)
-    bool fullscreen = false;
     #ifdef _WIN32
         bool console = false;
         for (int i = 0; i < argc; i++) {
@@ -47,9 +83,6 @@ int main(int argc, char* argv[]) {
             std::string arg = argv[i];
             if (arg.compare("-console") == 0) {
                 console = true;
-            }
-            if (arg.compare("-fullscreen") == 0) {
-                fullscreen = true;
             }
         }
 
@@ -61,18 +94,23 @@ int main(int argc, char* argv[]) {
         }
     #endif
 
-    // Window and OpenGL initialization
+    // GLFW
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#ifdef USEEYETRACKER
-    GLFWwindow* window = glfwCreateWindow(1280, 800, "GazeTheWeb - Tweet", glfwGetPrimaryMonitor(), NULL);
-#else
-    GLFWwindow* window = glfwCreateWindow(1280, 800, "GazeTheWeb - Tweet", fullscreen? glfwGetPrimaryMonitor() : NULL, NULL);
-#endif
+
+	// Determine screen resolution
+	const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	int resX = mode->width;
+	int resY = mode->height;
+
+	// Create window
+    GLFWwindow* window = glfwCreateWindow(resX, resY, "GazeTheWeb - Tweet", glfwGetPrimaryMonitor(), NULL);
     glfwMakeContextCurrent(window);
+
+	// OpenGL initialization
     ogl_LoadFunctions();
 
     // VSync
@@ -103,8 +141,47 @@ int main(int argc, char* argv[]) {
     guiBuilder.height = 800;
     Login* login = Login::createInstance(1280,800);
 
-    float lastTime, deltaTime;
-    lastTime = (float)glfwGetTime();
+	// Create framebuffer into which is the whole application rendered since it has to be always 1280x720
+	Framebuffer framebuffer(1280, 800);
+	framebuffer.Bind();
+	framebuffer.AddAttachment(Framebuffer::ColorFormat::RGB, true);
+	framebuffer.Unbind();
+
+	// Screen filling quad
+
+	// Vertex shader
+	int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	char const * pVertSource = vertexShaderSource.c_str();
+	glShaderSource(vertexShader, 1, &pVertSource, NULL);
+	glCompileShader(vertexShader);
+
+	// Geometry shader
+	int geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+	char const * pGeomSource = geometryShaderSource.c_str();
+	glShaderSource(geometryShader, 1, &pGeomSource, NULL);
+	glCompileShader(geometryShader);
+
+	// Fragment shader
+	int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	char const * pFragSource = fragmentShaderSource.c_str();
+	glShaderSource(fragmentShader, 1, &pFragSource, NULL);
+	glCompileShader(fragmentShader);
+
+	// Create program
+	GLuint screenfillingProgram  = glCreateProgram();
+	glAttachShader(screenfillingProgram, vertexShader);
+	glAttachShader(screenfillingProgram, geometryShader);
+	glAttachShader(screenfillingProgram, fragmentShader);
+	glLinkProgram(screenfillingProgram);
+
+	// Delete shaders
+	glDeleteShader(vertexShader);
+	glDeleteShader(geometryShader);
+	glDeleteShader(fragmentShader);
+
+	// Vertex array object
+	GLuint screenfillingVAO;
+	glGenVertexArrays(1, &screenfillingVAO);
 
 	// Hide mouse for eyetracking input
 #if defined(USEEYETRACKER_IVIEW) || defined(USEEYETRACKER_TOBII)
@@ -114,6 +191,10 @@ int main(int argc, char* argv[]) {
 	// Setup input
     input_setup();
 
+	// Prepare delta time
+	float lastTime, deltaTime;
+	lastTime = (float)glfwGetTime();
+
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -121,6 +202,7 @@ int main(int argc, char* argv[]) {
         {
             glfwDestroyWindow(window);
         }
+
         // Calculate delta time per frame
         float currentTime = (float)glfwGetTime();
         deltaTime = currentTime - lastTime;
@@ -134,13 +216,26 @@ int main(int argc, char* argv[]) {
         eyegui::Input input;
 
         input_get_xy(x, y, window);
-        input.gazeX = x;
+        input.gazeX = x; 
         input.gazeY = y;
         input.instantInteraction = false;
 
-        // Render GUI
+		// Since the input coordinates are probably in full screen resolution, calculate them into coordinates of framebuffer
+		input.gazeX = (int)((float)input.gazeX * (1280.f / (float)resX));
+		input.gazeY = (int)((float)input.gazeY * (800.f / (float)resY));
+
+        // Render GUI into framebuffer
+		framebuffer.Bind();
         eyegui::Input usedInput = eyegui::updateGUI(login->application->getGUI(), deltaTime, input);
         eyegui::drawGUI(login->application->getGUI());
+		framebuffer.Unbind();
+
+		// Render framebuffer on screen
+		glBindVertexArray(screenfillingVAO);
+		glUseProgram(screenfillingProgram);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, framebuffer.GetAttachment(0));
+		glDrawArrays(GL_POINTS, 0, 1);
 
         // Swap front and back buffers and poll events
         glfwSwapBuffers(window);
@@ -154,6 +249,10 @@ int main(int argc, char* argv[]) {
 
     //Destructor
     delete login;
+
+	// Delete screen filling stuff
+	glDeleteProgram(screenfillingProgram);
+	glDeleteVertexArrays(1, &screenfillingVAO);
 
     // Termination of program
     glfwTerminate();
