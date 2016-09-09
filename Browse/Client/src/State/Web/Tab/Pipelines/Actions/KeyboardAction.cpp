@@ -100,11 +100,14 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
         _overlaySpaceButtonId,
         [&]() // down callback
         {
-            this->_text.append(_currentWord);
-            this->_text.append(u" ");
-            this->_currentWord.clear();
-            _pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, u"");
-            UpdateTextBlock();
+			if (!_currentWord.empty()) // TODO: hot fix because eyeGUI crashes when two spaces directly follow each other
+			{
+				this->_text.append(_currentWord);
+				this->_text.append(u" ");
+				this->_currentWord.clear();
+				_pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, u"");
+				UpdateTextBlock();
+			}
         },
 		[](){}); // up callback
 
