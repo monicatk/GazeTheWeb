@@ -13,17 +13,17 @@
 namespace setup
 {
     // Window
-    static const bool FULLSCREEN = false;
+    static const bool FULLSCREEN = true;
     static const int INITIAL_WINDOW_WIDTH = 1280;
     static const int INITIAL_WINDOW_HEIGHT = 720;
 
     // Control
     static const float DURATION_BEFORE_INPUT = 1.f; // wait one second before accepting input
-    static const bool PAUSED_AT_STARTUP = false;
+    static const bool PAUSED_AT_STARTUP = true;
     static const float LINK_CORRECTION_MAX_PIXEL_DISTANCE = 20.f;
 
     // Debugging
-    static const bool LOG_DEBUG_MESSAGES = true;
+    static const bool LOG_DEBUG_MESSAGES = false;
     static const bool DRAW_DEBUG_OVERLAY = false;
 
     // Experiments
