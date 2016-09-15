@@ -13,7 +13,7 @@ Svenja Neuneier, Dennis Hahn, Caterine Ospina Ocampo, Sergei Diez, Saskia Handab
 ## HowTo
 Use CMake to create a project either for Visual Studio 2015 or Unix Makefile. The provided CMakeLists.txt should find all necessary dependencies in the _externals_ folder. As default, mouse control is chosen. For eyetracker support, set the CMake variable *USEEYETRACKER* to `ON`. The program tries to connect to a SMI REDn tracker by default, for connection to an Tobii EyeX tracker one has to set the variable *USETOBII* to `ON`, in addition.
 
-For showing in fullscreen, one has to add '-fullscreen' to the execution arguments. To activate the console, the same procedure with "-console" has to be done. Both does only work on Windows.
+To activate the console, add "-console" to the call arguments of the application. Does work on Windows, only.
 
 ## Shortcuts
 ESC: Exit application
