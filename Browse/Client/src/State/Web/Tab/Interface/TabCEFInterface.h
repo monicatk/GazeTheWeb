@@ -70,6 +70,9 @@ public:
 
     // Add new Tab after that one
     virtual void AddTabAfter(std::string URL) = 0;
+
+	// Receive current loading status of each frame
+	virtual void SetLoadingStatus(int64 frameID, bool isMain, bool isLoading) = 0;
 };
 
 #endif // TABCEFINTERFACE_H_

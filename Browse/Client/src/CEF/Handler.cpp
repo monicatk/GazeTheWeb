@@ -119,6 +119,9 @@ void Handler::OnLoadError(
 
 void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame)
 {
+	// Set loading status of each in Tab to loading in order to display loading icon and status
+	_pMediator->SetLoadingStatus(browser, frame->GetIdentifier(), frame->IsMain(), true);
+
     //CEF_REQUIRE_UI_THREAD();
 	if(frame->IsMain())
 		LogDebug("Handler: Started loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), "), browserID = ", browser->GetIdentifier());
@@ -149,6 +152,10 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
 
 void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode)
 {
+	// Set loading status of each frame in Tab to load finished in order to display loading icon and status
+	_pMediator->SetLoadingStatus(browser, frame->GetIdentifier(), frame->IsMain(), false);
+
+
 	if(frame->IsMain())
 		LogDebug("Handler: End of loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), ").");
 
@@ -168,6 +175,7 @@ void Handler::OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
     bool canGoBack,
     bool canGoForward)
 {
+
     // TODO: There might be a more performant way to set those values not as regularly as with every callback
     _pMediator->SetCanGoBack(browser, canGoBack);
     _pMediator->SetCanGoForward(browser, canGoForward);

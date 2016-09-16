@@ -271,3 +271,28 @@ void Tab::RemoveFixedElement(int id)
 	//	LogDebug("Tab: Fixed element with id=", id, " wasn't in list...");
 	//}
 }
+
+void Tab::SetLoadingStatus(int64 frameID, bool isMain, bool isLoading)
+{
+	// NOTE: isMain=true && isLoading=false may indicate, that site has completely finished loading
+
+	if (isLoading)
+	{
+		_loadingFrames.emplace(frameID);
+
+		if (isMain)
+		{
+			LogInfo("Tab: Started to load page.");
+		}
+	}
+	else if (_loadingFrames.find(frameID) != _loadingFrames.end())
+	{
+		_loadingFrames.erase(frameID);
+
+		if (isMain)
+		{
+			LogInfo("Tab: Finished loading page.");
+		}
+	}
+	
+}

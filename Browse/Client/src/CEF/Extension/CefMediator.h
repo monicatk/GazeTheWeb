@@ -112,6 +112,8 @@ public:
 
 	void FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
 
+	bool SetLoadingStatus(CefRefPtr<CefBrowser> browser, int64 frameID, bool isMain, bool isLoading);
+
 protected:
 
     /* MEMBERS */
