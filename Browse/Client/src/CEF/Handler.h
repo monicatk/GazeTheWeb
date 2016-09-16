@@ -126,9 +126,6 @@ private:
 
     /* MEMBERS */
 
-    // Used for an early DOM node update, if main frame loading takes too long because of multiple subframes
-    std::map<int64, bool> _loadingMainFrames;
-
     // List of existing browser windows. Only accessed on the CEF UI thread
     typedef std::list<CefRefPtr<CefBrowser> > BrowserList;
     BrowserList _browserList;

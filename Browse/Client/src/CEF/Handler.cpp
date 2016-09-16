@@ -140,12 +140,6 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
         // Inject Javascript to hide scrollbar
         frame->ExecuteJavaScript(_js_remove_css_scrollbar, frame->GetURL(), 0);
 
-        //// Clear all previous DOM nodes in corresponding Tab when new main frame is loading
-        //_pMediator->ClearDOMNodes(browser);	// now triggered when context is created in Renderer
-
-        // Add own ID + false to loading frame map
-        _loadingMainFrames.emplace(std::make_pair(frame->GetIdentifier(), true));
-
     }
     else // Current frame is not the main frame
     {
