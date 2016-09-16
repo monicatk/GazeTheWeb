@@ -1,25 +1,18 @@
-Other
-- Scrolling with sub windows (GMail, Facebook)
-- Show loading status with e.g. a loading symbol
+Basic Features
+- Page Loading Status
+- Scrolling within page
+- Auto Fill / Password Manager
+ - Daniel: Passwort / Anmeldeformulare erkennen
+- Search on page
+- Direct search of non URLs
+- History / Inkognito
+- Https recognition
+- Emulation Fallback
 
-Daniel Roadmap
-- Rectangle for fixed elements (with and without children) (later polygon)
-- Polling (frame based by master call and context based at calls from Tab)
-  - Add delay whose duration is defined in Global.h
-  - Use for updating rectangles (if not observable)
-- DOMNode creation using observer (InputFields, Links, Buttons, Images)
-- Open new windows in Tabs
--- Until August
-- Find out when elements are scrollable
-- Refactoring
-- CSS injection
+Advanced Features
+- CSS Injection
+- Copy Paste / Marking
+ - Rough selection via browser window (getstring) and precise selection in eyeGUI
+ 
+Milestone
 
-Raphael Roadmap
-- Overlay keyboard
-- Navigation / Link clicking
-- Interaction Logging
-  - Send also from browser or only from eyeGUI?
-
-Aims
-- Use GMail
-- Faster navigation
