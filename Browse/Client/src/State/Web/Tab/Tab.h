@@ -210,7 +210,6 @@ public:
     virtual void ClearDOMNodes();
 	virtual void RemoveDOMNode(DOMNodeType type, int nodeID);
 
-
     // Receive callbacks from CefMediator upon scrolling offset changes
     virtual void SetScrollingOffset(double x, double y);
 

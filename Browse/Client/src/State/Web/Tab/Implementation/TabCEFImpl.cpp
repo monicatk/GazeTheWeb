@@ -21,8 +21,15 @@ void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upDa
 	int size; // width * height * 4
 	if (upData != NULL && ((size = (int)upData->size()) >= 4) && width > 0 && height > 0)
 	{
-		// Show favicon in layout (TODO: test. Name of image must be constructed from tab id)
-		// eyegui::setImageOfPicture(_pPanelLayout, "favicon", "test", width, height, eyegui::ColorFormat::RGBA, upData->data(), true);
+        // Create name of image by using tab information for having a unique image for each tab
+        int tabId = _pWeb->GetIdOfTab(this);
+        if(tabId >= 0)
+        {
+            std::string imageName = "tab_info_" + std::to_string(tabId);
+
+            // Show favicon in layout
+            eyegui::setImageOfPicture(_pPanelLayout, "icon", imageName, width, height, eyegui::ColorFormat::RGBA, upData->data(), true);
+        }
 
 		// Prepare loop
 		int steps = (width * height) / TAB_ACCENT_COLOR_SAMPLING_POINTS;

@@ -398,6 +398,21 @@ void Web::PushAddTabAfterJob(Tab* pCaller, std::string URL)
     _jobs.push(std::unique_ptr<TabJob>(new AddTabAfterJob(pCaller, URL, true)));
 }
 
+int Web::GetIdOfTab(Tab const * pCaller) const
+{
+    // Go through map and find tab
+    for(const auto& rPair : _tabs)
+    {
+        // Check whether tab is the same
+        if(rPair.second.get() == pCaller)
+        {
+            return rPair.first;
+        }
+    }
+
+    return -1;
+}
+
 int Web::GetIndexOfTabInOrderVector(int id) const
 {
     // Search tab in order
