@@ -237,6 +237,9 @@ public:
 
 private:
 
+	// Enumeration for icon state of tab
+	enum class IconState { LOADING, FAVICON };
+
 	// Struct for click visulizations
 	struct ClickVisualization
 	{
@@ -365,6 +368,9 @@ private:
 
     // Pushes back click visualization which fades out. X and y are in pixels
     void PushBackClickVisualization(double x, double y);
+
+	// Set icon state of tab
+	void SetIconState(IconState iconState);
 
 	// ###############
 	// ### MEMBERS ###

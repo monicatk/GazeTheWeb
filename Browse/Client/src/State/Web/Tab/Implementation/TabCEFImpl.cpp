@@ -27,8 +27,8 @@ void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upDa
         {
             std::string imageName = "tab_info_" + std::to_string(tabId);
 
-            // Show favicon in layout
-            eyegui::setImageOfPicture(_pPanelLayout, "icon", imageName, width, height, eyegui::ColorFormat::RGBA, upData->data(), true);
+            // Show favicon in layout TODO: save? favicon until page loaded
+            // eyegui::setImageOfPicture(_pPanelLayout, "icon", imageName, width, height, eyegui::ColorFormat::RGBA, upData->data(), true);
         }
 
 		// Prepare loop
@@ -281,25 +281,16 @@ void Tab::RemoveFixedElement(int id)
 
 void Tab::SetLoadingStatus(int64 frameID, bool isMain, bool isLoading)
 {
-	// NOTE: isMain=true && isLoading=false may indicate, that site has completely finished loading
-
-	if (isLoading)
+	// isMain=true && isLoading=false may indicate, that site has completely finished loading
+	if (isMain)
 	{
-		_loadingFrames.emplace(frameID);
-
-		if (isMain)
+		if (isLoading)
 		{
-			LogInfo("Tab: Started to load page.");
+			SetIconState(IconState::LOADING);
+		}
+		else
+		{
+			SetIconState(IconState::FAVICON);
 		}
 	}
-	else if (_loadingFrames.find(frameID) != _loadingFrames.end())
-	{
-		_loadingFrames.erase(frameID);
-
-		if (isMain)
-		{
-			LogInfo("Tab: Finished loading page.");
-		}
-	}
-	
 }

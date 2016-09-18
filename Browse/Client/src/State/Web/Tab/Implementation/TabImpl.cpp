@@ -851,3 +851,16 @@ void Tab::PushBackClickVisualization(double x, double y)
 	// Add to vector which is updated per frame
 	_clickVisualizations.push_back(clickVisualization);
 }
+
+void Tab::SetIconState(IconState iconState)
+{
+	switch (iconState)
+	{
+	case IconState::LOADING:
+		// TODO
+		break;
+	case IconState::FAVICON:
+		// TODO
+		break;
+	}
+}
