@@ -21,15 +21,9 @@ void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upDa
 	int size; // width * height * 4
 	if (upData != NULL && ((size = (int)upData->size()) >= 4) && width > 0 && height > 0)
 	{
-        // Create name of image by using tab information for having a unique image for each tab
-        int tabId = _pWeb->GetIdOfTab(this);
-        if(tabId >= 0)
-        {
-            std::string imageName = "tab_info_" + std::to_string(tabId);
-
-            // Show favicon in layout TODO: save? favicon until page loaded
-            // eyegui::setImageOfPicture(_pPanelLayout, "icon", imageName, width, height, eyegui::ColorFormat::RGBA, upData->data(), true);
-        }
+		// Load icon into eyeGUI
+		eyegui::fetchImage(_pPanelLayout, GetFaviconIdentifier(), width, height, eyegui::ColorFormat::RGBA, upData->data(), true);
+		_faviconLoaded = true;
 
 		// Prepare loop
 		int steps = (width * height) / TAB_ACCENT_COLOR_SAMPLING_POINTS;
@@ -284,13 +278,6 @@ void Tab::SetLoadingStatus(int64 frameID, bool isMain, bool isLoading)
 	// isMain=true && isLoading=false may indicate, that site has completely finished loading
 	if (isMain)
 	{
-		if (isLoading)
-		{
-			SetIconState(IconState::LOADING);
-		}
-		else
-		{
-			SetIconState(IconState::FAVICON);
-		}
+		SetLoadingIcon(isLoading);
 	}
 }

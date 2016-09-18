@@ -1,5 +1,6 @@
 Basic Features
 - Page Loading Status
+ - Problem of favicon rendering. Maybe: Same function used for image loading via filepath and via raw bytes. Maybe path to root is a problem?
 - Scrolling within page
 - Auto Fill / Password Manager
  - Daniel: Passwort / Anmeldeformulare erkennen
@@ -13,6 +14,3 @@ Advanced Features
 - CSS Injection
 - Copy Paste / Marking
  - Rough selection via browser window (getstring) and precise selection in eyeGUI
- 
-Milestone
-
