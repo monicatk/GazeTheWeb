@@ -652,7 +652,8 @@ document.onreadystatechange = function()
 	{
 		UpdateDOMRects();
 
-		ForEveryChild(document.documentElement, AnalyzeNode);
+		// GMail
+		// ForEveryChild(document.documentElement, AnalyzeNode);
 	}
 
 	if(document.readyState == 'complete')
@@ -662,7 +663,7 @@ document.onreadystatechange = function()
 		ConsolePrint('<----- Page fully loaded. -------|');
 
 		// GMail
-		ForEveryChild(document.documentElement, AnalyzeNode);
+		// ForEveryChild(document.documentElement, AnalyzeNode);
 		
 	}
 }
@@ -705,6 +706,30 @@ document.addEventListener('transitionend', function(event){
 
 var docFrags = [];
 
+var origCreateElement = Document.prototype.createElement;
+Document.prototype.createElement = function(tag)
+{
+	if(arguments[0] === "iframe" || arguments[0] === "IFRAME") 
+	{
+		ConsolePrint("<iframe> created.");
+		// ConsolePrint("Preventing creation of <iframe>, returning Text instead...");
+		// var txt = this.createElement("A");
+		// txt.appendChild(this.createTextNode("<iframe>, nein nein!"));
+		// ConsolePrint("DONE");
+		// return txt;
+	}
+	// ConsolePrint("Creating element with tagName="+tag);
+	var elem = origCreateElement.apply(this, arguments);
+	if(arguments[0] === "iframe") elem.style.backgroundColor = "#0000ff";
+	return elem ;
+}
+
+var origImportNode = Document.prototype.importNode;
+Document.prototype.importNode = function(importedNode, deep){
+	ConsolePrint("Document.importNode called!");
+	return origImportNode.apply(this, arguments);
+}
+
 /* Modify appendChild in order to get notifications when this function is called */
 var originalAppendChild = Element.prototype.appendChild;
 Element.prototype.appendChild = function(child){
@@ -713,6 +738,18 @@ Element.prototype.appendChild = function(child){
     if(this.nodeType == 1 || this.nodeType > 8)
     {
 		var subtreeRoot = this;
+
+		if(child.nodeType === 1 && child.tagName == "IFRAME") 
+		{
+			ConsolePrint("iframe appended as child to "+this.tagName);
+			child.style.backgroundColor = "#00ff00";
+			if(this.style) this.style.backgroundColor = "#ff0000";
+
+			var txt = document.createElement("A");
+			txt.appendChild(document.createTextNode("<iframe>, nein nein!"))
+			return originalAppendChild.apply(this, txt);
+		}
+		if(this.tagName == "IFRAME" && child.nodeType === 1) ConsolePrint(child.tagName+" appended to iframe");
 
 		// Stop going up the tree when parentNode is documentElement or doesn't exist (null or undefined)
 		while(subtreeRoot !== document.documentElement && subtreeRoot.parentNode && subtreeRoot.parentNode !== undefined)
@@ -784,8 +821,10 @@ Element.prototype.appendChild = function(child){
     return originalAppendChild.apply(this, arguments); // Doesn't work with child, why?? Where does arguments come from?
 };
 
-document.createDocumentFragment = function() {
+Document.prototype.createDocumentFragment = function() {
 	var fragment = new DocumentFragment();
+
+	// TODO: childList in config not needed? Or later for children, added to DOM, relevant?
 
 	var config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: false, attributeOldValue: true};
 	window.observer.observe(fragment, config);
@@ -827,10 +866,20 @@ function ForEveryChild(parentNode, applyFunction, depth)
 function AnalyzeNode(node)
 {
 	// ConsolePrint("AnalyzeNode called");
+	if(node.nodeType === 1 && node.tagName == "IFRAME")
+	{
+		ConsolePrint("Found iframe.. analyzing it...");
+		ForEveryChild(node.contentDocument.documentElement, function(child){
+			if(child.tagName) ConsolePrint("tag: "+child.tagName);
+			AnalyzeNode(child);
+			if(child.style) child.style.backgroundColor = "#ff0000";
+		});
+		ConsolePrint("... done analyzing.");
+	}
 
 
 
-	if((node.nodeType == 1 && !node.hasAttribute("nodeType"))|| node.nodeType > 8) // 1 == ELEMENT_NODE
+	if( (node.nodeType == 1 || node.nodeType > 8) && !node.hasAttribute("nodeType") ) // 1 == ELEMENT_NODE
 	{
 		// EXPERIMENTAL
 		// if(node.tagName == 'SCRIPT')

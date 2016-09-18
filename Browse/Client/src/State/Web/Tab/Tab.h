@@ -26,6 +26,7 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <set>
 
 // Forward declaration
 class Master;
@@ -230,6 +231,9 @@ public:
 
     // Add new Tab after that one
 	virtual void AddTabAfter(std::string URL) { _pWeb->PushAddTabAfterJob(this, URL); }
+
+	// Receive current loading status of each frame
+	virtual void SetLoadingStatus(int64 frameID, bool isMain, bool isLoading);
 
 private:
 
@@ -462,6 +466,9 @@ private:
 
     // Title of current website
     std::string _title;
+
+	// Used for current loading status
+	std::set<int64> _loadingFrames;
 };
 
 #endif // TAB_H_

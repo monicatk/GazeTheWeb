@@ -260,6 +260,20 @@ void CefMediator::FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<C
 	}
 }
 
+bool CefMediator::SetLoadingStatus(CefRefPtr<CefBrowser> browser, int64 frameID, bool isMain, bool isLoading)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		pTab->SetLoadingStatus(frameID, isMain, isLoading);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+	
+}
+
 void CefMediator::ResetScrolling(TabCEFInterface * pTab)
 {
     if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
