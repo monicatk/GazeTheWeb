@@ -1,6 +1,4 @@
 Basic Features
-- Page Loading Status
- - Problem of favicon rendering. Maybe: Same function used for image loading via filepath and via raw bytes. Maybe path to root is a problem?
 - Scrolling within page
 - Auto Fill / Password Manager
  - Daniel: Passwort / Anmeldeformulare erkennen
