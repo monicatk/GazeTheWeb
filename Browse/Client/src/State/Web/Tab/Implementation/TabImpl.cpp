@@ -10,7 +10,7 @@
 #include "src/Utils/QuadRenderItem.h"
 #include "src/Utils/Helper.h"
 #include "submodules/glm/glm/gtc/matrix_transform.hpp" // TODO: move to debug rendering class
-#include <algorithm>
+#include <algorithm>y
 
 // Shaders (For debugging rectangles)
 const std::string vertexShaderSource =
@@ -215,6 +215,29 @@ void Tab::Update(float tpf, Input& rInput)
 	// ### UPDATE COLOR OF GUI ###
 
 	UpdateAccentColor(tpf);
+
+	// ### UPDATE ICON ###
+	if (_iconState == IconState::ICON_NOT_FOUND)
+	{
+		// Check whether favicon is available now
+		if (_faviconLoaded)
+		{
+			// Set icon to favicon
+			eyegui::setImageOfPicture(_pPanelLayout, "icon", GetFaviconIdentifier());
+			_iconState = IconState::FAVICON;
+		}
+	}
+	else if (_iconState == IconState::LOADING)
+	{
+		// Update frame of loading icon
+		_timeUntilNextLoadingIconFrame -= tpf;
+		while (_timeUntilNextLoadingIconFrame < 0)
+		{
+			_timeUntilNextLoadingIconFrame += TAB_LOADING_ICON_FRAME_DURATION;
+			_loadingIconFrame = (_loadingIconFrame + 1) % 3;
+		}
+		eyegui::setImageOfPicture(_pPanelLayout, "icon", "icons/TabLoading_" + std::to_string(_loadingIconFrame) + ".png");
+	}
 
     // ### UPDATE DEBUG LAYOUT ###
 
@@ -850,4 +873,32 @@ void Tab::PushBackClickVisualization(double x, double y)
 
 	// Add to vector which is updated per frame
 	_clickVisualizations.push_back(clickVisualization);
+}
+
+void Tab::SetLoadingIcon(bool visible)
+{
+	if (visible)
+	{
+		eyegui::setImageOfPicture(_pPanelLayout, "icon", "icons/TabLoading_0.png");
+		_timeUntilNextLoadingIconFrame = TAB_LOADING_ICON_FRAME_DURATION;
+		_iconState = IconState::LOADING;
+	}
+	else
+	{
+		if (_faviconLoaded)
+		{
+			eyegui::setImageOfPicture(_pPanelLayout, "icon", GetFaviconIdentifier());
+			_iconState = IconState::FAVICON;
+		}
+		else
+		{
+			eyegui::setImageOfPicture(_pPanelLayout, "icon", "icons/TabIconNotFound.png");
+			_iconState = IconState::ICON_NOT_FOUND;
+		}
+	}
+}
+
+std::string Tab::GetFaviconIdentifier() const
+{
+	return "tab_info_" + std::to_string(_pWeb->GetIdOfTab(this));
 }

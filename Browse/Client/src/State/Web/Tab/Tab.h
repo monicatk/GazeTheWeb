@@ -211,7 +211,6 @@ public:
     virtual void ClearDOMNodes();
 	virtual void RemoveDOMNode(DOMNodeType type, int nodeID);
 
-
     // Receive callbacks from CefMediator upon scrolling offset changes
     virtual void SetScrollingOffset(double x, double y);
 
@@ -237,6 +236,9 @@ public:
 	virtual void SetLoadingStatus(int64 frameID, bool isMain, bool isLoading);
 
 private:
+
+	// Enumeration for icon state of tab
+	enum class IconState { LOADING, ICON_NOT_FOUND, FAVICON };
 
 	// Struct for click visulizations
 	struct ClickVisualization
@@ -367,6 +369,12 @@ private:
     // Pushes back click visualization which fades out. X and y are in pixels
     void PushBackClickVisualization(double x, double y);
 
+	// Activates or deactivate loading icon in tab
+	void SetLoadingIcon(bool visible);
+
+	// Unique name for favicon which is stored in eyeGUI
+	std::string GetFaviconIdentifier() const;
+
 	// ###############
 	// ### MEMBERS ###
 	// ###############
@@ -470,6 +478,18 @@ private:
 
 	// Used for current loading status
 	std::set<int64> _loadingFrames;
+
+	// Boolean which indicates whether (at least some) favicon is loaded to eyeGUI
+	bool _faviconLoaded = false;
+
+	// Saves current state of icon
+	IconState _iconState;
+
+	// There are multiple icon for a loading tab. This it time until next one is displayed
+	float _timeUntilNextLoadingIconFrame = 0;
+
+	// Current loading icon frame
+	int _loadingIconFrame = 0;
 };
 
 #endif // TAB_H_

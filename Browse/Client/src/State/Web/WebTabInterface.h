@@ -22,6 +22,9 @@ public:
 	// Add tab after that tab
     virtual void PushAddTabAfterJob(Tab* pCaller, std::string URL) = 0;
 
+    // Get own id in web. Returns -1 if not found
+    virtual int GetIdOfTab(Tab const * pCaller) const = 0;
+
 };
 
 #endif // WEBTABINTERFACE_H_

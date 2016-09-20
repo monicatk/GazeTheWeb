@@ -76,6 +76,9 @@ public:
 	// Add tab after that tab
     virtual void PushAddTabAfterJob(Tab* pCaller, std::string URL);
 
+    // Get own id in web. Returns -1 if not found
+    virtual int GetIdOfTab(Tab const * pCaller) const;
+
 private:
 
     // Jobs given by Tab over WebTabInterface
