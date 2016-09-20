@@ -72,7 +72,6 @@ public:
 
     // External zoom level request
     void SetZoomLevel(TabCEFInterface* pTab);
-
     // Called by Handler OnLoadStart
     double GetZoomLevel(CefRefPtr<CefBrowser> browser);
 
@@ -93,6 +92,7 @@ public:
 	// Add new Tab with given URL at the position after the current Tab (in context of Tab overview)
 	void OpenPopupTab(CefRefPtr<CefBrowser> browser, std::string url);
 
+	bool SetLoadingStatus(CefRefPtr<CefBrowser> browser, int64 frameID, bool isMain, bool isLoading);
 
 
 	/* DOM relevant methods */
@@ -112,7 +112,7 @@ public:
 
 	void FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
 
-	bool SetLoadingStatus(CefRefPtr<CefBrowser> browser, int64 frameID, bool isMain, bool isLoading);
+
 
 protected:
 

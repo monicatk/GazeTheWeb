@@ -916,9 +916,10 @@ function AnalyzeNode(node)
 			window.appendedSubtreeRoots.delete(node);
 		}
 
+		var computedStyle = window.getComputedStyle(node, null);
 
 		// Identify fixed elements on appending them to DOM tree
-		if(window.getComputedStyle(node, null).getPropertyValue('position') == 'fixed') 
+		if(computedStyle.getPropertyValue('position') == 'fixed') 
 		{
 			// ConsolePrint('position: '+node.style.position);
 			if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
@@ -979,10 +980,20 @@ function AnalyzeNode(node)
 
 
 
+		// Detect scrollable elements inside of webpage
+		if(computedStyle.getPropertyValue("overflow") !== "visible" && 
+			(node.scrollTopMax != "0" || node.scrollLeftMax != "0") ) // Scrolling can be performed
+		{
+			CreateOverflowObject(node);
+		}
+
+
+		// Update whole <form> if transition happens in form's subtree
+		// (For shifting elements in form (e.g. Google Login) )
+		// TODO: Find out why transition events aren't fired properly
 		if(node.tagName == 'FORM')
 		{
-			// Update whole <form> if transition happens in form's subtree
-			// (For shifting elements in form (e.g. Google Login) )
+
 			node.addEventListener('webkitTransitionEnd', function(event){
 				// ConsolePrint("FORM transition event detected"); //DEBUG
 				ForEveryChild(node, function(child){

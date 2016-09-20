@@ -112,6 +112,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		{
 		case('0') : {type = DOMNodeType::TextInput; break;  };
 		case('1') : {type = DOMNodeType::TextLink; break;  };
+		case('2') : {type = DOMNodeType::OverflowObject; break; }
 		}
 
 		// Extract information of variable length from rest of string

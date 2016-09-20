@@ -183,9 +183,6 @@ void Handler::OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
     // Finished loading whole page
     if (!isLoading)
     {
-        // Clear list of DOM nodes and recreate all DOM node instances
-        //_pMediator->ClearDOMNodes(browser);		// TODO: Delete this, because of MutationObserver
-
         // Set zoom level again at load end, in case it was written over again
         SetZoomLevel(browser, false);
 

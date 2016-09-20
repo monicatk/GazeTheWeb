@@ -279,6 +279,8 @@ function CreateDOMTextInput(node) { CreateDOMObject(node, 0); }
 function CreateDOMLink(node) { CreateDOMObject(node, 1); }
 
 
+
+
 /**
  * Adjusts given DOMRects to window properties in order to get screen coordinates
  * 
@@ -454,7 +456,7 @@ function InformCEF(domObj, operation)
     }
     else
     {
-        ConsolePrint("ERROR: No DOMObject given to perform informing of CEF!");
+        ConsolePrint("ERROR: No DOMObject given to perform informing of CEF! id: "+id+", type: "+type);
     }
 }
 
@@ -473,6 +475,8 @@ function GetDOMObjectList(nodeType)
         case '0': { return window.domTextInputs; };
         case 1:
         case '1': { return window.domLinks; };
+        case 2:
+        case '2': { return window.overflowObjects; }
         // NOTE: Add more cases if new nodeTypes are added
         default:
         {
@@ -521,3 +525,29 @@ function GetDOMObject(nodeType, nodeID)
 
 //     return GetDOMObject(type, id);
 // }
+
+
+function OverflowObject(node)
+{
+    /* Attributes */
+        this.node = node;
+        this.nodeType = "2";
+
+    /* Methods */
+
+}
+
+window.overflowObjects = [];
+
+function CreateOverflowObject(node)
+{
+    var overflowObj = new OverflowObject(node);
+
+    window.overflowObjects.push(overflowObj);
+
+    var id = window.overflowObjects.length - 1;
+    node.setAttribute("nodeID", id);
+    
+    InformCEF(overflowObj, ["added"]);
+}
+
