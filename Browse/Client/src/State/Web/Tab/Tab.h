@@ -369,9 +369,6 @@ private:
     // Pushes back click visualization which fades out. X and y are in pixels
     void PushBackClickVisualization(double x, double y);
 
-	// Activates or deactivate loading icon in tab
-	void SetLoadingIcon(bool visible);
-
 	// Unique name for favicon which is stored in eyeGUI
 	std::string GetFaviconIdentifier() const;
 

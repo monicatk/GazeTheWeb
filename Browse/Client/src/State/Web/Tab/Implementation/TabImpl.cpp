@@ -10,7 +10,7 @@
 #include "src/Utils/QuadRenderItem.h"
 #include "src/Utils/Helper.h"
 #include "submodules/glm/glm/gtc/matrix_transform.hpp" // TODO: move to debug rendering class
-#include <algorithm>y
+#include <algorithm>
 
 // Shaders (For debugging rectangles)
 const std::string vertexShaderSource =
@@ -217,17 +217,13 @@ void Tab::Update(float tpf, Input& rInput)
 	UpdateAccentColor(tpf);
 
 	// ### UPDATE ICON ###
-	if (_iconState == IconState::ICON_NOT_FOUND)
+    if (_iconState == IconState::ICON_NOT_FOUND && _faviconLoaded)
 	{
-		// Check whether favicon is available now
-		if (_faviconLoaded)
-		{
-			// Set icon to favicon
-			eyegui::setImageOfPicture(_pPanelLayout, "icon", GetFaviconIdentifier());
-			_iconState = IconState::FAVICON;
-		}
+        // Favicon has been loaded now
+        eyegui::setImageOfPicture(_pPanelLayout, "icon", GetFaviconIdentifier());
+        _iconState = IconState::FAVICON;
 	}
-	else if (_iconState == IconState::LOADING)
+    else if (_iconState == IconState::LOADING)
 	{
 		// Update frame of loading icon
 		_timeUntilNextLoadingIconFrame -= tpf;
@@ -873,29 +869,6 @@ void Tab::PushBackClickVisualization(double x, double y)
 
 	// Add to vector which is updated per frame
 	_clickVisualizations.push_back(clickVisualization);
-}
-
-void Tab::SetLoadingIcon(bool visible)
-{
-	if (visible)
-	{
-		eyegui::setImageOfPicture(_pPanelLayout, "icon", "icons/TabLoading_0.png");
-		_timeUntilNextLoadingIconFrame = TAB_LOADING_ICON_FRAME_DURATION;
-		_iconState = IconState::LOADING;
-	}
-	else
-	{
-		if (_faviconLoaded)
-		{
-			eyegui::setImageOfPicture(_pPanelLayout, "icon", GetFaviconIdentifier());
-			_iconState = IconState::FAVICON;
-		}
-		else
-		{
-			eyegui::setImageOfPicture(_pPanelLayout, "icon", "icons/TabIconNotFound.png");
-			_iconState = IconState::ICON_NOT_FOUND;
-		}
-	}
 }
 
 std::string Tab::GetFaviconIdentifier() const

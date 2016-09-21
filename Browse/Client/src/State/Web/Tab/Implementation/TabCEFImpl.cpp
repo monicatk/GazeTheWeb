@@ -79,20 +79,17 @@ void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upDa
 			// Too dark, use default instead
 			_targetColorAccent = TAB_DEFAULT_COLOR_ACCENT;
 		}
-	}
-	else
-	{
-		// Something went wrong at favicon loading
-		_targetColorAccent = TAB_DEFAULT_COLOR_ACCENT;
-	}
 
-	// Start color accent interpolation
-	_colorInterpolation = 0;
+        // Start color accent interpolation
+        _colorInterpolation = 0;
+
+	}
+    // else: do nothing
 }
 
 void Tab::ResetFaviconBytes()
 {
-	// TODO
+    _faviconLoaded = false;
 }
 
 void Tab::AddDOMNode(std::shared_ptr<DOMNode> spNode)
@@ -278,6 +275,26 @@ void Tab::SetLoadingStatus(int64 frameID, bool isMain, bool isLoading)
 	// isMain=true && isLoading=false may indicate, that site has completely finished loading
 	if (isMain)
 	{
-		SetLoadingIcon(isLoading);
+        if(isLoading)
+        {
+            // Main frame is loading
+            eyegui::setImageOfPicture(_pPanelLayout, "icon", "icons/TabLoading_0.png");
+            _timeUntilNextLoadingIconFrame = TAB_LOADING_ICON_FRAME_DURATION;
+            _iconState = IconState::LOADING;
+        }
+        else
+        {
+            // Main frame is done with loading
+            if (_faviconLoaded)
+            {
+                eyegui::setImageOfPicture(_pPanelLayout, "icon", GetFaviconIdentifier());
+                _iconState = IconState::FAVICON;
+            }
+            else
+            {
+                eyegui::setImageOfPicture(_pPanelLayout, "icon", "icons/TabIconNotFound.png");
+                _iconState = IconState::ICON_NOT_FOUND;
+            }
+        }
 	}
 }
