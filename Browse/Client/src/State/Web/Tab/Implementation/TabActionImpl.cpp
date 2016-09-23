@@ -101,3 +101,8 @@ std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pageCoordinate, float
     }
 
 }
+
+void  Tab::ScrollOverflowElement(int elemId, int x, int y)
+{
+	_pCefMediator->ScrollOverflowElement(this, elemId, x, y);
+}

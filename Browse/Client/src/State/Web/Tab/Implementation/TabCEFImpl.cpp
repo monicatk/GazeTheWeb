@@ -129,6 +129,13 @@ void Tab::AddDOMNode(std::shared_ptr<DOMNode> spNode)
 
 		break;
 	}
+
+	case DOMNodeType::OverflowObject:
+	{
+		LogInfo("Tab: OverflowObject would be created in Tab, at this very moment.");
+		break;
+	}
+
 	}
 }
 
@@ -298,3 +305,24 @@ void Tab::SetLoadingStatus(int64 frameID, bool isMain, bool isLoading)
         }
 	}
 }
+
+
+void Tab::AddOverflowElement(std::shared_ptr<OverflowElement> overflowElem)
+{
+	_overflowElements.push_back(overflowElem);
+}
+
+std::shared_ptr<OverflowElement> Tab::GetOverflowElement(int id)
+{
+	if (id < _overflowElements.size() && id >= 0)
+	{
+		return _overflowElements[id];
+	}
+	else
+	{
+		LogDebug("Tab: Error, could not find OverflowElement with id=", id);
+		return nullptr;
+	}
+
+}
+

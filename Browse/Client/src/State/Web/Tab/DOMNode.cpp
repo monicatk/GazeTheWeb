@@ -15,7 +15,7 @@
 std::vector<glm::vec2> DOMNode::GetCenters() const
 {
 	std::vector<glm::vec2> centers;
-	for (int i = 0; i < _rects.size(); i++)
+    for (int i = 0; i < (int)_rects.size(); i++)
 	{
 		centers.push_back(_rects[i].center());
 	}
@@ -27,7 +27,7 @@ glm::vec2 DOMNode::GetCenter() const
 	glm::vec2 center(0,0);
 	if (_rects.size() > 0)
 	{
-		for (int i = 0; i < _rects.size(); i++)
+        for (int i = 0; i < (int)_rects.size(); i++)
 		{
 			center += _rects[i].center();
 		}
@@ -40,8 +40,6 @@ void DOMNode::SetRects(std::shared_ptr<std::vector<Rect>> rects)
 {
 	_rects = *rects.get();
 }
-
-
 
 /* DOMTextInput methods*/
 DOMTextInput::DOMTextInput(	DOMNodeType type,

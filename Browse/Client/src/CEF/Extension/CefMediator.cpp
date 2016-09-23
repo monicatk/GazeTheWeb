@@ -133,6 +133,8 @@ void CefMediator::ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, Cef
 
     if (msgName == "ReceiveFavIconBytes")
     {
+		LogDebug("CefMediator: Received Favicon Bytes...");
+
         CefRefPtr<CefListValue> args = msg->GetArgumentList();
         int index = 0;
         if(TabCEFInterface* pTab = GetTab(browser))
@@ -142,7 +144,7 @@ void CefMediator::ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, Cef
 
             if (width <= 0 || height <= 0)
             {
-                LogDebug("CefMediator: Received favicon width or height less than zero!");
+                LogDebug("CefMediator: Failure. Received favicon width or height less than zero!");
 
                 if (TabCEFInterface* pInnerTab = GetTab(browser))
                 {
@@ -152,7 +154,7 @@ void CefMediator::ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, Cef
             }
             else
             {
-                LogDebug("CefMediator: Copying favicon bytes to Tab... (w= ", width, ", h=", height,")");
+                LogDebug("CefMediator: Success. Copying favicon bytes to Tab... (w= ", width, ", h=", height,")");
 
                 // Extract width, height and byte information
                 std::unique_ptr<std::vector<unsigned char> > upData = std::unique_ptr<std::vector<unsigned char> >(new std::vector<unsigned char>);
@@ -272,6 +274,22 @@ bool CefMediator::SetLoadingStatus(CefRefPtr<CefBrowser> browser, int64 frameID,
 		return false;
 	}
 	
+}
+
+void CefMediator::ScrollOverflowElement(TabCEFInterface * pTab, int elemId, int x, int y)
+{
+	if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
+	{
+		_handler->ScrollOverflowElement(browser, elemId, x, y);
+	}
+}
+
+void CefMediator::AddOverflowElement(CefRefPtr<CefBrowser> browser, std::shared_ptr<OverflowElement> overflowElem)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		pTab->AddOverflowElement(overflowElem);
+	}
 }
 
 void CefMediator::ResetScrolling(TabCEFInterface * pTab)

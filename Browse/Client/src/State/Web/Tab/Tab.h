@@ -177,6 +177,9 @@ public:
     // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available
     virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pageCoordinate, float& rDistance) const;
 
+	// Execute scrolling in determined Overflow Element with elemId, x and y are delta values for each dimension
+	virtual void ScrollOverflowElement(int elemId, int x, int y);
+
     // #########################
     // ### TAB CEF INTERFACE ###
     // #########################
@@ -234,6 +237,9 @@ public:
 
 	// Receive current loading status of each frame
 	virtual void SetLoadingStatus(int64 frameID, bool isMain, bool isLoading);
+	
+	virtual void AddOverflowElement(std::shared_ptr<OverflowElement> overflowElem);
+	virtual std::shared_ptr<OverflowElement> GetOverflowElement(int id);
 
 private:
 
@@ -487,6 +493,8 @@ private:
 
 	// Current loading icon frame
 	int _loadingIconFrame = 0;
+
+	std::vector<std::shared_ptr<OverflowElement> > _overflowElements;
 };
 
 #endif // TAB_H_

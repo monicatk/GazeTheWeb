@@ -183,9 +183,6 @@ void Handler::OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
     // Finished loading whole page
     if (!isLoading)
     {
-        // Clear list of DOM nodes and recreate all DOM node instances
-        //_pMediator->ClearDOMNodes(browser);		// TODO: Delete this, because of MutationObserver
-
         // Set zoom level again at load end, in case it was written over again
         SetZoomLevel(browser, false);
 
@@ -527,4 +524,14 @@ bool Handler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
 	_pMediator->OpenPopupTab(browser, target_url);
 
 	return true;
+}
+
+void Handler::ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, int x, int y)
+{
+	browser->GetMainFrame()->ExecuteJavaScript(
+		"var overflowObj = GetOverflowObject(" + std::to_string(elemId) + ");"\
+		"if(overflowObj) overflowObj.scroll(" + std::to_string(x) + ", " + std::to_string(y) + ");", 
+		"", 
+		0);
+	LogDebug("Handler: Executed OverflowElement scrolling for id=", elemId);
 }

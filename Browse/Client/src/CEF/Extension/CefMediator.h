@@ -24,6 +24,7 @@
 class TabCEFInterface;
 class Texture;
 class DOMNode;
+class OverflowElement;
 
 typedef int BrowserID;
 
@@ -72,7 +73,6 @@ public:
 
     // External zoom level request
     void SetZoomLevel(TabCEFInterface* pTab);
-
     // Called by Handler OnLoadStart
     double GetZoomLevel(CefRefPtr<CefBrowser> browser);
 
@@ -93,6 +93,14 @@ public:
 	// Add new Tab with given URL at the position after the current Tab (in context of Tab overview)
 	void OpenPopupTab(CefRefPtr<CefBrowser> browser, std::string url);
 
+	bool SetLoadingStatus(CefRefPtr<CefBrowser> browser, int64 frameID, bool isMain, bool isLoading);
+
+	// Execute scrolling request from Tab in determined Overflow Element with elemId
+	void ScrollOverflowElement(TabCEFInterface* pTab, int elemId, int x, int y);
+	// Add OverflowElement to corresponding Tab
+	void AddOverflowElement(CefRefPtr<CefBrowser> browser, std::shared_ptr<OverflowElement> overflowElem);
+
+
 
 
 	/* DOM relevant methods */
@@ -112,7 +120,7 @@ public:
 
 	void FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
 
-	bool SetLoadingStatus(CefRefPtr<CefBrowser> browser, int64 frameID, bool isMain, bool isLoading);
+
 
 protected:
 
