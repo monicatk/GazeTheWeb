@@ -16,6 +16,7 @@
 // Forward declaration
 class Texture;
 class DOMNode;
+class OverflowElement;
 
 class TabCEFInterface
 {
@@ -73,6 +74,9 @@ public:
 
 	// Receive current loading status of each frame
 	virtual void SetLoadingStatus(int64 frameID, bool isMain, bool isLoading) = 0;
+
+	virtual void AddOverflowElement(std::shared_ptr<OverflowElement> overflowElem) = 0;
+	virtual std::shared_ptr<OverflowElement> GetOverflowElement(int id) = 0;
 };
 
 #endif // TABCEFINTERFACE_H_

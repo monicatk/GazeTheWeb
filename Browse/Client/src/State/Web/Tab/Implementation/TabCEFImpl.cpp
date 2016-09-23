@@ -84,6 +84,8 @@ void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upDa
 	{
 		// Something went wrong at favicon loading
 		_targetColorAccent = TAB_DEFAULT_COLOR_ACCENT;
+
+		LogDebug("Tab: Favicon went wrong.. w: ", width, ", h: ", height);
 	}
 
 	// Start color accent interpolation
@@ -93,6 +95,7 @@ void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upDa
 void Tab::ResetFaviconBytes()
 {
 	// TODO
+	LogDebug("Tab: ResetFaviconBytes triggered! (needs to be implemented)");
 }
 
 void Tab::AddDOMNode(std::shared_ptr<DOMNode> spNode)
@@ -288,3 +291,24 @@ void Tab::SetLoadingStatus(int64 frameID, bool isMain, bool isLoading)
 		SetLoadingIcon(isLoading);
 	}
 }
+
+
+void Tab::AddOverflowElement(std::shared_ptr<OverflowElement> overflowElem)
+{
+	_overflowElements.push_back(overflowElem);
+}
+
+std::shared_ptr<OverflowElement> Tab::GetOverflowElement(int id)
+{
+	if (id < _overflowElements.size() && id >= 0)
+	{
+		return _overflowElements[id];
+	}
+	else
+	{
+		LogDebug("Tab: Error, could not find OverflowElement with id=", id);
+		return nullptr;
+	}
+
+}
+

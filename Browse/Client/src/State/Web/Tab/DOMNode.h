@@ -113,6 +113,35 @@ class DOMLink : public DOMNode
         std::string _url;
 };
 
+class OverflowElement
+{
+public:
+	OverflowElement(int id, Rect rect, int leftMax, int topMax)
+	{
+		_id = id;
+		_rects.push_back(rect);
+		_scrollLeftMax = leftMax;
+		_scrollTopMax = topMax;
+	}
+
+	std::vector<Rect> GetRects() const { return _rects; };
+
+	std::pair<int, int> GetMaxScrolling() const { return std::make_pair(_scrollLeftMax, _scrollTopMax); }
+	std::pair<int, int> GetCurrentScrolling() const { return std::make_pair(_scrollLeft, _scrollTop); }
+
+	void Scroll(int x, int y){
+		// TODO: Send to Mediator, Handler and execute Javascript Code
+	}
+
+private:
+	// OverflowElement ID
+	int _id;
+	std::vector<Rect> _rects;
+	// Maximum values for scrolling directions
+	int _scrollLeftMax, _scrollTopMax;
+	// Current position in interval [0, max value]
+	int _scrollLeft = 0, _scrollTop = 0;
+};
 
 #endif  // DOMNODE_H_
 

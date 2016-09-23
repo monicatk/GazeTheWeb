@@ -476,7 +476,7 @@ function GetDOMObjectList(nodeType)
         case 1:
         case '1': { return window.domLinks; };
         case 2:
-        case '2': { return window.overflowObjects; }
+        case '2': { return window.overflowElements; }
         // NOTE: Add more cases if new nodeTypes are added
         default:
         {
@@ -527,27 +527,93 @@ function GetDOMObject(nodeType, nodeID)
 // }
 
 
-function OverflowObject(node)
+function OverflowElement(node)
 {
     /* Attributes */
         this.node = node;
-        this.nodeType = "2";
+        this.rects = AdjustClientRects(this.node.getClientRects());
+
+        // this.overflowParent = undefined;
 
     /* Methods */
+        this.getMaxTopScrolling = function(){
+            return this.node.scrollTopMax;
+        }
+        this.getMaxLeftScrolling = function(){
+            return this.node.scrollLeftMax;
+        }
+        this.getTopScrolling = function(){
+            return this.node.scrollTop;
+        }
+        this.getLeftScrolling = function(){
+            return this.node.scrollLeft;
+        }
+        this.scroll = function(x, y){
+            // DEBUG
+            ConsolePrint("OverflowElement: Scrolling request received x: "+x+", y: "+y);
+            
+            this.node.scrollLeft += x;
+            this.node.scrollTop += y;
+            return [this.node.scrollLeft, this.node.scrollTop];
+        }
+        this.getRects = function(){
+            // TODO: Also check if maximal scrolling limits changed if Rect width or height changed
+            return this.rects;
+        }
+        
 
 }
 
-window.overflowObjects = [];
+window.overflowElements = [];
 
-function CreateOverflowObject(node)
+function CreateOverflowElement(node)
 {
-    var overflowObj = new OverflowObject(node);
+    var overflowObj = new OverflowElement(node);
 
-    window.overflowObjects.push(overflowObj);
+    window.overflowElements.push(overflowObj);
 
-    var id = window.overflowObjects.length - 1;
-    node.setAttribute("nodeID", id);
-    
-    InformCEF(overflowObj, ["added"]);
+    // Prepare informing CEF about added OverflowElement
+    var outStr = "#ovrflow#add#";
+
+    var id = window.overflowElements.length - 1;
+    var zero = (id < 10) ? "0" : "";
+    outStr += (zero + id + "#");
+    // #ovrflow#add#[0]id#
+
+
+    // Note: Ignoring multiple Rects at this point...
+    var rects = overflowObj.getRects();
+    var rect = (rects.length > 0) ? rects[0] : [0,0,0,0];
+
+
+    for(var i = 0; i < 4; i++)
+    {
+        outStr += rect[i];
+        if(i !== 3) outStr += ";";  // Note: if-statement misses in DOMObjects --> different decoding atm
+    }
+    outStr += "#";
+    // #ovrflow#add#[0]id#rect0;rect1;rect2;rect3#
+
+    ConsolePrint("Debug: maxLeft: "+overflowObj.node.scrollLeftMax+", maxTop: "+overflowObj.node.scrollTopMax);
+
+    outStr +=  overflowObj.node.scrollLeftMax;
+    outStr += ";";
+    outStr += overflowObj.node.scrollTopMax;
+    outStr += "#";
+    // #ovrflow#add#[0]id#rect0;rect1;rect2;rect3#maxLeft;maxTop#
+
+    ConsolePrint(outStr);
+
+    //DEBUG
+    ConsolePrint("### OverflowElement created: "+outStr);
+}
+
+// Called from CEF Handler
+function GetOverflowElement(id)
+{
+    if(id < window.overflowElements.length && id >= 0)
+        return window.overflowElements[id];
+    else
+        ConsolePrint("ERROR in GetOverflowElement: id="+id+", valid id is in [0, "+window.overflowElements.length+"]!");
 }
 

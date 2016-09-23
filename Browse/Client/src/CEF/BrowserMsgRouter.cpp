@@ -31,6 +31,35 @@ MsgHandler::MsgHandler(BrowserMsgRouter* pMsgRouter)
 	_pMsgRouter = pMsgRouter;
 }
 
+std::vector<std::string> MsgHandler::SplitBySeparator(std::string str, char separator)
+{
+	std::vector<std::string> output;
+	std::vector<char> buffer;
+
+	for (int i = 0; i < str.length(); i++)
+	{
+		const char read = str.at(i);
+		if (read == separator && buffer.size() > 0)
+		{
+			const std::string bufferStr(buffer.begin(), buffer.end());
+			output.push_back(bufferStr);
+			buffer.clear();
+		}
+		else
+		{
+			buffer.push_back(read);
+		}
+	}
+	if (buffer.size() > 0)
+	{
+		const std::string bufferStr(buffer.begin(), buffer.end());
+		output.push_back(bufferStr);
+		buffer.clear();
+	}
+
+	return output;
+}
+
 bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	CefRefPtr<CefFrame> frame,
 	int64 query_id,
@@ -80,7 +109,56 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		
 	}
 
-	
+	if (requestName.compare(0, 9, "#ovrflow#") == 0)
+	{
+		if (requestName.compare(9, 4, "add#") == 0)
+		{
+			LogDebug("MsgRouter: OverflowElement added...");
+
+			std::string dataStr = requestName.substr(13, requestName.length());
+			std::vector<std::string> data = SplitBySeparator(dataStr, '#');
+
+			for (const auto& str : data)
+			{
+				LogDebug(str);
+			}
+
+			 //Extract OverflowElement ID from dataStr
+			int id = std::stoi(data[0]);
+
+			 //Extract Rect data from encoded String
+			std::vector<float> rectData;
+			std::vector<std::string> rectStrData = SplitBySeparator(data[1], ';');
+			std::for_each(
+				rectStrData.begin(),
+				rectStrData.end(), 
+				[&rectData](std::string str) {rectData.push_back(std::stod(str)); }
+			);
+			Rect rect = Rect(rectData);
+
+			// Extract maximum possible scrolling in x and y direction
+			std::vector<std::string> scrollMaxsStr = SplitBySeparator(data[2], ';');
+			if (scrollMaxsStr[0].compare("undefined") == 0 || scrollMaxsStr[1].compare("undefined") == 0)
+			{
+				LogDebug("MsgRouter: Error in OverflowElement creation: Missing max scrolling value(s)! Setting them to 0.");
+			}
+			int scrollLeftMax = (scrollMaxsStr[0].compare("undefined") == 0) ? 0 : std::stoi(scrollMaxsStr[0]);
+			int scrollTopMax = (scrollMaxsStr[1].compare("undefined") == 0) ? 0 : std::stoi(scrollMaxsStr[1]);
+
+
+			OverflowElement overflowElem = OverflowElement(id, rect, scrollLeftMax, scrollTopMax);
+
+			_pMsgRouter->GetMediator()->AddOverflowElement(browser, std::make_shared<OverflowElement>(overflowElem));
+
+			return true;
+		}
+		if (requestName.compare(9, 4, "rem#") == 0)
+		{
+			LogDebug("MsgRouter: OverflowElement removed... TODO: Implement handling!");
+
+			return true;
+		}
+	}
 
 	/* NOTES
 		Encoding of request strings for DOM node operations:

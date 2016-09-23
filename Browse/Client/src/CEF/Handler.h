@@ -114,6 +114,9 @@ public:
 	void OnTitleChange(CefRefPtr<CefBrowser> browser,
 		const CefString& title) OVERRIDE;
 
+	// Execute scrolling request from Tab in determined Overflow Element with elemId
+	void ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, int x, int y);
+
 private:
 
     /* METHODS */

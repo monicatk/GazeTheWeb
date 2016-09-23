@@ -22,7 +22,7 @@ window.appendedSubtreeRoots = new Set();
 // Helper function for console output
 function ConsolePrint(msg)
 {
-	window.cefQuery({ request: msg, persistent : false, onSuccess : function(response) {}, onFailure : function(error_code, error_message){} });
+	window.cefQuery({ request: (""+msg), persistent : false, onSuccess : function(response) {}, onFailure : function(error_code, error_message){} });
 }
 
 // TODO: Add as global function and also use it in DOM node work
@@ -711,16 +711,12 @@ Document.prototype.createElement = function(tag)
 {
 	if(arguments[0] === "iframe" || arguments[0] === "IFRAME") 
 	{
-		ConsolePrint("<iframe> created.");
-		// ConsolePrint("Preventing creation of <iframe>, returning Text instead...");
-		// var txt = this.createElement("A");
-		// txt.appendChild(this.createTextNode("<iframe>, nein nein!"));
-		// ConsolePrint("DONE");
-		// return txt;
+		// ConsolePrint("<iframe> created.");
 	}
 	// ConsolePrint("Creating element with tagName="+tag);
+
 	var elem = origCreateElement.apply(this, arguments);
-	if(arguments[0] === "iframe") elem.style.backgroundColor = "#0000ff";
+	// if(arguments[0] === "iframe") elem.style.backgroundColor = "#0000ff";
 	return elem ;
 }
 
@@ -739,17 +735,18 @@ Element.prototype.appendChild = function(child){
     {
 		var subtreeRoot = this;
 
-		if(child.nodeType === 1 && child.tagName == "IFRAME") 
-		{
-			ConsolePrint("iframe appended as child to "+this.tagName);
-			child.style.backgroundColor = "#00ff00";
-			if(this.style) this.style.backgroundColor = "#ff0000";
+		// DEBUG
+		// if(child.nodeType === 1 && child.tagName == "IFRAME") 
+		// {
+		// 	ConsolePrint("iframe appended as child to "+this.tagName);
+		// 	child.style.backgroundColor = "#00ff00";
+		// 	if(this.style) this.style.backgroundColor = "#ff0000";
 
-			var txt = document.createElement("A");
-			txt.appendChild(document.createTextNode("<iframe>, nein nein!"))
-			return originalAppendChild.apply(this, txt);
-		}
-		if(this.tagName == "IFRAME" && child.nodeType === 1) ConsolePrint(child.tagName+" appended to iframe");
+		// 	var txt = document.createElement("A");
+		// 	txt.appendChild(document.createTextNode("<iframe>, nein nein!"))
+		// 	return originalAppendChild.apply(this, txt);
+		// }
+		// if(this.tagName == "IFRAME" && child.nodeType === 1) ConsolePrint(child.tagName+" appended to iframe");
 
 		// Stop going up the tree when parentNode is documentElement or doesn't exist (null or undefined)
 		while(subtreeRoot !== document.documentElement && subtreeRoot.parentNode && subtreeRoot.parentNode !== undefined)
@@ -866,16 +863,16 @@ function ForEveryChild(parentNode, applyFunction, depth)
 function AnalyzeNode(node)
 {
 	// ConsolePrint("AnalyzeNode called");
-	if(node.nodeType === 1 && node.tagName == "IFRAME")
-	{
-		ConsolePrint("Found iframe.. analyzing it...");
-		ForEveryChild(node.contentDocument.documentElement, function(child){
-			if(child.tagName) ConsolePrint("tag: "+child.tagName);
-			AnalyzeNode(child);
-			if(child.style) child.style.backgroundColor = "#ff0000";
-		});
-		ConsolePrint("... done analyzing.");
-	}
+	// if(node.nodeType === 1 && node.tagName == "IFRAME")
+	// {
+	// 	ConsolePrint("Found iframe.. analyzing it...");
+	// 	ForEveryChild(node.contentDocument.documentElement, function(child){
+	// 		if(child.tagName) ConsolePrint("tag: "+child.tagName);
+	// 		AnalyzeNode(child);
+	// 		if(child.style) child.style.backgroundColor = "#ff0000";
+	// 	});
+	// 	ConsolePrint("... done analyzing.");
+	// }
 
 
 
@@ -979,12 +976,16 @@ function AnalyzeNode(node)
 		}
 
 
+		var rect = node.getBoundingClientRect();
 
 		// Detect scrollable elements inside of webpage
-		if(computedStyle.getPropertyValue("overflow") !== "visible" && 
-			(node.scrollTopMax != "0" || node.scrollLeftMax != "0") ) // Scrolling can be performed
+		if(node.tagName == "DIV" && 
+			computedStyle.getPropertyValue("overflow") !== "visible" &&
+			rect.width > 0 && rect.height > 0) // && 
+			// ((node.scrollTopMax && node.scrollTopMax !== 0) || (node.scrollLeftMax && node.scrollLeftMax !== 0)) ) // Scrolling can be performed
 		{
-			CreateOverflowObject(node);
+			CreateOverflowElement(node);
+			// if(node.style) node.style.backgroundColor = "#ff0000";
 		}
 
 

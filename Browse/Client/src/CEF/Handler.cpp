@@ -525,3 +525,13 @@ bool Handler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
 
 	return true;
 }
+
+void Handler::ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, int x, int y)
+{
+	browser->GetMainFrame()->ExecuteJavaScript(
+		"var overflowObj = GetOverflowObject(" + std::to_string(elemId) + ");"\
+		"if(overflowObj) overflowObj.scroll(" + std::to_string(x) + ", " + std::to_string(y) + ");", 
+		"", 
+		0);
+	LogDebug("Handler: Executed OverflowElement scrolling for id=", elemId);
+}

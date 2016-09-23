@@ -27,6 +27,7 @@ public:
 		bool persistent,
 		CefRefPtr<Callback> callback) OVERRIDE;
 
+	std::vector<std::string> SplitBySeparator(std::string str, char separator);
 
 private:
 	// Keep reference to msg router to handle outgoing commands

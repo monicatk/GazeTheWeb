@@ -816,7 +816,7 @@ void Tab::DrawDebuggingOverlay() const
 		}
 	}
 
-	// DEBUG
+	// DEBUG - links containing line break are shown in another color
 	_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(1.f, 0.f, 1.f));
 	for (const auto& rDOMTextLink : _DOMTextLinks)
 	{
@@ -840,6 +840,15 @@ void Tab::DrawDebuggingOverlay() const
 			if(rFixedElement.height() > 0 && rFixedElement.width() > 0)
 				renderRect(rFixedElement, true);
 		}
+	}
+
+	// ### OVERFLOW ELEMENTS ###
+	_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(255.f/255.f, 127.f/255.f, 35.f/255.f));
+
+	for (const auto& rOverflowElement : _overflowElements)
+	{
+		for(const auto& rect : rOverflowElement->GetRects())
+			renderRect(rect, false);
 	}
 }
 
