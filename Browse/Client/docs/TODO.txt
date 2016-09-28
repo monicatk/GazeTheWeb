@@ -9,8 +9,12 @@ Basic Features
 - History / Inkognito
 - Https recognition
 - Emulation Fallback
+- Drag n Drop
 
 Advanced Features
+- Test image editing with web application
+- HTML5 Video Player support
+- Page fullscreen handling
 - CSS Injection
 - Copy Paste / Marking
 - Right click and _own_ context menus (see JS Window Object)
