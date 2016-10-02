@@ -560,8 +560,8 @@ function OverflowElement(node)
 
             var distLeft = gazeX - rect.left;   // negative values imply gaze outside of element
             var distRight = rect.right - gazeX;
-            var distTop; // TODO
-            var distBottom; // TODO
+            var distTop = gazeY - rect.top;
+            var distBottom = rect.bottom - gazeY;
 
             // Treshold for actual scrolling taking place, maximum distance to border where scrolling takes place
             var tresholdX = 1 / 5 * (rect.width / 2);
@@ -580,7 +580,14 @@ function OverflowElement(node)
             {
                 scrollX += (maxScrollingPerFrame * ( 1 - (distRight / tresholdX) ));
             }
-
+            if(distTop >= 0 && distTop < tresholdY)
+            {
+                scrollY += (maxScrollingPerFrame * (1 - (distTop / tresholdY)));
+            }
+            if(distBottom >= 0 && distBottom < tresholdY)
+            {
+                scrollY -= (maxScrollingPerFrame * (1 - (distBottom / tresholdY)));
+            }
 
             // ConsolePrint("Executing OverflowElement scrolling by (x, y) = ("+scrollX+", "+scrollY+").");
 
