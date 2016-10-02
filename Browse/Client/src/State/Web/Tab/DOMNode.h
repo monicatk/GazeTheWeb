@@ -124,14 +124,12 @@ public:
 		_scrollTopMax = topMax;
 	}
 
+	int GetId() const { return _id; };
 	std::vector<Rect> GetRects() const { return _rects; };
 
 	std::pair<int, int> GetMaxScrolling() const { return std::make_pair(_scrollLeftMax, _scrollTopMax); }
 	std::pair<int, int> GetCurrentScrolling() const { return std::make_pair(_scrollLeft, _scrollTop); }
 
-	void Scroll(int x, int y){
-		// TODO: Send to Mediator, Handler and execute Javascript Code
-	}
 
 private:
 	// OverflowElement ID

@@ -1,9 +1,11 @@
 Basic Features
 - Page Loading Status
 	--> first draft available in Tab::SetLoadingStatus
+
 - Scrolling within page
 - Auto Fill / Password Manager
  - Daniel: Passwort / Anmeldeformulare erkennen
+ - Raphael: Secure Password Keyboard mode?
 - Search on page
 - Direct search of non URLs
 - History / Inkognito
@@ -18,5 +20,9 @@ Advanced Features
  - Rough selection via browser window (getstring) and precise selection in eyeGUI
  
 Milestone
+
+
+Problems
+- Transition events not properly fired --> CEF Update?
 
 

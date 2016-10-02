@@ -537,10 +537,10 @@ function OverflowElement(node)
 
     /* Methods */
         this.getMaxTopScrolling = function(){
-            return this.node.scrollTopMax;
+            return (this.node.scrollHeight - this.node.getBoundingClientRect().width);
         }
         this.getMaxLeftScrolling = function(){
-            return this.node.scrollLeftMax;
+            return (this.node.scrollWidth - this.node.getBoundingClientRect().height);
         }
         this.getTopScrolling = function(){
             return this.node.scrollTop;
@@ -548,18 +548,106 @@ function OverflowElement(node)
         this.getLeftScrolling = function(){
             return this.node.scrollLeft;
         }
-        this.scroll = function(x, y){
+        this.scroll = function(gazeX, gazeY){
             // DEBUG
-            ConsolePrint("OverflowElement: Scrolling request received x: "+x+", y: "+y);
+            // ConsolePrint("OverflowElement: Scrolling request received x: "+x+", y: "+y+". Executing...");
             
-            this.node.scrollLeft += x;
-            this.node.scrollTop += y;
+            // Update scrolling position according to current gaze coordinates
+            // Idea: Only scroll if gaze is somewhere near the overflow elements edges
+            var rect = this.node.getBoundingClientRect();
+            var centerX = rect.left + Math.round(rect.width / 2);
+            var centerY =  rect.top + Math.round(rect.height / 2);
+
+            var distLeft = gazeX - rect.left;   // negative values imply gaze outside of element
+            var distRight = rect.right - gazeX;
+            var distTop; // TODO
+            var distBottom; // TODO
+
+            // Treshold for actual scrolling taking place, maximum distance to border where scrolling takes place
+            var tresholdX = 1 / 5 * (rect.width / 2);
+            var tresholdY = 1 / 5 * (rect.height / 2);
+
+            var maxScrollingPerFrame = 10;
+            // Actual scrolling, added afterwards
+            var scrollX = 0;
+            var scrollY = 0;
+
+            if(distLeft >= 0 && distLeft < tresholdX)
+            {
+                scrollX -= (maxScrollingPerFrame * ( 1 - (distLeft / tresholdX) ));
+            }
+            if(distRight >= 0 && distRight < tresholdX)
+            {
+                scrollX += (maxScrollingPerFrame * ( 1 - (distRight / tresholdX) ));
+            }
+
+
+            // ConsolePrint("Executing OverflowElement scrolling by (x, y) = ("+scrollX+", "+scrollY+").");
+
+            // Execute scrolling
+            this.node.scrollLeft += scrollX;
+            this.node.scrollTop += scrollY;
+
+            // Update Rects of all child elements
+            ForEveryChild(this.node, function(child){
+                if(child.nodeType == 1)
+				{
+                    var nodeType = child.getAttribute("nodeType");
+                    if(nodeType)
+                    {
+                        var nodeID = child.getAttribute("nodeID");
+                        var domObj = GetDOMObject(nodeType, nodeID);
+
+                        if(domObj) domObj.updateRects();
+                    }
+                }
+            });
+
+            // Return current scrolling position as feedback
             return [this.node.scrollLeft, this.node.scrollTop];
         }
+
         this.getRects = function(){
             // TODO: Also check if maximal scrolling limits changed if Rect width or height changed
             return this.rects;
         }
+
+        this.updateRects = function(){
+
+            // this.checkVisibility(); // doesn't exist yet!
+
+            // Get new Rect data
+            var updatedRectsData = AdjustClientRects(this.node.getClientRects());
+
+            // if(this.fixed) // doesn't exist yet!
+            // {
+            //     //  updatedRectsData = updatedRectsData.map( function(rectData){ rectData = SubstractScrollingOffset(rectData);} );
+            //     // NOTE: Not sure if this works like intended
+            //     updatedRectsData.map( function(rectData){ rectData = SubstractScrollingOffset(rectData);} );
+            // }
+
+            // Compare new and old Rect data
+            var equal = CompareClientRectsData(updatedRectsData, this.rects);
+
+            // Rect updates occured and new Rect data is accessible
+            if(!equal && updatedRectsData != undefined && updatedRectsData.length > 0)
+            {
+                this.rects = updatedRectsData;
+
+                var encodedCommand = "#ovrflow#upd#0#";
+                for (var i = 0; i < 4; i++)
+                {
+                    encodedCommand += this.rects[i];
+                    if(i !== 3) encodedCommad += ";";
+                }
+                encodedCommand += "#";
+                ConsolePrint(encodedCommand);
+
+                InformCEF(this, ['update', 'rects']); 
+            }
+            
+            return !equal;
+        };
         
 
 }
@@ -596,9 +684,9 @@ function CreateOverflowElement(node)
 
     ConsolePrint("Debug: maxLeft: "+overflowObj.node.scrollLeftMax+", maxTop: "+overflowObj.node.scrollTopMax);
 
-    outStr +=  overflowObj.node.scrollLeftMax;
+    outStr +=  overflowObj.getMaxLeftScrolling();
     outStr += ";";
-    outStr += overflowObj.node.scrollTopMax;
+    outStr += overflowObj.getMaxTopScrolling();
     outStr += "#";
     // #ovrflow#add#[0]id#rect0;rect1;rect2;rect3#maxLeft;maxTop#
 

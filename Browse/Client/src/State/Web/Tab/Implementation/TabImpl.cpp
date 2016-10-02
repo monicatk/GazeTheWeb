@@ -11,6 +11,7 @@
 #include "src/Utils/Helper.h"
 #include "submodules/glm/glm/gtc/matrix_transform.hpp" // TODO: move to debug rendering class
 #include <algorithm>
+#include "src/Utils/Logger.h"
 
 // Shaders (For debugging rectangles)
 const std::string vertexShaderSource =
@@ -334,10 +335,7 @@ void Tab::Update(float tpf, Input& rInput)
 			for (const auto& rElement : rElements)
 			{
 				// Simple box test
-				if (tabInput.webViewGazeX > rElement.left
-					&& tabInput.webViewGazeY > rElement.top
-					&& tabInput.webViewGazeY < rElement.bottom
-					&& tabInput.webViewGazeX < rElement.right)
+				if(rElement.isInside(tabInput.webViewGazeX, tabInput.webViewGazeY))
 				{
 					gazeUponFixed = true;
 					break;
@@ -380,6 +378,28 @@ void Tab::Update(float tpf, Input& rInput)
         {
             _pCefMediator->EmulateMouseWheelScrolling(this, 0.0, (double)(20.f * _autoScrollingValue));
         }
+
+		// Autoscroll inside of OverflowElement if gazed upon
+		bool overflowScrolling = false;
+		for (const auto& rOverflowElement : _overflowElements)
+		{
+			for (const auto& rRect : rOverflowElement->GetRects())
+			{
+				if (rRect.isInside(tabInput.webViewGazeX + _scrollingOffsetX, tabInput.webViewGazeY + _scrollingOffsetY))
+				{
+					// Call OverflowElements scroll(gazeX, gazeY) method with current webview gaze coordinates
+					// Scrolling will be executed in Javascript
+					// TODO/Note: Global scrolling parameters defining how/when is scrolled?
+					_pCefMediator->ScrollOverflowElement(this, rOverflowElement->GetId(), tabInput.webViewGazeX, tabInput.webViewGazeY);
+					break;
+				}
+			}
+			if (overflowScrolling) 
+			{
+				break;
+			}
+		}
+		//LogDebug(tabInput.webViewGazeX, "\t",tabInput.webViewGazeY);
 
 		// Update triggers
 		for (auto& upDOMTrigger : _DOMTriggers)

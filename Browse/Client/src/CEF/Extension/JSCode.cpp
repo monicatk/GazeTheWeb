@@ -59,6 +59,9 @@ std::string jsInputTextData(int inputID, std::string text, bool submit)
 	std::string code = "var domObj = GetDOMObject(0," + std::to_string(inputID) + ");\
                         domObj.setTextInput('" + text + "'," + std::to_string(submit) + ");";
 
+	// NOTE: Query Selector with ":required" for submitting forms or not?
+	// BTW: ":optional" for inputs without "required" attribute
+
     return code;
 
             /*

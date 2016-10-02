@@ -62,6 +62,11 @@ public:
 		return "(" + std::to_string(top) + ", " + std::to_string(left) + ", "
 			+ std::to_string(bottom) + ", " + std::to_string(right) + ")";
 	}
+	bool isInside(float x, float y) const
+	{
+		return y <= bottom && y >= top && x >= left && x <= right;
+	}
+
 };
 
 #endif

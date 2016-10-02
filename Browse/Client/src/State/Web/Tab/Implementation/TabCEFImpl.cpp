@@ -130,12 +130,6 @@ void Tab::AddDOMNode(std::shared_ptr<DOMNode> spNode)
 		break;
 	}
 
-	case DOMNodeType::OverflowObject:
-	{
-		LogInfo("Tab: OverflowObject would be created in Tab, at this very moment.");
-		break;
-	}
-
 	}
 }
 
@@ -159,6 +153,9 @@ void Tab::ClearDOMNodes()
 
 	// Clear fixed elements
 	_fixedElements.clear();
+
+	// Clear overflow elements
+	_overflowElements.clear();
 }
 
 void Tab::RemoveDOMNode(DOMNodeType type, int nodeID)

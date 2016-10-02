@@ -159,6 +159,10 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 
 			return true;
 		}
+		if (requestName.compare(9, 4, "upd#") == 0)
+		{
+			LogDebug("MsgRouter: OverflowElement update message handling has to be implemented! But it isn't.");
+		}
 	}
 
 	/* NOTES
