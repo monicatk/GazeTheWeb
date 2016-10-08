@@ -355,7 +355,7 @@ function CompareClientRectsData(rects1, rects2)
 		for(var j = 0; j < 4; j++)
         {
             if(rects1[i][j] != rects2[i][j])
-             return false;
+                return false;
         }
 	}
 
@@ -381,17 +381,24 @@ function UpdateDOMRects()
         function (domObj) { domObj.updateRects(); }
     );
 
-    // ConsolePrint("Also, update fixed element Rects");
+    // ... and all OverflowElements
+    window.overflowElements.forEach(
+        function (overflowObj) { overflowObj.updateRects(); }
+    );
+
+    // ... and all FixedElements
     UpdateFixedElementRects();
 
-    // ConsolePrint("And visibility!");
-    // Trigger update of Rects for every domObject
+   
+    // Update visibility of each DOM object
     window.domTextInputs.forEach(
         function (domObj) { domObj.searchOverflows(); domObj.checkVisibility(); }
     );
     window.domLinks.forEach(
         function (domObj) { domObj.searchOverflows(); domObj.checkVisibility(); }
     );
+
+
 }
 
 /**
@@ -554,64 +561,68 @@ function OverflowElement(node)
             
             // Update scrolling position according to current gaze coordinates
             // Idea: Only scroll if gaze is somewhere near the overflow elements edges
-            var rect = this.node.getBoundingClientRect();
-            var centerX = rect.left + Math.round(rect.width / 2);
-            var centerY =  rect.top + Math.round(rect.height / 2);
-
-            var distLeft = gazeX - rect.left;   // negative values imply gaze outside of element
-            var distRight = rect.right - gazeX;
-            var distTop = gazeY - rect.top;
-            var distBottom = rect.bottom - gazeY;
-
-            // Treshold for actual scrolling taking place, maximum distance to border where scrolling takes place
-            var tresholdX = 1 / 5 * (rect.width / 2);
-            var tresholdY = 1 / 5 * (rect.height / 2);
-
-            var maxScrollingPerFrame = 10;
-            // Actual scrolling, added afterwards
-            var scrollX = 0;
-            var scrollY = 0;
-
-            if(distLeft >= 0 && distLeft < tresholdX)
+            if(this.rects.length > 0)
             {
-                scrollX -= (maxScrollingPerFrame * ( 1 - (distLeft / tresholdX) ));
-            }
-            if(distRight >= 0 && distRight < tresholdX)
-            {
-                scrollX += (maxScrollingPerFrame * ( 1 - (distRight / tresholdX) ));
-            }
-            if(distTop >= 0 && distTop < tresholdY)
-            {
-                scrollY += (maxScrollingPerFrame * (1 - (distTop / tresholdY)));
-            }
-            if(distBottom >= 0 && distBottom < tresholdY)
-            {
-                scrollY -= (maxScrollingPerFrame * (1 - (distBottom / tresholdY)));
-            }
+                var rect = this.rects[0];
+                var centerX = rect[1] + Math.round(rect.width / 2);
+                var centerY =  rect[0] + Math.round(rect.height / 2);
 
-            // ConsolePrint("Executing OverflowElement scrolling by (x, y) = ("+scrollX+", "+scrollY+").");
+                var distLeft = gazeX - rect[1];   // negative values imply gaze outside of element
+                var distRight = rect[3] - gazeX;
+                var distTop = gazeY - rect[0];
+                var distBottom = rect[2] - gazeY;
 
-            // Execute scrolling
-            this.node.scrollLeft += scrollX;
-            this.node.scrollTop += scrollY;
+                // Treshold for actual scrolling taking place, maximum distance to border where scrolling takes place
+                var tresholdX = 1 / 5 * ((rect[3]-rect[1]) / 2);
+                var tresholdY = 1 / 5 * ((rect[2]-rect[0]) / 2);
 
-            // Update Rects of all child elements
-            ForEveryChild(this.node, function(child){
-                if(child.nodeType == 1)
-				{
-                    var nodeType = child.getAttribute("nodeType");
-                    if(nodeType)
-                    {
-                        var nodeID = child.getAttribute("nodeID");
-                        var domObj = GetDOMObject(nodeType, nodeID);
+                var maxScrollingPerFrame = 10;
+                // Actual scrolling, added afterwards
+                var scrollX = 0;
+                var scrollY = 0;
 
-                        if(domObj) domObj.updateRects();
-                    }
+                if(distLeft >= 0 && distLeft < tresholdX)
+                {
+                    scrollX -= (maxScrollingPerFrame * ( 1 - (distLeft / tresholdX) ));
                 }
-            });
+                if(distRight >= 0 && distRight < tresholdX)
+                {
+                    scrollX += (maxScrollingPerFrame * ( 1 - (distRight / tresholdX) ));
+                }
+                if(distTop >= 0 && distTop < tresholdY)
+                {
+                    scrollY += (maxScrollingPerFrame * (1 - (distTop / tresholdY)));
+                }
+                if(distBottom >= 0 && distBottom < tresholdY)
+                {
+                    scrollY -= (maxScrollingPerFrame * (1 - (distBottom / tresholdY)));
+                }
 
-            // Return current scrolling position as feedback
-            return [this.node.scrollLeft, this.node.scrollTop];
+                // ConsolePrint("Executing OverflowElement scrolling by (x, y) = ("+scrollX+", "+scrollY+").");
+
+                // Execute scrolling
+                this.node.scrollLeft += scrollX;
+                this.node.scrollTop += scrollY;
+
+                // Update Rects of all child elements
+                ForEveryChild(this.node, function(child){
+                    if(child.nodeType == 1)
+                    {
+                        var nodeType = child.getAttribute("nodeType");
+                        if(nodeType)
+                        {
+                            var nodeID = child.getAttribute("nodeID");
+                            var domObj = GetDOMObject(nodeType, nodeID);
+
+                            if(domObj) domObj.updateRects();
+                        }
+                    }
+                });
+
+                // Return current scrolling position as feedback
+                return [this.node.scrollLeft, this.node.scrollTop];
+            }
+         
         }
 
         this.getRects = function(){
@@ -626,13 +637,6 @@ function OverflowElement(node)
             // Get new Rect data
             var updatedRectsData = AdjustClientRects(this.node.getClientRects());
 
-            // if(this.fixed) // doesn't exist yet!
-            // {
-            //     //  updatedRectsData = updatedRectsData.map( function(rectData){ rectData = SubstractScrollingOffset(rectData);} );
-            //     // NOTE: Not sure if this works like intended
-            //     updatedRectsData.map( function(rectData){ rectData = SubstractScrollingOffset(rectData);} );
-            // }
-
             // Compare new and old Rect data
             var equal = CompareClientRectsData(updatedRectsData, this.rects);
 
@@ -642,17 +646,24 @@ function OverflowElement(node)
                 this.rects = updatedRectsData;
 
                 var encodedCommand = "#ovrflow#upd#0#";
+                
                 for (var i = 0; i < 4; i++)
-                {
-                    encodedCommand += this.rects[i];
-                    if(i !== 3) encodedCommad += ";";
+                {                 
+                    encodedCommand += this.rects[0][i];
+                    if(i < 3) 
+                    {
+                        encodedCommand += ";";
+                        ConsolePrint("3c");
+                    }
                 }
-                encodedCommand += "#";
+                encodedCommand += "#";                
                 ConsolePrint(encodedCommand);
 
-                InformCEF(this, ['update', 'rects']); 
+
             }
             
+            // if(equal) alert("Overflow Rects don't need to be updated!")
+
             return !equal;
         };
         
@@ -689,8 +700,6 @@ function CreateOverflowElement(node)
     outStr += "#";
     // #ovrflow#add#[0]id#rect0;rect1;rect2;rect3#
 
-    ConsolePrint("Debug: maxLeft: "+overflowObj.node.scrollLeftMax+", maxTop: "+overflowObj.node.scrollTopMax);
-
     outStr +=  overflowObj.getMaxLeftScrolling();
     outStr += ";";
     outStr += overflowObj.getMaxTopScrolling();
@@ -700,7 +709,7 @@ function CreateOverflowElement(node)
     ConsolePrint(outStr);
 
     //DEBUG
-    ConsolePrint("### OverflowElement created: "+outStr);
+    // ConsolePrint("### OverflowElement created: "+outStr);
 }
 
 // Called from CEF Handler

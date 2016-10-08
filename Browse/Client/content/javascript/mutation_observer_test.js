@@ -990,14 +990,9 @@ function AnalyzeNode(node)
 			&& rect.width > 0 
 			&& rect.height > 0
 			&& ( (node.scrollWidth - Math.round(rect.width) > 0) || (node.scrollHeight - Math.round(rect.height) > 0) )
-			// && ( (node.scrollLeftMax && node.scrollLeftMax > 0)  || (node.scrollTopMax && node.scrollTopMax > 0) )
 		)
 		{
-			ConsolePrint("Class: "+node.getAttribute("class")+", scrollwidth: "+node.scrollWidth+", scrollheight: "+node.scrollHeight);
-			ConsolePrint((node.scrollWidth - rect.width)+"    "+(node.scrollHeight - rect.height));
-			// ConsolePrint("SCHLAU: Left: "+node.getAttribute("scrollLeftMax")+", Top: "+node.getAttribute("scrollTopMax"));
 			CreateOverflowElement(node);
-			// if(node.style) node.style.backgroundColor = "#ff0000";
 		}
 
 

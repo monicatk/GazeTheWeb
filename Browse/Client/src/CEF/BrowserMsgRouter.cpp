@@ -161,7 +161,29 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		}
 		if (requestName.compare(9, 4, "upd#") == 0)
 		{
-			LogDebug("MsgRouter: OverflowElement update message handling has to be implemented! But it isn't.");
+			std::vector<std::string> dataStr = SplitBySeparator(requestName.substr(13), '#');
+			if (dataStr.size() == 2)
+			{
+				int id = std::stoi(dataStr[0]);
+
+				std::weak_ptr<OverflowElement> wpElem = _pMsgRouter->GetMediator()->GetOverflowElement(browser, id);
+
+				if (const auto& elem = wpElem.lock())
+				{
+					std::vector<std::string> rectData = SplitBySeparator(dataStr[1], ';');
+					std::vector<float> rect;
+					std::for_each(rectData.begin(),
+						rectData.end(),
+						[&rect](std::string str) {rect.push_back(std::stof(str)); });
+					elem->UpdateRect(id, Rect(rect));
+				}
+			}
+			else
+			{
+				LogError("MsgRouter: An error occured in decoding the update String of an OverflowElement!");
+			}
+
+			return true;
 		}
 	}
 

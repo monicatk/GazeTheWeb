@@ -2,7 +2,8 @@ Basic Features
 - Page Loading Status
 	--> first draft available in Tab::SetLoadingStatus
 
-- Scrolling within page
+- Scrolling within page (OverflowElements)
+	--> TODO: Activate Cookies in order to be able to test Facebooks Chat
 - Auto Fill / Password Manager
  - Daniel: Passwort / Anmeldeformulare erkennen
  - Raphael: Secure Password Keyboard mode?

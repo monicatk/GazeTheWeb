@@ -130,6 +130,14 @@ public:
 	std::pair<int, int> GetMaxScrolling() const { return std::make_pair(_scrollLeftMax, _scrollTopMax); }
 	std::pair<int, int> GetCurrentScrolling() const { return std::make_pair(_scrollLeft, _scrollTop); }
 
+	void UpdateRect(int rectId, Rect rect)
+	{
+		if (rectId < _rects.size() && rectId >= 0)
+		{
+			_rects[rectId] = rect;
+		}
+	}
+
 
 private:
 	// OverflowElement ID
