@@ -57,6 +57,7 @@ int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app
 
 	// Turn on offscreen rendering.
 	settings.windowless_rendering_enabled = true;
+	//settings.cache_path = CefString("%USERPROFILE%/AppData/Roaming/GazeTheWeb/Browser"); // Trying to activate cookies in CEF ...
 
     // Initialize CEF
     LogInfo("Initializing CEF...");

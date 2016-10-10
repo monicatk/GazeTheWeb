@@ -172,9 +172,11 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				{
 					std::vector<std::string> rectData = SplitBySeparator(dataStr[1], ';');
 					std::vector<float> rect;
+					// Convert Rect coordinates from string to float
 					std::for_each(rectData.begin(),
 						rectData.end(),
 						[&rect](std::string str) {rect.push_back(std::stof(str)); });
+					// Use float coordinates to update Rect
 					elem->UpdateRect(id, Rect(rect));
 				}
 			}

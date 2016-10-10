@@ -161,7 +161,7 @@ function DOMObject(node, nodeType)
         }
 
         this.setTextInput = function(text, submit){
-            ConsolePrint("setTextInput called with text='"+text+"' and submit="+submit+ "   domObj.nodeType="+this.nodeType);
+            ConsolePrint("setTextInput called with text='"+text+"' and submit="+submit);
 
             // Only executable if DOMNode is TextInput field
             if(this.nodeType === 0)
@@ -653,7 +653,6 @@ function OverflowElement(node)
                     if(i < 3) 
                     {
                         encodedCommand += ";";
-                        ConsolePrint("3c");
                     }
                 }
                 encodedCommand += "#";                

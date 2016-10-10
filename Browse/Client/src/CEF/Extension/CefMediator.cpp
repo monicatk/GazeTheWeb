@@ -13,6 +13,7 @@
 #include "include/cef_app.h"
 #include "include/wrapper/cef_helpers.h"
 
+
 void CefMediator::RegisterTab(TabCEFInterface* pTab)
 {
     CEF_REQUIRE_UI_THREAD();
@@ -31,7 +32,10 @@ void CefMediator::RegisterTab(TabCEFInterface* pTab)
     {
         browser_settings.webgl = STATE_ENABLED;
         browser_settings.windowless_frame_rate = 60;
+	
     }
+
+	browser_settings.application_cache = STATE_ENABLED; // Goal: Accepting & saving cookies enabled
 
     // TODO: Delay Renderer OR save Tab & Texture as default if key(browser) not in map, reset after map insertion
     //			OR add maps to CreateBrowserSync and fill them before Renderer starts (if possible)

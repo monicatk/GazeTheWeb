@@ -5,10 +5,11 @@ Basic Features
 - Scrolling within page (OverflowElements)
 	--> TODO: Activate Cookies in order to be able to test Facebooks Chat
 - Auto Fill / Password Manager
- - Daniel: Passwort / Anmeldeformulare erkennen
- - Raphael: Secure Password Keyboard mode?
+	- Daniel: Passwort / Anmeldeformulare erkennen
+	- Raphael: Secure Password Keyboard mode?
 - Search on page
 - Direct search of non URLs
+	--> Choose default search engine? Duckduckgo or Google for the start?
 - History / Inkognito
 - Https recognition
 - Emulation Fallback
