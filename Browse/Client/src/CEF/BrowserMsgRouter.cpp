@@ -176,8 +176,14 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					std::for_each(rectData.begin(),
 						rectData.end(),
 						[&rect](std::string str) {rect.push_back(std::stof(str)); });
+
+					LogInfo(requestName, "\tidStr: ",dataStr[0]);
+					LogInfo("MsgRouter: ", id, " old: ", elem->GetRects()[0].toString());
+					LogInfo("MsgRouter: ", id, " new: " + Rect(rect).toString());
+
+
 					// Use float coordinates to update Rect
-					elem->UpdateRect(id, Rect(rect));
+					elem->UpdateRect(id, std::make_shared<Rect>(rect));
 				}
 			}
 			else

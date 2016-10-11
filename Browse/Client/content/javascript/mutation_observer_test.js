@@ -981,6 +981,18 @@ function AnalyzeNode(node)
 		// var x = undefined;
 		// if(x !== "nope") alert("Nope!");
 
+		if(node.className == "fbNubFlyoutBody scrollable")
+		{
+			ConsolePrint("-----> if: "+(   (computedStyle.getPropertyValue("overflow") !== undefined && computedStyle.getPropertyValue("overflow") !== "visible" )
+				|| (computedStyle.getPropertyValue("overflow-x") !== undefined && computedStyle.getPropertyValue("overflow-x") !== "visible")
+				|| (computedStyle.getPropertyValue("overflow-y") !== undefined && computedStyle.getPropertyValue("overflow-y") !== "visible" )
+			));
+			ConsolePrint("(2): "+(rect.width > 0 && rect.height > 0));
+			ConsolePrint("(3): "+( (node.scrollWidth - Math.round(rect.width) > 0) || (node.scrollHeight - Math.round(rect.height) > 0) ));
+			ConsolePrint("(3a): "+node.scrollWidth+" - " + Math.round(rect.width) + " > 0 ?");
+			ConsolePrint("(3b): "+node.scrollHeight+" - "+Math.round(rect.height)+ " > 0 ?");
+		}
+
 		// Detect scrollable elements inside of webpage
 		if( node.tagName === "DIV" && 
 			(   (computedStyle.getPropertyValue("overflow") !== undefined && computedStyle.getPropertyValue("overflow") !== "visible" )
@@ -989,9 +1001,11 @@ function AnalyzeNode(node)
 			)
 			&& rect.width > 0 
 			&& rect.height > 0
-			&& ( (node.scrollWidth - Math.round(rect.width) > 0) || (node.scrollHeight - Math.round(rect.height) > 0) )
+			// && ( (node.scrollWidth - Math.round(rect.width) > 0) || (node.scrollHeight - Math.round(rect.height) > 0) )	// =false for Facebook Chat Window bottom-right...
 		)
 		{
+			if(node.className == "fbNubFlyoutBody scrollable")
+				ConsolePrint("-----> Ich wurde als Overflow Element erkannt! coords: "+AdjustRectCoordinatesToWindow(rect));
 			CreateOverflowElement(node);
 		}
 

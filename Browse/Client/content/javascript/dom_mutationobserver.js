@@ -604,6 +604,9 @@ function OverflowElement(node)
                 this.node.scrollLeft += scrollX;
                 this.node.scrollTop += scrollY;
 
+                // DEBUG
+                ConsolePrint("Scrolling ("+scrollX+", "+scrollY+")");
+
                 // Update Rects of all child elements
                 ForEveryChild(this.node, function(child){
                     if(child.nodeType == 1)
@@ -643,9 +646,14 @@ function OverflowElement(node)
             // Rect updates occured and new Rect data is accessible
             if(!equal && updatedRectsData != undefined && updatedRectsData.length > 0)
             {
+                // DEBUG
+                ConsolePrint("old:\t"+this.rects);
+                ConsolePrint("new:\t"+updatedRectsData);
+
                 this.rects = updatedRectsData;
 
-                var encodedCommand = "#ovrflow#upd#0#";
+                var id = this.node.getAttribute("overflowId");
+                var encodedCommand = "#ovrflow#upd#"+id+"#";
                 
                 for (var i = 0; i < 4; i++)
                 {                 
@@ -657,7 +665,7 @@ function OverflowElement(node)
                 }
                 encodedCommand += "#";                
                 ConsolePrint(encodedCommand);
-
+               
 
             }
             
@@ -673,42 +681,49 @@ window.overflowElements = [];
 
 function CreateOverflowElement(node)
 {
-    var overflowObj = new OverflowElement(node);
-
-    window.overflowElements.push(overflowObj);
-
-    // Prepare informing CEF about added OverflowElement
-    var outStr = "#ovrflow#add#";
-
-    var id = window.overflowElements.length - 1;
-    var zero = (id < 10) ? "0" : "";
-    outStr += (zero + id + "#");
-    // #ovrflow#add#[0]id#
-
-
-    // Note: Ignoring multiple Rects at this point...
-    var rects = overflowObj.getRects();
-    var rect = (rects.length > 0) ? rects[0] : [0,0,0,0];
-
-
-    for(var i = 0; i < 4; i++)
+    if(!node.getAttribute("overflowId"))
     {
-        outStr += rect[i];
-        if(i !== 3) outStr += ";";  // Note: if-statement misses in DOMObjects --> different decoding atm
+        var overflowObj = new OverflowElement(node);
+
+        window.overflowElements.push(overflowObj);
+
+        // Prepare informing CEF about added OverflowElement
+        var outStr = "#ovrflow#add#";
+
+
+        var id = window.overflowElements.length - 1;
+        node.setAttribute("overflowId", id);
+
+        var zero = (id < 10) ? "0" : "";
+        outStr += (zero + id + "#");
+        // #ovrflow#add#[0]id#
+
+
+        // Note: Ignoring multiple Rects at this point...
+        var rects = overflowObj.getRects();
+        var rect = (rects.length > 0) ? rects[0] : [0,0,0,0];
+
+
+        for(var i = 0; i < 4; i++)
+        {
+            outStr += rect[i];
+            if(i !== 3) outStr += ";";  // Note: if-statement misses in DOMObjects --> different decoding atm
+        }
+        outStr += "#";
+        // #ovrflow#add#[0]id#rect0;rect1;rect2;rect3#
+
+        outStr +=  overflowObj.getMaxLeftScrolling();
+        outStr += ";";
+        outStr += overflowObj.getMaxTopScrolling();
+        outStr += "#";
+        // #ovrflow#add#[0]id#rect0;rect1;rect2;rect3#maxLeft;maxTop#
+
+        ConsolePrint(outStr);
+
+        //DEBUG
+        // ConsolePrint("### OverflowElement created: "+outStr);
     }
-    outStr += "#";
-    // #ovrflow#add#[0]id#rect0;rect1;rect2;rect3#
-
-    outStr +=  overflowObj.getMaxLeftScrolling();
-    outStr += ";";
-    outStr += overflowObj.getMaxTopScrolling();
-    outStr += "#";
-    // #ovrflow#add#[0]id#rect0;rect1;rect2;rect3#maxLeft;maxTop#
-
-    ConsolePrint(outStr);
-
-    //DEBUG
-    // ConsolePrint("### OverflowElement created: "+outStr);
+   
 }
 
 // Called from CEF Handler
