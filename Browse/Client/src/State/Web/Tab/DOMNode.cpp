@@ -6,8 +6,8 @@
 #include "DOMNode.h"
 
 #include <iostream>
+#include "src/Utils/Logger.h"
 
-#include "src/Utils//Logger.h"
 
 /* DOMNode methods*/
 
@@ -81,3 +81,16 @@ DOMLink::DOMLink(
 	_text = text;
 	_url = url;
 }
+
+void OverflowElement::UpdateRect(int rectId, std::shared_ptr<Rect> rect)
+{
+	if (rectId < _rects.size() && rectId >= 0)
+	{
+		_rects[rectId] = *rect.get();
+	}
+	else
+	{
+		LogBug("OverflowElement: Tried to update ", rectId, "th Rect, but it doesn't exist.");
+	}
+}
+

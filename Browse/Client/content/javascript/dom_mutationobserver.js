@@ -647,8 +647,8 @@ function OverflowElement(node)
             if(!equal && updatedRectsData != undefined && updatedRectsData.length > 0)
             {
                 // DEBUG
-                ConsolePrint("old:\t"+this.rects);
-                ConsolePrint("new:\t"+updatedRectsData);
+                ConsolePrint(this.node.getAttribute("overflowId")+" old:\t"+this.rects);
+                ConsolePrint(this.node.getAttribute("overflowId")+" new:\t"+updatedRectsData);
 
                 this.rects = updatedRectsData;
 

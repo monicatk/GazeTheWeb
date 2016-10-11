@@ -863,8 +863,11 @@ void Tab::DrawDebuggingOverlay() const
 
 	for (const auto& rOverflowElement : _overflowElements)
 	{
-		for(const auto& rect : rOverflowElement->GetRects())
+		for (const auto& rect : rOverflowElement->GetRects())
+		{
 			renderRect(rect, false);
+		}
+			
 	}
 }
 
