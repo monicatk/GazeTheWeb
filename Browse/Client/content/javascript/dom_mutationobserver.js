@@ -33,7 +33,6 @@ function DOMObject(node, nodeType)
 
             if(this.fixed)
             {
-                //  updatedRectsData = updatedRectsData.map( function(rectData){ rectData = SubstractScrollingOffset(rectData);} );
                 // NOTE: Not sure if this works like intended
                 updatedRectsData.map( function(rectData){ rectData = SubstractScrollingOffset(rectData);} );
             }
@@ -389,13 +388,8 @@ function UpdateDOMRects()
 
     // ... and all OverflowElements
     window.overflowElements.forEach(
-        function (overflowObj) { 
-            // DEBUG
-            ConsolePrint("UpdateDOMRects() for OE id="+overflowObj.node.getAttribute("overflowId")+", before: "+overflowObj.rects);
-
+        function (overflowObj) {
             overflowObj.updateRects(); 
-
-            ConsolePrint("after: "+overflowObj.rects);
         }
     );
 
@@ -454,7 +448,7 @@ function InformCEF(domObj, operation)
             if(operation[1] == 'fixed')
             {
                 // If fixed attribute doesn't exist, node is not fixed
-                var status = (domObj.node.getAttribute('fixedID') != undefined) ? 1 : 0;
+                var status = (domObj.node.getAttribute('fixedID') !== undefined) ? 1 : 0;
                 // Encode changes in 'fixed' as attribute '1'
                 encodedCommand += ('1#'+status+'#');
 
@@ -552,6 +546,7 @@ function OverflowElement(node)
     /* Attributes */
         this.node = node;
         this.rects = AdjustClientRects(this.node.getClientRects());
+        this.fixed = false;
 
         // this.overflowParent = undefined;
 
@@ -613,17 +608,17 @@ function OverflowElement(node)
 
                 // ConsolePrint("Executing OverflowElement scrolling by (x, y) = ("+scrollX+", "+scrollY+").");
                 
-                // DEBUG 
-                var id = this.node.getAttribute("overflowId");
-                ConsolePrint(id+" before: scrollLeft: "+this.node.scrollLeft+" scrollTop: "+this.node.scrollTop);
+                // // DEBUG 
+                // var id = this.node.getAttribute("overflowId");
+                // ConsolePrint(id+" before: scrollLeft: "+this.node.scrollLeft+" scrollTop: "+this.node.scrollTop);
 
                 // Execute scrolling
                 this.node.scrollLeft += scrollX;
                 this.node.scrollTop += scrollY;
 
-                // DEBUG
-                ConsolePrint(id+"after : ("+scrollX+", "+scrollY+")\t-- scrollLeft: "+this.node.scrollLeft+" scrollTop: "+this.node.scrollTop);
-                ConsolePrint("class: "+this.node.className);
+                // // DEBUG
+                // ConsolePrint(id+"after : ("+scrollX+", "+scrollY+")\t-- scrollLeft: "+this.node.scrollLeft+" scrollTop: "+this.node.scrollTop);
+                // ConsolePrint("class: "+this.node.className);
 
                 // Update Rects of all child elements
                 ForEveryChild(this.node, function(child){
@@ -662,6 +657,13 @@ function OverflowElement(node)
             // Get new Rect data
             var updatedRectsData = AdjustClientRects(this.node.getClientRects());
 
+            
+            if(this.fixed)
+            {
+                updatedRectsData.map( function(rectData){ rectData = SubstractScrollingOffset(rectData);} );
+            }
+
+
             // Compare new and old Rect data
             var equal = CompareClientRectsData(updatedRectsData, this.rects);
 
@@ -670,15 +672,9 @@ function OverflowElement(node)
             // Rect updates occured and new Rect data is accessible
             if(!equal && updatedRectsData !== undefined)
             {
-                // DEBUG
-                ConsolePrint("Rect changed for id="+id);
-                ConsolePrint(id+" old:\t"+this.rects);
-                ConsolePrint(id+" new:\t"+updatedRectsData);
-
                 this.rects = updatedRectsData;
 
-                // var id = this.node.getAttribute("overflowId");
-                var encodedCommand = "#ovrflow#upd#"+id+"#";
+                var encodedCommand = "#ovrflow#upd#"+id+"#rect#";
                 
                 for (var i = 0; i < 4; i++)
                 {                 
@@ -690,43 +686,26 @@ function OverflowElement(node)
                 }
                 encodedCommand += "#";                
                 ConsolePrint(encodedCommand);
-
-   
-
-                // ConsolePrint("OE rect width: "+this.node.getBoundingClientRect().width);
-               
-
             }
-            else if(this.node.getBoundingClientRect().width === 0)
-            {
-                ConsolePrint("Rect width == 0, but CEF wasn't informed about changes.");
-                ConsolePrint("!equal = "+!equal);
-                ConsolePrint("updatedRectsData !== undefined = "+(updatedRectsData !== undefined));
-                ConsolePrint("updatedRectsData.length > 0 = "+(updatedRectsData.length > 0));
-            }
-          
-      
-
-            // // DEBUG
-            // if((id === 6 || id === 7))
-            // {
-            //     ConsolePrint("Rect Update triggered for id="+id);
-            //     if(this.node.getBoundingClientRect().width === 0)
-            //     {
-            //         ConsolePrint("id="+id+" should get invisible now! <-----");
-            //         ConsolePrint("this.node.rects: "+this.node.rects);
-            //     }
-            //     else
-            //     {
-            //         ConsolePrint(id+" rect.width= "+this.node.getBoundingClientRect().width);
-            //     }
-            // }
-
-
-            // if(equal) alert("Overflow Rects don't need to be updated!")
 
             return !equal;
         };
+
+        this.setFixed = function(fixed){
+            if(this.fixed !== fixed)
+            {
+                this.fixed = fixed;
+                
+                // Inform CEF about changes in fixed attribute
+                var id = this.node.getAttribute("overflowId");
+                var numFixed = (fixed) ? 1 : 0;
+                var encodedCommand = "#ovrflow#upd#"+id+"#fixed#"+numFixed+"#";
+                ConsolePrint(encodedCommand);
+
+                this.updateRects();
+            }
+        };
+
         
 
 }

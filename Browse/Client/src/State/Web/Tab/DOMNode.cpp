@@ -94,3 +94,7 @@ void OverflowElement::UpdateRect(int rectId, std::shared_ptr<Rect> rect)
 	}
 }
 
+void OverflowElement::UpdateFixation(int fixed)
+{
+	_fixed = fixed;
+}

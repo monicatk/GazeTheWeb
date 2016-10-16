@@ -387,11 +387,19 @@ void Tab::Update(float tpf, Input& rInput)
 			{
 				for (const auto& rRect : rOverflowElement->GetRects())
 				{
-					if (rRect.isInside(tabInput.webViewGazeX + _scrollingOffsetX, tabInput.webViewGazeY + _scrollingOffsetY))
+					int gazeX = tabInput.webViewGazeX;
+					int gazeY = tabInput.webViewGazeY;
+
+					// Do NOT add scrolling offset if element is fixed
+					if (!rOverflowElement->GetFixed())
 					{
-						// Call OverflowElements scroll(gazeX, gazeY) method with current webview gaze coordinates
-						// Scrolling will be executed in Javascript
-						// TODO/Note: Global scrolling parameters defining how/when is scrolled?
+						gazeX += _scrollingOffsetX;
+						gazeY += _scrollingOffsetY;
+					}
+
+					// Check if current gaze is inside of overflow element, if so execute scrolling method in corresponding Javascript object
+					if (rRect.isInside(gazeX, gazeY))
+					{
 						_pCefMediator->ScrollOverflowElement(this, rOverflowElement->GetId(), tabInput.webViewGazeX, tabInput.webViewGazeY);
 						break;
 					}
@@ -870,7 +878,7 @@ void Tab::DrawDebuggingOverlay() const
 		if (rOverflowElement) // Note: Can be NULL if aquivalent element in JS got deleted. (see Tab::RemoveOverflowElement)
 		{
 			for (const auto& rect : rOverflowElement->GetRects())
-				renderRect(rect, false);
+				renderRect(rect, rOverflowElement->GetFixed());
 		}
 
 	}

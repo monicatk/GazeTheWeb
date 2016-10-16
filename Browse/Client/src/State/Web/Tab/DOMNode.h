@@ -127,17 +127,19 @@ public:
 
 	int GetId() const { return _id; };
 	std::vector<Rect> GetRects() const { return _rects; };
-
+	bool GetFixed() const { return _fixed; };
 	std::pair<int, int> GetMaxScrolling() const { return std::make_pair(_scrollLeftMax, _scrollTopMax); }
 	std::pair<int, int> GetCurrentScrolling() const { return std::make_pair(_scrollLeft, _scrollTop); }
 
 	void UpdateRect(int rectId, std::shared_ptr<Rect> rect);
+	void UpdateFixation(int fixed);
 
 
 private:
 	// OverflowElement ID
 	int _id;
 	std::vector<Rect> _rects;
+	bool _fixed = false;
 	// Maximum values for scrolling directions
 	int _scrollLeftMax, _scrollTopMax;
 	// Current position in interval [0, max value]

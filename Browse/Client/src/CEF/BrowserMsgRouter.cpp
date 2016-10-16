@@ -114,17 +114,10 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	{
 		if (requestName.compare(9, 4, "add#") == 0)
 		{
-			LogDebug("MsgRouter: OverflowElement added...");
-
 			std::string dataStr = requestName.substr(13, requestName.length());
 			std::vector<std::string> data = SplitBySeparator(dataStr, '#');
 
-			for (const auto& str : data)
-			{
-				LogDebug(str);
-			}
-
-			 //Extract OverflowElement ID from dataStr
+			//Extract OverflowElement ID from dataStr
 			int id = std::stoi(data[0]);
 
 			 //Extract Rect data from encoded String
@@ -163,29 +156,49 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		if (requestName.compare(9, 4, "upd#") == 0)
 		{
 			std::vector<std::string> dataStr = SplitBySeparator(requestName.substr(13), '#');
-			if (dataStr.size() == 2)
+
+			// Assuming elementId, attribute name & data are enough information (at this time)
+			if (dataStr.size() == 3)
 			{
+				// Overflow Element ID
 				int id = std::stoi(dataStr[0]);
 
-				std::weak_ptr<OverflowElement> wpElem = _pMsgRouter->GetMediator()->GetOverflowElement(browser, id);
+				// Overflow Elements attribute as string, which gets updated
+				std::string attr = dataStr[1];
 
+				// dataStr[2] contains data for given attributes value changes
+
+				// Get access to given Overflow Element in Tab
+				std::weak_ptr<OverflowElement> wpElem = _pMsgRouter->GetMediator()->GetOverflowElement(browser, id);
 				if (const auto& elem = wpElem.lock())
 				{
-					std::vector<std::string> rectData = SplitBySeparator(dataStr[1], ';');
-					std::vector<float> rect;
-					// Convert Rect coordinates from string to float
-					std::for_each(rectData.begin(),
-						rectData.end(),
-						[&rect](std::string str) {rect.push_back(std::stof(str)); });
+					// Update Overflow Element's rect data
+					if (attr == "rect")
+					{
+						std::vector<std::string> rectData = SplitBySeparator(dataStr[2], ';');
+						std::vector<float> rect;
+						// Convert Rect coordinates from string to float
+						std::for_each(
+							rectData.begin(),
+							rectData.end(),
+							[&rect](std::string str) {rect.push_back(std::stof(str)); }
+						);
 
-					// Use float coordinates to update Rect #0
-					elem->UpdateRect(0, std::make_shared<Rect>(rect));
+						// Use float coordinates to update Rect #0
+						elem->UpdateRect(0, std::make_shared<Rect>(rect));
+					}
+
+					// Update OverflowElement's fixation status
+					if (attr == "fixed")
+					{
+						elem->UpdateFixation(std::stoi(dataStr[2]));
+					}
 				}
-
 			}
 			else
 			{
 				LogError("MsgRouter: An error occured in decoding the update String of an OverflowElement!");
+
 			}
 
 			return true;

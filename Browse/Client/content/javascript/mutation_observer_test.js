@@ -287,13 +287,8 @@ function AddFixedElement(node)
 
 function SaveBoundingRectCoordinates(node)
 {
-	// DEBUG
-	// ConsolePrint('Start of SaveBoundingRectCoordinates...');
-
 	var rect = node.getBoundingClientRect();
-	// Only add coordinates if width and height are greater zero
-	// if(rect.width && rect.height)
-	// {
+
 	var id = node.getAttribute('fixedID');
 
 	
@@ -310,9 +305,6 @@ function SaveBoundingRectCoordinates(node)
 	
 	// Add rect coordinates to list of fixed coordinates at position |id|
 	window.fixed_coordinates[id] = rect_coords;
-
-	// DEBUG
-	// ConsolePrint('Start of ComputeBoundingRectOfAllChilds...');
 
 	// Compute bounding rect containing all child nodes
 	var tree_rect_coords = ComputeBoundingRectOfAllChilds(node, 0, id);
@@ -331,27 +323,38 @@ function SaveBoundingRectCoordinates(node)
 				ComputeBoundingRect(rect_coords, tree_rect_coords)
 			);
 	}
-	 ConsolePrint('Computed fixed#'+id+": "+window.fixed_coordinates[id]);
-
-	 // DEBUG
-	// ConsolePrint('End of SaveBoundingRectCoordinates.');
 }
 
 // Inform CEF about the current fication status of a already known node
 function SetFixationStatus(node, status)
 {
 	var type = node.getAttribute('nodeType');
-	var id = node.getAttribute('nodeID');
+	var nodeId = node.getAttribute('nodeID');
 
-	if(type && id)
+	// Node might be linked to DOMObject
+	if(type !== null && nodeId !== null)
 	{
 		// DEBUG
 		// ConsolePrint("Getting DOMObject...");
 		
-		var domObj = GetDOMObject(type, id);
-		if(domObj)
+		var domObj = GetDOMObject(type, nodeId);
+		if(domObj !== null)
 		{
 			domObj.setFixed(status);
+		}
+	}
+
+	// Node might be linked to OverflowElement object
+	var overflowId = node.getAttribute("overflowId");
+	if(overflowId !== null)
+	{
+		var overflowObj = GetOverflowElement(overflowId);
+		if(overflowObj !== null)
+		{
+			//DEBUG
+			ConsolePrint("Changing fixation status to "+status+" for OE id="+overflowId);
+
+			overflowObj.setFixed(status);
 		}
 	}
 }
@@ -400,7 +403,7 @@ function ComputeBoundingRectOfAllChilds(node, depth, fixedID)
 		}
 
 		// Inform CEF that DOM node is child of a fixed element
-		if(node.hasAttribute('nodeType'))
+		if(node.hasAttribute('nodeType') || node.hasAttribute("overflowId"))
 		{
 			SetFixationStatus(node, true);
 		}
@@ -457,25 +460,17 @@ function RemoveFixedElement(node, resetChildren)
 		// Remove 'fixedID' attribute
 		node.removeAttribute('fixedID');
 
-		if(resetChildren && node.children)
+		if(resetChildren)
 		{
-			UnfixChildNodes(node.children);
+			ForEveryChild(
+				node,
+				function(child){
+					child.removeAttribute("fixedID");
+					SetFixationStatus(child, false);
+				}			
+			);
 		}
-	}
-}
 
-function UnfixChildNodes(childNodes)
-{
-	for(var i = 0, n = childNodes.length; i < n; i++)
-	{
-		childNodes[i].removeAttribute('fixedID');
-		
-		SetFixationStatus(childNodes[i], false);
-
-		if(childNodes[i].children)
-		{
-			UnfixChildNodes(childNodes[i].children);
-		}
 	}
 }
 
@@ -960,21 +955,6 @@ function AnalyzeNode(node)
 
 		var rect = node.getBoundingClientRect();
 
-		// var x = undefined;
-		// if(x !== "nope") alert("Nope!");
-
-		if(node.className == "fbNubFlyoutBody scrollable")
-		{
-			ConsolePrint("-----> if: "+(   (computedStyle.getPropertyValue("overflow") !== undefined && computedStyle.getPropertyValue("overflow") !== "visible" )
-				|| (computedStyle.getPropertyValue("overflow-x") !== undefined && computedStyle.getPropertyValue("overflow-x") !== "visible")
-				|| (computedStyle.getPropertyValue("overflow-y") !== undefined && computedStyle.getPropertyValue("overflow-y") !== "visible" )
-			));
-			ConsolePrint("(2): "+(rect.width > 0 && rect.height > 0));
-			ConsolePrint("(3): "+( (node.scrollWidth - Math.round(rect.width) > 0) || (node.scrollHeight - Math.round(rect.height) > 0) ));
-			ConsolePrint("(3a): "+node.scrollWidth+" - " + Math.round(rect.width) + " > 0 ?");
-			ConsolePrint("(3b): "+node.scrollHeight+" - "+Math.round(rect.height)+ " > 0 ?");
-		}
-
 		// Detect scrollable elements inside of webpage
 		if( node.tagName === "DIV" && 
 			(   (computedStyle.getPropertyValue("overflow") !== undefined && computedStyle.getPropertyValue("overflow") !== "visible" )
@@ -986,8 +966,6 @@ function AnalyzeNode(node)
 			// && ( (node.scrollWidth - Math.round(rect.width) > 0) || (node.scrollHeight - Math.round(rect.height) > 0) )	// =false for Facebook Chat Window bottom-right...
 		)
 		{
-			if(node.className == "fbNubFlyoutBody scrollable")
-				ConsolePrint("-----> Ich wurde als Overflow Element erkannt! coords: "+AdjustRectCoordinatesToWindow(rect));
 			CreateOverflowElement(node);
 		}
 
@@ -1107,17 +1085,12 @@ function MutationObserverInit()
 							{
 								if(node.hasAttribute('fixedID') !== null)
 								{
-									//DEBUG
-									// ConsolePrint("class changed, updating subtree");
 									UpdateDOMRects();
 
 									UpdateSubtreesBoundingRect(node);
 
 									// TODO: Triggered quite often... (while scrolling)
 								}
-
-								ConsolePrint("CHANGES IN ATTRIBUTE CLASS TOOK PLACE, UPDATING ALL CHILDRENS' RECTS");
-								ConsolePrint("class now: "+node.className);
 
 								// Update DOMObj / OverflowElement Rect, if node is linked to one
 								// TODO: Simple UpdateRects for one DOMObj & OverflowElement?
@@ -1156,9 +1129,7 @@ function MutationObserverInit()
 												var domObj = GetDOMObject(nodeType, nodeID);
 												if(domObj !== null)
 												{
-													// domObj.checkVisibility(); // included in updateRects()
 													domObj.updateRects();
-
 												}
 											}
 											else
@@ -1169,9 +1140,6 @@ function MutationObserverInit()
 													var overflowObj = GetOverflowElement(overflowId);
 													if(overflowObj !== null)
 													{
-														//DEBUG
-														ConsolePrint("Updating OE with id="+overflowId+" because of parent's class changes");
-
 														overflowObj.updateRects();
 													}
 												}
