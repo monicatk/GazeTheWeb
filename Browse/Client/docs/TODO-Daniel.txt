@@ -8,6 +8,7 @@
 	-	Visibility check if menu disappears again
 	Example: Message list on Fb when clicking on message button in topmost menu bar
 	-	Fixed overflow elements
+	-	Remove overflowParent attribute from DOMObjects and do aquivalent visbility check for each child in OverflowElements
 
 >>>	Fixed Elements
 	-	Add z-index for layers of fixed elements

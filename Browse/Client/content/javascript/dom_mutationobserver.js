@@ -42,7 +42,7 @@ function DOMObject(node, nodeType)
             var equal = CompareClientRectsData(updatedRectsData, this.rects);
 
             // Rect updates occured and new Rect data is accessible
-            if(!equal && updatedRectsData != undefined && updatedRectsData.length > 0)
+            if(!equal && updatedRectsData != undefined)
             {
                 this.rects = updatedRectsData;
                 InformCEF(this, ['update', 'rects']); 
@@ -289,7 +289,13 @@ function CreateDOMLink(node) { CreateDOMObject(node, 1); }
  */
 function AdjustClientRects(rects)
 {
-	function RectToFloatList(rect){ return [rect.top, rect.left, rect.bottom, rect.right]; };
+	// function RectToFloatList(rect){ return [rect.top, rect.left, rect.bottom, rect.right]; };
+
+    // .getClientRects() may return an empty DOMRectList{}
+    if(rects.length === 0)
+    {
+        return [[0,0,0,0]];
+    }
 
     var adjRects = [];
     for(var i = 0, n = rects.length; i < n; i++)
@@ -341,12 +347,12 @@ function CompareClientRects(rects1, rects2)
  */
 function CompareClientRectsData(rects1, rects2)
 {
-    if(rects2 == undefined)
+    if(rects2 === undefined || rects2 === null)
         return false;
 
     var n = rects1.length;
 
-	if(n != rects2.length)
+	if(n !== rects2.length)
 		return false;
 
 	// Check if width and height of each Rect are identical
@@ -354,7 +360,7 @@ function CompareClientRectsData(rects1, rects2)
 	{
 		for(var j = 0; j < 4; j++)
         {
-            if(rects1[i][j] != rects2[i][j])
+            if(rects1[i][j] !== rects2[i][j])
                 return false;
         }
 	}
@@ -383,7 +389,14 @@ function UpdateDOMRects()
 
     // ... and all OverflowElements
     window.overflowElements.forEach(
-        function (overflowObj) { overflowObj.updateRects(); }
+        function (overflowObj) { 
+            // DEBUG
+            ConsolePrint("UpdateDOMRects() for OE id="+overflowObj.node.getAttribute("overflowId")+", before: "+overflowObj.rects);
+
+            overflowObj.updateRects(); 
+
+            ConsolePrint("after: "+overflowObj.rects);
+        }
     );
 
     // ... and all FixedElements
@@ -488,7 +501,7 @@ function GetDOMObjectList(nodeType)
         default:
         {
             ConsolePrint('ERROR: No DOMObjectList for nodeType='+nodeType+' exists!');
-            return undefined;
+            return null;
         }
     }
 }
@@ -508,7 +521,7 @@ function GetDOMObject(nodeType, nodeID)
     if(nodeID >= targetList.length || targetList == undefined)
     {
         ConsolePrint('ERROR: Node with id='+nodeID+' does not exist for type='+nodeType+'!');
-        return undefined;
+        return null;
     }
 
     return targetList[nodeID];
@@ -599,13 +612,18 @@ function OverflowElement(node)
                 }
 
                 // ConsolePrint("Executing OverflowElement scrolling by (x, y) = ("+scrollX+", "+scrollY+").");
+                
+                // DEBUG 
+                var id = this.node.getAttribute("overflowId");
+                ConsolePrint(id+" before: scrollLeft: "+this.node.scrollLeft+" scrollTop: "+this.node.scrollTop);
 
                 // Execute scrolling
                 this.node.scrollLeft += scrollX;
                 this.node.scrollTop += scrollY;
 
                 // DEBUG
-                ConsolePrint("Scrolling ("+scrollX+", "+scrollY+")");
+                ConsolePrint(id+"after : ("+scrollX+", "+scrollY+")\t-- scrollLeft: "+this.node.scrollLeft+" scrollTop: "+this.node.scrollTop);
+                ConsolePrint("class: "+this.node.className);
 
                 // Update Rects of all child elements
                 ForEveryChild(this.node, function(child){
@@ -619,6 +637,10 @@ function OverflowElement(node)
 
                             if(domObj) domObj.updateRects();
                         }
+
+                        // TODO: Update child OEs as well. Idea: Update Method which can be called for one node and checks if DomObj or OE
+                        // and executes updateRects
+                        // Maybe better: Add function pointer to node s.t. node.updateRects() is callable
                     }
                 });
 
@@ -635,7 +657,7 @@ function OverflowElement(node)
 
         this.updateRects = function(){
 
-            // this.checkVisibility(); // doesn't exist yet!
+            // this.checkVisibility(); // doesn't exist (yet?) for OverflowElements!
 
             // Get new Rect data
             var updatedRectsData = AdjustClientRects(this.node.getClientRects());
@@ -643,16 +665,19 @@ function OverflowElement(node)
             // Compare new and old Rect data
             var equal = CompareClientRectsData(updatedRectsData, this.rects);
 
+            var id = this.node.getAttribute("overflowId");
+
             // Rect updates occured and new Rect data is accessible
-            if(!equal && updatedRectsData != undefined && updatedRectsData.length > 0)
+            if(!equal && updatedRectsData !== undefined)
             {
                 // DEBUG
-                ConsolePrint("old:\t"+this.rects);
-                ConsolePrint("new:\t"+updatedRectsData);
+                ConsolePrint("Rect changed for id="+id);
+                ConsolePrint(id+" old:\t"+this.rects);
+                ConsolePrint(id+" new:\t"+updatedRectsData);
 
                 this.rects = updatedRectsData;
 
-                var id = this.node.getAttribute("overflowId");
+                // var id = this.node.getAttribute("overflowId");
                 var encodedCommand = "#ovrflow#upd#"+id+"#";
                 
                 for (var i = 0; i < 4; i++)
@@ -665,10 +690,39 @@ function OverflowElement(node)
                 }
                 encodedCommand += "#";                
                 ConsolePrint(encodedCommand);
+
+   
+
+                // ConsolePrint("OE rect width: "+this.node.getBoundingClientRect().width);
                
 
             }
-            
+            else if(this.node.getBoundingClientRect().width === 0)
+            {
+                ConsolePrint("Rect width == 0, but CEF wasn't informed about changes.");
+                ConsolePrint("!equal = "+!equal);
+                ConsolePrint("updatedRectsData !== undefined = "+(updatedRectsData !== undefined));
+                ConsolePrint("updatedRectsData.length > 0 = "+(updatedRectsData.length > 0));
+            }
+          
+      
+
+            // // DEBUG
+            // if((id === 6 || id === 7))
+            // {
+            //     ConsolePrint("Rect Update triggered for id="+id);
+            //     if(this.node.getBoundingClientRect().width === 0)
+            //     {
+            //         ConsolePrint("id="+id+" should get invisible now! <-----");
+            //         ConsolePrint("this.node.rects: "+this.node.rects);
+            //     }
+            //     else
+            //     {
+            //         ConsolePrint(id+" rect.width= "+this.node.getBoundingClientRect().width);
+            //     }
+            // }
+
+
             // if(equal) alert("Overflow Rects don't need to be updated!")
 
             return !equal;
@@ -735,3 +789,18 @@ function GetOverflowElement(id)
         ConsolePrint("ERROR in GetOverflowElement: id="+id+", valid id is in [0, "+window.overflowElements.length+"]!");
 }
 
+function RemoveOverflowElement(id)
+{
+    if(id < window.overflowElements.length && id >= 0)
+    {
+        delete window.overflowElements[id]; // TODO: Keep list space empty or fill when new OE is created?
+
+        // Inform CEF about removed overflow element
+        ConsolePrint("#ovrflow#rem#"+id);
+
+    }
+    else
+    {
+        ConsolePrint("ERROR: Couldn't remove OverflowElement with id="+id);
+    }
+}

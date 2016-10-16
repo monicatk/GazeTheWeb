@@ -77,6 +77,7 @@ public:
 
 	virtual void AddOverflowElement(std::shared_ptr<OverflowElement> overflowElem) = 0;
 	virtual std::shared_ptr<OverflowElement> GetOverflowElement(int id) = 0;
+	virtual void RemoveOverflowElement(int id) = 0;
 };
 
 #endif // TABCEFINTERFACE_H_

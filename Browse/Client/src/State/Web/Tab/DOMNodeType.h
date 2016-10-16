@@ -10,8 +10,7 @@
 enum DOMNodeType
 {
     TextInput = 0, 
-	TextLink = 1,
-	OverflowObject = 2
+	TextLink = 1
 };
 
 #endif // DOMNODETYPE_H_

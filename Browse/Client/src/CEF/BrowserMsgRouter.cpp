@@ -155,7 +155,8 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		}
 		if (requestName.compare(9, 4, "rem#") == 0)
 		{
-			LogDebug("MsgRouter: OverflowElement removed... TODO: Implement handling!");
+			std::vector<std::string> dataStr = SplitBySeparator(requestName.substr(13), '#');
+			_pMsgRouter->GetMediator()->RemoveOverflowElement(browser, std::stoi(dataStr[0]));
 
 			return true;
 		}
@@ -177,13 +178,22 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 						rectData.end(),
 						[&rect](std::string str) {rect.push_back(std::stof(str)); });
 
-					LogInfo(requestName, "\tidStr: ",dataStr[0]);
 					LogInfo("MsgRouter: ", id, " old: ", elem->GetRects()[0].toString());
-					LogInfo("MsgRouter: ", id, " new: " + Rect(rect).toString());
+					LogInfo("MsgRouter: ", id, " new schould be: " + Rect(rect).toString());
+					
 
 
-					// Use float coordinates to update Rect
-					elem->UpdateRect(id, std::make_shared<Rect>(rect));
+
+					// Use float coordinates to update Rect #0
+					elem->UpdateRect(0, std::make_shared<Rect>(rect));
+				}
+
+				// DEBUG
+				wpElem = _pMsgRouter->GetMediator()->GetOverflowElement(browser, id);
+
+				if (const auto& elem = wpElem.lock())
+				{
+					LogInfo("MsgRouter: ", id, " new is: ", elem->GetRects()[0].toString());
 				}
 			}
 			else
@@ -225,7 +235,6 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		{
 		case('0') : {type = DOMNodeType::TextInput; break;  };
 		case('1') : {type = DOMNodeType::TextLink; break;  };
-		case('2') : {type = DOMNodeType::OverflowObject; break; }
 		}
 
 		// Extract information of variable length from rest of string

@@ -34,7 +34,7 @@ function ConsolePrint(msg)
 */
 function AdjustRectCoordinatesToWindow(rect)
 {
-	if(rect == undefined)
+	if(rect === undefined)
 		ConsolePrint("WARNING: rect == undefined in AdjustRectCoordinatesToWindow!");
 
 	var doc = document.documentElement;
@@ -598,26 +598,8 @@ function AddDOMTextLink(node)
 
 // TESTING PURPOSE
 document.onclick = function(){
-	ConsolePrint("### document.onclick() triggered! ###");
+	ConsolePrint("### document.onclick() triggered! Calling UpdateDOMRects! ###");
 	UpdateDOMRects();
-	// UpdateFixedElementRects();
-
-		// var divs = document.getElementsByTagName('DIV');
-		// for (var i = 0, n = divs.length; i < n; i++)
-		// {
-		// 	var role = divs[i].getAttribute('role');
-		// 	ConsolePrint('role: '+role);
-		// 	if(role == 'button')
-		// 	{
-		// 		ConsolePrint("Found DIV which behaves as Button!");
-		// 		CreateDOMLink(divs[i]);
-		// 	}
-		// 	if(role == 'textbox')
-		// 	{
-		// 		ConsolePrint("Found DIV which behaves as Textbox!");
-		// 		CreateDOMTextInput(divs[i]);
-		// 	}
-		// }
 	
 }
 
@@ -1123,7 +1105,7 @@ function MutationObserverInit()
 							// Changes in attribute 'class' may indicate that bounding rect update is needed, if node is child node of a fixed element
 							if(attr == 'class')
 							{
-								if(node.hasAttribute('fixedID'))
+								if(node.hasAttribute('fixedID') !== null)
 								{
 									//DEBUG
 									// ConsolePrint("class changed, updating subtree");
@@ -1131,30 +1113,72 @@ function MutationObserverInit()
 
 									UpdateSubtreesBoundingRect(node);
 
-									
-
-
 									// TODO: Triggered quite often... (while scrolling)
 								}
 
-								// Testing: GMail, username entered, pw field appears, Rects not in place...
-								UpdateDOMRects(); // TODO: With every class changes? Sounds wayyyy too much
+								ConsolePrint("CHANGES IN ATTRIBUTE CLASS TOOK PLACE, UPDATING ALL CHILDRENS' RECTS");
+								ConsolePrint("class now: "+node.className);
 
-								ForEveryChild(node, function(child){
-									if(child.nodeType == 1)
-									{	
-										var nodeType = child.getAttribute('nodeType');
-										if(nodeType)
-										{
-											var nodeID = child.getAttribute('nodeID');
-											var domObj = GetDOMObject(nodeType, nodeID);
-											if(domObj)
+								// Update DOMObj / OverflowElement Rect, if node is linked to one
+								// TODO: Simple UpdateRects for one DOMObj & OverflowElement?
+								var nodeType = node.getAttribute('nodeType');
+								if(nodeType !== null)
+								{
+									var nodeID = child.getAttribute('nodeID');
+									var domObj = GetDOMObject(nodeType, nodeID);
+									if(domObj !== null)
+									{
+										// domObj.checkVisibility(); // included in updateRects()
+										domObj.updateRects();
+
+									}
+								}
+
+								var overflowId = node.getAttribute("overflowId");
+								if(overflowId !== null)
+								{
+									var overflowObj = GetOverflowElement(overflowId);
+									if(overflowObj !== null)
+									{
+										overflowObj.updateRects();
+									}
+								}
+
+								// Update Rects and visibility for all children if they are linked to DOMObjects or OverflowElements
+								ForEveryChild(node, 
+									function(child){
+										if(child.nodeType == 1)
+										{	
+											var nodeType = child.getAttribute('nodeType');
+											if(nodeType !== null)
 											{
-												domObj.checkVisibility();
+												var nodeID = child.getAttribute('nodeID');
+												var domObj = GetDOMObject(nodeType, nodeID);
+												if(domObj !== null)
+												{
+													// domObj.checkVisibility(); // included in updateRects()
+													domObj.updateRects();
+
+												}
+											}
+											else
+											{
+												var overflowId = child.getAttribute("overflowId");
+												if(overflowId !== null)
+												{
+													var overflowObj = GetOverflowElement(overflowId);
+													if(overflowObj !== null)
+													{
+														//DEBUG
+														ConsolePrint("Updating OE with id="+overflowId+" because of parent's class changes");
+
+														overflowObj.updateRects();
+													}
+												}
 											}
 										}
 									}
-								});
+								); // end of ForEveryChild
 							}
 
 		  				} // END node.nodeType == 1
@@ -1214,9 +1238,23 @@ function MutationObserverInit()
 									UpdateDOMRects();
 								}
 
+								var overflowId = node.getAttribute("overflowId");
+								if(overflowId !== null)
+								{
+									RemoveOverflowElement(id);
+								}
+
 								// TODO: Removal of relevant DOM node types??
 			  				}
 			  			}
+
+						// At least one node was removed from DOM tree
+						if(removed_nodes.length > 0)
+						{
+							// Trigger Rect Updates after removal of (several) node(s)
+							UpdateDOMRects();
+						}
+
 
 		  			} // END mutation.type == 'childList'
 

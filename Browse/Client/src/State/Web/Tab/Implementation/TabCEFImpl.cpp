@@ -323,3 +323,15 @@ std::shared_ptr<OverflowElement> Tab::GetOverflowElement(int id)
 
 }
 
+void Tab::RemoveOverflowElement(int id)
+{
+	if (id < _overflowElements.size() && id >= 0)
+	{
+		_overflowElements[id] = NULL;
+	}
+	else
+	{
+		LogDebug("Tab: Error, could not find OverflowElement with id=", id," while trying to remove it.");
+
+	}
+}

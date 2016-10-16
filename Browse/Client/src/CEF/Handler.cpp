@@ -531,10 +531,25 @@ void Handler::ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, i
 	//DEBUG
 	LogDebug("Handler: Scrolling overflow element with id: ", elemId);
 
-	browser->GetMainFrame()->ExecuteJavaScript(
-		"var overflowObj = GetOverflowElement(" + std::to_string(elemId) + ");"\
-		"if(overflowObj) overflowObj.scroll(" + std::to_string(x) + ", " + std::to_string(y) + ");", 
-		"", 
-		0);
-	//LogDebug("Handler: Executed OverflowElement scrolling (",x,", ",y,") for id=", elemId);
+	std::string js_code = "var overflowObj = GetOverflowElement(" + std::to_string(elemId) + ");"\
+		"if(overflowObj) overflowObj.scroll(" + std::to_string(x) + ", " + std::to_string(y) + ");";
+
+	// DEBUG
+	if (elemId == 6 || elemId == 7)
+	{
+		// // Check if Rect update leads to Rect == 0 ... doesn't seem so.
+		//js_code += "ConsolePrint('DEBUG| before: '+overflowObj.rects);" \
+		//	"overflowObj.updateRects();" \
+		//	"ConsolePrint('DEBUG| after: '+overflowObj.rects);";
+
+		// // Check visbility when hidden again.. always true, opacity too
+		//js_code += ("ConsolePrint(" + std::to_string(elemId) + "+\" visibility: \"+window.getComputedStyle(overflowObj.node, null).getPropertyValue('visibility') );");
+		
+		//js_code += ("ConsolePrint(" + std::to_string(elemId) + "+\" class: \"+overflowObj.node.className);");
+
+		//js_code += ("ConsolePrint(\"C++ induced: \"+"+ std::to_string(elemId) + "+\" rect width: \"+overflowObj.node.getBoundingClientRect().width );");
+	}
+
+	browser->GetMainFrame()->ExecuteJavaScript(js_code, "",	0);
+
 }

@@ -383,21 +383,25 @@ void Tab::Update(float tpf, Input& rInput)
 		bool overflowScrolling = false;
 		for (const auto& rOverflowElement : _overflowElements)
 		{
-			for (const auto& rRect : rOverflowElement->GetRects())
+			if (rOverflowElement)
 			{
-				if (rRect.isInside(tabInput.webViewGazeX + _scrollingOffsetX, tabInput.webViewGazeY + _scrollingOffsetY))
+				for (const auto& rRect : rOverflowElement->GetRects())
 				{
-					// Call OverflowElements scroll(gazeX, gazeY) method with current webview gaze coordinates
-					// Scrolling will be executed in Javascript
-					// TODO/Note: Global scrolling parameters defining how/when is scrolled?
-					_pCefMediator->ScrollOverflowElement(this, rOverflowElement->GetId(), tabInput.webViewGazeX, tabInput.webViewGazeY);
+					if (rRect.isInside(tabInput.webViewGazeX + _scrollingOffsetX, tabInput.webViewGazeY + _scrollingOffsetY))
+					{
+						// Call OverflowElements scroll(gazeX, gazeY) method with current webview gaze coordinates
+						// Scrolling will be executed in Javascript
+						// TODO/Note: Global scrolling parameters defining how/when is scrolled?
+						_pCefMediator->ScrollOverflowElement(this, rOverflowElement->GetId(), tabInput.webViewGazeX, tabInput.webViewGazeY);
+						break;
+					}
+				}
+				if (overflowScrolling)
+				{
 					break;
 				}
 			}
-			if (overflowScrolling) 
-			{
-				break;
-			}
+
 		}
 		//LogDebug(tabInput.webViewGazeX, "\t",tabInput.webViewGazeY);
 
@@ -863,8 +867,12 @@ void Tab::DrawDebuggingOverlay() const
 
 	for (const auto& rOverflowElement : _overflowElements)
 	{
-		for(const auto& rect : rOverflowElement->GetRects())
-			renderRect(rect, false);
+		if (rOverflowElement) // Note: Can be NULL if aquivalent element in JS got deleted. (see Tab::RemoveOverflowElement)
+		{
+			for (const auto& rect : rOverflowElement->GetRects())
+				renderRect(rect, false);
+		}
+
 	}
 }
 

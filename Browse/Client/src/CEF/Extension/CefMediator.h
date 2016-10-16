@@ -100,6 +100,7 @@ public:
 	// Add OverflowElement to corresponding Tab
 	void AddOverflowElement(CefRefPtr<CefBrowser> browser, std::shared_ptr<OverflowElement> overflowElem);
 	std::weak_ptr<OverflowElement> GetOverflowElement(CefRefPtr<CefBrowser> browser, int id);
+	void RemoveOverflowElement(CefRefPtr<CefBrowser> browser, int id);
 
 
 

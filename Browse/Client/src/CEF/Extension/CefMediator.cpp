@@ -305,6 +305,14 @@ std::weak_ptr<OverflowElement> CefMediator::GetOverflowElement(CefRefPtr<CefBrow
 	return std::weak_ptr<OverflowElement>();
 }
 
+void CefMediator::RemoveOverflowElement(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		pTab->RemoveOverflowElement(id);
+	}
+}
+
 void CefMediator::ResetScrolling(TabCEFInterface * pTab)
 {
     if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))

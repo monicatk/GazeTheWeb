@@ -240,6 +240,7 @@ public:
 	
 	virtual void AddOverflowElement(std::shared_ptr<OverflowElement> overflowElem);
 	virtual std::shared_ptr<OverflowElement> GetOverflowElement(int id);
+	virtual void RemoveOverflowElement(int id);
 
 private:
 
