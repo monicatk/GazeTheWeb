@@ -11,6 +11,7 @@
 #include "src/Utils/Rect.h"
 #include "src/Utils/glmWrapper.h"
 #include "src/State/Web/Tab/DOMNodeType.h"
+
 #include <vector>
 #include <string>
 #include <memory>
@@ -130,13 +131,7 @@ public:
 	std::pair<int, int> GetMaxScrolling() const { return std::make_pair(_scrollLeftMax, _scrollTopMax); }
 	std::pair<int, int> GetCurrentScrolling() const { return std::make_pair(_scrollLeft, _scrollTop); }
 
-	void UpdateRect(int rectId, std::shared_ptr<Rect> rect)
-	{
-		if (rectId < _rects.size() && rectId >= 0)
-		{
-			_rects[rectId] = *rect.get();
-		}
-	}
+	void UpdateRect(int rectId, std::shared_ptr<Rect> rect);
 
 
 private:

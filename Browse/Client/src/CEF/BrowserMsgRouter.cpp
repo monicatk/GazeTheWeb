@@ -178,23 +178,10 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 						rectData.end(),
 						[&rect](std::string str) {rect.push_back(std::stof(str)); });
 
-					LogInfo("MsgRouter: ", id, " old: ", elem->GetRects()[0].toString());
-					LogInfo("MsgRouter: ", id, " new schould be: " + Rect(rect).toString());
-					
-
-
-
 					// Use float coordinates to update Rect #0
 					elem->UpdateRect(0, std::make_shared<Rect>(rect));
 				}
 
-				// DEBUG
-				wpElem = _pMsgRouter->GetMediator()->GetOverflowElement(browser, id);
-
-				if (const auto& elem = wpElem.lock())
-				{
-					LogInfo("MsgRouter: ", id, " new is: ", elem->GetRects()[0].toString());
-				}
 			}
 			else
 			{
