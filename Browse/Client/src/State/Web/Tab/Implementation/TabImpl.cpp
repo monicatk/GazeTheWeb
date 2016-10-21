@@ -245,7 +245,7 @@ void Tab::Update(float tpf, Input& rInput)
         + "Scrolled:\n"
         + std::to_string((int)(webViewGazeX + _scrollingOffsetX)) + ", " + std::to_string((int)(webViewGazeY + _scrollingOffsetY)));
 
-	// ### UPDATE PIPELINES OR MODE ###
+    // ### UPDATE PIPELINES OR STANDARD GUI ###
 
 	// Decide what to update
 	if (_pipelineActive)
@@ -277,7 +277,7 @@ void Tab::Update(float tpf, Input& rInput)
 	}
 	else
 	{
-		// MODE GETS UPDATED. STANDARD GUI IS VISIBLE
+        // STANDARD GUI IS VISIBLE
 
         // Gaze mouse
         if(_gazeMouse)
