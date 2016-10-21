@@ -5,14 +5,12 @@
 - (eyeGUI) Resize stuff is strange. Update() forces resize which let all! tabs reload their stuff. So if one layout is added, all tabs get reloaded. For DOMNodes, it is not possible to call it, because at a resize they get reloaded and trigger..a resize...
 - ActionConnector and DataConnector (instead of pushing actions to a vector)
 - Floating frames flicker at creation
-- Some "now new page is loading" screen
 - ScrollingSensors are not correct until reload (sometimes on 9gag for example)
 - ActionData Map stuff with templates
 - Much more settings (all the eyeGUI stuff)
-- Tobii EyeX seems to connect event when there is no...
+- Tobii EyeX seems to connect even when there is no...
 - Prefetch complete icon folder
 - While removing a tab, the preview textures switch to the FontAtlas texture for a short time?!
 - Bookmark Manager GUI
-- Implement TabModes
-- GUI for settings homepage
+- GUI for setting homepage
 - Somewhere seems to be one framebuffer unbind too much
