@@ -92,7 +92,8 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
 	_spTabSensorListener = std::shared_ptr<TabSensorListener>(new TabSensorListener(this));
 	eyegui::registerButtonListener(_pPanelLayout, "click_mode", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPanelLayout, "auto_scrolling", _spTabButtonListener);
-	eyegui::registerButtonListener(_pPanelLayout, "scroll_to_top", _spTabButtonListener);
+    // eyegui::registerButtonListener(_pPanelLayout, "scroll_to_top", _spTabButtonListener);
+    eyegui::registerButtonListener(_pPanelLayout, "pivot", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPanelLayout, "zoom", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPipelineAbortLayout, "abort", _spTabButtonListener);
 	eyegui::registerSensorListener(_pScrollingOverlayLayout, "scroll_up_sensor", _spTabSensorListener);

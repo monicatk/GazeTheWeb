@@ -15,7 +15,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="Zoom.svg">
+   sodipodi:docname="GazeMouse.svg">
   <defs
      id="defs4" />
   <sodipodi:namedview
@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.49497475"
-     inkscape:cx="-546.55965"
-     inkscape:cy="-9.6658822"
+     inkscape:zoom="1.4"
+     inkscape:cx="197.25836"
+     inkscape:cy="286.63517"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -38,11 +38,11 @@
      inkscape:bbox-nodes="true"
      inkscape:snap-bbox-edge-midpoints="true"
      inkscape:snap-bbox-midpoints="true"
-     inkscape:window-width="2501"
-     inkscape:window-height="1056"
-     inkscape:window-x="59"
+     inkscape:window-width="1249"
+     inkscape:window-height="1027"
+     inkscape:window-x="1309"
      inkscape:window-y="24"
-     inkscape:window-maximized="1"
+     inkscape:window-maximized="0"
      inkscape:snap-object-midpoints="true"
      inkscape:snap-center="true"
      inkscape:snap-to-guides="false"
@@ -51,7 +51,7 @@
      inkscape:object-nodes="true"
      inkscape:snap-smooth-nodes="false"
      inkscape:snap-midpoints="false"
-     inkscape:snap-grids="false">
+     inkscape:snap-grids="true">
     <inkscape:grid
        type="xygrid"
        id="grid4686" />
@@ -73,26 +73,20 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-698.03155)">
-    <path
-       style="fill:#f2f2f2;fill-opacity:1;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 145.53928,776.42202 c -17.32493,0.25319 -33.86921,7.24811 -46.121094,19.5 -26.010005,26.00957 -26.010005,68.17988 0,94.18945 21.336414,21.31673 54.334694,25.63461 80.437504,10.52539 l 72.7207,72.7207 21.21289,-21.21289 -72.0039,-72.00586 c 17.7469,-26.42018 14.32066,-61.70457 -8.17774,-84.21679 -12.72904,-12.72905 -30.0687,-19.76327 -48.06836,-19.5 z m 1.5918,24.12304 c 11.04997,0.16124 21.60203,4.6228 29.41601,12.4375 16.58727,16.58748 16.58727,43.48088 0,60.06836 -16.5877,16.58857 -43.4826,16.58857 -60.07031,0 -16.58857,-16.58771 -16.58857,-43.4826 0,-60.07031 8.11772,-8.11742 19.17555,-12.60325 30.6543,-12.43555 z"
-       id="path4706"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cscccccccccccsc" />
     <g
-       id="layer1-30"
-       inkscape:label="Layer 1"
-       transform="matrix(0.32762561,0,0,0.32762561,88.467322,556.2793)">
+       id="g4158"
+       transform="translate(-27.834646,-22.857156)">
       <path
-         id="rect4152"
-         transform="translate(0,698.03153)"
-         d="m 147.43555,84.775391 0,62.660159 -62.660159,0 0,59.45898 62.660159,0 0,62.66211 59.45898,0 0,-62.66211 62.66211,0 0,-59.45898 -62.66211,0 0,-62.660159 -59.45898,0 z"
-         style="fill:#f2f2f2;fill-opacity:1;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         inkscape:connector-curvature="0" />
-      <g
-         transform="translate(2.2089408,-173.26727)"
-         inkscape:label="Layer 1"
-         id="layer1-3" />
+         inkscape:connector-curvature="0"
+         id="path4193"
+         d="m 161.17792,843.53895 31.97117,105.0961 20.40701,-15.64542 15.64542,20.40699 20.40698,-15.64542 -15.64541,-20.40698 20.40699,-15.64542 -93.19216,-58.15985 z"
+         style="opacity:0.96000001;fill:#f2f2f2;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         sodipodi:nodetypes="scscssssss"
+         inkscape:connector-curvature="0"
+         id="path4145"
+         d="M 207.78404,795.19689 C 115.4669,795.19689 70,898.05403 70,898.05403 c 0,0 45.4669,102.85717 137.78404,102.85717 C 300.10115,1000.9112 340,898.05403 340,898.05403 c 0,0 -39.89885,-102.85714 -132.21596,-102.85714 z m 0,25.71429 c 42.60482,0 77.14286,34.53803 77.14285,77.14285 10e-6,42.60482 -34.53803,77.14284 -77.14285,77.14284 -42.60484,0 -77.14289,-34.538 -77.14288,-77.14284 -1e-5,-42.60483 34.53804,-77.14286 77.14288,-77.14285 z"
+         style="opacity:1;fill:#f2f2f2;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
     </g>
   </g>
 </svg>

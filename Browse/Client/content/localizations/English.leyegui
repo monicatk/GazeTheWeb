@@ -1,9 +1,11 @@
 tab:click=Click Emulation
 tab:auto_scrolling=Automatic Scrolling
 tab:zoom=Zoom
+tab:gaze_mouse=Gaze Mouse
 tab:scroll_to_top=Scroll To Top
 tab:scroll_up=Scroll Up
 tab:scroll_down=Scroll Down
+tab:pivot=Use Pivot
 web:tab_overview=Tab Overview
 web:settings=Go to Settings
 web:back=Back
