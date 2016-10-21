@@ -91,6 +91,7 @@ public:
     void ResizeBrowsers();
 
     // Emulation of mouse buttons in specific browser
+    void EmulateMouseCursor(CefRefPtr<CefBrowser> browser, double x, double y);
     void EmulateLeftMouseButtonClick(CefRefPtr<CefBrowser> browser, double x, double y);
     void EmulateMouseWheelScrolling(CefRefPtr<CefBrowser> browser, double deltaX, double deltaY);
 

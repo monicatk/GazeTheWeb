@@ -57,6 +57,7 @@ public:
     void DoMessageLoopWork();
 
     // Emulation of left mouse button press and release in specific Tab
+    void EmulateMouseCursor(TabCEFInterface* pTab, double x, double y);
     void EmulateLeftMouseButtonClick(TabCEFInterface* pTab, double x, double y);
     void EmulateMouseWheelScrolling(TabCEFInterface* pTab, double deltaX, double deltaY);
 

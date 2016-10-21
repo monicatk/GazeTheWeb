@@ -94,6 +94,7 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
 	eyegui::registerButtonListener(_pPanelLayout, "auto_scrolling", _spTabButtonListener);
     // eyegui::registerButtonListener(_pPanelLayout, "scroll_to_top", _spTabButtonListener);
     eyegui::registerButtonListener(_pPanelLayout, "pivot", _spTabButtonListener);
+    eyegui::registerButtonListener(_pPanelLayout, "gaze_mouse", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPanelLayout, "zoom", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPipelineAbortLayout, "abort", _spTabButtonListener);
 	eyegui::registerSensorListener(_pScrollingOverlayLayout, "scroll_up_sensor", _spTabSensorListener);
@@ -280,6 +281,12 @@ void Tab::Update(float tpf, Input& rInput)
 	else
 	{
 		// MODE GETS UPDATED. STANDARD GUI IS VISIBLE
+
+        // Gaze mouse
+        if(_gazeMouse)
+        {
+            _pCefMediator->EmulateMouseCursor(this, tabInput.webViewGazeX, tabInput.webViewGazeY);
+        }
 
 		// Ask for page resolution
 		_timeUntilGetPageResolution -= tpf;

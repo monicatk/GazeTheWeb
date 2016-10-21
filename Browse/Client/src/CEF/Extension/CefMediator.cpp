@@ -112,6 +112,14 @@ void CefMediator::DoMessageLoopWork()
     CefDoMessageLoopWork();
 }
 
+void CefMediator::EmulateMouseCursor(TabCEFInterface* pTab, double x, double y)
+{
+    if(CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
+    {
+        _handler->EmulateMouseCursor(browser, x, y);
+    }
+}
+
 void CefMediator::EmulateLeftMouseButtonClick(TabCEFInterface * pTab, double x, double y)
 {
     if(CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
