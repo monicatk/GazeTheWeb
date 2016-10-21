@@ -3,8 +3,6 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Action which displays keyboard and delivers text input.
-
-// Notes
 // - Input: none
 // - Output: std::u16string text
 // - Output: int submit (0 if not, else submit)

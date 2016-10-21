@@ -186,6 +186,10 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
             SetOutputValue("coordinate", glm::vec2(_coordinate * webViewPixels));
 		}
 
+        // Reset web view
+        WebViewParameters webViewParameters;
+        _pTab->SetWebViewParameters(webViewParameters);
+
 		// Return success
 		return true;
 	}

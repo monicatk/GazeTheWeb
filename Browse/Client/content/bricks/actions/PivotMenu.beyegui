@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<stack directitab_overlayon="horizontal" separator="0.1%" style="tab_overlay">
+	<boxbutton icon="icons/Circle.png"/>
+	<boxbutton icon="icons/Circle.png"/>
+	<boxbutton icon="icons/Circle.png"/>
+	<boxbutton icon="icons/Circle.png"/>
+</stack>

@@ -47,7 +47,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
     // Add overlay
     _overlayFrameIndex = _pTab->AddFloatingFrameToOverlay("bricks/actions/Keyboard.beyegui", x, y, sizeX, sizeY, idMapper);
 
-    // Register listener all the
+    // Register listeners
 
 	// Keyboard
     _pTab->RegisterKeyboardListenerInOverlay(

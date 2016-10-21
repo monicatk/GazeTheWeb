@@ -4,8 +4,6 @@
 //============================================================================
 // Action to navigate links by coordinate. DOM tree is used to fix imprecise
 // coordinates.
-
-// Notes
 // - Input: vec2 coordinate in pixels
 // - Input: int visualize (0 if not, else visualize; default here is 1)
 // - Output: none

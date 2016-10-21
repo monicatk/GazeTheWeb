@@ -3,8 +3,6 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Action to emulate mouse wheel scrolling.
-
-// Notes
 // - Input: vec2 scrolling
 // - Output: none
 

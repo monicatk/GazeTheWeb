@@ -2,22 +2,25 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// Action to emulate left mouse button click.
+// Action for displaying pivot menu.
 // - Input: vec2 coordinate in pixels
-// - Input: int visualize (0 if not, else visualize; default here is 1)
 // - Output: none
 
-#ifndef LEFTMOUSEBUTTONCLICKACTION_H_
-#define LEFTMOUSEBUTTONCLICKACTION_H_
+#ifndef PIVOTMENUACTION_H_
+#define PIVOTMENUACTION_H_
 
 #include "Action.h"
+#include "src/Utils/LerpValue.h"
 
-class LeftMouseButtonClickAction : public Action
+class PivotMenuAction : public Action
 {
 public:
 
     // Constructor
-    LeftMouseButtonClickAction(TabInteractionInterface* pTab);
+    PivotMenuAction(TabInteractionInterface* pTab);
+
+    // Destructor
+    ~PivotMenuAction();
 
     // Update retuns whether finished with execution
     virtual bool Update(float tpf, TabInput tabInput);
@@ -33,6 +36,12 @@ public:
 
     // Abort
     virtual void Abort();
+
+protected:
+
+    // Index of floating frame for menu in Tab's overlay
+    int _menuFrameIndex = -1;
+
 };
 
-#endif // LEFTMOUSEBUTTONCLICKACTION_H_
+#endif // PIVOTMENUACTION_H_
