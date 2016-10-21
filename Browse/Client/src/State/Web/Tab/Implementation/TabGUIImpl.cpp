@@ -66,6 +66,7 @@ void Tab::TabButtonListener::up(eyegui::Layout* pLayout, std::string id)
         else if (id == "gaze_mouse")
         {
             _pTab->_gazeMouse = false;
+            // TODO: reset mouse cursor position?
         }
 	}
 	else
