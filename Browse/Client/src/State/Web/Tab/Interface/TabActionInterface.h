@@ -16,9 +16,6 @@
 class Pipeline;
 class DOMNode;
 
-// Modes
-enum class TabMode { READ, INTERACTION, CURSOR };
-
 class TabActionInterface
 {
 public:
@@ -41,9 +38,6 @@ public:
     // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available
     virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pageCoordinate, float& rDistance) const = 0;
 
-    // Set next mode (will be set after pipelines finish)
-    virtual void SetNextMode(TabMode mode) { _nextMode = mode; }
-
     // ### METHODS WHICH SET PARAMETERS THAT MUST BE RESET WHEN NO PIPELINE / ACTION IS ACTIVE ###
 
     // Reset method (called by pipeline at destruction, finish and abort)
@@ -57,8 +51,6 @@ public:
 
 protected:
 
-    // Next mode
-    TabMode _nextMode = TabMode::READ;
 };
 
 #endif // TABACTIONINTERFACE_H_

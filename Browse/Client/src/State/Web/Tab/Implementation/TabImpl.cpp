@@ -108,10 +108,7 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
 	// Create WebView owned by Tab
 	int webRenderWidth, webRenderHeight = 0;
 	GetWebRenderResolution(webRenderWidth, webRenderHeight);
-	_upWebView = std::unique_ptr<WebView>(new WebView(webRenderWidth, webRenderHeight));
-
-	// Activate current mode
-	ActivateMode(_mode);
+    _upWebView = std::unique_ptr<WebView>(new WebView(webRenderWidth, webRenderHeight));
 
 	// Register itself and painted texture in mediator to receive DOMNodes
 	_pCefMediator->RegisterTab(this);
@@ -426,26 +423,6 @@ void Tab::Update(float tpf, Input& rInput)
 		{
 			upDOMTrigger->Update(tpf, tabInput);
 		}
-
-		// Check for mode change
-		if (_nextMode != _mode)
-		{
-			// Deactivate old mode
-			DeactivateMode(_mode);
-			_mode = _nextMode;
-			ActivateMode(_mode);
-		}
-
-		// Take a look at current mode
-		switch (_mode)
-		{
-		case TabMode::READ:
-			break;
-		case TabMode::INTERACTION:
-			break;
-		case TabMode::CURSOR:
-			break;
-		}
 	}
 }
 
@@ -471,17 +448,6 @@ void Tab::Draw() const
 		for (const auto& upDOMTrigger : _DOMTriggers)
 		{
 			upDOMTrigger->Draw();
-		}
-
-		// Pipeline is empty, so first take a look at current mode
-		switch (_mode)
-		{
-		case TabMode::READ:
-			break;
-		case TabMode::INTERACTION:
-			break;
-		case TabMode::CURSOR:
-			break;
 		}
 
 		// Draw debug overlay (do not so while pipeline is rendered)
@@ -704,68 +670,6 @@ void Tab::UpdateAccentColor(float tpf)
 		"tab_overlay_scroll_progress",
 		"background-color",
 		RGBAToHexString(transparentBackgroundColorAccent));
-}
-
-void Tab::ActivateMode(TabMode mode)
-{
-	switch (mode)
-	{
-	case TabMode::READ:
-		ActivateReadMode();
-		break;
-	case TabMode::INTERACTION:
-		ActivateInteractionMode();
-		break;
-	case TabMode::CURSOR:
-		ActivateCursorMode();
-		break;
-	}
-}
-
-void Tab::DeactivateMode(TabMode mode)
-{
-	switch (mode)
-	{
-	case TabMode::READ:
-		DeactivateReadMode();
-		break;
-	case TabMode::INTERACTION:
-		DeactivateInteractionMode();
-		break;
-	case TabMode::CURSOR:
-		DeactivateCursorMode();
-		break;
-	}
-}
-
-void Tab::ActivateReadMode()
-{
-	// TODO
-}
-
-void Tab::DeactivateReadMode()
-{
-	// TODO
-}
-
-void Tab::ActivateInteractionMode()
-{
-	// TODO
-}
-
-void Tab::DeactivateInteractionMode()
-{
-	// TODO
-}
-
-void Tab::ActivateCursorMode()
-{
-	// TODO
-}
-
-void Tab::DeactivateCursorMode()
-{
-	// TODO
 }
 
 void Tab::DrawDebuggingOverlay() const

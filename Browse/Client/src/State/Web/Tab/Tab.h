@@ -352,24 +352,6 @@ private:
     // Method to update and pipe accent color to eyeGUI
     void UpdateAccentColor(float tpf);
 
-    // Activate mode (called by update method, only)
-    void ActivateMode(TabMode mode);
-
-    // Deactivate mode (called by update method, only)
-    void DeactivateMode(TabMode mode);
-
-    // Activate / deactivate ReadMode
-    void ActivateReadMode();
-    void DeactivateReadMode();
-
-    // Activate / deactivate InteractionMode
-    void ActivateInteractionMode();
-    void DeactivateInteractionMode();
-
-    // Activate / deactivate CursorMode
-    void ActivateCursorMode();
-    void DeactivateCursorMode();
-
 	// Draw debugging overlay
 	void DrawDebuggingOverlay() const;
 
@@ -417,9 +399,6 @@ private:
 
     // Parameters for WebView
     WebViewParameters _webViewParameters;
-
-    // Mode
-    TabMode _mode = _nextMode; // use default next mode from interface here as default
 
     // Layout color accent
     glm::vec4 _targetColorAccent = TAB_DEFAULT_COLOR_ACCENT;
