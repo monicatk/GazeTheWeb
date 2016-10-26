@@ -38,6 +38,42 @@ PivotMenuAction::PivotMenuAction(TabInteractionInterface *pTab) : Action(pTab)
         sizeY,
         std::map<std::string, std::string>());
 
+    // Left click button
+    _pTab->RegisterButtonListenerInOverlay(
+        "pivot_left_click",
+        [&]() // down callback
+        {
+            _done= true;
+        },
+        [](){}); // up callback
+
+    // Right click button
+    _pTab->RegisterButtonListenerInOverlay(
+        "pivot_right_click",
+        [&]() // down callback
+        {
+            _done= true;
+        },
+        [](){}); // up callback
+
+    // Double left click button
+    _pTab->RegisterButtonListenerInOverlay(
+        "pivot_double_left_click",
+        [&]() // down callback
+        {
+            _done= true;
+        },
+        [](){}); // up callback
+
+    // Selection button
+    _pTab->RegisterButtonListenerInOverlay(
+        "pivot_selection",
+        [&]() // down callback
+        {
+            _done= true;
+        },
+        [](){}); // up callback
+
     // ### Pivot overlay ###
 
     // Position is set at activation when coordinate is known
@@ -47,11 +83,17 @@ PivotMenuAction::PivotMenuAction(TabInteractionInterface *pTab) : Action(pTab)
         0,
         _pivotSize, // size in x direction
         _pivotSize, // size in y direction
-        std::map<std::string, std::string>());
+        std::map<std::string, std::string>()); // no id used here
 }
 
 PivotMenuAction::~PivotMenuAction()
 {
+    // Unregister buttons
+    _pTab->UnregisterButtonListenerInOverlay("pivot_left_click");
+    _pTab->UnregisterButtonListenerInOverlay("pivot_right_click");
+    _pTab->UnregisterButtonListenerInOverlay("pivot_double_left_click");
+    _pTab->UnregisterButtonListenerInOverlay("pivot_selection");
+
     // Delete overlay frames
     _pTab->RemoveFloatingFrameFromOverlay(_menuFrameIndex);
     _pTab->RemoveFloatingFrameFromOverlay(_pivotFrameIndex);
@@ -59,8 +101,7 @@ PivotMenuAction::~PivotMenuAction()
 
 bool PivotMenuAction::Update(float tpf, TabInput tabInput)
 {
-    bool done = false;
-    return done;
+    return _done;
 }
 
 void PivotMenuAction::Draw() const

@@ -53,6 +53,9 @@ private:
     // Height of menu in overlay
     const float _menuHeight = 0.2f;
 
+    // Check whether done with menu
+    bool _done = false;
+
 };
 
 #endif // PIVOTMENUACTION_H_
