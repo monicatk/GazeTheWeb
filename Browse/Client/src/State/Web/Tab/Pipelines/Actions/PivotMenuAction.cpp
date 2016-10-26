@@ -16,35 +16,31 @@ PivotMenuAction::PivotMenuAction(TabInteractionInterface *pTab) : Action(pTab)
     _pTab->CalculateWebViewPositionAndSize(webViewX, webViewY, webViewWidth, webViewHeight);
     int windowWidth, windowHeight;
     _pTab->GetWindowSize(windowWidth, windowHeight);
-    float x, y, sizeX, sizeY;
+    float sizeX, sizeY;
 
     // ### Menu overlay ###
 
     // Pixel values
-    x = (float)webViewX + ((float)webViewWidth * 0.1f);
-    y = (float)webViewY + ((float)webViewHeight * 0.7f);
     sizeX = (float)webViewWidth * 0.8f;
-    sizeY = (float)webViewHeight * 0.2f;
+    sizeY = (float)webViewHeight * _menuHeight;
 
     // Relative values
-    x /= windowWidth;
-    y /= windowHeight;
     sizeX /= windowWidth;
     sizeY /= windowHeight;
 
     // Add overlay (TODO: no id mapper since no idea when there could occur a problem about it)
+    // Position is set at actviation when coordinate is known
     _menuFrameIndex = _pTab->AddFloatingFrameToOverlay(
         "bricks/actions/PivotMenu.beyegui",
-        x,
-        y,
+        0,
+        0,
         sizeX,
         sizeY,
         std::map<std::string, std::string>());
 
     // ### Pivot overlay ###
 
-    // Set position and size at update since here coordinate is not known
-
+    // Position is set at activation when coordinate is known
     _pivotFrameIndex = _pTab->AddFloatingFrameToOverlay(
         "bricks/actions/Pivot.beyegui",
         0,
@@ -74,23 +70,31 @@ void PivotMenuAction::Draw() const
 
 void PivotMenuAction::Activate()
 {
-    // Use coordinate to set position of cursor
+    // Use coordinate for positioning floating elements
     glm::vec2 coordinate;
     GetInputValue("coordinate", coordinate);
 
+    // Fetch web view values
     int webViewX, webViewY, webViewWidth, webViewHeight;
     _pTab->CalculateWebViewPositionAndSize(webViewX, webViewY, webViewWidth, webViewHeight);
     int windowWidth, windowHeight;
     _pTab->GetWindowSize(windowWidth, windowHeight);
 
-    coordinate.x += webViewX;
-    coordinate.y += webViewY;
-    coordinate.x /= windowWidth;
-    coordinate.y /= windowHeight;
-    coordinate.x -= _pivotSize / 2.f;
-    coordinate.y -= _pivotSize / 2.f;
+    // Position of menu
+    float verticalPosition = (coordinate.y > (webViewHeight / 2)) ? 0.1f : (0.5f + _menuHeight);
+    float x = (float)webViewX + ((float)webViewWidth * 0.1f);
+    float y = (float)webViewY + ((float)webViewHeight * verticalPosition);
+    _pTab->SetPositionOfFloatingFrameInOverlay(_menuFrameIndex, x / windowWidth, y / windowHeight);
 
-    _pTab->SetPositionOfFloatingFrameInOverlay(_pivotFrameIndex, coordinate.x, coordinate.y);
+    // Position of pivot
+    glm::vec2 pivotPosition = coordinate;
+    pivotPosition.x += webViewX;
+    pivotPosition.y += webViewY;
+    pivotPosition.x /= windowWidth;
+    pivotPosition.y /= windowHeight;
+    pivotPosition.x -= _pivotSize / 2.f;
+    pivotPosition.y -= _pivotSize / 2.f;
+    _pTab->SetPositionOfFloatingFrameInOverlay(_pivotFrameIndex, pivotPosition.x, pivotPosition.y);
 
     // Make overlays visible
     _pTab->SetVisibilyOfFloatingFrameInOverlay(_menuFrameIndex, true);

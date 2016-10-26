@@ -50,6 +50,9 @@ private:
     // Size of pivot in overlay
     const float _pivotSize = 0.2f;
 
+    // Height of menu in overlay
+    const float _menuHeight = 0.2f;
+
 };
 
 #endif // PIVOTMENUACTION_H_
