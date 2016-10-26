@@ -42,6 +42,14 @@ protected:
     // Index of floating frame for menu in Tab's overlay
     int _menuFrameIndex = -1;
 
+    // Index of floating frame for pivot visualization in Tab's overlay
+    int _pivotFrameIndex = -1;
+
+private:
+
+    // Size of pivot in overlay
+    const float _pivotSize = 0.2f;
+
 };
 
 #endif // PIVOTMENUACTION_H_
