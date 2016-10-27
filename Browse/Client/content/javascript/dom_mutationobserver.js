@@ -599,25 +599,37 @@ function OverflowElement(node)
                 }
                 if(distTop >= 0 && distTop < tresholdY)
                 {
-                    scrollY += (maxScrollingPerFrame * (1 - (distTop / tresholdY)));
+                    scrollY -= (maxScrollingPerFrame * (1 - (distTop / tresholdY)));
                 }
                 if(distBottom >= 0 && distBottom < tresholdY)
                 {
-                    scrollY -= (maxScrollingPerFrame * (1 - (distBottom / tresholdY)));
+                    scrollY += (maxScrollingPerFrame * (1 - (distBottom / tresholdY)));
                 }
 
                 // ConsolePrint("Executing OverflowElement scrolling by (x, y) = ("+scrollX+", "+scrollY+").");
                 
                 // // DEBUG 
-                // var id = this.node.getAttribute("overflowId");
-                // ConsolePrint(id+" before: scrollLeft: "+this.node.scrollLeft+" scrollTop: "+this.node.scrollTop);
+                var id = this.node.getAttribute("overflowId");
+                ConsolePrint(id+" before: scrollLeft: "+this.node.scrollLeft+" scrollTop: "+this.node.scrollTop);
 
                 // Execute scrolling
-                this.node.scrollLeft += scrollX;
-                this.node.scrollTop += scrollY;
+                // this.node.scrollLeft += Math.round(scrollX);
+                // this.node.scrollTop += Math.round(scrollY); //(scrollY !== 0) ? 0 : this.node.scrollTop;//this.node.scrollTop + Math.round(scrollY);
+
+                var mousePosition = new MouseEvent();
+                mousePosition.clientX = gazeX;
+                mousePosition.clientY = gazeY;
+
+                var mouseEvent = new WheelEvent();
+                mouseEvent.deltaX = scrollX;
+                mouseEvent.deltaY = scrollY;
+
+                // this.node.focus();
+                this.node.dispatchEvent(mousePosition);
+                this.node.dispatchEvent(mouseEvent);
 
                 // // DEBUG
-                // ConsolePrint(id+"after : ("+scrollX+", "+scrollY+")\t-- scrollLeft: "+this.node.scrollLeft+" scrollTop: "+this.node.scrollTop);
+                ConsolePrint(id+"after : ("+scrollX+", "+scrollY+")\t-- scrollLeft: "+this.node.scrollLeft+" scrollTop: "+this.node.scrollTop);
                 // ConsolePrint("class: "+this.node.className);
 
                 // Update Rects of all child elements
