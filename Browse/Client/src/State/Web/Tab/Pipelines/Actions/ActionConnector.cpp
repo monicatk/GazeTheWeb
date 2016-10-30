@@ -25,7 +25,7 @@ void ActionConnector::Execute()
     for(const auto& rConnection : _floatConnections)
     {
         float value;
-        _pPrevious->GetOutputValue(rConnection.first, value);
+        _pPrevious->GetOutputValue<float>(rConnection.first, value);
         _pNext->SetInputValue(rConnection.second, value);
     }
 

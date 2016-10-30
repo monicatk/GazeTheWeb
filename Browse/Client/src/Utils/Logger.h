@@ -4,6 +4,9 @@
 //============================================================================
 // Abstraction of logger.
 
+#ifndef LOGGER_H_
+#define LOGGER_H_
+
 #include <string>
 #include <sstream>
 
@@ -57,3 +60,5 @@ void LogBug(Args const&... args)
     (void)List{0, ((void)(stream << args), 0) ... };
     LogBug(stream.str());
 }
+
+#endif // LOGGER_H_

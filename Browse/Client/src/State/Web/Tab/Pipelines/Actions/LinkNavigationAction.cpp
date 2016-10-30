@@ -12,10 +12,7 @@ LinkNavigationAction::LinkNavigationAction(TabInteractionInterface* pTab) : Acti
 {
     // Add in- and output data slots
     AddVec2InputSlot("coordinate");
-	AddIntInputSlot("visualize");
-
-	// Set defaults (TODO: maybe directly at slot creation?)
-	SetInputValue("visualize", 1);
+	AddIntInputSlot("visualize", 1);
 }
 
 bool LinkNavigationAction::Update(float tpf, TabInput tabInput)

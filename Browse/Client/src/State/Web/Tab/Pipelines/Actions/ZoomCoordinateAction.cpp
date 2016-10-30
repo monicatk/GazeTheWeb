@@ -8,9 +8,6 @@
 #include "submodules/glm/glm/gtx/vector_angle.hpp"
 #include <algorithm>
 
-// TODO: Testing
-#include <iostream>
-
 ZoomCoordinateAction::ZoomCoordinateAction(TabInteractionInterface* pTab) : Action(pTab)
 {
     // Add in- and output data slots
