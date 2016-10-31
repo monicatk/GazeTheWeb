@@ -37,7 +37,7 @@ private:
 	template <typename T>
 	void Execute(std::map<std::string, std::string>& rConnectionMap)
 	{
-		for (const auto& rConnection : _intConnections)
+		for (const auto& rConnection : rConnectionMap)
 		{
 			T value;
 			if (auto spPrevious = _wpPrevious.lock()) { spPrevious->GetOutputValue(rConnection.first, value); }
