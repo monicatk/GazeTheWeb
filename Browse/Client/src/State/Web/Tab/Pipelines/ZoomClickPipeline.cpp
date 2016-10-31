@@ -10,7 +10,7 @@
 ZoomClickPipeline::ZoomClickPipeline(TabInteractionInterface* pTab) : Pipeline(pTab)
 {
     // Push back zoom coordinate action
-	std::shared_ptr<ZoomCoordinateAction> spZoomCoordinateAction = std::make_shared<ZoomCoordinateAction>(pTab);
+	std::shared_ptr<ZoomCoordinateAction> spZoomCoordinateAction = std::make_shared<ZoomCoordinateAction>(_pTab);
 	_actions.push_back(spZoomCoordinateAction);
 
 	// Push back link navigation action
