@@ -9,20 +9,17 @@
 
 PivotMenuPipeline::PivotMenuPipeline(TabInteractionInterface* pTab) : Pipeline(pTab)
 {
-     // Add some actions
-    std::unique_ptr<ZoomCoordinateAction> upZoomCoordinateAction =
-        std::unique_ptr<ZoomCoordinateAction>(new ZoomCoordinateAction(_pTab));
-    Action* pZoomCoordinateAction = upZoomCoordinateAction.get();
-    _actions.push_back(std::move(upZoomCoordinateAction));
+	// Push back zoom coordinate action
+	std::shared_ptr<ZoomCoordinateAction> spZoomCoordinateAction = std::make_shared<ZoomCoordinateAction>(_pTab);
+    _actions.push_back(spZoomCoordinateAction);
 
-    std::unique_ptr<PivotMenuAction> upPivotMenuAction =
-        std::unique_ptr<PivotMenuAction>(new PivotMenuAction(_pTab));
-    Action* pPivotMenuAction = upPivotMenuAction.get();
-    _actions.push_back(std::move(upPivotMenuAction));
+	// Push back pivot menu action
+	std::shared_ptr<PivotMenuAction> spPivotMenuAction = std::make_shared<PivotMenuAction>(_pTab);
+	_actions.push_back(spPivotMenuAction);
 
-    // Connect those actions
+    // Connect actions
     std::unique_ptr<ActionConnector> upConnector =
-        std::unique_ptr<ActionConnector>(new ActionConnector(pZoomCoordinateAction, pPivotMenuAction));
+        std::unique_ptr<ActionConnector>(new ActionConnector(spZoomCoordinateAction, spPivotMenuAction));
     upConnector->ConnectVec2("coordinate", "coordinate");
     _connectors.push_back(std::move(upConnector));
 }

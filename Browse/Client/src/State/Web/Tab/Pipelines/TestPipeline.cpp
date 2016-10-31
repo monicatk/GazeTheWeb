@@ -9,6 +9,7 @@
 
 TestPipeline::TestPipeline(TabInteractionInterface* pTab) : Pipeline(pTab)
 {
+	/*
     // Add some actions
     std::unique_ptr<ZoomCoordinateAction> upZoomCoordinateAction =
         std::unique_ptr<ZoomCoordinateAction>(new ZoomCoordinateAction(_pTab));
@@ -25,4 +26,5 @@ TestPipeline::TestPipeline(TabInteractionInterface* pTab) : Pipeline(pTab)
         std::unique_ptr<ActionConnector>(new ActionConnector(pZoomCoordinateAction, pLeftMouseButtonClickAction));
     upConnector->ConnectVec2("coordinate", "coordinate");
     _connectors.push_back(std::move(upConnector));
+	*/
 }

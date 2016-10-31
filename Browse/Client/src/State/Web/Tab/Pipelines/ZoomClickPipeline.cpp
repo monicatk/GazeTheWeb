@@ -9,20 +9,17 @@
 
 ZoomClickPipeline::ZoomClickPipeline(TabInteractionInterface* pTab) : Pipeline(pTab)
 {
-    // Add some actions
-    std::unique_ptr<ZoomCoordinateAction> upZoomCoordinateAction =
-        std::unique_ptr<ZoomCoordinateAction>(new ZoomCoordinateAction(_pTab));
-    Action* pZoomCoordinateAction = upZoomCoordinateAction.get();
-    _actions.push_back(std::move(upZoomCoordinateAction));
+    // Push back zoom coordinate action
+	std::shared_ptr<ZoomCoordinateAction> spZoomCoordinateAction = std::make_shared<ZoomCoordinateAction>(pTab);
+	_actions.push_back(spZoomCoordinateAction);
 
-    std::unique_ptr<LinkNavigationAction> upLinkNavigationAction =
-        std::unique_ptr<LinkNavigationAction>(new LinkNavigationAction(_pTab));
-    Action* pLeftMouseButtonClickAction = upLinkNavigationAction.get();
-    _actions.push_back(std::move(upLinkNavigationAction));
+	// Push back link navigation action
+	std::shared_ptr<LinkNavigationAction> spLinkNavigationAction = std::make_shared<LinkNavigationAction>(_pTab);
+	_actions.push_back(spLinkNavigationAction);
 
-    // Connect those actions
+    // Connect actions
     std::unique_ptr<ActionConnector> upConnector =
-        std::unique_ptr<ActionConnector>(new ActionConnector(pZoomCoordinateAction, pLeftMouseButtonClickAction));
+        std::unique_ptr<ActionConnector>(new ActionConnector(spZoomCoordinateAction, spLinkNavigationAction));
     upConnector->ConnectVec2("coordinate", "coordinate");
     _connectors.push_back(std::move(upConnector));
 }

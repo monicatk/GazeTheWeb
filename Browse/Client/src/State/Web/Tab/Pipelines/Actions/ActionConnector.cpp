@@ -5,10 +5,10 @@
 
 #include "src/State/Web/Tab/Pipelines/Actions/ActionConnector.h"
 
-ActionConnector::ActionConnector(Action const * pPrevious, Action* pNext)
+ActionConnector::ActionConnector(std::weak_ptr<const Action> wpPrevious, std::weak_ptr<Action> wpNext)
 {
-    _pPrevious = pPrevious;
-    _pNext = pNext;
+    _wpPrevious = wpPrevious;
+    _wpNext = wpNext;
 }
 
 void ActionConnector::Execute()
@@ -17,40 +17,40 @@ void ActionConnector::Execute()
     for(const auto& rConnection : _intConnections)
     {
         int value;
-        _pPrevious->GetOutputValue(rConnection.first, value);
-        _pNext->SetInputValue(rConnection.second, value);
+		if (auto spPrevious = _wpPrevious.lock()) { spPrevious->GetOutputValue(rConnection.first, value); }
+		if (auto spNext = _wpNext.lock()) { spNext->SetInputValue(rConnection.second, value); }
     }
 
     // Connect floats
     for(const auto& rConnection : _floatConnections)
     {
         float value;
-        _pPrevious->GetOutputValue<float>(rConnection.first, value);
-        _pNext->SetInputValue(rConnection.second, value);
+		if (auto spPrevious = _wpPrevious.lock()) { spPrevious->GetOutputValue(rConnection.first, value); }
+		if (auto spNext = _wpNext.lock()) { spNext->SetInputValue(rConnection.second, value); }
     }
 
     // Connect vec2s
     for(const auto& rConnection : _vec2Connections)
     {
         glm::vec2 value;
-        _pPrevious->GetOutputValue(rConnection.first, value);
-        _pNext->SetInputValue(rConnection.second, value);
+		if (auto spPrevious = _wpPrevious.lock()) { spPrevious->GetOutputValue(rConnection.first, value); }
+		if (auto spNext = _wpNext.lock()) { spNext->SetInputValue(rConnection.second, value); }
     }
 
     // Connect strings
     for(const auto& rConnection : _stringConnections)
     {
         std::string value;
-        _pPrevious->GetOutputValue(rConnection.first, value);
-        _pNext->SetInputValue(rConnection.second, value);
+		if (auto spPrevious = _wpPrevious.lock()) { spPrevious->GetOutputValue(rConnection.first, value); }
+		if (auto spNext = _wpNext.lock()) { spNext->SetInputValue(rConnection.second, value); }
     }
 
 	// Connect u16strings
 	for (const auto& rConnection : _string16Connections)
 	{
 		std::u16string value;
-		_pPrevious->GetOutputValue(rConnection.first, value);
-		_pNext->SetInputValue(rConnection.second, value);
+		if (auto spPrevious = _wpPrevious.lock()) { spPrevious->GetOutputValue(rConnection.first, value); }
+		if (auto spNext = _wpNext.lock()) { spNext->SetInputValue(rConnection.second, value); }
 	}
 }
 
