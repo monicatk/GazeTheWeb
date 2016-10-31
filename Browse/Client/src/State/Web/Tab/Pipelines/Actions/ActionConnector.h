@@ -33,6 +33,18 @@ public:
 
 private:
 
+	// Private execute. Executes copying of values for one datatype.
+	template <typename T>
+	void Execute(std::map<std::string, std::string>& rConnectionMap)
+	{
+		for (const auto& rConnection : _intConnections)
+		{
+			T value;
+			if (auto spPrevious = _wpPrevious.lock()) { spPrevious->GetOutputValue(rConnection.first, value); }
+			if (auto spNext = _wpNext.lock()) { spNext->SetInputValue(rConnection.second, value); }
+		}
+	}
+
     // Pointer to actions
     std::weak_ptr<const Action> _wpPrevious;
 	std::weak_ptr<Action> _wpNext;

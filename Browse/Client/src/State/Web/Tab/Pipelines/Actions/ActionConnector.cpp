@@ -13,45 +13,12 @@ ActionConnector::ActionConnector(std::weak_ptr<const Action> wpPrevious, std::we
 
 void ActionConnector::Execute()
 {
-    // Connect ints
-    for(const auto& rConnection : _intConnections)
-    {
-        int value;
-		if (auto spPrevious = _wpPrevious.lock()) { spPrevious->GetOutputValue(rConnection.first, value); }
-		if (auto spNext = _wpNext.lock()) { spNext->SetInputValue(rConnection.second, value); }
-    }
-
-    // Connect floats
-    for(const auto& rConnection : _floatConnections)
-    {
-        float value;
-		if (auto spPrevious = _wpPrevious.lock()) { spPrevious->GetOutputValue(rConnection.first, value); }
-		if (auto spNext = _wpNext.lock()) { spNext->SetInputValue(rConnection.second, value); }
-    }
-
-    // Connect vec2s
-    for(const auto& rConnection : _vec2Connections)
-    {
-        glm::vec2 value;
-		if (auto spPrevious = _wpPrevious.lock()) { spPrevious->GetOutputValue(rConnection.first, value); }
-		if (auto spNext = _wpNext.lock()) { spNext->SetInputValue(rConnection.second, value); }
-    }
-
-    // Connect strings
-    for(const auto& rConnection : _stringConnections)
-    {
-        std::string value;
-		if (auto spPrevious = _wpPrevious.lock()) { spPrevious->GetOutputValue(rConnection.first, value); }
-		if (auto spNext = _wpNext.lock()) { spNext->SetInputValue(rConnection.second, value); }
-    }
-
-	// Connect u16strings
-	for (const auto& rConnection : _string16Connections)
-	{
-		std::u16string value;
-		if (auto spPrevious = _wpPrevious.lock()) { spPrevious->GetOutputValue(rConnection.first, value); }
-		if (auto spNext = _wpNext.lock()) { spNext->SetInputValue(rConnection.second, value); }
-	}
+    // Connect per datatype
+	Execute<int>(_intConnections);
+	Execute<float>(_floatConnections);
+	Execute<glm::vec2>(_vec2Connections);
+	Execute<std::string>(_stringConnections);
+	Execute<std::u16string>(_string16Connections);
 }
 
 void ActionConnector::ConnectInt(std::string previousType, std::string nextType)
