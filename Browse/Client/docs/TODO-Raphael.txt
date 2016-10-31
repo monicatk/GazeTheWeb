@@ -1,3 +1,4 @@
+- eyeGUI: resize everything alltime (especially after adding of an layout and floating frame)
 - Complete Pivot mode
 - ZoomCoordinate Action is too fast in the end (and inaccurate)
 - Free scaling for webview (some refactoring of size stuff necessary then...)

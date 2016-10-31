@@ -66,6 +66,14 @@ public:
 
     // Set content of text block
     virtual void SetContentOfTextBlock(std::string id, std::u16string content) = 0;
+
+	// Getter for values of interest
+	virtual int GetWebViewX() const = 0;
+	virtual int GetWebViewY() const = 0;
+	virtual int GetWebViewWidth() const = 0;
+	virtual int GetWebViewHeight() const = 0;
+	virtual int GetWindowWidth() const = 0;
+	virtual int GetWindowHeight() const = 0;
 };
 
 #endif // TABOVERLAYINTERFACE_H_

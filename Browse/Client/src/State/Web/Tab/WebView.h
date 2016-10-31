@@ -26,7 +26,11 @@ class WebView
 public:
 
     // Constructor
-    WebView(int renderWidth, int renderHeight);
+    WebView(
+		int x,
+		int y,
+		int width,
+		int height);
 
     // Destructor
     virtual ~WebView();
@@ -51,6 +55,12 @@ public:
 
     // Set rects which are not dimmed
     void SetHighlightRects(std::vector<Rect> rects);
+
+	// Getter for values
+	int GetX() const;
+	int GetY() const;
+	int GetWidth() const;
+	int GetHeight() const;
 
 private:
 

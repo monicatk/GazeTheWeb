@@ -64,22 +64,26 @@ const std::string compositionFragmentShaderSource =
 "   fragColor = texture(tex, coords);\n"
 "}\n";
 
-WebView::WebView(int renderWidth, int renderHeight)
+WebView::WebView(int x, int y, int width, int height)
 {
+	// Set members
+	_x = x;
+	_y = y;
+	_width = width;
+	_height = height;
+
     // Generate texture
-    _spTexture = std::shared_ptr<Texture>(new Texture(renderWidth, renderHeight, GL_RGBA, Texture::Filter::LINEAR, Texture::Wrap::BORDER));
+    _spTexture = std::shared_ptr<Texture>(new Texture(_width, _height, GL_RGBA, Texture::Filter::LINEAR, Texture::Wrap::BORDER));
 
     // Render items
     _upSimpleRenderItem = std::unique_ptr<RenderItem>(new RenderItem(vertexShaderSource, geometryShaderSource, simpleFragmentShaderSource));
     _upCompositeRenderItem = std::unique_ptr<RenderItem>(new RenderItem(vertexShaderSource, geometryShaderSource, compositionFragmentShaderSource));
 
     // Framebuffer
-    _upFramebuffer = std::unique_ptr<Framebuffer>(new Framebuffer(renderWidth, renderHeight));
+    _upFramebuffer = std::unique_ptr<Framebuffer>(new Framebuffer(_width, _height));
     _upFramebuffer->Bind();
     _upFramebuffer->AddAttachment(Framebuffer::ColorFormat::RGB, true);
     _upFramebuffer->Unbind();
-
-    // _x, _y, _width and _height are set at first update
 }
 
 WebView::~WebView()
@@ -217,4 +221,24 @@ std::weak_ptr<Texture> WebView::GetTexture()
 void WebView::SetHighlightRects(std::vector<Rect> rects)
 {
     _rects = rects;
+}
+
+int WebView::GetX() const
+{
+	return _x;
+}
+
+int WebView::GetY() const
+{
+	return _y;
+}
+
+int WebView::GetWidth() const
+{
+	return _width;
+}
+
+int WebView::GetHeight() const
+{
+	return _height;
 }

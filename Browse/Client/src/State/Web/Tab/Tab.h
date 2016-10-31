@@ -85,11 +85,7 @@ public:
 	// >>> Implemented in TabInteractionImpl.cpp >>>
 	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    // Calculate position and size of web view
-    virtual void CalculateWebViewPositionAndSize(int& rX, int& rY, int& rWidth, int& rHeight) const;
-
-    // Getter for window with and height
-    virtual void GetWindowSize(int& rWidth, int& rHeight) const;
+	// Nothing extra here
 
     // #############################
     // ### TAB OVERLAY INTERFACE ###
@@ -148,6 +144,14 @@ public:
 
     // Set content of text block
     virtual void SetContentOfTextBlock(std::string id, std::u16string content);
+
+	// Getter for values of interest
+	virtual int GetWebViewX() const;
+	virtual int GetWebViewY() const;
+	virtual int GetWebViewWidth() const;
+	virtual int GetWebViewHeight() const;
+	virtual int GetWindowWidth() const;
+	virtual int GetWindowHeight() const;
 
     // ############################
     // ### TAB ACTION INTERFACE ###
@@ -342,9 +346,6 @@ private:
 	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	// >>> Implemented in TabImpl.cpp >>>
 	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-    // Get reserved space for WebView in eyeGUI layout
-    eyegui::AbsolutePositionAndSize CalculateWebViewPositionAndSize() const;
 
     // Set pipeline activity (indicates whether there is some pipeline to work on)
     void SetPipelineActivity(bool active);
