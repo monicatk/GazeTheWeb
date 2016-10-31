@@ -4,6 +4,7 @@
 //============================================================================
 
 #include "PivotMenuAction.h"
+#include "src/State/Web/Tab/Pipelines/LeftMouseButtonClickPipeline.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 
 PivotMenuAction::PivotMenuAction(TabInteractionInterface *pTab) : Action(pTab)
@@ -43,6 +44,12 @@ PivotMenuAction::PivotMenuAction(TabInteractionInterface *pTab) : Action(pTab)
         "pivot_left_click",
         [&]() // down callback
         {
+			// If coordinate set, do left mouse button click
+			glm::vec2 coordinate;
+			if (this->GetInputValue("coordinate", coordinate))
+			{
+				_pTab->PushBackPipeline(std::unique_ptr<LeftMouseButtonClickPipeline>(new LeftMouseButtonClickPipeline(_pTab, coordinate)));
+			}
             _done= true;
         },
         [](){}); // up callback

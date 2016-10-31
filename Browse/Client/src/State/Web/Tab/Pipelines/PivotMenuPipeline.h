@@ -2,19 +2,19 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// Pipeline for pivot usage.
+// Pipeline for pivot menu.
 
-#ifndef PIVOTPIPELINE_H_
-#define PIVOTPIPELINE_H_
+#ifndef PIVOTMENUPIPELINE_H_
+#define PIVOTMENUPIPELINE_H_
 
 #include "Pipeline.h"
 
-class PivotPipeline : public Pipeline
+class PivotMenuPipeline : public Pipeline
 {
 public:
 
     // Constructor
-    PivotPipeline(TabInteractionInterface* pTab);
+	PivotMenuPipeline(TabInteractionInterface* pTab);
 };
 
-#endif // PIVOTPIPELINE_H_
+#endif // PIVOTMENUPIPELINE_H_

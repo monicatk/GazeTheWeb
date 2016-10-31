@@ -20,7 +20,7 @@ class TabActionInterface
 {
 public:
 
-    //  Push back a pipeline
+    // Push back a pipeline
     virtual void PushBackPipeline(std::unique_ptr<Pipeline> upPipeline) = 0;
 
     // Emulate click in tab

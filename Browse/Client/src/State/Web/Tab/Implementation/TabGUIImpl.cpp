@@ -6,7 +6,7 @@
 
 #include "src/State/Web/Tab/Tab.h"
 #include "src/State/Web/Tab/Pipelines/ZoomClickPipeline.h"
-#include "src/State/Web/Tab/Pipelines/PivotPipeline.h"
+#include "src/State/Web/Tab/Pipelines/PivotMenuPipeline.h"
 #include "src/CEF/Extension/CefMediator.h"
 
 void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
@@ -39,7 +39,7 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
         }
         else if (id == "pivot")
         {
-            _pTab->PushBackPipeline(std::move(std::unique_ptr<PivotPipeline>(new PivotPipeline(_pTab))));
+            _pTab->PushBackPipeline(std::move(std::unique_ptr<PivotMenuPipeline>(new PivotMenuPipeline(_pTab))));
         }
 	}
 	else

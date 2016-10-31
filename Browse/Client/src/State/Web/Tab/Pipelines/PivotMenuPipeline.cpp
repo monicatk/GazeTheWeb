@@ -3,11 +3,11 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
-#include "PivotPipeline.h"
+#include "PivotMenuPipeline.h"
 #include "src/State/Web/Tab/Pipelines/Actions/ZoomCoordinateAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/PivotMenuAction.h"
 
-PivotPipeline::PivotPipeline(TabInteractionInterface* pTab) : Pipeline(pTab)
+PivotMenuPipeline::PivotMenuPipeline(TabInteractionInterface* pTab) : Pipeline(pTab)
 {
      // Add some actions
     std::unique_ptr<ZoomCoordinateAction> upZoomCoordinateAction =
