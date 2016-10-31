@@ -1,6 +1,4 @@
 Basic Features
-- Page Loading Status
-	--> first draft available in Tab::SetLoadingStatus
 - Scrolling within page (OverflowElements)
 	--> TODO: Activate Cookies in order to be able to test Facebooks Chat
 - Auto Fill / Password Manager
@@ -11,7 +9,7 @@ Basic Features
 	--> Choose default search engine? Duckduckgo or Google for the start?
 - History / Inkognito
 - Https recognition and displaying of lock
-- Emulation Fallback
+- Emulation Fallback (somehow approached with pivot mode)
 - Drag n Drop
 
 Advanced Features
