@@ -537,10 +537,16 @@ bool Handler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
 void Handler::ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, int x, int y)
 {
 	//DEBUG
-	LogDebug("Handler: Scrolling overflow element with id: ", elemId);
+	//LogDebug("Handler: Scrolling overflow element with id: ", elemId);
 
 	std::string js_code = "var overflowObj = GetOverflowElement(" + std::to_string(elemId) + ");"\
 		"if(overflowObj) overflowObj.scroll(" + std::to_string(x) + ", " + std::to_string(y) + ");";
+
+	CefMouseEvent event;
+	event.x = 0;	// TODO: Mouse position? Possible case: Scroll inside of a sub area inside the page
+	event.y = 0;
+	//DLOG(INFO) << "Emulating mouse wheel, browserID=" << browser->GetIdentifier();
+	browser->GetHost()->SendMouseWheelEvent(event, 0, -10);
 
 	// DEBUG
 	if (elemId == 6 || elemId == 7)
