@@ -9,7 +9,6 @@
 	Example: Message list on Fb when clicking on message button in topmost menu bar
 	-	Fixed overflow elements
 	-	Remove overflowParent attribute from DOMObjects and do aquivalent visbility check for each child in OverflowElements
-	- Lag when scrolling on Reddit because to many OverflowElements & every one gets scrolled all the time?
 
 >>>	Fixed Elements
 	-	Add z-index for layers of fixed elements
@@ -20,7 +19,7 @@
 >>>	Other:
 	-	Remove 0x IDs for nodes etc. in JS & use SeparateBy method in C++ (BrowserMsgRouter) to decode
 
-	- heise.de: top-right corner: TextInput stays fixed (also, links)
+
 
 
 ### DEPRECATED TODO LIST ###
