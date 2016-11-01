@@ -8,7 +8,7 @@
 #define TEXTINPUTPIPELINE_H_
 
 #include "Pipeline.h"
-#include "src/State/Web/Tab/DOMNode.h"
+#include "src/CEF/Data/DOMNode.h"
 
 class TextInputPipeline : public Pipeline
 {

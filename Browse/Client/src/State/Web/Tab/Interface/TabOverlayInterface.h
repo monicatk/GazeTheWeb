@@ -72,6 +72,8 @@ public:
 	virtual int GetWebViewY() const = 0;
 	virtual int GetWebViewWidth() const = 0;
 	virtual int GetWebViewHeight() const = 0;
+	virtual int GetWebViewResolutionX() const = 0;
+	virtual int GetWebViewResolutionY() const = 0;
 	virtual int GetWindowWidth() const = 0;
 	virtual int GetWindowHeight() const = 0;
 };

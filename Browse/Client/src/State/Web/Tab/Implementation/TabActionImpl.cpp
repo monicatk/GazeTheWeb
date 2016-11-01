@@ -21,16 +21,44 @@ void Tab::PushBackPipeline(std::unique_ptr<Pipeline> upPipeline)
 	}
 }
 
-void Tab::EmulateLeftMouseButtonClick(double x, double y, bool visualize)
+void Tab::EmulateLeftMouseButtonClick(double x, double y, bool visualize, bool isScreenCoordinate)
 {
-	// Tell mediator about the click
-	_pCefMediator->EmulateLeftMouseButtonClick(this, x, y);
-
-	// Add some visualization for the user
+	// Add some visualization for the user at screen position
 	if (visualize)
 	{
-        PushBackClickVisualization(x, y);
+		// Maybe convert into screen coordinate system
+		double screenX = x;
+		double screenY = y;
+		if (!isScreenCoordinate)
+		{
+			screenX = (screenX / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
+			screenY = (screenY / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
+		}
+		PushBackClickVisualization(screenX, screenY);
 	}
+
+	// Convert screen to render pixel coordinate
+	if (isScreenCoordinate)
+	{
+		x = (x / (float)_upWebView->GetWidth()) * (float)_upWebView->GetResolutionX();
+		y = (y / (float)_upWebView->GetHeight()) * (float)_upWebView->GetResolutionY();
+	}
+
+	// Tell mediator about the click
+	_pCefMediator->EmulateLeftMouseButtonClick(this, x, y);
+}
+
+void Tab::EmulateMouseCursor(double x, double y, bool isScreenCoordinate)
+{
+	// Convert screen to render pixel coordinate
+	if (isScreenCoordinate)
+	{
+		x = (x / (float)_upWebView->GetWidth()) * (float)_upWebView->GetResolutionX();
+		y = (y / (float)_upWebView->GetHeight()) * (float)_upWebView->GetResolutionY();
+	}
+
+	// Tell mediator about the cursor
+	_pCefMediator->EmulateMouseCursor(this, x, y);
 }
 
 void Tab::EmulateMouseWheelScrolling(double deltaX, double deltaY)
@@ -77,9 +105,11 @@ std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pageCoordinate, float
             // Go over rectangles of that link
             for(const auto& rRect : rLink->GetRects())
             {
-                glm::vec2 center = rRect.center();
-                float width = rRect.width();
-                float height = rRect.height();
+				glm::vec2 center = rRect.center();
+				center.x = (center.x / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
+				center.y = (center.y / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
+                float width = (rRect.width() / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
+                float height = (rRect.height() / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
 
                 // Distance
                 float dx = glm::max(glm::abs(pageCoordinate.x - center.x) - (width / 2.f), 0.f);

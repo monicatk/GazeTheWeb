@@ -296,7 +296,7 @@ void Tab::Update(float tpf, Input& rInput)
         // Gaze mouse
         if(_gazeMouse)
         {
-            _pCefMediator->EmulateMouseCursor(this, tabInput.webViewGazeX, tabInput.webViewGazeY);
+            EmulateMouseCursor(tabInput.webViewGazeX, tabInput.webViewGazeY);
         }
 
 		// Ask for page resolution
@@ -323,14 +323,14 @@ void Tab::Update(float tpf, Input& rInput)
 			}
 
 			// Scroll down
-			if ((_pageHeight - 1) > (_scrollingOffsetY + _upWebView->GetHeight()))
+			if ((_pageHeight - 1) > (_scrollingOffsetY + _upWebView->GetResolutionY()))
 			{
 				showScrollDown = true;
 			}
 		}
 
 		// Set progress of scrolling
-		float scrollableHeight = (_pageHeight - 1) - _upWebView->GetHeight();
+		float scrollableHeight = (_pageHeight - 1) - _upWebView->GetResolutionY();
 		float progressUp = 1.f;
 		float progressDown = 1.f;
 		if (scrollableHeight > 0)
@@ -702,6 +702,12 @@ void Tab::DrawDebuggingOverlay() const
 			scrollX = _scrollingOffsetX;
 			scrollY = _scrollingOffsetY;
 		}
+
+		// Scale from rendered resolution to screen
+		rect.left = (rect.left / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
+		rect.right = (rect.right / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
+		rect.bottom = (rect.bottom / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
+		rect.top = (rect.top / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
 
 		// Calculate model matrix
 		model = glm::mat4(1.0f);

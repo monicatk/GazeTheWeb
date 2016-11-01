@@ -9,7 +9,7 @@
 #include "src/CEF/Handler.h"
 #include "include/cef_browser.h"
 #include "include/cef_base.h"
-#include "src/State/Web/Tab/DOMNodeType.h"
+#include "src/CEF/Data/DOMNodeType.h"
 #include <map>
 #include <memory>
 #include <queue>

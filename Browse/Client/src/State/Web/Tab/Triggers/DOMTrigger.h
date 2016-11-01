@@ -8,7 +8,7 @@
 #define DOMTRIGGER_H_
 
 #include "src/State/Web/Tab/Triggers/Trigger.h"
-#include "src/State/Web/Tab/DOMNode.h"
+#include "src/CEF/Data/DOMNode.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 #include <memory>
 

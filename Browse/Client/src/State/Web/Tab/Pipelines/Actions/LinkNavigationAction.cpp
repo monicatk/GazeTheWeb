@@ -5,7 +5,7 @@
 
 #include "LinkNavigationAction.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
-#include "src/State/Web/Tab/DOMNode.h"
+#include "src/CEF/Data/DOMNode.h"
 #include "src/Setup.h"
 
 LinkNavigationAction::LinkNavigationAction(TabInteractionInterface* pTab) : Action(pTab)
@@ -49,7 +49,7 @@ bool LinkNavigationAction::Update(float tpf, TabInput tabInput)
     }
 
     // Emulate left mouse button click
-    _pTab->EmulateLeftMouseButtonClick((double)(coordinate.x), (double)(coordinate.y), visualize > 0);
+    _pTab->EmulateLeftMouseButtonClick((double)(coordinate.x), (double)(coordinate.y), visualize > 0, false); // coordinate taken from DOMNode which is in rendered coordinate system
 
     return true;
 }

@@ -32,9 +32,8 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	float zoomSpeed;
 
 	// Pixels in web view
-	int webViewWidth = 0;
-	int webViewHeight = 0;
-	_pTab->GetWebViewTextureResolution(webViewWidth, webViewHeight);
+	int webViewWidth = _pTab->GetWebViewWidth();
+	int webViewHeight = _pTab->GetWebViewHeight();
 
 	// Only allow zoom in when gaz upon web view
     if(!tabInput.gazeUsed && tabInput.insideWebView) // TODO: gazeUsed really good idea here? Maybe later null pointer?

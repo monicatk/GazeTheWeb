@@ -6,7 +6,7 @@
 #include "BrowserMsgRouter.h"
 #include "src/CEF/Extension/CefMediator.h"
 #include "src/Utils/Logger.h"
-#include "src/State/Web/Tab/DOMNode.h"
+#include "src/CEF/Data/DOMNode.h"
 #include <cstdlib>
 #include <algorithm>
 

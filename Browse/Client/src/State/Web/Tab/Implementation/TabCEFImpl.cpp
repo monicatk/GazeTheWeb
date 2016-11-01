@@ -10,9 +10,8 @@
 
 void Tab::GetWebRenderResolution(int& rWidth, int& rHeight) const
 {
-	// TODO: problem: maybe here is pixel value of page necessary, but when some kind of resolution scaling is used, pixel res in GUI is given
-	rWidth = _upWebView->GetWidth();
-	rHeight = _upWebView->GetHeight();
+	rWidth = _upWebView->GetResolutionX();
+	rHeight = _upWebView->GetResolutionY();
 }
 
 void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upData, int width, int height)

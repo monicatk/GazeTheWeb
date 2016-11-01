@@ -33,7 +33,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
     idMapper.emplace("word_suggest", _overlayWordSuggestId);
 	idMapper.emplace("shift", _overlayShiftButtonId);
 
-    // Calculate size of overlay (TODO: what to do at resize? everything ok? simpler function call would be cool)
+    // Calculate size of overlay
     float x, y, sizeX, sizeY;
     x = (float)_pTab->GetWebViewX() / (float)_pTab->GetWindowWidth();
 	y = (float)_pTab->GetWebViewY() / (float)_pTab->GetWindowHeight();

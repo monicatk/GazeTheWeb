@@ -8,7 +8,7 @@
 #include "src/CEF/Extension/Container.h"
 #include "src/Setup.h"
 #include "src/State/Web/Tab/Interface/TabCEFInterface.h"
-#include "src/State/Web/Tab/DOMNode.h"
+#include "src/CEF/Data/DOMNode.h"
 #include "src/Utils/Logger.h"
 #include "include/cef_app.h"
 #include "include/wrapper/cef_helpers.h"

@@ -162,6 +162,16 @@ int Tab::GetWebViewHeight() const
 	return _upWebView->GetHeight();
 }
 
+int Tab::GetWebViewResolutionX() const
+{
+	return _upWebView->GetResolutionX();
+}
+
+int Tab::GetWebViewResolutionY() const
+{
+	return _upWebView->GetResolutionY();
+}
+
 int Tab::GetWindowWidth() const
 {
 	return _pMaster->GetWindowWidth();

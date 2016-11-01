@@ -99,8 +99,12 @@ void DOMTrigger::Deactivate()
 
 void DOMTrigger::CalculatePositionOfOverlayButton(float& rRelativePositionX, float& rRelativePositionY) const
 {
-    // Top, left, buttom, right
+    // Center of node
 	glm::vec2 center = _spNode->GetCenter();
+
+	// Scale center from web view resolution to real pixel value
+	center.x = (center.x / (float)_pTab->GetWebViewResolutionX()) * (float)_pTab->GetWebViewWidth();
+	center.y = (center.y / (float)_pTab->GetWebViewResolutionY()) * (float)_pTab->GetWebViewHeight();
 
     // Scrolling offset only when not fixed
 	double scrollingOffsetX = 0;

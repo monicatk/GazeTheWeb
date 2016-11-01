@@ -5,6 +5,7 @@
 
 #include "WebView.h"
 #include "src/Utils/Texture.h"
+#include "src/Setup.h"
 #include "submodules/glm/glm/gtc/matrix_transform.hpp"
 
 // Shaders
@@ -159,6 +160,12 @@ void WebView::Draw(
 			rect.bottom -= scrollingOffsetY;
 			rect.top -= scrollingOffsetY;
 
+			// Scale from web view resolution to real one
+			rect.left = (rect.left / (float)GetResolutionX()) * (float)_width;
+			rect.right = (rect.right / (float)GetResolutionX()) * (float)_width;
+			rect.bottom = (rect.bottom / (float)GetResolutionY()) * (float)_height;
+			rect.top = (rect.top / (float)GetResolutionY()) * (float)_height;
+
             // Setup position
             _upSimpleRenderItem->GetShader()->UpdateValue(
                 "position",
@@ -241,4 +248,14 @@ int WebView::GetWidth() const
 int WebView::GetHeight() const
 {
 	return _height;
+}
+
+int WebView::GetResolutionX() const
+{
+	return _width * setup::WEB_VIEW_RESOLUTION_SCALE;
+}
+
+int WebView::GetResolutionY() const
+{
+	return _height * setup::WEB_VIEW_RESOLUTION_SCALE;
 }

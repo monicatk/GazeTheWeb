@@ -23,8 +23,11 @@ public:
     // Push back a pipeline
     virtual void PushBackPipeline(std::unique_ptr<Pipeline> upPipeline) = 0;
 
-    // Emulate click in tab
-    virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true) = 0;
+    // Emulate click in tab. Optionally converts screen pixel position to rendered pixel position before calling CEF method
+    virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true, bool isScreenCoordinate = true) = 0;
+
+	// Emulate mouse cursor in tab. Optionally converts screen pixel position to rendered pixel position before calling CEF method
+	virtual void EmulateMouseCursor(double x, double y, bool isScreenCoordinate = true) = 0;
 
     // Emulate mouse wheel scrolling
     virtual void EmulateMouseWheelScrolling(double deltaX, double deltaY) = 0;
@@ -35,7 +38,7 @@ public:
     // Get current web view resolution. Sets to 0 if not possible
     virtual void GetWebViewTextureResolution(int& rWidth, int& rHeight) const = 0;
 
-    // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available
+    // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available. Distance in screen coordinates
     virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pageCoordinate, float& rDistance) const = 0;
 
     // ### METHODS WHICH SET PARAMETERS THAT MUST BE RESET WHEN NO PIPELINE / ACTION IS ACTIVE ###

@@ -13,7 +13,7 @@
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 #include "src/State/Web/Tab/Interface/TabCEFInterface.h"
 #include "src/State/Web/WebTabInterface.h"
-#include "src/State/Web/Tab/DOMNode.h"
+#include "src/CEF/Data/DOMNode.h"
 #include "src/State/Web/Tab/WebView.h"
 #include "src/State/Web/Tab/Pipelines/Pipeline.h"
 #include "src/State/Web/Tab/Triggers/DOMTrigger.h"
@@ -150,6 +150,8 @@ public:
 	virtual int GetWebViewY() const;
 	virtual int GetWebViewWidth() const;
 	virtual int GetWebViewHeight() const;
+	virtual int GetWebViewResolutionX() const;
+	virtual int GetWebViewResolutionY() const;
 	virtual int GetWindowWidth() const;
 	virtual int GetWindowHeight() const;
 
@@ -163,8 +165,11 @@ public:
     // Push back an pipeline
     virtual void PushBackPipeline(std::unique_ptr<Pipeline> upPipeline);
 
-    // Emulate left mouse button click
-    virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true);
+	// Emulate click in tab. Optionally converts screen pixel position to rendered pixel position before calling CEF method
+	virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true, bool isScreenCoordinate = true);
+
+	// Emulate mouse cursor in tab. Optionally converts screen pixel position to rendered pixel position before calling CEF method
+	virtual void EmulateMouseCursor(double x, double y, bool isScreenCoordinate = true);
 
     // Emulate mouse wheel scrolling
     virtual void EmulateMouseWheelScrolling(double deltaX, double deltaY);
@@ -178,7 +183,7 @@ public:
     // Set WebViewParameters for WebView
     virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }
 
-    // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available
+    // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available. Distance in screen coordinates
     virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pageCoordinate, float& rDistance) const;
 
 	// Execute scrolling in determined Overflow Element with elemId, x and y are delta values for each dimension

@@ -35,6 +35,7 @@ namespace setup
     // Other
     static const bool ENABLE_WEBGL = false; // only on Windows
     static const bool BLUR_PERIPHERY = false;
+	static const float WEB_VIEW_RESOLUTION_SCALE = 0.75f;
 }
 
 #endif // SETUP_H_
