@@ -957,9 +957,9 @@ function AnalyzeNode(node)
 
 		// Detect scrollable elements inside of webpage
 		if( node.tagName === "DIV" && 
-			(   (computedStyle.getPropertyValue("overflow") !== undefined && computedStyle.getPropertyValue("overflow") !== "visible" )
-				|| (computedStyle.getPropertyValue("overflow-x") !== undefined && computedStyle.getPropertyValue("overflow-x") !== "visible")
-				|| (computedStyle.getPropertyValue("overflow-y") !== undefined && computedStyle.getPropertyValue("overflow-y") !== "visible" )
+			(   (computedStyle.getPropertyValue("overflow") !== "visible" )
+				|| (computedStyle.getPropertyValue("overflow-x") !== "visible")
+				|| (computedStyle.getPropertyValue("overflow-y") !== "visible" )
 			)
 			&& rect.width > 0 
 			&& rect.height > 0

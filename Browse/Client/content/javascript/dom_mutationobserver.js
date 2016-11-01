@@ -599,11 +599,11 @@ function OverflowElement(node)
                 }
                 if(distTop >= 0 && distTop < tresholdY)
                 {
-                    scrollY += (maxScrollingPerFrame * (1 - (distTop / tresholdY)));
+                    scrollY -= (maxScrollingPerFrame * (1 - (distTop / tresholdY)));
                 }
                 if(distBottom >= 0 && distBottom < tresholdY)
                 {
-                    scrollY -= (maxScrollingPerFrame * (1 - (distBottom / tresholdY)));
+                    scrollY += (maxScrollingPerFrame * (1 - (distBottom / tresholdY)));
                 }
 
                 // ConsolePrint("Executing OverflowElement scrolling by (x, y) = ("+scrollX+", "+scrollY+").");
