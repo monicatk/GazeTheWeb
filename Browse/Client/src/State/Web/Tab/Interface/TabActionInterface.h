@@ -35,9 +35,6 @@ public:
     // Set text in text input field
     virtual void InputTextData(int64 frameID, int nodeID, std::string text, bool submit) = 0;
 
-    // Get current web view resolution. Sets to 0 if not possible
-    virtual void GetWebViewTextureResolution(int& rWidth, int& rHeight) const = 0;
-
     // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available. Distance in screen coordinates
     virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pageCoordinate, float& rDistance) const = 0;
 

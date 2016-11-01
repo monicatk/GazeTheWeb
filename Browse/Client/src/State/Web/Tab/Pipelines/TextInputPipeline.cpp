@@ -24,11 +24,9 @@ TextInputPipeline::TextInputPipeline(TabInteractionInterface* pTab, std::shared_
 	_actions.push_back(spTextInputAction);
 
     // Fill some values directly
-    int webViewWidth, webViewHeight;
-    _pTab->GetWebViewTextureResolution(webViewWidth, webViewHeight);
     glm::vec2 clickCoordinates = spNode->GetCenter();
-    clickCoordinates.x /= (float)webViewWidth; // to relative coordinates
-    clickCoordinates.y /= (float)webViewHeight; // to relative coordinates
+	clickCoordinates.x = (clickCoordinates.x / (float)_pTab->GetWebViewResolutionX()) * (float)_pTab->GetWebViewWidth(); // to screen pixel coordinates
+	clickCoordinates.y = (clickCoordinates.y / (float)_pTab->GetWebViewResolutionY()) * (float)_pTab->GetWebViewHeight(); // to screen pixel coordinates
     spLeftMouseButtonClickAction->SetInputValue("coordinate", clickCoordinates);
 	spLeftMouseButtonClickAction->SetInputValue("visualize", 0);
     spTextInputAction->SetInputValue("frameId", spNode->GetFrameID());

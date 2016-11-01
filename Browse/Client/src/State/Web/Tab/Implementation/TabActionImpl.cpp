@@ -71,20 +71,6 @@ void Tab::InputTextData(int64 frameID, int nodeID, std::string text, bool submit
 	_pCefMediator->InputTextData(this, frameID, nodeID, text, submit);
 }
 
-void Tab::GetWebViewTextureResolution(int& rWidth, int& rHeight) const
-{
-	if (auto spTexture = _upWebView->GetTexture().lock())
-	{
-		rWidth = spTexture->GetWidth();
-		rHeight = spTexture->GetHeight();
-	}
-	else
-	{
-		rWidth = 0;
-		rHeight = 0;
-	}
-}
-
 std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pageCoordinate, float& rDistance) const
 {
     if(_DOMTextLinks.empty())

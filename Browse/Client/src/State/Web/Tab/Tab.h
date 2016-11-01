@@ -177,9 +177,6 @@ public:
     // Set text in text input field
     virtual void InputTextData(int64 frameID, int nodeID, std::string text, bool submit);
 
-    // Get current web view resolution. Sets to 0 if not possible
-    virtual void GetWebViewTextureResolution(int& rWidth, int& rHeight) const;
-
     // Set WebViewParameters for WebView
     virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }
 
