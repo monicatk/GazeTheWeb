@@ -1,22 +1,30 @@
 # Refinement #
+
+>>> Text Selection!
+
 >>>	Overflow Elements:
+	-	FIXED overflow elements
+	-	Remove overflowParent attribute from DOMObjects and do aquivalent visbility check for each child in OverflowElements
+	-	Calculate partial Rects if partially hidden by OverflowElements
+	-	Trigger childrens' Rect updates when scrolling happend
 	- 	OE containing another OE, keep outer OE scrollable
 		--> additional: scroll when looking outside at the edge of OE
 	-	Don't scroll in x-direction if there are only e.g. 30px for hiding the scrollbar
-	Example: Message list on Fb when clicking on message button in the topmost menu bar
+		Example: Message list on Fb when clicking on message button in the topmost menu bar
 		--> get scrollbar width and check scrollWidth - rect.width > scrollbar.width
 	-	Visibility check if menu disappears again
-	Example: Message list on Fb when clicking on message button in topmost menu bar
-	-	Fixed overflow elements
-	-	Remove overflowParent attribute from DOMObjects and do aquivalent visbility check for each child in OverflowElements
+		Example: Message list on Fb when clicking on message button in topmost menu bar
 
 >>>	Fixed Elements
 	-	Add z-index for layers of fixed elements
-	Example: Facebook chat popup in the right corner in contrast to mainpage in the background, consisting partly of other fixed elements
-	-	Better union of all child Rects (not simple bounding box)
-	Example: Facebook chat windows on the top
+		Example: Facebook chat popup in the right corner in contrast to mainpage in the background, consisting partly of other fixed elements
+	-	Better union of all child Rects (not simple bounding boxes)
+		Example: Facebook chat windows on the top
 
 >>>	Other:
+	- 	Emulate Enter button and send Fb message within chat window
+	- 	Find EVERY DOM node on its creation/appending to DOM
+		Example: See GMail
 	-	Remove 0x IDs for nodes etc. in JS & use SeparateBy method in C++ (BrowserMsgRouter) to decode
 
 
