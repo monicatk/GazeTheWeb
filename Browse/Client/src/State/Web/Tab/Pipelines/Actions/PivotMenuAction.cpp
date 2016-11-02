@@ -49,26 +49,27 @@ PivotMenuAction::PivotMenuAction(TabInteractionInterface *pTab) : Action(pTab)
         },
         [](){}); // up callback
 
-    // Right click button
-    _pTab->RegisterButtonListenerInOverlay(
-        "pivot_right_click",
-        [&]() // down callback
-        {
-            _done= true;
-        },
-        [](){}); // up callback
-
-    // Double left click button
-    _pTab->RegisterButtonListenerInOverlay(
-        "pivot_double_left_click",
-        [&]() // down callback
-        {
+	// Double left click button
+	_pTab->RegisterButtonListenerInOverlay(
+		"pivot_double_left_click",
+		[&]() // down callback
+		{
 			// If coordinate set, do left mouse button click
 			glm::vec2 coordinate;
 			if (this->GetInputValue("coordinate", coordinate))
 			{
 				_pTab->PushBackPipeline(std::unique_ptr<LeftMouseButtonDoubleClickPipeline>(new LeftMouseButtonDoubleClickPipeline(_pTab, coordinate)));
 			}
+			_done = true;
+		},
+		[]() {}); // up callback
+
+
+    // Right click button
+    _pTab->RegisterButtonListenerInOverlay(
+        "pivot_right_click",
+        [&]() // down callback
+        {
             _done= true;
         },
         [](){}); // up callback
