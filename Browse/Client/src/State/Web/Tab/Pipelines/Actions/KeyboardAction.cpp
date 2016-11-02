@@ -33,21 +33,17 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
     idMapper.emplace("word_suggest", _overlayWordSuggestId);
 	idMapper.emplace("shift", _overlayShiftButtonId);
 
-    // Calculate size of overlay (TODO: what to do at resize? everything ok? simpler function call would be cool)
-    int webViewX, webViewY, webViewWidth, webViewHeight;
-    _pTab->CalculateWebViewPositionAndSize(webViewX, webViewY, webViewWidth, webViewHeight);
-    int windowWidth, windowHeight;
-    _pTab->GetWindowSize(windowWidth, windowHeight);
+    // Calculate size of overlay
     float x, y, sizeX, sizeY;
-    x = (float)webViewX / (float)windowWidth;
-    y = (float)webViewY / (float)windowHeight;
-    sizeX = (float)webViewWidth / (float)windowWidth;
-    sizeY = (float)webViewHeight / (float)windowHeight;
+    x = (float)_pTab->GetWebViewX() / (float)_pTab->GetWindowWidth();
+	y = (float)_pTab->GetWebViewY() / (float)_pTab->GetWindowHeight();
+    sizeX = (float)_pTab->GetWebViewWidth() / (float)_pTab->GetWindowWidth();
+    sizeY = (float)_pTab->GetWebViewHeight() / (float)_pTab->GetWindowHeight();
 
     // Add overlay
     _overlayFrameIndex = _pTab->AddFloatingFrameToOverlay("bricks/actions/Keyboard.beyegui", x, y, sizeX, sizeY, idMapper);
 
-    // Register listener all the
+    // Register listeners
 
 	// Keyboard
     _pTab->RegisterKeyboardListenerInOverlay(

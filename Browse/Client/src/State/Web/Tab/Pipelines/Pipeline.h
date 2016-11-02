@@ -51,7 +51,7 @@ protected:
     TabInteractionInterface* _pTab;
 
     // Vector with actions
-    std::vector<std::unique_ptr<Action> > _actions;
+    std::vector<std::shared_ptr<Action> > _actions;
 
     // Index of current action
     int _currentActionIndex = -1;

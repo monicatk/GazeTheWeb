@@ -2,16 +2,17 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// Tab interface for methods that may be accessed by CEFMediator.
+// Tab interface for methods that may be accessed by CEFMediator. Pixel values
+// are taken in screen coordinates and are converted to render coordinates.
 
 #ifndef TABCEFINTERFACE_H_
 #define TABCEFINTERFACE_H_
 
 #include <memory>
 #include <vector>
-#include "src/Utils/Rect.h"
+#include "src/CEF/Data/Rect.h"
 #include "src/Utils/glmWrapper.h"
-#include "src/State/Web/Tab/DOMNodeType.h"
+#include "src/CEF/Data/DOMNodeType.h"
 
 // Forward declaration
 class Texture;
@@ -48,7 +49,6 @@ public:
 	virtual std::weak_ptr<DOMNode> GetDOMNode(DOMNodeType type, int nodeID) = 0;
     virtual void ClearDOMNodes() = 0;
 	virtual void RemoveDOMNode(DOMNodeType type, int nodeID) = 0;
-
 
     // Receive callbacks from CefMediator upon scrolling offset changes
     virtual void SetScrollingOffset(double x, double y) = 0;

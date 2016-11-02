@@ -10,7 +10,7 @@
 
 #include "src/State/Web/Tab/WebViewParameters.h"
 #include "src/Utils/RenderItem.h"
-#include "src/Utils/Rect.h"
+#include "src/CEF/Data/Rect.h"
 #include "src/Utils/glmWrapper.h"
 #include "src/Utils/Framebuffer.h"
 #include "externals/OGL/gl_core_3_3.h"
@@ -26,7 +26,11 @@ class WebView
 public:
 
     // Constructor
-    WebView(int renderWidth, int renderHeight);
+    WebView(
+		int x,
+		int y,
+		int width,
+		int height);
 
     // Destructor
     virtual ~WebView();
@@ -51,6 +55,16 @@ public:
 
     // Set rects which are not dimmed
     void SetHighlightRects(std::vector<Rect> rects);
+
+	// Getter for values of GUI element. Resolution may not be same as web page rendering
+	int GetX() const;
+	int GetY() const;
+	int GetWidth() const;
+	int GetHeight() const;
+
+	// Getter for web view resolution
+	int GetResolutionX() const;
+	int GetResolutionY() const;
 
 private:
 

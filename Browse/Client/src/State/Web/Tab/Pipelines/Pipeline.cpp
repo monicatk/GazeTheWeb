@@ -44,10 +44,13 @@ bool Pipeline::Update(float tpf, TabInput tabInput)
             Action const * pPreviousAction = _actions[_currentActionIndex].get();
             for(auto& rupConnector : _connectors)
             {
-                if(pPreviousAction == rupConnector->GetPreviousAction())
-                {
-                    rupConnector->Execute();
-                }
+				if (auto spPreviousActionInConnector = rupConnector->GetPreviousAction().lock())
+				{
+					if (spPreviousActionInConnector.get() == pPreviousAction)
+					{
+						rupConnector->Execute();
+					}
+				}
             }
 
             // Next action

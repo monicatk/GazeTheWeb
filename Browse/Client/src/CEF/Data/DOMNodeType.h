@@ -9,7 +9,7 @@
 
 enum DOMNodeType
 {
-    TextInput = 0, 
+	TextInput = 0,
 	TextLink = 1
 };
 

@@ -1,32 +1,26 @@
 Basic Features
-- Page Loading Status
-	--> first draft available in Tab::SetLoadingStatus
-
 - Scrolling within page (OverflowElements)
 	--> TODO: Activate Cookies in order to be able to test Facebooks Chat
 - Auto Fill / Password Manager
-	- Daniel: Passwort / Anmeldeformulare erkennen
+	- Daniel: Passwort / Sign in form recognition
 	- Raphael: Secure Password Keyboard mode?
 - Search on page
 - Direct search of non URLs
 	--> Choose default search engine? Duckduckgo or Google for the start?
 - History / Inkognito
-- Https recognition
-- Emulation Fallback
+- Https recognition and displaying of lock
+- Emulation Fallback (somehow approached with pivot mode)
 - Drag n Drop
 
 Advanced Features
 - Test image editing with web application
-- HTML5 Video Player support
+- HTML5 Video Player support (replace tab bar with controlls and dim everything)
 - Page fullscreen handling
 - CSS Injection
 - Copy Paste / Marking
 - Right click and _own_ context menus (see JS Window Object)
 	(Javascript Popup Handling)
  - Rough selection via browser window (getstring) and precise selection in eyeGUI
- 
-Milestone
-
 
 Problems
 - Transition events not properly fired --> CEF Update?

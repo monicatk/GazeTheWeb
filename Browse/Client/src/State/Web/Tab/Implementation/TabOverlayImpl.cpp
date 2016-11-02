@@ -141,3 +141,43 @@ void Tab::SetContentOfTextBlock(std::string id, std::u16string content)
 {
 	eyegui::setContentOfTextBlock(_pOverlayLayout, id, content);
 }
+
+int Tab::GetWebViewX() const
+{
+	return _upWebView->GetX();
+}
+
+int Tab::GetWebViewY() const
+{
+	return _upWebView->GetY();
+}
+
+int Tab::GetWebViewWidth() const
+{
+	return _upWebView->GetWidth();
+}
+
+int Tab::GetWebViewHeight() const
+{
+	return _upWebView->GetHeight();
+}
+
+int Tab::GetWebViewResolutionX() const
+{
+	return _upWebView->GetResolutionX();
+}
+
+int Tab::GetWebViewResolutionY() const
+{
+	return _upWebView->GetResolutionY();
+}
+
+int Tab::GetWindowWidth() const
+{
+	return _pMaster->GetWindowWidth();
+}
+
+int Tab::GetWindowHeight() const
+{
+	return _pMaster->GetWindowHeight();
+}

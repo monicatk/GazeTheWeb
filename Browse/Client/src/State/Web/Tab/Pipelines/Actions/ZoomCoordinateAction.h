@@ -3,8 +3,6 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Action to zoom to a coordinate with gaze.
-
-// Notes
 // - Input: none
 // - Output: vec2 coordinate in pixels
 

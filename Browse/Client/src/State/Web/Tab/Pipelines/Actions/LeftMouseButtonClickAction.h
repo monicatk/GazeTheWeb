@@ -3,8 +3,6 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Action to emulate left mouse button click.
-
-// Notes
 // - Input: vec2 coordinate in pixels
 // - Input: int visualize (0 if not, else visualize; default here is 1)
 // - Output: none

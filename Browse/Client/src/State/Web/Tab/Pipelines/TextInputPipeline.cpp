@@ -12,37 +12,29 @@
 TextInputPipeline::TextInputPipeline(TabInteractionInterface* pTab, std::shared_ptr<DOMNode> spNode) : Pipeline(pTab)
 {
     // At first, click in text field
-    std::unique_ptr<LeftMouseButtonClickAction> upLeftMouseButtonClickAction =
-    std::unique_ptr<LeftMouseButtonClickAction>(new LeftMouseButtonClickAction(_pTab));
-    Action* pLeftMouseButtonClickAction = upLeftMouseButtonClickAction.get();
-    _actions.push_back(std::move(upLeftMouseButtonClickAction));
+	std::shared_ptr<LeftMouseButtonClickAction> spLeftMouseButtonClickAction = std::make_shared<LeftMouseButtonClickAction>(_pTab);
+	_actions.push_back(spLeftMouseButtonClickAction);
 
     // Then, do input via keyboard
-    std::unique_ptr<KeyboardAction> upKeyboardAction =
-        std::unique_ptr<KeyboardAction>(new KeyboardAction(_pTab));
-    Action* pKeyboardAction = upKeyboardAction.get();
-    _actions.push_back(std::move(upKeyboardAction));
+	std::shared_ptr<KeyboardAction> spKeyboardAction = std::make_shared<KeyboardAction>(_pTab);
+	_actions.push_back(spKeyboardAction);
 
     // At last, fill input into text field
-    std::unique_ptr<TextInputAction> upTextInputAction =
-        std::unique_ptr<TextInputAction>(new TextInputAction(_pTab));
-    Action* pTextInputAction = upTextInputAction.get();
-    _actions.push_back(std::move(upTextInputAction));
+	std::shared_ptr<TextInputAction> spTextInputAction = std::make_shared<TextInputAction>(_pTab);
+	_actions.push_back(spTextInputAction);
 
     // Fill some values directly
-    int webViewWidth, webViewHeight;
-    _pTab->GetWebViewTextureResolution(webViewWidth, webViewHeight);
     glm::vec2 clickCoordinates = spNode->GetCenter();
-    clickCoordinates.x /= (float)webViewWidth; // to relative coordinates
-    clickCoordinates.y /= (float)webViewHeight; // to relative coordinates
-    pLeftMouseButtonClickAction->SetInputValue("coordinate", clickCoordinates);
-	pLeftMouseButtonClickAction->SetInputValue("visualize", 0);
-    pTextInputAction->SetInputValue("frameId", spNode->GetFrameID());
-    pTextInputAction->SetInputValue("nodeId", spNode->GetNodeID());
+	clickCoordinates.x = (clickCoordinates.x / (float)_pTab->GetWebViewResolutionX()) * (float)_pTab->GetWebViewWidth(); // to screen pixel coordinates
+	clickCoordinates.y = (clickCoordinates.y / (float)_pTab->GetWebViewResolutionY()) * (float)_pTab->GetWebViewHeight(); // to screen pixel coordinates
+    spLeftMouseButtonClickAction->SetInputValue("coordinate", clickCoordinates);
+	spLeftMouseButtonClickAction->SetInputValue("visualize", 0);
+    spTextInputAction->SetInputValue("frameId", spNode->GetFrameID());
+    spTextInputAction->SetInputValue("nodeId", spNode->GetNodeID());
 
     // Connect those actions
     std::unique_ptr<ActionConnector> upConnector =
-        std::unique_ptr<ActionConnector>(new ActionConnector(pKeyboardAction, pTextInputAction));
+        std::unique_ptr<ActionConnector>(new ActionConnector(spKeyboardAction, spTextInputAction));
     upConnector->ConnectString16("text", "text");
     upConnector->ConnectInt("submit", "submit");
     _connectors.push_back(std::move(upConnector));

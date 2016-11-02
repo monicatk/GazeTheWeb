@@ -3,8 +3,6 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Action to input text into a text input field on a webpage.
-
-// Notes
 // - Input: int64 frameId
 // - Input: int nodeId
 // - Input: std::u16string text

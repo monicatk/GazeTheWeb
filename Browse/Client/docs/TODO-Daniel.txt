@@ -1,3 +1,7 @@
+# Extra #
+Pause Tab Rendering / Script Execution
+  - Useful during zooming at click emulation
+
 # Refinement #
 
 >>> Text Selection!

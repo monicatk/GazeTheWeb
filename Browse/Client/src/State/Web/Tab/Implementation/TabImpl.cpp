@@ -92,7 +92,9 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
 	_spTabSensorListener = std::shared_ptr<TabSensorListener>(new TabSensorListener(this));
 	eyegui::registerButtonListener(_pPanelLayout, "click_mode", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPanelLayout, "auto_scrolling", _spTabButtonListener);
-	eyegui::registerButtonListener(_pPanelLayout, "scroll_to_top", _spTabButtonListener);
+    // eyegui::registerButtonListener(_pPanelLayout, "scroll_to_top", _spTabButtonListener);
+    eyegui::registerButtonListener(_pPanelLayout, "pivot", _spTabButtonListener);
+    eyegui::registerButtonListener(_pPanelLayout, "gaze_mouse", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPanelLayout, "zoom", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPipelineAbortLayout, "abort", _spTabButtonListener);
 	eyegui::registerSensorListener(_pScrollingOverlayLayout, "scroll_up_sensor", _spTabSensorListener);
@@ -104,12 +106,8 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
 	_spTabOverlayWordSuggestListener = std::shared_ptr<TabOverlayWordSuggestListener>(new TabOverlayWordSuggestListener(this));
 
 	// Create WebView owned by Tab
-	int webRenderWidth, webRenderHeight = 0;
-	GetWebRenderResolution(webRenderWidth, webRenderHeight);
-	_upWebView = std::unique_ptr<WebView>(new WebView(webRenderWidth, webRenderHeight));
-
-	// Activate current mode
-	ActivateMode(_mode);
+	auto webViewInGUI = eyegui::getAbsolutePositionAndSizeOfElement(_pPanelLayout, "web_view");
+    _upWebView = std::unique_ptr<WebView>(new WebView(webViewInGUI.x, webViewInGUI.y, webViewInGUI.width, webViewInGUI.height));
 
 	// Register itself and painted texture in mediator to receive DOMNodes
 	_pCefMediator->RegisterTab(this);
@@ -137,17 +135,21 @@ Tab::~Tab()
 
 void Tab::Update(float tpf, Input& rInput)
 {
+	// #######################
 	// ### UPDATE WEB VIEW ###
+	// #######################
 
 	// Update WebView (get values from eyeGUI layout directly)
-	auto webViewPositionAndSize = CalculateWebViewPositionAndSize();
+	auto webViewInGUI = eyegui::getAbsolutePositionAndSizeOfElement(_pPanelLayout, "web_view");
 	_upWebView->Update(
-		webViewPositionAndSize.x,
-		webViewPositionAndSize.y,
-		webViewPositionAndSize.width,
-		webViewPositionAndSize.height);
+		webViewInGUI.x,
+		webViewInGUI.y,
+		webViewInGUI.width,
+		webViewInGUI.height);
 
+	// ######################
 	// ### UPDATE OVERLAY ###
+	// ######################
 
 	// Update click visualization
 	for (int i = 0; i < (int)_clickVisualizations.size(); i++)
@@ -166,8 +168,8 @@ void Tab::Update(float tpf, Input& rInput)
 			float relativeSize = (_clickVisualizations.at(i).fading / CLICK_VISUALIZATION_DURATION) * CLICK_VISUALIZATION_RELATIVE_SIZE;
 
 			// Position of floating frame
-			float relativePositionX = (webViewPositionAndSize.x + _clickVisualizations.at(i).x) / (float)_pMaster->GetWindowWidth();
-			float relativePositionY = (webViewPositionAndSize.y + _clickVisualizations.at(i).y) / (float)_pMaster->GetWindowHeight();
+			float relativePositionX = (_upWebView->GetX() + _clickVisualizations.at(i).x) / (float)_pMaster->GetWindowWidth();
+			float relativePositionY = (_upWebView->GetY() + _clickVisualizations.at(i).y) / (float)_pMaster->GetWindowHeight();
 			relativePositionX -= relativeSize / 2.f;
 			relativePositionY -= relativeSize / 2.f;
 
@@ -185,13 +187,15 @@ void Tab::Update(float tpf, Input& rInput)
             [](const ClickVisualization& i) { return i.fading <= 0; }),
 		_clickVisualizations.end());
 
+	// ########################
 	// ### TAB INPUT STRUCT ###
+	// ########################
 
 	// Create tab input structure (like standard input but in addition with input coordinates in web view space)
-	int webViewGazeX = rInput.gazeX - webViewPositionAndSize.x;
-	int webViewGazeY = rInput.gazeY - webViewPositionAndSize.y;
-	float webViewGazeRelativeX = ((float)webViewGazeX) / ((float)webViewPositionAndSize.width);
-	float webViewGazeRelativeY = ((float)webViewGazeY) / ((float)webViewPositionAndSize.height);
+	int webViewGazeX = rInput.gazeX - _upWebView->GetX();
+	int webViewGazeY = rInput.gazeY - _upWebView->GetY();
+	float webViewGazeRelativeX = ((float)webViewGazeX) / (float)(_upWebView->GetWidth());
+	float webViewGazeRelativeY = ((float)webViewGazeY) / (float)(_upWebView->GetHeight());
 	TabInput tabInput(
 		rInput.gazeX,
 		rInput.gazeY,
@@ -213,11 +217,16 @@ void Tab::Update(float tpf, Input& rInput)
 	}
 	_upWebView->SetHighlightRects(rects);
 
+	// ###########################
 	// ### UPDATE COLOR OF GUI ###
+	// ###########################
 
 	UpdateAccentColor(tpf);
 
+	// ###################
 	// ### UPDATE ICON ###
+	// ###################
+
     if (_iconState == IconState::ICON_NOT_FOUND && _faviconLoaded)
 	{
         // Favicon has been loaded now
@@ -236,7 +245,9 @@ void Tab::Update(float tpf, Input& rInput)
 		eyegui::setImageOfPicture(_pPanelLayout, "icon", "icons/TabLoading_" + std::to_string(_loadingIconFrame) + ".png");
 	}
 
+	// ###########################
     // ### UPDATE DEBUG LAYOUT ###
+	// ###########################
 
     eyegui::setContentOfTextBlock(
         _pDebugLayout,
@@ -246,7 +257,9 @@ void Tab::Update(float tpf, Input& rInput)
         + "Scrolled:\n"
         + std::to_string((int)(webViewGazeX + _scrollingOffsetX)) + ", " + std::to_string((int)(webViewGazeY + _scrollingOffsetY)));
 
-	// ### UPDATE PIPELINES OR MODE ###
+	// #######################################
+    // ### UPDATE PIPELINE OR STANDARD GUI ###
+	// #######################################
 
 	// Decide what to update
 	if (_pipelineActive)
@@ -278,7 +291,13 @@ void Tab::Update(float tpf, Input& rInput)
 	}
 	else
 	{
-		// MODE GETS UPDATED. STANDARD GUI IS VISIBLE
+        // STANDARD GUI IS VISIBLE
+
+        // Gaze mouse
+        if(_gazeMouse)
+        {
+            EmulateMouseCursor(tabInput.webViewGazeX, tabInput.webViewGazeY);
+        }
 
 		// Ask for page resolution
 		_timeUntilGetPageResolution -= tpf;
@@ -304,14 +323,14 @@ void Tab::Update(float tpf, Input& rInput)
 			}
 
 			// Scroll down
-			if ((_pageHeight - 1) > (_scrollingOffsetY + webViewPositionAndSize.height))
+			if ((_pageHeight - 1) > (_scrollingOffsetY + _upWebView->GetResolutionY()))
 			{
 				showScrollDown = true;
 			}
 		}
 
 		// Set progress of scrolling
-		float scrollableHeight = (_pageHeight - 1) - webViewPositionAndSize.height;
+		float scrollableHeight = (_pageHeight - 1) - _upWebView->GetResolutionY();
 		float progressUp = 1.f;
 		float progressDown = 1.f;
 		if (scrollableHeight > 0)
@@ -409,34 +428,16 @@ void Tab::Update(float tpf, Input& rInput)
 					break;
 				}
 			}
-
 		}
 		//LogDebug(tabInput.webViewGazeX, "\t",tabInput.webViewGazeY);
 
-		// Update triggers
+		// #######################
+		// ### Update triggers ###
+		// #######################
+
 		for (auto& upDOMTrigger : _DOMTriggers)
 		{
 			upDOMTrigger->Update(tpf, tabInput);
-		}
-
-		// Check for mode change
-		if (_nextMode != _mode)
-		{
-			// Deactivate old mode
-			DeactivateMode(_mode);
-			_mode = _nextMode;
-			ActivateMode(_mode);
-		}
-
-		// Take a look at current mode
-		switch (_mode)
-		{
-		case TabMode::READ:
-			break;
-		case TabMode::INTERACTION:
-			break;
-		case TabMode::CURSOR:
-			break;
 		}
 	}
 }
@@ -463,17 +464,6 @@ void Tab::Draw() const
 		for (const auto& upDOMTrigger : _DOMTriggers)
 		{
 			upDOMTrigger->Draw();
-		}
-
-		// Pipeline is empty, so first take a look at current mode
-		switch (_mode)
-		{
-		case TabMode::READ:
-			break;
-		case TabMode::INTERACTION:
-			break;
-		case TabMode::CURSOR:
-			break;
 		}
 
 		// Draw debug overlay (do not so while pipeline is rendered)
@@ -546,11 +536,6 @@ void Tab::GoBack()
 void Tab::Reload()
 {
 	_pCefMediator->ReloadTab(this);
-}
-
-eyegui::AbsolutePositionAndSize Tab::CalculateWebViewPositionAndSize() const
-{
-	return eyegui::getAbsolutePositionAndSizeOfElement(_pPanelLayout, "web_view");
 }
 
 void Tab::SetPipelineActivity(bool active)
@@ -698,79 +683,10 @@ void Tab::UpdateAccentColor(float tpf)
 		RGBAToHexString(transparentBackgroundColorAccent));
 }
 
-void Tab::ActivateMode(TabMode mode)
-{
-	switch (mode)
-	{
-	case TabMode::READ:
-		ActivateReadMode();
-		break;
-	case TabMode::INTERACTION:
-		ActivateInteractionMode();
-		break;
-	case TabMode::CURSOR:
-		ActivateCursorMode();
-		break;
-	}
-}
-
-void Tab::DeactivateMode(TabMode mode)
-{
-	switch (mode)
-	{
-	case TabMode::READ:
-		DeactivateReadMode();
-		break;
-	case TabMode::INTERACTION:
-		DeactivateInteractionMode();
-		break;
-	case TabMode::CURSOR:
-		DeactivateCursorMode();
-		break;
-	}
-}
-
-void Tab::ActivateReadMode()
-{
-	// TODO
-}
-
-void Tab::DeactivateReadMode()
-{
-	// TODO
-}
-
-void Tab::ActivateInteractionMode()
-{
-	// TODO
-}
-
-void Tab::DeactivateInteractionMode()
-{
-	// TODO
-}
-
-void Tab::ActivateCursorMode()
-{
-	// TODO
-}
-
-void Tab::DeactivateCursorMode()
-{
-	// TODO
-}
-
 void Tab::DrawDebuggingOverlay() const
 {
 	// Reserve variables
 	glm::mat4 model, matrix;
-
-	// WebView coordinats
-	int webViewX = 0;
-	int webViewY = 0;
-	int webViewWidth = 0;
-	int webViewHeight = 0;
-	this->CalculateWebViewPositionAndSize(webViewX, webViewY, webViewWidth, webViewHeight);
 
 	// Projection
 	glm::mat4 projection = glm::ortho(0, 1, 0, 1);
@@ -787,10 +703,16 @@ void Tab::DrawDebuggingOverlay() const
 			scrollY = _scrollingOffsetY;
 		}
 
+		// Scale from rendered resolution to screen
+		rect.left = (rect.left / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
+		rect.right = (rect.right / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
+		rect.bottom = (rect.bottom / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
+		rect.top = (rect.top / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
+
 		// Calculate model matrix
 		model = glm::mat4(1.0f);
 		model = glm::scale(model, glm::vec3(1.f / _pMaster->GetWindowWidth(), 1.f / _pMaster->GetWindowHeight(), 1.f));
-		model = glm::translate(model, glm::vec3(webViewX + rect.left - scrollX, webViewHeight - (rect.bottom - scrollY), 1));
+		model = glm::translate(model, glm::vec3(_upWebView->GetX() + rect.left - scrollX, _upWebView->GetHeight() - (rect.bottom - scrollY), 1));
 		model = glm::scale(model, glm::vec3(rect.width(), rect.height(), 0));
 
 		// Combine matrics
@@ -886,9 +808,6 @@ void Tab::DrawDebuggingOverlay() const
 
 void Tab::PushBackClickVisualization(double x, double y)
 {
-	// Coordinates of web view
-	auto webViewCoordinates = CalculateWebViewPositionAndSize();
-
 	// Structure for click visulization
 	ClickVisualization clickVisualization;
 	clickVisualization.x = x;
@@ -896,8 +815,8 @@ void Tab::PushBackClickVisualization(double x, double y)
 	clickVisualization.fading = CLICK_VISUALIZATION_DURATION;
 
 	// Position of floating frame
-	float relativePositionX = (webViewCoordinates.x + x) / (float)_pMaster->GetWindowWidth();
-	float relativePositionY = (webViewCoordinates.y + y) / (float)_pMaster->GetWindowHeight();
+	float relativePositionX = (_upWebView->GetX() + x) / (float)_pMaster->GetWindowWidth();
+	float relativePositionY = (_upWebView->GetY() + y) / (float)_pMaster->GetWindowHeight();
 	relativePositionX -= CLICK_VISUALIZATION_RELATIVE_SIZE / 2.f;
 	relativePositionY -= CLICK_VISUALIZATION_RELATIVE_SIZE / 2.f;
 

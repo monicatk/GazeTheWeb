@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.98994949"
-     inkscape:cx="59.093239"
-     inkscape:cy="210.76332"
+     inkscape:zoom="0.49497475"
+     inkscape:cx="-546.55965"
+     inkscape:cy="-9.6658822"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -38,11 +38,11 @@
      inkscape:bbox-nodes="true"
      inkscape:snap-bbox-edge-midpoints="true"
      inkscape:snap-bbox-midpoints="true"
-     inkscape:window-width="1184"
-     inkscape:window-height="900"
-     inkscape:window-x="-7"
-     inkscape:window-y="0"
-     inkscape:window-maximized="0"
+     inkscape:window-width="2501"
+     inkscape:window-height="1056"
+     inkscape:window-x="59"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
      inkscape:snap-object-midpoints="true"
      inkscape:snap-center="true"
      inkscape:snap-to-guides="false"
@@ -51,7 +51,7 @@
      inkscape:object-nodes="true"
      inkscape:snap-smooth-nodes="false"
      inkscape:snap-midpoints="false"
-     inkscape:snap-grids="true">
+     inkscape:snap-grids="false">
     <inkscape:grid
        type="xygrid"
        id="grid4686" />
@@ -64,7 +64,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -79,5 +79,20 @@
        id="path4706"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cscccccccccccsc" />
+    <g
+       id="layer1-30"
+       inkscape:label="Layer 1"
+       transform="matrix(0.32762561,0,0,0.32762561,88.467322,556.2793)">
+      <path
+         id="rect4152"
+         transform="translate(0,698.03153)"
+         d="m 147.43555,84.775391 0,62.660159 -62.660159,0 0,59.45898 62.660159,0 0,62.66211 59.45898,0 0,-62.66211 62.66211,0 0,-59.45898 -62.66211,0 0,-62.660159 -59.45898,0 z"
+         style="fill:#f2f2f2;fill-opacity:1;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         inkscape:connector-curvature="0" />
+      <g
+         transform="translate(2.2089408,-173.26727)"
+         inkscape:label="Layer 1"
+         id="layer1-3" />
+    </g>
   </g>
 </svg>

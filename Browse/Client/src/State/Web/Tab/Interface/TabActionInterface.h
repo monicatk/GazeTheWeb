@@ -16,18 +16,18 @@
 class Pipeline;
 class DOMNode;
 
-// Modes
-enum class TabMode { READ, INTERACTION, CURSOR };
-
 class TabActionInterface
 {
 public:
 
-    //  Push back a pipeline
+    // Push back a pipeline
     virtual void PushBackPipeline(std::unique_ptr<Pipeline> upPipeline) = 0;
 
-    // Emulate click in tab
-    virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true) = 0;
+    // Emulate click in tab. Optionally converts screen pixel position to rendered pixel position before calling CEF method
+    virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true, bool isScreenCoordinate = true) = 0;
+
+	// Emulate mouse cursor in tab. Optionally converts screen pixel position to rendered pixel position before calling CEF method
+	virtual void EmulateMouseCursor(double x, double y, bool isScreenCoordinate = true) = 0;
 
     // Emulate mouse wheel scrolling
     virtual void EmulateMouseWheelScrolling(double deltaX, double deltaY) = 0;
@@ -35,14 +35,8 @@ public:
     // Set text in text input field
     virtual void InputTextData(int64 frameID, int nodeID, std::string text, bool submit) = 0;
 
-    // Get current web view resolution. Sets to 0 if not possible
-    virtual void GetWebViewTextureResolution(int& rWidth, int& rHeight) const = 0;
-
-    // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available
-    virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pageCoordinate, float& rDistance) const = 0;
-
-    // Set next mode (will be set after pipelines finish)
-    virtual void SetNextMode(TabMode mode) { _nextMode = mode; }
+    // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available. Distance in screen coordinates
+    virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 screenCoordinate, float& rDistance) const = 0;
 
     // ### METHODS WHICH SET PARAMETERS THAT MUST BE RESET WHEN NO PIPELINE / ACTION IS ACTIVE ###
 
@@ -57,8 +51,6 @@ public:
 
 protected:
 
-    // Next mode
-    TabMode _nextMode = TabMode::READ;
 };
 
 #endif // TABACTIONINTERFACE_H_

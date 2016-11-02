@@ -6,13 +6,17 @@
 
 #include "src/State/Web/Tab/Tab.h"
 #include "src/Utils/Logger.h"
+#include "src/Setup.h"
 #include <algorithm>
 
 void Tab::GetWebRenderResolution(int& rWidth, int& rHeight) const
 {
-	auto positionAndSize = CalculateWebViewPositionAndSize();
-	rWidth = positionAndSize.width;
-	rHeight = positionAndSize.height;
+	// One cannot ask the web view for its size, because its size is not updated before the update call
+	// of tab happens in the next frame. But this method is called by CEF directly at resize callback,
+	// which means before the update call. Ideas for improvement are welcomed
+	auto webViewInGUI = eyegui::getAbsolutePositionAndSizeOfElement(_pPanelLayout, "web_view");
+	rWidth = webViewInGUI.width * setup::WEB_VIEW_RESOLUTION_SCALE;
+	rHeight = webViewInGUI.height * setup::WEB_VIEW_RESOLUTION_SCALE;
 }
 
 void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upData, int width, int height)

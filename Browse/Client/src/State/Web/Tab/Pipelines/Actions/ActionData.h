@@ -14,8 +14,8 @@ class ActionData
 {
 public:
 
-    // Constructor
-    ActionData() {}
+    // Constructor taking initial value
+	ActionData(T value) { _value = value; }
 
     // Set value data (and remembers, that value was actively set)
     void SetValue(T value) { _value = value; _filled = true; }

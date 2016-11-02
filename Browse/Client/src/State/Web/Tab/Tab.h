@@ -13,7 +13,7 @@
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 #include "src/State/Web/Tab/Interface/TabCEFInterface.h"
 #include "src/State/Web/WebTabInterface.h"
-#include "src/State/Web/Tab/DOMNode.h"
+#include "src/CEF/Data/DOMNode.h"
 #include "src/State/Web/Tab/WebView.h"
 #include "src/State/Web/Tab/Pipelines/Pipeline.h"
 #include "src/State/Web/Tab/Triggers/DOMTrigger.h"
@@ -85,11 +85,7 @@ public:
 	// >>> Implemented in TabInteractionImpl.cpp >>>
 	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    // Calculate position and size of web view
-    virtual void CalculateWebViewPositionAndSize(int& rX, int& rY, int& rWidth, int& rHeight) const;
-
-    // Getter for window with and height
-    virtual void GetWindowSize(int& rWidth, int& rHeight) const;
+	// Nothing extra here
 
     // #############################
     // ### TAB OVERLAY INTERFACE ###
@@ -149,6 +145,16 @@ public:
     // Set content of text block
     virtual void SetContentOfTextBlock(std::string id, std::u16string content);
 
+	// Getter for values of interest
+	virtual int GetWebViewX() const;
+	virtual int GetWebViewY() const;
+	virtual int GetWebViewWidth() const;
+	virtual int GetWebViewHeight() const;
+	virtual int GetWebViewResolutionX() const;
+	virtual int GetWebViewResolutionY() const;
+	virtual int GetWindowWidth() const;
+	virtual int GetWindowHeight() const;
+
     // ############################
     // ### TAB ACTION INTERFACE ###
     // ############################
@@ -159,8 +165,11 @@ public:
     // Push back an pipeline
     virtual void PushBackPipeline(std::unique_ptr<Pipeline> upPipeline);
 
-    // Emulate left mouse button click
-    virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true);
+	// Emulate click in tab. Optionally converts screen pixel position to rendered pixel position before calling CEF method
+	virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true, bool isScreenCoordinate = true);
+
+	// Emulate mouse cursor in tab. Optionally converts screen pixel position to rendered pixel position before calling CEF method
+	virtual void EmulateMouseCursor(double x, double y, bool isScreenCoordinate = true);
 
     // Emulate mouse wheel scrolling
     virtual void EmulateMouseWheelScrolling(double deltaX, double deltaY);
@@ -168,14 +177,11 @@ public:
     // Set text in text input field
     virtual void InputTextData(int64 frameID, int nodeID, std::string text, bool submit);
 
-    // Get current web view resolution. Sets to 0 if not possible
-    virtual void GetWebViewTextureResolution(int& rWidth, int& rHeight) const;
-
     // Set WebViewParameters for WebView
     virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }
 
-    // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available
-    virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pageCoordinate, float& rDistance) const;
+    // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available. Distance in screen coordinates
+    virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 screenCoordinate, float& rDistance) const;
 
 	// Execute scrolling in determined Overflow Element with elemId, x and y are delta values for each dimension
 	virtual void ScrollOverflowElement(int elemId, int x, int y);
@@ -343,32 +349,11 @@ private:
 	// >>> Implemented in TabImpl.cpp >>>
 	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    // Get reserved space for WebView in eyeGUI layout
-    eyegui::AbsolutePositionAndSize CalculateWebViewPositionAndSize() const;
-
     // Set pipeline activity (indicates whether there is some pipeline to work on)
     void SetPipelineActivity(bool active);
 
     // Method to update and pipe accent color to eyeGUI
     void UpdateAccentColor(float tpf);
-
-    // Activate mode (called by update method, only)
-    void ActivateMode(TabMode mode);
-
-    // Deactivate mode (called by update method, only)
-    void DeactivateMode(TabMode mode);
-
-    // Activate / deactivate ReadMode
-    void ActivateReadMode();
-    void DeactivateReadMode();
-
-    // Activate / deactivate InteractionMode
-    void ActivateInteractionMode();
-    void DeactivateInteractionMode();
-
-    // Activate / deactivate CursorMode
-    void ActivateCursorMode();
-    void DeactivateCursorMode();
 
 	// Draw debugging overlay
 	void DrawDebuggingOverlay() const;
@@ -418,9 +403,6 @@ private:
     // Parameters for WebView
     WebViewParameters _webViewParameters;
 
-    // Mode
-    TabMode _mode = _nextMode; // use default next mode from interface here as default
-
     // Layout color accent
     glm::vec4 _targetColorAccent = TAB_DEFAULT_COLOR_ACCENT;
     glm::vec4 _currentColorAccent = TAB_DEFAULT_COLOR_ACCENT;
@@ -432,6 +414,9 @@ private:
     // Automatic scrolling
     bool _autoScrolling = false;
     float _autoScrollingValue = 0; // [-1..1]
+
+    // Gaze mouse
+    bool _gazeMouse = false;
 
     // Level of zooming
     double _zoomLevel = 1;

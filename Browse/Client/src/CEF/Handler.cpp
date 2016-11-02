@@ -309,6 +309,14 @@ void Handler::LoadPage(CefRefPtr<CefBrowser> browser, std::string url)
     browser->GetMainFrame()->LoadURL(url);
 }
 
+void Handler::EmulateMouseCursor(CefRefPtr<CefBrowser> browser, double x, double y)
+{
+    CefMouseEvent event;
+    event.x = x;
+    event.y = y;
+    browser->GetHost()->SendMouseMoveEvent(event, false);
+}
+
 void Handler::EmulateLeftMouseButtonClick(CefRefPtr<CefBrowser> browser, double x, double y)
 {
     CefMouseEvent event;

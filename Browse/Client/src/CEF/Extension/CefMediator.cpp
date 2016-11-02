@@ -8,7 +8,7 @@
 #include "src/CEF/Extension/Container.h"
 #include "src/Setup.h"
 #include "src/State/Web/Tab/Interface/TabCEFInterface.h"
-#include "src/State/Web/Tab/DOMNode.h"
+#include "src/CEF/Data/DOMNode.h"
 #include "src/Utils/Logger.h"
 #include "include/cef_app.h"
 #include "include/wrapper/cef_helpers.h"
@@ -110,6 +110,14 @@ void CefMediator::OpenNewTab(std::string url)
 void CefMediator::DoMessageLoopWork()
 {
     CefDoMessageLoopWork();
+}
+
+void CefMediator::EmulateMouseCursor(TabCEFInterface* pTab, double x, double y)
+{
+    if(CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
+    {
+        _handler->EmulateMouseCursor(browser, x, y);
+    }
 }
 
 void CefMediator::EmulateLeftMouseButtonClick(TabCEFInterface * pTab, double x, double y)

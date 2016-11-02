@@ -39,54 +39,53 @@ public:
     // Abort
     virtual void Abort() = 0;
 
-    // Set input data value
-    void SetInputValue(std::string type, int value);
-    void SetInputValue(std::string type, int64 value);
-    void SetInputValue(std::string type, float value);
-    void SetInputValue(std::string type, glm::vec2 value);
-    void SetInputValue(std::string type, std::string value);
-    void SetInputValue(std::string type, std::u16string value);
+	// Set input data value
+	template <typename T>
+	void SetInputValue(std::string type, T value) { _inputData.SetValue(type, value); }
 
     // Get output data value in reference and returns, whether value was filled
-    bool GetOutputValue(std::string type, int& rValue) const;
-    bool GetOutputValue(std::string type, int64& rValue) const;
-    bool GetOutputValue(std::string type, float& rValue) const;
-    bool GetOutputValue(std::string type, glm::vec2& rValue) const;
-    bool GetOutputValue(std::string type, std::string& rValue) const;
-    bool GetOutputValue(std::string type, std::u16string& rValue) const;
+	template <typename T>
+	bool GetOutputValue(std::string type, T& rValue) const { return _outputData.GetValue(type, rValue); }
 
 protected:
 
-    // Add slot to data maps
-    void AddIntInputSlot(std::string type);
-    void AddInt64InputSlot(std::string type);
-    void AddFloatInputSlot(std::string type);
-    void AddVec2InputSlot(std::string type);
-    void AddStringInputSlot(std::string type);
-    void AddString16InputSlot(std::string type);
+    // Add slot to data maps with default values
+	void AddIntInputSlot		(std::string type)	{ _inputData.AddIntSlot(type); }
+	void AddInt64InputSlot		(std::string type)	{ _inputData.AddInt64Slot(type); }
+	void AddFloatInputSlot		(std::string type)	{ _inputData.AddFloatSlot(type); }
+    void AddVec2InputSlot		(std::string type)	{ _inputData.AddVec2Slot(type); }
+    void AddStringInputSlot		(std::string type)	{ _inputData.AddStringSlot(type); }
+	void AddString16InputSlot	(std::string type)	{ _inputData.AddString16Slot(type); }
 
-    void AddIntOutputSlot(std::string type);
-    void AddInt64OutputSlot(std::string type);
-    void AddFloatOutputSlot(std::string type);
-    void AddVec2OutputSlot(std::string type);
-    void AddStringOutputSlot(std::string type);
-    void AddString16OutputSlot(std::string type);
+	void AddIntOutputSlot		(std::string type)	{ _outputData.AddIntSlot(type); }
+    void AddInt64OutputSlot		(std::string type)	{ _outputData.AddInt64Slot(type); }
+    void AddFloatOutputSlot		(std::string type)	{ _outputData.AddFloatSlot(type); }
+    void AddVec2OutputSlot		(std::string type)	{ _outputData.AddVec2Slot(type); }
+    void AddStringOutputSlot	(std::string type)	{ _outputData.AddStringSlot(type); }
+    void AddString16OutputSlot	(std::string type)	{ _outputData.AddString16Slot(type); }
+
+	// Add slot to data maps with custom values
+	void AddIntInputSlot		(std::string type, int value)				{ _inputData.AddIntSlot(type, value); }
+	void AddInt64InputSlot		(std::string type, int64 value)				{ _inputData.AddInt64Slot(type, value); }
+	void AddFloatInputSlot		(std::string type, float value)				{ _inputData.AddFloatSlot(type, value); }
+	void AddVec2InputSlot		(std::string type, glm::vec2 value)			{ _inputData.AddVec2Slot(type, value); }
+	void AddStringInputSlot		(std::string type, std::string value)		{ _inputData.AddStringSlot(type, value); }
+	void AddString16InputSlot	(std::string type, std::u16string value)	{ _inputData.AddString16Slot(type, value); }
+
+	void AddIntOutputSlot		(std::string type, int value)				{ _outputData.AddIntSlot(type, value); }
+	void AddInt64OutputSlot		(std::string type, int64 value)				{ _outputData.AddInt64Slot(type, value); }
+	void AddFloatOutputSlot		(std::string type, float value)				{ _outputData.AddFloatSlot(type, value); }
+	void AddVec2OutputSlot		(std::string type, glm::vec2 value)			{ _outputData.AddVec2Slot(type, value); }
+	void AddStringOutputSlot	(std::string type, std::string value)		{ _outputData.AddStringSlot(type, value); }
+	void AddString16OutputSlot	(std::string type, std::u16string value)	{ _outputData.AddString16Slot(type, value); }
 
     // Get input data value in reference and returns, whether value was filled
-    bool GetInputValue(std::string type, int& rValue) const;
-    bool GetInputValue(std::string type, int64& rValue) const;
-    bool GetInputValue(std::string type, float& rValue) const;
-    bool GetInputValue(std::string type, glm::vec2& rValue) const;
-    bool GetInputValue(std::string type, std::string& rValue) const;
-    bool GetInputValue(std::string type, std::u16string& rValue) const;
+	template <typename T>
+	bool GetInputValue(std::string type, T& rValue) const { return _inputData.GetValue(type, rValue); }
 
     // Set output data value
-    void SetOutputValue(std::string type, int value);
-    void SetOutputValue(std::string type, int64 value);
-    void SetOutputValue(std::string type, float value);
-    void SetOutputValue(std::string type, glm::vec2 value);
-    void SetOutputValue(std::string type, std::string);
-    void SetOutputValue(std::string type, std::u16string);
+	template <typename T>
+	void SetOutputValue(std::string type, T value) { _outputData.SetValue(type, value); }
 
     // Pointer to interface which enables interaction with tab
     TabInteractionInterface* _pTab;

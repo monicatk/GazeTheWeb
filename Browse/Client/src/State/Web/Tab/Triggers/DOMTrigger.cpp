@@ -99,16 +99,12 @@ void DOMTrigger::Deactivate()
 
 void DOMTrigger::CalculatePositionOfOverlayButton(float& rRelativePositionX, float& rRelativePositionY) const
 {
-    // Top, left, buttom, right
+    // Center of node
 	glm::vec2 center = _spNode->GetCenter();
 
-    // Web view coordinates
-    int webViewX, webViewY, webViewWidth, webViewHeight;
-    _pTab->CalculateWebViewPositionAndSize(webViewX, webViewY, webViewWidth, webViewHeight);
-
-    // Window size
-    int windowWidth, windowHeight;
-    _pTab->GetWindowSize(windowWidth, windowHeight);
+	// Scale center from web view resolution to real pixel value
+	center.x = (center.x / (float)_pTab->GetWebViewResolutionX()) * (float)_pTab->GetWebViewWidth();
+	center.y = (center.y / (float)_pTab->GetWebViewResolutionY()) * (float)_pTab->GetWebViewHeight();
 
     // Scrolling offset only when not fixed
 	double scrollingOffsetX = 0;
@@ -119,8 +115,8 @@ void DOMTrigger::CalculatePositionOfOverlayButton(float& rRelativePositionX, flo
 	}
 
     // Calculate coordinates and size
-    rRelativePositionX = (center.x - scrollingOffsetX + (float)webViewX) / (float)windowWidth;
-    rRelativePositionY = (center.y - scrollingOffsetY + (float)webViewY) / (float)windowHeight;
+    rRelativePositionX = (center.x - scrollingOffsetX + (float)_pTab->GetWebViewX()) / (float)_pTab->GetWindowWidth();
+    rRelativePositionY = (center.y - scrollingOffsetY + (float)_pTab->GetWebViewY()) / (float)_pTab->GetWindowHeight();
 
     // Subtract half of size to center frame
     rRelativePositionX -= _size / 2.f;

@@ -23,8 +23,8 @@ namespace setup
     static const float LINK_CORRECTION_MAX_PIXEL_DISTANCE = 20.f;
 
     // Debugging
-    static const bool LOG_DEBUG_MESSAGES = true;
-    static const bool DRAW_DEBUG_OVERLAY = true;
+    static const bool LOG_DEBUG_MESSAGES = false;
+    static const bool DRAW_DEBUG_OVERLAY = false;
 
     // Experiments
     static const std::string LAB_STREAM_OUTPUT_NAME = "BrowserOutputStream";
@@ -35,6 +35,7 @@ namespace setup
     // Other
     static const bool ENABLE_WEBGL = false; // only on Windows
     static const bool BLUR_PERIPHERY = false;
+	static const float WEB_VIEW_RESOLUTION_SCALE = 0.75f;
 }
 
 #endif // SETUP_H_

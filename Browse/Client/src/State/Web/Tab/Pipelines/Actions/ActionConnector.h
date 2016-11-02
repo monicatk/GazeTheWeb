@@ -9,19 +9,20 @@
 
 #include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 #include <map>
+#include <memory>
 
 class ActionConnector
 {
 public:
 
     // Constructor
-    ActionConnector(Action const * pPrevious, Action* pNext);
+    ActionConnector(std::weak_ptr<const Action> wpPrevious, std::weak_ptr<Action> wpNext);
 
     // Execute connection (should be done after previous action is executed and next is about to be)
     void Execute();
 
     // Get pointer to previous to decide about execution
-    Action const * GetPreviousAction() const { return _pPrevious; }
+	std::weak_ptr<const Action> GetPreviousAction() const { return _wpPrevious; }
 
     // Connect
     void ConnectInt(std::string previousType, std::string nextType);
@@ -32,9 +33,21 @@ public:
 
 private:
 
+	// Private execute. Executes copying of values for one datatype.
+	template <typename T>
+	void Execute(std::map<std::string, std::string>& rConnectionMap)
+	{
+		for (const auto& rConnection : rConnectionMap)
+		{
+			T value;
+			if (auto spPrevious = _wpPrevious.lock()) { spPrevious->GetOutputValue(rConnection.first, value); }
+			if (auto spNext = _wpNext.lock()) { spNext->SetInputValue(rConnection.second, value); }
+		}
+	}
+
     // Pointer to actions
-    Action const * _pPrevious;
-    Action* _pNext;
+    std::weak_ptr<const Action> _wpPrevious;
+	std::weak_ptr<Action> _wpNext;
 
     // Map of connections
     std::map<std::string, std::string> _intConnections;

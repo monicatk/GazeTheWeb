@@ -8,9 +8,6 @@
 #include "submodules/glm/glm/gtx/vector_angle.hpp"
 #include <algorithm>
 
-// TODO: Testing
-#include <iostream>
-
 ZoomCoordinateAction::ZoomCoordinateAction(TabInteractionInterface* pTab) : Action(pTab)
 {
     // Add in- and output data slots
@@ -35,9 +32,8 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	float zoomSpeed;
 
 	// Pixels in web view
-	int webViewWidth = 0;
-	int webViewHeight = 0;
-	_pTab->GetWebViewTextureResolution(webViewWidth, webViewHeight);
+	int webViewWidth = _pTab->GetWebViewWidth();
+	int webViewHeight = _pTab->GetWebViewHeight();
 
 	// Only allow zoom in when gaz upon web view
     if(!tabInput.gazeUsed && tabInput.insideWebView) // TODO: gazeUsed really good idea here? Maybe later null pointer?
@@ -185,6 +181,10 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			// Set coordinate in output value 
             SetOutputValue("coordinate", glm::vec2(_coordinate * webViewPixels));
 		}
+
+        // Reset web view
+        WebViewParameters webViewParameters;
+        _pTab->SetWebViewParameters(webViewParameters);
 
 		// Return success
 		return true;

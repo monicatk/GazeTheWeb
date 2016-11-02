@@ -9,7 +9,7 @@
 #include "src/CEF/Handler.h"
 #include "include/cef_browser.h"
 #include "include/cef_base.h"
-#include "src/State/Web/Tab/DOMNodeType.h"
+#include "src/CEF/Data/DOMNodeType.h"
 #include <map>
 #include <memory>
 #include <queue>
@@ -57,6 +57,7 @@ public:
     void DoMessageLoopWork();
 
     // Emulation of left mouse button press and release in specific Tab
+    void EmulateMouseCursor(TabCEFInterface* pTab, double x, double y);
     void EmulateLeftMouseButtonClick(TabCEFInterface* pTab, double x, double y);
     void EmulateMouseWheelScrolling(TabCEFInterface* pTab, double deltaX, double deltaY);
 

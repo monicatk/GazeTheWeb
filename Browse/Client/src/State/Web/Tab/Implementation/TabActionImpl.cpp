@@ -21,16 +21,44 @@ void Tab::PushBackPipeline(std::unique_ptr<Pipeline> upPipeline)
 	}
 }
 
-void Tab::EmulateLeftMouseButtonClick(double x, double y, bool visualize)
+void Tab::EmulateLeftMouseButtonClick(double x, double y, bool visualize, bool isScreenCoordinate)
 {
-	// Tell mediator about the click
-	_pCefMediator->EmulateLeftMouseButtonClick(this, x, y);
-
-	// Add some visualization for the user
+	// Add some visualization for the user at screen position
 	if (visualize)
 	{
-        PushBackClickVisualization(x, y);
+		// Maybe convert into screen coordinate system
+		double screenX = x;
+		double screenY = y;
+		if (!isScreenCoordinate)
+		{
+			screenX = (screenX / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
+			screenY = (screenY / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
+		}
+		PushBackClickVisualization(screenX, screenY);
 	}
+
+	// Convert screen to render pixel coordinate
+	if (isScreenCoordinate)
+	{
+		x = (x / (float)_upWebView->GetWidth()) * (float)_upWebView->GetResolutionX();
+		y = (y / (float)_upWebView->GetHeight()) * (float)_upWebView->GetResolutionY();
+	}
+
+	// Tell mediator about the click
+	_pCefMediator->EmulateLeftMouseButtonClick(this, x, y);
+}
+
+void Tab::EmulateMouseCursor(double x, double y, bool isScreenCoordinate)
+{
+	// Convert screen to render pixel coordinate
+	if (isScreenCoordinate)
+	{
+		x = (x / (float)_upWebView->GetWidth()) * (float)_upWebView->GetResolutionX();
+		y = (y / (float)_upWebView->GetHeight()) * (float)_upWebView->GetResolutionY();
+	}
+
+	// Tell mediator about the cursor
+	_pCefMediator->EmulateMouseCursor(this, x, y);
 }
 
 void Tab::EmulateMouseWheelScrolling(double deltaX, double deltaY)
@@ -43,21 +71,7 @@ void Tab::InputTextData(int64 frameID, int nodeID, std::string text, bool submit
 	_pCefMediator->InputTextData(this, frameID, nodeID, text, submit);
 }
 
-void Tab::GetWebViewTextureResolution(int& rWidth, int& rHeight) const
-{
-	if (auto spTexture = _upWebView->GetTexture().lock())
-	{
-		rWidth = spTexture->GetWidth();
-		rHeight = spTexture->GetHeight();
-	}
-	else
-	{
-		rWidth = 0;
-		rHeight = 0;
-	}
-}
-
-std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pageCoordinate, float& rDistance) const
+std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 screenCoordinate, float& rDistance) const
 {
     if(_DOMTextLinks.empty())
     {
@@ -77,13 +91,15 @@ std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pageCoordinate, float
             // Go over rectangles of that link
             for(const auto& rRect : rLink->GetRects())
             {
-                glm::vec2 center = rRect.center();
-                float width = rRect.width();
-                float height = rRect.height();
+				glm::vec2 center = rRect.center();
+				center.x = (center.x / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
+				center.y = (center.y / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
+                float width = (rRect.width() / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
+                float height = (rRect.height() / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
 
                 // Distance
-                float dx = glm::max(glm::abs(pageCoordinate.x - center.x) - (width / 2.f), 0.f);
-                float dy = glm::max(glm::abs(pageCoordinate.y - center.y) - (height / 2.f), 0.f);
+                float dx = glm::max(glm::abs(screenCoordinate.x - center.x) - (width / 2.f), 0.f);
+                float dy = glm::max(glm::abs(screenCoordinate.y - center.y) - (height / 2.f), 0.f);
                 float distance = glm::sqrt((dx * dx) + (dy * dy));
 
                 // Check whether distance is smaller

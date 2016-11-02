@@ -13,11 +13,11 @@ TestAction::TestAction(TabInteractionInterface *pTab) : Action(pTab)
 
 bool TestAction::Update(float tpf, TabInput tabInput)
 {
-    bool finished = _dim.update(0.25f * tpf) >= 1;
+    bool done = _dim.update(0.25f * tpf) >= 1;
     WebViewParameters webViewParameters;
     webViewParameters.dim = _dim.getValue();
     _pTab->SetWebViewParameters(webViewParameters);
-    return finished;
+    return done;
 }
 
 void TestAction::Draw() const
