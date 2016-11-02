@@ -1,4 +1,3 @@
-- BUG: Resize does not work correctly anymore
 - eyeGUI: resize everything alltime (especially after adding of an layout and floating frame)
 - Complete Pivot mode
 - ZoomCoordinate Action is too fast in the end (and inaccurate)

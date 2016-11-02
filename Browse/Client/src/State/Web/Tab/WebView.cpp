@@ -252,10 +252,10 @@ int WebView::GetHeight() const
 
 int WebView::GetResolutionX() const
 {
-	return _width * setup::WEB_VIEW_RESOLUTION_SCALE;
+	return _spTexture->GetWidth();
 }
 
 int WebView::GetResolutionY() const
 {
-	return _height * setup::WEB_VIEW_RESOLUTION_SCALE;
+	return _spTexture->GetHeight();
 }
