@@ -36,7 +36,7 @@ public:
     virtual void InputTextData(int64 frameID, int nodeID, std::string text, bool submit) = 0;
 
     // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available. Distance in screen coordinates
-    virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pageCoordinate, float& rDistance) const = 0;
+    virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 screenCoordinate, float& rDistance) const = 0;
 
     // ### METHODS WHICH SET PARAMETERS THAT MUST BE RESET WHEN NO PIPELINE / ACTION IS ACTIVE ###
 

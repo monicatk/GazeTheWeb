@@ -181,7 +181,7 @@ public:
     virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }
 
     // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available. Distance in screen coordinates
-    virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pageCoordinate, float& rDistance) const;
+    virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 screenCoordinate, float& rDistance) const;
 
 	// Execute scrolling in determined Overflow Element with elemId, x and y are delta values for each dimension
 	virtual void ScrollOverflowElement(int elemId, int x, int y);

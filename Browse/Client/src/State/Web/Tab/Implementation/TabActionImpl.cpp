@@ -71,7 +71,7 @@ void Tab::InputTextData(int64 frameID, int nodeID, std::string text, bool submit
 	_pCefMediator->InputTextData(this, frameID, nodeID, text, submit);
 }
 
-std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pageCoordinate, float& rDistance) const
+std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 screenCoordinate, float& rDistance) const
 {
     if(_DOMTextLinks.empty())
     {
@@ -98,8 +98,8 @@ std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pageCoordinate, float
                 float height = (rRect.height() / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
 
                 // Distance
-                float dx = glm::max(glm::abs(pageCoordinate.x - center.x) - (width / 2.f), 0.f);
-                float dy = glm::max(glm::abs(pageCoordinate.y - center.y) - (height / 2.f), 0.f);
+                float dx = glm::max(glm::abs(screenCoordinate.x - center.x) - (width / 2.f), 0.f);
+                float dy = glm::max(glm::abs(screenCoordinate.y - center.y) - (height / 2.f), 0.f);
                 float distance = glm::sqrt((dx * dx) + (dy * dy));
 
                 // Check whether distance is smaller

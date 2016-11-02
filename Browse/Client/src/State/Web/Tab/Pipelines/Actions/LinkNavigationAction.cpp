@@ -34,6 +34,7 @@ bool LinkNavigationAction::Update(float tpf, TabInput tabInput)
     std::weak_ptr<const DOMNode> wpNearestLink = _pTab->GetNearestLink(pageCoordinate, distance);
 
     // Determine where to click instead, if not too far away or coordinate already valid
+	bool setToDOMNode = false;
     if(distance < setup::LINK_CORRECTION_MAX_PIXEL_DISTANCE && distance > 0)
     {
         // Try to get value from weak pointer
@@ -43,10 +44,18 @@ bool LinkNavigationAction::Update(float tpf, TabInput tabInput)
             if(!sp->GetRects().empty())
             {
                 glm::vec2 linkCoordinate = sp->GetRects().front().center();
-                coordinate = linkCoordinate - scrolling;
+                coordinate = linkCoordinate - scrolling; // make coordinate relative in web view and not within page
+				setToDOMNode = true;
             }
         }
     }
+
+	// If not set to DOMNode position, convert screen spaced coordinate to web view rendered
+	if (!setToDOMNode)
+	{
+		coordinate.x = (coordinate.x / _pTab->GetWebViewWidth()) * _pTab->GetWebViewResolutionX();
+		coordinate.y = (coordinate.y/ _pTab->GetWebViewHeight()) * _pTab->GetWebViewResolutionY();
+	}
 
     // Emulate left mouse button click
     _pTab->EmulateLeftMouseButtonClick((double)(coordinate.x), (double)(coordinate.y), visualize > 0, false); // coordinate taken from DOMNode which is in rendered coordinate system
