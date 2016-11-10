@@ -102,8 +102,8 @@ function FixedElement(node)
         
         //DEBUG
         ConsolePrint(this.id+": ... Finished updateRects()!");
-        ConsolePrint(this.id+" -- Rects: "+this.rects+" Rects.length: "+this.rects.length);
-        ConsolePrint("Access via object array: "+window.domFixedElements[this.id].rects);
+        // ConsolePrint(this.id+" -- Rects: "+this.rects+" Rects.length: "+this.rects.length);
+        // ConsolePrint("Access via object array: "+window.domFixedElements[this.id].rects);
     }
 
     /* Code executed on constructor call ... */
@@ -111,14 +111,15 @@ function FixedElement(node)
     // Add FixedElement Object to list and determine its id
     window.domFixedElements.push(this);
     this.id = window.domFixedElements.length - 1;
-    ConsolePrint("")
 
     // DEBUG    
     ConsolePrint("Created FixedElement #"+this.id);
 
     this.node.setAttribute("fixedId", this.id);
     // Note corresponding fixed element ID in an attribute
-    ForEveryChild(this.node, function(child){ 
+    ConsolePrint("......... Setting fixation for every child of fixed element")
+    ForEveryChild(this.node, function(child)
+    { 
         if(child.nodeType === 1) 
         {
             child.setAttribute("childFixedId", this.id);
