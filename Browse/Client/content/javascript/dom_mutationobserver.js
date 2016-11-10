@@ -394,7 +394,9 @@ function UpdateDOMRects()
     );
 
     // ... and all FixedElements
-    UpdateFixedElementRects();
+    window.domFixedElements.forEach(
+        function(fixedObj){ fixedObj.updateRects(); }
+    );
 
    
     // Update visibility of each DOM object

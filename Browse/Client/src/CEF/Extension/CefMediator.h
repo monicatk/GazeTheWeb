@@ -123,6 +123,26 @@ public:
 	void FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
 
 
+	void PauseTabs()
+	{
+		for (const auto& key : _browsers)
+		{
+			CefRefPtr<CefBrowser> browser = key.second;
+
+			browser->GetHost()->WasHidden(true);
+		}
+	}
+
+	void UnpauseTabs()
+	{
+		for (const auto& key : _browsers)
+		{
+			CefRefPtr<CefBrowser> browser = key.second;
+
+			browser->GetHost()->WasHidden(false);
+		}
+	}
+
 
 protected:
 

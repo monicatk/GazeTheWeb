@@ -655,6 +655,9 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
             case GLFW_KEY_S: { _upLabStream->Send("42"); break; } // TODO: testing
+
+			case GLFW_KEY_0: { _pCefMediator->PauseTabs(); break; }
+			case GLFW_KEY_1: { _pCefMediator->UnpauseTabs(); break; }
         }
     }
 }
