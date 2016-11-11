@@ -105,6 +105,7 @@ void CefMediator::GoForward(TabCEFInterface * pTab)
 void CefMediator::OpenNewTab(std::string url)
 {
     // TODO? When is it called (asks Raphael)
+	// Daniel: Seems as if it was planned but then obsolete.. whoops. :D
 }
 
 void CefMediator::DoMessageLoopWork()
@@ -462,6 +463,29 @@ std::weak_ptr<DOMNode> CefMediator::GetDOMNode(CefRefPtr<CefBrowser> browser, DO
 	}
 }
 
+
+void CefMediator::ShowDevTools()
+{
+	LogDebug("CefMediator: Showing DevTools...");
+	for (const auto& key : _browsers)
+	{
+		CefRefPtr<CefBrowser> browser = key.second;
+
+		CefWindowInfo window_info;
+		class MyClient : public CefClient, CefBase
+		{
+		public:
+			MyClient();
+		private:
+			IMPLEMENT_REFCOUNTING(MyClient);
+
+		};
+		CefRefPtr<MyClient> client(MyClient());
+
+		CefBrowserSettings settings;
+		browser->GetHost()->ShowDevTools(window_info, _handler, settings, CefPoint());
+	}
+}
 
 TabCEFInterface* CefMediator::GetTab(CefRefPtr<CefBrowser> browser) const
 {

@@ -658,6 +658,7 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
 
 			case GLFW_KEY_0: { _pCefMediator->PauseTabs(); break; }
 			case GLFW_KEY_1: { _pCefMediator->UnpauseTabs(); break; }
+			case GLFW_KEY_2: { _pCefMediator->ShowDevTools(); break; }
         }
     }
 }

@@ -719,14 +719,9 @@ function AnalyzeNode(node)
 		// Identify fixed elements on appending them to DOM tree
 		if(computedStyle.getPropertyValue('position') == 'fixed') 
 		{
-			// ConsolePrint('position: '+node.style.position);
-			if(!window.fixed_elements.has(node)) // TODO: set.add(node) instead of has sufficient?
+			// Returns true if new FixedElement was added; false if already linked to FixedElement Object
+			if(AddFixedElement(node))
 			{
-				//DEBUG
-				// ConsolePrint("New fixed node added to DOM tree");
-
-				AddFixedElement(node);
-
 				UpdateDOMRects();
 			}
 		}
@@ -856,6 +851,7 @@ function MutationObserverInit()
 		  					{
 								if(window.getComputedStyle(node, null).getPropertyValue('position') === 'fixed')
 								{
+									ConsolePrint("Trying to AddFixedElement...");
 									AddFixedElement(node);
 									// Update every Rect, just in case anything changed due to an additional fixed element
 									UpdateDOMRects();

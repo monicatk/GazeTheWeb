@@ -142,6 +142,7 @@ public:
 			browser->GetHost()->WasHidden(false);
 		}
 	}
+	void ShowDevTools(); // EXPERIMENTAL
 
 
 protected:
