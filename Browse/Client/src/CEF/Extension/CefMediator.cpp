@@ -12,6 +12,7 @@
 #include "src/Utils/Logger.h"
 #include "include/cef_app.h"
 #include "include/wrapper/cef_helpers.h"
+#include "src/CEF/DevToolsHandler.h"
 
 
 void CefMediator::RegisterTab(TabCEFInterface* pTab)
@@ -470,20 +471,16 @@ void CefMediator::ShowDevTools()
 	for (const auto& key : _browsers)
 	{
 		CefRefPtr<CefBrowser> browser = key.second;
-
+		CefRefPtr<SimpleHandler> devToolHandler(new SimpleHandler());
 		CefWindowInfo window_info;
-		class MyClient : public CefClient, CefBase
-		{
-		public:
-			MyClient();
-		private:
-			IMPLEMENT_REFCOUNTING(MyClient);
 
-		};
-		CefRefPtr<MyClient> client(MyClient());
-
+#if defined(OS_WIN)
+		// On Windows we need to specify certain flags that will be passed to
+		// CreateWindowEx().
+		window_info.SetAsPopup(NULL, "DevTools");
+#endif
 		CefBrowserSettings settings;
-		browser->GetHost()->ShowDevTools(window_info, _handler, settings, CefPoint());
+		browser->GetHost()->ShowDevTools(window_info, devToolHandler.get(), settings, CefPoint());
 	}
 }
 

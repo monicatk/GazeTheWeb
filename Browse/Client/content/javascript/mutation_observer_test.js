@@ -879,7 +879,7 @@ function MutationObserverInit()
 								var nodeType = node.getAttribute('nodeType');
 								if(nodeType !== null)
 								{
-									var nodeID = child.getAttribute('nodeID');
+									var nodeID = node.getAttribute('nodeID');
 									var domObj = GetDOMObject(nodeType, nodeID);
 									if(domObj !== null)
 									{

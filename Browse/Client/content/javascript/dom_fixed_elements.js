@@ -135,16 +135,27 @@ function GetFixedElement(node)
     if(node.nodeType === 1)
     {
         var fixedId = node.getAttribute("fixedId");
-        var fixedObj = window.domFixedElements[fixedId];
-        if(node === fixedObj.node)
+        if(fixedId >= 0 && fixedId < window.domFixedElements.length)
         {
-            return fixedObj;
+            return window.domFixedElements[fixedId];
+            // var fixedObj = window.domFixedElements[fixedId];
+            // if(/*fixedObj !== undefined &&*/ node === fixedObj.node)
+            // {
+            //     return fixedObj;
+            // }
+            // else
+            // {
+            //     return undefined;
+            // }
         }
-        else
+        else if(fixedId !== null)
         {
-            return undefined;
+            console.log("Fetched fixedId, which doesn't seem to be supported: id="+fixedId);
+           
         }
     }
+    // default return value
+    return undefined;
 }
 
 function AddFixedElement(node)
@@ -177,7 +188,7 @@ function AddFixedElement(node)
 
 function RemoveFixedElement(node)
 {
-    if(fixedObj = GetFixedElement(node))
+    if(fixedObj = GetFixedElement(node) && fixedObj !== undefined)
     {
         var id = fixedObj.id;
         // Delete object in its list slot, slot will be left empty (undefined) at the moment
