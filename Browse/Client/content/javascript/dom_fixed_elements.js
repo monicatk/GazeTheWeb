@@ -21,9 +21,6 @@ function FixedElement(node)
 
     this.updateRects = function()
     {
-        // DEBUG
-        ConsolePrint(this.id+": Starting updateRects()...");
-
         // Compute fitting bounding box for fixed node and all its children
         // Starting with ClientRects of this parent node
         var domRectList = [];
@@ -98,36 +95,30 @@ function FixedElement(node)
             //   ConsolePrint("-----> #fixElem#add#"+this.id); // DEBUG
         }
         
-        //DEBUG
-        ConsolePrint(this.id+": ... Finished updateRects()!");
-        // ConsolePrint(this.id+" -- Rects: "+this.rects+" Rects.length: "+this.rects.length);
-        // ConsolePrint("Access via object array: "+window.domFixedElements[this.id].rects);
     }
 
     /* Code executed on constructor call ... */
-    ConsolePrint("(a)");
     // Add FixedElement Object to list and determine its id
     window.domFixedElements.push(this);
     this.id = window.domFixedElements.length - 1;
     
 
     this.node.setAttribute("fixedId", this.id);
+    var scope_id = this.id;
     // Note corresponding fixed element ID in an attribute
-    ConsolePrint("(b)");
     ForEveryChild(this.node, function(child)
     { 
         if(child.nodeType === 1) 
         {
-            child.setAttribute("childFixedId", this.id);
+            child.setAttribute("childFixedId", scope_id);
 
             // If child corresponds to DOMObject or OverflowElement, inform about its fixation
             SetFixationStatus(child, true);
         }
     });
-    ConsolePrint("(c)");
+
     // Update fixed Rects and inform CEF if changes happened
     this.updateRects();
-    ConsolePrint("(d)");
 }
 
 function GetFixedElement(node)
@@ -138,15 +129,6 @@ function GetFixedElement(node)
         if(fixedId >= 0 && fixedId < window.domFixedElements.length)
         {
             return window.domFixedElements[fixedId];
-            // var fixedObj = window.domFixedElements[fixedId];
-            // if(/*fixedObj !== undefined &&*/ node === fixedObj.node)
-            // {
-            //     return fixedObj;
-            // }
-            // else
-            // {
-            //     return undefined;
-            // }
         }
         else if(fixedId !== null)
         {

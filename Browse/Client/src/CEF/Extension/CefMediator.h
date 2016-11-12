@@ -122,27 +122,11 @@ public:
 
 	void FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
 
-
-	void PauseTabs()
-	{
-		for (const auto& key : _browsers)
-		{
-			CefRefPtr<CefBrowser> browser = key.second;
-
-			browser->GetHost()->WasHidden(true);
-		}
-	}
-
-	void UnpauseTabs()
-	{
-		for (const auto& key : _browsers)
-		{
-			CefRefPtr<CefBrowser> browser = key.second;
-
-			browser->GetHost()->WasHidden(false);
-		}
-	}
-	void ShowDevTools(); // EXPERIMENTAL
+	// Activate rendering in given Tab and deactivate it for all other Tabs
+	void SetTabActive(TabCEFInterface* pTab);	// TODO(Raphael): Call this method when Tab is changed via GUI
+	
+	// Master calls this method upon GLFW keyboard input in order to open new window with DevTools (for active Tab)
+	void ShowDevTools();
 
 
 protected:
@@ -154,11 +138,15 @@ protected:
     std::map<TabCEFInterface*, CefRefPtr<CefBrowser>> _browsers;
     std::map<BrowserID, TabCEFInterface*> _tabs;
 
+	TabCEFInterface* _activeTab = NULL;
+
     TabCEFInterface* _pendingTab = NULL; // Used in Tab registration progress (at first, Renderer works to fast for map access)
 
     // Use these methods for less coding overhead by checking if key exists in map
     TabCEFInterface* GetTab(CefRefPtr<CefBrowser> browser) const;
     CefRefPtr<CefBrowser> GetBrowser(TabCEFInterface* pTab) const;
+
+
 
     IMPLEMENT_REFCOUNTING(CefMediator);
 };

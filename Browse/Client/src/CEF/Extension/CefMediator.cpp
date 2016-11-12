@@ -276,6 +276,30 @@ void CefMediator::FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<C
 	}
 }
 
+void CefMediator::SetTabActive(TabCEFInterface * pTab)
+{
+	// Remember currently active Tab
+	_activeTab = pTab;
+
+	for (const auto& key : _browsers)
+	{
+		CefRefPtr<CefBrowser> browser = key.second;
+		if (key.first == pTab)
+		{
+			// Activate the given Tab's rendering
+			browser->GetHost()->WasHidden(false);
+		}
+		else
+		{
+			// Deactivate rendering of all other Tabs
+			browser->GetHost()->WasHidden(true);
+		}
+
+	}
+}
+
+
+
 bool CefMediator::SetLoadingStatus(CefRefPtr<CefBrowser> browser, int64 frameID, bool isMain, bool isLoading)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
@@ -468,20 +492,36 @@ std::weak_ptr<DOMNode> CefMediator::GetDOMNode(CefRefPtr<CefBrowser> browser, DO
 void CefMediator::ShowDevTools()
 {
 	LogDebug("CefMediator: Showing DevTools...");
-	for (const auto& key : _browsers)
-	{
-		CefRefPtr<CefBrowser> browser = key.second;
-		CefRefPtr<SimpleHandler> devToolHandler(new SimpleHandler());
-		CefWindowInfo window_info;
+
+	CefRefPtr<SimpleHandler> devToolHandler(new SimpleHandler());
+	CefWindowInfo window_info;
 
 #if defined(OS_WIN)
-		// On Windows we need to specify certain flags that will be passed to
-		// CreateWindowEx().
-		window_info.SetAsPopup(NULL, "DevTools");
+	// On Windows we need to specify certain flags that will be passed to
+	// CreateWindowEx().
+	window_info.SetAsPopup(NULL, "DevTools");
 #endif
-		CefBrowserSettings settings;
-		browser->GetHost()->ShowDevTools(window_info, devToolHandler.get(), settings, CefPoint());
+	CefBrowserSettings settings;
+
+	if (_activeTab)
+	{
+		auto browser = GetBrowser(_activeTab);
+		if (browser)
+		{
+			browser->GetHost()->ShowDevTools(window_info, devToolHandler.get(), settings, CefPoint());
+		}
 	}
+	// TODO: Delete "else" path with for-each loop when SetTabActive is integrated & called
+	else
+	{
+		for (const auto& key : _browsers)
+		{
+
+			CefRefPtr<CefBrowser> browser = key.second;
+			browser->GetHost()->ShowDevTools(window_info, devToolHandler.get(), settings, CefPoint());
+		}
+	}
+
 }
 
 TabCEFInterface* CefMediator::GetTab(CefRefPtr<CefBrowser> browser) const
@@ -504,6 +544,7 @@ CefRefPtr<CefBrowser> CefMediator::GetBrowser(TabCEFInterface * pTab) const
     LogDebug("CefMediator: The given Tab pointer is not contained in key in Tab->CefBrowser map (anymore).");
     return nullptr;
 }
+
 
 std::weak_ptr<Texture> CefMediator::GetTexture(CefRefPtr<CefBrowser> browser)
 {
