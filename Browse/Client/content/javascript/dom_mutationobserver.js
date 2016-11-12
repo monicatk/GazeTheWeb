@@ -766,9 +766,13 @@ function CreateOverflowElement(node)
 function GetOverflowElement(id)
 {
     if(id < window.overflowElements.length && id >= 0)
-        return window.overflowElements[id];
+        return window.overflowElements[id];     // This may return undefined
     else
+    {
         ConsolePrint("ERROR in GetOverflowElement: id="+id+", valid id is in [0, "+window.overflowElements.length+"]!");
+        return null;
+    }
+        
 }
 
 function RemoveOverflowElement(id)

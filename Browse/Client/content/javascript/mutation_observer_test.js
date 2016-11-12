@@ -527,6 +527,7 @@ document.addEventListener('transitionend', function(event){
 		// });
 	
 	// ConsolePrint("Transition ended: opacity="+window.getComputedStyle(node, null).getPropertyValue('opacity'));
+	console.log("TransitionEvent: transitionend "+event.target.className);
 }, false);
 
 
@@ -677,7 +678,7 @@ function ForEveryChild(parentNode, applyFunction, depth)
 function AnalyzeNode(node)
 {
 
-	if( (node.nodeType == 1 || node.nodeType > 8) && !node.hasAttribute("nodeType") ) // 1 == ELEMENT_NODE
+	if( (node.nodeType == 1 || node.nodeType > 8) && (node.hasAttribute && !node.hasAttribute("nodeType")) ) // 1 == ELEMENT_NODE
 	{
 		// EXPERIMENTAL
 		// if(node.tagName == 'SCRIPT')
@@ -909,7 +910,7 @@ function MutationObserverInit()
 											{
 												var nodeID = child.getAttribute('nodeID');
 												var domObj = GetDOMObject(nodeType, nodeID);
-												if(domObj !== null)
+												if(domObj !== null && domObj !== undefined)
 												{
 													domObj.updateRects();
 												}
@@ -920,7 +921,7 @@ function MutationObserverInit()
 												if(overflowId !== null)
 												{
 													var overflowObj = GetOverflowElement(overflowId);
-													if(overflowObj !== null)
+													if(overflowObj !== null && overflowObj !== undefined)
 													{
 														overflowObj.updateRects();
 													}
@@ -986,7 +987,7 @@ function MutationObserverInit()
 								var overflowId = node.getAttribute("overflowId");
 								if(overflowId !== null)
 								{
-									RemoveOverflowElement(id);
+									RemoveOverflowElement(overflowId);
 								}
 
 								// TODO: Removal of relevant DOM node types??
