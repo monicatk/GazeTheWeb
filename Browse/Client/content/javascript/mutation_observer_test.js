@@ -509,25 +509,37 @@ window.onresize = function()
 
 
 document.addEventListener('transitionend', function(event){
-	// TODO: for duckduckgo's shfiting links below search field
+	// Tree, whose children have to be check for rect updates
+	var tree = event.target.parentNode || event.target;
+	ForEveryChild(tree, function(child)
+	{
+		if(child.nodeType === 1)
+		{
+			// Check for DOMObjects
+			var type = child.getAttribute("nodeType");
+			if(type !== undefined && type !== null)
+			{
+				var id = child.getAttribute("nodeID");
+				var domObj = GetDOMObject(type, id);
+				if(domObj !== null && domObj !== undefined)
+				{
+					domObj.updateRects();
+				}
+			}
 
-	// ConsolePrint(event.target.textContent+" "+window.getComputedStyle(event.target, null).getPropertyValue('opacity'));
+			var overflowId = child.getAttribute("overflowId");
+			if(overflowId !== undefined && overflowId !== null)
+			{
+				var overflowObj = GetOverflowElement(overflowId);
+				if(overflowObj !== undefined && overflowObj !== null)
+				{
+					overflowObj.updateRects();
+				}
+			}
 
-		// ForEveryChild(event.target, function(child){
-		// 	var nodeType = child.getAttribute('nodeType');
-		// 	if(nodeType)
-		// 	{
-		// 		var nodeID = child.getAttribute('nodeID');
-		// 		var domObj = GetDOMObject(nodeType, nodeID);
-		// 		if(domObj)
-		// 		{
-		// 			domObj.checkVisibility();
-		// 		}
-		// 	}
-		// });
-	
-	// ConsolePrint("Transition ended: opacity="+window.getComputedStyle(node, null).getPropertyValue('opacity'));
-	console.log("TransitionEvent: transitionend "+event.target.className);
+		}
+
+	}); // ForEveryChild end
 }, false);
 
 
