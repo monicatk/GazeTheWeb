@@ -97,12 +97,15 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		}
 		if (requestName.compare(9, 4, "add#") == 0)
 		{
-			std::string id = requestName.substr(13, 2);
+			std::string dataStr = requestName.substr(13, requestName.length());
+			std::vector<std::string> data = SplitBySeparator(dataStr, '#');
+
+
 			//LogDebug("BrowserMsgRouter: Fixed element #", id, " was added.");
 
 			// Tell Renderer to read out bounding rectangle coordinates belonging to the given ID
 			CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("FetchFixedElements");
-			msg->GetArgumentList()->SetInt(0, atoi(id.c_str()));
+			msg->GetArgumentList()->SetInt(0, atoi(data[0].c_str()));
 			browser->SendProcessMessage(PID_RENDERER, msg);
 
 			return true;

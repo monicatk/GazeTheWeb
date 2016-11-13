@@ -19,13 +19,12 @@ function DOMObject(node, nodeType)
         this.nodeType = nodeType;
         this.rects = AdjustClientRects(this.node.getClientRects());
         this.visible = true;    // default value, call DOMObj.checkVisibility() after object is created!
-        this.fixed = false;
+        this.fixed = (node.hasAttribute("childFixedId")) ? true : false;
         this.overflowParent = undefined;
 
     /* Methods */ 
         // Update member variable for Rects and return true if an update has occured 
         this.updateRects = function(){
-
             this.checkVisibility();
 
             // Get new Rect data
@@ -33,7 +32,6 @@ function DOMObject(node, nodeType)
 
             if(this.fixed)
             {
-                // NOTE: Not sure if this works like intended
                 updatedRectsData.map( function(rectData){ rectData = SubstractScrollingOffset(rectData);} );
             }
 
@@ -50,6 +48,8 @@ function DOMObject(node, nodeType)
             return !equal;
         };
 
+        
+
         // Returns float[4] for each Rect with adjusted coordinates
         this.getRects = function(){
             // Update rects if changes occured
@@ -64,6 +64,7 @@ function DOMObject(node, nodeType)
             {
                 this.fixed = fixed;
                 InformCEF(this, ['update', 'fixed']);
+                // this.updateRects();
                 this.updateRects();
             }
         };
@@ -394,7 +395,9 @@ function UpdateDOMRects()
     );
 
     // ... and all FixedElements
-    UpdateFixedElementRects();
+    window.domFixedElements.forEach(
+        function(fixedObj){ fixedObj.updateRects(); }
+    );
 
    
     // Update visibility of each DOM object
@@ -512,7 +515,7 @@ function GetDOMObject(nodeType, nodeID)
     var targetList = GetDOMObjectList(nodeType);
 
     // Catch error case
-    if(nodeID >= targetList.length || targetList == undefined)
+    if(nodeID >= targetList.length || targetList == undefined || nodeID === undefined || nodeID === null)
     {
         ConsolePrint('ERROR: Node with id='+nodeID+' does not exist for type='+nodeType+'!');
         return null;
@@ -609,27 +612,15 @@ function OverflowElement(node)
                 // ConsolePrint("Executing OverflowElement scrolling by (x, y) = ("+scrollX+", "+scrollY+").");
                 
                 // // DEBUG 
-                var id = this.node.getAttribute("overflowId");
-                ConsolePrint(id+" before: scrollLeft: "+this.node.scrollLeft+" scrollTop: "+this.node.scrollTop);
+                // var id = this.node.getAttribute("overflowId");
+                // ConsolePrint(id+" before: scrollLeft: "+this.node.scrollLeft+" scrollTop: "+this.node.scrollTop);
 
                 // Execute scrolling
-                // this.node.scrollLeft += Math.round(scrollX);
-                // this.node.scrollTop += Math.round(scrollY); //(scrollY !== 0) ? 0 : this.node.scrollTop;//this.node.scrollTop + Math.round(scrollY);
-
-                var mousePosition = new MouseEvent();
-                mousePosition.clientX = gazeX;
-                mousePosition.clientY = gazeY;
-
-                var mouseEvent = new WheelEvent();
-                mouseEvent.deltaX = scrollX;
-                mouseEvent.deltaY = scrollY;
-
-                // this.node.focus();
-                this.node.dispatchEvent(mousePosition);
-                this.node.dispatchEvent(mouseEvent);
+                this.node.scrollLeft += scrollX;
+                this.node.scrollTop += scrollY;
 
                 // // DEBUG
-                ConsolePrint(id+"after : ("+scrollX+", "+scrollY+")\t-- scrollLeft: "+this.node.scrollLeft+" scrollTop: "+this.node.scrollTop);
+                // ConsolePrint(id+"after : ("+scrollX+", "+scrollY+")\t-- scrollLeft: "+this.node.scrollLeft+" scrollTop: "+this.node.scrollTop);
                 // ConsolePrint("class: "+this.node.className);
 
                 // Update Rects of all child elements
@@ -775,9 +766,13 @@ function CreateOverflowElement(node)
 function GetOverflowElement(id)
 {
     if(id < window.overflowElements.length && id >= 0)
-        return window.overflowElements[id];
+        return window.overflowElements[id];     // This may return undefined
     else
+    {
         ConsolePrint("ERROR in GetOverflowElement: id="+id+", valid id is in [0, "+window.overflowElements.length+"]!");
+        return null;
+    }
+        
 }
 
 function RemoveOverflowElement(id)
@@ -794,4 +789,14 @@ function RemoveOverflowElement(id)
     {
         ConsolePrint("ERROR: Couldn't remove OverflowElement with id="+id);
     }
+}
+
+function SubstractScrollingOffset(rectData)
+{
+	// Translate rectData by (-scrollX, -scrollY)
+	rectData[0] -= window.scrollY;
+	rectData[1] -= window.scrollX;
+	rectData[2] -= window.scrollY;
+	rectData[3] -= window.scrollX;
+	return rectData;
 }
