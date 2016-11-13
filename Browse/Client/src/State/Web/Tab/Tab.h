@@ -145,6 +145,18 @@ public:
     // Set content of text block
     virtual void SetContentOfTextBlock(std::string id, std::u16string content);
 
+	// Add content in text edit
+	virtual void AddContentAtCursorInTextEdit(std::string id, std::u16string content);
+
+	// Delete content in text edit
+	virtual void DeleteContentAtCursorInTextEdit(std::string id, int letterCount);
+
+	// Get content in active entity
+	virtual std::u16string GetActiveEntityContentInTextEdit(std::string id);
+
+	// Get content of text edit
+	virtual std::u16string GetContentOfTextEdit(std::string id);
+
 	// Getter for values of interest
 	virtual int GetWebViewX() const;
 	virtual int GetWebViewY() const;

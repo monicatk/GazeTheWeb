@@ -18,7 +18,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
     _overlaySubmitButtonId = "text_input_action_submit_button";
     _overlayDeleteCharacterButtonId = "text_input_action_delete_character_button";
     _overlaySpaceButtonId = "text_input_action_space_button";
-    _overlayTextBlockId = "text_input_action_text_block";
+	_overlayTextEditId = "text_input_action_text_edit";
     _overlayWordSuggestId = "text_input_action_word_suggest";
 	_overlayShiftButtonId = "text_input_action_shift_button";
 
@@ -29,7 +29,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
     idMapper.emplace("submit", _overlaySubmitButtonId);
     idMapper.emplace("delete_character", _overlayDeleteCharacterButtonId);
     idMapper.emplace("space", _overlaySpaceButtonId);
-    idMapper.emplace("text_block", _overlayTextBlockId);
+    idMapper.emplace("text_edit", _overlayTextEditId);
     idMapper.emplace("word_suggest", _overlayWordSuggestId);
 	idMapper.emplace("shift", _overlayShiftButtonId);
 
@@ -50,9 +50,8 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
         _overlayKeyboardId,
         [&](std::u16string value)
         {
-            _currentWord.append(value);
-            _pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, _currentWord);
-            UpdateTextBlock();
+			_pTab->AddContentAtCursorInTextEdit(_overlayTextEditId, value);
+            // _pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, _currentWord);
         });
 
 	// Complete button
@@ -79,15 +78,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
         _overlayDeleteCharacterButtonId,
         [&]() // down callback
         {
-            if (!_currentWord.empty())
-            {
-                this->_currentWord.pop_back();
-            }
-            else if(!_text.empty())
-            {
-                this->_text.pop_back();
-            }
-            UpdateTextBlock();
+			_pTab->DeleteContentAtCursorInTextEdit(_overlayTextEditId, -1);
         },
 		[](){}); // up callback
 
@@ -96,11 +87,8 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
         _overlaySpaceButtonId,
         [&]() // down callback
         {
-            this->_text.append(_currentWord);
-            this->_text.append(u" ");
-            this->_currentWord.clear();
-            _pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, u"");
-            UpdateTextBlock();
+			_pTab->AddContentAtCursorInTextEdit(_overlayTextEditId, u" ");
+            //_pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, u"");
         },
 		[](){}); // up callback
 
@@ -109,8 +97,8 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
         _overlayWordSuggestId,
         [&](std::u16string value)
         {
-            this->_currentWord = value;
-            UpdateTextBlock();
+            //this->_currentWord = value;
+            //UpdateTextBlock();
         });
 
 	// Shift button (switch)
@@ -124,9 +112,6 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 		{
 			this->_pTab->SetCaseOfKeyboardLetters(_overlayKeyboardId, false);
 		});
-
-    // Update the text block for start
-    UpdateTextBlock();
 }
 
 KeyboardAction::~KeyboardAction()
@@ -149,7 +134,7 @@ bool KeyboardAction::Update(float tpf, TabInput tabInput)
     if (_complete)
     {
         // Fill collected input to output
-        SetOutputValue("text", _text + _currentWord);
+        SetOutputValue("text", _pTab->GetContentOfTextEdit(_overlayTextEditId));
 
         // Submit text directly if wished
         SetOutputValue("submit", _submit);
@@ -181,9 +166,4 @@ void KeyboardAction::Deactivate()
 void KeyboardAction::Abort()
 {
     // Nothing to do
-}
-
-void KeyboardAction::UpdateTextBlock()
-{
-    this->_pTab->SetContentOfTextBlock(_overlayTextBlockId, _text + _currentWord + u"|");
 }

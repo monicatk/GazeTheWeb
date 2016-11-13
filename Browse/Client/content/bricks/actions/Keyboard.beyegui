@@ -7,7 +7,7 @@
 		<column size="100%">
 			<stack>
 				<circlebutton border="10%" id="delete_character" icon="icons/DeleteCharacter.png" desckey="action_keyboard:delete"/>
-				<textblock style="tab_overlay_noback" id="text_block" alignment="center" verticalalignment="center" fontsize="medium" relativescale="250%"/>
+				<textedit style="tab_overlay_noback" id="text_edit"/>
 				<grid relativescale="125%">
 					<row size="100%">
 						<column size="55%">

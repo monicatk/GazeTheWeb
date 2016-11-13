@@ -39,9 +39,6 @@ public:
 
 protected:
 
-    // Update text block
-    void UpdateTextBlock();
-
     // Index of floating frame in Tab's overlay
     int _overlayFrameIndex = -1;
 
@@ -60,20 +57,14 @@ protected:
     // Id of space button in overlay
     std::string _overlaySpaceButtonId;
 
-    // Id of text block in overlay
-    std::string _overlayTextBlockId;
+    // Id of text edit in overlay
+    std::string _overlayTextEditId;
 
     // Id of word suggest in overlay
     std::string _overlayWordSuggestId;
 
     // Id of shift button in overlay
     std::string _overlayShiftButtonId;
-
-    // String which collects input
-    std::u16string _text = u"";
-
-    // String with current word
-    std::u16string _currentWord = u"";
 
     // Bool which indicates whether input is complete
     bool _complete = false;
