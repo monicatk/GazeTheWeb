@@ -5,25 +5,30 @@
 	</row>
 	<row size="25%">
 		<column size="100%">
-			<stack>
-				<circlebutton border="10%" id="delete_character" icon="icons/DeleteCharacter.png" desckey="action_keyboard:delete"/>
 				<textedit style="tab_overlay_noback" id="text_edit"/>
-				<grid relativescale="125%">
-					<row size="100%">
-						<column size="55%">
-							<circlebutton border="10%" id="complete" icon="icons/Ok.png" desckey="action_keyboard:complete"/>
-						</column>
-						<column size="45%">
-							<circlebutton border="10%" id="submit" icon="icons/Forward.png" desckey="action_keyboard:submit"/>
-						</column>
-					</row>
-				</grid>			
-			</stack>
 		</column>
 	</row>
 	<row size="10%">
 		<column size="100%">
-			<wordsuggest style="tab_overlay_panel" id="word_suggest"/>
+			<grid relativescale="125%">
+					<row size="100%">
+						<column size="20%">
+							<stack separator="0.5%">
+								<boxbutton id="delete_character" icon="icons/DeleteCharacter.png" desckey="action_keyboard:delete"/>
+								<boxbutton id="paste" icon="icons/Paste.png" desckey="action_keyboard:paste"/>
+							</stack>
+						</column>
+						<column size="55%">
+							<wordsuggest style="tab_overlay_panel" id="word_suggest"/>
+						</column>
+						<column size="20%">
+							<stack separator="0.5%">
+								<boxbutton id="complete" icon="icons/Ok.png" desckey="action_keyboard:complete"/>
+								<boxbutton id="submit" icon="icons/Forward.png" desckey="action_keyboard:submit"/>
+							</stack>
+						</column>
+					</row>
+				</grid>			
 		</column>
 	</row>
 	<row size="47%">
