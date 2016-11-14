@@ -152,7 +152,10 @@ public:
 	virtual void DeleteContentAtCursorInTextEdit(std::string id, int letterCount);
 
 	// Get content in active entity
-	virtual std::u16string GetActiveEntityContentInTextEdit(std::string id);
+	virtual std::u16string GetActiveEntityContentInTextEdit(std::string id) const;
+
+	// Set content in active entity
+	virtual void SetActiveEntityContentInTextEdit(std::string id, std::u16string content);
 
 	// Get content of text edit
 	virtual std::u16string GetContentOfTextEdit(std::string id);

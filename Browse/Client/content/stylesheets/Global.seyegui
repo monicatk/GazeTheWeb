@@ -6,6 +6,7 @@ default
 	separator-color = 0x393E40FF
 	background-color = 0x505659FF
 	threshold-color = 0x00FFFFFF
+	mark-color = 0xFFFFFF33
 }
 
 default_noback : default
