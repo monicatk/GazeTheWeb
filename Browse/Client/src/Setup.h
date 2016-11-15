@@ -24,7 +24,7 @@ namespace setup
 
     // Debugging
     static const bool LOG_DEBUG_MESSAGES = false;
-    static const bool DRAW_DEBUG_OVERLAY = true;
+    static const bool DRAW_DEBUG_OVERLAY = false;
 
     // Experiments
     static const std::string LAB_STREAM_OUTPUT_NAME = "BrowserOutputStream";

@@ -1,11 +1,8 @@
 <?xml version="1.0"?>
 <grid showbackground="true" consumeinput="true" style="tab_overlay">
-	<row size="5%">
-		<column size="100%"/>
-	</row>
-	<row size="25%">
+	<row size="30%">
 		<column size="100%">
-				<textedit style="tab_overlay_noback" id="text_edit"/>
+				<textedit border="5%" style="tab_overlay_noback" id="text_edit"/>
 		</column>
 	</row>
 	<row size="10%">
