@@ -397,7 +397,7 @@ void Handler::SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged
     if (double zoomLevel = _pMediator->GetZoomLevel(browser))
     {
         LogDebug("Handler: Setting zoom level = ", zoomLevel, " (browserID = ", browser->GetIdentifier(), ").");
-		const std::string setZoomLevel = "document.body.style.zoom=" + std::to_string(zoomLevel) + ";this.blur(); UpdateDOMRects(); UpdateFixedElementRects();";
+		const std::string setZoomLevel = "if(document.body !== null) document.body.style.zoom=" + std::to_string(zoomLevel) + ";this.blur(); UpdateDOMRects();";
         browser->GetMainFrame()->ExecuteJavaScript(setZoomLevel, "", 0); 
 
         if (definitelyChanged)
@@ -541,12 +541,6 @@ void Handler::ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, i
 
 	std::string js_code = "var overflowObj = GetOverflowElement(" + std::to_string(elemId) + ");"\
 		"if(overflowObj) overflowObj.scroll(" + std::to_string(x) + ", " + std::to_string(y) + ");";
-
-	CefMouseEvent event;
-	event.x = 0;	// TODO: Mouse position? Possible case: Scroll inside of a sub area inside the page
-	event.y = 0;
-	//DLOG(INFO) << "Emulating mouse wheel, browserID=" << browser->GetIdentifier();
-	browser->GetHost()->SendMouseWheelEvent(event, 0, -10);
 
 	// DEBUG
 	if (elemId == 6 || elemId == 7)

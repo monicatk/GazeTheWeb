@@ -166,26 +166,38 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 
         if (context->Enter())
         {
-			int fixedID = msg->GetArgumentList()->GetInt(0);
+			int fixedId = msg->GetArgumentList()->GetInt(0);
 
 			// Create response
 			msg = CefProcessMessage::Create("ReceiveFixedElements");
 			CefRefPtr<CefListValue> args = msg->GetArgumentList();
 
 			CefRefPtr<CefV8Value> global = context->GetGlobal();
-			CefRefPtr<CefV8Value> coordsArray = global->GetValue("fixed_coordinates")->GetValue(fixedID);
+			//CefRefPtr<CefV8Value> coordsArray = global->GetValue("fixed_coordinates")->GetValue(fixedId);
+			CefRefPtr<CefV8Value> fixedObj = global->GetValue("domFixedElements")->GetValue(fixedId);
+			//CefRefPtr<CefV8Value> rectsArray = fixedObj->GetValue("rects");
+			
+			int index = 0;
+			args->SetInt(index++, fixedId);
 
-			args->SetInt(0, fixedID);
-			int n = coordsArray->GetArrayLength();
-			for (int i = 0; i < n; i++)
+			// Get V8 list of floats, representing all Rect coordinates of the given fixedObj
+			CefRefPtr<CefV8Value> rectList = fixedObj->GetValue("getRects")->ExecuteFunction(fixedObj, {});
+
+			for (int i = 0; i < rectList->GetArrayLength(); i++)
 			{
-				args->SetDouble(i+1, coordsArray->GetValue(i)->GetDoubleValue());
+				// Assuming each rect consist of exactly 4 double values
+				for (int j = 0; j < 4; j++)
+				{
+					// Access rect #i in rectList and j-th coordinate vale [t, l, b, r]
+					args->SetDouble(index++, rectList->GetValue(i)->GetValue(j)->GetDoubleValue());
+				}
+
 			}
 
 			// DEBUG
-			if (n == 0)
+			if (rectList->GetArrayLength() == 0)
 			{
-				IPCLogDebug(browser, "No Rect coordinates available for fixedID="+std::to_string(fixedID));
+				IPCLogDebug(browser, "No Rect coordinates available for fixedID="+std::to_string(fixedId));
 			}
       
 			// Send response
@@ -363,6 +375,7 @@ void RenderProcessHandler::OnContextCreated(
 
 			frame->ExecuteJavaScript(_js_dom_mutationobserver, "", 0);
 			frame->ExecuteJavaScript(_js_mutation_observer_test, "", 0);
+			frame->ExecuteJavaScript(_js_dom_fixed_elements, "", 0);
 			frame->ExecuteJavaScript("MutationObserverInit();", "", 0);
 
 			// TESTING

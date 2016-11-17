@@ -64,6 +64,7 @@ private:
 	const std::string _js_fixed_element_read_out = GetJSCode(FIXED_ELEMENT_READ_OUT);
 	const std::string _js_mutation_observer_test = GetJSCode(MUTATION_OBSERVER_TEST);
 	const std::string _js_dom_mutationobserver = GetJSCode(DOM_MUTATIONOBSERVER);
+	const std::string _js_dom_fixed_elements = GetJSCode(DOM_FIXED_ELEMENTS);
 
     // Include CEF'S default reference counting implementation
     IMPLEMENT_REFCOUNTING(RenderProcessHandler);
