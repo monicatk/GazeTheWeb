@@ -66,6 +66,9 @@ protected:
     // Id of shift button in overlay
     std::string _overlayShiftButtonId;
 
+	// Id of new line button in overlay
+	std::string _overlayNewLineButtonId;
+
     // Bool which indicates whether input is complete
     bool _complete = false;
 
