@@ -10,6 +10,7 @@ web:tab_overview=Tab Overview
 web:settings=Go to Settings
 web:back=Back
 web:forward=Forward
+web:history=History
 tab_overview:forward=Next Page
 tab_overview:back=Previous Page
 tab_overview:close=Close
