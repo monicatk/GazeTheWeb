@@ -19,8 +19,11 @@ Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)
 	// Create bookmark manager
 	_upBookmarkManager = std::unique_ptr<BookmarkManager>(new BookmarkManager(pMaster->GetUserDirectory()));
 
+	// Create hisotry manager
+	_upHistoryManager = std::unique_ptr<HistoryManager>(new HistoryManager(pMaster->GetUserDirectory()));
+
 	// Create History
-	_upHistory = std::unique_ptr<History>(new History(_pMaster));
+	_upHistory = std::unique_ptr<History>(new History(_pMaster, _upHistoryManager.get()));
 
 	// Create URL input
 	_upURLInput = std::unique_ptr<URLInput>(new URLInput(_pMaster, _upBookmarkManager.get()));

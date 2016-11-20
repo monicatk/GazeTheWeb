@@ -9,10 +9,11 @@
 #include "src/Utils/Helper.h"
 
 
-History::History(Master* pMaster)
+History::History(Master* pMaster, HistoryManager const * pHistoryManager)
 {
 	// Fill members
 	_pMaster = pMaster;
+	_pHistoryManager = pHistoryManager;
 
 	// Create layouts
 	_pLayout = _pMaster->AddLayout("layouts/History.xeyegui", EYEGUI_WEB_HISTORY_LAYER, false);

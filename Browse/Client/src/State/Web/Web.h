@@ -9,9 +9,10 @@
 
 #include "src/State/State.h"
 #include "src/State/Web/Tab/Tab.h"
-#include "src/State/Web/URLInput.h"
-#include "src/State/Web/History.h"
-#include "src/State/Web/BookmarkManager.h"
+#include "src/State/Web/Managers/BookmarkManager.h"
+#include "src/State/Web/Managers/HistoryManager.h"
+#include "src/State/Web/Screens/URLInput.h"
+#include "src/State/Web/Screens/History.h"
 #include <map>
 #include <vector>
 #include <memory>
@@ -161,12 +162,6 @@ private:
     // Current tab is indicated with index of vector (-1 means, that no tab is currently displayed)
     int _currentTabId = -1;
 
-	// History object
-	std::unique_ptr<History> _upHistory;
-
-    // URL input object
-    std::unique_ptr<URLInput> _upURLInput;
-
     // Layouts
     eyegui::Layout* _pWebLayout;
     eyegui::Layout* _pTabOverviewLayout;
@@ -185,6 +180,15 @@ private:
 
 	// Bookmark manager
 	std::unique_ptr<BookmarkManager> _upBookmarkManager;
+
+	// History manager
+	std::unique_ptr<HistoryManager> _upHistoryManager;
+
+	// History object
+	std::unique_ptr<History> _upHistory;
+
+	// URL input object
+	std::unique_ptr<URLInput> _upURLInput;
 };
 
 #endif // WEB_H_

@@ -45,6 +45,7 @@ static const glm::vec3 FIXED_ELEMENT_DEBUG_COLOR = glm::vec3(1, 0, 0);
 static const float BLUR_FOCUS_RELATIVE_RADIUS = 0.25f; // relative to smaller of both width or height
 static const float BLUR_PERIPHERY_MULTIPLIER = 0.7f;
 static const std::string BOOKMARKS_FILE = "bookmarks.xml";
+static const std::string HISTORY_FILE = "history.xml";
 static const std::string SETTINGS_FILE = "settings.xml";
 static const int URL_INPUT_BOOKMARKS_ROWS_ON_SCREEN = 6;
 static const float NOTIFICATION_WIDTH = 0.3f;

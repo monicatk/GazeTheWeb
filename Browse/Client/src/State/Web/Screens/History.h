@@ -14,13 +14,14 @@
 
 // Forward declaration
 class Master;
+class HistoryManager;
 
 class History
 {
 public:
 
 	// Constructor
-	History(Master* pMaster);
+	History(Master* pMaster, HistoryManager const * pHistoryManager);
 
 	// Destructor
 	virtual ~History();
@@ -68,6 +69,9 @@ private:
 
 	// Pointer to master
 	Master* _pMaster;
+
+	// Pointer to history manager
+	HistoryManager const * _pHistoryManager;
 
 	// Pointer to layout
 	eyegui::Layout* _pLayout;

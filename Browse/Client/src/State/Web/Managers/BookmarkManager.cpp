@@ -133,25 +133,17 @@ bool BookmarkManager::LoadBookmarks()
 	tinyxml2::XMLElement* pElement = pRoot->FirstChildElement("bookmark");
 	if (pElement == NULL) { return true; } // nothing found but somehow successful
 
-	// Query URL string from attribute
-	const char * pURL = NULL;
-	pURL = pElement->Attribute("url");
-	if (pURL != NULL)
-	{
-		_bookmarks.insert(pURL);
-	}
-
-	// Go over all bookmarks
-	while ((pElement = pElement->NextSiblingElement("bookmark")) != NULL)
+	// Collect bookmarks
+	do
 	{
 		// Query URL string from attribute
-		pURL = NULL;
+		const char * pURL = NULL;
 		pURL = pElement->Attribute("url");
 		if (pURL != NULL)
 		{
 			_bookmarks.insert(pURL);
-		}	
-	}
+		}
+	} while ((pElement = pElement->NextSiblingElement("bookmark")) != NULL);
 
 	// When you came to here no real errors occured
 	return true;
