@@ -161,11 +161,11 @@ private:
     // Current tab is indicated with index of vector (-1 means, that no tab is currently displayed)
     int _currentTabId = -1;
 
-    // URL input object
-    std::unique_ptr<URLInput> _upURLInput;
-
 	// History object
 	std::unique_ptr<History> _upHistory;
+
+    // URL input object
+    std::unique_ptr<URLInput> _upURLInput;
 
     // Layouts
     eyegui::Layout* _pWebLayout;

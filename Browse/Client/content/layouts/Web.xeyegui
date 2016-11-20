@@ -4,7 +4,7 @@
         <row size="100%">
             <column size="9.375%">
                 <stack showbackground="true" style="panel" direction="vertical">
-									<block style="default_noback" relativescale="90%"/>
+									<block style="default_noback" relativescale="70%"/>
 									<circlebutton icon="icons/TabOverview.png" desckey="web:tab_overview" id="tab_overview" border="10%"/>
 									<grid relativescale="150%">
 										<row size="60%">
@@ -20,7 +20,6 @@
 											</column>
 										</row>
 									</grid>
-									<circlebutton icon="icons/History.png" desckey="web:history" id="history" border="10%"/>
 									<circlebutton icon="icons/Settings.png" desckey="web:settings" id="settings" border="10%"/>
 									<block style="default_noback" relativescale="15%"/>
                 </stack>
