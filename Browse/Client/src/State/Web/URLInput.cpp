@@ -15,10 +15,10 @@ URLInput::URLInput(Master* pMaster, BookmarkManager const * pBookmarkManager)
 	_pBookmarkManager = pBookmarkManager;
 
     // Create layouts
-    _pLayout = _pMaster->AddLayout("layouts/URLInput.xeyegui", EYEGUI_WEB_URLINPUT_LAYER, false);
-	_pBookmarksLayout = _pMaster->AddLayout("layouts/URLInputBookmarks.xeyegui", EYEGUI_WEB_URLINPUT_LAYER, false);
+    _pLayout = _pMaster->AddLayout("layouts/URLInput.xeyegui", EYEGUI_WEB_URL_INPUT_LAYER, false);
+	_pBookmarksLayout = _pMaster->AddLayout("layouts/URLInputBookmarks.xeyegui", EYEGUI_WEB_URL_INPUT_LAYER, false);
 
-    // Create listener
+    // Create listeners
     _spURLKeyboardListener = std::shared_ptr<URLKeyboardListener>(new URLKeyboardListener(this));
     eyegui::registerKeyboardListener(_pLayout, "keyboard", _spURLKeyboardListener);
     _spURLButtonListener = std::shared_ptr<URLButtonListener>(new URLButtonListener(this));
@@ -61,7 +61,7 @@ void URLInput::Activate(int tabId)
         // Remember id of tab which url shall be changed
         _currentTabId = tabId;
 
-        // Remember it
+        // Remember activation
         _active = true;
 
 		// Get current bookmarks

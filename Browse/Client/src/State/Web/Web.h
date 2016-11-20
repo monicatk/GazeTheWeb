@@ -10,6 +10,7 @@
 #include "src/State/State.h"
 #include "src/State/Web/Tab/Tab.h"
 #include "src/State/Web/URLInput.h"
+#include "src/State/Web/History.h"
 #include "src/State/Web/BookmarkManager.h"
 #include <map>
 #include <vector>
@@ -159,6 +160,9 @@ private:
 
     // Current tab is indicated with index of vector (-1 means, that no tab is currently displayed)
     int _currentTabId = -1;
+
+	// History object
+	std::unique_ptr<History> _upHistory;
 
     // URL input object
     std::unique_ptr<URLInput> _upURLInput;

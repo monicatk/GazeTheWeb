@@ -9,15 +9,15 @@ Basic Features
 	--> Choose default search engine? Duckduckgo or Google for the start?
 - History / Inkognito
 - Https recognition and displaying of lock
-- Emulation Fallback (somehow approached with pivot mode)
-- Drag n Drop
+- Copy Paste / Selection
+- Get string of text input field to avoid overriding with empty string when accidentially hitting a text input trigger
 
 Advanced Features
 - Test image editing with web application
 - HTML5 Video Player support (replace tab bar with controlls and dim everything)
 - Page fullscreen handling
 - CSS Injection
-- Copy Paste / Marking
+- Drag n Drop
 - Right click and _own_ context menus (see JS Window Object)
 	(Javascript Popup Handling)
  - Rough selection via browser window (getstring) and precise selection in eyeGUI

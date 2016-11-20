@@ -142,6 +142,31 @@ void Tab::SetContentOfTextBlock(std::string id, std::u16string content)
 	eyegui::setContentOfTextBlock(_pOverlayLayout, id, content);
 }
 
+void Tab::AddContentAtCursorInTextEdit(std::string id, std::u16string content)
+{
+	eyegui::addContentAtCursorInTextEdit(_pOverlayLayout, id, content);
+}
+
+void Tab::DeleteContentAtCursorInTextEdit(std::string id, int letterCount)
+{
+	eyegui::deleteContentAtCursorInTextEdit(_pOverlayLayout, id, letterCount);
+}
+
+std::u16string Tab::GetActiveEntityContentInTextEdit(std::string id) const
+{
+	return eyegui::getActiveEntityContentInTextEdit(_pOverlayLayout, id);
+}
+
+void Tab::SetActiveEntityContentInTextEdit(std::string id, std::u16string content)
+{
+	eyegui::setActiveEntityContentInTextEdit(_pOverlayLayout, id, content);
+}
+
+std::u16string Tab::GetContentOfTextEdit(std::string id)
+{
+	return eyegui::getContentOfTextEdit(_pOverlayLayout, id);
+}
+
 int Tab::GetWebViewX() const
 {
 	return _upWebView->GetX();

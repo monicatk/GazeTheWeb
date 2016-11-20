@@ -1,5 +1,5 @@
 # GazeTheWeb - Browse: Client
-Gaze controlled web browser, part of the EU-funded research project MAMEM.
+Gaze-controlled Web browser, part of the EU-funded research project MAMEM.
 
 ## Structure
 ![Structure](media/Structure.png)

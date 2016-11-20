@@ -125,6 +125,9 @@ Tab::~Tab()
 	// Delete triggers before removing layout
 	_DOMTriggers.clear();
 
+	// Abort pipeline
+	AbortAndClearPipelines();
+
 	_pCefMediator->UnregisterTab(this);
 	_pMaster->RemoveLayout(_pPanelLayout);
 	_pMaster->RemoveLayout(_pPipelineAbortLayout);
