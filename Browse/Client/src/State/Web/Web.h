@@ -10,6 +10,7 @@
 #include "src/State/State.h"
 #include "src/State/Web/Tab/Tab.h"
 #include "src/State/Web/URLInput.h"
+#include "src/State/Web/History.h"
 #include "src/State/Web/BookmarkManager.h"
 #include <map>
 #include <vector>
@@ -162,6 +163,9 @@ private:
 
     // URL input object
     std::unique_ptr<URLInput> _upURLInput;
+
+	// History object
+	std::unique_ptr<History> _upHistory;
 
     // Layouts
     eyegui::Layout* _pWebLayout;

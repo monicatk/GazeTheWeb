@@ -28,6 +28,7 @@ url_input:bookmarks=Bookmarks
 url_input_bookmarks:back=Back
 url_input_bookmarks:select=Ok
 url_input_bookmarks:title=Bookmarks
+history:close=Close
 settings:title=Settings
 settings:close=Close
 settings:general=General

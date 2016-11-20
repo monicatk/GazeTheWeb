@@ -22,6 +22,9 @@ Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)
 	// Create URL input
 	_upURLInput = std::unique_ptr<URLInput>(new URLInput(_pMaster, _upBookmarkManager.get()));
 
+	// Create History
+	_upHistory = std::unique_ptr<History>(new History(_pMaster));
+
     // Create own layout
     _pWebLayout = _pMaster->AddLayout("layouts/Web.xeyegui", EYEGUI_WEB_LAYER, false);
     _pTabOverviewLayout = _pMaster->AddLayout("layouts/WebTabOverview.xeyegui", EYEGUI_WEB_LAYER, false);
@@ -32,6 +35,7 @@ Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)
     eyegui::registerButtonListener(_pWebLayout, "settings", _spWebButtonListener);
     eyegui::registerButtonListener(_pWebLayout, "back", _spWebButtonListener);
     eyegui::registerButtonListener(_pWebLayout, "forward", _spWebButtonListener);
+	eyegui::registerButtonListener(_pWebLayout, "history", _spWebButtonListener);
     eyegui::registerButtonListener(_pTabOverviewLayout, "close", _spWebButtonListener);
     eyegui::registerButtonListener(_pTabOverviewLayout, "back", _spWebButtonListener);
     eyegui::registerButtonListener(_pTabOverviewLayout, "forward", _spWebButtonListener);
@@ -328,6 +332,18 @@ StateType Web::Update(float tpf, Input& rInput)
             _upURLInput->Deactivate();
         }
     }
+
+	// History
+	if (_upHistory->IsActive())
+	{
+		// Update it and wait for it to finish
+		if (_upHistory->Update())
+		{
+			// TODO either do nothing, set url of current tab or create new tab if none is there
+
+			_upHistory->Deactivate();
+		}
+	}
 
     // Only do it if there is some tab to update
     if(_currentTabId >= 0)
@@ -728,6 +744,10 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
                 _pWeb->_tabs[tabId]->GoForward();
             }
         }
+		else if (id == "history")
+		{
+			_pWeb->_upHistory->Activate(_pWeb->_currentTabId);
+		}
     }
     else
     {
