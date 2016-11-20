@@ -23,14 +23,16 @@ HistoryManager::~HistoryManager()
 	// Nothing to do
 }
 
-void HistoryManager::AddPage(std::string URL, std::string title)
+void HistoryManager::AddPage(Page page)
 {
-	// Create new struct
-	Page page;
-	page.URL = URL;
-	page.title = title;
+	// Filter page
+	if (FilterPage(page))
+	{
+		// Page should not be added to history
+		return;
+	}
 
-	// Add to vector with pages
+	// Add to vector storing pages
 	_pages.push_back(page);
 
 	// Try to open XML file
@@ -55,9 +57,34 @@ void HistoryManager::AddPage(std::string URL, std::string title)
 			return;
 		}
 	}
+	else
+	{
+		pRoot = doc.FirstChild();
+	}
 
-	// Append to XML file
-	// TODO
+	// Check whether root exists
+	if (pRoot == NULL)
+	{
+		LogInfo("HistoryManager: Failed to add page to history");
+		return;
+	}
+
+	// Create element for page
+	tinyxml2::XMLElement* pElement = doc.NewElement("page");
+	pElement->SetAttribute("url", page.URL.c_str());
+	pElement->SetAttribute("title", page.title.c_str());
+
+	// Append to top of XML file
+	pRoot->InsertFirstChild(pElement);
+
+	// Try to save file
+	result = doc.SaveFile(_fullpathHistory.c_str());
+
+	// Log at failure
+	if (result != tinyxml2::XMLError::XML_SUCCESS)
+	{
+		LogInfo("HistoryManager: Failed to save history file");
+	}
 }
 
 std::vector<HistoryManager::Page> HistoryManager::GetHistory() const
@@ -117,4 +144,20 @@ bool HistoryManager::LoadHistory()
 
 	// When you came to here no real errors occured
 	return true;
+}
+
+bool HistoryManager::FilterPage(Page page) const
+{
+	// Go over filter list and test for equality
+	for (const std::string& rURL : _filterURLs)
+	{
+		if (rURL == page.URL)
+		{
+			// URL is filtered
+			return true;
+		}
+	}
+
+	// URL is ok
+	return false;
 }

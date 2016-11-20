@@ -7,6 +7,7 @@
 #include "src/State/Web/Tab/Tab.h"
 #include "src/Utils/Logger.h"
 #include "src/Setup.h"
+#include "src/State/Web/Managers/HistoryManager.h"
 #include <algorithm>
 
 void Tab::GetWebRenderResolution(int& rWidth, int& rHeight) const
@@ -310,10 +311,15 @@ void Tab::SetLoadingStatus(int64 frameID, bool isMain, bool isLoading)
                 eyegui::setImageOfPicture(_pPanelLayout, "icon", "icons/TabIconNotFound.png");
                 _iconState = IconState::ICON_NOT_FOUND;
             }
+
+			// Add page to history after loading
+			HistoryManager::Page page;
+			page.URL = _url;
+			page.title = _title;
+			_pWeb->PushAddPageToHistoryJob(this, page);
         }
 	}
 }
-
 
 void Tab::AddOverflowElement(std::shared_ptr<OverflowElement> overflowElem)
 {

@@ -78,6 +78,9 @@ public:
 	// Add tab after that tab
     virtual void PushAddTabAfterJob(Tab* pCaller, std::string URL);
 
+	// Add page to history job
+	virtual void PushAddPageToHistoryJob(Tab* pCaller, HistoryManager::Page page);
+
     // Get own id in web. Returns -1 if not found
     virtual int GetIdOfTab(Tab const * pCaller) const;
 
@@ -105,7 +108,11 @@ private:
     public:
 
         // Constructor
-        AddTabAfterJob(Tab* pCaller, std::string URL, bool show);
+		AddTabAfterJob(Tab* pCaller, std::string URL, bool show) : TabJob(pCaller)
+		{
+			_URL = URL;
+			_show = show;
+		}
 
         // Execute
         virtual void Execute(Web* pCallee);
@@ -116,6 +123,25 @@ private:
         std::string _URL;
         bool _show;
     };
+
+	class AddPageToHistoryJob : public TabJob
+	{
+	public:
+
+		// Constructor
+		AddPageToHistoryJob(Tab* pCaller, HistoryManager::Page page) : TabJob(pCaller)
+		{
+			_page = page;
+		}
+
+		// Execute
+		virtual void Execute(Web* pCallee);
+
+	protected:
+
+		// Members
+		HistoryManager::Page _page;
+	};
 
     // Give listener full access
     friend class WebButtonListener;

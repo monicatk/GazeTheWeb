@@ -3,6 +3,7 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Manager of history.
+// TODO: limit entry count!!!
 
 #ifndef HISTORYMANAGER_H_
 #define HISTORYMANAGER_H_
@@ -27,16 +28,25 @@ public:
 	// Destructor
 	virtual ~HistoryManager();
 
-	// Add page. Time and date is added inside method
-	void AddPage(std::string URL, std::string title);
+	// Add page
+	void AddPage(Page page);
 
 	// Get history (TODO: get history from certain date etc)
 	std::vector<Page> GetHistory() const;
 
 private:
 
+	// List of filtered pages which will not be added to history
+	const std::vector<std::string> _filterURLs
+	{
+		"about:blank"
+	};
+
 	// Load history from hard disk. Returns whether successful
 	bool LoadHistory();
+
+	// Filter pages like about:blank. Returns true when page should be NOT added
+	bool FilterPage(Page page) const;
 
 	// Vector of pages
 	std::vector<Page> _pages;

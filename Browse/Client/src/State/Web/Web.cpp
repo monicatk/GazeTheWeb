@@ -417,6 +417,11 @@ void Web::PushAddTabAfterJob(Tab* pCaller, std::string URL)
     _jobs.push(std::unique_ptr<TabJob>(new AddTabAfterJob(pCaller, URL, true)));
 }
 
+void Web::PushAddPageToHistoryJob(Tab* pCaller, HistoryManager::Page page)
+{
+	_jobs.push(std::unique_ptr<TabJob>(new AddPageToHistoryJob(pCaller, page)));
+}
+
 int Web::GetIdOfTab(Tab const * pCaller) const
 {
     // Go through map and find tab
@@ -703,12 +708,6 @@ Web::TabJob::TabJob(Tab* pCaller)
     _pCaller = pCaller;
 }
 
-Web::AddTabAfterJob::AddTabAfterJob(Tab* pCaller, std::string URL, bool show) : TabJob(pCaller)
-{
-    _URL = URL;
-    _show = show;
-}
-
 void Web::AddTabAfterJob::Execute(Web* pCallee)
 {
 	// Add tab after caller
@@ -716,6 +715,12 @@ void Web::AddTabAfterJob::Execute(Web* pCallee)
 
 	// Flash tab overview button to indicate, that new tab was created by application
 	eyegui::flash(pCallee->_pWebLayout, "tab_overview");
+}
+
+void Web::AddPageToHistoryJob::Execute(Web* pCallee)
+{
+	// Add page to history
+	pCallee->_upHistoryManager->AddPage(_page);
 }
 
 void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
