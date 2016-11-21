@@ -3,7 +3,6 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Manager of history.
-// TODO: limit entry count!!!
 
 #ifndef HISTORYMANAGER_H_
 #define HISTORYMANAGER_H_

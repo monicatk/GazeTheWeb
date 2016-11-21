@@ -5,6 +5,7 @@
 
 #include "HistoryManager.h"
 #include "src/Global.h"
+#include "src/Setup.h"
 #include "src/Utils/Logger.h"
 #include "submodules/eyeGUI/externals/TinyXML2/tinyxml2.h"
 #include <iterator>
@@ -44,11 +45,11 @@ void HistoryManager::AddPage(Page page)
 	if (result != tinyxml2::XMLError::XML_SUCCESS)
 	{
 		// Create and insert root
-		tinyxml2::XMLNode* pRoot = doc.NewElement("history");
+		pRoot = doc.NewElement("history");
 		doc.InsertFirstChild(pRoot);
 
 		// Try to save file
-		tinyxml2::XMLError result = doc.SaveFile(_fullpathHistory.c_str());
+		result = doc.SaveFile(_fullpathHistory.c_str());
 
 		// Return at failure
 		if (result != tinyxml2::XMLError::XML_SUCCESS)
@@ -76,6 +77,24 @@ void HistoryManager::AddPage(Page page)
 
 	// Append to top of XML file
 	pRoot->InsertFirstChild(pElement);
+
+	// Check length of vector and delete history if too many pages have been saved
+	int pagesSize = (int)_pages.size();
+ 	if (pagesSize > setup::HISTORY_MAX_PAGE_COUNT)
+	{
+		// Count of pages that should be deleted
+		int deleteCount = pagesSize - setup::HISTORY_MAX_PAGE_COUNT;
+
+		// Delete older ones from vector
+		_pages.erase(_pages.begin(), _pages.begin() + deleteCount);
+
+		// Delete older ones from XML file
+		for (int i = 0; i < deleteCount; i++)
+		{
+			auto pLastChild = pRoot->LastChild();
+			pRoot->DeleteChild(pLastChild);
+		}
+	}
 
 	// Try to save file
 	result = doc.SaveFile(_fullpathHistory.c_str());
@@ -112,17 +131,17 @@ bool HistoryManager::LoadHistory()
 	tinyxml2::XMLElement* pElement = pRoot->FirstChildElement("page");
 	if (pElement == NULL) { return true; } // nothing found but somehow successful
 
-	// Collect pages
+	// Collect pages (not checked whether maximum number exceeded. Done at saving)
 	do
 	{
 		// Preparation
 		Page page;
-		bool pageError = true;
+		bool pageError = false;
 
 		// Query URL string from attribute
 		const char * pURL = NULL;
 		pURL = pElement->Attribute("url");
-		if (pageError |= (pURL != NULL))
+		if ((pageError |= (pURL == NULL)) == false)
 		{
 			page.URL = pURL;
 		}
@@ -130,7 +149,7 @@ bool HistoryManager::LoadHistory()
 		// Query title string from attribute
 		const char * pTitle = NULL;
 		pTitle = pElement->Attribute("title");
-		if (pageError |= (pTitle != NULL))
+		if ((pageError |= (pTitle == NULL)) == false)
 		{
 			page.title = pTitle;
 		}
@@ -140,7 +159,7 @@ bool HistoryManager::LoadHistory()
 		{
 			_pages.push_back(page);
 		}
-	} while ((pElement = pElement->NextSiblingElement("bookmark")) != NULL);
+	} while ((pElement = pElement->NextSiblingElement("page")) != NULL);
 
 	// When you came to here no real errors occured
 	return true;
