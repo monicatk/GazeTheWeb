@@ -85,7 +85,7 @@ bool BookmarkManager::SaveBoomarks() const
 	doc.InsertFirstChild(pRoot);
 
 	// Insert bookmarks
-	tinyxml2::XMLElement* lastChild = NULL;
+    tinyxml2::XMLElement* previousChild = NULL;
 	for (const auto& rBookmark : _bookmarks)
 	{
 		// Insert bookmark
@@ -93,17 +93,17 @@ bool BookmarkManager::SaveBoomarks() const
 		pElement->SetAttribute("url", rBookmark.c_str());
 
 		// Decide how to insert
-		if (lastChild == NULL)
+        if (previousChild == NULL)
 		{
 			pRoot->InsertFirstChild(pElement);
 		}
 		else
 		{
-			pRoot->InsertAfterChild(lastChild, pElement);
+            pRoot->InsertAfterChild(previousChild, pElement);
 		}
 
-		// Remember last child
-		lastChild = pElement;
+        // Remember previous child
+        previousChild = pElement;
 	}
 
 	// Try to save file
@@ -115,7 +115,7 @@ bool BookmarkManager::SaveBoomarks() const
 
 bool BookmarkManager::LoadBookmarks()
 {
-	// Clean bookmarks
+    // Clear bookmarks
 	_bookmarks.clear();
 
 	// Open document

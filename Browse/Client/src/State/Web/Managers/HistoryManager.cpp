@@ -60,6 +60,7 @@ void HistoryManager::AddPage(Page page)
 	}
 	else
 	{
+        // Fetch root node when file exists
 		pRoot = doc.FirstChild();
 	}
 
@@ -113,7 +114,7 @@ std::vector<HistoryManager::Page> HistoryManager::GetHistory() const
 
 bool HistoryManager::LoadHistory()
 {
-	// Clean history
+    // Clean local history copy
 	_pages.clear();
 
 	// Open document
@@ -131,7 +132,7 @@ bool HistoryManager::LoadHistory()
 	tinyxml2::XMLElement* pElement = pRoot->FirstChildElement("page");
 	if (pElement == NULL) { return true; } // nothing found but somehow successful
 
-	// Collect pages (not checked whether maximum number exceeded. Done at saving)
+    // Collect pages (not checked whether maximum number exceeded. Only done at saving)
 	do
 	{
 		// Preparation
