@@ -56,7 +56,7 @@ function DOMObject(node, nodeType)
             {
                 // TODO: Work on OverflowElemen Objects and their getRects method instead!
                 var bb_overflow = this.overflowParent.getBoundingClientRect();
-                if(bb_overflow.height >= 0 && bb_overflow.width >= 0)
+                if(bb_overflow.height > 0 && bb_overflow.width > 0)
                 {
                     var oRect = AdjustClientRects([bb_overflow])[0];
 
