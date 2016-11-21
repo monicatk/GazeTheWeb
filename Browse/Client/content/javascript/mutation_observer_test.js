@@ -25,6 +25,11 @@ function ConsolePrint(msg)
 	window.cefQuery({ request: (""+msg), persistent : false, onSuccess : function(response) {}, onFailure : function(error_code, error_message){} });
 }
 
+function GetTextSelection()
+{
+	// Pipe message to C++ MsgRouter
+	ConsolePrint("#select#"+document.getSelection().toString()+"#");
+}
 // TODO: Add as global function and also use it in DOM node work
 /**
 	Adjust bounding client rectangle coordinates to window, using scrolling offset and zoom factor.

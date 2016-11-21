@@ -314,6 +314,13 @@ void Handler::EmulateMouseCursor(CefRefPtr<CefBrowser> browser, double x, double
     CefMouseEvent event;
     event.x = x;
     event.y = y;
+
+	// Used for text selection via pressed left mouse button and simultaneous movement
+	if (_pMediator->GetLeftMouseStatus())
+	{
+		event.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON;
+	}
+
     browser->GetHost()->SendMouseMoveEvent(event, false);
 }
 
@@ -326,10 +333,6 @@ void Handler::EmulateLeftMouseButtonClick(CefRefPtr<CefBrowser> browser, double 
     browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, false, 1);	// press
     browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, true, 1);	// release
 
-	// DEBUG
-	//browser->GetMainFrame()->ExecuteJavaScript("consolePrint('BLABLABLA');StillObserving();", "", 0);
-	//browser->GetMainFrame()->ExecuteJavaScript("ContextTest();", "", 0);
-	//browser->GetMainFrame()->ExecuteJavaScript("StartObserving();", "", 0);
 }
 
 void Handler::EmulateMouseWheelScrolling(CefRefPtr<CefBrowser> browser, double deltaX, double deltaY)

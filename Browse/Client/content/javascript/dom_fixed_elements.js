@@ -149,15 +149,13 @@ function AddFixedElement(node)
             // Trigger rect updates of whole subtree, just in case
             window.domFixedElements[id].updateRects();
 
-            ConsolePrint("AddFixedElement: fixedId = "+id+" already linked to FixedObj!");
+            // ConsolePrint("AddFixedElement: fixedId = "+id+" already linked to FixedObj!");
             return false;
         }
         else
         {
-            ConsolePrint("Constructing new FixedElement Object...");
             // Create new FixedElement object, which will be added to global fixed element list
             new FixedElement(node);
-            ConsolePrint("DONE - Constructing new FixedElement Object");
 
             //DEBUG
             // ConsolePrint("Added fixed element, currently available fixedIDs...");
