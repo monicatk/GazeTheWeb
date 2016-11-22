@@ -4,12 +4,12 @@
 //============================================================================
 // Action to zoom to a coordinate with gaze.
 // - Input: none
-// - Output: vec2 coordinate in pixels
+// - Output: vec2 coordinate in screen space pixels
 
 #ifndef ZOOMCOORDINATEACTION_H_
 #define ZOOMCOORDINATEACTION_H_
 
-#include "Action.h"
+#include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 #include "src/Utils/LerpValue.h"
 #include <deque>
 
@@ -67,7 +67,7 @@ protected:
 	// Maximal angle between gaze drift and zoom coordinate drift in degree
 	const float DRIFT_MAX_ANGLE_DEGREE = 10.f;
 
-    // Coordinate which is updated and output
+    // Coordinate which is updated and output. Must be multiplied by web view pixels to be in pixel screen space
     glm::vec2 _coordinate;
 
     // Log zooming amount (used for rendering)
@@ -79,7 +79,7 @@ protected:
     float _linZoom = 1.f;
 
     // Offset to center of webview
-    glm::vec2 _coordinateCenterOffset;
+    glm::vec2 _coordinateCenterOffset = glm::vec2(0, 0);
 
     // Bool to indicate first update
     bool _firstUpdate = true;

@@ -12,9 +12,6 @@ ZoomCoordinateAction::ZoomCoordinateAction(TabInteractionInterface* pTab) : Acti
 {
     // Add in- and output data slots
     AddVec2OutputSlot("coordinate");
-
-    // Initialize members
-    _coordinateCenterOffset = glm::vec2(0, 0);
 }
 
 bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)

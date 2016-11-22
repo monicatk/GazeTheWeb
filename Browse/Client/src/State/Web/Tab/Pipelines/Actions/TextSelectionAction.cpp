@@ -6,51 +6,44 @@
 #include "TextSelectionAction.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 
-TextSelectionAction::TextSelectionAction(TabInteractionInterface *pTab) : Action(pTab)
+TextSelectionAction::TextSelectionAction(TabInteractionInterface *pTab) : ZoomCoordinateAction(pTab)
 {
-	// TODO: just some timer to end action
-	_timer = 5.f;
+	// Add in- and output data slots
+	AddVec2InputSlot("coordinate");
 }
 
 bool TextSelectionAction::Update(float tpf, TabInput tabInput)
 {
-	bool done = false;
+	// Call standard zoom coordinate update function
+	bool done = ZoomCoordinateAction::Update(tpf, tabInput);
 
-	_timer -= tpf;
+	// TODO: maybe use some more direct coordinate than this one
+	// Calculate current coordinate in screen space
+	glm::vec2 webViewPixels(_pTab->GetWebViewWidth(), _pTab->GetWebViewHeight());
+	glm::vec2 screenCoordinate = _coordinate * webViewPixels;
 
 	// When finished, set end position of text selection
-	if (_timer < 0)
+	if (done)
 	{
 		// End selection procedure
-		_pTab->EndTextSelection(tabInput.webViewGazeX, tabInput.webViewGazeY);
-		done = true;
+		_pTab->EndTextSelection(screenCoordinate.x, screenCoordinate.y);
 	}
 	else
 	{
 		// Keep simulating mouse cursor
-		_pTab->EmulateMouseCursor(tabInput.webViewGazeX, tabInput.webViewGazeY);
+		_pTab->EmulateMouseCursor(screenCoordinate.x, screenCoordinate.y);
 	}
 
     return done;
 }
 
-void TextSelectionAction::Draw() const
-{
-
-}
-
 void TextSelectionAction::Activate()
 {
-	// Set starting point of selection for testing purposes
-	_pTab->StartTextSelection(310, 470);
-}
+	// Call super method
+	ZoomCoordinateAction::Activate();
 
-void TextSelectionAction::Deactivate()
-{
-
-}
-
-void TextSelectionAction::Abort()
-{
-
+	// Set starting point of selection
+	glm::vec2 startCoordinate;
+	GetInputValue("coordinate", startCoordinate);
+	_pTab->StartTextSelection(startCoordinate.x, startCoordinate.y);
 }

@@ -7,7 +7,7 @@
 #ifndef TESTACTION_H_
 #define TESTACTION_H_
 
-#include "Action.h"
+#include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 #include "src/Utils/LerpValue.h"
 
 class TestAction : public Action

@@ -9,7 +9,7 @@
 #ifndef PIVOTMENUACTION_H_
 #define PIVOTMENUACTION_H_
 
-#include "Action.h"
+#include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 #include "src/Utils/LerpValue.h"
 
 class PivotMenuAction : public Action

@@ -9,7 +9,7 @@
 #ifndef MOUSEWHEELSCROLLINGACTION_H_
 #define MOUSEWHEELSCROLLINGACTION_H_
 
-#include "Action.h"
+#include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 
 class MouseWheelScrollingAction : public Action
 {

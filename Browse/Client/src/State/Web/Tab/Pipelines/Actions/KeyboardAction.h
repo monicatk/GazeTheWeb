@@ -10,7 +10,7 @@
 #ifndef KEYBOARDACTION_H_
 #define KEYBOARDACTION_H_
 
-#include "Action.h"
+#include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 
 class KeyboardAction : public Action
 {

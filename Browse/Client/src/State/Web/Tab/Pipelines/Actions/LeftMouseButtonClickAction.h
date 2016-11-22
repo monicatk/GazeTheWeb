@@ -10,7 +10,7 @@
 #ifndef LEFTMOUSEBUTTONCLICKACTION_H_
 #define LEFTMOUSEBUTTONCLICKACTION_H_
 
-#include "Action.h"
+#include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 
 class LeftMouseButtonClickAction : public Action
 {
