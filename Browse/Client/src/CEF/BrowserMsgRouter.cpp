@@ -40,11 +40,14 @@ std::vector<std::string> MsgHandler::SplitBySeparator(std::string str, char sepa
 	for (int i = 0; i < str.length(); i++)
 	{
 		const char read = str.at(i);
-		if (read == separator && buffer.size() > 0)
+		if (read == separator)
 		{
-			const std::string bufferStr(buffer.begin(), buffer.end());
-			output.push_back(bufferStr);
-			buffer.clear();
+			if (buffer.size() > 0)
+			{
+				const std::string bufferStr(buffer.begin(), buffer.end());
+				output.push_back(bufferStr);
+				buffer.clear();
+			}
 		}
 		else
 		{
@@ -82,12 +85,24 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		return true;
 	}
 
+	// Text selection callback, asynchronously called when CefMediator::EndTextSelection finishes
+	if (requestName.compare(0, 8, "#select#") == 0)
+	{
+		const std::string selectionStr = SplitBySeparator(requestName, '#')[1];
+
+		// TODO(Raphael): Pipe selectionStr where ever it may be useful
+		LogDebug("MsgRouter: Selected Text: '", selectionStr, "'");
+
+		return true;
+	}
+
 	// Fixed element callbacks
 	if (requestName.compare(0, 9, "#fixElem#") == 0)
 	{
 		if (requestName.compare(9, 4, "rem#") == 0)
 		{
-			std::string id = requestName.substr(13, 2);
+
+			const std::string& id = SplitBySeparator(requestName, '#')[2];	// TODO: Updated code, not tested yet
 			//LogDebug("BrowserMsgRouter: Fixed element #", id, " was removed.");
 
 			// Notify Tab via CefMediator, that a fixed element was removed

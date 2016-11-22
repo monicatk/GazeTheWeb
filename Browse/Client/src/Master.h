@@ -87,6 +87,7 @@ public:
 	// Set homepage URL in settings
 	void SetHomepage(std::string URL) { _upSettings->SetHomepage(URL); }
 
+
 private:
 
     // Give listener full access
@@ -193,6 +194,8 @@ private:
 
 	// Time of notification displaying
 	float _notificationTime;
+
+
 };
 
 #endif // MASTER_H_

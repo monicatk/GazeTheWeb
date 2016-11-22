@@ -5,6 +5,8 @@ Pause Tab Rendering / Script Execution
 # Refinement #
 
 >>> Text Selection!
+	- 	Create clipboard in Master: std::vector<std::string> 
+		Clipboard might also contain pictures in the future
 
 >>>	Overflow Elements:
 	-	FIXED overflow elements

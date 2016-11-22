@@ -314,6 +314,13 @@ void Handler::EmulateMouseCursor(CefRefPtr<CefBrowser> browser, double x, double
     CefMouseEvent event;
     event.x = x;
     event.y = y;
+
+	// Used for text selection via pressed left mouse button and simultaneous movement
+	if (_pMediator->GetLeftMouseStatus())
+	{
+		event.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON;
+	}
+
     browser->GetHost()->SendMouseMoveEvent(event, false);
 }
 
@@ -326,10 +333,6 @@ void Handler::EmulateLeftMouseButtonClick(CefRefPtr<CefBrowser> browser, double 
     browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, false, 1);	// press
     browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, true, 1);	// release
 
-	// DEBUG
-	//browser->GetMainFrame()->ExecuteJavaScript("consolePrint('BLABLABLA');StillObserving();", "", 0);
-	//browser->GetMainFrame()->ExecuteJavaScript("ContextTest();", "", 0);
-	//browser->GetMainFrame()->ExecuteJavaScript("StartObserving();", "", 0);
 }
 
 void Handler::EmulateMouseWheelScrolling(CefRefPtr<CefBrowser> browser, double deltaX, double deltaY)
@@ -418,9 +421,14 @@ void Handler::SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged
 void Handler::UpdatePageResolution(CefRefPtr<CefBrowser> browser)
 {
     // Javascript code for receiving the current page width & height
-    const std::string getPageResolution = "\
-            window._pageWidth = document.documentElement.scrollWidth;\
+	const std::string getPageResolution = "\
+            if(document.documentElement)\
+			{\
+			window._pageWidth = document.documentElement.scrollWidth;\
             window._pageHeight = document.documentElement.scrollHeight;\
+			}\
+			else\
+				console.log('Handler::UpdatePageResolution: Could not access document.documentElement!');\
             ";
 
     browser->GetMainFrame()->ExecuteJavaScript(getPageResolution, browser->GetMainFrame()->GetURL(), 0);

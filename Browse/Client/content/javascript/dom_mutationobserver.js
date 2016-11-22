@@ -52,8 +52,35 @@ function DOMObject(node, nodeType)
 
         // Returns float[4] for each Rect with adjusted coordinates
         this.getRects = function(){
-            // Update rects if changes occured
-            // this.updateRects();
+            if(this.visible && this.overflowParent !== null && this.overflowParent !== undefined)
+            {
+                // TODO: Work on OverflowElemen Objects and their getRects method instead!
+                var bb_overflow = this.overflowParent.getBoundingClientRect();
+                if(bb_overflow.height > 0 && bb_overflow.width > 0)
+                {
+                    var oRect = AdjustClientRects([bb_overflow])[0];
+
+                    var rects = AdjustClientRects(this.node.getClientRects());
+                    var new_rects = [];
+                    for(var j = 0, n = rects.length; j < n; j++)
+                    {
+                        var rect = [];
+                        rect.push(Math.max(rects[j][0], oRect[0]));
+                        rect.push(Math.max(rects[j][1], oRect[1]));
+                        rect.push(Math.min(rects[j][2], oRect[2]));
+                        rect.push(Math.min(rects[j][3], oRect[3]));
+                        new_rects.push(rect);
+                    }
+
+                    // ConsolePrint("Cut-off on OverflowElements doesn't work correctly!");
+                    return new_rects;
+                }
+                else
+                {
+                    return this.rects;
+                }
+
+            }
 
             // Return rects as list of float lists with adjusted coordinates
             return this.rects;
@@ -122,9 +149,11 @@ function DOMObject(node, nodeType)
 
                 // Test if overflow box is more than a thin line
                 if( (overflowRect.height > 0 && overflowRect.width > 0) &&
-                    // Test if node's Rect lies completely inside of overflow Rect, then node is visible
-                    !(overflowRect.left <= nodeRect.left && overflowRect.right >= nodeRect.right && 
-                    overflowRect.top <= nodeRect.top && overflowRect.bottom >= nodeRect.bottom))
+                    // // Test if node's Rect lies completely inside of overflow Rect, then node is visible
+                    // !(overflowRect.left <= nodeRect.left && overflowRect.right >= nodeRect.right && 
+                    // overflowRect.top <= nodeRect.top && overflowRect.bottom >= nodeRect.bottom))
+                    (overflowRect.top >= nodeRect.bottom || overflowRect.bottom <= nodeRect.top 
+                        || overflowRect.left >= nodeRect.right || overflowRect.right <= nodeRect.left) )
                     {
                         this.setVisibility(false);
                         // DEBUG
