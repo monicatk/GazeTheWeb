@@ -6,6 +6,7 @@
 #include "PivotMenuAction.h"
 #include "src/State/Web/Tab/Pipelines/LeftMouseButtonClickPipeline.h"
 #include "src/State/Web/Tab/Pipelines/LeftMouseButtonDoubleClickPipeline.h"
+#include "src/State/Web/Tab/Pipelines/TextSelectionPipeline.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 
 PivotMenuAction::PivotMenuAction(TabInteractionInterface *pTab) : Action(pTab)
@@ -79,6 +80,12 @@ PivotMenuAction::PivotMenuAction(TabInteractionInterface *pTab) : Action(pTab)
         "pivot_selection",
         [&]() // down callback
         {
+		// If coordinate set, do start text selection
+		glm::vec2 coordinate;
+			if (this->GetInputValue("coordinate", coordinate))
+			{
+				_pTab->PushBackPipeline(std::unique_ptr<TextSelectionPipeline>(new TextSelectionPipeline(_pTab, coordinate)));
+			}
             _done= true;
         },
         [](){}); // up callback

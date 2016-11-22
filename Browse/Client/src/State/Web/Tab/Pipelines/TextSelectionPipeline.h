@@ -13,8 +13,8 @@ class TextSelectionPipeline : public Pipeline
 {
 public:
 
-    // Constructor
-	TextSelectionPipeline(TabInteractionInterface* pTab);
+    // Constructor. Takes start coordinate in pixel screen space
+	TextSelectionPipeline(TabInteractionInterface* pTab, glm::vec2 startCoordinate);
 };
 
 #endif // TEXTSELECTIONPIPELINE_H_

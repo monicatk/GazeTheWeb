@@ -6,10 +6,10 @@
 #include "TextSelectionPipeline.h"
 #include "src/State/Web/Tab/Pipelines/Actions/TextSelectionAction.h"
 
-TextSelectionPipeline::TextSelectionPipeline(TabInteractionInterface* pTab) : Pipeline(pTab)
+TextSelectionPipeline::TextSelectionPipeline(TabInteractionInterface* pTab, glm::vec2 startCoordinate) : Pipeline(pTab)
 {
 	// Add text selection action
 	auto upTextSelectionAction = std::make_unique<TextSelectionAction>(_pTab);
-	upTextSelectionAction->SetInputValue("coordinate", glm::vec2(310, 470)); // set start coordinate for selection
+	upTextSelectionAction->SetInputValue("coordinate", startCoordinate); // set start coordinate for selection
 	_actions.push_back(std::move(upTextSelectionAction));
 }

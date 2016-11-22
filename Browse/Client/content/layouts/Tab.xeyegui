@@ -21,7 +21,7 @@
 										<boxbutton icon="icons/AutoScrolling.png" desckey="tab:auto_scrolling" id="auto_scrolling" switch="true"/>
 										<boxbutton icon="icons/Zoom.png" desckey="tab:zoom" id="zoom" switch="true"/>
 										<boxbutton icon="icons/GazeMouse.png" desckey="tab:gaze_mouse" id="gaze_mouse" switch="true"/>
-										<boxbutton icon="icons/Circle.png" id="test_button"/>
+										<!-- <boxbutton icon="icons/Circle.png" id="test_button"/> -->
 		  						</stack>
 		  						<block style="default_noback" relativescale="3%"/>
   							</stack>

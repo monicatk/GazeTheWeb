@@ -42,10 +42,12 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
         {
 			_pTab->PushBackPipeline(std::make_unique<PivotMenuPipeline>(_pTab));
         }
+		/*
 		else if (id == "test_button") // TODO: only for testing new features
 		{
 			_pTab->PushBackPipeline(std::make_unique<TextSelectionPipeline>(_pTab));
 		}
+		*/
 	}
 	else
 	{
