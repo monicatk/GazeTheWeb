@@ -5,6 +5,7 @@
 
 #include "KeyboardAction.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
+#include "submodules/eyeGUI/include/eyeGUI.h"
 
 KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 {
@@ -99,10 +100,12 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 		[&]() // down callback
 	{
 		// Get text from global clipboard and convert it to UTF-16
-		// TODO
+		std::string clipboard = _pTab->GetClipboardText();
+		std::u16string clipboard16;
+		eyegui_helper::convertUTF8ToUTF16(clipboard, clipboard16);
 
 		// Add text from clipboard to collected text
-		_pTab->AddContentAtCursorInTextEdit(_overlayTextEditId, u" ");
+		_pTab->AddContentAtCursorInTextEdit(_overlayTextEditId, clipboard16);
 
 		// Refresh suggestions
 		_pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, _pTab->GetActiveEntityContentInTextEdit(_overlayTextEditId));
