@@ -557,6 +557,7 @@ void CefMediator::EndTextSelection(TabCEFInterface* pTab, double x, double y)
 		browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, true, 1);
 
 		// Call JS GetTextSelection and receive selected text as string in MsgRouter
+		// TODO: maybe separate call?
 		browser->GetMainFrame()->ExecuteJavaScript("GetTextSelection();", "", 0);
 	}
 }

@@ -128,7 +128,6 @@ public:
 	// Master calls this method upon GLFW keyboard input in order to open new window with DevTools (for active Tab)
 	void ShowDevTools();
 
-
 	// ### MOUSE INTERACTION ###
 
 	// Start and end text selection for given tab. During selection, gaze coordinates MUST be used as mouse input

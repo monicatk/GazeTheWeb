@@ -66,6 +66,30 @@ void Tab::EmulateMouseWheelScrolling(double deltaX, double deltaY)
 	_pCefMediator->EmulateMouseWheelScrolling(this, deltaX, deltaY);
 }
 
+void Tab::StartTextSelection(double x, double y, bool isScreenCoordinate)
+{
+	if (isScreenCoordinate)
+	{
+		x = (x / (float)_upWebView->GetWidth()) * (float)_upWebView->GetResolutionX();
+		y = (y / (float)_upWebView->GetHeight()) * (float)_upWebView->GetResolutionY();
+	}
+
+	// Tell mediator about start of selection
+	_pCefMediator->StartTextSelection(this, x, y);
+}
+
+void Tab::EndTextSelection(double x, double y, bool isScreenCoordinate)
+{
+	if (isScreenCoordinate)
+	{
+		x = (x / (float)_upWebView->GetWidth()) * (float)_upWebView->GetResolutionX();
+		y = (y / (float)_upWebView->GetHeight()) * (float)_upWebView->GetResolutionY();
+	}
+
+	// Tell mediator about start of selection
+	_pCefMediator->EndTextSelection(this, x, y);
+}
+
 void Tab::InputTextData(int64 frameID, int nodeID, std::string text, bool submit)
 {
 	_pCefMediator->InputTextData(this, frameID, nodeID, text, submit);

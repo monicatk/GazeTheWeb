@@ -189,6 +189,13 @@ public:
     // Emulate mouse wheel scrolling
     virtual void EmulateMouseWheelScrolling(double deltaX, double deltaY);
 
+	// Start text selection for tab. During selection, gaze coordinates must be piped as mouse coordinates!
+	// Remember to call end text selection afterwards
+	virtual void StartTextSelection(double x, double y, bool isScreenCoordinate = true);
+
+	// End text selection for tab
+	virtual void EndTextSelection(double x, double y, bool isScreenCoordinate = true);
+
     // Set text in text input field
     virtual void InputTextData(int64 frameID, int nodeID, std::string text, bool submit);
 

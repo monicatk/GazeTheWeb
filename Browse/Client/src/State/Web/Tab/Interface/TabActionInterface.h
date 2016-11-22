@@ -35,6 +35,13 @@ public:
     // Set text in text input field
     virtual void InputTextData(int64 frameID, int nodeID, std::string text, bool submit) = 0;
 
+	// Start text selection for tab. During selection, gaze coordinates must be piped as mouse coordinates!
+	// Remember to call end text selection afterwards
+	virtual void StartTextSelection(double x, double y, bool isScreenCoordinate = true) = 0;
+
+	// End text selection for tab
+	virtual void EndTextSelection(double x, double y, bool isScreenCoordinate = true) = 0;
+
     // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available. Distance in screen coordinates
     virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 screenCoordinate, float& rDistance) const = 0;
 

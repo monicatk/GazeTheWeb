@@ -34,6 +34,9 @@ public:
 
 protected:
 
+	// TODO: just something to end selection
+	float _timer;
+
 };
 
 #endif // TEXTSELECTIONACTION_H_
