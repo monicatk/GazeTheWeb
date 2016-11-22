@@ -659,6 +659,7 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
 
 			// Testing text selection via keyboard events
+			/*
 			case GLFW_KEY_1: {
 
 				double x, y;
@@ -687,6 +688,7 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
 				_pCefMediator->InvokePaste(NULL, x - 120, y);
 				break;
 			}
+			*/
         }
     }
 }

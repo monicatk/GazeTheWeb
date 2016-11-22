@@ -88,11 +88,19 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	// Text selection callback, asynchronously called when CefMediator::EndTextSelection finishes
 	if (requestName.compare(0, 8, "#select#") == 0)
 	{
-		const std::string selectionStr = SplitBySeparator(requestName, '#')[1];
+		// Split result
+		auto split = SplitBySeparator(requestName, '#');
 
-		// TODO(Raphael): Pipe selectionStr where ever it may be useful
-		LogDebug("MsgRouter: Selected Text: '", selectionStr, "'");
+		// Check whether result is empty
+		if (split.size() > 1)
+		{
+			// Extract selection
+			const std::string selectionStr = split.at(1);
 
+			// TODO(Raphael): Pipe selectionStr where ever it may be useful
+			LogDebug("MsgRouter: Selected Text: '", selectionStr, "'");
+		}
+	
 		return true;
 	}
 

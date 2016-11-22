@@ -131,16 +131,12 @@ public:
 
 	// ### MOUSE INTERACTION ###
 
-	// TODO(Raphael): Activate Gazeposition == Mouseposition when called before calling StartTextSelection
-	// and reset it after EndTextSelection call
+	// Start and end text selection for given tab. During selection, gaze coordinates MUST be used as mouse input
 	void StartTextSelection(TabCEFInterface* pTab, double x, double y);
 	void EndTextSelection(TabCEFInterface* pTab, double x, double y);
 
-	bool GetLeftMouseStatus() const { return _leftMousePressed; }
-	void SetLeftMouseStatus(bool isPressed) { _leftMousePressed = isPressed; }
-
+	// Copy and paste functionality
 	void InvokeCopy(TabCEFInterface* pTab);
-	// Click at (x, y) position and invoke paste
 	void InvokePaste(TabCEFInterface* pTab, double x, double y);
 
 protected:
@@ -159,9 +155,6 @@ protected:
     // Use these methods for less coding overhead by checking if key exists in map
     TabCEFInterface* GetTab(CefRefPtr<CefBrowser> browser) const;
     CefRefPtr<CefBrowser> GetBrowser(TabCEFInterface* pTab) const;
-
-	// Globally indicate if mouse button is currently pressed
-	bool _leftMousePressed = false;
 
     IMPLEMENT_REFCOUNTING(CefMediator);
 };

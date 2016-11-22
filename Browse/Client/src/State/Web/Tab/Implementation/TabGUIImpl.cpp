@@ -7,6 +7,7 @@
 #include "src/State/Web/Tab/Tab.h"
 #include "src/State/Web/Tab/Pipelines/ZoomClickPipeline.h"
 #include "src/State/Web/Tab/Pipelines/PivotMenuPipeline.h"
+#include "src/State/Web/Tab/Pipelines/TextSelectionPipeline.h"
 #include "src/CEF/Extension/CefMediator.h"
 
 void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
@@ -39,8 +40,12 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
         }
         else if (id == "pivot")
         {
-            _pTab->PushBackPipeline(std::move(std::unique_ptr<PivotMenuPipeline>(new PivotMenuPipeline(_pTab))));
+			_pTab->PushBackPipeline(std::make_unique<PivotMenuPipeline>(_pTab));
         }
+		else if (id == "test_button") // TODO: only for testing new features
+		{
+			_pTab->PushBackPipeline(std::make_unique<TextSelectionPipeline>(_pTab));
+		}
 	}
 	else
 	{

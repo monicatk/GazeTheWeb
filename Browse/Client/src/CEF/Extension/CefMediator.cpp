@@ -524,51 +524,40 @@ void CefMediator::ShowDevTools()
 
 }
 
-
 void CefMediator::StartTextSelection(TabCEFInterface* pTab, double x, double y)
 {
-	// if(const auto& browser = GetBrowser(pTab))
-	for (const auto& key : _browsers)		// TODO: Use "if" above instead, when method is correctly called. 
-	{										// For testing purposes, it's executed in every opened Tab simultaneously
-		const auto& browser = key.second;	// TODO: Remove when "if" is used instead
+	if (const CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
+	{
 		LogDebug("CefMediator: Starting text selection at position (", x,  ", " , y, ")");
 
+		// Create mouse event
 		CefMouseEvent event;
 		event.x = x;
 		event.y = y;
 		event.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON;	// TODO: Do you really need this line
 
-		// Set state of left mouse button to pressed, while selecting text
-		SetLeftMouseStatus(true);
-
+		// Send mouse down event to tab
 		browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, false, 1); // keep mouse down
-
 	}
 }
 
 void CefMediator::EndTextSelection(TabCEFInterface* pTab, double x, double y)
 {
-	// if(const auto& browser = GetBrowser(pTab))
-	for (const auto& key : _browsers) // TODO: Use "if" above instead
+	if (const CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
-		const auto& browser = key.second; // TODO: Remove when "if" is used instead
-
 		LogDebug("CefMediator: Ending text selection at position (", x, ", ", y, ")");
 
-
+		// Create mouse event
 		CefMouseEvent event;
 		event.x = x;
 		event.y = y;
 		event.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON;	// TODO: Do you really need this line
 
+		// Send mouse up event to tab
 		browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, true, 1);
-
-		SetLeftMouseStatus(false);
 
 		// Call JS GetTextSelection and receive selected text as string in MsgRouter
 		browser->GetMainFrame()->ExecuteJavaScript("GetTextSelection();", "", 0);
-		// TODO(Raphael): See BrowserMsgRouter TODO(Raphael) in order to get selection string ;)
-
 	}
 }
 

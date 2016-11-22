@@ -314,12 +314,7 @@ void Handler::EmulateMouseCursor(CefRefPtr<CefBrowser> browser, double x, double
     CefMouseEvent event;
     event.x = x;
     event.y = y;
-
-	// Used for text selection via pressed left mouse button and simultaneous movement
-	if (_pMediator->GetLeftMouseStatus())
-	{
-		event.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON;
-	}
+	event.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON; // seems necessary at least during text selection
 
     browser->GetHost()->SendMouseMoveEvent(event, false);
 }
