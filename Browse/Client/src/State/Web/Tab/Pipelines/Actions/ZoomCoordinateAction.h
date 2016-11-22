@@ -67,7 +67,7 @@ protected:
 	// Maximal angle between gaze drift and zoom coordinate drift in degree
 	const float DRIFT_MAX_ANGLE_DEGREE = 10.f;
 
-    // Coordinate which is updated and output. Must be multiplied by web view pixels to be in pixel screen space
+    // Coordinate which is updated and output. In relative web view space
     glm::vec2 _coordinate;
 
     // Log zooming amount (used for rendering)
