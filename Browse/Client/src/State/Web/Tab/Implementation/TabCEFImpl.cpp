@@ -328,7 +328,7 @@ void Tab::AddOverflowElement(std::shared_ptr<OverflowElement> overflowElem)
 
 std::shared_ptr<OverflowElement> Tab::GetOverflowElement(int id)
 {
-	if (id < _overflowElements.size() && id >= 0)
+	if (id < (int)_overflowElements.size() && id >= 0)
 	{
 		return _overflowElements[id];
 	}
@@ -342,7 +342,7 @@ std::shared_ptr<OverflowElement> Tab::GetOverflowElement(int id)
 
 void Tab::RemoveOverflowElement(int id)
 {
-	if (id < _overflowElements.size() && id >= 0)
+	if (id < (int)_overflowElements.size() && id >= 0)
 	{
 		_overflowElements[id] = NULL;
 	}

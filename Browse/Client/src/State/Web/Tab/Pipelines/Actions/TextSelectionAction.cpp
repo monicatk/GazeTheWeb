@@ -26,12 +26,14 @@ bool TextSelectionAction::Update(float tpf, TabInput tabInput)
 	if (done)
 	{
 		// End selection procedure
-		_pTab->EndTextSelection(screenCoordinate.x, screenCoordinate.y);
+		_pTab->EmulateLeftMouseButtonUp(screenCoordinate.x, screenCoordinate.y);
+
+		// TODO: copy selected string
 	}
 	else
 	{
-		// Keep simulating mouse cursor
-		_pTab->EmulateMouseCursor(screenCoordinate.x, screenCoordinate.y);
+		// Keep emulating mouse cursor
+		_pTab->EmulateMouseCursor(screenCoordinate.x, screenCoordinate.y, true);
 	}
 
     return done;
@@ -45,5 +47,5 @@ void TextSelectionAction::Activate()
 	// Set starting point of selection
 	glm::vec2 startCoordinate;
 	GetInputValue("coordinate", startCoordinate);
-	_pTab->StartTextSelection(startCoordinate.x, startCoordinate.y);
+	_pTab->EmulateLeftMouseButtonDown(startCoordinate.x, startCoordinate.y);
 }

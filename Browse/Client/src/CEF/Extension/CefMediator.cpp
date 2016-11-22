@@ -114,11 +114,11 @@ void CefMediator::DoMessageLoopWork()
     CefDoMessageLoopWork();
 }
 
-void CefMediator::EmulateMouseCursor(TabCEFInterface* pTab, double x, double y)
+void CefMediator::EmulateMouseCursor(TabCEFInterface* pTab, double x, double y, bool leftButtonPressed)
 {
     if(CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
     {
-        _handler->EmulateMouseCursor(browser, x, y);
+        _handler->EmulateMouseCursor(browser, x, y, leftButtonPressed);
     }
 }
 
@@ -486,6 +486,7 @@ std::weak_ptr<DOMNode> CefMediator::GetDOMNode(CefRefPtr<CefBrowser> browser, DO
 	{
 		return pTab->GetDOMNode(type, nodeID);
 	}
+	return std::weak_ptr<DOMNode>();
 }
 
 
@@ -524,12 +525,10 @@ void CefMediator::ShowDevTools()
 
 }
 
-void CefMediator::StartTextSelection(TabCEFInterface* pTab, double x, double y)
+void CefMediator::EmulateLeftMouseButtonDown(TabCEFInterface* pTab, double x, double y)
 {
 	if (const CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
-		LogDebug("CefMediator: Starting text selection at position (", x,  ", " , y, ")");
-
 		// Create mouse event
 		CefMouseEvent event;
 		event.x = x;
@@ -541,12 +540,10 @@ void CefMediator::StartTextSelection(TabCEFInterface* pTab, double x, double y)
 	}
 }
 
-void CefMediator::EndTextSelection(TabCEFInterface* pTab, double x, double y)
+void CefMediator::EmulateLeftMouseButtonUp(TabCEFInterface* pTab, double x, double y)
 {
 	if (const CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
-		LogDebug("CefMediator: Ending text selection at position (", x, ", ", y, ")");
-
 		// Create mouse event
 		CefMouseEvent event;
 		event.x = x;
@@ -558,7 +555,7 @@ void CefMediator::EndTextSelection(TabCEFInterface* pTab, double x, double y)
 
 		// Call JS GetTextSelection and receive selected text as string in MsgRouter
 		// TODO: maybe separate call?
-		browser->GetMainFrame()->ExecuteJavaScript("GetTextSelection();", "", 0);
+		// browser->GetMainFrame()->ExecuteJavaScript("GetTextSelection();", "", 0);
 	}
 }
 

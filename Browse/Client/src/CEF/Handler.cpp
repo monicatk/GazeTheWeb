@@ -309,12 +309,12 @@ void Handler::LoadPage(CefRefPtr<CefBrowser> browser, std::string url)
     browser->GetMainFrame()->LoadURL(url);
 }
 
-void Handler::EmulateMouseCursor(CefRefPtr<CefBrowser> browser, double x, double y)
+void Handler::EmulateMouseCursor(CefRefPtr<CefBrowser> browser, double x, double y, bool leftButtonPressed)
 {
     CefMouseEvent event;
     event.x = x;
     event.y = y;
-	event.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON; // seems necessary at least during text selection
+	if (leftButtonPressed) { event.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON; }
 
     browser->GetHost()->SendMouseMoveEvent(event, false);
 }

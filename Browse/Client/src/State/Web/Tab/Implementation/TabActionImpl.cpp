@@ -48,7 +48,7 @@ void Tab::EmulateLeftMouseButtonClick(double x, double y, bool visualize, bool i
 	_pCefMediator->EmulateLeftMouseButtonClick(this, x, y);
 }
 
-void Tab::EmulateMouseCursor(double x, double y, bool isScreenCoordinate)
+void Tab::EmulateMouseCursor(double x, double y, bool leftButtonPressed, bool isScreenCoordinate)
 {
 	// Convert screen to render pixel coordinate
 	if (isScreenCoordinate)
@@ -58,7 +58,7 @@ void Tab::EmulateMouseCursor(double x, double y, bool isScreenCoordinate)
 	}
 
 	// Tell mediator about the cursor
-	_pCefMediator->EmulateMouseCursor(this, x, y);
+	_pCefMediator->EmulateMouseCursor(this, x, y, leftButtonPressed);
 }
 
 void Tab::EmulateMouseWheelScrolling(double deltaX, double deltaY)
@@ -66,7 +66,7 @@ void Tab::EmulateMouseWheelScrolling(double deltaX, double deltaY)
 	_pCefMediator->EmulateMouseWheelScrolling(this, deltaX, deltaY);
 }
 
-void Tab::StartTextSelection(double x, double y, bool isScreenCoordinate)
+void Tab::EmulateLeftMouseButtonDown(double x, double y, bool isScreenCoordinate)
 {
 	if (isScreenCoordinate)
 	{
@@ -74,11 +74,11 @@ void Tab::StartTextSelection(double x, double y, bool isScreenCoordinate)
 		y = (y / (float)_upWebView->GetHeight()) * (float)_upWebView->GetResolutionY();
 	}
 
-	// Tell mediator about start of selection
-	_pCefMediator->StartTextSelection(this, x, y);
+	// Tell mediator about mouse button down
+	_pCefMediator->EmulateLeftMouseButtonDown(this, x, y);
 }
 
-void Tab::EndTextSelection(double x, double y, bool isScreenCoordinate)
+void Tab::EmulateLeftMouseButtonUp(double x, double y, bool isScreenCoordinate)
 {
 	if (isScreenCoordinate)
 	{
@@ -86,8 +86,8 @@ void Tab::EndTextSelection(double x, double y, bool isScreenCoordinate)
 		y = (y / (float)_upWebView->GetHeight()) * (float)_upWebView->GetResolutionY();
 	}
 
-	// Tell mediator about start of selection
-	_pCefMediator->EndTextSelection(this, x, y);
+	// Tell mediator about mouse button up
+	_pCefMediator->EmulateLeftMouseButtonUp(this, x, y);
 }
 
 void Tab::InputTextData(int64 frameID, int nodeID, std::string text, bool submit)

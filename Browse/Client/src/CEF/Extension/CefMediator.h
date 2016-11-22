@@ -57,7 +57,8 @@ public:
     void DoMessageLoopWork();
 
     // Emulation of left mouse button press and release in specific Tab
-    void EmulateMouseCursor(TabCEFInterface* pTab, double x, double y);
+    void EmulateMouseCursor(TabCEFInterface* pTab, double x, double y, bool leftButtonPressed); // leftButtonPressed seems necessary
+																								// between mouse button down and up during text selection
     void EmulateLeftMouseButtonClick(TabCEFInterface* pTab, double x, double y);
     void EmulateMouseWheelScrolling(TabCEFInterface* pTab, double deltaX, double deltaY);
 
@@ -130,9 +131,9 @@ public:
 
 	// ### MOUSE INTERACTION ###
 
-	// Start and end text selection for given tab. During selection, gaze coordinates MUST be used as mouse input
-	void StartTextSelection(TabCEFInterface* pTab, double x, double y);
-	void EndTextSelection(TabCEFInterface* pTab, double x, double y);
+	// Can be used as start and end of text selection
+	void EmulateLeftMouseButtonDown(TabCEFInterface* pTab, double x, double y);
+	void EmulateLeftMouseButtonUp(TabCEFInterface* pTab, double x, double y);
 
 	// Copy and paste functionality
 	void InvokeCopy(TabCEFInterface* pTab);
