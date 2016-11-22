@@ -561,11 +561,8 @@ void CefMediator::InvokeCopy(TabCEFInterface * pTab)
 {
 	LogDebug("CefMediator: InvokeCopy called.");
 
-	// if (const auto& browser = GetBrowser(pTab))
-	for(const auto& key : _browsers) // TODO: Use pTab instead
+	if (const CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
-		const auto& browser = key.second;
-
 		browser->GetFocusedFrame()->Copy();
 	}
 }
@@ -574,22 +571,18 @@ void CefMediator::InvokePaste(TabCEFInterface * pTab, double x, double y)
 {
 	LogDebug("CefMediator: InvokePaste called on position (", x, ", ", y, ").");
 
-	// if (const auto& browser = GetBrowser(pTab))
-	for (const auto& key : _browsers)	// TODO: Use pTab instead
+	if (const CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
-		const auto& browser = key.second;
-
 		CefMouseEvent event;
 		event.x = x;
 		event.y = y;
+
 		// Click at position where text should be pasted
 		browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, false, 1);
 
 		browser->GetFocusedFrame()->Paste();
 	}
 }
-
-
 
 TabCEFInterface* CefMediator::GetTab(CefRefPtr<CefBrowser> browser) const
 {

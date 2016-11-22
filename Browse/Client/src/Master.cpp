@@ -657,38 +657,6 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_S: { _upLabStream->Send("42"); break; } // TODO: testing
 
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
-
-			// Testing text selection via keyboard events
-			/*
-			case GLFW_KEY_1: {
-
-				double x, y;
-				glfwGetCursorPos(_pWindow, &x, &y);
-				_pCefMediator->StartTextSelection(NULL, x - 120, y);
-				break;
-			}
-			case GLFW_KEY_2: {
-
-				double x, y;
-				glfwGetCursorPos(_pWindow, &x, &y);
-				_pCefMediator->EndTextSelection(NULL, x - 120, y);
-				break;
-			}
-			case GLFW_KEY_3: {
-
-				double x, y;
-				glfwGetCursorPos(_pWindow, &x, &y);
-				_pCefMediator->InvokeCopy(NULL);
-				break;
-			}
-			case GLFW_KEY_4: {
-
-				double x, y;
-				glfwGetCursorPos(_pWindow, &x, &y);
-				_pCefMediator->InvokePaste(NULL, x - 120, y);
-				break;
-			}
-			*/
         }
     }
 }
