@@ -552,8 +552,9 @@ void CefMediator::EmulateLeftMouseButtonUp(TabCEFInterface* pTab, double x, doub
 		browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, true, 1);
 
 		// Call JS GetTextSelection and receive selected text as string in MsgRouter
-		// TODO: maybe separate call?
-		// browser->GetMainFrame()->ExecuteJavaScript("GetTextSelection();", "", 0);
+		// TODO: maybe separate call? Yes, make extra method for this here
+		ClearClipboardText();
+		browser->GetMainFrame()->ExecuteJavaScript("GetTextSelection();", "", 0);
 	}
 }
 
@@ -582,6 +583,21 @@ void CefMediator::InvokePaste(TabCEFInterface * pTab, double x, double y)
 
 		browser->GetFocusedFrame()->Paste();
 	}
+}
+
+void CefMediator::SetClipboardText(std::string text)
+{
+	_clipboard = text;
+}
+
+std::string CefMediator::GetClipboardText() const
+{
+	return _clipboard;
+}
+
+void CefMediator::ClearClipboardText()
+{
+	_clipboard = "";
 }
 
 TabCEFInterface* CefMediator::GetTab(CefRefPtr<CefBrowser> browser) const

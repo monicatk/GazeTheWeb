@@ -97,8 +97,10 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			// Extract selection
 			const std::string selectionStr = split.at(1);
 
-			// TODO(Raphael): Pipe selectionStr where ever it may be useful
 			LogDebug("MsgRouter: Selected Text: '", selectionStr, "'");
+
+			// Set clipboard in mediator (TODO: what happens when two parallel string extractions are ongoing? some weird overwriting)
+			_pMsgRouter->GetMediator()->SetClipboardText(selectionStr);
 		}
 	
 		return true;

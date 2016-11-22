@@ -137,6 +137,12 @@ public:
 	void InvokeCopy(TabCEFInterface* pTab);
 	void InvokePaste(TabCEFInterface* pTab, double x, double y);
 
+	// ### GLOBAL CLIPBOARD ###
+
+	void SetClipboardText(std::string text); // should be called by browser msg router
+	std::string GetClipboardText() const; // should be called by tab
+	void ClearClipboardText(); // should be called by mediator before asking Javascript to extract selected string from page
+
 protected:
 
     /* MEMBERS */
@@ -149,6 +155,9 @@ protected:
 	TabCEFInterface* _activeTab = NULL;
 
     TabCEFInterface* _pendingTab = NULL; // Used in Tab registration progress (at first, Renderer works to fast for map access)
+
+	// Simple internal clipboard
+	std::string _clipboard = "";
 
     // Use these methods for less coding overhead by checking if key exists in map
     TabCEFInterface* GetTab(CefRefPtr<CefBrowser> browser) const;

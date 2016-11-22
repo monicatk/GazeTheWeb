@@ -90,6 +90,11 @@ void Tab::EmulateLeftMouseButtonUp(double x, double y, bool isScreenCoordinate)
 	_pCefMediator->EmulateLeftMouseButtonUp(this, x, y);
 }
 
+std::string Tab::GetClipboardText() const
+{
+	return _pCefMediator->GetClipboardText();
+}
+
 void Tab::InputTextData(int64 frameID, int nodeID, std::string text, bool submit)
 {
 	_pCefMediator->InputTextData(this, frameID, nodeID, text, submit);
