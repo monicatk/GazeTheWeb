@@ -533,10 +533,9 @@ void CefMediator::EmulateLeftMouseButtonDown(TabCEFInterface* pTab, double x, do
 		CefMouseEvent event;
 		event.x = x;
 		event.y = y;
-		event.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON;	// TODO: Do you really need this line
 
 		// Send mouse down event to tab
-		browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, false, 1); // keep mouse down
+		browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, false, 1);
 	}
 }
 
@@ -548,7 +547,6 @@ void CefMediator::EmulateLeftMouseButtonUp(TabCEFInterface* pTab, double x, doub
 		CefMouseEvent event;
 		event.x = x;
 		event.y = y;
-		event.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON;	// TODO: Do you really need this line
 
 		// Send mouse up event to tab
 		browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, true, 1);

@@ -104,8 +104,6 @@ public:
 	std::weak_ptr<OverflowElement> GetOverflowElement(CefRefPtr<CefBrowser> browser, int id);
 	void RemoveOverflowElement(CefRefPtr<CefBrowser> browser, int id);
 
-
-
 	/* DOM relevant methods */
 
 	// Used by BrowserMsgRouter to pass blank DOMNodes to Tab
