@@ -7,9 +7,8 @@ Basic Features
 - Search on page
 - Direct search of non URLs
 	--> Choose default search engine? Duckduckgo or Google for the start?
-- History / Inkognito
+- Inkognito
 - Https recognition and displaying of lock
-- Copy Paste / Selection
 - Get string of text input field to avoid overriding with empty string when accidentially hitting a text input trigger
 
 Advanced Features
@@ -17,10 +16,9 @@ Advanced Features
 - HTML5 Video Player support (replace tab bar with controlls and dim everything)
 - Page fullscreen handling
 - CSS Injection
-- Drag n Drop
+- Drag n Drop (really necessary?)
 - Right click and _own_ context menus (see JS Window Object)
 	(Javascript Popup Handling)
- - Rough selection via browser window (getstring) and precise selection in eyeGUI
 
 Problems
 - Transition events not properly fired --> CEF Update?
