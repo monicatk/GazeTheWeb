@@ -201,6 +201,22 @@ void Web::RemoveTab(int id)
 	}
 }
 
+void Web::RemoveAllTabs()
+{
+	// Push back ids of tabs
+	std::vector<int> ids(_tabs.size());
+	for (const auto& tab : _tabs)
+	{
+		ids.push_back(tab.first);
+	}
+
+	// Delegate work to remove tab method
+	for (int i = 0; i < ids.size(); i++)
+	{
+		RemoveTab(i);
+	}
+}
+
 bool Web::SwitchToTab(int id)
 {
     // Simple case

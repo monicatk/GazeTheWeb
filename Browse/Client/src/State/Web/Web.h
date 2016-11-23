@@ -31,14 +31,17 @@ public:
     // Destructor
     virtual ~Web();
 
-    // Add Tab and return id of it
+    // Add tab and return id of it
     int AddTab(std::string URL, bool show = true);
 
-    // Add Tab after another
+    // Add tab after another
     int AddTabAfter(Tab* other, std::string URL, bool show = true);
 
-    // Remove Tab
+    // Remove tab
     void RemoveTab(int id);
+
+	// Remove all tabs
+	void RemoveAllTabs();
 
     // Switch to tab. Returns whether successful
     bool SwitchToTab(int id);

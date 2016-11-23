@@ -196,7 +196,8 @@ private:
 	// Time of notification displaying
 	float _notificationTime;
 
-
+	// Boolean to indicate exiting the applicatoin
+	bool _exit = false;
 };
 
 #endif // MASTER_H_

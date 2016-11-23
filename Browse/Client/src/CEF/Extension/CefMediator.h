@@ -11,6 +11,7 @@
 #include "include/cef_browser.h"
 #include "include/cef_base.h"
 #include "src/CEF/Data/DOMNodeType.h"
+#include <set>
 #include <map>
 #include <memory>
 #include <queue>

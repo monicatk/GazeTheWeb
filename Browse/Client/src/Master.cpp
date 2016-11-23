@@ -393,7 +393,14 @@ double Master::GetTime() const
 
 void Master::Exit()
 {
-    glfwSetWindowShouldClose(_pWindow, GL_TRUE);
+	// Close all tabs
+	_upWeb->RemoveAllTabs();
+
+	// Stop update loop
+	_exit = true;
+
+	// Let CEF do a last message loop to be able to clean up
+	_pCefMediator->DoMessageLoopWork();
 }
 
 void Master::PushNotification(std::u16string content)
@@ -421,8 +428,15 @@ void Master::RemoveLayout(eyegui::Layout* pLayout)
 
 void Master::Loop()
 {
-	while (!glfwWindowShouldClose(_pWindow))
+	while (!_exit)
 	{
+		// Call exit when window should close
+		if (glfwWindowShouldClose(_pWindow))
+		{
+			Exit();
+			continue; // or break because _exit is set by Exit()
+		}
+
 		// Time per frame
 		double currentTime = glfwGetTime();
 		float tpf = std::min((float)(currentTime - _lastTime), 0.25f); // everything breaks when tpf too big
@@ -651,7 +665,7 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
     {
         switch (key)
         {
-            case GLFW_KEY_ESCAPE: { glfwSetWindowShouldClose(_pWindow, GL_TRUE); break; }
+            case GLFW_KEY_ESCAPE: { Exit(); break; }
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
             case GLFW_KEY_S: { _upLabStream->Send("42"); break; } // TODO: testing

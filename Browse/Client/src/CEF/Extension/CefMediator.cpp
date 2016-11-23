@@ -60,7 +60,6 @@ void CefMediator::RegisterTab(TabCEFInterface* pTab)
 
 void CefMediator::UnregisterTab(TabCEFInterface* pTab)
 {
-
     if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
     {
         // Close corresponding CefBrowser in Handler
