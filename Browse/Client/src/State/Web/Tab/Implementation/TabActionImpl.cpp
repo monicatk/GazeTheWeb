@@ -90,6 +90,11 @@ void Tab::EmulateLeftMouseButtonUp(double x, double y, bool isScreenCoordinate)
 	_pCefMediator->EmulateLeftMouseButtonUp(this, x, y);
 }
 
+void Tab::PutTextSelectionToClipboardAsync()
+{
+	_pCefMediator->PutTextSelectionToClipboardAsync(this);
+}
+
 std::string Tab::GetClipboardText() const
 {
 	return _pCefMediator->GetClipboardText();

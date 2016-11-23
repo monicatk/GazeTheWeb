@@ -28,7 +28,8 @@ bool TextSelectionAction::Update(float tpf, TabInput tabInput)
 		// End selection procedure
 		_pTab->EmulateLeftMouseButtonUp(screenCoordinate.x, screenCoordinate.y);
 
-		// TODO: copy selected string
+		// Copy selected string to clipboard. Maybe create extra action for this later
+		_pTab->PutTextSelectionToClipboardAsync();
 	}
 	else
 	{

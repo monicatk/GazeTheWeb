@@ -38,6 +38,9 @@ public:
 	// Emulate left mouse button up. Can be used to end text selection
 	virtual void EmulateLeftMouseButtonUp(double x, double y, bool isScreenCoordinate = true) = 0;
 
+	// Asynchronous javascript call
+	virtual void PutTextSelectionToClipboardAsync() = 0;
+
 	// Get text out of global clipboard in mediator
 	virtual std::string GetClipboardText() const = 0;
 

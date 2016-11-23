@@ -20,6 +20,9 @@ void Execute(CefRefPtr<App> app, std::string userDirectory)
     // Initialize master
     Master master(app.get(), userDirectory);
 
+	// Give app poiner to master (only functions exposed through interface are accessible)
+	app->SetMaster(&master);
+
     // Run master which communicates with CEF over mediator
     master.Run();
 

@@ -54,3 +54,4 @@ action_pivot_menu:selection=Selection
 pause:pause=Pause
 notification:bookmark_added_success=Successfully Added Bookmark
 notification:bookmark_added_existing=Bookmark Already Existed
+notification:ccopied_to_clipboard=Copied To Clipboard

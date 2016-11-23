@@ -14,6 +14,10 @@
 #include "include/wrapper/cef_helpers.h"
 #include "src/CEF/DevToolsHandler.h"
 
+void CefMediator::SetMaster(MasterNotificationInterface* pMaster)
+{
+	_pMaster = pMaster;
+}
 
 void CefMediator::RegisterTab(TabCEFInterface* pTab)
 {
@@ -550,11 +554,6 @@ void CefMediator::EmulateLeftMouseButtonUp(TabCEFInterface* pTab, double x, doub
 
 		// Send mouse up event to tab
 		browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, true, 1);
-
-		// Call JS GetTextSelection and receive selected text as string in MsgRouter
-		// TODO: maybe separate call? Yes, make extra method for this here
-		ClearClipboardText();
-		browser->GetMainFrame()->ExecuteJavaScript("GetTextSelection();", "", 0);
 	}
 }
 
@@ -585,9 +584,25 @@ void CefMediator::InvokePaste(TabCEFInterface * pTab, double x, double y)
 	}
 }
 
+void CefMediator::PutTextSelectionToClipboardAsync(TabCEFInterface* pTab)
+{
+	if (const CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
+	{
+		// Matter of taste whether to clear the clipboard or keep the current string until new one is set
+		ClearClipboardText();
+
+		// Asynchronous javascript call. See BrowserMsgRouter #select# in onQuery
+		browser->GetMainFrame()->ExecuteJavaScript("GetTextSelection();", "", 0);
+	}
+}
+
 void CefMediator::SetClipboardText(std::string text)
 {
+	// Set clipboard
 	_clipboard = text;
+
+	// Notify user about the new content of the clipboard
+	_pMaster->PushNotificationByKey("notification:ccopied_to_clipboard");
 }
 
 std::string CefMediator::GetClipboardText() const

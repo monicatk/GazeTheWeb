@@ -6,6 +6,7 @@
 #ifndef CEF_MEDIATOR_H_
 #define CEF_MEDIATOR_H_
 
+#include "src/MasterNotificationInterface.h"
 #include "src/CEF/Handler.h"
 #include "include/cef_browser.h"
 #include "include/cef_base.h"
@@ -31,6 +32,9 @@ typedef int BrowserID;
 class CefMediator : public CefBase
 {
 public:
+
+	// Setter for master pointer (MUST be called before usage)
+	void SetMaster(MasterNotificationInterface* pMaster);
 
     // Receive tab specific commands
     void RegisterTab(TabCEFInterface* pTab);
@@ -138,7 +142,7 @@ public:
 	void InvokePaste(TabCEFInterface* pTab, double x, double y);
 
 	// ### GLOBAL CLIPBOARD ###
-
+	void PutTextSelectionToClipboardAsync(TabCEFInterface* pTab); // asynchronous javascript call
 	void SetClipboardText(std::string text); // should be called by browser msg router
 	std::string GetClipboardText() const; // should be called by tab
 	void ClearClipboardText(); // should be called by mediator before asking Javascript to extract selected string from page
@@ -162,6 +166,9 @@ protected:
     // Use these methods for less coding overhead by checking if key exists in map
     TabCEFInterface* GetTab(CefRefPtr<CefBrowser> browser) const;
     CefRefPtr<CefBrowser> GetBrowser(TabCEFInterface* pTab) const;
+
+	// Pointer to master (but only functions exposed through the interface)
+	MasterNotificationInterface* _pMaster = NULL;
 
     IMPLEMENT_REFCOUNTING(CefMediator);
 };
