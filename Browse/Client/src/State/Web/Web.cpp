@@ -311,8 +311,31 @@ StateType Web::Update(float tpf, Input& rInput)
 		// Update it and wait for it to finish
 		if (_upHistory->Update())
 		{
-			// TODO either do nothing, set url of current tab or create new tab if none is there
+			// Update it and wait for finish of URL input
+			if (_upHistory->Update())
+			{
+				// Get input and decide
+				std::string URL = _upHistory->GetURL();
+				if (!URL.empty())
+				{
+					int tabId = _upHistory->GetCurrentTabId();
 
+					// Check whether tab id is valid
+					auto iter = _tabs.find(tabId);
+					if (iter != _tabs.end())
+					{
+						// Open URL in current tab
+						_tabs.at(tabId)->OpenURL(URL);
+					}
+					else
+					{
+						// Since there is no tab, create one
+						AddTab(URL, true);
+					}
+				}
+			}
+
+			// Input is done, deactivate it
 			_upHistory->Deactivate();
 		}
 	}

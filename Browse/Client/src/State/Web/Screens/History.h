@@ -8,13 +8,13 @@
 #ifndef HISTORY_H_
 #define HISTORY_H_
 
+#include "src/State/Web/Managers/HistoryManager.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 #include <string>
 #include <vector>
 
 // Forward declaration
 class Master;
-class HistoryManager;
 
 class History
 {
@@ -87,6 +87,9 @@ private:
 
 	// Id of current tab
 	int _currentTabId = -1;
+
+	// Hold copy of pages in order to access their URL at interaction
+	std::deque<HistoryManager::Page> _pages;
 };
 
 #endif // HISTORY_H_

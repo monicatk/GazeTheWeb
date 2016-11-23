@@ -8,6 +8,7 @@
 #define HISTORYMANAGER_H_
 
 #include <string>
+#include <deque>
 #include <vector>
 
 class HistoryManager
@@ -31,7 +32,8 @@ public:
 	void AddPage(Page page);
 
 	// Get history (TODO: get history from certain date etc)
-	std::vector<Page> GetHistory() const;
+	std::deque<Page> GetHistory() const;
+	std::deque<Page> GetHistory(int count) const;
 
 private:
 
@@ -48,7 +50,7 @@ private:
 	bool FilterPage(Page page) const;
 
 	// Vector of pages
-	std::vector<Page> _pages;
+	std::deque<Page> _pages;
 
 	// Fullpath to history file
 	std::string _fullpathHistory;

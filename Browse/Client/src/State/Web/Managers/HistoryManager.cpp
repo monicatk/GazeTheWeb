@@ -34,7 +34,7 @@ void HistoryManager::AddPage(Page page)
 	}
 
 	// Add to vector storing pages
-	_pages.push_back(page);
+	_pages.push_front(page);
 
 	// Try to open XML file
 	tinyxml2::XMLDocument doc;
@@ -107,9 +107,27 @@ void HistoryManager::AddPage(Page page)
 	}
 }
 
-std::vector<HistoryManager::Page> HistoryManager::GetHistory() const
+std::deque<HistoryManager::Page> HistoryManager::GetHistory() const
 {
 	return _pages;
+}
+
+std::deque<HistoryManager::Page> HistoryManager::GetHistory(int count) const
+{
+	// When count is negative or zero
+	if (count <= 0)
+	{
+		return std::deque<HistoryManager::Page>();
+	}
+
+	// Count is limited by size of page deque
+	if (count > _pages.size())
+	{
+		count = _pages.size();
+	}
+
+	// Return sublist of pages
+	return std::deque<HistoryManager::Page>(_pages.begin(), _pages.begin() + count);
 }
 
 bool HistoryManager::LoadHistory()
