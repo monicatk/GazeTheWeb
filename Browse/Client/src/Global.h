@@ -50,10 +50,10 @@ static const std::string SETTINGS_FILE = "settings.xml";
 static const int URL_INPUT_BOOKMARKS_ROWS_ON_SCREEN = 6;
 static const int HISTORY_ROWS_ON_SCREEN = 6;
 static const int HISTORY_DISPLAY_COUNT = 20;
-static const float NOTIFICATION_WIDTH = 0.3f;
+static const float NOTIFICATION_WIDTH = 0.75f;
 static const float NOTIFICATION_Y = 0.0075f;
-static const float NOTIFICATION_HEIGHT = 0.03f;
-static const float NOTIFICATION_DISPLAY_DURATION = 3.f;
+static const float NOTIFICATION_HEIGHT = 0.06f;
+static const float NOTIFICATION_DISPLAY_DURATION = 5.f;
 static const float CLICK_VISUALIZATION_DURATION = 0.75f;
 static const float CLICK_VISUALIZATION_RELATIVE_SIZE = 0.4f;
 
