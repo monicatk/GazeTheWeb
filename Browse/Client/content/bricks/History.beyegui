@@ -5,7 +5,18 @@
 			<blank/>
 		</column>
 		<column size="80%">
-			<textblock border="10%" id="url" alignment="left" verticalalignment="center"/>
+			<grid>
+				<row size="60%">
+					<column size="100%">
+						<textblock border="10%" id="title" alignment="left" verticalalignment="center"/>
+					</column>
+				</row>
+				<row size="40%">
+					<column size="100%">
+						<textblock border="10%" id="url" alignment="left" verticalalignment="center" fontsize="small"/>
+					</column>
+				</row>
+			</grid>
 		</column>
 		<column size="15%">
 			<boxbutton icon="icons/Select.png" desckey="history:select" id="select"/>

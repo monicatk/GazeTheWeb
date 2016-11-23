@@ -80,6 +80,9 @@ void History::Activate(int tabId)
 			// URL id
 			std::string URLId = "url_" + std::to_string(i);
 
+			// Title id
+			std::string titleId = "title_" + std::to_string(i);
+
 			// Select id
 			std::string selectId = "select_" + std::to_string(i);
 
@@ -87,6 +90,7 @@ void History::Activate(int tabId)
 			idMapper.clear();
 			idMapper.emplace("grid", brickId);
 			idMapper.emplace("url", URLId);
+			idMapper.emplace("title", titleId);
 			idMapper.emplace("select", selectId);
 
 			// Add brick to stack, which was added by flow brick
@@ -98,6 +102,9 @@ void History::Activate(int tabId)
 
 			// Set content of displayed URL
 			eyegui::setContentOfTextBlock(_pLayout, URLId, _pages.at(i).URL);
+
+			// Set content of display title
+			eyegui::setContentOfTextBlock(_pLayout, titleId, _pages.at(i).title);
 
 			// Register button listener for select buttons
 			eyegui::registerButtonListener(_pLayout, selectId, _spHistoryButtonListener);
