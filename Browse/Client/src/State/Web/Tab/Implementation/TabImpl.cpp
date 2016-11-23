@@ -214,9 +214,12 @@ void Tab::Update(float tpf, Input& rInput)
 	std::vector<Rect> rects;
 	for (const auto& rDOMNode : _DOMTextLinks)
 	{
-		for (const auto& rRect : rDOMNode->GetRects())
+		if (rDOMNode->GetVisibility()) // only proceed if currently visible
 		{
-			rects.push_back(rRect);
+			for (const auto& rRect : rDOMNode->GetRects())
+			{
+				rects.push_back(rRect);
+			}
 		}
 	}
 	_upWebView->SetHighlightRects(rects);
