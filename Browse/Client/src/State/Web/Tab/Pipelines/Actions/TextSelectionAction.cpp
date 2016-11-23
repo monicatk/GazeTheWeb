@@ -6,7 +6,7 @@
 #include "TextSelectionAction.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 
-TextSelectionAction::TextSelectionAction(TabInteractionInterface *pTab) : ZoomCoordinateAction(pTab)
+TextSelectionAction::TextSelectionAction(TabInteractionInterface *pTab) : ZoomCoordinateAction(pTab, false)
 {
 	// Add in- and output data slots
 	AddVec2InputSlot("coordinate");

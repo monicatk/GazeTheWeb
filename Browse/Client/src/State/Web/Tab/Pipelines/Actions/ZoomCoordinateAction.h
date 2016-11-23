@@ -18,7 +18,7 @@ class ZoomCoordinateAction : public Action
 public:
 
     // Constructor
-    ZoomCoordinateAction(TabInteractionInterface* pTab);
+    ZoomCoordinateAction(TabInteractionInterface* pTab, bool doDimming = true);
 
     // Update retuns whether finished with execution
     virtual bool Update(float tpf, TabInput tabInput);
@@ -92,6 +92,9 @@ protected:
 
 	// Queue for recording data which is used as click to compensate calibration errors
 	std::deque<ZoomData> _zoomDataQueue;
+
+	// Do dimming
+	bool _doDimming = true;
 };
 
 #endif // ZOOMCOORDINATEACTION_H_

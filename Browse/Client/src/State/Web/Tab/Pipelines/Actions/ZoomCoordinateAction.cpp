@@ -8,8 +8,11 @@
 #include "submodules/glm/glm/gtx/vector_angle.hpp"
 #include <algorithm>
 
-ZoomCoordinateAction::ZoomCoordinateAction(TabInteractionInterface* pTab) : Action(pTab)
+ZoomCoordinateAction::ZoomCoordinateAction(TabInteractionInterface* pTab, bool doDimming) : Action(pTab)
 {
+	// Save members
+	_doDimming = doDimming;
+
     // Add in- and output data slots
     AddVec2OutputSlot("coordinate");
 }
@@ -196,7 +199,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	webViewParameters.centerOffset = _coordinateCenterOffset;
 	webViewParameters.zoom = _logZoom;
 	webViewParameters.zoomPosition = _coordinate;
-	webViewParameters.dim = DIMMING_VALUE * (_dimming / DIMMING_DURATION);
+	if (_doDimming) { webViewParameters.dim = DIMMING_VALUE * (_dimming / DIMMING_DURATION); }
 	_pTab->SetWebViewParameters(webViewParameters);
 
 	// Save values in queue
