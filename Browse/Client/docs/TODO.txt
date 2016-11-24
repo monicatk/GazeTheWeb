@@ -1,18 +1,13 @@
-Basic Features
+Features (ordered)
 - Scrolling within page (OverflowElements)
 	--> TODO: Activate Cookies in order to be able to test Facebooks Chat
 - Auto Fill / Password Manager
 	- Daniel: Passwort / Sign in form recognition
 	- Raphael: Secure Password Keyboard mode?
-- Search on page
-- Direct search of non URLs
-	--> Choose default search engine? Duckduckgo or Google for the start?
 - Inkognito
-- Https recognition and displaying of lock
 - Get string of text input field to avoid overriding with empty string when accidentially hitting a text input trigger
-
-Advanced Features
-- Test image editing with web application
+- Search on page
+- Https recognition and displaying of lock
 - HTML5 Video Player support (replace tab bar with controlls and dim everything)
 - Page fullscreen handling
 - CSS Injection
