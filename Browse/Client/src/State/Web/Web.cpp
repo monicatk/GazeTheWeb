@@ -46,6 +46,11 @@ Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)
     eyegui::registerButtonListener(_pTabOverviewLayout, "reload_tab", _spWebButtonListener);
     eyegui::registerButtonListener(_pTabOverviewLayout, "edit_url", _spWebButtonListener);
 	eyegui::registerButtonListener(_pTabOverviewLayout, "bookmark_tab", _spWebButtonListener);
+
+	// Regular expression for URL validation
+	_upURLregex = std::make_unique<std::regex>(
+		_pURLregexExpression,
+		std::regex_constants::icase);
 }
 
 Web::~Web()
@@ -366,6 +371,13 @@ StateType Web::Update(float tpf, Input& rInput)
             std::string URL = _upURLInput->GetURL();
             if (!URL.empty())
             {
+				// Validate URL
+				if (!ValidateURL(URL))
+				{
+					URL = SEARCH_PREFIX + URL;
+				}
+
+				// Fetch tab id from URL input object
                 int tabId = _upURLInput->GetCurrentTabId();
 
                 // Check whether tab id is valid
@@ -740,6 +752,11 @@ void Web::UpdateTabOverviewIcon()
 		iconFilepath = "icons/TabOverview_9+.png";
 	}
 	eyegui::setIconOfIconElement(_pWebLayout, "tab_overview", iconFilepath);
+}
+
+bool Web::ValidateURL(const std::string& rURL) const
+{
+	return std::regex_match(rURL, *(_upURLregex.get()));
 }
 
 Web::TabJob::TabJob(Tab* pCaller)

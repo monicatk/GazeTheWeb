@@ -17,6 +17,7 @@
 #include <vector>
 #include <memory>
 #include <stack>
+#include <regex>
 
 // Forward declaration
 class CefMediator;
@@ -182,6 +183,9 @@ private:
 	// Update icon of tab overview
 	void UpdateTabOverviewIcon();
 
+	// Validate URL
+	bool ValidateURL(const std::string& rURL) const;
+
     // Maps id to Tab
     std::map<int, std::unique_ptr<Tab> > _tabs;
 
@@ -218,6 +222,16 @@ private:
 
 	// URL input object
 	std::unique_ptr<URLInput> _upURLInput;
+
+	// Regex for URL validation
+	std::unique_ptr<std::regex> _upURLregex;
+	const char* _pURLregexExpression =
+		"(https?://)?"		// optional http or https
+		"([\\da-z\\.-]+)"	// domain name (any number, dot and character from a to z)
+		"\\."				// dot between name and domain
+		"([a-z\\.]{2,6})"	// domain itself
+		"([/\\w\\.-]*)*"	// folder structure
+		"/?";				// optional last dash
 };
 
 #endif // WEB_H_
