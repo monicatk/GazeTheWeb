@@ -9,6 +9,7 @@
 #include "src/Global.h"
 #include "src/Utils/Helper.h"
 #include "src/Utils/Texture.h"
+#include "src/Utils/MakeUnique.h"
 #include <algorithm>
 
 Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)

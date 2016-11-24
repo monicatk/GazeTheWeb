@@ -9,6 +9,7 @@
 #include "src/State/Web/Tab/Pipelines/PivotMenuPipeline.h"
 #include "src/State/Web/Tab/Pipelines/TextSelectionPipeline.h"
 #include "src/CEF/Extension/CefMediator.h"
+#include "src/Utils/MakeUnique.h"
 
 void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 {

@@ -5,6 +5,7 @@
 
 #include "TextSelectionPipeline.h"
 #include "src/State/Web/Tab/Pipelines/Actions/TextSelectionAction.h"
+#include "src/Utils/MakeUnique.h"
 
 TextSelectionPipeline::TextSelectionPipeline(TabInteractionInterface* pTab, glm::vec2 startCoordinate) : Pipeline(pTab)
 {
