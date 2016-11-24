@@ -72,7 +72,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			_deviation = glm::max(glm::length(delta), _deviation);			
 
             // Move to new click position (weighted by zoom level for more smoothness at higher zoom, since zoom value gets smaller at higher zoom)
-            _coordinate += delta * tpf * _logZoom;
+			_coordinate += delta * tpf; // *_logZoom; // TODO TESTING
 
 			// If at the moment a high deviation is given, try to zoom out to give user more overview
 			zoomSpeed = ZOOM_SPEED - glm::min(1.f, 3.f * _deviation); // [-0.5, 0.5]
