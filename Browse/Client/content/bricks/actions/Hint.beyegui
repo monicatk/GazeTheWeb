@@ -1,5 +1,16 @@
 <?xml version="1.0"?>
-<stack direction="vertical" separator="0.1%" style="tab_overlay">
-	<textblock id="text_block"/>
-	<circlebutton id="button" icon="icons/Ok.png"/>
-</stack>
+<grid style="tab_overlay" showbackground="true" consumeinput="true" border="20%">
+	<row size="60%">
+		<column size="100%">
+			<textblock id="text_block" alignment="center" verticalalignment="center"/>
+		</column>
+	</row>
+	<row size="30%">
+		<column size="100%">
+			<circlebutton id="button" icon="icons/Ok.png" desckey="action_hint:continue"/>
+		</column>
+	</row>
+	<row size="10%">
+		<column size="100%"/>
+	</row>
+</grid>
