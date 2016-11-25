@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
-<stack direction="horizontal" separator="0.1%" style="tab_overlay">
-	<circlebutton id="button"/>
+<stack direction="vertical" separator="0.1%" style="tab_overlay">
+	<textblock id="text_block"/>
+	<circlebutton id="button" icon="icons/Ok.png"/>
 </stack>

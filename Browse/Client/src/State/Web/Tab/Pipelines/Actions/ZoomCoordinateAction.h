@@ -59,7 +59,7 @@ protected:
 	const float CENTER_OFFSET_MULTIPLIER = 0.5f;
 
 	// Speed of zoom
-	const float ZOOM_SPEED = 0.6f;
+	const float ZOOM_SPEED = 0.4f;
 
 	// Maximal time which is looked back at compensation of calibration errors
 	const float LOOK_BACK_TIME = 0.5f;

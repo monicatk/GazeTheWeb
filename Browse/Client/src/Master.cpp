@@ -426,6 +426,11 @@ void Master::RemoveLayout(eyegui::Layout* pLayout)
     eyegui::removeLayout(_pGUI, pLayout);
 }
 
+std::u16string Master::FetchLocalization(std::string key) const
+{
+	return eyegui::fetchLocalization(_pGUI, key);
+}
+
 void Master::Loop()
 {
 	while (!_exit)

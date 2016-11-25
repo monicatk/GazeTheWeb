@@ -83,6 +83,9 @@ public:
     // Remove layout from eyeGUI
     void RemoveLayout(eyegui::Layout* pLayout);
 
+	// Fetch localization string by key
+	std::u16string FetchLocalization(std::string key) const;
+
 	// ### SETTINGS ACCESS ###
 
 	// Set homepage URL in settings

@@ -12,7 +12,7 @@
 TextSelectionPipeline::TextSelectionPipeline(TabInteractionInterface* pTab) : Pipeline(pTab)
 {
     // Add hint action
-    auto spStartHintAction = std::make_shared<HintAction>(_pTab, "hint:start_selection", "start_selection");
+    auto spStartHintAction = std::make_shared<HintAction>(_pTab, "action_hint:start_selection", "start_selection");
     _actions.push_back(spStartHintAction);
 
     // Add zoom coordinate to determine start of text selection
@@ -20,7 +20,7 @@ TextSelectionPipeline::TextSelectionPipeline(TabInteractionInterface* pTab) : Pi
     _actions.push_back(spZoomCoordinateAction);
 
     // Add hint action
-    auto spEndHintAction = std::make_shared<HintAction>(_pTab, "hint:end_selection", "end_selection");
+    auto spEndHintAction = std::make_shared<HintAction>(_pTab, "action_hint:end_selection", "end_selection");
     _actions.push_back(spEndHintAction);
 
 	// Add text selection action

@@ -8,16 +8,14 @@
 
 HintAction::HintAction(TabInteractionInterface *pTab, std::string key, std::string id) : Action(pTab)
 {
-    // TODO
-    // - Delay after done
-    // - Textblock
-
     // Create id, which is unique in overlay
     _overlayButtonId = "hint_button_" + id;
+	_overlayTextBlockId = "hint_text_block_" + id;
 
     // Id mapper for brick to change ids from file to the used ones
     std::map<std::string, std::string> idMapper;
     idMapper.emplace("button", _overlayButtonId);
+	idMapper.emplace("text_block", _overlayTextBlockId);
 
     // Calculate size of overlay
     float x, y, sizeX, sizeY;
@@ -34,10 +32,13 @@ HintAction::HintAction(TabInteractionInterface *pTab, std::string key, std::stri
         _overlayButtonId,
         [&]() // down callback
         {
+			_pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, false);
             this->_done = true;
         },
         [](){}); // up callback
 
+	// Set content of text block
+	_pTab->SetContentOfTextBlock(_overlayTextBlockId, key);
 }
 
 HintAction::~HintAction()
@@ -51,22 +52,36 @@ HintAction::~HintAction()
 
 bool HintAction::Update(float tpf, TabInput tabInput)
 {
-    return _done;
+	if(_done)
+	{
+		if (_waitDuration <= 0)
+		{
+			return true;
+		}
+		_waitDuration -= tpf;
+	}
+    return false;
 }
 
 void HintAction::Draw() const
 {
-
+	// Nothing to do
 }
 
 void HintAction::Activate()
 {
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, true);
+	if (!_done)
+	{
+		_pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, true);
+	}
 }
 
 void HintAction::Deactivate()
 {
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, false);
+	if (!_done)
+	{
+		_pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, false);
+	}
 }
 
 void HintAction::Abort()

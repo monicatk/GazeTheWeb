@@ -43,8 +43,14 @@ protected:
     // Id of button in overlay
     std::string _overlayButtonId;
 
+	// Id of text block in overlay
+	std::string _overlayTextBlockId;
+
     // Bool which indicates whether input is complete
     bool _done = false;
+
+	// Waiting duration after hint has been vanished in seconds
+	float _waitDuration = 0.75f;
 };
 
 #endif // HINTACTION_H_
