@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<stack direction="horizontal" separator="0.1%" style="tab_overlay">
+	<circlebutton id="button"/>
+</stack>

@@ -54,5 +54,5 @@ void TextSelectionAction::Activate()
 void TextSelectionAction::Deactivate()
 {
     // Reset mouse state
-    _pTab->EmulateLeftMouseButtonUp(screenCoordinate.x, screenCoordinate.y);
+    _pTab->EmulateLeftMouseButtonUp(0, 0);
 }
