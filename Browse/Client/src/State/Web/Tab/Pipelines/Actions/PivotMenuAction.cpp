@@ -71,6 +71,7 @@ PivotMenuAction::PivotMenuAction(TabInteractionInterface *pTab) : Action(pTab)
         "pivot_right_click",
         [&]() // down callback
         {
+            // TODO
             _done= true;
         },
         [](){}); // up callback

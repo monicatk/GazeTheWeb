@@ -27,6 +27,9 @@ public:
     // Activate
     virtual void Activate();
 
+    // Deactivate
+    virtual void Deactivate();
+
 protected:
 
 

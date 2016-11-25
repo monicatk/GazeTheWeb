@@ -95,6 +95,7 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
     // eyegui::registerButtonListener(_pPanelLayout, "scroll_to_top", _spTabButtonListener);
     // eyegui::registerButtonListener(_pPanelLayout, "pivot", _spTabButtonListener);
     eyegui::registerButtonListener(_pPanelLayout, "gaze_mouse", _spTabButtonListener);
+    eyegui::registerButtonListener(_pPanelLayout, "selection", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPanelLayout, "zoom", _spTabButtonListener);
 	// eyegui::registerButtonListener(_pPanelLayout, "test_button", _spTabButtonListener); // TODO: only for testing new features
 	eyegui::registerButtonListener(_pPipelineAbortLayout, "abort", _spTabButtonListener);

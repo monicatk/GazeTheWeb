@@ -50,3 +50,9 @@ void TextSelectionAction::Activate()
 	GetInputValue("coordinate", startCoordinate);
 	_pTab->EmulateLeftMouseButtonDown(startCoordinate.x, startCoordinate.y);
 }
+
+void TextSelectionAction::Deactivate()
+{
+    // Reset mouse state
+    _pTab->EmulateLeftMouseButtonUp(screenCoordinate.x, screenCoordinate.y);
+}

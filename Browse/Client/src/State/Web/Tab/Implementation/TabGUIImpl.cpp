@@ -39,6 +39,10 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
         {
             _pTab->_gazeMouse = true;
         }
+        else if (id == "selection")
+        {
+            _pTab->PushBackPipeline(std::make_unique<TextSelectionPipeline>(_pTab));
+        }
         /*
         else if (id == "pivot")
         {
