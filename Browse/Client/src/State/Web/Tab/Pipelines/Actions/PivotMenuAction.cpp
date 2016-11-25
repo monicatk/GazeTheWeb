@@ -75,21 +75,6 @@ PivotMenuAction::PivotMenuAction(TabInteractionInterface *pTab) : Action(pTab)
         },
         [](){}); // up callback
 
-    // Selection button
-    _pTab->RegisterButtonListenerInOverlay(
-        "pivot_selection",
-        [&]() // down callback
-        {
-		// If coordinate set, do start text selection
-		glm::vec2 coordinate;
-			if (this->GetInputValue("coordinate", coordinate))
-			{
-				_pTab->PushBackPipeline(std::unique_ptr<TextSelectionPipeline>(new TextSelectionPipeline(_pTab, coordinate)));
-			}
-            _done= true;
-        },
-        [](){}); // up callback
-
     // ### Pivot overlay ###
 
     // Position is set at activation when coordinate is known
