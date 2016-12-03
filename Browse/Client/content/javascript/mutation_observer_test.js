@@ -869,7 +869,7 @@ function MutationObserverInit()
 		  					{
 								if(window.getComputedStyle(node, null).getPropertyValue('position') === 'fixed')
 								{
-									ConsolePrint("Trying to AddFixedElement...");
+									// ConsolePrint("Trying to AddFixedElement...");
 									AddFixedElement(node);
 									// Update every Rect, just in case anything changed due to an additional fixed element
 									UpdateDOMRects();

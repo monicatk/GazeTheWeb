@@ -31,52 +31,6 @@ bool RenderProcessHandler::OnProcessMessageReceived(
     if (msgName == "GetDOMElements")
     {
 		IPCLogDebug(browser, "Renderer: Reached old code 'GetDOMElements' msg");
-    //    long long frameID = (long long) msg->GetArgumentList()->GetDouble(0);
-    //    CefRefPtr<CefFrame> frame = browser->GetFrame(frameID);
-
-    //    CefRefPtr<CefV8Context> context = frame->GetV8Context();
-    //    // Return global object for this context
-    //    CefRefPtr<CefV8Value> global = context->GetGlobal();
-
-    //    // Determine number of each DOM element
-    //    IPCLogDebug(browser, "Updating size of text input array via Javascript");
-    //    frame->ExecuteJavaScript(_js_dom_update_sizes, frame->GetURL(), 0);
-
-    //    int arraySize = 0;
-    //    if (context->Enter())
-    //    {
-    //        arraySize += global->GetValue("sizeTextInputs")->GetUIntValue();
-    //        context->Exit();
-    //    }
-    //    IPCLogDebug(browser, "Found " + std::to_string(arraySize) + " objects to be packed into IPC msg");
-
-    //    if (arraySize > 0)
-    //    {
-    //        // Add array of container arrays to JS
-    //        V8_Container v8Container(domNodeScheme);
-    //        v8Container.AddContainerArray(context, "TextInputs", arraySize);
-
-    //        // Fill container array in JS with data
-    //        frame->ExecuteJavaScript(_js_dom_fill_arrays, frame->GetURL(), 0);
-
-    //        // Create IPC message, which is to be filled with data
-    //        CefRefPtr<CefProcessMessage> DOMmsg = CefProcessMessage::Create("ReceiveDOMElements");
-
-    //        // Read out data in JS container array and write it to IPC message
-    //        IPC_Container ipcContainer(domNodeScheme);
-    //        ipcContainer.ReadContainerObjectsAndWriteToIPCMsg(
-    //            context,										// Frame's V8 context in order to read out JS variables
-    //            "TextInputs",									// Container arrays variable name in JS
-    //            std::vector<int>{ arraySize },					// Amount of each different node types
-    //            frameID,										// First position in message is frameID
-				//DOMmsg);											// Message to be filled with value's from JS container array
-
-    //        // Send read-out DOM node data to browser process
-    //        browser->SendProcessMessage(PID_BROWSER, DOMmsg);
-    //        IPCLogDebug(browser, "Finished reading DOM node data, sending IPC msg to Handler with node information");
-    //    }
-    //    return true;
-
     }
 
     // EXPERIMENTAL: Handle request of favicon image bytes
@@ -98,44 +52,52 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 		{
             CefRefPtr<CefV8Value> globalObj = context->GetGlobal();
 
-			height = globalObj->GetValue("favIconHeight")->GetDoubleValue();
-			width = globalObj->GetValue("favIconWidth")->GetDoubleValue();
+			if (globalObj->GetValue("favIconHeight")->IsDouble() && globalObj->GetValue("favIconWidth")->IsDouble())
+			{
+				height = globalObj->GetValue("favIconHeight")->GetDoubleValue();
+				width = globalObj->GetValue("favIconWidth")->GetDoubleValue();
 
+				// Fill msg args with help of this index variable
+				int index = 0;
+				// Write image resolution to IPC response
+				args->SetInt(index++, width);
+				args->SetInt(index++, height);
 
-            // Fill msg args with help of this index variable
-            int index = 0;
-            // Write image resolution to IPC response
-            args->SetInt(index++, width);
-            args->SetInt(index++, height);
+				if (width > 0 && height > 0)
+				{
+					IPCLogDebug(browser, "Reading bytes of favicon (w: " + std::to_string(width) + ", h: " + std::to_string(height) + ")");
 
-            if (width > 0 && height > 0)
-            {
-                IPCLogDebug(browser, "Reading bytes of favicon (w: " + std::to_string(width) +", h: " + std::to_string(height) + ")");
+					CefRefPtr<CefV8Value> byteArray = globalObj->GetValue("favIconData");
 
-				CefRefPtr<CefV8Value> byteArray = globalObj->GetValue("favIconData");
+					// Fill byte array with JS
+					browser->GetMainFrame()->ExecuteJavaScript(_js_favicon_copy_img_bytes_to_v8array, browser->GetMainFrame()->GetURL(), 0);
 
-                // Fill byte array with JS
-                browser->GetMainFrame()->ExecuteJavaScript(_js_favicon_copy_img_bytes_to_v8array, browser->GetMainFrame()->GetURL(), 0);
-
-                // Read out each byte and write it to IPC msg
-                byteArray = context->GetGlobal()->GetValue("favIconData");
-                for (int i = 0; i < width*height; i++)
-                {
-                    args->SetInt(index++, byteArray->GetValue(i)->GetIntValue());
-                    byteArray->DeleteValue(i);
-                }
-
-                // Release V8 value afterwards
-                globalObj->DeleteValue("favIconData");
-            }
+					// Read out each byte and write it to IPC msg
+					bool error_occured = false;
+					for (int i = 0; i < byteArray->GetArrayLength(); i++)
+					{
+						error_occured = error_occured || byteArray->GetValue(i)->IsInt();
+						if (error_occured)
+						{
+							args->SetInt(index++, byteArray->GetValue(i)->GetIntValue());
+						}
+					}
+					
+					if(!error_occured)
+						browser->SendProcessMessage(PID_BROWSER, msg);
+				}
+				else
+				{
+					IPCLogDebug(browser, "Invalid favicon image resolution: w=" + std::to_string(width) + ", h=" + std::to_string(height));
+				}
+			}
 			else
 			{
-				IPCLogDebug(browser, "Invalid favicon image resolution: w=" + std::to_string(width) + ", h=" + std::to_string(height));
+				IPCLogDebug(browser, "Renderer: Failed to load favicon height and/or width, expected double value, got something different. Aborting.");
 			}
-
             context->Exit();
         }
-        browser->SendProcessMessage(PID_BROWSER, msg);
+
     }
 
     if (msgName == "GetPageResolution")
@@ -146,14 +108,21 @@ bool RenderProcessHandler::OnProcessMessageReceived(
         {
             CefRefPtr<CefV8Value> global = context->GetGlobal();
 
-            double pageWidth = global->GetValue("_pageWidth")->GetDoubleValue();
-            double pageHeight = global->GetValue("_pageHeight")->GetDoubleValue();
+			if (global->GetValue("_pageWidth")->IsDouble() && global->GetValue("_pageHeight")->IsDouble())
+			{
+				double pageWidth = global->GetValue("_pageWidth")->GetDoubleValue();
+				double pageHeight = global->GetValue("_pageHeight")->GetDoubleValue();
 
-            msg = CefProcessMessage::Create("ReceivePageResolution");
-            msg->GetArgumentList()->SetDouble(0, pageWidth);
-            msg->GetArgumentList()->SetDouble(1, pageHeight);
-            browser->SendProcessMessage(PID_BROWSER, msg);
-
+				msg = CefProcessMessage::Create("ReceivePageResolution");
+				msg->GetArgumentList()->SetDouble(0, pageWidth);
+				msg->GetArgumentList()->SetDouble(1, pageHeight);
+				browser->SendProcessMessage(PID_BROWSER, msg);
+			}
+			else
+			{
+				IPCLogDebug(browser, "Renderer: Failed to read page width and/or height, expected double value, got something different. Aborting.");
+			}
+            
             context->Exit();
         }
         return true;
@@ -173,8 +142,19 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			CefRefPtr<CefListValue> args = msg->GetArgumentList();
 
 			CefRefPtr<CefV8Value> global = context->GetGlobal();
-			//CefRefPtr<CefV8Value> coordsArray = global->GetValue("fixed_coordinates")->GetValue(fixedId);
-			CefRefPtr<CefV8Value> fixedObj = global->GetValue("domFixedElements")->GetValue(fixedId);
+			
+			CefRefPtr<CefV8Value> fixedObj;
+			if (global->HasValue("domFixedElements"))
+			{
+				fixedObj = global->GetValue("domFixedElements")->GetValue(fixedId);
+			}
+			else
+			{
+				IPCLogDebug(browser, "Renderer: List of fixed elements does not seem to exist yet. Aborting fetching them.");
+				return true;
+			}
+			
+			
 			//CefRefPtr<CefV8Value> rectsArray = fixedObj->GetValue("rects");
 			
 			int index = 0;
@@ -209,80 +189,12 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 
 	if (msgName == "FetchDOMTextLink")
 	{
-		CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
-
-		if (context->Enter())
-		{
-			int id = msg->GetArgumentList()->GetInt(0);
-
-			CefRefPtr<CefV8Value> global = context->GetGlobal();
-			CefRefPtr<CefV8Value> domLinkNode = global->GetValue("dom_links")->GetValue(id);
-			CefRefPtr<CefV8Value> domLinkRect = global->GetValue("dom_links_rect")->GetValue(id);
-
-			const std::string text = domLinkNode->GetValue("text")->GetStringValue();
-			const std::string url = domLinkNode->GetValue("href")->GetStringValue();
-
-			std::vector<double> coords;
-			for (int i = 0; i < domLinkRect->GetArrayLength(); i++)
-			{
-				coords.push_back(domLinkRect->GetValue(i)->GetDoubleValue());
-			}
-
-			msg = CefProcessMessage::Create("CreateDOMTextLink");
-			CefRefPtr<CefListValue> args = msg->GetArgumentList();
-
-			int index = 0;
-			args->SetInt(index++, id);
-			args->SetString(index++, text);
-			args->SetString(index++, url);
-
-			for (int i = 0; i < (int)coords.size(); i++)
-			{
-				args->SetDouble(index++, coords[i]);
-			}
-
-			browser->SendProcessMessage(PID_BROWSER, msg);
-
-			context->Exit();
-		}
+		IPCLog(browser, "Renderer: Received Deprecated FetchDOMTextLink message!");
 	}
 
 	if (msgName == "FetchDOMTextInput")
 	{
-		CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
-
-		if (context->Enter())
-		{
-			int id = msg->GetArgumentList()->GetInt(0);
-
-			CefRefPtr<CefV8Value> global = context->GetGlobal();
-			CefRefPtr<CefV8Value> domLinkNode = global->GetValue("dom_textinputs")->GetValue(id);
-			CefRefPtr<CefV8Value> domLinkRect = global->GetValue("dom_textinputs_rect")->GetValue(id);
-
-			const std::string text = domLinkNode->GetValue("text")->GetStringValue();
-
-			std::vector<double> coords;
-			for (int i = 0; i < domLinkRect->GetArrayLength(); i++)
-			{
-				coords.push_back(domLinkRect->GetValue(i)->GetDoubleValue());
-			}
-
-			msg = CefProcessMessage::Create("CreateDOMTextInput");
-			CefRefPtr<CefListValue> args = msg->GetArgumentList();
-
-			int index = 0;
-			args->SetInt(index++, id);
-			args->SetString(index++, text);
-
-			for (int i = 0; i < (int)coords.size(); i++)
-			{
-				args->SetDouble(index++, coords[i]);
-			}
-
-			browser->SendProcessMessage(PID_BROWSER, msg);
-
-			context->Exit();
-		}
+		IPCLog(browser, "Renderer: Received Deprecated FetchDOMTextInput message!");
 	}
 
 	if (msgName == "LoadDOMNodeData")
