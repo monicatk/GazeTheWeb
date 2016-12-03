@@ -6,6 +6,7 @@
 #include "PivotMenuAction.h"
 #include "src/State/Web/Tab/Pipelines/LeftMouseButtonClickPipeline.h"
 #include "src/State/Web/Tab/Pipelines/LeftMouseButtonDoubleClickPipeline.h"
+#include "src/State/Web/Tab/Pipelines/TextSelectionPipeline.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 
 PivotMenuAction::PivotMenuAction(TabInteractionInterface *pTab) : Action(pTab)
@@ -70,15 +71,7 @@ PivotMenuAction::PivotMenuAction(TabInteractionInterface *pTab) : Action(pTab)
         "pivot_right_click",
         [&]() // down callback
         {
-            _done= true;
-        },
-        [](){}); // up callback
-
-    // Selection button
-    _pTab->RegisterButtonListenerInOverlay(
-        "pivot_selection",
-        [&]() // down callback
-        {
+            // TODO
             _done= true;
         },
         [](){}); // up callback

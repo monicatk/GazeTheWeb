@@ -20,6 +20,9 @@ void Execute(CefRefPtr<App> app, std::string userDirectory)
     // Initialize master
     Master master(app.get(), userDirectory);
 
+	// Give app poiner to master (only functions exposed through interface are accessible)
+	app->SetMaster(&master);
+
     // Run master which communicates with CEF over mediator
     master.Run();
 
@@ -47,6 +50,10 @@ int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app
 
 #endif
 
+	// Set path for CEF data, both cache and user data
+	CefString(&settings.cache_path).FromASCII(std::string(userDirectory + "cache").c_str());
+	CefString(&settings.user_data_path).FromASCII(std::string(userDirectory + "user_data").c_str());
+
 	// Set output path of log file
 	LogPath = userDirectory;
 
@@ -58,7 +65,6 @@ int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app
 	// Turn on offscreen rendering.
 	settings.windowless_rendering_enabled = true;
 	settings.remote_debugging_port = 8088;
-	//settings.cache_path = CefString("%USERPROFILE%/AppData/Roaming/GazeTheWeb/Browser"); // Trying to activate cookies in CEF ...
 
     // Initialize CEF
     LogInfo("Initializing CEF...");

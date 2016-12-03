@@ -12,7 +12,7 @@
 #ifndef TEXTINPUTACTION_H_
 #define TEXTINPUTACTION_H_
 
-#include "Action.h"
+#include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 
 class TextInputAction : public Action
 {

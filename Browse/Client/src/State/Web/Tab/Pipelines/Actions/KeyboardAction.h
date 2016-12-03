@@ -10,7 +10,7 @@
 #ifndef KEYBOARDACTION_H_
 #define KEYBOARDACTION_H_
 
-#include "Action.h"
+#include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 
 class KeyboardAction : public Action
 {
@@ -53,6 +53,9 @@ protected:
 
     // Id of delete character button in overlay
     std::string _overlayDeleteCharacterButtonId;
+
+	// Id of paste button in overlay
+	std::string _overlayPasteButtonId;
 
     // Id of space button in overlay
     std::string _overlaySpaceButtonId;

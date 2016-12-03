@@ -14,6 +14,10 @@
 #include "include/wrapper/cef_helpers.h"
 #include "src/CEF/DevToolsHandler.h"
 
+void CefMediator::SetMaster(MasterNotificationInterface* pMaster)
+{
+	_pMaster = pMaster;
+}
 
 void CefMediator::RegisterTab(TabCEFInterface* pTab)
 {
@@ -56,7 +60,6 @@ void CefMediator::RegisterTab(TabCEFInterface* pTab)
 
 void CefMediator::UnregisterTab(TabCEFInterface* pTab)
 {
-
     if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
     {
         // Close corresponding CefBrowser in Handler
@@ -114,11 +117,11 @@ void CefMediator::DoMessageLoopWork()
     CefDoMessageLoopWork();
 }
 
-void CefMediator::EmulateMouseCursor(TabCEFInterface* pTab, double x, double y)
+void CefMediator::EmulateMouseCursor(TabCEFInterface* pTab, double x, double y, bool leftButtonPressed)
 {
     if(CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
     {
-        _handler->EmulateMouseCursor(browser, x, y);
+        _handler->EmulateMouseCursor(browser, x, y, leftButtonPressed);
     }
 }
 
@@ -486,6 +489,7 @@ std::weak_ptr<DOMNode> CefMediator::GetDOMNode(CefRefPtr<CefBrowser> browser, DO
 	{
 		return pTab->GetDOMNode(type, nodeID);
 	}
+	return std::weak_ptr<DOMNode>();
 }
 
 
@@ -524,51 +528,31 @@ void CefMediator::ShowDevTools()
 
 }
 
-
-void CefMediator::StartTextSelection(TabCEFInterface* pTab, double x, double y)
+void CefMediator::EmulateLeftMouseButtonDown(TabCEFInterface* pTab, double x, double y)
 {
-	// if(const auto& browser = GetBrowser(pTab))
-	for (const auto& key : _browsers)		// TODO: Use "if" above instead, when method is correctly called. 
-	{										// For testing purposes, it's executed in every opened Tab simultaneously
-		const auto& browser = key.second;	// TODO: Remove when "if" is used instead
-		LogDebug("CefMediator: Starting text selection at position (", x,  ", " , y, ")");
-
+	if (const CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
+	{
+		// Create mouse event
 		CefMouseEvent event;
 		event.x = x;
 		event.y = y;
-		event.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON;	// TODO: Do you really need this line
 
-		// Set state of left mouse button to pressed, while selecting text
-		SetLeftMouseStatus(true);
-
-		browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, false, 1); // keep mouse down
-
+		// Send mouse down event to tab
+		browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, false, 1);
 	}
 }
 
-void CefMediator::EndTextSelection(TabCEFInterface* pTab, double x, double y)
+void CefMediator::EmulateLeftMouseButtonUp(TabCEFInterface* pTab, double x, double y)
 {
-	// if(const auto& browser = GetBrowser(pTab))
-	for (const auto& key : _browsers) // TODO: Use "if" above instead
+	if (const CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
-		const auto& browser = key.second; // TODO: Remove when "if" is used instead
-
-		LogDebug("CefMediator: Ending text selection at position (", x, ", ", y, ")");
-
-
+		// Create mouse event
 		CefMouseEvent event;
 		event.x = x;
 		event.y = y;
-		event.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON;	// TODO: Do you really need this line
 
+		// Send mouse up event to tab
 		browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, true, 1);
-
-		SetLeftMouseStatus(false);
-
-		// Call JS GetTextSelection and receive selected text as string in MsgRouter
-		browser->GetMainFrame()->ExecuteJavaScript("GetTextSelection();", "", 0);
-		// TODO(Raphael): See BrowserMsgRouter TODO(Raphael) in order to get selection string ;)
-
 	}
 }
 
@@ -576,11 +560,8 @@ void CefMediator::InvokeCopy(TabCEFInterface * pTab)
 {
 	LogDebug("CefMediator: InvokeCopy called.");
 
-	// if (const auto& browser = GetBrowser(pTab))
-	for(const auto& key : _browsers) // TODO: Use pTab instead
+	if (const CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
-		const auto& browser = key.second;
-
 		browser->GetFocusedFrame()->Copy();
 	}
 }
@@ -589,14 +570,12 @@ void CefMediator::InvokePaste(TabCEFInterface * pTab, double x, double y)
 {
 	LogDebug("CefMediator: InvokePaste called on position (", x, ", ", y, ").");
 
-	// if (const auto& browser = GetBrowser(pTab))
-	for (const auto& key : _browsers)	// TODO: Use pTab instead
+	if (const CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
-		const auto& browser = key.second;
-
 		CefMouseEvent event;
 		event.x = x;
 		event.y = y;
+
 		// Click at position where text should be pasted
 		browser->GetHost()->SendMouseClickEvent(event, MBT_LEFT, false, 1);
 
@@ -604,7 +583,36 @@ void CefMediator::InvokePaste(TabCEFInterface * pTab, double x, double y)
 	}
 }
 
+void CefMediator::PutTextSelectionToClipboardAsync(TabCEFInterface* pTab)
+{
+	if (const CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
+	{
+		// Matter of taste whether to clear the clipboard or keep the current string until new one is set
+		ClearClipboardText();
 
+		// Asynchronous javascript call. See BrowserMsgRouter #select# in onQuery
+		browser->GetMainFrame()->ExecuteJavaScript("GetTextSelection();", "", 0);
+	}
+}
+
+void CefMediator::SetClipboardText(std::string text)
+{
+	// Set clipboard
+	_clipboard = text;
+
+	// Notify user about the new content of the clipboard
+	_pMaster->PushNotificationByKey("notification:copied_to_clipboard");
+}
+
+std::string CefMediator::GetClipboardText() const
+{
+	return _clipboard;
+}
+
+void CefMediator::ClearClipboardText()
+{
+	_clipboard = "";
+}
 
 TabCEFInterface* CefMediator::GetTab(CefRefPtr<CefBrowser> browser) const
 {

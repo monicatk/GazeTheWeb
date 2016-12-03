@@ -11,7 +11,7 @@
 #ifndef LINKNAVIGATIONACTION_H_
 #define LINKNAVIGATIONACTION_H_
 
-#include "Action.h"
+#include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 
 class LinkNavigationAction : public Action
 {

@@ -6,10 +6,12 @@
 #ifndef CEF_MEDIATOR_H_
 #define CEF_MEDIATOR_H_
 
+#include "src/MasterNotificationInterface.h"
 #include "src/CEF/Handler.h"
 #include "include/cef_browser.h"
 #include "include/cef_base.h"
 #include "src/CEF/Data/DOMNodeType.h"
+#include <set>
 #include <map>
 #include <memory>
 #include <queue>
@@ -31,6 +33,9 @@ typedef int BrowserID;
 class CefMediator : public CefBase
 {
 public:
+
+	// Setter for master pointer (MUST be called before usage)
+	void SetMaster(MasterNotificationInterface* pMaster);
 
     // Receive tab specific commands
     void RegisterTab(TabCEFInterface* pTab);
@@ -57,7 +62,8 @@ public:
     void DoMessageLoopWork();
 
     // Emulation of left mouse button press and release in specific Tab
-    void EmulateMouseCursor(TabCEFInterface* pTab, double x, double y);
+    void EmulateMouseCursor(TabCEFInterface* pTab, double x, double y, bool leftButtonPressed); // leftButtonPressed seems necessary
+																								// between mouse button down and up during text selection
     void EmulateLeftMouseButtonClick(TabCEFInterface* pTab, double x, double y);
     void EmulateMouseWheelScrolling(TabCEFInterface* pTab, double deltaX, double deltaY);
 
@@ -103,8 +109,6 @@ public:
 	std::weak_ptr<OverflowElement> GetOverflowElement(CefRefPtr<CefBrowser> browser, int id);
 	void RemoveOverflowElement(CefRefPtr<CefBrowser> browser, int id);
 
-
-
 	/* DOM relevant methods */
 
 	// Used by BrowserMsgRouter to pass blank DOMNodes to Tab
@@ -128,20 +132,21 @@ public:
 	// Master calls this method upon GLFW keyboard input in order to open new window with DevTools (for active Tab)
 	void ShowDevTools();
 
-
 	// ### MOUSE INTERACTION ###
 
-	// TODO(Raphael): Activate Gazeposition == Mouseposition when called before calling StartTextSelection
-	// and reset it after EndTextSelection call
-	void StartTextSelection(TabCEFInterface* pTab, double x, double y);
-	void EndTextSelection(TabCEFInterface* pTab, double x, double y);
+	// Can be used as start and end of text selection
+	void EmulateLeftMouseButtonDown(TabCEFInterface* pTab, double x, double y);
+	void EmulateLeftMouseButtonUp(TabCEFInterface* pTab, double x, double y);
 
-	bool GetLeftMouseStatus() const { return _leftMousePressed; }
-	void SetLeftMouseStatus(bool isPressed) { _leftMousePressed = isPressed; }
-
+	// Copy and paste functionality
 	void InvokeCopy(TabCEFInterface* pTab);
-	// Click at (x, y) position and invoke paste
 	void InvokePaste(TabCEFInterface* pTab, double x, double y);
+
+	// ### GLOBAL CLIPBOARD ###
+	void PutTextSelectionToClipboardAsync(TabCEFInterface* pTab); // asynchronous javascript call
+	void SetClipboardText(std::string text); // should be called by browser msg router
+	std::string GetClipboardText() const; // should be called by tab
+	void ClearClipboardText(); // should be called by mediator before asking Javascript to extract selected string from page
 
 protected:
 
@@ -156,12 +161,15 @@ protected:
 
     TabCEFInterface* _pendingTab = NULL; // Used in Tab registration progress (at first, Renderer works to fast for map access)
 
+	// Simple internal clipboard
+	std::string _clipboard = "";
+
     // Use these methods for less coding overhead by checking if key exists in map
     TabCEFInterface* GetTab(CefRefPtr<CefBrowser> browser) const;
     CefRefPtr<CefBrowser> GetBrowser(TabCEFInterface* pTab) const;
 
-	// Globally indicate if mouse button is currently pressed
-	bool _leftMousePressed = false;
+	// Pointer to master (but only functions exposed through the interface)
+	MasterNotificationInterface* _pMaster = NULL;
 
     IMPLEMENT_REFCOUNTING(CefMediator);
 };

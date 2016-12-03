@@ -95,7 +95,10 @@ void URLInput::ShowBookmarks()
 	std::string brickId;
 	std::map<std::string, std::string> idMapper;
 
-	// Add brick to stack
+	// Add brick to stack.
+	// Necessary because layout cannot be reset and it is easier
+	// to reset the bookmarks list by replacing the current stack
+	// with an empty one from a brick
 	eyegui::replaceElementWithBrick(
 		_pBookmarksLayout,
 		"bookmarks_flow", // same id used in brick, so no replacement necessary

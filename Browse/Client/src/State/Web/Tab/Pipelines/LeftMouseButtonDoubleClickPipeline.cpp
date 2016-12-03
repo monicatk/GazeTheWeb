@@ -6,6 +6,7 @@
 #include "LeftMouseButtonDoubleClickPipeline.h"
 #include "src/State/Web/Tab/Pipelines/Actions/LeftMouseButtonClickAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/DelayAction.h"
+#include "src/Utils/MakeUnique.h"
 
 LeftMouseButtonDoubleClickPipeline::LeftMouseButtonDoubleClickPipeline(TabInteractionInterface* pTab, glm::vec2 coordinate) : Pipeline(pTab)
 {

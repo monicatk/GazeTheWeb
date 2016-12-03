@@ -3,5 +3,4 @@
 	<boxbutton icon="icons/LeftClick.png" id="pivot_left_click" desckey="action_pivot_menu:left_click"/>
 	<boxbutton icon="icons/DoubleLeftClick.png" id="pivot_double_left_click" desckey="action_pivot_menu:double_left_click"/>
 	<boxbutton icon="icons/RightClick.png" id="pivot_right_click" desckey="action_pivot_menu:right_click"/>
-	<boxbutton icon="icons/Selection.png" id="pivot_selection" desckey="action_pivot_menu:selection"/>
 </stack>

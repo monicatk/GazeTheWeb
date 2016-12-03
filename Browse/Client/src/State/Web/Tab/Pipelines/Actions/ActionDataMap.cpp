@@ -4,7 +4,7 @@
 //============================================================================
 
 #include "ActionDataMap.h"
-
+#include "src/Utils/MakeUnique.h"
 
 void ActionDataMap::AddIntSlot(std::string type, int value)
 {

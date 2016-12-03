@@ -9,6 +9,7 @@
 #include "src/Global.h"
 #include "src/Utils/Helper.h"
 #include "src/Utils/Texture.h"
+#include "src/Utils/MakeUnique.h"
 #include <algorithm>
 
 Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)
@@ -19,8 +20,11 @@ Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)
 	// Create bookmark manager
 	_upBookmarkManager = std::unique_ptr<BookmarkManager>(new BookmarkManager(pMaster->GetUserDirectory()));
 
+	// Create hisotry manager
+	_upHistoryManager = std::unique_ptr<HistoryManager>(new HistoryManager(pMaster->GetUserDirectory()));
+
 	// Create History
-	_upHistory = std::unique_ptr<History>(new History(_pMaster));
+	_upHistory = std::unique_ptr<History>(new History(_pMaster, _upHistoryManager.get()));
 
 	// Create URL input
 	_upURLInput = std::unique_ptr<URLInput>(new URLInput(_pMaster, _upBookmarkManager.get()));
@@ -43,6 +47,11 @@ Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)
     eyegui::registerButtonListener(_pTabOverviewLayout, "reload_tab", _spWebButtonListener);
     eyegui::registerButtonListener(_pTabOverviewLayout, "edit_url", _spWebButtonListener);
 	eyegui::registerButtonListener(_pTabOverviewLayout, "bookmark_tab", _spWebButtonListener);
+
+	// Regular expression for URL validation
+	_upURLregex = std::make_unique<std::regex>(
+		_pURLregexExpression,
+		std::regex_constants::icase);
 }
 
 Web::~Web()
@@ -198,6 +207,22 @@ void Web::RemoveTab(int id)
 	}
 }
 
+void Web::RemoveAllTabs()
+{
+	// Push back ids of tabs
+	std::vector<int> ids(_tabs.size());
+	for (const auto& tab : _tabs)
+	{
+		ids.push_back(tab.first);
+	}
+
+	// Delegate work to remove tab method
+	for (int i = 0; i < ids.size(); i++)
+	{
+		RemoveTab(i);
+	}
+}
+
 bool Web::SwitchToTab(int id)
 {
     // Simple case
@@ -308,8 +333,31 @@ StateType Web::Update(float tpf, Input& rInput)
 		// Update it and wait for it to finish
 		if (_upHistory->Update())
 		{
-			// TODO either do nothing, set url of current tab or create new tab if none is there
+			// Update it and wait for finish of URL input
+			if (_upHistory->Update())
+			{
+				// Get input and decide
+				std::string URL = _upHistory->GetURL();
+				if (!URL.empty())
+				{
+					int tabId = _upHistory->GetCurrentTabId();
 
+					// Check whether tab id is valid
+					auto iter = _tabs.find(tabId);
+					if (iter != _tabs.end())
+					{
+						// Open URL in current tab
+						_tabs.at(tabId)->OpenURL(URL);
+					}
+					else
+					{
+						// Since there is no tab, create one
+						AddTab(URL, true);
+					}
+				}
+			}
+
+			// Input is done, deactivate it
 			_upHistory->Deactivate();
 		}
 	}
@@ -324,6 +372,13 @@ StateType Web::Update(float tpf, Input& rInput)
             std::string URL = _upURLInput->GetURL();
             if (!URL.empty())
             {
+				// Validate URL
+				if (!ValidateURL(URL))
+				{
+					URL = SEARCH_PREFIX + URL;
+				}
+
+				// Fetch tab id from URL input object
                 int tabId = _upURLInput->GetCurrentTabId();
 
                 // Check whether tab id is valid
@@ -412,6 +467,11 @@ void Web::Deactivate()
 void Web::PushAddTabAfterJob(Tab* pCaller, std::string URL)
 {
     _jobs.push(std::unique_ptr<TabJob>(new AddTabAfterJob(pCaller, URL, true)));
+}
+
+void Web::PushAddPageToHistoryJob(Tab* pCaller, HistoryManager::Page page)
+{
+	_jobs.push(std::unique_ptr<TabJob>(new AddPageToHistoryJob(pCaller, page)));
 }
 
 int Web::GetIdOfTab(Tab const * pCaller) const
@@ -695,15 +755,14 @@ void Web::UpdateTabOverviewIcon()
 	eyegui::setIconOfIconElement(_pWebLayout, "tab_overview", iconFilepath);
 }
 
+bool Web::ValidateURL(const std::string& rURL) const
+{
+	return std::regex_match(rURL, *(_upURLregex.get()));
+}
+
 Web::TabJob::TabJob(Tab* pCaller)
 {
     _pCaller = pCaller;
-}
-
-Web::AddTabAfterJob::AddTabAfterJob(Tab* pCaller, std::string URL, bool show) : TabJob(pCaller)
-{
-    _URL = URL;
-    _show = show;
 }
 
 void Web::AddTabAfterJob::Execute(Web* pCallee)
@@ -713,6 +772,12 @@ void Web::AddTabAfterJob::Execute(Web* pCallee)
 
 	// Flash tab overview button to indicate, that new tab was created by application
 	eyegui::flash(pCallee->_pWebLayout, "tab_overview");
+}
+
+void Web::AddPageToHistoryJob::Execute(Web* pCallee)
+{
+	// Add page to history
+	pCallee->_upHistoryManager->AddPage(_page);
 }
 
 void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)

@@ -142,8 +142,9 @@ public:
     // Get scrolling offset
     virtual void GetScrollingOffset(double& rScrollingOffsetX, double& rScrollingOffsetY) const;
 
-    // Set content of text block
-    virtual void SetContentOfTextBlock(std::string id, std::u16string content);
+	// Set content of text block directly or by key
+	virtual void SetContentOfTextBlock(std::string id, std::u16string content);
+	virtual void SetContentOfTextBlock(std::string id, std::string key);
 
 	// Add content in text edit
 	virtual void AddContentAtCursorInTextEdit(std::string id, std::u16string content);
@@ -184,13 +185,25 @@ public:
 	virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true, bool isScreenCoordinate = true);
 
 	// Emulate mouse cursor in tab. Optionally converts screen pixel position to rendered pixel position before calling CEF method
-	virtual void EmulateMouseCursor(double x, double y, bool isScreenCoordinate = true);
+	virtual void EmulateMouseCursor(double x, double y, bool leftButtonPressed = false, bool isScreenCoordinate = true);
 
     // Emulate mouse wheel scrolling
     virtual void EmulateMouseWheelScrolling(double deltaX, double deltaY);
 
-    // Set text in text input field
-    virtual void InputTextData(int64 frameID, int nodeID, std::string text, bool submit);
+	// Emulate left mouse button down. Can be used to start text selection
+	virtual void EmulateLeftMouseButtonDown(double x, double y, bool isScreenCoordinate = true);
+
+	// Emulate left mouse button up. Can be used to end text selection
+	virtual void EmulateLeftMouseButtonUp(double x, double y, bool isScreenCoordinate = true);
+
+	// Asynchronous javascript call
+	virtual void PutTextSelectionToClipboardAsync();
+
+	// Get text out of global clipboard in mediator
+	virtual std::string GetClipboardText() const;
+
+	// Set text in text input field
+	virtual void InputTextData(int64 frameID, int nodeID, std::string text, bool submit);
 
     // Set WebViewParameters for WebView
     virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }
