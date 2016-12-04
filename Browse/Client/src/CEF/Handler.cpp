@@ -144,10 +144,7 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
         frame->ExecuteJavaScript(_js_remove_css_scrollbar, frame->GetURL(), 0);
 
     }
-    else // Current frame is not the main frame
-    {
-        int64 mainFrameID = frame->GetParent()->GetIdentifier();
-    }
+
 }
 
 void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode)
@@ -155,17 +152,15 @@ void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame
 	// Set loading status of each frame in Tab to load finished in order to display loading icon and status
 	_pMediator->SetLoadingStatus(browser, frame->GetIdentifier(), frame->IsMain(), false);
 
-
-	if(frame->IsMain())
-		LogDebug("Handler: End of loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), ").");
-
-    // Inject Javascript to hide scrollbar
-    frame->ExecuteJavaScript(_js_remove_css_scrollbar, frame->GetURL(), 0);
-
     if (frame->IsMain())
     {
+		LogDebug("Handler: End of loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), ").");
+
         // Set zoom level according to Tab's settings
         SetZoomLevel(browser, false);
+
+		// Inject Javascript to hide scrollbar
+		frame->ExecuteJavaScript(_js_remove_css_scrollbar, frame->GetURL(), 0);
     }
 
 }
