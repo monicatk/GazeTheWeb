@@ -122,17 +122,14 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
 	// Set loading status of each in Tab to loading in order to display loading icon and status
 	_pMediator->SetLoadingStatus(browser, frame->GetIdentifier(), frame->IsMain(), true);
 
-    //CEF_REQUIRE_UI_THREAD();
-	if(frame->IsMain())
-		LogDebug("Handler: Started loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), "), browserID = ", browser->GetIdentifier());
+	// DEBUG: golem.de
+	//LogDebug("OnLoadStart: frameId=", frame->GetIdentifier(), ", isMain?=", frame->IsMain());
+	//frame->ExecuteJavaScript("document.onreadystatechange = function(){console.log('" + std::to_string(frame->GetIdentifier())
+	//	+ ": '+document.readyState)}", "", 0);
 
     if (frame->IsMain())
     {
-/*
-		browser->GetMainFrame()->ExecuteJavaScript(
-			"document.addEventListener('transitionend', function(event){alert(event.target.textContent+' '+window.getComputedStyle(event.target, null).getPropertyValue('opacity'));}, false);",
-			"", 0);*/
-
+		LogDebug("Handler: Started loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), "), browserID = ", browser->GetIdentifier());
 
         // Set Tab's URL when page is loading
         _pMediator->SetURL(browser);
@@ -151,6 +148,9 @@ void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame
 {
 	// Set loading status of each frame in Tab to load finished in order to display loading icon and status
 	_pMediator->SetLoadingStatus(browser, frame->GetIdentifier(), frame->IsMain(), false);
+
+	// DEBUG: golem.de
+	//LogDebug("OnLoadEnd: frameId=", frame->GetIdentifier(), ", isMain?=", frame->IsMain());
 
     if (frame->IsMain())
     {
@@ -544,22 +544,6 @@ void Handler::ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, i
 
 	std::string js_code = "var overflowObj = GetOverflowElement(" + std::to_string(elemId) + ");"\
 		"if(overflowObj) overflowObj.scroll(" + std::to_string(x) + ", " + std::to_string(y) + ");";
-
-	// DEBUG
-	if (elemId == 6 || elemId == 7)
-	{
-		// // Check if Rect update leads to Rect == 0 ... doesn't seem so.
-		//js_code += "ConsolePrint('DEBUG| before: '+overflowObj.rects);" \
-		//	"overflowObj.updateRects();" \
-		//	"ConsolePrint('DEBUG| after: '+overflowObj.rects);";
-
-		// // Check visbility when hidden again.. always true, opacity too
-		//js_code += ("ConsolePrint(" + std::to_string(elemId) + "+\" visibility: \"+window.getComputedStyle(overflowObj.node, null).getPropertyValue('visibility') );");
-		
-		//js_code += ("ConsolePrint(" + std::to_string(elemId) + "+\" class: \"+overflowObj.node.className);");
-
-		//js_code += ("ConsolePrint(\"C++ induced: \"+"+ std::to_string(elemId) + "+\" rect width: \"+overflowObj.node.getBoundingClientRect().width );");
-	}
 
 	browser->GetMainFrame()->ExecuteJavaScript(js_code, "",	0);
 

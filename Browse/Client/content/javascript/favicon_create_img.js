@@ -34,26 +34,33 @@ favIconImg.onload = function(){
 	// topleft x, y, width, height of image
 	window.favIconData = [];
 
-	var imageData = ctx.getImageData(0, 0, window.favIconWidth, window.favIconHeight);
-	// alert('getImageData worked!');
+	try{
+		var imageData = ctx.getImageData(0, 0, window.favIconWidth, window.favIconHeight);
+		// alert('getImageData worked!');
 
-	var bytes = channel*window.favIconHeight*window.favIconWidth;
+		var bytes = channel*window.favIconHeight*window.favIconWidth;
 
-	if(channel == 4)
-	{
-		for (i=0; i < bytes ; i+=4)
+		if(channel == 4)
 		{
-			window.favIconData.push( ( (imageData.data[i] << 8*3) | (imageData.data[i+1] << 8*2) | (imageData.data[i+2] << 8) | (imageData.data[i+3])) );
+			for (i=0; i < bytes ; i+=4)
+			{
+				window.favIconData.push( ( (imageData.data[i] << 8*3) | (imageData.data[i+1] << 8*2) | (imageData.data[i+2] << 8) | (imageData.data[i+3])) );
+			}
 		}
-	}
-	else // .ico image has only 3 color channels, fill alpha channel with 255 (not transparent)
-	{
-		for (i=0; i < bytes ; i+=3)
+		else // .ico image has only 3 color channels, fill alpha channel with 255 (not transparent)
 		{
-			window.favIconData.push( ( (imageData.data[i] << 8*3) | (imageData.data[i+1] << 8*2) | (imageData.data[i+2] << 8) | (0xFF) ) );
+			for (i=0; i < bytes ; i+=3)
+			{
+				window.favIconData.push( ( (imageData.data[i] << 8*3) | (imageData.data[i+1] << 8*2) | (imageData.data[i+2] << 8) | (0xFF) ) );
+			}
 		}
+
+		// Tell BrowserMsgRouter, that favicon bytes are ready
+		window.cefQuery({ request: 'faviconBytesReady', persistent : false, onSuccess : function(response) {}, onFailure : function(error_code, error_message){} });
+	}
+	catch (exception)
+	{
+		console.log("Caught exception while trying to access favicon data:\n"+exception.message)
 	}
 
-	// Tell BrowserMsgRouter, that favicon bytes are ready
-	window.cefQuery({ request: 'faviconBytesReady', persistent : false, onSuccess : function(response) {}, onFailure : function(error_code, error_message){} });
 };
