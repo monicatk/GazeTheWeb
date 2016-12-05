@@ -706,12 +706,13 @@ void Tab::DrawDebuggingOverlay() const
 	std::function<void(Rect, bool)> renderRect = [&](Rect rect, bool fixed)
 	{
 		// Fixed or not
-		float scrollX = 0;
-		float scrollY = 0;
 		if (!fixed)
 		{
-			scrollX = _scrollingOffsetX;
-			scrollY = _scrollingOffsetY;
+			// Subtract scrolling while coordinates are in CEFPixel space
+			rect.left -= _scrollingOffsetX;
+			rect.right -= _scrollingOffsetX;
+			rect.bottom -= _scrollingOffsetY;
+			rect.top -= _scrollingOffsetY;
 		}
 
 		// Scale from CEFPixel space to WebViewPixel
@@ -723,7 +724,7 @@ void Tab::DrawDebuggingOverlay() const
 		// Calculate model matrix
 		model = glm::mat4(1.0f);
 		model = glm::scale(model, glm::vec3(1.f / _pMaster->GetWindowWidth(), 1.f / _pMaster->GetWindowHeight(), 1.f));
-		model = glm::translate(model, glm::vec3(_upWebView->GetX() + rect.left - scrollX, _upWebView->GetHeight() - (rect.bottom - scrollY), 1));
+		model = glm::translate(model, glm::vec3(_upWebView->GetX() + rect.left, _upWebView->GetHeight() - (rect.bottom), 1));
 		model = glm::scale(model, glm::vec3(rect.width(), rect.height(), 0));
 
 		// Combine matrics
@@ -784,7 +785,6 @@ void Tab::DrawDebuggingOverlay() const
 		if(rDOMTextLink->GetRects().size() == 2 && rDOMTextLink->GetVisibility())
 			renderRect(rDOMTextLink->GetRects()[1], rDOMTextLink->GetFixed());
 	}
-
 
 	// ### FIXED ELEMENTS ###
 
