@@ -99,31 +99,30 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	// Fixed element callbacks
 	if (requestName.compare(0, 9, "#fixElem#") == 0)
 	{
-		if (requestName.compare(9, 4, "rem#") == 0)
+		std::vector<std::string> data = SplitBySeparator(requestName, '#');
+
+		if (data.size() > 2)
 		{
+			if (data[1].compare("rem") == 0)
+			{
 
-			const std::string& id = SplitBySeparator(requestName, '#')[2];	// TODO: Updated code, not tested yet
-			//LogDebug("BrowserMsgRouter: Fixed element #", id, " was removed.");
+				const std::string& id = data[2];	// TODO: Updated code, not tested yet
+				//LogDebug("BrowserMsgRouter: Fixed element #", id, " was removed.");
 
-			// Notify Tab via CefMediator, that a fixed element was removed
-			_pMsgRouter->GetMediator()->RemoveFixedElement(browser, atoi(id.c_str()));
+				// Notify Tab via CefMediator, that a fixed element was removed
+				_pMsgRouter->GetMediator()->RemoveFixedElement(browser, atoi(id.c_str()));
 
-			return true;
-		}
-		if (requestName.compare(9, 4, "add#") == 0)
-		{
-			std::string dataStr = requestName.substr(13, requestName.length());
-			std::vector<std::string> data = SplitBySeparator(dataStr, '#');
+				return true;
+			}
+			if (data[1].compare("add") == 0)
+			{
+				// Tell Renderer to read out bounding rectangle coordinates belonging to the given ID
+				CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("FetchFixedElements");
+				msg->GetArgumentList()->SetInt(0, atoi(data[2].c_str()));
+				browser->SendProcessMessage(PID_RENDERER, msg);
 
-
-			//LogDebug("BrowserMsgRouter: Fixed element #", id, " was added.");
-
-			// Tell Renderer to read out bounding rectangle coordinates belonging to the given ID
-			CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("FetchFixedElements");
-			msg->GetArgumentList()->SetInt(0, atoi(data[0].c_str()));
-			browser->SendProcessMessage(PID_RENDERER, msg);
-
-			return true;
+				return true;
+			}
 		}
 		
 	}

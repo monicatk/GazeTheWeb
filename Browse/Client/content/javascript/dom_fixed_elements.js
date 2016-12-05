@@ -104,8 +104,9 @@ function FixedElement(node)
     
 
     this.node.setAttribute("fixedId", this.id);
-    var scope_id = this.id;
+    
     // Note corresponding fixed element ID in an attribute
+    var scope_id = this.id;
     ForEveryChild(this.node, function(child)
     { 
         if(child.nodeType === 1) 
@@ -144,8 +145,9 @@ function AddFixedElement(node)
 {
     if(node.nodeType === 1)
     {
-        if(id = node.getAttribute("fixedId"))
+        if(node.hasAttribute("fixedId"))
         {
+            var id = node.getAttribute("fixedId")
             // Trigger rect updates of whole subtree, just in case
             window.domFixedElements[id].updateRects();
 
@@ -157,10 +159,6 @@ function AddFixedElement(node)
             // Create new FixedElement object, which will be added to global fixed element list
             new FixedElement(node);
 
-            //DEBUG
-            // ConsolePrint("Added fixed element, currently available fixedIDs...");
-            // window.domFixedElements.forEach(function(obj){ if(obj) ConsolePrint(obj.id);});
-
             return true;
         }
     }
@@ -168,15 +166,32 @@ function AddFixedElement(node)
 
 function RemoveFixedElement(node)
 {
+    //// Why does the following NOT work at all?!
+    // ConsolePrint("A")
+    // var fixedObj = GetFixedElement(node);
+    // ConsolePrint("B")
+    // ConsolePrint(fixedObj.id);
+    // if(fixedObj !== undefined)
+    // {
     if(fixedObj = GetFixedElement(node) && fixedObj !== undefined)
     {
+        // Needed for output at the end
         var id = fixedObj.id;
+
         // Delete object in its list slot, slot will be left empty (undefined) at the moment
-        if(fixedObj.id > 0 && fixedObj.id < window.domFixedElements.length)
+        if(fixedObj.id >= 0 && fixedObj.id < window.domFixedElements.length)
         {
+
+
             delete window.domFixedElements[fixedObj.id];
+
+            ConsolePrint("#fixElem#rem#"+fixedObj.id);
+            // console.log("Removed fixedObj with id="+id);
         }
+        // console.log("Removed fixedId, seems like fixedObj might not have be found! id="+id);
+        // console.log("node's fixedId="+node.getAttribute("fixedId"));
         node.removeAttribute("fixedId");
+        
 
         // Also remove fixed ID from every child
         ForEveryChild(node, 
@@ -199,6 +214,11 @@ function RemoveFixedElement(node)
         UpdateDOMRects();
 
         ConsolePrint("Successfully removed FixedElement with ID="+id);
+    }
+    else
+    {
+        ConsolePrint("fixedObj === undefined")
+        ConsolePrint("node.fixedId="+node.getAttribute("fixedId"));
     }
 }
 
