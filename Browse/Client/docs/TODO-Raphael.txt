@@ -11,5 +11,4 @@
 -- Not on Windows at least
 - Bookmark Manager GUI
 - GUI for setting homepage
-- Somewhere seems to be one framebuffer unbind too much
 - Create empty xml files to avoid warnings at startups
