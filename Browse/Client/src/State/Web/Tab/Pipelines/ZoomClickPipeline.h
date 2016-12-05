@@ -16,7 +16,6 @@ public:
 
     // Constructor
     ZoomClickPipeline(TabInteractionInterface* pTab);
-
 };
 
 #endif // ZOOMCLICKPIPELINE_H_

@@ -217,7 +217,7 @@ void Web::RemoveAllTabs()
 	}
 
 	// Delegate work to remove tab method
-	for (int i = 0; i < ids.size(); i++)
+	for (int i = 0; i < (int)ids.size(); i++)
 	{
 		RemoveTab(i);
 	}

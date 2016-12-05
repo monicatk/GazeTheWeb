@@ -4,7 +4,7 @@
 //============================================================================
 // Action to zoom to a coordinate with gaze.
 // - Input: none
-// - Output: vec2 coordinate in screen space pixels
+// - Output: vec2 coordinate in WebViewPixel space
 
 #ifndef ZOOMCOORDINATEACTION_H_
 #define ZOOMCOORDINATEACTION_H_

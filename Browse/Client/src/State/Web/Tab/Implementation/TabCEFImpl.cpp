@@ -166,29 +166,29 @@ void Tab::ClearDOMNodes()
 void Tab::RemoveDOMNode(DOMNodeType type, int nodeID)
 {
 
-	std::map<int, std::shared_ptr<DOMNode> >* map;
-	std::vector<std::shared_ptr<DOMNode> >* list;
+	std::map<int, std::shared_ptr<DOMNode> >* pMap = nullptr;
+	std::vector<std::shared_ptr<DOMNode> >* pList = nullptr;
 
 	switch (type)
 	{
-	case(DOMNodeType::TextInput) : { map = &_TextInputMap; break; }
-	case(DOMNodeType::TextLink) : { map = &_TextLinkMap; list = &_DOMTextLinks; break; }
+	case(DOMNodeType::TextInput) : { pMap = &_TextInputMap; break; }
+	case(DOMNodeType::TextLink) : { pMap = &_TextLinkMap; pList = &_DOMTextLinks; break; }
 	}
 
 	// Remove node's ID from map
-	if (map->find(nodeID) != map->end())
+	if (pMap != nullptr && pMap->find(nodeID) != pMap->end())
 	{
-		map->erase(nodeID);
+		pMap->erase(nodeID);
 	}
 
 	// TODO: List for all types of nodes?
 	// TODO (maybe Raphael): Remove one specific DOMTrigger belonging to input field with id= nodeID
-	if (list)
+	if (pList != nullptr)
 	{
 		// Remove node from list of all nodes, if condition holds
 		std::remove_if(
-			list->begin(),
-			list->end(),
+			pList->begin(),
+			pList->end(),
 			[nodeID](const std::shared_ptr<DOMNode>& node) {
 			return node->GetNodeID() == nodeID;
 		}

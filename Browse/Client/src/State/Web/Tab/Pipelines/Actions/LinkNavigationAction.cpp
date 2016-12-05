@@ -5,6 +5,7 @@
 
 #include "LinkNavigationAction.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
+#include "src/State/Web/Tab/Interface/TabActionInterface.h"
 #include "src/CEF/Data/DOMNode.h"
 #include "src/Setup.h"
 
@@ -26,12 +27,14 @@ bool LinkNavigationAction::Update(float tpf, TabInput tabInput)
 	GetInputValue("visualize", visualize);
 
     // Decide what to click
+	double CEFPixelX = coordinate.x;
+	double CEFPixelY = coordinate.y;
+	_pTab->ConvertToCEFPixel(CEFPixelX, CEFPixelY);
     float distance = 0.f;
     double scrollingX, scrollingY;
     _pTab->GetScrollingOffset(scrollingX, scrollingY);
-    glm::vec2 scrolling = glm::vec2(scrollingX, scrollingY);
-    glm::vec2 pageCoordinate = coordinate + scrolling;
-    std::weak_ptr<const DOMNode> wpNearestLink = _pTab->GetNearestLink(pageCoordinate, distance);
+    glm::vec2 pagePixelCoordinate = glm::vec2(CEFPixelX + scrollingX, CEFPixelY + scrollingY);
+    std::weak_ptr<const DOMNode> wpNearestLink = _pTab->GetNearestLink(pagePixelCoordinate, distance);
 
     // Determine where to click instead, if not too far away or coordinate already valid
 	bool setToDOMNode = false;
@@ -43,22 +46,16 @@ bool LinkNavigationAction::Update(float tpf, TabInput tabInput)
             // Just get coordinate of first rect
             if(!sp->GetRects().empty())
             {
+				// Get coordinate in CEFPixel space
                 glm::vec2 linkCoordinate = sp->GetRects().front().center();
-                coordinate = linkCoordinate - scrolling; // make coordinate relative in web view and not within page
+                coordinate = linkCoordinate - glm::vec2(scrollingX, scrollingY); // make coordinate relative in web view and not within page
 				setToDOMNode = true;
             }
         }
     }
 
-	// If not set to DOMNode position, convert screen spaced coordinate to web view rendered
-	if (!setToDOMNode)
-	{
-		coordinate.x = (coordinate.x / _pTab->GetWebViewWidth()) * _pTab->GetWebViewResolutionX();
-		coordinate.y = (coordinate.y/ _pTab->GetWebViewHeight()) * _pTab->GetWebViewResolutionY();
-	}
-
     // Emulate left mouse button click
-    _pTab->EmulateLeftMouseButtonClick((double)(coordinate.x), (double)(coordinate.y), visualize > 0, false); // coordinate taken from DOMNode which is in rendered coordinate system
+    _pTab->EmulateLeftMouseButtonClick(CEFPixelX, CEFPixelY, visualize > 0, false); // coordinate taken from DOMNode which is in rendered coordinate system
 
     return true;
 }

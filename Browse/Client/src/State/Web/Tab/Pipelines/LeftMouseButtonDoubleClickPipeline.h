@@ -13,7 +13,7 @@ class LeftMouseButtonDoubleClickPipeline : public Pipeline
 {
 public:
 
-    // Constructor. Taking click coordinate in pixel screen space as input
+    // Constructor. Taking click coordiante in WebViewPixel space as input
 	LeftMouseButtonDoubleClickPipeline(TabInteractionInterface* pTab, glm::vec2 coordinate);
 };
 

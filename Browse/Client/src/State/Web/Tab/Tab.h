@@ -7,6 +7,14 @@
 // interfaces. Has queue of pipelines which are executed in the order they are
 // pushed back.
 
+// Coordinate systems of interest:
+// - Window Coordinates: Complete window as created by window manager, in pixels
+// - WebViewRelative Coordinates: Relative coordinates within web view
+// - WebViewPixel Coordinates: Pixel coordinates within web view in *real screen* pixels
+// - CEFPixel Coordinates: Pixel coordinates as rendered by CEF (is the only one known to code in CEF folder)
+// - PagePixel Coordinates: Pixel coordinates as rendered by CEF inclusive scrolling
+// All coordinate system have their origin at the upper left corner!
+
 #ifndef TAB_H_
 #define TAB_H_
 
@@ -181,20 +189,20 @@ public:
     // Push back an pipeline
     virtual void PushBackPipeline(std::unique_ptr<Pipeline> upPipeline);
 
-	// Emulate click in tab. Optionally converts screen pixel position to rendered pixel position before calling CEF method
-	virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true, bool isScreenCoordinate = true);
+	// Emulate click in tab. Optionally converts WebViewPixel position to CEFpixel position before calling CEF method
+	virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true, bool isWebViewPixelCoordinate = true);
 
-	// Emulate mouse cursor in tab. Optionally converts screen pixel position to rendered pixel position before calling CEF method. Optional offset in rendered pixels
-	virtual void EmulateMouseCursor(double x, double y, bool leftButtonPressed = false, bool isScreenCoordinate = true, double xOffset = 0, double yOffset = 0);
+	// Emulate mouse cursor in tab. Optionally converts WebViewPixel position to CEFpixel position before calling CEF method. Optional offset in rendered pixels
+	virtual void EmulateMouseCursor(double x, double y, bool leftButtonPressed = false, bool isWebViewPixelCoordinate = true, double xOffset = 0, double yOffset = 0) ;
 
-    // Emulate mouse wheel scrolling
-    virtual void EmulateMouseWheelScrolling(double deltaX, double deltaY);
+	// Emulate mouse wheel scrolling
+	virtual void EmulateMouseWheelScrolling(double deltaX, double deltaY);
 
 	// Emulate left mouse button down. Can be used to start text selection. Optional offset in rendered pixels
-	virtual void EmulateLeftMouseButtonDown(double x, double y, bool isScreenCoordinate = true, double xOffset = 0, double yOffset = 0);
+	virtual void EmulateLeftMouseButtonDown(double x, double y, bool isWebViewPixelCoordinate = true, double xOffset = 0, double yOffset = 0);
 
 	// Emulate left mouse button up. Can be used to end text selection. Optional offset in rendered pixels
-	virtual void EmulateLeftMouseButtonUp(double x, double y, bool isScreenCoordinate = true, double xOffset = 0, double yOffset = 0);
+	virtual void EmulateLeftMouseButtonUp(double x, double y, bool isWebViewPixelCoordinate = true, double xOffset = 0, double yOffset = 0);
 
 	// Asynchronous javascript call
 	virtual void PutTextSelectionToClipboardAsync();
@@ -208,11 +216,17 @@ public:
     // Set WebViewParameters for WebView
     virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }
 
-    // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available. Distance in screen coordinates
-    virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 screenCoordinate, float& rDistance) const;
+    // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available. Distance in page pixels
+    virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pagePixelCoordinate, float& rDistance) const;
 
 	// Execute scrolling in determined Overflow Element with elemId, x and y are delta values for each dimension
 	virtual void ScrollOverflowElement(int elemId, int x, int y);
+
+	// Convert WebViewPixel coordinate to CEFPixel coordinate
+	void ConvertToCEFPixel(double& rWebViewPixelX, double& rWebViewPixelY) const;
+
+	// Convert CEFPixel coordinate to WebViewPixel coordinate
+	void ConvertToWebViewPixel(double& rCEFPixelX, double& rCEFPixelY) const;
 
     // #########################
     // ### TAB CEF INTERFACE ###
