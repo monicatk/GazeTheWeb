@@ -2,20 +2,19 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// Pipeline to emulate clicking by zooming to a screen coordinate controlled
-// with gaze.
+// Pipeline for text selection
 
-#ifndef ZOOMCLICKPIPELINE_H_
-#define ZOOMCLICKPIPELINE_H_
+#ifndef TEXTSELECTIONPIPELINE_H_
+#define TEXTSELECTIONPIPELINE_H_
 
 #include "Pipeline.h"
 
-class ZoomClickPipeline : public Pipeline
+class TextSelectionPipeline : public Pipeline
 {
 public:
 
-    // Constructor
-    ZoomClickPipeline(TabInteractionInterface* pTab);
+    // Constructor.
+    TextSelectionPipeline(TabInteractionInterface* pTab);
 };
 
-#endif // ZOOMCLICKPIPELINE_H_
+#endif // TEXTSELECTIONPIPELINE_H_

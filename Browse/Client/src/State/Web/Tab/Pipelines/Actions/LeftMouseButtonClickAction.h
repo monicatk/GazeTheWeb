@@ -3,14 +3,14 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Action to emulate left mouse button click.
-// - Input: vec2 coordinate in pixels
+// - Input: vec2 coordinate in WebViewPixel coordinates
 // - Input: int visualize (0 if not, else visualize; default here is 1)
 // - Output: none
 
 #ifndef LEFTMOUSEBUTTONCLICKACTION_H_
 #define LEFTMOUSEBUTTONCLICKACTION_H_
 
-#include "Action.h"
+#include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 
 class LeftMouseButtonClickAction : public Action
 {

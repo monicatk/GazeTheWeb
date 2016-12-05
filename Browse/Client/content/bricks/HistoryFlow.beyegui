@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<flow space="100%" direction="vertical" id="history_flow">
+	<stack id="history_stack" direction="vertical">
+		<textblock style="default_noback" alignment="center" verticalalignment="center" fontsize="tall" key="history:title"/>
+	</stack>
+</flow>

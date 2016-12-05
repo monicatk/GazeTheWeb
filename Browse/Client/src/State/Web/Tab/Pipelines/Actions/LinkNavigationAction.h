@@ -4,14 +4,14 @@
 //============================================================================
 // Action to navigate links by coordinate. DOM tree is used to fix imprecise
 // coordinates.
-// - Input: vec2 coordinate in pixels
+// - Input: vec2 coordinate in WebViewPixel coordinate
 // - Input: int visualize (0 if not, else visualize; default here is 1)
 // - Output: none
 
 #ifndef LINKNAVIGATIONACTION_H_
 #define LINKNAVIGATIONACTION_H_
 
-#include "Action.h"
+#include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 
 class LinkNavigationAction : public Action
 {

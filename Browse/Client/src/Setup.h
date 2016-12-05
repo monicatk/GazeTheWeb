@@ -21,6 +21,7 @@ namespace setup
     static const float DURATION_BEFORE_INPUT = 1.f; // wait one second before accepting input
     static const bool PAUSED_AT_STARTUP = false;
     static const float LINK_CORRECTION_MAX_PIXEL_DISTANCE = 20.f;
+	static const int TEXT_SELECTION_MARGIN = 8; // area which is selected before / after zoom coordinate in pixels
 
     // Debugging
     static const bool LOG_DEBUG_MESSAGES = true;
@@ -35,7 +36,8 @@ namespace setup
     // Other
     static const bool ENABLE_WEBGL = false; // only on Windows
     static const bool BLUR_PERIPHERY = false;
-	static const float WEB_VIEW_RESOLUTION_SCALE = 1.f;
+	static const float WEB_VIEW_RESOLUTION_SCALE = 0.75f;
+	static const unsigned int HISTORY_MAX_PAGE_COUNT = 100; // maximal length of history
 }
 
 #endif // SETUP_H_

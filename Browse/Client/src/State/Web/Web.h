@@ -9,13 +9,15 @@
 
 #include "src/State/State.h"
 #include "src/State/Web/Tab/Tab.h"
-#include "src/State/Web/URLInput.h"
-#include "src/State/Web/History.h"
-#include "src/State/Web/BookmarkManager.h"
+#include "src/State/Web/Managers/BookmarkManager.h"
+#include "src/State/Web/Managers/HistoryManager.h"
+#include "src/State/Web/Screens/URLInput.h"
+#include "src/State/Web/Screens/History.h"
 #include <map>
 #include <vector>
 #include <memory>
 #include <stack>
+#include <regex>
 
 // Forward declaration
 class CefMediator;
@@ -30,14 +32,17 @@ public:
     // Destructor
     virtual ~Web();
 
-    // Add Tab and return id of it
+    // Add tab and return id of it
     int AddTab(std::string URL, bool show = true);
 
-    // Add Tab after another
+    // Add tab after another
     int AddTabAfter(Tab* other, std::string URL, bool show = true);
 
-    // Remove Tab
+    // Remove tab
     void RemoveTab(int id);
+
+	// Remove all tabs
+	void RemoveAllTabs();
 
     // Switch to tab. Returns whether successful
     bool SwitchToTab(int id);
@@ -77,6 +82,9 @@ public:
 	// Add tab after that tab
     virtual void PushAddTabAfterJob(Tab* pCaller, std::string URL);
 
+	// Add page to history job
+	virtual void PushAddPageToHistoryJob(Tab* pCaller, HistoryManager::Page page);
+
     // Get own id in web. Returns -1 if not found
     virtual int GetIdOfTab(Tab const * pCaller) const;
 
@@ -104,7 +112,11 @@ private:
     public:
 
         // Constructor
-        AddTabAfterJob(Tab* pCaller, std::string URL, bool show);
+		AddTabAfterJob(Tab* pCaller, std::string URL, bool show) : TabJob(pCaller)
+		{
+			_URL = URL;
+			_show = show;
+		}
 
         // Execute
         virtual void Execute(Web* pCallee);
@@ -115,6 +127,25 @@ private:
         std::string _URL;
         bool _show;
     };
+
+	class AddPageToHistoryJob : public TabJob
+	{
+	public:
+
+		// Constructor
+		AddPageToHistoryJob(Tab* pCaller, HistoryManager::Page page) : TabJob(pCaller)
+		{
+			_page = page;
+		}
+
+		// Execute
+		virtual void Execute(Web* pCallee);
+
+	protected:
+
+		// Members
+		HistoryManager::Page _page;
+	};
 
     // Give listener full access
     friend class WebButtonListener;
@@ -152,6 +183,9 @@ private:
 	// Update icon of tab overview
 	void UpdateTabOverviewIcon();
 
+	// Validate URL
+	bool ValidateURL(const std::string& rURL) const;
+
     // Maps id to Tab
     std::map<int, std::unique_ptr<Tab> > _tabs;
 
@@ -160,12 +194,6 @@ private:
 
     // Current tab is indicated with index of vector (-1 means, that no tab is currently displayed)
     int _currentTabId = -1;
-
-	// History object
-	std::unique_ptr<History> _upHistory;
-
-    // URL input object
-    std::unique_ptr<URLInput> _upURLInput;
 
     // Layouts
     eyegui::Layout* _pWebLayout;
@@ -185,6 +213,25 @@ private:
 
 	// Bookmark manager
 	std::unique_ptr<BookmarkManager> _upBookmarkManager;
+
+	// History manager
+	std::unique_ptr<HistoryManager> _upHistoryManager;
+
+	// History object
+	std::unique_ptr<History> _upHistory;
+
+	// URL input object
+	std::unique_ptr<URLInput> _upURLInput;
+
+	// Regex for URL validation
+	std::unique_ptr<std::regex> _upURLregex;
+	const char* _pURLregexExpression =
+		"(https?://)?"		// optional http or https
+		"([\\da-z\\.-]+)"	// domain name (any number, dot and character from a to z)
+		"\\."				// dot between name and domain
+		"([a-z\\.]{2,6})"	// domain itself
+		"([/\\w\\.-:]*)*"	// folder structure
+		"/?";				// optional last dash
 };
 
 #endif // WEB_H_

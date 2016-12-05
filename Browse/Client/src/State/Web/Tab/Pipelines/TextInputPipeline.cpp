@@ -5,6 +5,7 @@
 
 #include "TextInputPipeline.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
+#include "src/State/Web/Tab/Interface/TabActionInterface.h"
 #include "src/State/Web/Tab/Pipelines/Actions/KeyboardAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/TextInputAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/LeftMouseButtonClickAction.h"
@@ -24,10 +25,11 @@ TextInputPipeline::TextInputPipeline(TabInteractionInterface* pTab, std::shared_
 	_actions.push_back(spTextInputAction);
 
     // Fill some values directly
-    glm::vec2 clickCoordinates = spNode->GetCenter();
-	clickCoordinates.x = (clickCoordinates.x / (float)_pTab->GetWebViewResolutionX()) * (float)_pTab->GetWebViewWidth(); // to screen pixel coordinates
-	clickCoordinates.y = (clickCoordinates.y / (float)_pTab->GetWebViewResolutionY()) * (float)_pTab->GetWebViewHeight(); // to screen pixel coordinates
-    spLeftMouseButtonClickAction->SetInputValue("coordinate", clickCoordinates);
+    glm::vec2 clickCEFPixelCoordinates = spNode->GetCenter();
+	double webViewPixelX = clickCEFPixelCoordinates.x;
+	double webViewPixelY = clickCEFPixelCoordinates.y;
+	_pTab->ConvertToWebViewPixel(webViewPixelX, webViewPixelY);
+    spLeftMouseButtonClickAction->SetInputValue("coordinate", glm::vec2(webViewPixelX, webViewPixelY));
 	spLeftMouseButtonClickAction->SetInputValue("visualize", 0);
     spTextInputAction->SetInputValue("frameId", spNode->GetFrameID());
     spTextInputAction->SetInputValue("nodeId", spNode->GetNodeID());

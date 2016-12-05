@@ -64,8 +64,9 @@ public:
     // Get scrolling offset
     virtual void GetScrollingOffset(double& rScrollingOffsetX, double& rScrollingOffsetY) const = 0;
 
-    // Set content of text block
+    // Set content of text block directly or by key
     virtual void SetContentOfTextBlock(std::string id, std::u16string content) = 0;
+	virtual void SetContentOfTextBlock(std::string id, std::string key) = 0;
 
 	// Add content in text edit
 	virtual void AddContentAtCursorInTextEdit(std::string id, std::u16string content) = 0;

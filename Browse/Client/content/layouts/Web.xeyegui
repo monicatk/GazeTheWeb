@@ -7,7 +7,7 @@
 									<block style="default_noback" relativescale="70%"/>
 									<circlebutton icon="icons/TabOverview.png" desckey="web:tab_overview" id="tab_overview" border="10%"/>
 									<grid relativescale="150%">
-										<row size="60%">
+										<row size="55%">
 											<column size="95%">
 												<circlebutton icon="icons/TabBack.png" desckey="web:back" id="back" border="2%"/>
 											</column>

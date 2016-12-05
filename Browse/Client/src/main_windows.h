@@ -58,7 +58,8 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 	// Fetch directory for saving bookmarks etc.
 	char *pValue;
 	size_t len;
-	errno_t err = _dupenv_s(&pValue, &len, "APPDATA");
+	// errno_t err = _dupenv_s(&pValue, &len, "APPDATA"); // not used err produces compiler warning
+	_dupenv_s(&pValue, &len, "APPDATA");
 	std::string userDirectory(pValue, len - 1);
 
     // Create project folder.

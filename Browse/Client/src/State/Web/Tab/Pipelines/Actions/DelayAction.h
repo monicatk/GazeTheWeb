@@ -7,7 +7,7 @@
 #ifndef DELAYACTION_H_
 #define DELAYACTION_H_
 
-#include "Action.h"
+#include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 
 class DelayAction : public Action
 {

@@ -9,6 +9,7 @@
 #ifndef MASTER_H_
 #define MASTER_H_
 
+#include "src/MasterNotificationInterface.h"
 #include "src/CEF/Extension/CefMediator.h"
 #include "src/State/Web/Web.h"
 #include "src/State/Settings/Settings.h"
@@ -26,7 +27,7 @@ class Texture;
 struct GLFWwindow;
 class LabStream;
 
-class Master
+class Master : public MasterNotificationInterface
 {
 public:
 
@@ -69,10 +70,10 @@ public:
 	std::string GetUserDirectory() const { return _userDirectory; }
 
 	// Push notification to display
-	void PushNotification(std::u16string content);
+	virtual void PushNotification(std::u16string content);
 
 	// Push notification to display taken from localization file
-	void PushNotificationByKey(std::string key);
+	virtual void PushNotificationByKey(std::string key);
 
     // ### EYEGUI DELEGATION ###
 
@@ -81,6 +82,9 @@ public:
 
     // Remove layout from eyeGUI
     void RemoveLayout(eyegui::Layout* pLayout);
+
+	// Fetch localization string by key
+	std::u16string FetchLocalization(std::string key) const;
 
 	// ### SETTINGS ACCESS ###
 
@@ -195,7 +199,8 @@ private:
 	// Time of notification displaying
 	float _notificationTime;
 
-
+	// Boolean to indicate exiting the applicatoin
+	bool _exit = false;
 };
 
 #endif // MASTER_H_

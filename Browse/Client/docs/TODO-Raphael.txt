@@ -1,17 +1,12 @@
 - eyeGUI: resize everything alltime (especially after adding of an layout and floating frame)
-- Complete Pivot mode
-- ZoomCoordinate Action is too fast in the end (and inaccurate)
-- Free scaling for webview (some refactoring of size stuff necessary then...)
-- Web should have class "TabManager" which handles also TabOverview
 - Settings: Icons on the left which indicate status of setting
 - TabOverview preview: seems that preview textures are clamped and not cut
 - (eyeGUI) Resize stuff is strange. Update() forces resize which let all! tabs reload their stuff. So if one layout is added, all tabs get reloaded. For DOMNodes, it is not possible to call it, because at a resize they get reloaded and trigger..a resize...
-- Floating frames flicker at creation
-- ScrollingSensors are not correct until reload (sometimes on 9gag for example)
 - Much more settings (all the eyeGUI stuff)
-- Tobii EyeX seems to connect even when there is no...
+- Tobii EyeX seems to connect even when there is none...
 - Prefetch complete icon folder
 - While removing a tab, the preview textures switch to the FontAtlas texture for a short time?!
+-- Not on Windows at least
 - Bookmark Manager GUI
 - GUI for setting homepage
-- Somewhere seems to be one framebuffer unbind too much
+- Create empty xml files to avoid warnings at startups

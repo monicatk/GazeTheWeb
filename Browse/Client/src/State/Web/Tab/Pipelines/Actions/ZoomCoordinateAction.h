@@ -4,12 +4,12 @@
 //============================================================================
 // Action to zoom to a coordinate with gaze.
 // - Input: none
-// - Output: vec2 coordinate in pixels
+// - Output: vec2 coordinate in WebViewPixel space
 
 #ifndef ZOOMCOORDINATEACTION_H_
 #define ZOOMCOORDINATEACTION_H_
 
-#include "Action.h"
+#include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 #include "src/Utils/LerpValue.h"
 #include <deque>
 
@@ -18,7 +18,7 @@ class ZoomCoordinateAction : public Action
 public:
 
     // Constructor
-    ZoomCoordinateAction(TabInteractionInterface* pTab);
+    ZoomCoordinateAction(TabInteractionInterface* pTab, bool doDimming = true);
 
     // Update retuns whether finished with execution
     virtual bool Update(float tpf, TabInput tabInput);
@@ -59,7 +59,7 @@ protected:
 	const float CENTER_OFFSET_MULTIPLIER = 0.5f;
 
 	// Speed of zoom
-	const float ZOOM_SPEED = 0.6f;
+	const float ZOOM_SPEED = 0.4f;
 
 	// Maximal time which is looked back at compensation of calibration errors
 	const float LOOK_BACK_TIME = 0.5f;
@@ -67,7 +67,7 @@ protected:
 	// Maximal angle between gaze drift and zoom coordinate drift in degree
 	const float DRIFT_MAX_ANGLE_DEGREE = 10.f;
 
-    // Coordinate which is updated and output
+    // Coordinate which is updated and output. In relative web view space
     glm::vec2 _coordinate;
 
     // Log zooming amount (used for rendering)
@@ -79,7 +79,7 @@ protected:
     float _linZoom = 1.f;
 
     // Offset to center of webview
-    glm::vec2 _coordinateCenterOffset;
+    glm::vec2 _coordinateCenterOffset = glm::vec2(0, 0);
 
     // Bool to indicate first update
     bool _firstUpdate = true;
@@ -92,6 +92,9 @@ protected:
 
 	// Queue for recording data which is used as click to compensate calibration errors
 	std::deque<ZoomData> _zoomDataQueue;
+
+	// Do dimming
+	bool _doDimming = true;
 };
 
 #endif // ZOOMCOORDINATEACTION_H_

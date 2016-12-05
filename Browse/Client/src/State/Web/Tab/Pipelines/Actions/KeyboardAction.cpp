@@ -5,6 +5,7 @@
 
 #include "KeyboardAction.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
+#include "submodules/eyeGUI/include/eyeGUI.h"
 
 KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 {
@@ -17,6 +18,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
     _overlayCompleteButtonId = "text_input_action_complete_button";
     _overlaySubmitButtonId = "text_input_action_submit_button";
     _overlayDeleteCharacterButtonId = "text_input_action_delete_character_button";
+	_overlayPasteButtonId = "text_input_action_paste_button";
     _overlaySpaceButtonId = "text_input_action_space_button";
 	_overlayTextEditId = "text_input_action_text_edit";
     _overlayWordSuggestId = "text_input_action_word_suggest";
@@ -29,6 +31,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
     idMapper.emplace("complete", _overlayCompleteButtonId);
     idMapper.emplace("submit", _overlaySubmitButtonId);
     idMapper.emplace("delete_character", _overlayDeleteCharacterButtonId);
+	idMapper.emplace("paste", _overlayPasteButtonId);
     idMapper.emplace("space", _overlaySpaceButtonId);
     idMapper.emplace("text_edit", _overlayTextEditId);
     idMapper.emplace("word_suggest", _overlayWordSuggestId);
@@ -91,6 +94,24 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
         },
 		[](){}); // up callback
 
+	// Paste button
+	_pTab->RegisterButtonListenerInOverlay(
+		_overlayPasteButtonId,
+		[&]() // down callback
+	{
+		// Get text from global clipboard and convert it to UTF-16
+		std::string clipboard = _pTab->GetClipboardText();
+		std::u16string clipboard16;
+		eyegui_helper::convertUTF8ToUTF16(clipboard, clipboard16);
+
+		// Add text from clipboard to collected text
+		_pTab->AddContentAtCursorInTextEdit(_overlayTextEditId, clipboard16);
+
+		// Refresh suggestions
+		_pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, _pTab->GetActiveEntityContentInTextEdit(_overlayTextEditId));
+	},
+		[]() {}); // up callback
+
 	// Space button
     _pTab->RegisterButtonListenerInOverlay(
         _overlaySpaceButtonId,
@@ -146,6 +167,7 @@ KeyboardAction::~KeyboardAction()
     _pTab->UnregisterButtonListenerInOverlay(_overlayCompleteButtonId);
     _pTab->UnregisterButtonListenerInOverlay(_overlaySubmitButtonId);
     _pTab->UnregisterButtonListenerInOverlay(_overlayDeleteCharacterButtonId);
+	_pTab->UnregisterButtonListenerInOverlay(_overlayPasteButtonId);
     _pTab->UnregisterButtonListenerInOverlay(_overlaySpaceButtonId);
     _pTab->UnregisterWordSuggestListenerInOverlay(_overlayWordSuggestId);
 	_pTab->UnregisterButtonListenerInOverlay(_overlayShiftButtonId);

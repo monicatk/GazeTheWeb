@@ -8,13 +8,13 @@
 #include "submodules/glm/glm/gtx/vector_angle.hpp"
 #include <algorithm>
 
-ZoomCoordinateAction::ZoomCoordinateAction(TabInteractionInterface* pTab) : Action(pTab)
+ZoomCoordinateAction::ZoomCoordinateAction(TabInteractionInterface* pTab, bool doDimming) : Action(pTab)
 {
+	// Save members
+	_doDimming = doDimming;
+
     // Add in- and output data slots
     AddVec2OutputSlot("coordinate");
-
-    // Initialize members
-    _coordinateCenterOffset = glm::vec2(0, 0);
 }
 
 bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
@@ -71,8 +71,8 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			// Set length of delta to deviation if bigger than current deviation
 			_deviation = glm::max(glm::length(delta), _deviation);			
 
-            // Move to new click position (weighted by zoom level for more smoothness at higher zoom, since zoom value gets smaller at higher zoom)
-            _coordinate += delta * tpf * _logZoom;
+            // Move to new click position
+            _coordinate += delta * tpf;
 
 			// If at the moment a high deviation is given, try to zoom out to give user more overview
 			zoomSpeed = ZOOM_SPEED - glm::min(1.f, 3.f * _deviation); // [-0.5, 0.5]
@@ -199,7 +199,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	webViewParameters.centerOffset = _coordinateCenterOffset;
 	webViewParameters.zoom = _logZoom;
 	webViewParameters.zoomPosition = _coordinate;
-	webViewParameters.dim = DIMMING_VALUE * (_dimming / DIMMING_DURATION);
+	if (_doDimming) { webViewParameters.dim = DIMMING_VALUE * (_dimming / DIMMING_DURATION); }
 	_pTab->SetWebViewParameters(webViewParameters);
 
 	// Save values in queue

@@ -11,7 +11,7 @@
 				<blank/>
 			</column>
 			<column size="80%">
-					<blank id="bookmarks_flow"/>
+					<blank id="history_flow"/>
 			</column>
 			<column size="5%">
 				<blank/>

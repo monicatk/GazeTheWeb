@@ -23,20 +23,38 @@ public:
     // Push back a pipeline
     virtual void PushBackPipeline(std::unique_ptr<Pipeline> upPipeline) = 0;
 
-    // Emulate click in tab. Optionally converts screen pixel position to rendered pixel position before calling CEF method
-    virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true, bool isScreenCoordinate = true) = 0;
+    // Emulate click in tab. Optionally converts WebViewPixel position to CEFpixel position before calling CEF method
+    virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true, bool isWebViewPixelCoordinate = true) = 0;
 
-	// Emulate mouse cursor in tab. Optionally converts screen pixel position to rendered pixel position before calling CEF method
-	virtual void EmulateMouseCursor(double x, double y, bool isScreenCoordinate = true) = 0;
+	// Emulate mouse cursor in tab. Optionally converts WebViewPixel position to CEFpixel position before calling CEF method. Optional offset in rendered pixels
+	virtual void EmulateMouseCursor(double x, double y, bool leftButtonPressed = false, bool isWebViewPixelCoordinate = true, double xOffset = 0, double yOffset = 0) = 0;
 
     // Emulate mouse wheel scrolling
     virtual void EmulateMouseWheelScrolling(double deltaX, double deltaY) = 0;
 
+	// Emulate left mouse button down. Can be used to start text selection. Optional offset in rendered pixels
+	virtual void EmulateLeftMouseButtonDown(double x, double y, bool isWebViewPixelCoordinate = true, double xOffset = 0, double yOffset = 0) = 0;
+
+	// Emulate left mouse button up. Can be used to end text selection. Optional offset in rendered pixels
+	virtual void EmulateLeftMouseButtonUp(double x, double y, bool isWebViewPixelCoordinate = true, double xOffset = 0, double yOffset = 0) = 0;
+
+	// Asynchronous javascript call
+	virtual void PutTextSelectionToClipboardAsync() = 0;
+
+	// Get text out of global clipboard in mediator
+	virtual std::string GetClipboardText() const = 0;
+
     // Set text in text input field
     virtual void InputTextData(int64 frameID, int nodeID, std::string text, bool submit) = 0;
 
-    // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available. Distance in screen coordinates
-    virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 screenCoordinate, float& rDistance) const = 0;
+    // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available. Distance in page pixels
+    virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pagePixelCoordinate, float& rDistance) const = 0;
+
+	// Convert WebViewPixel coordinate to CEFPixel coordinate
+	virtual void ConvertToCEFPixel(double& rWebViewPixelX, double& rWebViewPixelY) const = 0;
+
+	// Convert CEFPixel coordinate to WebViewPixel coordinate
+	virtual void ConvertToWebViewPixel(double& rCEFPixelX, double& rCEFPixelY) const = 0;
 
     // ### METHODS WHICH SET PARAMETERS THAT MUST BE RESET WHEN NO PIPELINE / ACTION IS ACTIVE ###
 

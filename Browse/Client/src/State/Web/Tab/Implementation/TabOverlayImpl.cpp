@@ -142,6 +142,11 @@ void Tab::SetContentOfTextBlock(std::string id, std::u16string content)
 	eyegui::setContentOfTextBlock(_pOverlayLayout, id, content);
 }
 
+void Tab::SetContentOfTextBlock(std::string id, std::string key)
+{
+	eyegui::setContentOfTextBlock(_pOverlayLayout, id, _pMaster->FetchLocalization(key));
+}
+
 void Tab::AddContentAtCursorInTextEdit(std::string id, std::u16string content)
 {
 	eyegui::addContentAtCursorInTextEdit(_pOverlayLayout, id, content);

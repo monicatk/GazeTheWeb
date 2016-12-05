@@ -5,6 +5,7 @@
 
 #include "LinkNavigationAction.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
+#include "src/State/Web/Tab/Interface/TabActionInterface.h"
 #include "src/CEF/Data/DOMNode.h"
 #include "src/Setup.h"
 
@@ -17,7 +18,7 @@ LinkNavigationAction::LinkNavigationAction(TabInteractionInterface* pTab) : Acti
 
 bool LinkNavigationAction::Update(float tpf, TabInput tabInput)
 {
-    // Get coordinate from input slot
+    // Get coordinate from input slot (WebViewPixel space)
     glm::vec2 coordinate;
     GetInputValue("coordinate", coordinate);
 
@@ -26,15 +27,18 @@ bool LinkNavigationAction::Update(float tpf, TabInput tabInput)
 	GetInputValue("visualize", visualize);
 
     // Decide what to click
-    float distance = 0.f;
+	double CEFPixelX = coordinate.x;
+	double CEFPixelY = coordinate.y;
+	_pTab->ConvertToCEFPixel(CEFPixelX, CEFPixelY);
     double scrollingX, scrollingY;
     _pTab->GetScrollingOffset(scrollingX, scrollingY);
-    glm::vec2 scrolling = glm::vec2(scrollingX, scrollingY);
-    glm::vec2 pageCoordinate = coordinate + scrolling;
-    std::weak_ptr<const DOMNode> wpNearestLink = _pTab->GetNearestLink(pageCoordinate, distance);
+
+	// Call function to find nearest neighbor
+	float distance = 0.f;
+    glm::vec2 pagePixelCoordinate = glm::vec2(CEFPixelX + scrollingX, CEFPixelY + scrollingY);
+    std::weak_ptr<const DOMNode> wpNearestLink = _pTab->GetNearestLink(pagePixelCoordinate, distance);
 
     // Determine where to click instead, if not too far away or coordinate already valid
-	bool setToDOMNode = false;
     if(distance < setup::LINK_CORRECTION_MAX_PIXEL_DISTANCE && distance > 0)
     {
         // Try to get value from weak pointer
@@ -43,23 +47,18 @@ bool LinkNavigationAction::Update(float tpf, TabInput tabInput)
             // Just get coordinate of first rect
             if(!sp->GetRects().empty())
             {
+				// Get coordinate in CEFPixel space
                 glm::vec2 linkCoordinate = sp->GetRects().front().center();
-                coordinate = linkCoordinate - scrolling; // make coordinate relative in web view and not within page
-				setToDOMNode = true;
+				CEFPixelX = linkCoordinate.x - scrollingX;
+				CEFPixelY = linkCoordinate.y - scrollingY;
             }
         }
     }
 
-	// If not set to DOMNode position, convert screen spaced coordinate to web view rendered
-	if (!setToDOMNode)
-	{
-		coordinate.x = (coordinate.x / _pTab->GetWebViewWidth()) * _pTab->GetWebViewResolutionX();
-		coordinate.y = (coordinate.y/ _pTab->GetWebViewHeight()) * _pTab->GetWebViewResolutionY();
-	}
-
     // Emulate left mouse button click
-    _pTab->EmulateLeftMouseButtonClick((double)(coordinate.x), (double)(coordinate.y), visualize > 0, false); // coordinate taken from DOMNode which is in rendered coordinate system
+    _pTab->EmulateLeftMouseButtonClick(CEFPixelX, CEFPixelY, visualize > 0, false); // coordinate already in CEFPixel space
 
+	// Return success
     return true;
 }
 

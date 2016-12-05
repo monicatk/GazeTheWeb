@@ -17,15 +17,15 @@ public:
         int gazeX,
         int gazeY,
         bool gazeUsed,
-        int webViewGazeX,
-        int webViewGazeY,
-        float webViewGazeRelativeX,
-        float webViewGazeRelativeY) : Input(gazeX, gazeY, gazeUsed)
+        int webViewPixelGazeX,
+        int webViewPixelGazeY,
+        float webViewRelativeGazeX,
+        float webViewRelativeGazeY) : Input(gazeX, gazeY, gazeUsed)
     {
-        this->webViewGazeX = webViewGazeX;
-        this->webViewGazeY = webViewGazeY;
-        this->webViewGazeRelativeX = webViewGazeRelativeX;
-        this->webViewGazeRelativeY = webViewGazeRelativeY;
+        this->webViewPixelGazeX = webViewPixelGazeX;
+        this->webViewPixelGazeY = webViewPixelGazeY;
+        this->webViewGazeRelativeX = webViewRelativeGazeX;
+        this->webViewGazeRelativeY = webViewRelativeGazeY;
         this->gazeUsed = gazeUsed;
         insideWebView =
             this->webViewGazeRelativeX < 1.f
@@ -34,8 +34,8 @@ public:
             && this->webViewGazeRelativeY >= 0;
     }
 
-    int webViewGazeX;
-    int webViewGazeY;
+    int webViewPixelGazeX;
+    int webViewPixelGazeY;
     float webViewGazeRelativeX;
     float webViewGazeRelativeY;
     bool insideWebView;
