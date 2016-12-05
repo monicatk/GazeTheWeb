@@ -48,7 +48,7 @@ void Tab::EmulateLeftMouseButtonClick(double x, double y, bool visualize, bool i
 	_pCefMediator->EmulateLeftMouseButtonClick(this, x, y);
 }
 
-void Tab::EmulateMouseCursor(double x, double y, bool leftButtonPressed, bool isScreenCoordinate)
+void Tab::EmulateMouseCursor(double x, double y, bool leftButtonPressed, bool isScreenCoordinate, double xOffset, double yOffset)
 {
 	// Convert screen to render pixel coordinate
 	if (isScreenCoordinate)
@@ -58,7 +58,7 @@ void Tab::EmulateMouseCursor(double x, double y, bool leftButtonPressed, bool is
 	}
 
 	// Tell mediator about the cursor
-	_pCefMediator->EmulateMouseCursor(this, x, y, leftButtonPressed);
+	_pCefMediator->EmulateMouseCursor(this, x + xOffset, y + yOffset, leftButtonPressed);
 }
 
 void Tab::EmulateMouseWheelScrolling(double deltaX, double deltaY)
@@ -66,7 +66,7 @@ void Tab::EmulateMouseWheelScrolling(double deltaX, double deltaY)
 	_pCefMediator->EmulateMouseWheelScrolling(this, deltaX, deltaY);
 }
 
-void Tab::EmulateLeftMouseButtonDown(double x, double y, bool isScreenCoordinate)
+void Tab::EmulateLeftMouseButtonDown(double x, double y, bool isScreenCoordinate, double xOffset, double yOffset)
 {
 	if (isScreenCoordinate)
 	{
@@ -75,10 +75,10 @@ void Tab::EmulateLeftMouseButtonDown(double x, double y, bool isScreenCoordinate
 	}
 
 	// Tell mediator about mouse button down
-	_pCefMediator->EmulateLeftMouseButtonDown(this, x, y);
+	_pCefMediator->EmulateLeftMouseButtonDown(this, x + xOffset, y + yOffset);
 }
 
-void Tab::EmulateLeftMouseButtonUp(double x, double y, bool isScreenCoordinate)
+void Tab::EmulateLeftMouseButtonUp(double x, double y, bool isScreenCoordinate, double xOffset, double yOffset)
 {
 	if (isScreenCoordinate)
 	{
@@ -87,7 +87,7 @@ void Tab::EmulateLeftMouseButtonUp(double x, double y, bool isScreenCoordinate)
 	}
 
 	// Tell mediator about mouse button up
-	_pCefMediator->EmulateLeftMouseButtonUp(this, x, y);
+	_pCefMediator->EmulateLeftMouseButtonUp(this, x + xOffset, y + yOffset);
 }
 
 void Tab::PutTextSelectionToClipboardAsync()

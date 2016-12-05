@@ -5,6 +5,7 @@
 
 #include "TextSelectionAction.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
+#include "src/Setup.h"
 
 TextSelectionAction::TextSelectionAction(TabInteractionInterface *pTab) : ZoomCoordinateAction(pTab, false)
 {
@@ -26,7 +27,7 @@ bool TextSelectionAction::Update(float tpf, TabInput tabInput)
 	if (done)
 	{
 		// End selection procedure
-		_pTab->EmulateLeftMouseButtonUp(screenCoordinate.x, screenCoordinate.y);
+		_pTab->EmulateLeftMouseButtonUp(screenCoordinate.x, screenCoordinate.y, true, setup::TEXT_SELECTION_MARGIN);
 
 		// Copy selected string to clipboard. Maybe create extra action for this later
 		_pTab->PutTextSelectionToClipboardAsync();
@@ -34,7 +35,7 @@ bool TextSelectionAction::Update(float tpf, TabInput tabInput)
 	else
 	{
 		// Keep emulating mouse cursor
-		_pTab->EmulateMouseCursor(screenCoordinate.x, screenCoordinate.y, true);
+		_pTab->EmulateMouseCursor(screenCoordinate.x, screenCoordinate.y, true, setup::TEXT_SELECTION_MARGIN);
 	}
 
     return done;
@@ -48,7 +49,7 @@ void TextSelectionAction::Activate()
 	// Set starting point of selection
 	glm::vec2 startCoordinate;
 	GetInputValue("coordinate", startCoordinate);
-	_pTab->EmulateLeftMouseButtonDown(startCoordinate.x, startCoordinate.y);
+	_pTab->EmulateLeftMouseButtonDown(startCoordinate.x, startCoordinate.y, true, -setup::TEXT_SELECTION_MARGIN);
 }
 
 void TextSelectionAction::Deactivate()

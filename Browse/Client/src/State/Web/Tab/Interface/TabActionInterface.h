@@ -26,17 +26,17 @@ public:
     // Emulate click in tab. Optionally converts screen pixel position to rendered pixel position before calling CEF method
     virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true, bool isScreenCoordinate = true) = 0;
 
-	// Emulate mouse cursor in tab. Optionally converts screen pixel position to rendered pixel position before calling CEF method
-	virtual void EmulateMouseCursor(double x, double y, bool leftButtonPressed = false, bool isScreenCoordinate = true) = 0;
+	// Emulate mouse cursor in tab. Optionally converts screen pixel position to rendered pixel position before calling CEF method. Optional offset in rendered pixels
+	virtual void EmulateMouseCursor(double x, double y, bool leftButtonPressed = false, bool isScreenCoordinate = true, double xOffset = 0, double yOffset = 0) = 0;
 
     // Emulate mouse wheel scrolling
     virtual void EmulateMouseWheelScrolling(double deltaX, double deltaY) = 0;
 
-	// Emulate left mouse button down. Can be used to start text selection
-	virtual void EmulateLeftMouseButtonDown(double x, double y, bool isScreenCoordinate = true) = 0;
+	// Emulate left mouse button down. Can be used to start text selection. Optional offset in rendered pixels
+	virtual void EmulateLeftMouseButtonDown(double x, double y, bool isScreenCoordinate = true, double xOffset = 0, double yOffset = 0) = 0;
 
-	// Emulate left mouse button up. Can be used to end text selection
-	virtual void EmulateLeftMouseButtonUp(double x, double y, bool isScreenCoordinate = true) = 0;
+	// Emulate left mouse button up. Can be used to end text selection. Optional offset in rendered pixels
+	virtual void EmulateLeftMouseButtonUp(double x, double y, bool isScreenCoordinate = true, double xOffset = 0, double yOffset = 0) = 0;
 
 	// Asynchronous javascript call
 	virtual void PutTextSelectionToClipboardAsync() = 0;
