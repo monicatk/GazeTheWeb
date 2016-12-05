@@ -54,11 +54,11 @@ bool HintAction::Update(float tpf, TabInput tabInput)
 {
 	if(_done)
 	{
-		if (_waitDuration <= 0)
+		if (_waitTime <= 0)
 		{
 			return true;
 		}
-		_waitDuration -= tpf;
+		_waitTime -= tpf;
 	}
     return false;
 }

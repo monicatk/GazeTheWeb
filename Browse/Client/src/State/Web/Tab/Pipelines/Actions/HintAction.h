@@ -50,7 +50,7 @@ protected:
     bool _done = false;
 
 	// Waiting duration after hint has been vanished in seconds
-	float _waitDuration = 0.75f;
+	float _waitTime = 0.75f;
 };
 
 #endif // HINTACTION_H_
