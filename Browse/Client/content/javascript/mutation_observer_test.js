@@ -439,30 +439,6 @@ function CompareArrays(array1, array2)
 	return true;
 }
 
-// OLD APPROACH
-function AddDOMTextLink(node)
-{
-	// DEBUG
-	//ConsolePrint("START adding text link");
-
-	window.dom_links.push(node);
-
-	var rect = node.getBoundingClientRect(node);
-	var coords = AdjustRectCoordinatesToWindow(rect); //[rect.top, rect.left, rect.bottom, rect.right];
-	window.dom_links_rect.push(coords);
-
-
-	// Add attribute in order to recognize already discovered DOM nodes later
-	node.setAttribute('nodeType', '1');
-	node.setAttribute('nodeID', (window.dom_links.length-1));
-
-	// Tell CEF message router, that DOM Link was added
-	ConsolePrint('DOM#add#1#'+(window.dom_links.length-1)+'#');
-
-		// DEBUG
-	//ConsolePrint("END adding text link");
-}
-
 // TESTING PURPOSE
 document.onclick = function(){
 	ConsolePrint("### document.onclick() triggered! Calling UpdateDOMRects! ###");
@@ -695,7 +671,7 @@ function ForEveryChild(parentNode, applyFunction, depth)
 function AnalyzeNode(node)
 {
 
-	if( (node.nodeType == 1 || node.nodeType > 8) && (node.hasAttribute && !node.hasAttribute("nodeType")) ) // 1 == ELEMENT_NODE
+	if( (node.nodeType == 1 || node.nodeType > 8) && (node.hasAttribute && !node.hasAttribute("nodeType")) && (node !== window)) // 1 == ELEMENT_NODE
 	{
 		// EXPERIMENTAL
 		// if(node.tagName == 'SCRIPT')
@@ -752,7 +728,7 @@ function AnalyzeNode(node)
 			CreateDOMLink(node);
 		}
 
-		if(node.tagName == 'INPUT')
+		if(node.tagName == 'INPUT' || node.tagName == "BUTTON") // Fun fact: There exists the combination of tag "BUTTON" and type "submit"
 		{
 			// Identify text input fields
 			if(node.type == 'text' || node.type == 'search' || node.type == 'email' || node.type == 'password')
@@ -885,7 +861,7 @@ function MutationObserverInit()
 							// Changes in attribute 'class' may indicate that bounding rect update is needed, if node is child node of a fixed element
 							if(attr == 'class')
 							{
-								if(fixedObj = GetFixedElement(node))
+								if((fixedObj = GetFixedElement(node)) !== null && fixedObj !== undefined)
 								{
 									fixedObj.updateRects();
 									// Just in case

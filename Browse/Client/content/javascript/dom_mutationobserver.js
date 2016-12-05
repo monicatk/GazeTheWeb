@@ -460,7 +460,7 @@ function UpdateDOMRects()
 
     // ... and all FixedElements
     window.domFixedElements.forEach(
-        function(fixedObj){ fixedObj.updateRects(); }
+        function(fixedObj){ if(fixedObj !== undefined){fixedObj.updateRects();} }
     );
 
    

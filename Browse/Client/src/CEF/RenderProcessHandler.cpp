@@ -147,6 +147,10 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			if (global->HasValue("domFixedElements"))
 			{
 				fixedObj = global->GetValue("domFixedElements")->GetValue(fixedId);
+
+				// Slots in domFixedElements might contain undefined as value, if FixedElement was deleted
+				if (fixedObj->IsUndefined() || fixedObj->IsNull())
+					return true;
 			}
 			else
 			{

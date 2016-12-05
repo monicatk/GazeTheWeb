@@ -149,7 +149,15 @@ function AddFixedElement(node)
         {
             var id = node.getAttribute("fixedId")
             // Trigger rect updates of whole subtree, just in case
-            window.domFixedElements[id].updateRects();
+            if((fixedObj = window.domFixedElements[id]) !== undefined)
+            {
+                fixedObj.updateRects();
+            }
+            else
+            {
+                ConsolePrint("Tried to access fixedObj with id="+id+", but it seems to be already deleted. But corresponding node still has its ID as attribute!");
+            }
+            
 
             // ConsolePrint("AddFixedElement: fixedId = "+id+" already linked to FixedObj!");
             return false;
@@ -173,19 +181,21 @@ function RemoveFixedElement(node)
     // ConsolePrint(fixedObj.id);
     // if(fixedObj !== undefined)
     // {
-    if(fixedObj = GetFixedElement(node) && fixedObj !== undefined)
+    if((fixedObj = GetFixedElement(node)) !== null && fixedObj !== undefined)
     {
         // Needed for output at the end
         var id = fixedObj.id;
 
+        ConsolePrint(id >= 0);
+        ConsolePrint(id < window.domFixedElements.length);
         // Delete object in its list slot, slot will be left empty (undefined) at the moment
-        if(fixedObj.id >= 0 && fixedObj.id < window.domFixedElements.length)
+        if(id >= 0 && id < window.domFixedElements.length)
         {
 
 
-            delete window.domFixedElements[fixedObj.id];
+            delete window.domFixedElements[id];
 
-            ConsolePrint("#fixElem#rem#"+fixedObj.id);
+            ConsolePrint("#fixElem#rem#"+id);
             // console.log("Removed fixedObj with id="+id);
         }
         // console.log("Removed fixedId, seems like fixedObj might not have be found! id="+id);
@@ -217,8 +227,8 @@ function RemoveFixedElement(node)
     }
     else
     {
-        ConsolePrint("fixedObj === undefined")
-        ConsolePrint("node.fixedId="+node.getAttribute("fixedId"));
+        // ConsolePrint("fixedObj === undefined")
+        // ConsolePrint("node.fixedId="+node.getAttribute("fixedId"));
     }
 }
 

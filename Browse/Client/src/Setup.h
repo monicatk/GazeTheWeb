@@ -36,7 +36,7 @@ namespace setup
     // Other
     static const bool ENABLE_WEBGL = false; // only on Windows
     static const bool BLUR_PERIPHERY = false;
-	static const float WEB_VIEW_RESOLUTION_SCALE = 0.75f;
+	static const float WEB_VIEW_RESOLUTION_SCALE = 1.f;
 	static const unsigned int HISTORY_MAX_PAGE_COUNT = 100; // maximal length of history
 }
 
