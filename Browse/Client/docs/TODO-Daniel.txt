@@ -1,3 +1,12 @@
+# Bugs?
+	- golem.de needs time to function properly after a couple of seconds at the beginning
+		--> something with still loading subframes
+	- sometimes scroll button up is displayed, although it is scrolled to the top
+		then, everything seems to stay broken. Wrong positions of Rects and loading new page results in the same error, staying forever
+	- C++ debug console produces the same error message over and over again:
+	Exception thrown at 0x7626A6F2 in Client.exe: Microsoft C++ exception: lslboost::exception_detail::clone_impl<lslboost::exception_detail::error_info_injector<lslboost::system::system_error> > at memory location 0x14C7E454.
+	 	--> Why?
+
 # Extra #
 Pause Tab Rendering / Script Execution
   - Useful during zooming at click emulation

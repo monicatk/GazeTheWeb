@@ -252,6 +252,40 @@ function DOMObject(node, nodeType)
             }
         };
 
+        /* Code, executed on object construction*/
+        
+        // Push to list and determined by DOMObjects position in type specific list
+        var domObjList = GetDOMObjectList(this.nodeType);
+
+        // This should never fail
+        if(domObjList !== undefined)
+        {
+            domObjList.push(this);
+            var nodeID = domObjList.length - 1;
+            // Add attributes to given DOM node
+            this.node.setAttribute('nodeID', nodeID);
+            this.node.setAttribute('nodeType', nodeType);
+
+            // Setup of attributes
+            this.checkVisibility();
+            this.searchOverflows();
+ 
+
+            // Relies on existing nodeId!
+            InformCEF(this, ['added']);
+
+            // Send msg if already fixed on creation!
+            if(this.fixed)
+            {
+                InformCEF(this, ['update', 'fixed']);
+            }
+        }
+        else
+        {
+            ConsolePrint("ERROR: No DOMObjectList found for adding node with type="+nodeType+"!");
+        }
+
+
 
 }
 
@@ -270,32 +304,33 @@ function CreateDOMObject(node, nodeType)
         // Create DOMObject, which encapsulates the given DOM node
         var domObj = new DOMObject(node, nodeType);
 
-        // Push to list and determined by DOMObjects position in type specific list
-        var domObjList = GetDOMObjectList(nodeType);
+        /// Moved to domObj Constructor!
+        // // Push to list and determined by DOMObjects position in type specific list
+        // var domObjList = GetDOMObjectList(nodeType);
 
 
 
-        if(domObjList != undefined)
-        {
-            domObjList.push(domObj);
-            var nodeID = domObjList.length - 1;
+        // if(domObjList != undefined)
+        // {
+        //     domObjList.push(domObj);
+        //     var nodeID = domObjList.length - 1;
 
-            // Add attributes to given DOM node
-            node.setAttribute('nodeID', nodeID);
-            node.setAttribute('nodeType', nodeType);
+        //     // Add attributes to given DOM node
+        //     node.setAttribute('nodeID', nodeID);
+        //     node.setAttribute('nodeType', nodeType);
 
-            // Setup of attributes
-            domObj.checkVisibility();
-            domObj.searchOverflows();
+        //     // Setup of attributes
+        //     domObj.checkVisibility();
+        //     domObj.searchOverflows();
  
 
 
-            InformCEF(domObj, ['added']);
-        }
-        else
-        {
-            ConsolePrint("ERROR: No DOMObjectList found for adding node with type="+nodeType+"!");
-        }
+        //     InformCEF(domObj, ['added']);
+        // }
+        // else
+        // {
+        //     ConsolePrint("ERROR: No DOMObjectList found for adding node with type="+nodeType+"!");
+        // }
 
     }
     else
