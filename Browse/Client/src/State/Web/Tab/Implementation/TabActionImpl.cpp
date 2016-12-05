@@ -122,15 +122,9 @@ std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pagePixelCoordinate, 
             // Go over rectangles of that link
             for(const auto& rRect : rLink->GetRects())
             {
-				glm::vec2 center = rRect.center();
-				center.x = (center.x / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
-				center.y = (center.y / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
-                float width = (rRect.width() / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
-                float height = (rRect.height() / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
-
                 // Distance
-                float dx = glm::max(glm::abs(pagePixelCoordinate.x - center.x) - (width / 2.f), 0.f);
-                float dy = glm::max(glm::abs(pagePixelCoordinate.y - center.y) - (height / 2.f), 0.f);
+                float dx = glm::max(glm::abs(pagePixelCoordinate.x - rRect.center().x) - (rRect.width() / 2.f), 0.f);
+                float dy = glm::max(glm::abs(pagePixelCoordinate.y - rRect.center().y) - (rRect.height() / 2.f), 0.f);
                 float distance = glm::sqrt((dx * dx) + (dy * dy));
 
                 // Check whether distance is smaller

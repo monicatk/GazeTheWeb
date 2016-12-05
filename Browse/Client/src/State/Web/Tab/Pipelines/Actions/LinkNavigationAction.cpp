@@ -18,7 +18,7 @@ LinkNavigationAction::LinkNavigationAction(TabInteractionInterface* pTab) : Acti
 
 bool LinkNavigationAction::Update(float tpf, TabInput tabInput)
 {
-    // Get coordinate from input slot
+    // Get coordinate from input slot (WebViewPixel space)
     glm::vec2 coordinate;
     GetInputValue("coordinate", coordinate);
 
@@ -30,14 +30,15 @@ bool LinkNavigationAction::Update(float tpf, TabInput tabInput)
 	double CEFPixelX = coordinate.x;
 	double CEFPixelY = coordinate.y;
 	_pTab->ConvertToCEFPixel(CEFPixelX, CEFPixelY);
-    float distance = 0.f;
     double scrollingX, scrollingY;
     _pTab->GetScrollingOffset(scrollingX, scrollingY);
+
+	// Call function to find nearest neighbor
+	float distance = 0.f;
     glm::vec2 pagePixelCoordinate = glm::vec2(CEFPixelX + scrollingX, CEFPixelY + scrollingY);
     std::weak_ptr<const DOMNode> wpNearestLink = _pTab->GetNearestLink(pagePixelCoordinate, distance);
 
     // Determine where to click instead, if not too far away or coordinate already valid
-	bool setToDOMNode = false;
     if(distance < setup::LINK_CORRECTION_MAX_PIXEL_DISTANCE && distance > 0)
     {
         // Try to get value from weak pointer
@@ -48,15 +49,16 @@ bool LinkNavigationAction::Update(float tpf, TabInput tabInput)
             {
 				// Get coordinate in CEFPixel space
                 glm::vec2 linkCoordinate = sp->GetRects().front().center();
-                coordinate = linkCoordinate - glm::vec2(scrollingX, scrollingY); // make coordinate relative in web view and not within page
-				setToDOMNode = true;
+				CEFPixelX = linkCoordinate.x - scrollingX;
+				CEFPixelY = linkCoordinate.y - scrollingY;
             }
         }
     }
 
     // Emulate left mouse button click
-    _pTab->EmulateLeftMouseButtonClick(CEFPixelX, CEFPixelY, visualize > 0, false); // coordinate taken from DOMNode which is in rendered coordinate system
+    _pTab->EmulateLeftMouseButtonClick(CEFPixelX, CEFPixelY, visualize > 0, false); // coordinate already in CEFPixel space
 
+	// Return success
     return true;
 }
 
