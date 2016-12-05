@@ -757,6 +757,7 @@ void Web::UpdateTabOverviewIcon()
 
 bool Web::ValidateURL(const std::string& rURL) const
 {
+	// TODO: Try n catch and maybe extra thread and some waiting duration.
 	return std::regex_match(rURL, *(_upURLregex.get()));
 }
 
