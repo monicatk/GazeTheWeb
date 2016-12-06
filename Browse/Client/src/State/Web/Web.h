@@ -183,7 +183,7 @@ private:
 	// Update icon of tab overview
 	void UpdateTabOverviewIcon();
 
-	// Validate URL
+	// Validate URL. Returns true if recognized as URL
 	bool ValidateURL(const std::string& rURL) const;
 
     // Maps id to Tab
