@@ -39,7 +39,7 @@ function DOMObject(node, nodeType)
             var equal = CompareClientRectsData(updatedRectsData, this.rects);
 
             // Rect updates occured and new Rect data is accessible
-            if(!equal && updatedRectsData != undefined)
+            if(!equal && updatedRectsData !== undefined)
             {
                 this.rects = updatedRectsData;
                 InformCEF(this, ['update', 'rects']); 
@@ -91,7 +91,6 @@ function DOMObject(node, nodeType)
             {
                 this.fixed = fixed;
                 InformCEF(this, ['update', 'fixed']);
-                // this.updateRects();
                 this.updateRects();
             }
         };
@@ -303,35 +302,6 @@ function CreateDOMObject(node, nodeType)
     {
         // Create DOMObject, which encapsulates the given DOM node
         var domObj = new DOMObject(node, nodeType);
-
-        /// Moved to domObj Constructor!
-        // // Push to list and determined by DOMObjects position in type specific list
-        // var domObjList = GetDOMObjectList(nodeType);
-
-
-
-        // if(domObjList != undefined)
-        // {
-        //     domObjList.push(domObj);
-        //     var nodeID = domObjList.length - 1;
-
-        //     // Add attributes to given DOM node
-        //     node.setAttribute('nodeID', nodeID);
-        //     node.setAttribute('nodeType', nodeType);
-
-        //     // Setup of attributes
-        //     domObj.checkVisibility();
-        //     domObj.searchOverflows();
- 
-
-
-        //     InformCEF(domObj, ['added']);
-        // }
-        // else
-        // {
-        //     ConsolePrint("ERROR: No DOMObjectList found for adding node with type="+nodeType+"!");
-        // }
-
     }
     else
     {
@@ -515,7 +485,7 @@ function InformCEF(domObj, operation)
             if(operation[1] == 'fixed')
             {
                 // If fixed attribute doesn't exist, node is not fixed
-                var status = (domObj.node.getAttribute('fixedID') !== undefined) ? 1 : 0;
+                var status = (domObj.node.hasAttribute('fixedId')|| domObj.node.hasAttribute("childFixedId")) ? 1 : 0;
                 // Encode changes in 'fixed' as attribute '1'
                 encodedCommand += ('1#'+status+'#');
 
@@ -833,7 +803,7 @@ function GetOverflowElement(id)
         return window.overflowElements[id];     // This may return undefined
     else
     {
-        ConsolePrint("ERROR in GetOverflowElement: id="+id+", valid id is in [0, "+window.overflowElements.length+"]!");
+        ConsolePrint("ERROR in GetOverflowElement: id="+id+", valid id should be in [0, "+(window.overflowElements.length-1)+"]!");
         return null;
     }
         

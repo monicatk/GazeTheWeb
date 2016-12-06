@@ -182,20 +182,11 @@ function AddFixedElement(node)
 
 function RemoveFixedElement(node)
 {
-    //// Why does the following NOT work at all?!
-    // ConsolePrint("A")
-    // var fixedObj = GetFixedElement(node);
-    // ConsolePrint("B")
-    // ConsolePrint(fixedObj.id);
-    // if(fixedObj !== undefined)
-    // {
     if((fixedObj = GetFixedElement(node)) !== null && fixedObj !== undefined)
     {
         // Needed for output at the end
         var id = fixedObj.id;
 
-        ConsolePrint(id >= 0);
-        ConsolePrint(id < window.domFixedElements.length);
         // Delete object in its list slot, slot will be left empty (undefined) at the moment
         if(id >= 0 && id < window.domFixedElements.length)
         {

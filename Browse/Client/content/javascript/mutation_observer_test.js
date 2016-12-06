@@ -59,21 +59,20 @@ function AdjustRectCoordinatesToWindow(rect)
 	output.push(rect.left*zoomFactor + offsetX);
 	output.push(rect.bottom*zoomFactor + offsetY);
 	output.push(rect.right*zoomFactor + offsetX);
-
 	return output;
 }
 
 
-// // Iterate over Set of already used fixedIDs to find the next ID not yet used and assign it to node as attribute
+// // Iterate over Set of already used fixedIds to find the next ID not yet used and assign it to node as attribute
 // function AddFixedElement(node)
 // {
 // 	// Determine fixed element ID
 // 	var id;
 
-// 	if(node.hasAttribute('fixedID'))
+// 	if(node.hasAttribute('fixedId'))
 // 	{
 // 		// node already in set, use existing ID
-// 		id = node.getAttribute('fixedID');
+// 		id = node.getAttribute('fixedId');
 
 // 		// Check if bounding Rect changes happened
 // 		UpdateSubtreesBoundingRect(node);
@@ -103,7 +102,7 @@ function AdjustRectCoordinatesToWindow(rect)
 // 		}
 
 // 		// Create attribute in node and store ID there
-// 		node.setAttribute('fixedID', id);
+// 		node.setAttribute('fixedId', id);
 
 // 		// DEBUG
 // 		// ConsolePrint("Adding fixed node #"+id);
@@ -112,7 +111,7 @@ function AdjustRectCoordinatesToWindow(rect)
 // 		SaveBoundingRectCoordinates(node);
 // 	}
 
-// 	// TODO: Add attribute 'fixedID' to every child node
+// 	// TODO: Add attribute 'fixedId' to every child node
 
 
 
@@ -130,7 +129,7 @@ function SaveBoundingRectCoordinates(node)
 
 	var rect = node.getBoundingClientRect();
 
-	var id = node.getAttribute('fixedID');
+	var id = node.getAttribute('fixedId');
 
 	
 	// Add empty 1D array to 2D array, if needed
@@ -259,7 +258,7 @@ function ComputeBoundingRect(parent, child)
 	return bbs;
 }
 
-function ComputeBoundingRectOfAllChilds(node, depth, fixedID)
+function ComputeBoundingRectOfAllChilds(node, depth, fixedId)
 {
 	ConsolePrint("WARNING: ComputeBoundingRectOfAllChilds called. DEPRECATED!")
 
@@ -267,10 +266,10 @@ function ComputeBoundingRectOfAllChilds(node, depth, fixedID)
 	if(node.nodeType == 1) // 1 == ELEMENT_NODE
 	{
 
-		// Add attribute 'fixedID' in order to indicate being a child of a fixed node
-		if(!node.hasAttribute('fixedID'))
+		// Add attribute 'fixedId' in order to indicate being a child of a fixed node
+		if(!node.hasAttribute('fixedId'))
 		{
-			node.setAttribute('fixedID', fixedID);
+			node.setAttribute('fixedId', fixedId);
 		}
 
 		// Inform CEF that DOM node is child of a fixed element
@@ -295,7 +294,7 @@ function ComputeBoundingRectOfAllChilds(node, depth, fixedID)
 				rect_coords = 
 					ComputeBoundingRect(
 						rect_coords,
-						ComputeBoundingRectOfAllChilds(node.children.item(i), depth+1, fixedID)
+						ComputeBoundingRectOfAllChilds(node.children.item(i), depth+1, fixedId)
 					);
 			}
 		}
@@ -308,17 +307,17 @@ function ComputeBoundingRectOfAllChilds(node, depth, fixedID)
 	return [-1,-1,-1,-1]; // TODO: nodeType != 1 possible? May ruin the whole computation
 }
 
-// If resetChildren=true, traverse through all child nodes and remove attribute 'fixedID'
+// If resetChildren=true, traverse through all child nodes and remove attribute 'fixedId'
 // May not be neccessary if node (and its children) were completely removed from DOM tree
 // function RemoveFixedElement(node, resetChildren)
 // {
 // 	// Remove node from Set of fixed elements
 // 	window.fixed_elements.delete(node);
 
-// 	if(node.hasAttribute('fixedID'))
+// 	if(node.hasAttribute('fixedId'))
 // 	{
-// 		var id = node.getAttribute('fixedID');
-// 		// Remove fixedID from ID List
+// 		var id = node.getAttribute('fixedId');
+// 		// Remove fixedId from ID List
 // 		window.fixed_IDlist[id] = false;
 // 		// Delete bounding rectangle coordinates for this ID
 // 		window.fixed_coordinates[id] = [];
@@ -328,15 +327,15 @@ function ComputeBoundingRectOfAllChilds(node, depth, fixedID)
 
 // 		// Tell CEF that fixed node with ID was removed
 // 		ConsolePrint('#fixElem#rem#'+zero+id);
-// 		// Remove 'fixedID' attribute
-// 		node.removeAttribute('fixedID');
+// 		// Remove 'fixedId' attribute
+// 		node.removeAttribute('fixedId');
 
 // 		if(resetChildren)
 // 		{
 // 			ForEveryChild(
 // 				node,
 // 				function(child){
-// 					child.removeAttribute("fixedID");
+// 					child.removeAttribute("fixedId");
 // 					SetFixationStatus(child, false);
 // 				}			
 // 			);
@@ -350,7 +349,7 @@ function UpdateSubtreesBoundingRect(childNode)
 {
 	ConsolePrint("WARNING: UpdateSubtreesBoundingRect called. DEPRECATED!");
 
-	var id = childNode.getAttribute('fixedID');
+	var id = childNode.getAttribute('fixedId');
 
 	// ConsolePrint('Checking #'+id+' for updates...');
 

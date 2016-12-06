@@ -93,7 +93,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			}
 			else
 			{
-				IPCLogDebug(browser, "Renderer: Failed to load favicon height and/or width, expected double value, got something different. Aborting.");
+				IPCLogDebug(browser, "Failed to load favicon height and/or width, expected double value, got something different. Aborting.");
 			}
             context->Exit();
         }
@@ -120,7 +120,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			}
 			else
 			{
-				IPCLogDebug(browser, "Renderer: Failed to read page width and/or height, expected double value, got something different. Aborting.");
+				IPCLogDebug(browser, "Failed to read page width and/or height, expected double value, got something different. Aborting.");
 			}
             
             context->Exit();
@@ -153,14 +153,14 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 				// Slots in domFixedElements might contain undefined as value, if FixedElement was deleted
 				if (fixedObj->IsUndefined() || fixedObj->IsNull())
 				{
-					IPCLogDebug(browser, "Renderer: Prevented access to already deleted fixed element at id=" + std::to_string(fixedId));
+					//IPCLogDebug(browser, "Prevented access to already deleted fixed element at id=" + std::to_string(fixedId));
 					context->Exit();
 					return true;
 				}
 			}
 			else
 			{
-				IPCLogDebug(browser, "Renderer: List of fixed elements does not seem to exist yet. Aborting fetching them.");
+				IPCLogDebug(browser, "List of fixed elements does not seem to exist yet. Aborting fetching them.");
 				context->Exit();
 				return true;
 			}
@@ -186,7 +186,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			// DEBUG
 			if (rectList->GetArrayLength() == 0)
 			{
-				IPCLogDebug(browser, "No Rect coordinates available for fixedID="+std::to_string(fixedId));
+				IPCLogDebug(browser, "No Rect coordinates available for fixedId="+std::to_string(fixedId));
 			}
       
 			// Send response
