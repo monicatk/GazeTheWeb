@@ -661,15 +661,24 @@ function OverflowElement(node)
                 ForEveryChild(this.node, function(child){
                     if(child.nodeType == 1)
                     {
-                        var nodeType = child.getAttribute("nodeType");
-                        if(nodeType)
+                        if((nodeType = child.getAttribute("nodeType")) !== undefined && nodeType !== null)
                         {
                             var nodeID = child.getAttribute("nodeID");
-                            var domObj = GetDOMObject(nodeType, nodeID);
-
-                            if(domObj) domObj.updateRects();
+                            if((domObj = GetDOMObject(nodeType, nodeID)) !== undefined)
+                            {
+                                domObj.updateRects();
+                            } 
                         }
 
+                        if((overflowId = child.getAttribute("overflowId")) !== undefined && overflowId !== null)
+                        {
+                            if((overflowObj = GetOverflowElement(overflowId)) !== undefined)
+                            {
+                                overflowObj.updateRects();
+                            }
+                        }
+
+                        
                         // TODO: Update child OEs as well. Idea: Update Method which can be called for one node and checks if DomObj or OE
                         // and executes updateRects
                         // Maybe better: Add function pointer to node s.t. node.updateRects() is callable

@@ -390,7 +390,7 @@ void Handler::SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged
     if (double zoomLevel = _pMediator->GetZoomLevel(browser))
     {
         LogDebug("Handler: Setting zoom level = ", zoomLevel, " (browserID = ", browser->GetIdentifier(), ").");
-		const std::string setZoomLevel = "if(document.body !== null) document.body.style.zoom=" + std::to_string(zoomLevel) + ";this.blur(); UpdateDOMRects();";
+		const std::string setZoomLevel = "if(document.body !== null && document.body !== undefined) document.body.style.zoom=" + std::to_string(zoomLevel) + ";this.blur(); UpdateDOMRects();";
         browser->GetMainFrame()->ExecuteJavaScript(setZoomLevel, "", 0); 
 
         if (definitelyChanged)
