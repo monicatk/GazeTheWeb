@@ -91,8 +91,16 @@ function FixedElement(node)
         if(changed)
         {
             // Inform CEF that fixed element has been updated
-            ConsolePrint("#fixElem#add#"+this.id);
+            // var debug = (window.domFixedElements[this.id] === undefined) ? "undefined" : "ok";
+            ConsolePrint("#fixElem#add#"+this.id+"#");
             //   ConsolePrint("-----> #fixElem#add#"+this.id); // DEBUG
+
+            // Give feedback if other rects might have to get updated too
+            return true;
+        }
+        else
+        {
+            return false;
         }
         
     }

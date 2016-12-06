@@ -863,9 +863,10 @@ function MutationObserverInit()
 							{
 								if((fixedObj = GetFixedElement(node)) !== null && fixedObj !== undefined)
 								{
-									fixedObj.updateRects();
-									// Just in case
-									UpdateDOMRects();
+									if(fixedObj.updateRects())
+									{
+										UpdateDOMRects();
+									}
 								}
 
 								// Update DOMObj / OverflowElement Rect, if node is linked to one
@@ -875,7 +876,7 @@ function MutationObserverInit()
 								{
 									var nodeID = node.getAttribute('nodeID');
 									var domObj = GetDOMObject(nodeType, nodeID);
-									if(domObj !== null)
+									if(domObj !== null && domObj !== undefined)
 									{
 										// domObj.checkVisibility(); // included in updateRects()
 										domObj.updateRects();
@@ -887,7 +888,7 @@ function MutationObserverInit()
 								if(overflowId !== null)
 								{
 									var overflowObj = GetOverflowElement(overflowId);
-									if(overflowObj !== null)
+									if(overflowObj !== null && overflowObj !== undefined)
 									{
 										overflowObj.updateRects();
 									}

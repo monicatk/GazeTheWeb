@@ -143,23 +143,28 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 
 			CefRefPtr<CefV8Value> global = context->GetGlobal();
 			
+
 			CefRefPtr<CefV8Value> fixedObj;
-			if (global->HasValue("domFixedElements"))
+			if (global->HasValue("domFixedElements") && fixedId < global->GetValue("domFixedElements")->GetArrayLength())
 			{
+				
 				fixedObj = global->GetValue("domFixedElements")->GetValue(fixedId);
 
 				// Slots in domFixedElements might contain undefined as value, if FixedElement was deleted
 				if (fixedObj->IsUndefined() || fixedObj->IsNull())
+				{
+					IPCLogDebug(browser, "Renderer: Prevented access to already deleted fixed element at id=" + std::to_string(fixedId));
+					context->Exit();
 					return true;
+				}
 			}
 			else
 			{
 				IPCLogDebug(browser, "Renderer: List of fixed elements does not seem to exist yet. Aborting fetching them.");
+				context->Exit();
 				return true;
 			}
 			
-			
-			//CefRefPtr<CefV8Value> rectsArray = fixedObj->GetValue("rects");
 			
 			int index = 0;
 			args->SetInt(index++, fixedId);
@@ -191,14 +196,9 @@ bool RenderProcessHandler::OnProcessMessageReceived(
         }
     }
 
-	if (msgName == "FetchDOMTextLink")
+	if (msgName == "FetchDOMTextLink" || msgName == "FetchDOMTextInput")
 	{
-		IPCLog(browser, "Renderer: Received Deprecated FetchDOMTextLink message!");
-	}
-
-	if (msgName == "FetchDOMTextInput")
-	{
-		IPCLog(browser, "Renderer: Received Deprecated FetchDOMTextInput message!");
+		IPCLogDebug(browser, "Renderer: Received deprecated "+msgName+" message!");
 	}
 
 	if (msgName == "LoadDOMNodeData")
@@ -373,7 +373,6 @@ CefRefPtr<CefV8Value> RenderProcessHandler::FetchDOMObject(CefRefPtr<CefV8Contex
 		// Only try to execute function, if function exists
 		if (jsWindow->GetValue("GetDOMObject")->IsFunction())
 		{
-			// 
 			result = jsWindow->GetValue("GetDOMObject")->ExecuteFunction(
 				NULL, 
 				{ CefV8Value::CreateInt(nodeType), CefV8Value::CreateInt(nodeID) }
@@ -403,7 +402,7 @@ CefRefPtr<CefProcessMessage> RenderProcessHandler::UnwrapDOMTextInput(
 	CefRefPtr<CefProcessMessage> result = CefProcessMessage::Create("CreateDOMTextInput");
 	CefRefPtr<CefListValue> args = result->GetArgumentList();
 
-	if (domObj && !domObj->IsNull())
+	if (domObj && !domObj->IsNull() && !domObj->IsUndefined())
 	{
 		if (context->Enter())
 		{
@@ -441,7 +440,7 @@ CefRefPtr<CefProcessMessage> RenderProcessHandler::UnwrapDOMLink(
 	CefRefPtr<CefProcessMessage> result = CefProcessMessage::Create("CreateDOMLink");
 	CefRefPtr<CefListValue> args = result->GetArgumentList();
 
-	if (domObj && !domObj->IsNull())
+	if (domObj && !domObj->IsNull() && !domObj->IsUndefined())
 	{
 		if (context->Enter())
 		{

@@ -131,6 +131,9 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				msg->GetArgumentList()->SetInt(0, atoi(data[2].c_str()));
 				browser->SendProcessMessage(PID_RENDERER, msg);
 
+				// DEBUG
+				if (data.size() > 3)
+					LogDebug(requestName);
 				return true;
 			}
 		}
