@@ -1,21 +1,15 @@
 Features (ordered)
+- Get string of text input field to avoid overriding with empty string when accidentially hitting a text input trigger
 - Scrolling within page (OverflowElements)
 	--> TODO: Activate Cookies in order to be able to test Facebooks Chat
 - Auto Fill / Password Manager
 	- Daniel: Passwort / Sign in form recognition
 	- Raphael: Secure Password Keyboard mode?
-- Inkognito
-- Get string of text input field to avoid overriding with empty string when accidentially hitting a text input trigger
-- Search on page
-- Https recognition and displaying of lock
 - HTML5 Video Player support (replace tab bar with controlls and dim everything)
 - Page fullscreen handling
+- Inkognito
+- Search on page
+- Https recognition and displaying of lock
 - CSS Injection
-- Drag n Drop (really necessary?)
 - Right click and _own_ context menus (see JS Window Object)
 	(Javascript Popup Handling)
-
-Problems
-- Transition events not properly fired --> CEF Update?
-
-
