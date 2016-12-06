@@ -522,9 +522,18 @@ void Tab::Deactivate()
 
 void Tab::OpenURL(std::string URL)
 {
+	// Set URL
 	_url = URL;
-	_pCefMediator->RefreshTab(this);
+
+	// Abort any pipeline execution
 	AbortAndClearPipelines();
+
+	// Tell CEF to refresh this tab (which will fetch the URL and load it)
+	_pCefMediator->RefreshTab(this);
+
+	// Reset scrolling
+	_scrollingOffsetX = 0.0;
+	_scrollingOffsetY = 0.0;
 }
 
 void Tab::AbortAndClearPipelines()
