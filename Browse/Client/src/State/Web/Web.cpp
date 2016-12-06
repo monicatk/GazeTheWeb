@@ -757,8 +757,14 @@ void Web::UpdateTabOverviewIcon()
 
 bool Web::ValidateURL(const std::string& rURL) const
 {
-	// TODO: Try n catch and maybe extra thread and some waiting duration.
-	return std::regex_match(rURL, *(_upURLregex.get()));
+	try
+	{
+		return std::regex_match(rURL, *(_upURLregex.get()));
+	}
+	catch (...)
+	{
+		return true; // in case of failed validation, assume it is a URL since it seems to be complicated
+	}
 }
 
 Web::TabJob::TabJob(Tab* pCaller)
