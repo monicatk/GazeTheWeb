@@ -73,18 +73,23 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 					browser->GetMainFrame()->ExecuteJavaScript(_js_favicon_copy_img_bytes_to_v8array, browser->GetMainFrame()->GetURL(), 0);
 
 					// Read out each byte and write it to IPC msg
-					bool error_occured = false;
+					//bool error_occured = false;
 					for (int i = 0; i < byteArray->GetArrayLength(); i++)
 					{
-						error_occured = error_occured || byteArray->GetValue(i)->IsInt();
-						if (error_occured)
-						{
-							args->SetInt(index++, byteArray->GetValue(i)->GetIntValue());
-						}
+						//// Check if value IsInt will fail!
+						//error_occured = error_occured || byteArray->GetValue(i)->IsInt();
+						//if (error_occured)
+						//{
+						args->SetInt(index++, byteArray->GetValue(i)->GetIntValue());
+						//}
 					}
 					
-					if(!error_occured)
-						browser->SendProcessMessage(PID_BROWSER, msg);
+					//if(!error_occured)
+					browser->SendProcessMessage(PID_BROWSER, msg);
+					//else
+					//{
+					//	IPCLogDebug(browser, "An error occured while reading out favicon bytes!");
+					//}
 				}
 				else
 				{

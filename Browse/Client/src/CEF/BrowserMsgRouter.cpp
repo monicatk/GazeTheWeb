@@ -76,7 +76,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	if (requestName == "faviconBytesReady")
 	{
 		callback->Success("GetFavIconBytes");
-		LogDebug("BrowserMsgRouter: Received 'faviconBytesReady 'callback from Javascript");
+		LogDebug("BrowserMsgRouter: Received 'faviconBytesReady' callback from Javascript");
 
 		// Tell renderer to read out favicon image's bytes
 		CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("GetFavIconBytes");
@@ -257,7 +257,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	*/
 
 	// Identify general DOM request
-	// example: DOM#upd#7#1337#5#0.9;0.7;0.5;0.7#
+	// example: DOM#upd#7#1337#0#0.9;0.7;0.5;0.7#
 	if (requestName.compare(0, 4, "DOM#") == 0)
 	{
 		std::vector<std::string> data = SplitBySeparator(requestName, '#');
