@@ -21,6 +21,7 @@ function DOMObject(node, nodeType)
         this.visible = true;    // default value, call DOMObj.checkVisibility() after object is created!
         this.fixed = (node.hasAttribute("childFixedId")) ? true : false;
         this.overflowParent = undefined;
+        this.text = "";
 
     /* Methods */ 
         // Update member variable for Rects and return true if an update has occured 
@@ -194,7 +195,11 @@ function DOMObject(node, nodeType)
             // Only executable if DOMNode is TextInput field
             if(this.nodeType === 0)
             {
-                if (this.node.tagName == 'INPUT')
+                if(this.node.tagName == "TEXTAREA")
+                {
+                    this.node.value = text;
+                }
+                else if (this.node.tagName == 'INPUT')
                 {
                     // GOOGLE FIX
                     var inputs = this.node.parentNode.getElementsByTagName("INPUT");
@@ -221,6 +226,9 @@ function DOMObject(node, nodeType)
                     ConsolePrint("Set input's value to given text");
                 }
                 
+                // Assuming text input works in any case (no feedback needed), so that input text is now displayed
+                this.text = text;
+                InformCEF(this, ["update", "text"]);
                 
                 // ConsolePrint("Input text was set!");
 
@@ -277,6 +285,23 @@ function DOMObject(node, nodeType)
             if(this.fixed)
             {
                 InformCEF(this, ['update', 'fixed']);
+            }
+
+            // Set displayed text, depending on given node type
+            // TODO/IDEA: (External) function returning node's text attribute, corresponding to node's tagName & type
+            if(nodeType == 0)   // Only needed for text inputs
+            {
+                if(this.node.tagName == "TEXTAREA" || this.node.tagName == "INPUT")
+                {
+                    if(this.node.value !== undefined && this.node.value !== null)
+                        this.text = this.node.value;
+                }
+                else
+                {
+                    if(this.node.textContent !== undefined && this.node.textContent !== null)
+                    this.text = this.node.textContent;
+                }
+                InformCEF(this, ["update", "text"]);
             }
         }
         else
@@ -497,6 +522,11 @@ function InformCEF(domObj, operation)
                 
                 encodedCommand += ('2#'+status+'#');
                 // ConsolePrint("encodedCommand: "+encodedCommand);
+            }
+
+            if(operation[1] == "text")
+            {
+                encodedCommand += ("3#"+domObj.text+"#");
             }
         }
 

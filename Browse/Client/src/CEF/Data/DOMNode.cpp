@@ -62,10 +62,8 @@ DOMLink::DOMLink(DOMNodeType type,
 	int64 frameID,
 	int nodeID,
 	Rect rect,
-	std::string text,
 	std::string url) : DOMNode(type, frameID, nodeID, rect)
 {
-	_text = text;
 	_url = url;
 }
 
@@ -74,10 +72,8 @@ DOMLink::DOMLink(
 	int64 frameID,
 	int nodeID,
 	std::vector<Rect> rects,
-	std::string text,
 	std::string url) : DOMNode(type, frameID, nodeID, rects)
 {
-	_text = text;
 	_url = url;
 }
 

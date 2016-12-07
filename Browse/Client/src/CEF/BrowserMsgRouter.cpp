@@ -48,6 +48,11 @@ std::vector<std::string> MsgHandler::SplitBySeparator(std::string str, char sepa
 				output.push_back(bufferStr);
 				buffer.clear();
 			}
+			// Insert empty strings between two separators, but not directly after first separator!
+			else if (i > 0 && buffer.size() == 0)
+			{
+				output.push_back("");
+			}
 		}
 		else
 		{
@@ -110,32 +115,33 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	if (requestName.compare(0, 9, "#fixElem#") == 0)
 	{
 		std::vector<std::string> data = SplitBySeparator(requestName, '#');
+		const std::string& op = data[1];
 
 		if (data.size() > 2)
 		{
-			if (data[1].compare("rem") == 0)
-			{
+			const std::string& id = data[2];
 
-				const std::string& id = data[2];	// TODO: Updated code, not tested yet
-				//LogDebug("BrowserMsgRouter: Fixed element #", id, " was removed.");
+			if (op.compare("rem") == 0)
+			{
 
 				// Notify Tab via CefMediator, that a fixed element was removed
 				_pMsgRouter->GetMediator()->RemoveFixedElement(browser, atoi(id.c_str()));
 
 				return true;
 			}
-			if (data[1].compare("add") == 0)
+			if (op.compare("add") == 0)
 			{
 				// Tell Renderer to read out bounding rectangle coordinates belonging to the given ID
 				CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("FetchFixedElements");
-				msg->GetArgumentList()->SetInt(0, atoi(data[2].c_str()));
+				msg->GetArgumentList()->SetInt(0, atoi(id.c_str()));
 				browser->SendProcessMessage(PID_RENDERER, msg);
-
-				// DEBUG
-				if (data.size() > 3)
-					LogDebug(requestName);
 				return true;
 			}
+		}
+		else
+		{
+			LogDebug("MsgRouter: Expected more arguments for fixed elements. Aborting.");
+			return true;
 		}
 		
 	}
@@ -342,7 +348,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 							break;
 						};
 
-								  // Node's fixation status changed
+						// Node's fixation status changed
 						case(1) : {
 							bool boolVal = attrData.at(0) != '0';
 
@@ -355,9 +361,8 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 							break;
 						};
 
-								  // Node's visibility has changed
+						// Node's visibility has changed
 						case (2) : {
-							//LogDebug("MsgHandler: Updating node's visibility...");
 							bool boolVal = attrData.at(0) != '0';
 
 							// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
@@ -367,7 +372,15 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 							}
 
 							break;
-
+						}
+						// Node's text(Content) changed
+						case (3) : {
+							if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
+							{
+								targetNode->SetText(attrData);
+								LogDebug("MsgRouter: Set node's text attribute to: '", attrData, "'");
+							}
+							break;
 						}
 						default: {
 							LogDebug("MsgHandler: Received Javascript 'update' request of DOMNode attribute=", attr, ", which is not yet defined.");
