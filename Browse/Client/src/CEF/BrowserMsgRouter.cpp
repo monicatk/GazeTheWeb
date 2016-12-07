@@ -223,6 +223,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					{
 						elem->UpdateFixation(std::stoi(dataStr[2]));
 					}
+
 				}
 			}
 			else
@@ -259,164 +260,127 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	// example: DOM#upd#7#1337#5#0.9;0.7;0.5;0.7#
 	if (requestName.compare(0, 4, "DOM#") == 0)
 	{
-		const char typeChar = requestName.at(8);
-		DOMNodeType type;
-		switch (typeChar)
-		{
-		case('0') : {type = DOMNodeType::TextInput; break;  };
-		case('1') : {type = DOMNodeType::TextLink; break;  };
-		}
+		std::vector<std::string> data = SplitBySeparator(requestName, '#');
 
-		// Extract information of variable length from rest of string
-		int id = -1, attr = -1;
-		std::string dataStr;
-
-		const std::string str = requestName.substr(10, requestName.length() - 1);
-		std::vector<char> buffer;
-		int amount_separators = 0;
-		for (int i = 0; i < (int)str.length(); i++)
+		if (data.size() > 3)
 		{
-			const char read = str.at(i);
-			if (read != '#')
+			const std::string& op = data[1];
+			const int& numeric_type = std::stoi(data[2]);
+			const int& id = std::stoi(data[3]);
+			
+			// Identify type as string with DOMNodeType
+			DOMNodeType type;
+			switch (numeric_type)
 			{
-				buffer.push_back(read);
+			case(0) : {type = DOMNodeType::TextInput; break;  };
+			case(1) : {type = DOMNodeType::TextLink; break;  };
 			}
-			else
-			{
-				// Write char buffer to string
-				const std::string bufferStr(buffer.begin(), buffer.end());
 
-				// Identify what information is to be extracted
-				switch (amount_separators)
+			// Node was added
+			if (op.compare("add") == 0)
+			{
+				//LogDebug("MsgHandler: Javascript says, that DOM node with type=", type, " & id=", id, " was found.");
+
+				// Create blank DOM node of given node type with nodeID
+				_pMsgRouter->GetMediator()->AddDOMNode(
+					browser,
+					std::make_shared<DOMNode>(
+						type,
+						browser->GetMainFrame()->GetIdentifier(),
+						id,
+						Rect()
+						)
+					);
+
+				// Send IPC msg to Renderer to fetch more data to fill in
+				CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("LoadDOMNodeData");
+				msg->GetArgumentList()->SetInt(0, type);
+				msg->GetArgumentList()->SetInt(1, id);
+				browser->SendProcessMessage(PID_RENDERER, msg);
+			}
+
+			// Node was removed
+			if (op.compare("rem") == 0)
+			{
+				_pMsgRouter->GetMediator()->RemoveDOMNode(browser, type, id);
+			}
+
+			// Node was updated
+			if (op.compare("upd") == 0)
+			{
+				if (data.size() > 5)
 				{
-				case(0) : { 
-					id = std::stoi(bufferStr); break;
-				};
-				case(1) : { 
-					attr = std::stoi(bufferStr);
-					// Extract data string, interpret it later
-					dataStr = str.substr(i + 1, str.length() - 2);
-					break; 
-				};
-				}
-				amount_separators++;
-				buffer.clear();
-			}
-		}
-		// DEBUG
-		//LogDebug("MsgHandler: Received 'DOM' request for nodeID=", id, " with nodeType=", type);
-		//LogDebug("MsgHandler: str= ", str);
-		//LogDebug("MsgHandler: dataStr= ", dataStr);
-
-
-		// Node was added
-		if (requestName.compare(4, 3, "add") == 0)
-		{
-			//LogDebug("MsgHandler: Javascript says, that DOM node with type=", type, " & id=", id, " was found.");
-
-			// Create blank DOM node of given node type with nodeID
-			_pMsgRouter->GetMediator()->AddDOMNode(
-				browser,
-				std::make_shared<DOMNode>(
-					type,
-					browser->GetMainFrame()->GetIdentifier(),
-					id,
-					Rect()
-					)
-				);
-
-			// Send IPC msg to Renderer to fetch more data to fill in
-			CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("LoadDOMNodeData");
-			msg->GetArgumentList()->SetInt(0, type);
-			msg->GetArgumentList()->SetInt(1, id);
-			browser->SendProcessMessage(PID_RENDERER, msg);
-		}
-
-		// Node was removed
-		if (requestName.compare(4, 3, "rem") == 0)
-		{
-			_pMsgRouter->GetMediator()->RemoveDOMNode(browser, type, id);
-		}
-
-		// Node was updated
-		if (requestName.compare(4, 3, "upd") == 0)
-		{
-			switch (attr)
-			{
-				// List of Rects were updated
-				case(0) : {
-					std::vector<float> rectData;
-					std::vector<char> buffer;
-					for (int i = 0; i < (int)dataStr.length(); i++)
-					{
-						const char read = dataStr.at(i);
-						if (read != ';' && read != '#')
-						{
-							// Save each char which is no separator symbol
-							buffer.push_back(read);
-						}
-						else if (buffer.size() > 0)
-						{
-							// vector<char> -> string
-							const std::string bufferStr(buffer.begin(), buffer.end());
-
-							rectData.push_back(std::stod(bufferStr));
-
-							buffer.clear();
-						}
-					}
-
-					std::vector<Rect> rects;
-					// Read out each 4 float values und create 1 Rect with them
-					for (int i = 0; i + 3 < rectData.size(); i+= 4)
-					{
-						Rect rect = Rect(rectData[i], rectData[i + 1], rectData[i + 2], rectData[i + 3]);
-						rects.push_back(rect);
-					}
+					const int& attr = std::stoi(data[4]);
+					const std::string& attrData = data[5];
 					
-					// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
-					if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
+					switch (attr)
 					{
-						targetNode->SetRects(std::make_shared<std::vector<Rect>>(rects));
+						// List of Rects were updated
+						case(0) : {
+							std::vector<std::string> rectDataStr = SplitBySeparator(attrData, ';');
+							std::vector<float> rectData;
+							// Extract each float value from string, earlier separated by ';', and convert string to numerical value
+							std::for_each(
+								rectDataStr.begin(),
+								rectDataStr.end(), 
+								[&rectData](std::string value) {rectData.push_back(std::stod(value)); }
+							);
+
+							std::vector<Rect> rects;
+							// Read out each 4 float values und create 1 Rect with them
+							for (int i = 0; i + 3 < rectData.size(); i += 4)
+							{
+								Rect rect = Rect(rectData[i], rectData[i + 1], rectData[i + 2], rectData[i + 3]);
+								rects.push_back(rect);
+							}
+
+							// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
+							if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
+							{
+								targetNode->SetRects(std::make_shared<std::vector<Rect>>(rects));
+							}
+							break;
+						};
+
+								  // Node's fixation status changed
+						case(1) : {
+							bool boolVal = attrData.at(0) != '0';
+
+							// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
+							if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
+							{
+								targetNode->SetFixed(boolVal);
+							}
+
+							break;
+						};
+
+								  // Node's visibility has changed
+						case (2) : {
+							//LogDebug("MsgHandler: Updating node's visibility...");
+							bool boolVal = attrData.at(0) != '0';
+
+							// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
+							if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
+							{
+								targetNode->SetVisibility(boolVal);
+							}
+
+							break;
+
+						}
+						default: {
+							LogDebug("MsgHandler: Received Javascript 'update' request of DOMNode attribute=", attr, ", which is not yet defined.");
+						}
 					}
-
-					break;
-				};
-
-				// Node's fixation status changed
-				case(1) : {
-					bool boolVal = dataStr.at(0) != '0';
-
-					// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
-					if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
-					{
-						targetNode->SetFixed(boolVal);
-					}
-
-					break;
-				};
-
-				// Node's visibility has changed
-				case (2) : {
-					//LogDebug("MsgHandler: Updating node's visibility...");
-					bool boolVal = dataStr.at(0) != '0';
-
-					// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
-					if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
-					{
-						targetNode->SetVisibility(boolVal);
-						//LogDebug("MsgHandler: Changed node's visibilty to: ", boolVal);
-					}
-
-					break;
-
 				}
-				default: {
-					LogDebug("MsgHandler: Received Javascript 'update' request of DOMNode attribute=", attr, ", which is not yet defined.");
+				else
+				{
+					LogDebug("MsgRouter: Expected more data in DOMObject update:\n", requestName, "\nAborting update.");
+					return true;
 				}
 			}
-
-		} // End of node update
+		}
 
 		return true;
 	}

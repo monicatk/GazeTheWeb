@@ -500,8 +500,6 @@ function InformCEF(domObj, operation)
             }
         }
 
-
-
         // Send encoded command to CEF
         ConsolePrint(encodedCommand);
     }
