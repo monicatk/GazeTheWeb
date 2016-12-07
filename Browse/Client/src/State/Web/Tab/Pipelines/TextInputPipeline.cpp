@@ -9,15 +9,22 @@
 #include "src/State/Web/Tab/Pipelines/Actions/KeyboardAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/TextInputAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/LeftMouseButtonClickAction.h"
+#include "submodules/eyeGUI/include/eyeGUI.h"
 
 TextInputPipeline::TextInputPipeline(TabInteractionInterface* pTab, std::shared_ptr<DOMNode> spNode) : Pipeline(pTab)
 {
+	// Get current text from node
+	std::string text = spNode->GetText();
+	std::u16string text16;
+	eyegui_helper::convertUTF8ToUTF16(text, text16);
+
     // At first, click in text field
 	std::shared_ptr<LeftMouseButtonClickAction> spLeftMouseButtonClickAction = std::make_shared<LeftMouseButtonClickAction>(_pTab);
 	_actions.push_back(spLeftMouseButtonClickAction);
 
     // Then, do input via keyboard
 	std::shared_ptr<KeyboardAction> spKeyboardAction = std::make_shared<KeyboardAction>(_pTab);
+	spKeyboardAction->SetInputValue<std::u16string>("text", text16);
 	_actions.push_back(spKeyboardAction);
 
     // At last, fill input into text field

@@ -1,5 +1,4 @@
 Features (ordered)
-- Get string of text input field to avoid overriding with empty string when accidentially hitting a text input trigger
 - Scrolling within page (OverflowElements)
 	--> TODO: Activate Cookies in order to be able to test Facebooks Chat
 - Auto Fill / Password Manager

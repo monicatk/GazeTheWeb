@@ -3,8 +3,8 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Action which displays keyboard and delivers text input.
-// - Input: none
-// - Output: std::u16string text
+// - Input: std::u16string text (which is given)
+// - Output: std::u16string text (which is edited by keyboard)
 // - Output: int submit (0 if not, else submit)
 
 #ifndef KEYBOARDACTION_H_

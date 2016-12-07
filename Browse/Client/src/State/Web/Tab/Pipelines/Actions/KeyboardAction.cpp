@@ -10,6 +10,7 @@
 KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 {
     // Add in- and output data slots
+	AddString16InputSlot("text");
     AddString16OutputSlot("text");
     AddIntOutputSlot("submit");
 
@@ -200,11 +201,20 @@ void KeyboardAction::Draw() const
 
 void KeyboardAction::Activate()
 {
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, true);
+	// Set visibility of floating frame
+    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, true); // TODO: typo in method!
+
+	// Get text from input
+	std::u16string text;
+	GetInputValue<std::u16string>("text", text);
+
+	// Put text into preview
+	_pTab->AddContentAtCursorInTextEdit(_overlayTextEditId, text); // TODO: set content would be better here
 }
 
 void KeyboardAction::Deactivate()
 {
+	// Set visibility of floating frame
     _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, false);
 }
 
