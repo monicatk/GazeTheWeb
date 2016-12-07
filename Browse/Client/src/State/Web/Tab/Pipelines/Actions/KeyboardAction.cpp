@@ -202,7 +202,7 @@ void KeyboardAction::Draw() const
 void KeyboardAction::Activate()
 {
 	// Set visibility of floating frame
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, true); // TODO: typo in method!
+    _pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayFrameIndex, true);
 
 	// Get text from input
 	std::u16string text;
@@ -215,7 +215,7 @@ void KeyboardAction::Activate()
 void KeyboardAction::Deactivate()
 {
 	// Set visibility of floating frame
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, false);
+    _pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayFrameIndex, false);
 }
 
 void KeyboardAction::Abort()

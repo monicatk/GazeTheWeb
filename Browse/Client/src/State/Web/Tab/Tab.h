@@ -118,7 +118,7 @@ public:
         float relativePositionY);
 
     // Set visibility of floating frame in overlay
-    virtual void SetVisibilyOfFloatingFrameInOverlay(int index, bool visible);
+    virtual void SetVisibilityOfFloatingFrameInOverlay(int index, bool visible);
 
     // Remove floating frame from overlay
     virtual void RemoveFloatingFrameFromOverlay(int index);

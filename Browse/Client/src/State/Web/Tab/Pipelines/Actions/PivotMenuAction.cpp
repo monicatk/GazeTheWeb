@@ -134,14 +134,14 @@ void PivotMenuAction::Activate()
     _pTab->SetPositionOfFloatingFrameInOverlay(_pivotFrameIndex, pivotPosition.x, pivotPosition.y);
 
     // Make overlays visible
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_menuFrameIndex, true);
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_pivotFrameIndex, true);
+    _pTab->SetVisibilityOfFloatingFrameInOverlay(_menuFrameIndex, true);
+    _pTab->SetVisibilityOfFloatingFrameInOverlay(_pivotFrameIndex, true);
 }
 
 void PivotMenuAction::Deactivate()
 {
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_menuFrameIndex, false);
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_pivotFrameIndex, false);
+    _pTab->SetVisibilityOfFloatingFrameInOverlay(_menuFrameIndex, false);
+    _pTab->SetVisibilityOfFloatingFrameInOverlay(_pivotFrameIndex, false);
 }
 
 void PivotMenuAction::Abort()

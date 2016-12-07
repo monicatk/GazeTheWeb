@@ -54,7 +54,7 @@ bool DOMTrigger::Update(float tpf, TabInput& rTabInput)
     if(_visible != visible)
     {
         _visible = visible;
-        _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, _visible);
+        _pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayFrameIndex, _visible);
     }
 
     // Calculate position of overlay button
@@ -89,12 +89,12 @@ void DOMTrigger::Draw() const
 
 void DOMTrigger::Activate()
 {
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, _visible);
+    _pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayFrameIndex, _visible);
 }
 
 void DOMTrigger::Deactivate()
 {
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, false);
+    _pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayFrameIndex, false);
 }
 
 void DOMTrigger::CalculatePositionOfOverlayButton(float& rRelativePositionX, float& rRelativePositionY) const
