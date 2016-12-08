@@ -8,6 +8,7 @@ Features (End of January):
 - Page fullscreen handling
 - First loading sometimes fails in terms of DOM Node creation
 - Javascript PopUp handling
+- DOM Node boxes for images are only text height
 
 Test all MAMEM trial tasks! -> Sofias Document
 
