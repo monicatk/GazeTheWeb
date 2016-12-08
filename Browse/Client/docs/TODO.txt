@@ -1,14 +1,20 @@
-Features (ordered)
-- Scrolling within page (OverflowElements)
-	--> TODO: Activate Cookies in order to be able to test Facebooks Chat
+Features (End of January):
 - Auto Fill / Password Manager
 	- Daniel: Passwort / Sign in form recognition
 	- Raphael: Secure Password Keyboard mode?
-- HTML5 Video Player support (replace tab bar with controlls and dim everything)
+- Daniel: Copy URL (from links and images)
+- Ad blocking
+- Word prediction improvement (and add typed words) and make extra one for URL Input
 - Page fullscreen handling
+
+Test all MAMEM trial tasks! -> Sofias Document
+
+Furthermore:
+- HTML5 Video Player support (replace tab bar with controlls and dim everything)
 - Inkognito
 - Search on page
 - Https recognition and displaying of lock
 - CSS Injection
 - Right click and _own_ context menus (see JS Window Object)
-	(Javascript Popup Handling)
+	- (Javascript Popup Handling)
+- z-Layering of (fixed, text input) DOM elements (like Google.com)
