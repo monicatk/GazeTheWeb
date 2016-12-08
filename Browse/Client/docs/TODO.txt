@@ -7,6 +7,7 @@ Features (End of January):
 - Word prediction improvement (and add typed words) and make extra one for URL Input
 - Page fullscreen handling
 - First loading sometimes fails in terms of DOM Node creation
+- Javascript PopUp handling
 
 Test all MAMEM trial tasks! -> Sofias Document
 
