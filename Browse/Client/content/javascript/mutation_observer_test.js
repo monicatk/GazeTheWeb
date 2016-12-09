@@ -392,35 +392,58 @@ window.onresize = function()
 document.addEventListener('transitionend', function(event){
 	// Tree, whose children have to be check for rect updates
 	var tree = event.target.parentNode || event.target;
-	ForEveryChild(tree, function(child)
+
+	// If first node is fixed element, only call fixed objects update rects method
+	// it triggers rect updates for all its children
+	if((fixedObj = GetFixedElement(tree)) !== undefined && fixedObj !== null)
 	{
-		if(child.nodeType === 1)
+		fixedObj.updateRects();
+	}
+	else
+	{
+		ForEveryChild(tree, function(child)
 		{
-			// Check for DOMObjects
-			var type = child.getAttribute("nodeType");
-			if(type !== undefined && type !== null)
+			/* Update every child after transition took place */
+			if(child.nodeType === 1)
 			{
-				var id = child.getAttribute("nodeID");
-				var domObj = GetDOMObject(type, id);
-				if(domObj !== null && domObj !== undefined)
+				// Check for DOMObjects
+				var type = child.getAttribute("nodeType");
+				if(type !== undefined && type !== null)
 				{
-					domObj.updateRects();
+					var id = child.getAttribute("nodeID");
+					var domObj = GetDOMObject(type, id);
+					if(domObj !== null && domObj !== undefined)
+					{
+						domObj.updateRects();
+					}
 				}
-			}
 
-			var overflowId = child.getAttribute("overflowId");
-			if(overflowId !== undefined && overflowId !== null)
-			{
-				var overflowObj = GetOverflowElement(overflowId);
-				if(overflowObj !== undefined && overflowObj !== null)
+				var overflowId = child.getAttribute("overflowId");
+				if(overflowId !== undefined && overflowId !== null)
 				{
-					overflowObj.updateRects();
+					var overflowObj = GetOverflowElement(overflowId);
+					if(overflowObj !== undefined && overflowObj !== null)
+					{
+						overflowObj.updateRects();
+					}
 				}
+
+				if(child.hasAttribute("fixedId") !== undefined)
+				{
+					var fixedObj = GetFixedElement(child);
+					if(fixedObj !== undefined)
+					{
+						fixedObj.updateRects();
+					}
+				}
+
+
+
+
 			}
+		}); // ForEveryChild end
+	}
 
-		}
-
-	}); // ForEveryChild end
 }, false);
 
 

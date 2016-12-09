@@ -1,5 +1,7 @@
 window.domLinks = [];
 window.domTextInputs = [];
+window.overflowElements = [];
+
 
 /* TODOs
         - Write method 'InformCEF' -- DONE
@@ -795,7 +797,6 @@ function OverflowElement(node)
 
 }
 
-window.overflowElements = [];
 
 function CreateOverflowElement(node)
 {

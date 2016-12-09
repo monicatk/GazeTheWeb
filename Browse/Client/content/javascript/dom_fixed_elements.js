@@ -69,7 +69,6 @@ function FixedElement(node)
         domRectList.forEach(
             function(domRect)
             { 
-                // ConsolePrint(AdjustRectToZoom(domRect));
                 updatedRectsData.push(AdjustRectToZoom(domRect));
             }
         );
@@ -258,9 +257,6 @@ function SetFixationStatus(node, status)
 		var overflowObj = GetOverflowElement(overflowId);
 		if(overflowObj !== null)
 		{
-			//DEBUG
-			// ConsolePrint("Changing fixation status to "+status+" for OE id="+overflowId);
-
 			overflowObj.setFixed(status);
 		}
 	}
