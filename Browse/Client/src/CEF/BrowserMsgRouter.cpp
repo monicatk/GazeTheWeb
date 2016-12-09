@@ -378,7 +378,16 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 							if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
 							{
 								targetNode->SetText(attrData);
-								LogDebug("MsgRouter: Set node's text attribute to: '", attrData, "'");
+								//LogDebug("MsgRouter: Set node's text attribute to: '", attrData, "'");
+							}
+							break;
+						}
+						// Node is set as password input field
+						case(4) : {
+							if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
+							{
+								targetNode->SetAsPasswordField();
+								LogDebug("MsgRouter: Set input field node to password field!");
 							}
 							break;
 						}

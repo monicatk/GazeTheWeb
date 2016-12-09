@@ -760,8 +760,22 @@ void Tab::DrawDebuggingOverlay() const
 		// Render rects
 		for (const auto rRect : rDOMTrigger->GetDOMRects())
 		{
-			if(rDOMTrigger->GetDOMVisibility())
-				renderRect(rRect, rDOMTrigger->GetDOMFixed());
+			if (rDOMTrigger->GetDOMVisibility())
+			{
+				if (!rDOMTrigger->GetDOMIsPasswordField())
+				{
+					renderRect(rRect, rDOMTrigger->GetDOMFixed());
+				}
+				else
+				{
+					_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(0.0f, 1.f, 1.f));
+					renderRect(rRect, rDOMTrigger->GetDOMFixed());
+					_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_TRIGGER_DEBUG_COLOR);
+				}
+
+
+			}
+				
 		}
 	}
 

@@ -28,6 +28,7 @@ public:
 	bool GetFixed() const { return _fixed; }
 	bool GetVisibility() const { return _visible; }
 	const std::string GetText() const { return _text; }
+	bool IsPasswordField() const { return _isPasswordField; }
 
 	void AddRect(Rect rect) { _rects.push_back(rect); }
 
@@ -35,6 +36,7 @@ public:
 	void SetFixed(bool fixed) { _fixed = fixed; }
 	void SetVisibility(bool visible) { _visible = visible; }
 	void SetText(std::string text) { _text = text; }
+	void SetAsPasswordField() { _isPasswordField = true; }
 
 
 	DOMNode(DOMNodeType type, int64 frameID, int nodeID, std::vector<Rect> rects)
@@ -63,7 +65,7 @@ protected:
 	bool _fixed = false;
 	bool _visible = true;
 	std::string _text = "";
-
+	bool _isPasswordField = false;
 
 };
 

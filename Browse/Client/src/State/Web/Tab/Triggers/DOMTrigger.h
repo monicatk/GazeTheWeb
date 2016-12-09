@@ -43,6 +43,9 @@ public:
 	// Get whether DOMNode is visible or not
 	bool GetDOMVisibility() const { return _spNode->GetVisibility(); }
 
+	// Identify input field as password input or not
+	bool GetDOMIsPasswordField() const { return _spNode->IsPasswordField(); }
+
 private:
 
     // Calculate position of overlay button

@@ -22,6 +22,7 @@ function DOMObject(node, nodeType)
         this.fixed = (node.hasAttribute("childFixedId")) ? true : false;
         this.overflowParent = undefined;
         this.text = "";
+        this.isPassword = false;
 
     /* Methods */ 
         // Update member variable for Rects and return true if an update has occured 
@@ -259,7 +260,7 @@ function DOMObject(node, nodeType)
             }
         };
 
-        /* Code, executed on object construction*/
+/* -------------- Code, executed on object construction -------------- */
         
         // Push to list and determined by DOMObjects position in type specific list
         var domObjList = GetDOMObjectList(this.nodeType);
@@ -271,15 +272,15 @@ function DOMObject(node, nodeType)
             var nodeID = domObjList.length - 1;
             // Add attributes to given DOM node
             this.node.setAttribute('nodeID', nodeID);
-            this.node.setAttribute('nodeType', nodeType);
+            this.node.setAttribute('nodeType', this.nodeType);
+            
+            // Create empty DOMNode object on C++ side
+            InformCEF(this, ['added']);
 
             // Setup of attributes
             this.checkVisibility();
             this.searchOverflows();
- 
 
-            // Relies on existing nodeId!
-            InformCEF(this, ['added']);
 
             // Send msg if already fixed on creation!
             if(this.fixed)
@@ -289,7 +290,7 @@ function DOMObject(node, nodeType)
 
             // Set displayed text, depending on given node type
             // TODO/IDEA: (External) function returning node's text attribute, corresponding to node's tagName & type
-            if(nodeType == 0)   // Only needed for text inputs
+            if(this.nodeType == 0)   // Only needed for text inputs
             {
                 if(this.node.tagName == "TEXTAREA" || this.node.tagName == "INPUT")
                 {
@@ -303,6 +304,15 @@ function DOMObject(node, nodeType)
                 }
                 InformCEF(this, ["update", "text"]);
             }
+
+            if(this.node.tagName == "INPUT" && this.node.type == "password")
+            {
+                // Update attribute 4 aka (bool) isPasswordField=true, the last 1 for 'true' could be skipped, 
+                // but MsgRouter needs 5 arguments in encoded string for attribute updates
+                ConsolePrint("DOM#upd#"+this.nodeType+"#"+nodeID+"#4#1#");
+            }
+
+
         }
         else
         {
@@ -472,6 +482,7 @@ function UpdateDOMRects()
 
 /**
  * Transform natural language to encoded command to send to CEF
+ * Relies on existing nodeId in domObj.node!
  * 
  * args:    domObj : DOMObject, operation : [string]
  * returns: void
@@ -481,7 +492,7 @@ function InformCEF(domObj, operation)
     var id = domObj.node.getAttribute('nodeID');
     var type = domObj.nodeType;
 
-    if(id != undefined && type != undefined)
+    if(id !== undefined && type !== undefined)
     {
         // Encoding uses only first 3 chars of natural language operation
         var op = operation[0].substring(0,3);
