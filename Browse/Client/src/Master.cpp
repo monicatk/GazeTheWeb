@@ -170,6 +170,40 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
     static std::function<void(int, int)> fC = [&](int w, int h) { this->GLFWResizeCallback(w, h); };
     glfwSetFramebufferSizeCallback(_pWindow, [](GLFWwindow* window, int w, int h) { fC(w, h); });
 
+	// ### WINDOW ICON ###
+
+	// Load window icons for GLFW
+	std::vector<unsigned char> icon16Data;
+	int icon16Width, icon16Height, icon16ChannelCount;
+	eyegui_helper::loadImage("resources/Icon_16.png", icon16Data, icon16Width, icon16Height, icon16ChannelCount);
+
+	std::vector<unsigned char> icon32Data;
+	int icon32Width, icon32Height, icon32ChannelCount;
+	eyegui_helper::loadImage("resources/Icon_32.png", icon32Data, icon32Width, icon32Height, icon32ChannelCount);
+
+	std::vector<unsigned char> icon64Data;
+	int icon64Width, icon64Height, icon64ChannelCount;
+	eyegui_helper::loadImage("resources/Icon_64.png", icon64Data, icon64Width, icon64Height, icon64ChannelCount);
+
+	// Create GLFWImages
+	std::vector<GLFWimage> icons;
+	icons.resize(3);
+	icons.at(0).width = icon16Width;
+	icons.at(0).height = icon16Height;
+	icons.at(0).pixels = icon16Data.data();
+	icons.at(1).width = icon32Width;
+	icons.at(1).height = icon32Height;
+	icons.at(1).pixels = icon32Data.data();
+	icons.at(2).width = icon64Width;
+	icons.at(2).height = icon64Height;
+	icons.at(2).pixels = icon64Data.data();
+
+	// Set window icon
+	glfwSetWindowIcon(
+		_pWindow,
+		(int)icons.size(),
+		icons.data());
+
     // ### EYEGUI ###
 
     // Set content path
@@ -196,6 +230,7 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
 	eyegui::updateGUI(pSplashGUI, 1.f, eyegui::Input()); // update GUI one time for resizing
 	eyegui::drawGUI(pSplashGUI);
 	glfwSwapBuffers(_pWindow);
+	glfwPollEvents(); // poll events not necessary for GUI but lets display the icon in Windows taskbar
 	eyegui::terminateGUI(pSplashGUI);
 
     // Construct GUI
@@ -213,40 +248,6 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
 
     // Load dictionary
     _dictonaryId = eyegui::addDictionary(_pGUI, "dictionaries/EnglishUS.dic");
-
-	// ### WINDOW ICON ###
-
-	// Load window icons for GLFW
-    std::vector<unsigned char> icon16Data;
-    int icon16Width, icon16Height, icon16ChannelCount;
-    eyegui_helper::loadImage("resources/Icon_16.png", icon16Data, icon16Width, icon16Height, icon16ChannelCount);
-
-    std::vector<unsigned char> icon32Data;
-    int icon32Width, icon32Height, icon32ChannelCount;
-    eyegui_helper::loadImage("resources/Icon_32.png", icon32Data, icon32Width, icon32Height, icon32ChannelCount);
-
-    std::vector<unsigned char> icon64Data;
-    int icon64Width, icon64Height, icon64ChannelCount;
-    eyegui_helper::loadImage("resources/Icon_64.png", icon64Data, icon64Width, icon64Height, icon64ChannelCount);
-
-    // Create GLFWImages
-    std::vector<GLFWimage> icons;
-    icons.resize(3);
-    icons.at(0).width = icon16Width;
-    icons.at(0).height = icon16Height;
-    icons.at(0).pixels = icon16Data.data();
-    icons.at(1).width = icon32Width;
-    icons.at(1).height = icon32Height;
-    icons.at(1).pixels = icon32Data.data();
-    icons.at(2).width = icon64Width;
-    icons.at(2).height = icon64Height;
-    icons.at(2).pixels = icon64Data.data();
-
-	// Set window icon
-	glfwSetWindowIcon(
-		_pWindow,
-        (int)icons.size(),
-        icons.data());
 
     // ### INTERACTION LOGGING ###
 
