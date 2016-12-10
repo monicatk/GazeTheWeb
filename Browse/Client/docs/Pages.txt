@@ -1,2 +1,5 @@
 Slow/Scrolling does not work:
 - https://de-de.facebook.com/deutschetelekom/
+
+Favicon not loaded correctly:
+- www.mamem.eu
