@@ -29,30 +29,16 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 		_zoomDataQueue.end());
 
 	// Speed of zooming
-	float zoomSpeed;
+	float zoomSpeed = 0.f;
 
 	// Pixels in web view
 	int webViewWidth = _pTab->GetWebViewWidth();
 	int webViewHeight = _pTab->GetWebViewHeight();
 
-	// Only allow zoom in when gaz upon web view
+	// Only allow zoom in when gaze upon web view
     if(!tabInput.gazeUsed && tabInput.insideWebView) // TODO: gazeUsed really good idea here? Maybe later null pointer?
     {
-		// Aspect ration correction
-		glm::vec2 aspectRatioCorrection(1.f, 1.f);
-		if (webViewWidth != 0 && webViewHeight != 0)
-		{
-			if (webViewWidth > webViewHeight)
-			{
-				aspectRatioCorrection.x = (float)webViewWidth / (float)webViewHeight;
-			}
-			else
-			{
-				aspectRatioCorrection.y = (float)webViewHeight / (float)webViewWidth;
-			}
-		}
-
-		// Calculate current raw position in web view relative coordinates
+		// Calculate current raw coordinate in web view relative coordinates. The filtered coordinate will move towards that position
 		glm::vec2 newCoordinate(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY);
 		newCoordinate += _coordinateCenterOffset;
 
@@ -65,32 +51,40 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
             // Delta of new relative position
             glm::vec2 rawDelta = newCoordinate - _coordinate;
 
+			// Move to new click position
+			_coordinate += rawDelta * (tpf / MOVE_DURATION);
+
+			// Aspect ratio correction
+			glm::vec2 aspectRatioCorrection(1.f, 1.f);
+			if (webViewWidth != 0 && webViewHeight != 0)
+			{
+				if (webViewWidth > webViewHeight)
+				{
+					aspectRatioCorrection.x = (float)webViewWidth / (float)webViewHeight;
+				}
+				else
+				{
+					aspectRatioCorrection.y = (float)webViewHeight / (float)webViewWidth;
+				}
+			}
+
 			// Do aspect correction for delta
 			glm::vec2 delta = rawDelta / aspectRatioCorrection;
 
 			// Set length of delta to deviation if bigger than current deviation
-			_deviation = glm::max(glm::length(delta), _deviation);			
-
-            // Move to new click position
-            _coordinate += delta * tpf;
+			_deviation = glm::min(1.f, glm::max(glm::length(delta), _deviation));			
 
 			// If at the moment a high deviation is given, try to zoom out to give user more overview
 			zoomSpeed = ZOOM_SPEED - glm::min(1.f, 3.f * _deviation); // [-0.5, 0.5]
         }
-        else
+        else // first frame of execution
         {
-            // First frame of new click
+			// Use raw coordinate as new coordinate
             _coordinate = newCoordinate;
-            zoomSpeed = 0.0f;
 
-			// Since only first frame, do not do it again
+			// Since only for first frame, do not do it again
             _firstUpdate = false;
         }
-	}
-	else
-	{
-		// Stop zooming when gaze either not in web view or used otherwise
-		zoomSpeed = 0;
 	}
 
 	// Update linear zoom
@@ -99,14 +93,14 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	// Clamp linear zoom (one is standard, everything higher is zoomed)
 	_linZoom = glm::max(_linZoom, 1.f);
 
-	// Click position to center offset.
+	// Make zoom better with log function
+	_logZoom = 1.f - std::log(_linZoom); // log zooming is starting at one and getting smaller with smaller _linZoom
+
+	// Calculated center offset
 	_coordinateCenterOffset =
 		CENTER_OFFSET_MULTIPLIER
 		* (1.f - _logZoom) // weight with zoom (starting at zero) to have more centered version at higher zoom level
 		* (_coordinate - 0.5f); // vector from current zoom coordinate to center of web view center
-
-	// Make zoom better with log function
-	_logZoom = 1.f - std::log(_linZoom); // log zooming is starting at one and getting smaller with smaller _linZoom
 
     // Vector with web view pixel resolution
     glm::vec2 webViewPixels(webViewWidth, webViewHeight);
@@ -123,9 +117,10 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	pixelGazeCoordinate *= webViewPixels; // into pixel space
 
 	// Check, whether click is done
+	LogInfo(_deviation);
 	if (
 		_logZoom <= 0.075f // just zoomed so far into that coordinate is used
-		|| (_logZoom <= 0.3f && _deviation < 0.03f)) // coordinate seems to be quite fixed, just do it
+		|| ((_logZoom <= 0.5f) && (_deviation < 0.0125f))) // coordinate seems to be quite fixed, just do it
 	{
 		int zoomDataIndex = -1;
 

@@ -53,10 +53,13 @@ protected:
 	const float DIMMING_VALUE = 0.3f;
 
 	// Deviation fading duration (how many seconds until full deviation is back to zero)
-	const float DEVIATION_FADING_DURATION = 0.3f;
+	const float DEVIATION_FADING_DURATION = 1.0f;
 
 	// Multiplier of movement towards center
 	const float CENTER_OFFSET_MULTIPLIER = 0.5f;
+
+	// Duration to replace current coordinate with input
+	const float MOVE_DURATION = 0.75f;
 
 	// Speed of zoom
 	const float ZOOM_SPEED = 0.4f;
@@ -67,7 +70,7 @@ protected:
 	// Maximal angle between gaze drift and zoom coordinate drift in degree
 	const float DRIFT_MAX_ANGLE_DEGREE = 10.f;
 
-    // Coordinate which is updated and output. In relative web view space
+    // Coordinate which is updated and later output. In relative web view space
     glm::vec2 _coordinate;
 
     // Log zooming amount (used for rendering)
@@ -85,7 +88,8 @@ protected:
     bool _firstUpdate = true;
 
 	// Deviation of coordinate (not of gaze!; relative coordiantes, no pixels!)
-	float _deviation = 0; // [0..1]
+	// Not really in relative coordinates, since aspect ratio corrected...
+	float _deviation = 0.f; // [0..1]
 
 	// Dimming
 	float _dimming = 0.f;
