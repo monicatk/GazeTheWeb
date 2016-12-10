@@ -117,7 +117,6 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	pixelGazeCoordinate *= webViewPixels; // into pixel space
 
 	// Check, whether click is done
-	LogInfo(_deviation);
 	if (
 		_logZoom <= 0.075f // just zoomed so far into that coordinate is used
 		|| ((_logZoom <= 0.5f) && (_deviation < 0.0125f))) // coordinate seems to be quite fixed, just do it
