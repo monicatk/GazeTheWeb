@@ -180,15 +180,25 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
     eyegui::setErrorCallback(printGUICallback);
     eyegui::setWarningCallback(printGUICallback);
 
-    // Create GUI
-    LogInfo("Creating eyeGUI...");
-    eyegui::GUIBuilder guiBuilder;
-    guiBuilder.width = _width;
-    guiBuilder.height = _height;
-    guiBuilder.fontFilepath = "fonts/dejavu-sans/ttf/DejaVuSans.ttf";
-    guiBuilder.characterSet = eyegui::CharacterSet::US_ENGLISH;
-    guiBuilder.localizationFilepath = "localizations/English.leyegui";
-    guiBuilder.fontTallSize = 0.07f;
+	// Create GUI builder
+	LogInfo("Creating eyeGUI...");
+	eyegui::GUIBuilder guiBuilder;
+	guiBuilder.width = _width;
+	guiBuilder.height = _height;
+	guiBuilder.fontFilepath = "fonts/dejavu-sans/ttf/DejaVuSans.ttf";
+	guiBuilder.characterSet = eyegui::CharacterSet::US_ENGLISH;
+	guiBuilder.localizationFilepath = "localizations/English.leyegui";
+	guiBuilder.fontTallSize = 0.07f;
+
+	// Create splash screen GUI, render it one time and throw it away
+	eyegui::GUI* pSplashGUI = guiBuilder.construct();
+	eyegui::addLayout(pSplashGUI, "layouts/Splash.xeyegui"); // TODO: fill version string
+	eyegui::updateGUI(pSplashGUI, 1.f, eyegui::Input()); // update GUI one time for resizing
+	eyegui::drawGUI(pSplashGUI);
+	glfwSwapBuffers(_pWindow);
+	eyegui::terminateGUI(pSplashGUI);
+
+    // Construct GUI
     _pGUI = guiBuilder.construct(); // standard GUI object used everywhere
     _pSuperGUI = guiBuilder.construct(); // GUI which is rendered on top of everything else
     LogInfo("..done.");
