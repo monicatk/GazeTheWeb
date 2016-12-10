@@ -88,7 +88,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	}
 
 	// Update linear zoom
-	_linZoom += tpf * zoomSpeed;
+	_linZoom += tpf * zoomSpeed; // frame rate depended, because zoomSpeed is depending on deviation which is depending on tpf
 
 	// Clamp linear zoom (one is standard, everything higher is zoomed)
 	_linZoom = glm::max(_linZoom, 1.f);
