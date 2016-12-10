@@ -230,7 +230,7 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
 	eyegui::updateGUI(pSplashGUI, 1.f, eyegui::Input()); // update GUI one time for resizing
 	eyegui::drawGUI(pSplashGUI);
 	glfwSwapBuffers(_pWindow);
-	glfwPollEvents(); // poll events not necessary for GUI but lets display the icon in Windows taskbar
+	glfwPollEvents(); // poll events not necessary for GUI but lets display the icon in Windows taskbar earlier
 	eyegui::terminateGUI(pSplashGUI);
 
     // Construct GUI
