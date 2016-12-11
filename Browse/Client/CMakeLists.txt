@@ -6,7 +6,7 @@ set(CEF_TARGET Client)
 
 set(CLIENT_DEPLOYMENT OFF CACHE BOOL "Setup for Deployment.")
 set(CLIENT_TOBII_EYEX_SUPPORT OFF CACHE BOOL "Support for Tobii EyeX.")
-set(CLIENT_SMI_REDN_SUPPORT OFF CACHE BOOL "Support for SMI Red.")
+set(CLIENT_SMI_IVIEWX_SUPPORT OFF CACHE BOOL "Support for SMI iViewX.")
 
 # Pipe them to C++
 if(${CLIENT_DEPLOYMENT})
@@ -15,7 +15,7 @@ endif()
 if(${CLIENT_TOBII_EYEX_SUPPORT})
 	add_definitions(-DTOBII_SUPPORT)
 endif()
-if(${CLIENT_SMI_REDN_SUPPORT})
+if(${CLIENT_SMI_IVIEWX_SUPPORT})
 	add_definitions(-DSMI_SUPPORT)
 endif()
 
@@ -236,6 +236,11 @@ elseif(OS_LINUX) # Linux
 	SET_LINUX_SUID_PERMISSIONS("${CEF_TARGET}" "${CEF_TARGET_OUT_DIR}/chrome-sandbox")
 
 endif()
+
+### EYETRACKER PLUGINS #########################################################
+
+include_directories(${CMAKE_CURRENT_LIST_DIR}/plugins)
+add_library(mylibrary MODULE ${CMAKE_CURRENT_LIST_DIR}/plugins/test.cpp)
 
 ### FILTERING ##################################################################
 
