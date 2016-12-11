@@ -1,6 +1,3 @@
 Slow/Scrolling does not work:
-- https://de-de.facebook.com/deutschetelekom/	
-	--> It does now. Fixed Elements were constantly changing their class attribute and rect updates for whole page were triggered. Now, only children of this fixed elements update their rects
 
 Favicon not loaded correctly:
-- www.mamem.eu
