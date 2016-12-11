@@ -247,7 +247,7 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
     eyegui::setResizeCallback(_pGUI, resizeGUICallback); // only one GUI needs to callback it. Use standard for it
 
     // Load dictionary
-    _dictonaryId = eyegui::addDictionary(_pGUI, "dictionaries/EnglishUS.dic");
+    _dictonaryId = eyegui::addDictionary(_pGUI, "dictionaries/NewEnglishUS.dic");
 
     // ### INTERACTION LOGGING ###
 
