@@ -754,7 +754,7 @@ function MutationObserverInit()
 								{
 									if(fixedObj.updateRects())
 									{
-										UpdateDOMRects();
+										UpdateChildrensDOMRects(node);
 									}
 								}
 
