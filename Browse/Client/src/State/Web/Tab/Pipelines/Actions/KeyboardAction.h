@@ -72,6 +72,12 @@ protected:
 	// Id of new line button in overlay
 	std::string _overlayNewLineButtonId;
 
+	// Ids for controlling text edit
+	std::string _overlayNextWordButtonId;
+	std::string _overlayPreviousWordButtonId;
+	std::string _overlayNextLetterButtonId;
+	std::string _overlayPreviousLetterButtonId;
+
     // Bool which indicates whether input is complete
     bool _complete = false;
 

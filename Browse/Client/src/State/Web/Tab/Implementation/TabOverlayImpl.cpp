@@ -172,6 +172,16 @@ std::u16string Tab::GetContentOfTextEdit(std::string id)
 	return eyegui::getContentOfTextEdit(_pOverlayLayout, id);
 }
 
+void Tab::MoveCursorOverLettersInTextEdit(std::string id, int letterCount)
+{
+	eyegui::moveCursorOverLettersInTextEdit(_pOverlayLayout, id, letterCount);
+}
+
+void Tab::MoveCursorOverWordsInTextEdit(std::string id, int wordCount)
+{
+	eyegui::moveCursorOverWordsInTextEdit(_pOverlayLayout, id, wordCount);
+}
+
 int Tab::GetWebViewX() const
 {
 	return _upWebView->GetX();

@@ -83,6 +83,12 @@ public:
 	// Get content of text edit
 	virtual std::u16string GetContentOfTextEdit(std::string id) = 0;
 
+	// Move cursor over letters in text edit. Positive letter count means rightward movement, else leftward
+	virtual void MoveCursorOverLettersInTextEdit(std::string id, int letterCount) = 0;
+
+	// Move cursor over words in text edit. Positive word count means rightward movement, else leftward
+	virtual void MoveCursorOverWordsInTextEdit(std::string id, int wordCount) = 0;
+
 	// Getter for values of interest
 	virtual int GetWebViewX() const = 0;
 	virtual int GetWebViewY() const = 0;
