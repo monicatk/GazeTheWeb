@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-DLL_EXPORT int __cdecl HelloWorld()
+DLL_EXPORT int HelloWorld()
 {
 	return 42;
 }
