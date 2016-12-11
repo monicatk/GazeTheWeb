@@ -208,44 +208,7 @@ function ComputeBoundingRectOfAllChilds(node, depth, fixedId)
 	return [-1,-1,-1,-1]; // TODO: nodeType != 1 possible? May ruin the whole computation
 }
 
-// If resetChildren=true, traverse through all child nodes and remove attribute 'fixedId'
-// May not be neccessary if node (and its children) were completely removed from DOM tree
-// function RemoveFixedElement(node, resetChildren)
-// {
-// 	// Remove node from Set of fixed elements
-// 	window.fixed_elements.delete(node);
-
-// 	if(node.hasAttribute('fixedId'))
-// 	{
-// 		var id = node.getAttribute('fixedId');
-// 		// Remove fixedId from ID List
-// 		window.fixed_IDlist[id] = false;
-// 		// Delete bounding rectangle coordinates for this ID
-// 		window.fixed_coordinates[id] = [];
-
-// 		var zero = '';
-// 		if(id < 10) zero = '0';
-
-// 		// Tell CEF that fixed node with ID was removed
-// 		ConsolePrint('#fixElem#rem#'+zero+id);
-// 		// Remove 'fixedId' attribute
-// 		node.removeAttribute('fixedId');
-
-// 		if(resetChildren)
-// 		{
-// 			ForEveryChild(
-// 				node,
-// 				function(child){
-// 					child.removeAttribute("fixedId");
-// 					SetFixationStatus(child, false);
-// 				}			
-// 			);
-// 		}
-
-// 	}
-// }
-
-// For fixed elements: Traverse subtree starting with given childNode as root
+0// For fixed elements: Traverse subtree starting with given childNode as root
 function UpdateSubtreesBoundingRect(childNode)
 {
 	ConsolePrint("WARNING: UpdateSubtreesBoundingRect called. DEPRECATED!");
@@ -737,6 +700,7 @@ function AnalyzeNode(node)
 	}
 }
 
+var debug_mutation_list = [];
 
 // Instantiate and initialize the MutationObserver
 function MutationObserverInit()
@@ -748,8 +712,7 @@ function MutationObserverInit()
 		  	mutations.forEach(
 		  		function(mutation)
 		  		{
-					// DEBUG
-					// ConsolePrint("Mutation occured..."+mutation.type);
+					var working_time_start = Date.now();
 
 			  		var node;
 					
@@ -769,9 +732,12 @@ function MutationObserverInit()
 								if(window.getComputedStyle(node, null).getPropertyValue('position') === 'fixed')
 								{
 									// ConsolePrint("Trying to AddFixedElement...");
-									AddFixedElement(node);
-									// Update every Rect, just in case anything changed due to an additional fixed element
-									UpdateDOMRects();
+									if(AddFixedElement(node))
+									{
+										// Update every Rect, just in case anything changed due to an additional fixed element
+										UpdateDOMRects();
+									}
+
 								}
 								else 
 								{
@@ -788,7 +754,7 @@ function MutationObserverInit()
 								{
 									if(fixedObj.updateRects())
 									{
-										UpdateDOMRects();
+										UpdateChildrensDOMRects(node);
 									}
 								}
 
@@ -914,14 +880,25 @@ function MutationObserverInit()
 						// At least one node was removed from DOM tree
 						if(removed_nodes.length > 0)
 						{
+							// update_starting_time = Date.now();
 							// Trigger Rect Updates after removal of (several) node(s)
-							UpdateDOMRects();
+							UpdateChildrensDOMRects(mutation.target);
+							// console.log("UpdateChildrensDOMRects(): "+(Date.now() - update_starting_time)+"ms");
 						}
 
 
 		  			} // END mutation.type == 'childList'
 
+					mutation_observer_working_time += (Date.now() - working_time_start);
 
+					// console.log("Finished mutation");
+					if(Date.now() - working_time_start >= 100)
+					{
+						console.log(debug_mutation_list.length+": "+(Date.now() - working_time_start)+"ms at mutation type: "+mutation.type+", target: "+mutation.target);
+						debug_mutation_list.push(mutation);
+						// throw "DaFuckNigga"
+					}
+						
 		  		} // END forEach mutation
 
 
@@ -975,3 +952,19 @@ function MutationObserverShutdown()
 								// if(nodes[i].hasOwnProperty('style'))
 
 			  					// http://ryanmorr.com/understanding-scope-and-context-in-javascript/
+
+var mutation_observer_working_time = 0;
+var load_starting_time;
+
+function StartPageLoadingTimer()
+{
+	load_starting_time = Date.now();
+}
+
+function StopPageLoadingTimer()
+{
+	var page_load_duration = Date.now() - load_starting_time;
+	ConsolePrint("Page load took "+page_load_duration+"ms");
+	ConsolePrint("MutationObserver operations took "+mutation_observer_working_time+"ms, "+
+		(100*mutation_observer_working_time/page_load_duration)+"% of page load.");
+}

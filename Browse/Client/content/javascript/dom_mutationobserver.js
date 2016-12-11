@@ -482,6 +482,35 @@ function UpdateDOMRects()
 
 }
 
+function UpdateChildrensDOMRects(parent)
+{
+    ForEveryChild(parent, function(child){
+        if(child.nodeType == 1)
+        {
+            if((nodeType = child.getAttribute("nodeType")) !== undefined && nodeType !== null)
+            {
+                var nodeID = child.getAttribute("nodeID");
+                if((domObj = GetDOMObject(nodeType, nodeID)) !== undefined)
+                {
+                    domObj.searchOverflows(); 
+                    domObj.checkVisibility(); 
+                    domObj.updateRects();
+                } 
+            }
+
+            if((overflowId = child.getAttribute("overflowId")) !== undefined && overflowId !== null)
+            {
+                if((overflowObj = GetOverflowElement(overflowId)) !== undefined)
+                {
+                    overflowObj.updateRects();
+                }
+            }
+
+        }
+    });
+
+}
+
 /**
  * Transform natural language to encoded command to send to CEF
  * Relies on existing nodeId in domObj.node!
@@ -792,6 +821,8 @@ function OverflowElement(node)
                 this.updateRects();
             }
         };
+
+/* ------------ CODE EXECUTED ON CONSTRUCTION OF OBJECT ---------------- */
 
         
 
