@@ -2,23 +2,13 @@ var favIconImg = new Image();
 var canvas = document.createElement('canvas');
 var ctx = canvas.getContext('2d');
 favIconImg.onload = function(){
-	// alert('img.onload '+favIconImg.src);
-	// alert('favIconImg.onload(), width:'+favIconImg.width);
-	// canvas.width = favIconImg.width;
-	// canvas.height = favIconImg.height+1;	// see experimental above
-	ctx.drawImage(favIconImg, 0, 0);
 
-	//alert('Setting V8 favicon res to ('+favIconImg.height+','+favIconImg.width+')');
+	ctx.canvas.width = favIconImg.width;
+	ctx.canvas.height = favIconImg.height;
+	ctx.drawImage(favIconImg, 0, 0, favIconImg.width, favIconImg.height);
+
 	window.favIconHeight = favIconImg.height;
 	window.favIconWidth = favIconImg.width;
-	// alert(window.favIconHeight);
-
-	// experimental: draw 1 row in RGBA to force encoding, don't read this line afterwards
-	// ctx.fillStyle = 'rgba(255, 0, 0, 255)';
-	// ctx.fillRect(0, favIconImg.height, favIconImg.width, favIconImg.height+1);
-	//alert('DEBUG: Drew 1px line on canvas bottom');
-	//alert('Updated favIconImg!');
-
 
 	// Extract image format in search of 'ico'
 	var url_length = favIconImg.src.length;
