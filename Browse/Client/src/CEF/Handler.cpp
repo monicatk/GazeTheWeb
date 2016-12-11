@@ -129,7 +129,9 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
 
     if (frame->IsMain())
     {
-		LogDebug("Handler: Started loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), "), browserID = ", browser->GetIdentifier());
+		//LogDebug("Handler: Started loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), "), browserID = ", browser->GetIdentifier());
+
+		frame->ExecuteJavaScript("StartPageLoadingTimer();", "", 0);
 
         // Set Tab's URL when page is loading
         _pMediator->SetURL(browser);
@@ -154,7 +156,8 @@ void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame
 
     if (frame->IsMain())
     {
-		LogDebug("Handler: End of loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), ").");
+		//LogDebug("Handler: End of loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), ").");
+		frame->ExecuteJavaScript("StopPageLoadingTimer();", "", 0);
 
         // Set zoom level according to Tab's settings
         SetZoomLevel(browser, false);
