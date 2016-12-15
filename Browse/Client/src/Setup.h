@@ -13,7 +13,7 @@
 namespace setup
 {
     // Window
-    static const bool FULLSCREEN = true;
+    static const bool FULLSCREEN = false;
     static const int INITIAL_WINDOW_WIDTH = 1280;
     static const int INITIAL_WINDOW_HEIGHT = 720;
 
@@ -24,8 +24,8 @@ namespace setup
 	static const int TEXT_SELECTION_MARGIN = 4; // area which is selected before / after zoom coordinate in CEFPixels
 
     // Debugging
-    static const bool LOG_DEBUG_MESSAGES = false;
-    static const bool DRAW_DEBUG_OVERLAY = false;
+    static const bool LOG_DEBUG_MESSAGES = true;
+    static const bool DRAW_DEBUG_OVERLAY = true;
 
     // Experiments
     static const std::string LAB_STREAM_OUTPUT_NAME = "BrowserOutputStream";

@@ -407,6 +407,8 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		return true;
 	}
 
+	SearchForExternalCallbacks(requestName);
+
 	// Print message to console and withdraw callback
 	LogDebug("Javascript: ", requestName);
 	callback->Failure(0, "");
