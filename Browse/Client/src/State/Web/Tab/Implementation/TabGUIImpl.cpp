@@ -35,10 +35,12 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			// Trigger zooming in CefMediator
 			_pTab->_pCefMediator->SetZoomLevel(_pTab);
 		}
+		/*
         else if (id == "gaze_mouse")
         {
             _pTab->_gazeMouse = true;
         }
+		*/
         else if (id == "selection")
         {
             _pTab->PushBackPipeline(std::make_unique<TextSelectionPipeline>(_pTab));
