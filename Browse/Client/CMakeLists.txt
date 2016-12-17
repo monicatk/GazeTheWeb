@@ -23,6 +23,22 @@ if(OS_LINUX) # Linux
 	add_definitions(-Doff_t=__off_t)
 endif()
 
+### EYETRACKER PLUGINS #########################################################
+
+set(EYETRACKER_PLUGIN_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/plugins/Eyetracker")
+
+# Plugin for SMI iViewX
+# TODO
+
+# Plugin for Tobii EyeX
+add_library(
+	TobiiEyeXPlugin
+	MODULE
+	${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
+	${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
+	${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
+	${EYETRACKER_PLUGIN_DIRECTORY}/TobiiEyeX/EyetrackerImpl.cpp)
+
 ### CONTENT ####################################################################
 
 set(CLIENT_CONTENT_PATH ${CMAKE_CURRENT_LIST_DIR}/content CACHE PATH "Path to content folder.")
@@ -236,11 +252,6 @@ elseif(OS_LINUX) # Linux
 	SET_LINUX_SUID_PERMISSIONS("${CEF_TARGET}" "${CEF_TARGET_OUT_DIR}/chrome-sandbox")
 
 endif()
-
-### EYETRACKER PLUGINS #########################################################
-
-include_directories(${CMAKE_CURRENT_LIST_DIR}/plugins)
-add_library(mylibrary MODULE ${CMAKE_CURRENT_LIST_DIR}/plugins/test.cpp)
 
 ### FILTERING ##################################################################
 

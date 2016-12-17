@@ -57,7 +57,7 @@ int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app
 	BOOL fFreeResult, fRunTimeLinkSuccess = FALSE;
 
 	// Get handle to library
-	hinstLib = LoadLibrary(TEXT("mylibrary.dll"));
+	hinstLib = LoadLibrary(TEXT("TobiiEyeXPlugin.dll"));
 
 	// Check whether library has ben found
 	if (hinstLib != NULL)

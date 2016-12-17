@@ -3,7 +3,7 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
-#include "EyetrackerGlobal.h"
+#include "EyetrackerData.h"
 #include "src/Global.h"
 #include <algorithm>
 

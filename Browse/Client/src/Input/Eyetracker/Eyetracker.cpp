@@ -4,7 +4,7 @@
 //============================================================================
 
 #include "Eyetracker.h"
-#include "src/Input/Eyetracker/EyetrackerGlobal.h"
+//#include "src/Input/Eyetracker/EyetrackerGlobal.h"
 #include "src/Global.h"
 #include <algorithm>
 
@@ -44,6 +44,7 @@ void Eyetracker::Update(
 	int windowWidth,
 	int windowHeight)
 {
+	/*
 	// Collect k or less valid samples
 	std::vector<double> gazeXSamples, gazeYSamples;
 	eyetracker_global::GetKOrLessValidRawGazeEntries(EYETRACKER_AVERAGE_SAMPLE_COUNT, gazeXSamples, gazeYSamples);
@@ -80,6 +81,7 @@ void Eyetracker::Update(
 		sum += clampedY;
 	}
 	_gazeY = sum / gazeYSamples.size();
+	*/
 }
 
 double Eyetracker::GetGazeX() const

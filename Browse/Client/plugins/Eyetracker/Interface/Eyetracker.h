@@ -6,10 +6,8 @@
 extern "C" {
 #endif
 
-DLL_EXPORT int HelloWorld()
-{
-	return 42;
-}
+	// Interface
+	DLL_EXPORT int HelloWorld();
 
 #ifdef __cplusplus
 }
