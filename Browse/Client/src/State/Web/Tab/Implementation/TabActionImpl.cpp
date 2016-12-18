@@ -21,44 +21,41 @@ void Tab::PushBackPipeline(std::unique_ptr<Pipeline> upPipeline)
 	}
 }
 
-void Tab::EmulateLeftMouseButtonClick(double x, double y, bool visualize, bool isScreenCoordinate)
+void Tab::EmulateLeftMouseButtonClick(double x, double y, bool visualize, bool isWebViewPixelCoordinate)
 {
 	// Add some visualization for the user at screen position
 	if (visualize)
 	{
-		// Maybe convert into screen coordinate system
-		double screenX = x;
-		double screenY = y;
-		if (!isScreenCoordinate)
+		// Maybe convert (back) into WebViewPixel system
+		double WebViewPixelX = x;
+		double WebViewPixelY = y;
+		if (!isWebViewPixelCoordinate)
 		{
-			screenX = (screenX / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
-			screenY = (screenY / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
+			ConvertToWebViewPixel(WebViewPixelX, WebViewPixelY);
 		}
-		PushBackClickVisualization(screenX, screenY);
+		PushBackClickVisualization(WebViewPixelX, WebViewPixelY);
 	}
 
-	// Convert screen to render pixel coordinate
-	if (isScreenCoordinate)
+	// To CEFPixel coordinates
+	if (isWebViewPixelCoordinate)
 	{
-		x = (x / (float)_upWebView->GetWidth()) * (float)_upWebView->GetResolutionX();
-		y = (y / (float)_upWebView->GetHeight()) * (float)_upWebView->GetResolutionY();
+		ConvertToCEFPixel(x, y);
 	}
 
 	// Tell mediator about the click
 	_pCefMediator->EmulateLeftMouseButtonClick(this, x, y);
 }
 
-void Tab::EmulateMouseCursor(double x, double y, bool leftButtonPressed, bool isScreenCoordinate)
+void Tab::EmulateMouseCursor(double x, double y, bool leftButtonPressed, bool isWebViewPixelCoordinate, double xOffset, double yOffset)
 {
-	// Convert screen to render pixel coordinate
-	if (isScreenCoordinate)
+	// To CEFPixel coordinates
+	if (isWebViewPixelCoordinate)
 	{
-		x = (x / (float)_upWebView->GetWidth()) * (float)_upWebView->GetResolutionX();
-		y = (y / (float)_upWebView->GetHeight()) * (float)_upWebView->GetResolutionY();
+		ConvertToCEFPixel(x, y);
 	}
 
 	// Tell mediator about the cursor
-	_pCefMediator->EmulateMouseCursor(this, x, y, leftButtonPressed);
+	_pCefMediator->EmulateMouseCursor(this, x + xOffset, y + yOffset, leftButtonPressed);
 }
 
 void Tab::EmulateMouseWheelScrolling(double deltaX, double deltaY)
@@ -66,28 +63,28 @@ void Tab::EmulateMouseWheelScrolling(double deltaX, double deltaY)
 	_pCefMediator->EmulateMouseWheelScrolling(this, deltaX, deltaY);
 }
 
-void Tab::EmulateLeftMouseButtonDown(double x, double y, bool isScreenCoordinate)
+void Tab::EmulateLeftMouseButtonDown(double x, double y, bool isWebViewPixelCoordinate, double xOffset, double yOffset)
 {
-	if (isScreenCoordinate)
+	// To CEFPixel coordinates
+	if (isWebViewPixelCoordinate)
 	{
-		x = (x / (float)_upWebView->GetWidth()) * (float)_upWebView->GetResolutionX();
-		y = (y / (float)_upWebView->GetHeight()) * (float)_upWebView->GetResolutionY();
+		ConvertToCEFPixel(x, y);
 	}
 
 	// Tell mediator about mouse button down
-	_pCefMediator->EmulateLeftMouseButtonDown(this, x, y);
+	_pCefMediator->EmulateLeftMouseButtonDown(this, x + xOffset, y + yOffset);
 }
 
-void Tab::EmulateLeftMouseButtonUp(double x, double y, bool isScreenCoordinate)
+void Tab::EmulateLeftMouseButtonUp(double x, double y, bool isWebViewPixelCoordinate, double xOffset, double yOffset)
 {
-	if (isScreenCoordinate)
+	// To CEFPixel coordinates
+	if (isWebViewPixelCoordinate)
 	{
-		x = (x / (float)_upWebView->GetWidth()) * (float)_upWebView->GetResolutionX();
-		y = (y / (float)_upWebView->GetHeight()) * (float)_upWebView->GetResolutionY();
+		ConvertToCEFPixel(x, y);
 	}
 
 	// Tell mediator about mouse button up
-	_pCefMediator->EmulateLeftMouseButtonUp(this, x, y);
+	_pCefMediator->EmulateLeftMouseButtonUp(this, x + xOffset, y + yOffset);
 }
 
 void Tab::PutTextSelectionToClipboardAsync()
@@ -105,7 +102,7 @@ void Tab::InputTextData(int64 frameID, int nodeID, std::string text, bool submit
 	_pCefMediator->InputTextData(this, frameID, nodeID, text, submit);
 }
 
-std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 screenCoordinate, float& rDistance) const
+std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pagePixelCoordinate, float& rDistance) const
 {
     if(_DOMTextLinks.empty())
     {
@@ -125,15 +122,9 @@ std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 screenCoordinate, flo
             // Go over rectangles of that link
             for(const auto& rRect : rLink->GetRects())
             {
-				glm::vec2 center = rRect.center();
-				center.x = (center.x / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
-				center.y = (center.y / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
-                float width = (rRect.width() / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
-                float height = (rRect.height() / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
-
                 // Distance
-                float dx = glm::max(glm::abs(screenCoordinate.x - center.x) - (width / 2.f), 0.f);
-                float dy = glm::max(glm::abs(screenCoordinate.y - center.y) - (height / 2.f), 0.f);
+                float dx = glm::max(glm::abs(pagePixelCoordinate.x - rRect.center().x) - (rRect.width() / 2.f), 0.f);
+                float dy = glm::max(glm::abs(pagePixelCoordinate.y - rRect.center().y) - (rRect.height() / 2.f), 0.f);
                 float distance = glm::sqrt((dx * dx) + (dy * dy));
 
                 // Check whether distance is smaller
@@ -149,10 +140,21 @@ std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 screenCoordinate, flo
         rDistance = minDistance;
         return wpResult;
     }
-
 }
 
-void  Tab::ScrollOverflowElement(int elemId, int x, int y)
+void Tab::ScrollOverflowElement(int elemId, int x, int y)
 {
 	_pCefMediator->ScrollOverflowElement(this, elemId, x, y);
+}
+
+void Tab::ConvertToCEFPixel(double& rWebViewPixelX, double& rWebViewPixelY) const
+{
+	rWebViewPixelX = (rWebViewPixelX / (double)_upWebView->GetWidth()) * (double)_upWebView->GetResolutionX();
+	rWebViewPixelY = (rWebViewPixelY / (double)_upWebView->GetHeight()) * (double)_upWebView->GetResolutionY();
+}
+
+void Tab::ConvertToWebViewPixel(double& rCEFPixelX, double& rCEFPixelY) const
+{
+	rCEFPixelX = (rCEFPixelX / (double)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
+	rCEFPixelY = (rCEFPixelY / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
 }

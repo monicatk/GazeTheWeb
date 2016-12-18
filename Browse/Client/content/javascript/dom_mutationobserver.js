@@ -1,5 +1,7 @@
 window.domLinks = [];
 window.domTextInputs = [];
+window.overflowElements = [];
+
 
 /* TODOs
         - Write method 'InformCEF' -- DONE
@@ -21,6 +23,8 @@ function DOMObject(node, nodeType)
         this.visible = true;    // default value, call DOMObj.checkVisibility() after object is created!
         this.fixed = (node.hasAttribute("childFixedId")) ? true : false;
         this.overflowParent = undefined;
+        this.text = "";
+        this.isPassword = false;
 
     /* Methods */ 
         // Update member variable for Rects and return true if an update has occured 
@@ -39,7 +43,7 @@ function DOMObject(node, nodeType)
             var equal = CompareClientRectsData(updatedRectsData, this.rects);
 
             // Rect updates occured and new Rect data is accessible
-            if(!equal && updatedRectsData != undefined)
+            if(!equal && updatedRectsData !== undefined)
             {
                 this.rects = updatedRectsData;
                 InformCEF(this, ['update', 'rects']); 
@@ -91,7 +95,6 @@ function DOMObject(node, nodeType)
             {
                 this.fixed = fixed;
                 InformCEF(this, ['update', 'fixed']);
-                // this.updateRects();
                 this.updateRects();
             }
         };
@@ -195,7 +198,11 @@ function DOMObject(node, nodeType)
             // Only executable if DOMNode is TextInput field
             if(this.nodeType === 0)
             {
-                if (this.node.tagName == 'INPUT')
+                if(this.node.tagName == "TEXTAREA")
+                {
+                    this.node.value = text;
+                }
+                else if (this.node.tagName == 'INPUT')
                 {
                     // GOOGLE FIX
                     var inputs = this.node.parentNode.getElementsByTagName("INPUT");
@@ -222,6 +229,9 @@ function DOMObject(node, nodeType)
                     ConsolePrint("Set input's value to given text");
                 }
                 
+                // Assuming text input works in any case (no feedback needed), so that input text is now displayed
+                this.text = text;
+                InformCEF(this, ["update", "text"]);
                 
                 // ConsolePrint("Input text was set!");
 
@@ -252,6 +262,66 @@ function DOMObject(node, nodeType)
             }
         };
 
+/* -------------- Code, executed on object construction -------------- */
+        
+        // Push to list and determined by DOMObjects position in type specific list
+        var domObjList = GetDOMObjectList(this.nodeType);
+
+        // This should never fail
+        if(domObjList !== undefined)
+        {
+            domObjList.push(this);
+            var nodeID = domObjList.length - 1;
+            // Add attributes to given DOM node
+            this.node.setAttribute('nodeID', nodeID);
+            this.node.setAttribute('nodeType', this.nodeType);
+            
+            // Create empty DOMNode object on C++ side
+            InformCEF(this, ['added']);
+
+            // Setup of attributes
+            this.checkVisibility();
+            this.searchOverflows();
+
+
+            // Send msg if already fixed on creation!
+            if(this.fixed)
+            {
+                InformCEF(this, ['update', 'fixed']);
+            }
+
+            // Set displayed text, depending on given node type
+            // TODO/IDEA: (External) function returning node's text attribute, corresponding to node's tagName & type
+            if(this.nodeType == 0)   // Only needed for text inputs
+            {
+                if(this.node.tagName == "TEXTAREA" || this.node.tagName == "INPUT")
+                {
+                    if(this.node.value !== undefined && this.node.value !== null)
+                        this.text = this.node.value;
+                }
+                else
+                {
+                    if(this.node.textContent !== undefined && this.node.textContent !== null)
+                    this.text = this.node.textContent;
+                }
+                InformCEF(this, ["update", "text"]);
+            }
+
+            if(this.node.tagName == "INPUT" && this.node.type == "password")
+            {
+                // Update attribute 4 aka (bool) isPasswordField=true, the last 1 for 'true' could be skipped, 
+                // but MsgRouter needs 5 arguments in encoded string for attribute updates
+                ConsolePrint("DOM#upd#"+this.nodeType+"#"+nodeID+"#4#1#");
+            }
+
+
+        }
+        else
+        {
+            ConsolePrint("ERROR: No DOMObjectList found for adding node with type="+nodeType+"!");
+        }
+
+
 
 }
 
@@ -269,34 +339,6 @@ function CreateDOMObject(node, nodeType)
     {
         // Create DOMObject, which encapsulates the given DOM node
         var domObj = new DOMObject(node, nodeType);
-
-        // Push to list and determined by DOMObjects position in type specific list
-        var domObjList = GetDOMObjectList(nodeType);
-
-
-
-        if(domObjList != undefined)
-        {
-            domObjList.push(domObj);
-            var nodeID = domObjList.length - 1;
-
-            // Add attributes to given DOM node
-            node.setAttribute('nodeID', nodeID);
-            node.setAttribute('nodeType', nodeType);
-
-            // Setup of attributes
-            domObj.checkVisibility();
-            domObj.searchOverflows();
- 
-
-
-            InformCEF(domObj, ['added']);
-        }
-        else
-        {
-            ConsolePrint("ERROR: No DOMObjectList found for adding node with type="+nodeType+"!");
-        }
-
     }
     else
     {
@@ -425,7 +467,7 @@ function UpdateDOMRects()
 
     // ... and all FixedElements
     window.domFixedElements.forEach(
-        function(fixedObj){ fixedObj.updateRects(); }
+        function(fixedObj){ if(fixedObj !== undefined){fixedObj.updateRects();} }
     );
 
    
@@ -440,8 +482,38 @@ function UpdateDOMRects()
 
 }
 
+function UpdateChildrensDOMRects(parent)
+{
+    ForEveryChild(parent, function(child){
+        if(child.nodeType == 1)
+        {
+            if((nodeType = child.getAttribute("nodeType")) !== undefined && nodeType !== null)
+            {
+                var nodeID = child.getAttribute("nodeID");
+                if((domObj = GetDOMObject(nodeType, nodeID)) !== undefined)
+                {
+                    domObj.searchOverflows(); 
+                    domObj.checkVisibility(); 
+                    domObj.updateRects();
+                } 
+            }
+
+            if((overflowId = child.getAttribute("overflowId")) !== undefined && overflowId !== null)
+            {
+                if((overflowObj = GetOverflowElement(overflowId)) !== undefined)
+                {
+                    overflowObj.updateRects();
+                }
+            }
+
+        }
+    });
+
+}
+
 /**
  * Transform natural language to encoded command to send to CEF
+ * Relies on existing nodeId in domObj.node!
  * 
  * args:    domObj : DOMObject, operation : [string]
  * returns: void
@@ -451,7 +523,7 @@ function InformCEF(domObj, operation)
     var id = domObj.node.getAttribute('nodeID');
     var type = domObj.nodeType;
 
-    if(id != undefined && type != undefined)
+    if(id !== undefined && type !== undefined)
     {
         // Encoding uses only first 3 chars of natural language operation
         var op = operation[0].substring(0,3);
@@ -480,7 +552,7 @@ function InformCEF(domObj, operation)
             if(operation[1] == 'fixed')
             {
                 // If fixed attribute doesn't exist, node is not fixed
-                var status = (domObj.node.getAttribute('fixedID') !== undefined) ? 1 : 0;
+                var status = (domObj.node.hasAttribute('fixedId')|| domObj.node.hasAttribute("childFixedId")) ? 1 : 0;
                 // Encode changes in 'fixed' as attribute '1'
                 encodedCommand += ('1#'+status+'#');
 
@@ -493,9 +565,12 @@ function InformCEF(domObj, operation)
                 encodedCommand += ('2#'+status+'#');
                 // ConsolePrint("encodedCommand: "+encodedCommand);
             }
+
+            if(operation[1] == "text")
+            {
+                encodedCommand += ("3#"+domObj.text+"#");
+            }
         }
-
-
 
         // Send encoded command to CEF
         ConsolePrint(encodedCommand);
@@ -656,15 +731,24 @@ function OverflowElement(node)
                 ForEveryChild(this.node, function(child){
                     if(child.nodeType == 1)
                     {
-                        var nodeType = child.getAttribute("nodeType");
-                        if(nodeType)
+                        if((nodeType = child.getAttribute("nodeType")) !== undefined && nodeType !== null)
                         {
                             var nodeID = child.getAttribute("nodeID");
-                            var domObj = GetDOMObject(nodeType, nodeID);
-
-                            if(domObj) domObj.updateRects();
+                            if((domObj = GetDOMObject(nodeType, nodeID)) !== undefined)
+                            {
+                                domObj.updateRects();
+                            } 
                         }
 
+                        if((overflowId = child.getAttribute("overflowId")) !== undefined && overflowId !== null)
+                        {
+                            if((overflowObj = GetOverflowElement(overflowId)) !== undefined)
+                            {
+                                overflowObj.updateRects();
+                            }
+                        }
+
+                        
                         // TODO: Update child OEs as well. Idea: Update Method which can be called for one node and checks if DomObj or OE
                         // and executes updateRects
                         // Maybe better: Add function pointer to node s.t. node.updateRects() is callable
@@ -738,11 +822,12 @@ function OverflowElement(node)
             }
         };
 
+/* ------------ CODE EXECUTED ON CONSTRUCTION OF OBJECT ---------------- */
+
         
 
 }
 
-window.overflowElements = [];
 
 function CreateOverflowElement(node)
 {
@@ -798,7 +883,7 @@ function GetOverflowElement(id)
         return window.overflowElements[id];     // This may return undefined
     else
     {
-        ConsolePrint("ERROR in GetOverflowElement: id="+id+", valid id is in [0, "+window.overflowElements.length+"]!");
+        ConsolePrint("ERROR in GetOverflowElement: id="+id+", valid id should be in [0, "+(window.overflowElements.length-1)+"]!");
         return null;
     }
         

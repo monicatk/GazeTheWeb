@@ -20,7 +20,8 @@ namespace setup
     // Control
     static const float DURATION_BEFORE_INPUT = 1.f; // wait one second before accepting input
     static const bool PAUSED_AT_STARTUP = false;
-    static const float LINK_CORRECTION_MAX_PIXEL_DISTANCE = 20.f;
+    static const float LINK_CORRECTION_MAX_PIXEL_DISTANCE = 5.f;
+	static const int TEXT_SELECTION_MARGIN = 4; // area which is selected before / after zoom coordinate in CEFPixels
 
     // Debugging
     static const bool LOG_DEBUG_MESSAGES = true;

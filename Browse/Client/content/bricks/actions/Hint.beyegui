@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
-<grid style="tab_overlay" showbackground="true" consumeinput="true" border="20%">
+<grid style="tab_overlay" showbackground="true" consumeinput="true" border="40%">
 	<row size="60%">
 		<column size="100%">
 			<textblock id="text_block" alignment="center" verticalalignment="center"/>
 		</column>
 	</row>
-	<row size="30%">
+	<row size="35%">
 		<column size="100%">
 			<circlebutton id="button" icon="icons/Ok.png" desckey="action_hint:continue"/>
 		</column>
 	</row>
-	<row size="10%">
+	<row size="5%">
 		<column size="100%"/>
 	</row>
 </grid>

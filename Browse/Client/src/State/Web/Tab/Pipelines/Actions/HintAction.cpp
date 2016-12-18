@@ -32,7 +32,7 @@ HintAction::HintAction(TabInteractionInterface *pTab, std::string key, std::stri
         _overlayButtonId,
         [&]() // down callback
         {
-			_pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, false);
+			_pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayFrameIndex, false);
             this->_done = true;
         },
         [](){}); // up callback
@@ -54,11 +54,11 @@ bool HintAction::Update(float tpf, TabInput tabInput)
 {
 	if(_done)
 	{
-		if (_waitDuration <= 0)
+		if (_waitTime <= 0)
 		{
 			return true;
 		}
-		_waitDuration -= tpf;
+		_waitTime -= tpf;
 	}
     return false;
 }
@@ -72,7 +72,7 @@ void HintAction::Activate()
 {
 	if (!_done)
 	{
-		_pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, true);
+		_pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayFrameIndex, true);
 	}
 }
 
@@ -80,7 +80,7 @@ void HintAction::Deactivate()
 {
 	if (!_done)
 	{
-		_pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, false);
+		_pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayFrameIndex, false);
 	}
 }
 

@@ -122,17 +122,16 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
 	// Set loading status of each in Tab to loading in order to display loading icon and status
 	_pMediator->SetLoadingStatus(browser, frame->GetIdentifier(), frame->IsMain(), true);
 
-    //CEF_REQUIRE_UI_THREAD();
-	if(frame->IsMain())
-		LogDebug("Handler: Started loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), "), browserID = ", browser->GetIdentifier());
+	// DEBUG: golem.de
+	//LogDebug("OnLoadStart: frameId=", frame->GetIdentifier(), ", isMain?=", frame->IsMain());
+	//frame->ExecuteJavaScript("document.onreadystatechange = function(){console.log('" + std::to_string(frame->GetIdentifier())
+	//	+ ": '+document.readyState)}", "", 0);
 
     if (frame->IsMain())
     {
-/*
-		browser->GetMainFrame()->ExecuteJavaScript(
-			"document.addEventListener('transitionend', function(event){alert(event.target.textContent+' '+window.getComputedStyle(event.target, null).getPropertyValue('opacity'));}, false);",
-			"", 0);*/
+		//LogDebug("Handler: Started loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), "), browserID = ", browser->GetIdentifier());
 
+		frame->ExecuteJavaScript("StartPageLoadingTimer();", "", 0);
 
         // Set Tab's URL when page is loading
         _pMediator->SetURL(browser);
@@ -144,10 +143,7 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
         frame->ExecuteJavaScript(_js_remove_css_scrollbar, frame->GetURL(), 0);
 
     }
-    else // Current frame is not the main frame
-    {
-        int64 mainFrameID = frame->GetParent()->GetIdentifier();
-    }
+
 }
 
 void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode)
@@ -155,17 +151,19 @@ void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame
 	// Set loading status of each frame in Tab to load finished in order to display loading icon and status
 	_pMediator->SetLoadingStatus(browser, frame->GetIdentifier(), frame->IsMain(), false);
 
-
-	if(frame->IsMain())
-		LogDebug("Handler: End of loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), ").");
-
-    // Inject Javascript to hide scrollbar
-    frame->ExecuteJavaScript(_js_remove_css_scrollbar, frame->GetURL(), 0);
+	// DEBUG: golem.de
+	//LogDebug("OnLoadEnd: frameId=", frame->GetIdentifier(), ", isMain?=", frame->IsMain());
 
     if (frame->IsMain())
     {
+		//LogDebug("Handler: End of loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), ").");
+		frame->ExecuteJavaScript("StopPageLoadingTimer();", "", 0);
+
         // Set zoom level according to Tab's settings
         SetZoomLevel(browser, false);
+
+		// Inject Javascript to hide scrollbar
+		frame->ExecuteJavaScript(_js_remove_css_scrollbar, frame->GetURL(), 0);
     }
 
 }
@@ -395,7 +393,7 @@ void Handler::SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged
     if (double zoomLevel = _pMediator->GetZoomLevel(browser))
     {
         LogDebug("Handler: Setting zoom level = ", zoomLevel, " (browserID = ", browser->GetIdentifier(), ").");
-		const std::string setZoomLevel = "if(document.body !== null) document.body.style.zoom=" + std::to_string(zoomLevel) + ";this.blur(); UpdateDOMRects();";
+		const std::string setZoomLevel = "if(document.body !== null && document.body !== undefined) document.body.style.zoom=" + std::to_string(zoomLevel) + ";this.blur(); UpdateDOMRects();";
         browser->GetMainFrame()->ExecuteJavaScript(setZoomLevel, "", 0); 
 
         if (definitelyChanged)
@@ -544,22 +542,6 @@ void Handler::ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, i
 
 	std::string js_code = "var overflowObj = GetOverflowElement(" + std::to_string(elemId) + ");"\
 		"if(overflowObj) overflowObj.scroll(" + std::to_string(x) + ", " + std::to_string(y) + ");";
-
-	// DEBUG
-	if (elemId == 6 || elemId == 7)
-	{
-		// // Check if Rect update leads to Rect == 0 ... doesn't seem so.
-		//js_code += "ConsolePrint('DEBUG| before: '+overflowObj.rects);" \
-		//	"overflowObj.updateRects();" \
-		//	"ConsolePrint('DEBUG| after: '+overflowObj.rects);";
-
-		// // Check visbility when hidden again.. always true, opacity too
-		//js_code += ("ConsolePrint(" + std::to_string(elemId) + "+\" visibility: \"+window.getComputedStyle(overflowObj.node, null).getPropertyValue('visibility') );");
-		
-		//js_code += ("ConsolePrint(" + std::to_string(elemId) + "+\" class: \"+overflowObj.node.className);");
-
-		//js_code += ("ConsolePrint(\"C++ induced: \"+"+ std::to_string(elemId) + "+\" rect width: \"+overflowObj.node.getBoundingClientRect().width );");
-	}
 
 	browser->GetMainFrame()->ExecuteJavaScript(js_code, "",	0);
 

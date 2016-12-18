@@ -217,7 +217,7 @@ void Web::RemoveAllTabs()
 	}
 
 	// Delegate work to remove tab method
-	for (int i = 0; i < ids.size(); i++)
+	for (int i = 0; i < (int)ids.size(); i++)
 	{
 		RemoveTab(i);
 	}
@@ -757,7 +757,14 @@ void Web::UpdateTabOverviewIcon()
 
 bool Web::ValidateURL(const std::string& rURL) const
 {
-	return std::regex_match(rURL, *(_upURLregex.get()));
+	try
+	{
+		return std::regex_match(rURL, *(_upURLregex.get()));
+	}
+	catch (...)
+	{
+		return true; // in case of failed validation, assume it is a URL since it seems to be complicated
+	}
 }
 
 Web::TabJob::TabJob(Tab* pCaller)

@@ -89,5 +89,5 @@ invisible_but_icon : default
 
 notification : default
 {
-	background-color = 0xFF6000BF
+	background-color = 0xFF6000FF
 }

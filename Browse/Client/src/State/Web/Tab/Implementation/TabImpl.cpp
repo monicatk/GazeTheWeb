@@ -92,9 +92,9 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
 	_spTabSensorListener = std::shared_ptr<TabSensorListener>(new TabSensorListener(this));
 	eyegui::registerButtonListener(_pPanelLayout, "click_mode", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPanelLayout, "auto_scrolling", _spTabButtonListener);
-    // eyegui::registerButtonListener(_pPanelLayout, "scroll_to_top", _spTabButtonListener);
+    eyegui::registerButtonListener(_pPanelLayout, "scroll_to_top", _spTabButtonListener);
     // eyegui::registerButtonListener(_pPanelLayout, "pivot", _spTabButtonListener);
-    eyegui::registerButtonListener(_pPanelLayout, "gaze_mouse", _spTabButtonListener);
+    // eyegui::registerButtonListener(_pPanelLayout, "gaze_mouse", _spTabButtonListener);
     eyegui::registerButtonListener(_pPanelLayout, "selection", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPanelLayout, "zoom", _spTabButtonListener);
 	// eyegui::registerButtonListener(_pPanelLayout, "test_button", _spTabButtonListener); // TODO: only for testing new features
@@ -145,7 +145,7 @@ void Tab::Update(float tpf, Input& rInput)
 	// #######################
 
 	// Update WebView (get values from eyeGUI layout directly)
-	auto webViewInGUI = eyegui::getAbsolutePositionAndSizeOfElement(_pPanelLayout, "web_view");
+	const auto webViewInGUI = eyegui::getAbsolutePositionAndSizeOfElement(_pPanelLayout, "web_view");
 	_upWebView->Update(
 		webViewInGUI.x,
 		webViewInGUI.y,
@@ -197,18 +197,20 @@ void Tab::Update(float tpf, Input& rInput)
 	// ########################
 
 	// Create tab input structure (like standard input but in addition with input coordinates in web view space)
-	int webViewGazeX = rInput.gazeX - _upWebView->GetX();
-	int webViewGazeY = rInput.gazeY - _upWebView->GetY();
-	float webViewGazeRelativeX = ((float)webViewGazeX) / (float)(_upWebView->GetWidth());
-	float webViewGazeRelativeY = ((float)webViewGazeY) / (float)(_upWebView->GetHeight());
+	int webViewPixelGazeX = rInput.gazeX - _upWebView->GetX();
+	int webViewPixelGazeY = rInput.gazeY - _upWebView->GetY();
+	float webViewGazeRelativeX = ((float)webViewPixelGazeX) / (float)(_upWebView->GetWidth());
+	float webViewGazeRelativeY = ((float)webViewPixelGazeY) / (float)(_upWebView->GetHeight());
 	TabInput tabInput(
 		rInput.gazeX,
 		rInput.gazeY,
 		rInput.gazeUsed,
-		webViewGazeX,
-		webViewGazeY,
+		webViewPixelGazeX,
+		webViewPixelGazeY,
 		webViewGazeRelativeX,
 		webViewGazeRelativeY);
+	double CEFPixelGazeX = tabInput.webViewPixelGazeX;
+	double CEFPixelGazeY = tabInput.webViewPixelGazeY;
 
 	// Update highlight rectangle of webview
 	// TODO: alternative: give webview shared pointer to DOM nodes
@@ -261,9 +263,9 @@ void Tab::Update(float tpf, Input& rInput)
         _pDebugLayout,
         "web_view_coordinate",
         "Fixed:\n"
-        + std::to_string(webViewGazeX) + ", " + std::to_string(webViewGazeY) + "\n"
+        + std::to_string(webViewPixelGazeX) + ", " + std::to_string(webViewPixelGazeY) + "\n"
         + "Scrolled:\n"
-        + std::to_string((int)(webViewGazeX + _scrollingOffsetX)) + ", " + std::to_string((int)(webViewGazeY + _scrollingOffsetY)));
+        + std::to_string((int)(webViewPixelGazeX + _scrollingOffsetX)) + ", " + std::to_string((int)(webViewPixelGazeY + _scrollingOffsetY)));
 
 	// #######################################
     // ### UPDATE PIPELINE OR STANDARD GUI ###
@@ -304,7 +306,7 @@ void Tab::Update(float tpf, Input& rInput)
         // Gaze mouse
         if(_gazeMouse)
         {
-            EmulateMouseCursor(tabInput.webViewGazeX, tabInput.webViewGazeY);
+            EmulateMouseCursor(tabInput.webViewPixelGazeX, tabInput.webViewPixelGazeY);
         }
 
 		// Ask for page resolution
@@ -356,13 +358,14 @@ void Tab::Update(float tpf, Input& rInput)
 		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownSensorFrameIndex, showScrollDown, false, true);
 
 		// Check, that gaze is not upon a fixed element
+		ConvertToCEFPixel(CEFPixelGazeX, CEFPixelGazeY);
 		bool gazeUponFixed = false;
 		for (const auto& rElements : _fixedElements)
 		{
 			for (const auto& rElement : rElements)
 			{
 				// Simple box test
-				if(rElement.isInside(tabInput.webViewGazeX, tabInput.webViewGazeY))
+				if(rElement.isInside(CEFPixelGazeX, CEFPixelGazeY))
 				{
 					gazeUponFixed = true;
 					break;
@@ -414,20 +417,20 @@ void Tab::Update(float tpf, Input& rInput)
 			{
 				for (const auto& rRect : rOverflowElement->GetRects())
 				{
-					int gazeX = tabInput.webViewGazeX;
-					int gazeY = tabInput.webViewGazeY;
+					int scrolledCEFPixelGazeX = CEFPixelGazeX;
+					int scrolledCEFPixelGazeY = CEFPixelGazeY;
 
 					// Do NOT add scrolling offset if element is fixed
 					if (!rOverflowElement->GetFixed())
 					{
-						gazeX += _scrollingOffsetX;
-						gazeY += _scrollingOffsetY;
+						scrolledCEFPixelGazeX += _scrollingOffsetX;
+						scrolledCEFPixelGazeY += _scrollingOffsetY;
 					}
 
 					// Check if current gaze is inside of overflow element, if so execute scrolling method in corresponding Javascript object
-					if (rRect.isInside(gazeX, gazeY))
+					if (rRect.isInside(scrolledCEFPixelGazeX, scrolledCEFPixelGazeY))
 					{
-						_pCefMediator->ScrollOverflowElement(this, rOverflowElement->GetId(), tabInput.webViewGazeX, tabInput.webViewGazeY);
+						_pCefMediator->ScrollOverflowElement(this, rOverflowElement->GetId(), CEFPixelGazeX, CEFPixelGazeY);
 						break;
 					}
 				}
@@ -519,9 +522,18 @@ void Tab::Deactivate()
 
 void Tab::OpenURL(std::string URL)
 {
+	// Set URL
 	_url = URL;
-	_pCefMediator->RefreshTab(this);
+
+	// Abort any pipeline execution
 	AbortAndClearPipelines();
+
+	// Tell CEF to refresh this tab (which will fetch the URL and load it)
+	_pCefMediator->RefreshTab(this);
+
+	// Reset scrolling
+	_scrollingOffsetX = 0.0;
+	_scrollingOffsetY = 0.0;
 }
 
 void Tab::AbortAndClearPipelines()
@@ -703,15 +715,16 @@ void Tab::DrawDebuggingOverlay() const
 	std::function<void(Rect, bool)> renderRect = [&](Rect rect, bool fixed)
 	{
 		// Fixed or not
-		float scrollX = 0;
-		float scrollY = 0;
 		if (!fixed)
 		{
-			scrollX = _scrollingOffsetX;
-			scrollY = _scrollingOffsetY;
+			// Subtract scrolling while coordinates are in CEFPixel space
+			rect.left -= _scrollingOffsetX;
+			rect.right -= _scrollingOffsetX;
+			rect.bottom -= _scrollingOffsetY;
+			rect.top -= _scrollingOffsetY;
 		}
 
-		// Scale from rendered resolution to screen
+		// Scale from CEFPixel space to WebViewPixel
 		rect.left = (rect.left / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
 		rect.right = (rect.right / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
 		rect.bottom = (rect.bottom / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
@@ -720,7 +733,7 @@ void Tab::DrawDebuggingOverlay() const
 		// Calculate model matrix
 		model = glm::mat4(1.0f);
 		model = glm::scale(model, glm::vec3(1.f / _pMaster->GetWindowWidth(), 1.f / _pMaster->GetWindowHeight(), 1.f));
-		model = glm::translate(model, glm::vec3(_upWebView->GetX() + rect.left - scrollX, _upWebView->GetHeight() - (rect.bottom - scrollY), 1));
+		model = glm::translate(model, glm::vec3(_upWebView->GetX() + rect.left, _upWebView->GetHeight() - (rect.bottom), 1));
 		model = glm::scale(model, glm::vec3(rect.width(), rect.height(), 0));
 
 		// Combine matrics
@@ -747,8 +760,22 @@ void Tab::DrawDebuggingOverlay() const
 		// Render rects
 		for (const auto rRect : rDOMTrigger->GetDOMRects())
 		{
-			if(rDOMTrigger->GetDOMVisibility())
-				renderRect(rRect, rDOMTrigger->GetDOMFixed());
+			if (rDOMTrigger->GetDOMVisibility())
+			{
+				if (!rDOMTrigger->GetDOMIsPasswordField())
+				{
+					renderRect(rRect, rDOMTrigger->GetDOMFixed());
+				}
+				else
+				{
+					_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(0.0f, 1.f, 1.f));
+					renderRect(rRect, rDOMTrigger->GetDOMFixed());
+					_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_TRIGGER_DEBUG_COLOR);
+				}
+
+
+			}
+				
 		}
 	}
 
@@ -781,7 +808,6 @@ void Tab::DrawDebuggingOverlay() const
 		if(rDOMTextLink->GetRects().size() == 2 && rDOMTextLink->GetVisibility())
 			renderRect(rDOMTextLink->GetRects()[1], rDOMTextLink->GetFixed());
 	}
-
 
 	// ### FIXED ELEMENTS ###
 

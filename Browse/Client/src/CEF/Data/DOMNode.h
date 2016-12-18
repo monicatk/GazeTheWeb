@@ -27,13 +27,16 @@ public:
 	glm::vec2 GetCenter() const;
 	bool GetFixed() const { return _fixed; }
 	bool GetVisibility() const { return _visible; }
+	const std::string GetText() const { return _text; }
+	bool IsPasswordField() const { return _isPasswordField; }
 
 	void AddRect(Rect rect) { _rects.push_back(rect); }
 
 	void SetRects(std::shared_ptr<std::vector<Rect>> rects);
 	void SetFixed(bool fixed) { _fixed = fixed; }
 	void SetVisibility(bool visible) { _visible = visible; }
-
+	void SetText(std::string text) { _text = text; }
+	void SetAsPasswordField() { _isPasswordField = true; }
 
 
 	DOMNode(DOMNodeType type, int64 frameID, int nodeID, std::vector<Rect> rects)
@@ -61,7 +64,8 @@ protected:
 	std::vector<Rect> _rects;
 	bool _fixed = false;
 	bool _visible = true;
-
+	std::string _text = "";
+	bool _isPasswordField = false;
 
 };
 
@@ -93,7 +97,6 @@ public:
 		int64 frameID,
 		int nodeID,
 		Rect rect,
-		std::string text,
 		std::string url
 		);
 
@@ -102,15 +105,12 @@ public:
 		int64 frameID,
 		int nodeID,
 		std::vector<Rect> rects,
-		std::string text,
 		std::string url
 		);
 
-	std::string GetText() const { return _text; }
 	std::string GetURL() const { return _url; }
 
 private:
-	std::string _text;
 	std::string _url;
 };
 

@@ -5,18 +5,26 @@
 
 #include "TextInputPipeline.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
+#include "src/State/Web/Tab/Interface/TabActionInterface.h"
 #include "src/State/Web/Tab/Pipelines/Actions/KeyboardAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/TextInputAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/LeftMouseButtonClickAction.h"
+#include "submodules/eyeGUI/include/eyeGUI.h"
 
 TextInputPipeline::TextInputPipeline(TabInteractionInterface* pTab, std::shared_ptr<DOMNode> spNode) : Pipeline(pTab)
 {
+	// Get current text from node
+	std::string text = spNode->GetText();
+	std::u16string text16;
+	eyegui_helper::convertUTF8ToUTF16(text, text16);
+
     // At first, click in text field
 	std::shared_ptr<LeftMouseButtonClickAction> spLeftMouseButtonClickAction = std::make_shared<LeftMouseButtonClickAction>(_pTab);
 	_actions.push_back(spLeftMouseButtonClickAction);
 
     // Then, do input via keyboard
 	std::shared_ptr<KeyboardAction> spKeyboardAction = std::make_shared<KeyboardAction>(_pTab);
+	spKeyboardAction->SetInputValue<std::u16string>("text", text16);
 	_actions.push_back(spKeyboardAction);
 
     // At last, fill input into text field
@@ -24,10 +32,11 @@ TextInputPipeline::TextInputPipeline(TabInteractionInterface* pTab, std::shared_
 	_actions.push_back(spTextInputAction);
 
     // Fill some values directly
-    glm::vec2 clickCoordinates = spNode->GetCenter();
-	clickCoordinates.x = (clickCoordinates.x / (float)_pTab->GetWebViewResolutionX()) * (float)_pTab->GetWebViewWidth(); // to screen pixel coordinates
-	clickCoordinates.y = (clickCoordinates.y / (float)_pTab->GetWebViewResolutionY()) * (float)_pTab->GetWebViewHeight(); // to screen pixel coordinates
-    spLeftMouseButtonClickAction->SetInputValue("coordinate", clickCoordinates);
+    glm::vec2 clickCEFPixelCoordinates = spNode->GetCenter();
+	double webViewPixelX = clickCEFPixelCoordinates.x;
+	double webViewPixelY = clickCEFPixelCoordinates.y;
+	_pTab->ConvertToWebViewPixel(webViewPixelX, webViewPixelY);
+    spLeftMouseButtonClickAction->SetInputValue("coordinate", glm::vec2(webViewPixelX, webViewPixelY));
 	spLeftMouseButtonClickAction->SetInputValue("visualize", 0);
     spTextInputAction->SetInputValue("frameId", spNode->GetFrameID());
     spTextInputAction->SetInputValue("nodeId", spNode->GetNodeID());

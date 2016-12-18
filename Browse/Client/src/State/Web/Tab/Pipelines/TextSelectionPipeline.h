@@ -13,7 +13,7 @@ class TextSelectionPipeline : public Pipeline
 {
 public:
 
-    // Constructor. Takes start coordinate in pixel screen space
+    // Constructor.
     TextSelectionPipeline(TabInteractionInterface* pTab);
 };
 

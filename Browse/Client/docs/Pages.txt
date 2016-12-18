@@ -1,0 +1,3 @@
+Slow/Scrolling does not work:
+
+Favicon not loaded correctly:

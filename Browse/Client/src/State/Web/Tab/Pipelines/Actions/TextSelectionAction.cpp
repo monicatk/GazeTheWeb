@@ -5,6 +5,7 @@
 
 #include "TextSelectionAction.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
+#include "src/Setup.h"
 
 TextSelectionAction::TextSelectionAction(TabInteractionInterface *pTab) : ZoomCoordinateAction(pTab, false)
 {
@@ -17,16 +18,15 @@ bool TextSelectionAction::Update(float tpf, TabInput tabInput)
 	// Call standard zoom coordinate update function
 	bool done = ZoomCoordinateAction::Update(tpf, tabInput);
 
-	// TODO: maybe use some more direct coordinate than this one
-	// Calculate current coordinate in screen space
+	// Calculate current coordinate in WebViewPixel space
 	glm::vec2 webViewPixels(_pTab->GetWebViewWidth(), _pTab->GetWebViewHeight());
-	glm::vec2 screenCoordinate = _coordinate * webViewPixels;
+	glm::vec2 coordinate = _coordinate * webViewPixels; // _coordinate is given by superclass
 
 	// When finished, set end position of text selection
 	if (done)
 	{
 		// End selection procedure
-		_pTab->EmulateLeftMouseButtonUp(screenCoordinate.x, screenCoordinate.y);
+		_pTab->EmulateLeftMouseButtonUp(coordinate.x, coordinate.y, true, setup::TEXT_SELECTION_MARGIN);
 
 		// Copy selected string to clipboard. Maybe create extra action for this later
 		_pTab->PutTextSelectionToClipboardAsync();
@@ -34,7 +34,7 @@ bool TextSelectionAction::Update(float tpf, TabInput tabInput)
 	else
 	{
 		// Keep emulating mouse cursor
-		_pTab->EmulateMouseCursor(screenCoordinate.x, screenCoordinate.y, true);
+		_pTab->EmulateMouseCursor(coordinate.x, coordinate.y, true, setup::TEXT_SELECTION_MARGIN);
 	}
 
     return done;
@@ -48,7 +48,7 @@ void TextSelectionAction::Activate()
 	// Set starting point of selection
 	glm::vec2 startCoordinate;
 	GetInputValue("coordinate", startCoordinate);
-	_pTab->EmulateLeftMouseButtonDown(startCoordinate.x, startCoordinate.y);
+	_pTab->EmulateLeftMouseButtonDown(startCoordinate.x, startCoordinate.y, true, -setup::TEXT_SELECTION_MARGIN);
 }
 
 void TextSelectionAction::Deactivate()

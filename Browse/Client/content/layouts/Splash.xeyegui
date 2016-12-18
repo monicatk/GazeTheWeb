@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<layout stylesheet="stylesheets/Global.seyegui">
+	<grid showbackground="true">
+		<row size="10%">
+			<column size="100%"/>
+		</row>
+		<row size="70%">
+			<column size="100%">
+				<picture src="graphics/Splash.png" border="25%"/>
+			</column>
+		</row>
+		<row size="20%">
+			<column size="100%">
+				<textblock alignment="center" id="version"/> 
+			</column>
+		</row>
+	</grid>
+</layout>

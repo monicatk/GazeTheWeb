@@ -32,7 +32,7 @@ public:
         float relativePositionY) = 0;
 
     // Set visibility of floating frame in overlay
-    virtual void SetVisibilyOfFloatingFrameInOverlay(int index, bool visible) = 0;
+    virtual void SetVisibilityOfFloatingFrameInOverlay(int index, bool visible) = 0;
 
     // Remove floating frame from overlay
     virtual void RemoveFloatingFrameFromOverlay(int index) = 0;
@@ -82,6 +82,12 @@ public:
 
 	// Get content of text edit
 	virtual std::u16string GetContentOfTextEdit(std::string id) = 0;
+
+	// Move cursor over letters in text edit. Positive letter count means rightward movement, else leftward
+	virtual void MoveCursorOverLettersInTextEdit(std::string id, int letterCount) = 0;
+
+	// Move cursor over words in text edit. Positive word count means rightward movement, else leftward
+	virtual void MoveCursorOverWordsInTextEdit(std::string id, int wordCount) = 0;
 
 	// Getter for values of interest
 	virtual int GetWebViewX() const = 0;

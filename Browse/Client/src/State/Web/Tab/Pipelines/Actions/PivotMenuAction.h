@@ -3,7 +3,7 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Action for displaying pivot menu.
-// - Input: vec2 coordinate in pixels
+// - Input: vec2 WebViewPixel coordinate
 // - Output: none
 
 #ifndef PIVOTMENUACTION_H_

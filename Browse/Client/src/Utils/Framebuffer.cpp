@@ -77,38 +77,38 @@ void Framebuffer::Unbind() const
 
 void Framebuffer::Resize(int width, int height)
 {
-    if(width != _width || height != _height)
-    {
-        // Save width and height
-        _width = width;
-        _height = height;
+	if (width != _width || height != _height)
+	{
+		// Save width and height
+		_width = width;
+		_height = height;
 
-        // Create renderbuffer
-        glBindRenderbuffer(GL_RENDERBUFFER, _depthStencil);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		// Create renderbuffer
+		glBindRenderbuffer(GL_RENDERBUFFER, _depthStencil);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-        // (Re)Bind depth and stencil
-        glFramebufferRenderbuffer(
-            GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _depthStencil);
-        }
+		// (Re)Bind depth and stencil
+		glFramebufferRenderbuffer(
+			GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _depthStencil);
 
-        // Do it for all color attachments
-        for(const auto& rPair : _colorAttachments)
-        {
-            glBindTexture(GL_TEXTURE_2D, rPair.first);
-            glTexImage2D(
-                GL_TEXTURE_2D,
-                0,
-                rPair.second == ColorFormat::RGB ? GL_RGB8 : GL_RGBA8,
-                _width,
-                _height,
-                0,
-                rPair.second == ColorFormat::RGB ? GL_RGB : GL_RGBA,
-                GL_UNSIGNED_BYTE,
-                NULL);
-            glBindTexture(GL_TEXTURE_2D, 0);
-        }
+		// Do it for all color attachments
+		for (const auto& rPair : _colorAttachments)
+		{
+			glBindTexture(GL_TEXTURE_2D, rPair.first);
+			glTexImage2D(
+				GL_TEXTURE_2D,
+				0,
+				rPair.second == ColorFormat::RGB ? GL_RGB8 : GL_RGBA8,
+				_width,
+				_height,
+				0,
+				rPair.second == ColorFormat::RGB ? GL_RGB : GL_RGBA,
+				GL_UNSIGNED_BYTE,
+				NULL);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+	}
 }
 
 void Framebuffer::AddAttachment(ColorFormat colorFormat, bool clampToBorder)

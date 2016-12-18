@@ -36,7 +36,7 @@ void Tab::SetPositionOfFloatingFrameInOverlay(
 	eyegui::setPositionOfFloatingFrame(_pOverlayLayout, index, relativePositionX, relativePositionY);
 }
 
-void Tab::SetVisibilyOfFloatingFrameInOverlay(int index, bool visible)
+void Tab::SetVisibilityOfFloatingFrameInOverlay(int index, bool visible)
 {
 	// Reset when becoming visible
 	eyegui::setVisibilityOFloatingFrame(_pOverlayLayout, index, visible, visible, true);
@@ -170,6 +170,16 @@ void Tab::SetActiveEntityContentInTextEdit(std::string id, std::u16string conten
 std::u16string Tab::GetContentOfTextEdit(std::string id)
 {
 	return eyegui::getContentOfTextEdit(_pOverlayLayout, id);
+}
+
+void Tab::MoveCursorOverLettersInTextEdit(std::string id, int letterCount)
+{
+	eyegui::moveCursorOverLettersInTextEdit(_pOverlayLayout, id, letterCount);
+}
+
+void Tab::MoveCursorOverWordsInTextEdit(std::string id, int wordCount)
+{
+	eyegui::moveCursorOverWordsInTextEdit(_pOverlayLayout, id, wordCount);
 }
 
 int Tab::GetWebViewX() const

@@ -10,6 +10,7 @@
 KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 {
     // Add in- and output data slots
+	AddString16InputSlot("text");
     AddString16OutputSlot("text");
     AddIntOutputSlot("submit");
 
@@ -24,6 +25,10 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
     _overlayWordSuggestId = "text_input_action_word_suggest";
 	_overlayShiftButtonId = "text_input_action_shift_button";
 	_overlayNewLineButtonId = "text_input_action_new_line_button";
+	_overlayNextWordButtonId = "text_input_action_next_word_button";
+	_overlayPreviousWordButtonId = "text_input_action_previous_word_button";
+	_overlayNextLetterButtonId = "text_input_action_next_letter_button";
+	_overlayPreviousLetterButtonId = "text_input_action_previous_letter_button";
 
     // Id mapper for brick to change ids from file to the used ones
     std::map<std::string, std::string> idMapper;
@@ -37,6 +42,10 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
     idMapper.emplace("word_suggest", _overlayWordSuggestId);
 	idMapper.emplace("shift", _overlayShiftButtonId);
 	idMapper.emplace("new_line", _overlayNewLineButtonId);
+	idMapper.emplace("next_word", _overlayNextWordButtonId);
+	idMapper.emplace("previous_word", _overlayPreviousWordButtonId);
+	idMapper.emplace("next_letter", _overlayNextLetterButtonId);
+	idMapper.emplace("previous_letter", _overlayPreviousLetterButtonId);
 
     // Calculate size of overlay
     float x, y, sizeX, sizeY;
@@ -155,6 +164,46 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 		_pTab->AddContentAtCursorInTextEdit(_overlayTextEditId, u"\n");
 	},
 	[]() {}); // up callback
+
+	// Next word button
+	_pTab->RegisterButtonListenerInOverlay(
+		_overlayNextWordButtonId,
+		[&]() // down callback
+	{
+		// Move one word righward
+		_pTab->MoveCursorOverWordsInTextEdit(_overlayTextEditId, 1);
+	},
+	[]() {}); // up callback
+
+	 // Previous word button
+	_pTab->RegisterButtonListenerInOverlay(
+		_overlayPreviousWordButtonId,
+		[&]() // down callback
+	{
+		// Move one word leftward
+		_pTab->MoveCursorOverWordsInTextEdit(_overlayTextEditId, -1);
+	},
+	[]() {}); // up callback
+
+	// Next letter button
+	_pTab->RegisterButtonListenerInOverlay(
+		_overlayNextLetterButtonId,
+		[&]() // down callback
+	{
+		// Move one letter righward
+		_pTab->MoveCursorOverLettersInTextEdit(_overlayTextEditId, 1);
+	},
+	[]() {}); // up callback
+
+	// Previous word button
+	_pTab->RegisterButtonListenerInOverlay(
+		_overlayPreviousLetterButtonId,
+		[&]() // down callback
+	{
+		// Move one letter leftward
+		_pTab->MoveCursorOverLettersInTextEdit(_overlayTextEditId, -1);
+	},
+	[]() {}); // up callback
 }
 
 KeyboardAction::~KeyboardAction()
@@ -172,6 +221,10 @@ KeyboardAction::~KeyboardAction()
     _pTab->UnregisterWordSuggestListenerInOverlay(_overlayWordSuggestId);
 	_pTab->UnregisterButtonListenerInOverlay(_overlayShiftButtonId);
 	_pTab->UnregisterButtonListenerInOverlay(_overlayNewLineButtonId);
+	_pTab->UnregisterButtonListenerInOverlay(_overlayNextWordButtonId);
+	_pTab->UnregisterButtonListenerInOverlay(_overlayPreviousWordButtonId);
+	_pTab->UnregisterButtonListenerInOverlay(_overlayNextLetterButtonId);
+	_pTab->UnregisterButtonListenerInOverlay(_overlayPreviousLetterButtonId);
 }
 
 bool KeyboardAction::Update(float tpf, TabInput tabInput)
@@ -200,12 +253,21 @@ void KeyboardAction::Draw() const
 
 void KeyboardAction::Activate()
 {
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, true);
+	// Set visibility of floating frame
+    _pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayFrameIndex, true);
+
+	// Get text from input
+	std::u16string text;
+	GetInputValue<std::u16string>("text", text);
+
+	// Put text into preview
+	_pTab->AddContentAtCursorInTextEdit(_overlayTextEditId, text); // TODO: set content would be better here
 }
 
 void KeyboardAction::Deactivate()
 {
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, false);
+	// Set visibility of floating frame
+    _pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayFrameIndex, false);
 }
 
 void KeyboardAction::Abort()

@@ -73,18 +73,23 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 					browser->GetMainFrame()->ExecuteJavaScript(_js_favicon_copy_img_bytes_to_v8array, browser->GetMainFrame()->GetURL(), 0);
 
 					// Read out each byte and write it to IPC msg
-					bool error_occured = false;
+					//bool error_occured = false;
 					for (int i = 0; i < byteArray->GetArrayLength(); i++)
 					{
-						error_occured = error_occured || byteArray->GetValue(i)->IsInt();
-						if (error_occured)
-						{
-							args->SetInt(index++, byteArray->GetValue(i)->GetIntValue());
-						}
+						//// Check if value IsInt will fail!
+						//error_occured = error_occured || byteArray->GetValue(i)->IsInt();
+						//if (error_occured)
+						//{
+						args->SetInt(index++, byteArray->GetValue(i)->GetIntValue());
+						//}
 					}
 					
-					if(!error_occured)
-						browser->SendProcessMessage(PID_BROWSER, msg);
+					//if(!error_occured)
+					browser->SendProcessMessage(PID_BROWSER, msg);
+					//else
+					//{
+					//	IPCLogDebug(browser, "An error occured while reading out favicon bytes!");
+					//}
 				}
 				else
 				{
@@ -93,7 +98,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			}
 			else
 			{
-				IPCLogDebug(browser, "Renderer: Failed to load favicon height and/or width, expected double value, got something different. Aborting.");
+				IPCLogDebug(browser, "Failed to load favicon height and/or width, expected double value, got something different. Aborting.");
 			}
             context->Exit();
         }
@@ -120,7 +125,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			}
 			else
 			{
-				IPCLogDebug(browser, "Renderer: Failed to read page width and/or height, expected double value, got something different. Aborting.");
+				IPCLogDebug(browser, "Failed to read page width and/or height, expected double value, got something different. Aborting.");
 			}
             
             context->Exit();
@@ -143,19 +148,28 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 
 			CefRefPtr<CefV8Value> global = context->GetGlobal();
 			
+
 			CefRefPtr<CefV8Value> fixedObj;
-			if (global->HasValue("domFixedElements"))
+			if (global->HasValue("domFixedElements") && fixedId < global->GetValue("domFixedElements")->GetArrayLength())
 			{
+				
 				fixedObj = global->GetValue("domFixedElements")->GetValue(fixedId);
+
+				// Slots in domFixedElements might contain undefined as value, if FixedElement was deleted
+				if (fixedObj->IsUndefined() || fixedObj->IsNull())
+				{
+					//IPCLogDebug(browser, "Prevented access to already deleted fixed element at id=" + std::to_string(fixedId));
+					context->Exit();
+					return true;
+				}
 			}
 			else
 			{
-				IPCLogDebug(browser, "Renderer: List of fixed elements does not seem to exist yet. Aborting fetching them.");
+				IPCLogDebug(browser, "List of fixed elements does not seem to exist yet. Aborting fetching them.");
+				context->Exit();
 				return true;
 			}
 			
-			
-			//CefRefPtr<CefV8Value> rectsArray = fixedObj->GetValue("rects");
 			
 			int index = 0;
 			args->SetInt(index++, fixedId);
@@ -177,7 +191,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			// DEBUG
 			if (rectList->GetArrayLength() == 0)
 			{
-				IPCLogDebug(browser, "No Rect coordinates available for fixedID="+std::to_string(fixedId));
+				IPCLogDebug(browser, "No Rect coordinates available for fixedId="+std::to_string(fixedId));
 			}
       
 			// Send response
@@ -187,14 +201,9 @@ bool RenderProcessHandler::OnProcessMessageReceived(
         }
     }
 
-	if (msgName == "FetchDOMTextLink")
+	if (msgName == "FetchDOMTextLink" || msgName == "FetchDOMTextInput")
 	{
-		IPCLog(browser, "Renderer: Received Deprecated FetchDOMTextLink message!");
-	}
-
-	if (msgName == "FetchDOMTextInput")
-	{
-		IPCLog(browser, "Renderer: Received Deprecated FetchDOMTextInput message!");
+		IPCLogDebug(browser, "Renderer: Received deprecated "+msgName+" message!");
 	}
 
 	if (msgName == "LoadDOMNodeData")
@@ -369,7 +378,6 @@ CefRefPtr<CefV8Value> RenderProcessHandler::FetchDOMObject(CefRefPtr<CefV8Contex
 		// Only try to execute function, if function exists
 		if (jsWindow->GetValue("GetDOMObject")->IsFunction())
 		{
-			// 
 			result = jsWindow->GetValue("GetDOMObject")->ExecuteFunction(
 				NULL, 
 				{ CefV8Value::CreateInt(nodeType), CefV8Value::CreateInt(nodeID) }
@@ -399,7 +407,7 @@ CefRefPtr<CefProcessMessage> RenderProcessHandler::UnwrapDOMTextInput(
 	CefRefPtr<CefProcessMessage> result = CefProcessMessage::Create("CreateDOMTextInput");
 	CefRefPtr<CefListValue> args = result->GetArgumentList();
 
-	if (domObj && !domObj->IsNull())
+	if (domObj && !domObj->IsNull() && !domObj->IsUndefined())
 	{
 		if (context->Enter())
 		{
@@ -437,7 +445,7 @@ CefRefPtr<CefProcessMessage> RenderProcessHandler::UnwrapDOMLink(
 	CefRefPtr<CefProcessMessage> result = CefProcessMessage::Create("CreateDOMLink");
 	CefRefPtr<CefListValue> args = result->GetArgumentList();
 
-	if (domObj && !domObj->IsNull())
+	if (domObj && !domObj->IsNull() && !domObj->IsUndefined())
 	{
 		if (context->Enter())
 		{

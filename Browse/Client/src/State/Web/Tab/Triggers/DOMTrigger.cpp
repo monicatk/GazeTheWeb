@@ -54,7 +54,7 @@ bool DOMTrigger::Update(float tpf, TabInput& rTabInput)
     if(_visible != visible)
     {
         _visible = visible;
-        _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, _visible);
+        _pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayFrameIndex, _visible);
     }
 
     // Calculate position of overlay button
@@ -89,24 +89,17 @@ void DOMTrigger::Draw() const
 
 void DOMTrigger::Activate()
 {
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, _visible);
+    _pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayFrameIndex, _visible);
 }
 
 void DOMTrigger::Deactivate()
 {
-    _pTab->SetVisibilyOfFloatingFrameInOverlay(_overlayFrameIndex, false);
+    _pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayFrameIndex, false);
 }
 
 void DOMTrigger::CalculatePositionOfOverlayButton(float& rRelativePositionX, float& rRelativePositionY) const
 {
-    // Center of node
-	glm::vec2 center = _spNode->GetCenter();
-
-	// Scale center from web view resolution to real pixel value
-	center.x = (center.x / (float)_pTab->GetWebViewResolutionX()) * (float)_pTab->GetWebViewWidth();
-	center.y = (center.y / (float)_pTab->GetWebViewResolutionY()) * (float)_pTab->GetWebViewHeight();
-
-    // Scrolling offset only when not fixed
+	// Scrolling offset only when not fixed
 	double scrollingOffsetX = 0;
 	double scrollingOffsetY = 0;
 	if (!_spNode->GetFixed())
@@ -114,9 +107,14 @@ void DOMTrigger::CalculatePositionOfOverlayButton(float& rRelativePositionX, flo
 		_pTab->GetScrollingOffset(scrollingOffsetX, scrollingOffsetY);
 	}
 
+    // Center of node in WebViewPixel space
+	double webViewPixelX = _spNode->GetCenter().x - scrollingOffsetX;
+	double webViewPixelY = _spNode->GetCenter().y - scrollingOffsetY;
+	_pTab->ConvertToWebViewPixel(webViewPixelX, webViewPixelY);
+
     // Calculate coordinates and size
-    rRelativePositionX = (center.x - scrollingOffsetX + (float)_pTab->GetWebViewX()) / (float)_pTab->GetWindowWidth();
-    rRelativePositionY = (center.y - scrollingOffsetY + (float)_pTab->GetWebViewY()) / (float)_pTab->GetWindowHeight();
+    rRelativePositionX = ((float)webViewPixelX + (float)_pTab->GetWebViewX()) / (float)_pTab->GetWindowWidth();
+    rRelativePositionY = ((float)webViewPixelY + (float)_pTab->GetWebViewY()) / (float)_pTab->GetWindowHeight();
 
     // Subtract half of size to center frame
     rRelativePositionX -= _size / 2.f;

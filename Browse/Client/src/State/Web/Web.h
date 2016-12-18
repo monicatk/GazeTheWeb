@@ -183,7 +183,7 @@ private:
 	// Update icon of tab overview
 	void UpdateTabOverviewIcon();
 
-	// Validate URL
+	// Validate URL. Returns true if recognized as URL
 	bool ValidateURL(const std::string& rURL) const;
 
     // Maps id to Tab
@@ -230,7 +230,7 @@ private:
 		"([\\da-z\\.-]+)"	// domain name (any number, dot and character from a to z)
 		"\\."				// dot between name and domain
 		"([a-z\\.]{2,6})"	// domain itself
-		"([/\\w\\.-]*)*"	// folder structure
+		"([/\\w\\.-:]*)*"	// folder structure
 		"/?";				// optional last dash
 };
 

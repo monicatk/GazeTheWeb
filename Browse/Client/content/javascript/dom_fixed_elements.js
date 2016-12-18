@@ -69,7 +69,6 @@ function FixedElement(node)
         domRectList.forEach(
             function(domRect)
             { 
-                // ConsolePrint(AdjustRectToZoom(domRect));
                 updatedRectsData.push(AdjustRectToZoom(domRect));
             }
         );
@@ -91,8 +90,16 @@ function FixedElement(node)
         if(changed)
         {
             // Inform CEF that fixed element has been updated
-            ConsolePrint("#fixElem#add#"+this.id);
+            // var debug = (window.domFixedElements[this.id] === undefined) ? "undefined" : "ok";
+            ConsolePrint("#fixElem#add#"+this.id+"#");
             //   ConsolePrint("-----> #fixElem#add#"+this.id); // DEBUG
+
+            // Give feedback if other rects might have to get updated too
+            return true;
+        }
+        else
+        {
+            return false;
         }
         
     }
@@ -104,8 +111,9 @@ function FixedElement(node)
     
 
     this.node.setAttribute("fixedId", this.id);
-    var scope_id = this.id;
+    
     // Note corresponding fixed element ID in an attribute
+    var scope_id = this.id;
     ForEveryChild(this.node, function(child)
     { 
         if(child.nodeType === 1) 
@@ -144,10 +152,19 @@ function AddFixedElement(node)
 {
     if(node.nodeType === 1)
     {
-        if(id = node.getAttribute("fixedId"))
+        if(node.hasAttribute("fixedId"))
         {
+            var id = node.getAttribute("fixedId")
             // Trigger rect updates of whole subtree, just in case
-            window.domFixedElements[id].updateRects();
+            if((fixedObj = window.domFixedElements[id]) !== undefined)
+            {
+                fixedObj.updateRects();
+            }
+            else
+            {
+                ConsolePrint("Tried to access fixedObj with id="+id+", but it seems to be already deleted. But corresponding node still has its ID as attribute!");
+            }
+            
 
             // ConsolePrint("AddFixedElement: fixedId = "+id+" already linked to FixedObj!");
             return false;
@@ -157,10 +174,6 @@ function AddFixedElement(node)
             // Create new FixedElement object, which will be added to global fixed element list
             new FixedElement(node);
 
-            //DEBUG
-            // ConsolePrint("Added fixed element, currently available fixedIDs...");
-            // window.domFixedElements.forEach(function(obj){ if(obj) ConsolePrint(obj.id);});
-
             return true;
         }
     }
@@ -168,15 +181,25 @@ function AddFixedElement(node)
 
 function RemoveFixedElement(node)
 {
-    if(fixedObj = GetFixedElement(node) && fixedObj !== undefined)
+    if((fixedObj = GetFixedElement(node)) !== null && fixedObj !== undefined)
     {
+        // Needed for output at the end
         var id = fixedObj.id;
+
         // Delete object in its list slot, slot will be left empty (undefined) at the moment
-        if(fixedObj.id > 0 && fixedObj.id < window.domFixedElements.length)
+        if(id >= 0 && id < window.domFixedElements.length)
         {
-            delete window.domFixedElements[fixedObj.id];
+
+
+            delete window.domFixedElements[id];
+
+            ConsolePrint("#fixElem#rem#"+id);
+            // console.log("Removed fixedObj with id="+id);
         }
+        // console.log("Removed fixedId, seems like fixedObj might not have be found! id="+id);
+        // console.log("node's fixedId="+node.getAttribute("fixedId"));
         node.removeAttribute("fixedId");
+        
 
         // Also remove fixed ID from every child
         ForEveryChild(node, 
@@ -199,6 +222,11 @@ function RemoveFixedElement(node)
         UpdateDOMRects();
 
         ConsolePrint("Successfully removed FixedElement with ID="+id);
+    }
+    else
+    {
+        // ConsolePrint("fixedObj === undefined")
+        // ConsolePrint("node.fixedId="+node.getAttribute("fixedId"));
     }
 }
 
@@ -229,9 +257,6 @@ function SetFixationStatus(node, status)
 		var overflowObj = GetOverflowElement(overflowId);
 		if(overflowObj !== null)
 		{
-			//DEBUG
-			// ConsolePrint("Changing fixation status to "+status+" for OE id="+overflowId);
-
 			overflowObj.setFixed(status);
 		}
 	}
