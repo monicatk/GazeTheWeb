@@ -7,8 +7,8 @@ set(CEF_TARGET Client)
 set(CLIENT_DEPLOYMENT OFF CACHE BOOL "Setup for Deployment.")
 
 if(OS_WINDOWS) # Windows
-	set(CLIENT_SMI_IVIEWX_PLUGIN OFF CACHE BOOL "Build plugin for SMI iViewX.")
-	set(CLIENT_TOBII_EYEX_PLUGIN OFF CACHE BOOL "Build plugin for Tobii EyeX.")
+	set(CLIENT_BUILD_SMI_IVIEWX_PLUGIN OFF CACHE BOOL "Build plugin for SMI iViewX.")
+	set(CLIENT_BUILD_TOBII_EYEX_PLUGIN OFF CACHE BOOL "Build plugin for Tobii EyeX.")
 endif()
 
 # Pipe some of them to C++
