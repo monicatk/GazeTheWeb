@@ -8,7 +8,7 @@
 
 bool Connect()
 {
-	return false;
+	return true;
 }
 
 bool Disconnect()
