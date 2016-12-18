@@ -40,13 +40,13 @@ A file named _log.txt_ is created at binary folder containing information about 
 ![Tab Overview](media/Screenshot-C.png)
 
 ## Dependencies
-All necessary dependencies are provided in the _externals_, _submodules_ or within the corresponding _plugins_ folder.
+All necessary dependencies are provided in the __externals__, __submodules__ or within the corresponding __plugins__ folder.
 
-externals:
+__externals__:
 * liblsl: https://github.com/sccn/labstreaminglayer
   * Boost: https://github.com/boostorg/boost
 	
-submodules:
+__submodules__:
 * eyeGUI: https://github.com/raphaelmenges/eyeGUI
   * FreeType 2.6.1: http://www.freetype.org (FreeType license chosen)
 * TinyXML2 (used one from eyeGUI library): https://github.com/leethomason/tinyxml2
@@ -55,10 +55,10 @@ submodules:
 * spdlog: https://github.com/gabime/spdlog
 * text-csv: https://github.com/roman-kashitsyn/text-csv
 
-plugins/Eyetracker/SMIiViewX:
+__plugins__/Eyetracker/SMIiViewX:
 * iViewX: Connection to the iViewX SDK, copyright SMI GmbH (http://www.smivision.com)
 
-plugins/Eyetracker/TobiiEyeX:
+__plugins__/Eyetracker/TobiiEyeX:
 * TobiiEyeX: Connection to Tobii EyeX SDK, copyright Tobii Technology AB (http://developer.tobii.com/eyex-sdk)
 
 ## License
