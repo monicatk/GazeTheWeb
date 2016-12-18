@@ -41,17 +41,25 @@ A file named _log.txt_ is created at binary folder containing information about 
 
 ## Dependencies
 All necessary dependencies are provided in the _externals_, _submodules_ or within the corresponding _plugins_ folder.
-* GLM: http://glm.g-truc.net/0.9.7/index.html (MIT license chosen)
-* GLFW3: http://www.glfw.org
-* iViewX: Connection to the iViewX SDK, copyright SMI GmbH (http://www.smivision.com)
-* TobiiEyeX: Connection to Tobii EyeX SDK, copyright Tobii Technology AB (http://developer.tobii.com/eyex-sdk)
-* eyeGUI: https://github.com/raphaelmenges/eyeGUI
-  * FreeType 2.6.1: http://www.freetype.org (FreeType license chosen)
-* spdlog: https://github.com/gabime/spdlog
+
+externals:
 * liblsl: https://github.com/sccn/labstreaminglayer
   * Boost: https://github.com/boostorg/boost
-* text-csv: https://github.com/roman-kashitsyn/text-csv
+	
+submodules:
+* eyeGUI: https://github.com/raphaelmenges/eyeGUI
+  * FreeType 2.6.1: http://www.freetype.org (FreeType license chosen)
 * TinyXML2 (used one from eyeGUI library): https://github.com/leethomason/tinyxml2
+* GLFW3: http://www.glfw.org
+* GLM: http://glm.g-truc.net/0.9.7/index.html (MIT license chosen)
+* spdlog: https://github.com/gabime/spdlog
+* text-csv: https://github.com/roman-kashitsyn/text-csv
+
+plugins/Eyetracker/SMIiViewX:
+* iViewX: Connection to the iViewX SDK, copyright SMI GmbH (http://www.smivision.com)
+
+plugins/Eyetracker/TobiiEyeX:
+* TobiiEyeX: Connection to Tobii EyeX SDK, copyright Tobii Technology AB (http://developer.tobii.com/eyex-sdk)
 
 ## License
 >Copyright 2016 Raphael Menges and Daniel Müller
