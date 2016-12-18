@@ -39,7 +39,7 @@ if(${CLIENT_BUILD_SMI_IVIEWX_PLUGIN})
 		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
 		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
 		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
-		${EYETRACKER_PLUGIN_DIRECTORY}/SMIiViewX/EyetrackerImpl.cpp)
+		${EYETRACKER_PLUGIN_DIRECTORY}/SMIiViewX/SMIiViewXImpl.cpp)
 	
 	# Link SDK
 	target_link_libraries(SMIiViewXPlugin ${SMI_IVIEWX_SDK_LIBRARIES})
@@ -64,7 +64,7 @@ if(${CLIENT_BUILD_TOBII_EYEX_PLUGIN})
 		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
 		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
 		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
-		${EYETRACKER_PLUGIN_DIRECTORY}/TobiiEyeX/EyetrackerImpl.cpp)
+		${EYETRACKER_PLUGIN_DIRECTORY}/TobiiEyeX/TobiiEyeXImpl.cpp)
 		
 	# Link SDK
 	target_link_libraries(TobiiEyeXPlugin ${TOBII_EYEX_SDK_LIBRARIES})

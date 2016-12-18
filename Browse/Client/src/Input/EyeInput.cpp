@@ -209,7 +209,7 @@ bool EyeInput::Update(
 
 #ifdef _WIN32
 
-	if (_procFetchGaze != NULL && _connected)
+	if (_connected && _procFetchGaze != NULL)
 	{
 		// Prepare vectors to fill
 		std::vector<double> gazeXSamples, gazeYSamples;
