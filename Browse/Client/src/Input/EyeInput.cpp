@@ -10,6 +10,7 @@
 
 EyeInput::EyeInput(bool useEmulation)
 {
+
 #ifdef _WIN32
 
 	if (!useEmulation)
@@ -92,6 +93,7 @@ EyeInput::EyeInput(bool useEmulation)
 
 EyeInput::~EyeInput()
 {
+
 #ifdef _WIN32
     
     if (_pluginHandle != NULL)
@@ -125,7 +127,9 @@ EyeInput::~EyeInput()
 		// Unload plugin
 		FreeLibrary(_pluginHandle);
     }
+
 #endif
+
 }
 
 bool EyeInput::Update(
@@ -202,7 +206,9 @@ bool EyeInput::Update(
 	// Update gaze by eyetracker
 	double filteredGazeX = 0;
 	double filteredGazeY = 0;
+
 #ifdef _WIN32
+
 	if (_procFetchGaze != NULL && _connected)
 	{
 		// Prepare vectors to fill
@@ -244,6 +250,7 @@ bool EyeInput::Update(
 		}
 		filteredGazeY = sum / gazeYSamples.size();
 	}
+
 #endif
 
     // Bool to indicate mouse usage for gaze coordinates
