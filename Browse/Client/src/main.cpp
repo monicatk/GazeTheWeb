@@ -50,33 +50,6 @@ int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app
 
 #endif
 
-	// TODO: TESTING PLUGIN LOADING
-	typedef int(__cdecl *MYPROC)();
-	HINSTANCE hinstLib;
-	MYPROC ProcAdd;
-	BOOL fFreeResult, fRunTimeLinkSuccess = FALSE;
-
-	// Get handle to library
-	hinstLib = LoadLibrary(TEXT("TobiiEyeXPlugin.dll"));
-
-	// Check whether library has ben found
-	if (hinstLib != NULL)
-	{
-		LogInfo("LibraryLoaded");
-		ProcAdd = (MYPROC)GetProcAddress(hinstLib, "HelloWorld");
-
-		// If the function address is valid, call the function.
-		if (NULL != ProcAdd)
-		{
-			fRunTimeLinkSuccess = TRUE;
-			int result = (ProcAdd)();
-			LogInfo("Result is: ", result);
-		}
-
-		// Free the DLL module.
-		fFreeResult = FreeLibrary(hinstLib);
-	}
-
 	// Set path for CEF data, both cache and user data
 	CefString(&settings.cache_path).FromASCII(std::string(userDirectory + "cache").c_str());
 	CefString(&settings.user_data_path).FromASCII(std::string(userDirectory + "user_data").c_str());

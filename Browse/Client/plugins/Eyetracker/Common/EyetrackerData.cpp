@@ -4,12 +4,11 @@
 //============================================================================
 
 #include "EyetrackerData.h"
-#include "src/Global.h"
 #include <algorithm>
 
 namespace eyetracker_global
 {
-    // Global variables for raw gaze data are defined here
+    // Global variables for raw gaze data are defined here. Will exist within this translation unit
     double EyetrackerRawGazeX[EYETRACKER_SAMPLE_COLLECTION_COUNT];
     double EyetrackerRawGazeY[EYETRACKER_SAMPLE_COLLECTION_COUNT];
     bool EyetrackerRawGazeValidity[EYETRACKER_SAMPLE_COLLECTION_COUNT];

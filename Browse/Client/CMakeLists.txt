@@ -5,18 +5,12 @@ set(CEF_TARGET Client)
 ### PARAMETERS #################################################################
 
 set(CLIENT_DEPLOYMENT OFF CACHE BOOL "Setup for Deployment.")
-set(CLIENT_TOBII_EYEX_SUPPORT OFF CACHE BOOL "Support for Tobii EyeX.")
-set(CLIENT_SMI_IVIEWX_SUPPORT OFF CACHE BOOL "Support for SMI iViewX.")
+set(CLIENT_SMI_IVIEWX_PLUGIN OFF CACHE BOOL "Build plugin for SMI iViewX.")
+set(CLIENT_TOBII_EYEX_PLUGIN OFF CACHE BOOL "Build plugin for Tobii EyeX.")
 
-# Pipe them to C++
+# Pipe some of them to C++
 if(${CLIENT_DEPLOYMENT})
 	add_definitions(-DDEPLOYMENT)
-endif()
-if(${CLIENT_TOBII_EYEX_SUPPORT})
-	add_definitions(-DTOBII_SUPPORT)
-endif()
-if(${CLIENT_SMI_IVIEWX_SUPPORT})
-	add_definitions(-DSMI_SUPPORT)
 endif()
 
 if(OS_LINUX) # Linux
@@ -28,16 +22,28 @@ endif()
 set(EYETRACKER_PLUGIN_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/plugins/Eyetracker")
 
 # Plugin for SMI iViewX
-# TODO
+if(${CLIENT_SMI_IVIEWX_PLUGIN})
+	add_library(
+		SMIiViewXPlugin
+		MODULE
+		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
+		${EYETRACKER_PLUGIN_DIRECTORY}/SMIiViewX/EyetrackerImpl.cpp)
+	message("Plugin for SMI iViewX will be built.")
+endif()
 
 # Plugin for Tobii EyeX
-add_library(
-	TobiiEyeXPlugin
-	MODULE
-	${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
-	${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
-	${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
-	${EYETRACKER_PLUGIN_DIRECTORY}/TobiiEyeX/EyetrackerImpl.cpp)
+if(${CLIENT_TOBII_EYEX_PLUGIN})
+	add_library(
+		TobiiEyeXPlugin
+		MODULE
+		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
+		${EYETRACKER_PLUGIN_DIRECTORY}/TobiiEyeX/EyetrackerImpl.cpp)
+	message("Plugin for Tobii EyeX will be built.")
+endif()
 
 ### CONTENT ####################################################################
 
