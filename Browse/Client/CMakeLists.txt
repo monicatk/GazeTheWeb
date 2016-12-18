@@ -73,7 +73,7 @@ if(${CLIENT_BUILD_TOBII_EYEX_PLUGIN})
 	message("Plugin for Tobii EyeX will be built.")
 	
 	# Copy Tobii EyeX library to output folder
-	add_custom_command(TARGET TobiiEyeXPlugin PRE_BUILD
+	add_custom_command(TARGET TobiiEyeXPlugin POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		"${TOBII_EYEX_SDK_DIRECTORY}/lib/x86/Tobii.EyeX.Client.dll"
 		$<TARGET_FILE_DIR:TobiiEyeXPlugin>)
