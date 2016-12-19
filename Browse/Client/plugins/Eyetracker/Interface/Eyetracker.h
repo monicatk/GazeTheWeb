@@ -19,8 +19,8 @@ extern "C" {
 	// Disconnect eyetracker, returns whether succesfull
 	DLL_EXPORT bool Disconnect();
 
-	// Get k or less valid raw gaze entries
-	DLL_EXPORT void GetKOrLessValidRawGazeEntries(int k, std::vector<double>& rGazeX, std::vector<double>& rGazeY);
+	// Get k or less valid raw gaze entries. May fill vectors with nothing if nothing available
+	DLL_EXPORT void FetchGaze(int maxSampleCount, std::vector<double>& rGazeX, std::vector<double>& rGazeY);
 
 #ifdef __cplusplus
 }

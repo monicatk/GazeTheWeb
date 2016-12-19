@@ -33,10 +33,10 @@ namespace eyetracker_global
         rGazeY.clear();
 
         // Calculate actual k
-        int K = std::min(k, RawGazeEntries);
+        int clampedK = std::min(k, RawGazeEntries);
 
         // Go over last k entries and collect valid ones
-        for (int i = 0; i < K; i++)
+        for (int i = 0; i < clampedK; i++)
         {
             int index = EyetrackerRawGazeIndex - i;
             if (index < 0)

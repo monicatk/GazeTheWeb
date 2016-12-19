@@ -57,7 +57,7 @@ bool Disconnect()
 	return iV_Disconnect() == RET_SUCCESS;
 }
 
-void GetKOrLessValidRawGazeEntries(int k, std::vector<double>& rGazeX, std::vector<double>& rGazeY)
+void FetchGaze(int maxSampleCount, std::vector<double>& rGazeX, std::vector<double>& rGazeY)
 {
-	eyetracker_global::GetKOrLessValidRawGazeEntries(k, rGazeX, rGazeY);
+	eyetracker_global::GetKOrLessValidRawGazeEntries(maxSampleCount, rGazeX, rGazeY);
 }

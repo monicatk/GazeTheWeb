@@ -32,7 +32,7 @@ EyeInput::EyeInput(bool useEmulation)
 				CONNECT procConnect = (CONNECT)GetProcAddress(_pluginHandle, "Connect");
 
 				// Fetch procedure for fetching gaze data
-				_procFetchGaze = (FETCH_GAZE)GetProcAddress(_pluginHandle, "GetKOrLessValidRawGazeEntries");
+				_procFetchGaze = (FETCH_GAZE)GetProcAddress(_pluginHandle, "FetchGaze");
 
 				// Check whether procedures could be loaded
 				if (procConnect != NULL && _procFetchGaze != NULL)
@@ -217,38 +217,40 @@ bool EyeInput::Update(
 		// Fetch k or less valid samples
 		_procFetchGaze(EYETRACKER_AVERAGE_SAMPLE_COUNT, gazeXSamples, gazeYSamples);
 
-		// TODO: maybe use something like queue to collect raw data, clamp it and then add it to a buffer. Then
-		// every sample is clamped with the correct (or at least more corresponding) window coordinates. At the moment,
-		// All collected samples are clamped with the current window coordinates
-
-		// Convert parameters to double
+		// Convert parameters to double (use same values for all samples,
+		// although they could have been collected whil windows transformation has been different)
 		double windowXDouble = (double)windowX;
 		double windowYDouble = (double)windowY;
 		double windowWidthDouble = (double)windowWidth;
 		double windowHeightDouble = (double)windowHeight;
 
-		// TODO: queues may be empty! Then devision through 0 occurs
 		// Average the given samples
-		double sum = 0;
-		for (double x : gazeXSamples)
+		if (!gazeXSamples.empty())
 		{
-			// Do some clamping according to window coordinates
-			double clampedX = x - windowXDouble;
-			clampedX = clampedX > 0.0 ? clampedX : 0.0;
-			clampedX = clampedX < windowWidthDouble ? clampedX : windowWidthDouble;
-			sum += clampedX;
+			double sum = 0;
+			for (double x : gazeXSamples)
+			{
+				// Do some clamping according to window coordinates
+				double clampedX = x - windowXDouble;
+				clampedX = clampedX > 0.0 ? clampedX : 0.0;
+				clampedX = clampedX < windowWidthDouble ? clampedX : windowWidthDouble;
+				sum += clampedX;
+			}
+			filteredGazeX = sum / gazeXSamples.size();
 		}
-		filteredGazeX = sum / gazeXSamples.size();
-		sum = 0;
-		for (double y : gazeYSamples)
+		if (!gazeYSamples.empty())
 		{
-			// Do some clamping according to window coordinates
-			double clampedY = y - windowYDouble;
-			clampedY = clampedY > 0.0 ? clampedY : 0.0;
-			clampedY = clampedY < windowHeightDouble ? clampedY : windowHeightDouble;
-			sum += clampedY;
+			double sum = 0;
+			for (double y : gazeYSamples)
+			{
+				// Do some clamping according to window coordinates
+				double clampedY = y - windowYDouble;
+				clampedY = clampedY > 0.0 ? clampedY : 0.0;
+				clampedY = clampedY < windowHeightDouble ? clampedY : windowHeightDouble;
+				sum += clampedY;
+			}
+			filteredGazeY = sum / gazeYSamples.size();
 		}
-		filteredGazeY = sum / gazeYSamples.size();
 	}
 
 #endif
