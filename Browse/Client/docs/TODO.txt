@@ -11,6 +11,8 @@ Features (End of January):
 - First loading sometimes fails in terms of DOM Node creation
 - Javascript PopUp handling
 - DOM Node boxes for images are only text height
+- Activate Sandbox on Application Side
+- C++ -> JS Communication
 
 Test all MAMEM trial tasks! -> Sofias Document
 
