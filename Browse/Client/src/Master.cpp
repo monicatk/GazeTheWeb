@@ -581,7 +581,7 @@ void Master::Loop()
         _pCefMediator->DoMessageLoopWork();
 
         // Create input struct for own framework
-        Input input(usedEyeGUIInput.gazeX, usedEyeGUIInput.gazeY, usedEyeGUIInput.gazeUsed);
+        Input input(usedEyeGUIInput.gazeX, usedEyeGUIInput.gazeY, usedEyeGUIInput.gazeUsed, usedEyeGUIInput.instantInteraction);
 
         // Bind framebuffer
         _upFramebuffer->Bind();
