@@ -3,12 +3,9 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
-#ifdef SMI_SUPPORT
-
-#include "SMI.h"
-#include "src/Input/Eyetracker/EyetrackerGlobal.h"
-#include "src/Global.h"
-#include "src/Utils/Logger.h"
+#include "plugins/Eyetracker/Interface/Eyetracker.h"
+#include "plugins/Eyetracker/Common/EyetrackerData.h"
+#include "plugins/Eyetracker/SMIiViewX/iViewX/include/iViewXAPI.h"
 #include <algorithm>
 
 int __stdcall SampleCallbackFunction(SampleStruct sampleData)
@@ -23,7 +20,7 @@ int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 	return 1;
 }
 
-bool SMI::SpecialConnect()
+bool Connect()
 {
 	// Initialize eyetracker
 	SystemInfoStruct systemInfoData;
@@ -31,15 +28,17 @@ bool SMI::SpecialConnect()
 
 	// Connect to iViewX
 	ret_connect = iV_Connect("127.0.0.1", 4444, "127.0.0.1", 5555);
-	
+
 	// Set sample callback
 	if (ret_connect == RET_SUCCESS)
 	{
 		iV_GetSystemInfo(&systemInfoData);
+		/*
 		LogInfo("iViewX ETSystem: ", systemInfoData.iV_ETDevice);
 		LogInfo("iViewX iV_Version: ", systemInfoData.iV_MajorVersion, ".", systemInfoData.iV_MinorVersion, ".", systemInfoData.iV_Buildnumber);
 		LogInfo("iViewX API_Version: ", systemInfoData.API_MajorVersion, ".", systemInfoData.API_MinorVersion, ".", systemInfoData.API_Buildnumber);
 		LogInfo("iViewX SystemInfo Samplerate: ", systemInfoData.samplerate);
+		*/
 
 		// Define a callback function for receiving samples
 		iV_SetSampleCallback(SampleCallbackFunction);
@@ -49,7 +48,7 @@ bool SMI::SpecialConnect()
 	return (ret_connect == RET_SUCCESS);
 }
 
-bool SMI::SpecialDisconnect()
+bool Disconnect()
 {
 	// Disable callbacks
 	iV_SetSampleCallback(NULL);
@@ -58,4 +57,7 @@ bool SMI::SpecialDisconnect()
 	return iV_Disconnect() == RET_SUCCESS;
 }
 
-#endif // SMI_SUPPORT
+void FetchGaze(int maxSampleCount, std::vector<double>& rGazeX, std::vector<double>& rGazeY)
+{
+	eyetracker_global::GetKOrLessValidRawGazeEntries(maxSampleCount, rGazeX, rGazeY);
+}

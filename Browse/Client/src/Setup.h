@@ -13,7 +13,7 @@
 namespace setup
 {
     // Window
-    static const bool FULLSCREEN = true;
+    static const bool FULLSCREEN = false;
     static const int INITIAL_WINDOW_WIDTH = 1280;
     static const int INITIAL_WINDOW_HEIGHT = 720;
 
