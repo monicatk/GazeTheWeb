@@ -25,3 +25,4 @@ Furthermore:
 - Right click and _own_ context menus (see JS Window Object)
 	- (Javascript Popup Handling)
 - z-Layering of (fixed, text input) DOM elements (like Google.com)
+- DOM Nodes of image have incorrect rectangle
