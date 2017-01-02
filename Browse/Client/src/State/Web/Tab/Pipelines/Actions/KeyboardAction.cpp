@@ -259,7 +259,7 @@ bool KeyboardAction::Update(float tpf, TabInput tabInput)
 		// When timer is complete, accept selection
 		if (_classificationTime == 0)
 		{
-			_pTab->ClassifyKey(_overlayKeyboardId, false); // true for accept
+			_pTab->ClassifyKey(_overlayKeyboardId, true); // true for accept
 		}
 	}
 
