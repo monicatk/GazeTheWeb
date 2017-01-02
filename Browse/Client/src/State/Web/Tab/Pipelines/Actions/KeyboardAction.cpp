@@ -62,13 +62,20 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 	// Keyboard
     _pTab->RegisterKeyboardListenerInOverlay(
         _overlayKeyboardId,
-        [&](std::u16string value)
+		[&]() // select callback
+		{
+			// TODO
+			LogInfo("Selected!");
+		},
+        [&](std::u16string value) // press callback
         {
 			// Add content from keyboard
 			_pTab->AddContentAtCursorInTextEdit(_overlayTextEditId, value);
 
 			// Refresh suggestions
-            _pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, _pTab->GetActiveEntityContentInTextEdit(_overlayTextEditId));
+            _pTab->DisplaySuggestionsInWordSuggest(
+				_overlayWordSuggestId,
+				_pTab->GetActiveEntityContentInTextEdit(_overlayTextEditId));
         });
 
 	// Complete button
@@ -229,6 +236,8 @@ KeyboardAction::~KeyboardAction()
 
 bool KeyboardAction::Update(float tpf, TabInput tabInput)
 {
+	_pTab->ClassifyKey(_overlayKeyboardId, true);
+
     if (_complete)
     {
         // Fill collected input to output

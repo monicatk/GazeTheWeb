@@ -133,11 +133,22 @@ void Tab::TabOverlayButtonListener::up(eyegui::Layout* pLayout, std::string id)
 	}
 }
 
+void Tab::TabOverlayKeyboardListener::keySelected(eyegui::Layout* pLayout, std::string id)
+{
+	// Search for id in map
+	auto iter = _pTab->_overlayKeyboardSelectCallbacks.find(id);
+	if (iter != _pTab->_overlayKeyboardSelectCallbacks.end())
+	{
+		// Execute callback
+		iter->second();
+	}
+}
+
 void Tab::TabOverlayKeyboardListener::keyPressed(eyegui::Layout* pLayout, std::string id, std::u16string value)
 {
 	// Search for id in map
-	auto iter = _pTab->_overlayKeyboardCallbacks.find(id);
-	if (iter != _pTab->_overlayKeyboardCallbacks.end())
+	auto iter = _pTab->_overlayKeyboardPressCallbacks.find(id);
+	if (iter != _pTab->_overlayKeyboardPressCallbacks.end())
 	{
 		// Execute callback
 		iter->second(value);
