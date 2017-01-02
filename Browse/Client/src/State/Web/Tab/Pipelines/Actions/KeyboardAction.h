@@ -83,6 +83,12 @@ protected:
 
     // Bool which indicates whether text should submitted directly
     bool _submit = false;
+
+	// Key selection classification duration in seconds
+	const float CLASSIFICATION_DURATION = 1.f;
+
+	// Key selection classification time in seconds
+	float _classificationTime = 0.f;
 };
 
 #endif // KEYBOARDACTION_H_
