@@ -257,7 +257,7 @@ bool KeyboardAction::Update(float tpf, TabInput tabInput)
 		_classificationTime = glm::max(0.f, _classificationTime); // lower limir of timer
 
 		// When timer is complete, accept selection
-		if (_classificationTime == 0)
+		if (_classificationTime <= 0)
 		{
 			_pTab->ClassifyKey(_overlayKeyboardId, true); // true for accept
 		}
