@@ -20,7 +20,7 @@ bool LeftMouseButtonClickAction::Update(float tpf, TabInput tabInput)
     GetInputValue("coordinate", coordinate);
 
 	// Get whether should be visualized
-	int visualize;
+    int visualize = 0;
 	GetInputValue("visualize", visualize);
 
     // Emulate left mouse button click

@@ -9,9 +9,15 @@
 #ifndef EYEINPUT_H_
 #define EYEINPUT_H_
 
-#include "src/Input/Eyetracker/Eyetracker.h"
 #include "src/Global.h"
 #include <memory>
+#include <vector>
+
+// Necessary for dynamic DLL loading in Windows
+#ifdef _WIN32
+#include <windows.h>
+typedef void(__cdecl *FETCH_GAZE)(int, std::vector<double>&, std::vector<double>&);
+#endif
 
 class EyeInput
 {
@@ -38,8 +44,16 @@ public:
 
 private:
 
-    // Vendor of input
-    std::unique_ptr<Eyetracker> _upEyetracker = NULL;
+#ifdef _WIN32
+	// Handle for plugin
+	HINSTANCE _pluginHandle = NULL;
+
+	// Handle to fetch gaze
+	FETCH_GAZE _procFetchGaze = NULL;
+#endif
+
+	// Remember whether connection has been established
+	bool _connected = false;
 
     // Mouse cursor coordinates
     double _mouseX = 0;

@@ -24,10 +24,10 @@ TextInputAction::~TextInputAction()
 bool TextInputAction::Update(float tpf, TabInput tabInput)
 {
     // Fetch input values
-    int64 frameId;
-    int nodeId;
+    int64 frameId = 0;
+    int nodeId = 0;
     std::u16string text;
-    int submit;
+    int submit = 0;
     GetInputValue("frameId", frameId);
     GetInputValue("nodeId", nodeId);
     GetInputValue("text", text);

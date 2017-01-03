@@ -9,17 +9,32 @@ Please refer to the Readme in the [parent folder](https://github.com/MAMEM/GazeT
 
 For configuration, edit the lines in _src/Setup.h_:
 ```C++
+// Window
 static const bool FULLSCREEN = false;
 static const int INITIAL_WINDOW_WIDTH = 1280;
 static const int INITIAL_WINDOW_HEIGHT = 720;
+
+// Control
 static const float DURATION_BEFORE_INPUT = 1.f; // wait one second before accepting input
 static const bool PAUSED_AT_STARTUP = false;
-static const bool ENABLE_WEBGL = false; // only on Windows
+static const float LINK_CORRECTION_MAX_PIXEL_DISTANCE = 5.f;
+static const int TEXT_SELECTION_MARGIN = 4; // area which is selected before / after zoom coordinate in CEFPixels
+
+// Debugging
 static const bool LOG_DEBUG_MESSAGES = false;
-static const bool LOG_DEBUG_MESSAGES = true;
+static const bool DRAW_DEBUG_OVERLAY = false;
+
+// Experiments
 static const std::string LAB_STREAM_OUTPUT_NAME = "BrowserOutputStream";
 static const std::string LAB_STREAM_OUTPUT_SOURCE_ID = "myuniquesourceid23443";
 static const std::string LAB_STREAM_INPUT_NAME = "MiddlewareStream"; // may be set to same value as LAB_STREAM_OUTPUT_NAME to receive own events for debugging purposes
+static const bool LOG_INTERACTIONS = false;
+
+// Other
+static const bool ENABLE_WEBGL = false; // only on Windows
+static const bool BLUR_PERIPHERY = false;
+static const float WEB_VIEW_RESOLUTION_SCALE = 1.f;
+static const unsigned int HISTORY_MAX_PAGE_COUNT = 100; // maximal length of history
 ```
 
 ## Shortcuts
@@ -40,18 +55,26 @@ A file named _log.txt_ is created at binary folder containing information about 
 ![Tab Overview](media/Screenshot-C.png)
 
 ## Dependencies
-All necessary dependencies are provided in the _externals_ or _submodules_ folder.
-* GLM: http://glm.g-truc.net/0.9.7/index.html (MIT license chosen)
-* GLFW3: http://www.glfw.org
-* iViewX: Connection to the iViewX SDK, copyright SMI GmbH (http://www.smivision.com)
-* TobiiEyeX: Connection to Tobii EyeX SDK, copyright Tobii Technology AB (http://developer.tobii.com/eyex-sdk)
-* eyeGUI: https://github.com/raphaelmenges/eyeGUI
-  * FreeType 2.6.1: http://www.freetype.org (FreeType license chosen)
-* spdlog: https://github.com/gabime/spdlog
+All necessary dependencies are provided in the __externals__, __submodules__ or within the corresponding __plugins__ folder.
+
+__externals__:
 * liblsl: https://github.com/sccn/labstreaminglayer
   * Boost: https://github.com/boostorg/boost
-* text-csv: https://github.com/roman-kashitsyn/text-csv
+	
+__submodules__:
+* eyeGUI: https://github.com/raphaelmenges/eyeGUI
+  * FreeType 2.6.1: http://www.freetype.org (FreeType license chosen)
 * TinyXML2 (used one from eyeGUI library): https://github.com/leethomason/tinyxml2
+* GLFW3: http://www.glfw.org
+* GLM: http://glm.g-truc.net/0.9.7/index.html (MIT license chosen)
+* spdlog: https://github.com/gabime/spdlog
+* text-csv: https://github.com/roman-kashitsyn/text-csv
+
+__plugins__/Eyetracker/SMIiViewX:
+* iViewX: Connection to the iViewX SDK, copyright SMI GmbH (http://www.smivision.com)
+
+__plugins__/Eyetracker/TobiiEyeX:
+* TobiiEyeX: Connection to Tobii EyeX SDK, copyright Tobii Technology AB (http://developer.tobii.com/eyex-sdk)
 
 ## License
 >Copyright 2016 Raphael Menges and Daniel Müller

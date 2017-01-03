@@ -130,13 +130,16 @@ public:
     virtual void UnregisterButtonListenerInOverlay(std::string id);
 
     // Register keyboard listener in overlay
-    virtual void RegisterKeyboardListenerInOverlay(std::string id, std::function<void(std::u16string)> callback);
+    virtual void RegisterKeyboardListenerInOverlay(std::string id, std::function<void()> selectCallback, std::function<void(std::u16string)> pressCallback);
 
     // Unregister keyboard listener callback in overlay
     virtual void UnregisterKeyboardListenerInOverlay(std::string id);
 
     // Set case of keyboard letters
-    virtual void SetCaseOfKeyboardLetters(std::string id, bool upper);
+    virtual void SetCaseOfKeyboardLetters(std::string id, bool accept);
+
+	// Classify currently selected key
+	virtual void ClassifyKey(std::string id, bool accept);
 
     // Register word suggest listener in overlay
     virtual void RegisterWordSuggestListenerInOverlay(std::string id, std::function<void(std::u16string)> callback);
@@ -365,6 +368,7 @@ private:
     public:
 
         TabOverlayKeyboardListener(Tab* pTab) { _pTab = pTab; }
+		virtual void keySelected(eyegui::Layout* pLayout, std::string id);
         virtual void keyPressed(eyegui::Layout* pLayout, std::string id, std::u16string value);
         virtual void keyPressed(eyegui::Layout* pLayout, std::string id, std::string value) {}
 
@@ -484,7 +488,8 @@ private:
     // Ids of elements in overlay (added / removed by triggers or actions)
     std::map<std::string, std::function<void(void)> > _overlayButtonDownCallbacks;
     std::map<std::string, std::function<void(void)> > _overlayButtonUpCallbacks;
-    std::map<std::string, std::function<void(std::u16string)> > _overlayKeyboardCallbacks;
+	std::map<std::string, std::function<void()> > _overlayKeyboardSelectCallbacks;
+    std::map<std::string, std::function<void(std::u16string)> > _overlayKeyboardPressCallbacks;
     std::map<std::string, std::function<void(std::u16string)> > _overlayWordSuggestCallbacks;
 
     // Time until Cef is asked for page resolution

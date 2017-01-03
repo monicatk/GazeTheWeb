@@ -15,7 +15,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="PreviousLetter.svg">
+   sodipodi:docname="Submit.svg"
+   inkscape:export-filename="C:\Users\Raphael\Git\GazeTheWeb\Browse\Client\content\icons\Submit.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs4" />
   <sodipodi:namedview
@@ -25,9 +28,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4142136"
-     inkscape:cx="190.05885"
-     inkscape:cy="118.67669"
+     inkscape:zoom="0.7071068"
+     inkscape:cx="-211.02185"
+     inkscape:cy="331.47924"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -38,11 +41,11 @@
      inkscape:bbox-nodes="true"
      inkscape:snap-bbox-edge-midpoints="true"
      inkscape:snap-bbox-midpoints="true"
-     inkscape:window-width="1184"
-     inkscape:window-height="900"
-     inkscape:window-x="324"
-     inkscape:window-y="131"
-     inkscape:window-maximized="0"
+     inkscape:window-width="2560"
+     inkscape:window-height="1387"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
      inkscape:snap-object-midpoints="true"
      inkscape:snap-center="true"
      inkscape:snap-to-guides="false"
@@ -51,7 +54,8 @@
      inkscape:object-nodes="true"
      inkscape:snap-smooth-nodes="true"
      inkscape:snap-midpoints="true"
-     inkscape:snap-grids="true">
+     inkscape:snap-grids="false"
+     showguides="true">
     <inkscape:grid
        type="xygrid"
        id="grid4686" />
@@ -64,7 +68,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -75,9 +79,16 @@
      transform="translate(0,-698.03155)">
     <path
        style="opacity:1;fill:#f2f2f2;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:4.38505936;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 209.31768,787.41074 c -1.60545,0 -3.17932,0.444 -4.55274,1.2754 -46.87076,28.2196 -140.099586,86.51169 -140.099586,86.51169 0,0 93.228826,58.2903 140.099586,86.5098 1.37342,0.8314 2.94729,1.2724 4.55274,1.2754 4.8731,0 8.82226,-3.9511 8.82226,-8.8242 l 0,-48.9619 71.52541,0 0,-59.99999 -71.52541,0 0,-48.962 c 0,-4.8731 -3.94916,-8.8242 -8.82226,-8.8242 z"
+       d="m 306.96907,756.55139 c 0,0 -80.0883,24.7777 -119.72266,37.76563 -1.16399,0.37838 -2.20156,1.06291 -3,1.97851 -2.41826,2.78359 -2.08523,6.96906 0.74219,9.34961 l 27.57226,23.21094 -91.52344,108.95703 -43.642575,-46.69531 -30.033203,30.03125 48.333984,58.58393 0.02539,0 c 5.408144,8.762 14.967134,14.1004 25.263674,14.1094 8.83436,0 17.20818,-3.9373 22.85156,-10.7344 l 0.0117,0 104.32032,-124.17768 0.0488,-0.0566 28.41016,23.91797 c 2.8277,2.38053 7.07983,2.05534 9.49805,-0.72852 l 0.002,0 c 0.79671,-0.91705 1.31846,-2.03395 1.51758,-3.22461 6.88451,-40.55864 19.32422,-122.28711 19.32422,-122.28711 z"
        id="path3335-0"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cccccsccccsc" />
+       inkscape:connector-curvature="0" />
+    <g
+       id="layer1-0"
+       inkscape:label="Layer 1"
+       transform="translate(-102.4091,71.274304)">
+      <g
+         transform="matrix(0.69959977,0,0,0.79690303,104.32296,177.74986)"
+         id="g4138" />
+    </g>
   </g>
 </svg>

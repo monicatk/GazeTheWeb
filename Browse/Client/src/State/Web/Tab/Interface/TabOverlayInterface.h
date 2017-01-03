@@ -44,13 +44,16 @@ public:
     virtual void UnregisterButtonListenerInOverlay(std::string id) = 0;
 
     // Register keyboard listener in overlay
-    virtual void RegisterKeyboardListenerInOverlay(std::string id, std::function<void(std::u16string)> callback) = 0;
+    virtual void RegisterKeyboardListenerInOverlay(std::string id, std::function<void()> selectCallback, std::function<void(std::u16string)> pressCallback) = 0;
 
     // Unregister keyboard listener callback in overlay
     virtual void UnregisterKeyboardListenerInOverlay(std::string id) = 0;
 
     // Set case of keyboard letters
     virtual void SetCaseOfKeyboardLetters(std::string id, bool upper) = 0;
+
+	// Classify currently selected key
+	virtual void ClassifyKey(std::string id, bool accept) = 0;
 
     // Register word suggest listener in overlay
     virtual void RegisterWordSuggestListenerInOverlay(std::string id, std::function<void(std::u16string)> callback) = 0;

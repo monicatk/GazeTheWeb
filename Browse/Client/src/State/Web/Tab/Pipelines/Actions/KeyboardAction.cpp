@@ -62,13 +62,28 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 	// Keyboard
     _pTab->RegisterKeyboardListenerInOverlay(
         _overlayKeyboardId,
-        [&](std::u16string value)
+		[&]() // select callback
+		{
+			// ######################################################
+			// ### TODO CERTH #######################################
+			// ######################################################
+			// This lambda function is called when ANY key on keyboard is selected by user.
+			// In this example, the timer for classification is reset.
+
+			// Start classification here
+			_classificationTime = CLASSIFICATION_DURATION;
+
+			// ######################################################
+		},
+        [&](std::u16string value) // press callback
         {
 			// Add content from keyboard
 			_pTab->AddContentAtCursorInTextEdit(_overlayTextEditId, value);
 
 			// Refresh suggestions
-            _pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, _pTab->GetActiveEntityContentInTextEdit(_overlayTextEditId));
+            _pTab->DisplaySuggestionsInWordSuggest(
+				_overlayWordSuggestId,
+				_pTab->GetActiveEntityContentInTextEdit(_overlayTextEditId));
         });
 
 	// Complete button
@@ -229,6 +244,28 @@ KeyboardAction::~KeyboardAction()
 
 bool KeyboardAction::Update(float tpf, TabInput tabInput)
 {
+	// ######################################################
+	// ### TODO CERTH #######################################
+	// ######################################################
+	// When classification timer is set, it is decremted at each update.
+	// When timer is zero, selection is ALWAYS accepted. Please change as required.
+
+	// Check classification
+	if (_classificationTime > 0)
+	{
+		_classificationTime -= tpf; // decrement timer
+		_classificationTime = glm::max(0.f, _classificationTime); // lower limir of timer
+
+		// When timer is complete, accept selection
+		if (_classificationTime <= 0)
+		{
+			_pTab->ClassifyKey(_overlayKeyboardId, true); // true for accept
+		}
+	}
+
+	// ######################################################
+
+	// Decide whether action is complete
     if (_complete)
     {
         // Fill collected input to output

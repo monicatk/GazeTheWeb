@@ -205,6 +205,7 @@ void Tab::Update(float tpf, Input& rInput)
 		rInput.gazeX,
 		rInput.gazeY,
 		rInput.gazeUsed,
+		rInput.instantInteraction,
 		webViewPixelGazeX,
 		webViewPixelGazeY,
 		webViewGazeRelativeX,

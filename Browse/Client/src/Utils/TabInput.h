@@ -17,10 +17,11 @@ public:
         int gazeX,
         int gazeY,
         bool gazeUsed,
+		bool instantInteraction,
         int webViewPixelGazeX,
         int webViewPixelGazeY,
         float webViewRelativeGazeX,
-        float webViewRelativeGazeY) : Input(gazeX, gazeY, gazeUsed)
+        float webViewRelativeGazeY) : Input(gazeX, gazeY, gazeUsed, instantInteraction)
     {
         this->webViewPixelGazeX = webViewPixelGazeX;
         this->webViewPixelGazeY = webViewPixelGazeY;
