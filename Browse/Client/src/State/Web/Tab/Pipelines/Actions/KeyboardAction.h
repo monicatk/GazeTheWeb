@@ -85,7 +85,7 @@ protected:
     bool _submit = false;
 
 	// Key selection classification duration in seconds
-	const float CLASSIFICATION_DURATION = 1.f;
+	const float CLASSIFICATION_DURATION = 0.01f; // set low since currently not used
 
 	// Key selection classification time in seconds
 	float _classificationTime = 0.f;
