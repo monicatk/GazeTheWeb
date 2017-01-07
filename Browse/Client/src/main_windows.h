@@ -79,7 +79,7 @@ int APIENTRY wWinMain(
 
 	// Execute process. Returns for main process zero.
 	int exit_code = CefExecuteProcess(main_args, app.get(), sandbox_info);
-	if (exit_code >= 0)
+	if (exit_code >= 0 || mainProcessApp.get() == nullptr)
 	{
 		// The sub-process has completed so return here.
 		return exit_code;
