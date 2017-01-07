@@ -10,7 +10,7 @@
 #define MASTER_H_
 
 #include "src/MasterNotificationInterface.h"
-#include "src/CEF/Extension/CefMediator.h"
+#include "src/CEF/CefMediator.h"
 #include "src/State/Web/Web.h"
 #include "src/State/Settings/Settings.h"
 #include "src/Input/EyeInput.h"

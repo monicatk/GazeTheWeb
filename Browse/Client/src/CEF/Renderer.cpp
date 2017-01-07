@@ -4,7 +4,7 @@
 //============================================================================
 
 #include "Renderer.h"
-#include "src/CEF/Extension/CefMediator.h"
+#include "src/CEF/CefMediator.h"
 #include "src/Utils/Texture.h"
 #include "src/Utils/Logger.h"
 #include "include/wrapper/cef_helpers.h"

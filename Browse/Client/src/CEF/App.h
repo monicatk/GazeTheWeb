@@ -7,7 +7,7 @@
 #define CEF_APP_H_
 
 #include "include/cef_app.h"
-#include "src/CEF/Extension/CefMediator.h"
+#include "src/CEF/CefMediator.h"
 #include "src/CEF/RenderProcess/RenderProcessHandler.h"
 
 class App :	public CefApp,

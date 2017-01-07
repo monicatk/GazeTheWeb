@@ -7,7 +7,7 @@
 #define CEF_HANDLER_H_
 
 #include "src/CEF/Renderer.h"
-#include "src/CEF/Extension/JSCode.h"
+#include "src/CEF/JSCode.h"
 #include "include/cef_client.h"
 #include "src/CEF/BrowserMsgRouter.h"
 #include <list>

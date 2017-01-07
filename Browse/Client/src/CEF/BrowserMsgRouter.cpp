@@ -4,7 +4,7 @@
 //============================================================================
 
 #include "BrowserMsgRouter.h"
-#include "src/CEF/Extension/CefMediator.h"
+#include "src/CEF/CefMediator.h"
 #include "src/Utils/Logger.h"
 #include "src/CEF/Data/DOMNode.h"
 #include <cstdlib>
