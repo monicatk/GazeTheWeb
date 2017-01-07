@@ -4,7 +4,7 @@
 //============================================================================
 
 #include "src/CEF/Handler.h"
-#include "src/CEF/CefMediator.h"
+#include "src/CEF/Mediator.h"
 #include "src/Utils/Logger.h"
 #include "include/base/cef_bind.h"
 #include "include/cef_app.h"
@@ -19,7 +19,7 @@ namespace
     Handler* g_instance = NULL;
 }  // namespace
 
-Handler::Handler(CefMediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing(false)
+Handler::Handler(Mediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing(false)
 {
   DCHECK(!g_instance);
   g_instance = this;

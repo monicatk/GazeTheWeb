@@ -34,7 +34,7 @@ const std::string fragmentShaderSource =
 "   fragColor = vec4(color,1);\n"
 "}\n";
 
-Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std::string url)
+Tab::Tab(Master* pMaster, Mediator* pCefMediator, WebTabInterface* pWeb, std::string url)
 {
 	// Fill members
 	_pMaster = pMaster;

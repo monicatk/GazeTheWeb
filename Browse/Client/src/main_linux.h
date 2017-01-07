@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <sys/stat.h>
-#include "src/CEF/App.h"
+#include "src/CEF/MainCefApp.h"
 #include "src/CEF/OtherProcess/DefaultCefApp.h"
 #include "src/CEF/ProcessTypeGetter.h"
 #include "include/base/cef_logging.h"
@@ -26,21 +26,21 @@ int main(int argc, char* argv[])
 
 	// Create an app of the correct type.
 	CefRefPtr<CefApp> app;
-	CefRefPtr<App> mainProcessApp; // extra pointer to main process app implementation. Only filled on main process.
+	CefRefPtr<MainCefApp> mainProcessApp; // extra pointer to main process app implementation. Only filled on main process.
 	ProcessType processType = ProcessTypeGetter::GetProcessType(commandLine);
 	switch (processType)
 	{
 	case ProcessType::MAIN:
 
 		// Main process
-		mainProcessApp = new App();
+		mainProcessApp = new MainCefApp();
 		app = mainProcessApp;
 		break;
 
 	case ProcessType::RENDER:
 
 		// Render process
-		app = new App(); // TODO: different app implementation
+		app = new MainCefApp(); // TODO: different app implementation
 		break;
 
 	default:

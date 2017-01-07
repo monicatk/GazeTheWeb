@@ -97,7 +97,7 @@ const std::string simpleFragmentShaderSource =
 "   fragColor = texture(tex, uv);\n"
 "}\n";
 
-Master::Master(CefMediator* pCefMediator, std::string userDirectory)
+Master::Master(Mediator* pCefMediator, std::string userDirectory)
 {
     // Save members
     _pCefMediator = pCefMediator;

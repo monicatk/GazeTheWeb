@@ -4,13 +4,13 @@
 //============================================================================
 
 #include "BrowserMsgRouter.h"
-#include "src/CEF/CefMediator.h"
+#include "src/CEF/Mediator.h"
 #include "src/Utils/Logger.h"
 #include "src/CEF/Data/DOMNode.h"
 #include <cstdlib>
 #include <algorithm>
 
-BrowserMsgRouter::BrowserMsgRouter(CefMediator* pMediator)
+BrowserMsgRouter::BrowserMsgRouter(Mediator* pMediator)
 {
 	_pMediator = pMediator;
 

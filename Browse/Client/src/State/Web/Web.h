@@ -20,14 +20,14 @@
 #include <regex>
 
 // Forward declaration
-class CefMediator;
+class Mediator;
 
 class Web : public State, public WebTabInterface
 {
 public:
 
     // Constructor
-    Web(Master* pMaster, CefMediator* pCefMediator);
+    Web(Master* pMaster, Mediator* pCefMediator);
 
     // Destructor
     virtual ~Web();
@@ -203,7 +203,7 @@ private:
     int _tabOverviewPage = 0;
 
     // Pointer to mediator
-    CefMediator* _pCefMediator;
+    Mediator* _pCefMediator;
 
     // Bool to remind it should be switched to settings
     bool _goToSettings = false;

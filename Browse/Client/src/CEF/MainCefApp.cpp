@@ -3,7 +3,7 @@
 // Author: Daniel Müller (muellerd@uni-koblenz.de)
 //============================================================================
 
-#include "App.h"
+#include "MainCefApp.h"
 #include "src/Setup.h"
 #include "src/CEF/Handler.h"
 #include "src/CEF/Renderer.h"
@@ -12,17 +12,17 @@
 #include "include/wrapper/cef_helpers.h"
 #include <string>
 
-App::App() : CefMediator()
+MainCefApp::MainCefApp() : Mediator()
 {
     _renderProcessHandler = new RenderProcessHandler();
 }
 
-void App::OnContextInitialized()
+void MainCefApp::OnContextInitialized()
 {
     CEF_REQUIRE_UI_THREAD();
 
     // App is extended by CefMediator interface, so point to itself
-    CefRefPtr<CefMediator> mediator = this;
+    CefRefPtr<Mediator> mediator = this;
 
     // Create Renderer
     CefRefPtr<Renderer> renderer(new Renderer(mediator));
@@ -31,7 +31,7 @@ void App::OnContextInitialized()
 	_handler = new Handler(mediator, renderer);
 }
 
-void App::OnBeforeCommandLineProcessing(const CefString& process_type, CefRefPtr< CefCommandLine > command_line)
+void MainCefApp::OnBeforeCommandLineProcessing(const CefString& process_type, CefRefPtr< CefCommandLine > command_line)
 {
     // Enable WebGL part 2 (other is in CefMediator.cpp) (or not disable is better description)
     if(!setup::ENABLE_WEBGL)
@@ -48,7 +48,6 @@ void App::OnBeforeCommandLineProcessing(const CefString& process_type, CefRefPtr
     // EXPERIMENTAL: slow loading?
     // see end of https://bitbucket.org/chromiumembedded/cef/wiki/GeneralUsage#markdown-header-proxy-resolution
     command_line->AppendSwitch("no-proxy-server");
-
 
 	// EXPERIMENTAL
 	// Javascript debugging?

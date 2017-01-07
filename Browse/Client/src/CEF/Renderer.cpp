@@ -4,12 +4,12 @@
 //============================================================================
 
 #include "Renderer.h"
-#include "src/CEF/CefMediator.h"
+#include "src/CEF/Mediator.h"
 #include "src/Utils/Texture.h"
 #include "src/Utils/Logger.h"
 #include "include/wrapper/cef_helpers.h"
 
-Renderer::Renderer(CefRefPtr<CefMediator> mediator)
+Renderer::Renderer(CefRefPtr<Mediator> mediator)
 {
     _mediator = mediator;
 }

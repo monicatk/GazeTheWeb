@@ -5,7 +5,7 @@
 //============================================================================
 
 #include "src/State/Web/Tab/Tab.h"
-#include "src/CEF/CefMediator.h"
+#include "src/CEF/Mediator.h"
 #include "src/Utils/Texture.h"
 
 void Tab::PushBackPipeline(std::unique_ptr<Pipeline> upPipeline)

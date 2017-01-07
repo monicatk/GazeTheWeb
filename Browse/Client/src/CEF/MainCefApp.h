@@ -3,21 +3,21 @@
 // Author: Daniel Müller (muellerd@uni-koblenz.de)
 //============================================================================
 
-#ifndef CEF_APP_H_
-#define CEF_APP_H_
+#ifndef CEF_MAINCEFAPP_H_
+#define CEF_MAINCEFAPP_H_
 
 #include "include/cef_app.h"
-#include "src/CEF/CefMediator.h"
+#include "src/CEF/Mediator.h"
 #include "src/CEF/RenderProcess/RenderProcessHandler.h"
 
-class App :	public CefApp,
-            public CefBrowserProcessHandler,
-            // expanding CefApp by our mediator interface
-            public CefMediator
+class MainCefApp :	public CefApp,
+					public CefBrowserProcessHandler,
+					// expanding CefApp by our mediator interface
+					public Mediator
 {
 public:
 
-    App();
+	MainCefApp();
 
     // Manipulate command line input
     virtual void OnBeforeCommandLineProcessing(const CefString& process_type, CefRefPtr< CefCommandLine > command_line) OVERRIDE;
@@ -35,7 +35,7 @@ private:
     CefRefPtr<RenderProcessHandler> _renderProcessHandler;
 
     // Include CEF'S default reference counting implementation
-    IMPLEMENT_REFCOUNTING(App);
+    IMPLEMENT_REFCOUNTING(MainCefApp);
 };
 
-#endif  // CEF_APP_H_
+#endif  // CEF_MAINCEFAPP_H_

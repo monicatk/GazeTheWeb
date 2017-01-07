@@ -12,7 +12,7 @@
 #include "src/Utils/MakeUnique.h"
 #include <algorithm>
 
-Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)
+Web::Web(Master* pMaster, Mediator* pCefMediator) : State(pMaster)
 {
     // Save member
     _pCefMediator = pCefMediator;

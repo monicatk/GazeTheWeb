@@ -11,14 +11,14 @@
 
 // Forward declaration
 class Texture;
-class CefMediator;
+class Mediator;
 
 // Does offscreen rendering
 class Renderer : public CefRenderHandler
 {
 public:
 
-    Renderer(CefRefPtr<CefMediator> mediator);
+    Renderer(CefRefPtr<Mediator> mediator);
 
     // Tell CEF3 the size of texture to render to
     bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) OVERRIDE;
@@ -41,7 +41,7 @@ private:
     /* MEMBERS */
 
     // Pointer to CefMediator in order to send rendering relevant information to Tabs etc.
-    CefRefPtr<CefMediator> _mediator;
+    CefRefPtr<Mediator> _mediator;
 
     // Include CEF'S default reference counting implementation
     IMPLEMENT_REFCOUNTING(Renderer);

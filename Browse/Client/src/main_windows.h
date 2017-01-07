@@ -1,5 +1,5 @@
 #include <windows.h>
-#include "src/CEF/App.h"
+#include "src/CEF/MainCefApp.h"
 #include "src/CEF/OtherProcess/DefaultCefApp.h"
 #include "src/CEF/ProcessTypeGetter.h"
 #include "include/cef_sandbox_win.h"
@@ -9,7 +9,7 @@
 #endif
 
 // Forward declaration of common main
-int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app, void* windows_sandbox_info, std::string userDirectory);
+int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<MainCefApp> app, void* windows_sandbox_info, std::string userDirectory);
 
 // Following taken partly out of CefSimple example of Chromium Embedded Framework!
 
@@ -53,21 +53,21 @@ int APIENTRY wWinMain(
 
 	// Create an app of the correct type.
 	CefRefPtr<CefApp> app;
-	CefRefPtr<App> mainProcessApp; // extra pointer to main process app implementation. Only filled on main process.
+	CefRefPtr<MainCefApp> mainProcessApp; // extra pointer to main process app implementation. Only filled on main process.
 	ProcessType processType = ProcessTypeGetter::GetProcessType(commandLine);
 	switch (processType)
 	{
 	case ProcessType::MAIN:
 
 		// Main process
-		mainProcessApp = new App();
+		mainProcessApp = new MainCefApp();
 		app = mainProcessApp;
 		break;
 
 	case ProcessType::RENDER:
 
 		// Render process
-		app = new App(); // TODO: different app implementation
+		app = new MainCefApp(); // TODO: different app implementation
 		break;
 
 	default:

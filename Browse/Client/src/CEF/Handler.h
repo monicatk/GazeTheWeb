@@ -14,7 +14,7 @@
 #include <set>
 
 // Forward declaration
-class CefMediator;
+class Mediator;
 class BrowserMsgRouter;
 
 class Handler : public CefClient,
@@ -24,7 +24,7 @@ class Handler : public CefClient,
 {
 public:
 
-    Handler(CefMediator* pMediator, CefRefPtr<Renderer> renderer);
+    Handler(Mediator* pMediator, CefRefPtr<Renderer> renderer);
     ~Handler();
 
     // Provide access to the single global instance of this object
@@ -142,7 +142,7 @@ private:
     bool _isClosing;
 
     // Provide pointer to CefMediator in order to communicate with Tabs etc.
-    CefMediator* _pMediator;
+    Mediator* _pMediator;
 
     // Renderer, whose methods are called when rendering relevant actions take place
     CefRefPtr<Renderer> _renderer;

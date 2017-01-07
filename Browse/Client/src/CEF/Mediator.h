@@ -30,7 +30,7 @@ class OverflowElement;
 
 typedef int BrowserID;
 
-class CefMediator : public CefBase
+class Mediator : public CefBase
 {
 public:
 
@@ -176,7 +176,7 @@ protected:
 	// Pointer to master (but only functions exposed through the interface)
 	MasterNotificationInterface* _pMaster = NULL;
 
-    IMPLEMENT_REFCOUNTING(CefMediator);
+    IMPLEMENT_REFCOUNTING(Mediator);
 };
 
 
