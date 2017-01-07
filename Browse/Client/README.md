@@ -52,7 +52,9 @@ A file named _log.txt_ is created at binary folder containing information about 
 
 ![Text Input](media/Screenshot-B.png)
 
-![Tab Overview](media/Screenshot-C.png)
+![Wikipedia](media/Screenshot-C.png)
+
+![Tab Overview](media/Screenshot-D.png)
 
 ## Dependencies
 All necessary dependencies are provided in the __externals__, __submodules__ or within the corresponding __plugins__ folder.
