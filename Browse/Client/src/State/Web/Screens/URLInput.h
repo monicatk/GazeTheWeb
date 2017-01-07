@@ -58,6 +58,7 @@ private:
     public:
 
         URLKeyboardListener(URLInput* pURLInput) { _pURLInput = pURLInput; }
+		void virtual keySelected(eyegui::Layout* pLayout, std::string id) {}
         void virtual keyPressed(eyegui::Layout* pLayout, std::string id, std::u16string value);
         void virtual keyPressed(eyegui::Layout* pLayout, std::string id, std::string value) {}
 

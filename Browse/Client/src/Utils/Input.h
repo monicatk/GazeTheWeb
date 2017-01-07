@@ -11,16 +11,18 @@ class Input
 {
 public:
 
-    Input(int gazeX, int gazeY, bool gazeUsed)
+    Input(int gazeX, int gazeY, bool gazeUsed, bool instantInteraction)
     {
         this->gazeX = gazeX;
         this->gazeY = gazeY;
         this->gazeUsed = gazeUsed;
+		this->instantInteraction = instantInteraction;
     }
 
     int gazeX;
     int gazeY;
     bool gazeUsed;
+	bool instantInteraction;
 };
 
 #endif // INPUT_H_

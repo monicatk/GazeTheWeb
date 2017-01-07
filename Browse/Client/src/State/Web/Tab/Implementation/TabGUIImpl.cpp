@@ -35,10 +35,12 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			// Trigger zooming in CefMediator
 			_pTab->_pCefMediator->SetZoomLevel(_pTab);
 		}
+		/*
         else if (id == "gaze_mouse")
         {
             _pTab->_gazeMouse = true;
         }
+		*/
         else if (id == "selection")
         {
             _pTab->PushBackPipeline(std::make_unique<TextSelectionPipeline>(_pTab));
@@ -131,11 +133,22 @@ void Tab::TabOverlayButtonListener::up(eyegui::Layout* pLayout, std::string id)
 	}
 }
 
+void Tab::TabOverlayKeyboardListener::keySelected(eyegui::Layout* pLayout, std::string id)
+{
+	// Search for id in map
+	auto iter = _pTab->_overlayKeyboardSelectCallbacks.find(id);
+	if (iter != _pTab->_overlayKeyboardSelectCallbacks.end())
+	{
+		// Execute callback
+		iter->second();
+	}
+}
+
 void Tab::TabOverlayKeyboardListener::keyPressed(eyegui::Layout* pLayout, std::string id, std::u16string value)
 {
 	// Search for id in map
-	auto iter = _pTab->_overlayKeyboardCallbacks.find(id);
-	if (iter != _pTab->_overlayKeyboardCallbacks.end())
+	auto iter = _pTab->_overlayKeyboardPressCallbacks.find(id);
+	if (iter != _pTab->_overlayKeyboardPressCallbacks.end())
 	{
 		// Execute callback
 		iter->second(value);

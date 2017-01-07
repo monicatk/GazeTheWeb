@@ -5,22 +5,79 @@ set(CEF_TARGET Client)
 ### PARAMETERS #################################################################
 
 set(CLIENT_DEPLOYMENT OFF CACHE BOOL "Setup for Deployment.")
-set(CLIENT_TOBII_EYEX_SUPPORT OFF CACHE BOOL "Support for Tobii EyeX.")
-set(CLIENT_SMI_REDN_SUPPORT OFF CACHE BOOL "Support for SMI Red.")
 
-# Pipe them to C++
+if(OS_WINDOWS) # Windows
+	set(CLIENT_BUILD_SMI_IVIEWX_PLUGIN ON CACHE BOOL "Build plugin for SMI iViewX.")
+	set(CLIENT_BUILD_TOBII_EYEX_PLUGIN ON CACHE BOOL "Build plugin for Tobii EyeX.")
+endif()
+
+# Pipe some of them to C++
 if(${CLIENT_DEPLOYMENT})
 	add_definitions(-DDEPLOYMENT)
-endif()
-if(${CLIENT_TOBII_EYEX_SUPPORT})
-	add_definitions(-DTOBII_SUPPORT)
-endif()
-if(${CLIENT_SMI_REDN_SUPPORT})
-	add_definitions(-DSMI_SUPPORT)
 endif()
 
 if(OS_LINUX) # Linux
 	add_definitions(-Doff_t=__off_t)
+endif()
+
+### EYETRACKER PLUGINS #########################################################
+
+set(EYETRACKER_PLUGIN_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/plugins/Eyetracker")
+
+# Plugin for SMI iViewX
+if(${CLIENT_BUILD_SMI_IVIEWX_PLUGIN})
+
+	# SMI iViewX SDK
+	set(SMI_IVIEWX_SDK_DIRECTORY "${EYETRACKER_PLUGIN_DIRECTORY}/SMIiViewX/iViewX")
+	include_directories("${SMI_IVIEWX_SDK_DIRECTORY}/include")
+	set(SMI_IVIEWX_SDK_LIBRARIES "${SMI_IVIEWX_SDK_DIRECTORY}/iViewXAPI.lib")
+
+	# Plugin project
+	add_library(
+		SMIiViewXPlugin
+		MODULE
+		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
+		${EYETRACKER_PLUGIN_DIRECTORY}/SMIiViewX/SMIiViewXImpl.cpp)
+	
+	# Link SDK
+	target_link_libraries(SMIiViewXPlugin ${SMI_IVIEWX_SDK_LIBRARIES})
+
+	# Tell user about it
+	message("Plugin for SMI iViewX will be built.")
+	
+endif()
+
+# Plugin for Tobii EyeX
+if(${CLIENT_BUILD_TOBII_EYEX_PLUGIN})
+
+	# Tobii EyeX SDK
+	set(TOBII_EYEX_SDK_DIRECTORY "${EYETRACKER_PLUGIN_DIRECTORY}/TobiiEyeX/TobiiEyeXSDK")
+	include_directories("${TOBII_EYEX_SDK_DIRECTORY}/include")
+	set(TOBII_EYEX_SDK_LIBRARIES "${TOBII_EYEX_SDK_DIRECTORY}/lib/x86/Tobii.EyeX.Client.lib")
+
+	# Plugin project
+	add_library(
+		TobiiEyeXPlugin
+		MODULE
+		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
+		${EYETRACKER_PLUGIN_DIRECTORY}/TobiiEyeX/TobiiEyeXImpl.cpp)
+		
+	# Link SDK
+	target_link_libraries(TobiiEyeXPlugin ${TOBII_EYEX_SDK_LIBRARIES})
+	
+	# Tell user about it
+	message("Plugin for Tobii EyeX will be built.")
+	
+	# Copy Tobii EyeX library to output folder
+	add_custom_command(TARGET TobiiEyeXPlugin POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		"${TOBII_EYEX_SDK_DIRECTORY}/lib/x86/Tobii.EyeX.Client.dll"
+		$<TARGET_FILE_DIR:TobiiEyeXPlugin>)
+		
 endif()
 
 ### CONTENT ####################################################################
@@ -79,6 +136,7 @@ set(GLFW_DOCUMENT_INTERNALS OFF CACHE INTERNAL "GLFW document internals.")
 set(GLFW_USE_EGL OFF CACHE INTERNAL "GLFW use EGL.")
 set(GLFW_USE_HYBRID_HPG OFF CACHE INTERNAL "GLFW use hybrid HPG.")
 set(USE_MSVC_RUNTIME_LIBRARY_DLL ON CACHE INTERNAL "MSCV runtime library dll.")
+set(GLFW_VULKAN_STATIC OFF CACHE INTERNAL "Use the Vulkan loader statically linked into application.")
 set(LIB_SUFFIX "" CACHE INTERNAL "Suffix of lib.")
 set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "GLFW build shared libs.")
 add_subdirectory(${SUBMODULES_DIR}/glfw)
@@ -96,16 +154,6 @@ include_directories("${SUBMODULES_DIR}/spdlog/include")
 	
 # Find libraries
 if(OS_WINDOWS) # Windows
-
-	# iViewX
-	set(SMI_IVIEW_X_DIRECTORY "${EXTERNALS_DIR}/iViewX")
-	include_directories("${SMI_IVIEW_X_DIRECTORY}/include")
-	set(SMI_IVIEW_X_LIBRARIES "${SMI_IVIEW_X_DIRECTORY}/iViewXAPI.lib")
-
-	# TobiiEyeXSDK
-	set(TOBII_EYEX_SDK_DIRECTORY "${EXTERNALS_DIR}/TobiiEyeXSDK")
-	include_directories("${TOBII_EYEX_SDK_DIRECTORY}/include")
-	set(TOBII_EYEX_SDK_LIBRARIES "${TOBII_EYEX_SDK_DIRECTORY}/lib/x86/Tobii.EyeX.Client.lib")
 
 	# LabStreamingLayer (dynamic linking)
 	set(LIBLSL_LIBRARIES "${LIBLSL_DIRECTORY}/lib-vs2015_x86_release/liblsl32.lib")
@@ -166,8 +214,6 @@ if(OS_WINDOWS) # Windows
 		${OPENGL_LIBRARIES}
 		glfw
 		eyeGUI
-		${SMI_IVIEW_X_LIBRARIES}
-		${TOBII_EYEX_SDK_LIBRARIES}
 		${LIBLSL_LIBRARIES}
 		libcef_lib
 		libcef_dll_wrapper
@@ -185,14 +231,6 @@ if(OS_WINDOWS) # Windows
 	# Copy binary and resource files to the target output directory
 	COPY_FILES("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "${CEF_TARGET_OUT_DIR}")
 	COPY_FILES("${CEF_TARGET}" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "${CEF_TARGET_OUT_DIR}")
-
-	# Copy Tobii EyeX library to output folder
-	if(${CLIENT_TOBII_EYEX_SUPPORT})
-	add_custom_command(TARGET ${CEF_TARGET} PRE_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		"${TOBII_EYEX_SDK_DIRECTORY}/lib/x86/Tobii.EyeX.Client.dll"
-		$<TARGET_FILE_DIR:${CEF_TARGET}>)
-	endif(${CLIENT_TOBII_EYEX_SUPPORT})
 
 	# Copy LabStreamingLayer library to output folder
 	add_custom_command(TARGET ${CEF_TARGET} PRE_BUILD

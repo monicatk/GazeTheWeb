@@ -172,6 +172,9 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
 
 	// ### WINDOW ICON ###
 
+	// Set content path (before using it in the helper)
+	eyegui::setRootFilepath(CONTENT_PATH);
+
 	// Load window icons for GLFW
 	std::vector<unsigned char> icon16Data;
 	int icon16Width, icon16Height, icon16ChannelCount;
@@ -205,9 +208,6 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
 		icons.data());
 
     // ### EYEGUI ###
-
-    // Set content path
-    eyegui::setRootFilepath(CONTENT_PATH);
 
     // Set print callbacks
     std::function<void(std::string)> printGUICallback = [&](std::string message) { this->GUIPrintCallback(message); };
@@ -581,7 +581,7 @@ void Master::Loop()
         _pCefMediator->DoMessageLoopWork();
 
         // Create input struct for own framework
-        Input input(usedEyeGUIInput.gazeX, usedEyeGUIInput.gazeY, usedEyeGUIInput.gazeUsed);
+        Input input(usedEyeGUIInput.gazeX, usedEyeGUIInput.gazeY, usedEyeGUIInput.gazeUsed, usedEyeGUIInput.instantInteraction);
 
         // Bind framebuffer
         _upFramebuffer->Bind();

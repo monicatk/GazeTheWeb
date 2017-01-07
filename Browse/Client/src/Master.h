@@ -75,6 +75,11 @@ public:
 	// Push notification to display taken from localization file
 	virtual void PushNotificationByKey(std::string key);
 
+	void RegisterJavascriptCallback(std::string prefix, std::function<void (std::string)>& callbackFunction)
+	{
+		_pCefMediator->RegisterJavascriptCallback(prefix, callbackFunction);
+	};
+
     // ### EYEGUI DELEGATION ###
 
     // Add layout to eyeGUI
