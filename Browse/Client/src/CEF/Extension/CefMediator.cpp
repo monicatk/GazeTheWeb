@@ -5,7 +5,6 @@
 
 #include "CefMediator.h"
 #include "src/CEF/Extension/JSCode.h"
-#include "src/CEF/Extension/Container.h"
 #include "src/Setup.h"
 #include "src/State/Web/Tab/Interface/TabCEFInterface.h"
 #include "src/CEF/Data/DOMNode.h"
