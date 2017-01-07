@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include "src/CEF/App.h"
+#include "src/CEF/ProcessTypeGetter.h"
 #include "include/base/cef_logging.h"
 
 // Forward declaration of common main
@@ -11,12 +12,32 @@ int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app
 // Entry point function for all processes.
 int main(int argc, char* argv[])
 {
-    // Provide CEF with command-line arguments.
-    CefMainArgs main_args(argc, argv);
+	// Provide CEF with command-line arguments.
+	CefMainArgs main_args(argc, argv);
 
-    // SimpleApp implements application-level callbacks. It will create the first
-    // browser instance in OnContextInitialized() after CEF has initialized.
-    CefRefPtr<App> app(new App);
+	// ###############
+	// ### PROCESS ###
+	// ###############
+
+	// Parse command-line arguments
+	CefRefPtr<CefCommandLine> command_line = CefCommandLine::CreateCommandLine();
+	command_line->InitFromArgv(argc, argv);
+
+	// Create an app of the correct type.
+	CefRefPtr<CefApp> app;
+	ProcessType processType = ProcessTypeGetter::GetProcessType(commandLine);
+	switch (processType)
+	{
+	case ProcessType::MAIN:
+		app = new App();
+		break;
+	case ProcessType::RENDER:
+		app = new App(); // TODO: different app implementation
+		break;
+	default:
+		app = new App(); // TODO: different app implementation
+		break;
+	}
 
     // CEF applications have multiple sub-processes (render, plugin, GPU, etc)
     // that share the same executable. This function checks the command-line and,
@@ -27,6 +48,10 @@ int main(int argc, char* argv[])
         // The sub-process has completed so return here.
         return exit_code;
     }
+
+	// ################
+	// ### SETTINGS ###
+	// ################
 
     // Specify CEF global settings here.
     CefSettings settings;

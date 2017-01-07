@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "src/CEF/App.h"
+#include "src/CEF/ProcessTypeGetter.h"
 #include "include/cef_sandbox_win.h"
 
 #if defined(CEF_USE_SANDBOX)
@@ -12,15 +13,24 @@ int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app
 // Following taken partly out of CefSimple example of Chromium Embedded Framework!
 
 // Entry point function for all processes.
-int APIENTRY wWinMain(HINSTANCE hInstance,
+int APIENTRY wWinMain(
+	HINSTANCE hInstance,
 	HINSTANCE hPrevInstance,
 	LPTSTR    lpCmdLine,
-	int       nCmdShow) {
+	int       nCmdShow)
+{
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	// Enable High-DPI support on Windows 7 or newer.
 	// CefEnableHighDPISupport();
+
+	// Provide CEF with command-line arguments.
+	CefMainArgs main_args(hInstance);
+
+	// ###############
+	// ### SANDBOX ###
+	// ###############
 
 	// Sandbox information.
 	void* sandbox_info = NULL;
@@ -32,12 +42,29 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 	sandbox_info = scoped_sandbox.sandbox_info();
 #endif
 
-	// Provide CEF with command-line arguments.
-	CefMainArgs main_args(hInstance);
+	// ###############
+	// ### PROCESS ###
+	// ###############
 
-	// App implements application-level callbacks. It will create the first
-	// browser instance in OnContextInitialized() after CEF has initialized.
-	CefRefPtr<App> app(new App);
+	// Parse command-line arguments
+	CefRefPtr<CefCommandLine> commandLine = CefCommandLine::CreateCommandLine();
+	commandLine->InitFromString(::GetCommandLineW());
+
+	// Create an app of the correct type.
+	CefRefPtr<App> app;
+	ProcessType processType = ProcessTypeGetter::GetProcessType(commandLine);
+	switch (processType)
+	{
+	case ProcessType::MAIN:
+		app = new App();
+		break;
+	case ProcessType::RENDER:
+		app = new App(); // TODO: different app implementation
+		break;
+	default:
+		app = new App(); // TODO: different app implementation
+		break;
+	}
 
 	// CEF applications have multiple sub-processes (render, plugin, GPU, etc)
 	// that share the same executable. This function checks the command-line and,
@@ -47,6 +74,10 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 		// The sub-process has completed so return here.
 		return exit_code;
 	}
+
+	// ################
+	// ### SETTINGS ###
+	// ################
 
 	// Specify CEF global settings here.
 	CefSettings settings;
