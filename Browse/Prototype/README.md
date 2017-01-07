@@ -1,5 +1,5 @@
 # GazeTheWeb - Browse: Prototype
-Prototype of gaze controlled web browser, part of the EU-funded research project MAMEM.
+Prototype of gaze-controlled Web browser, part of the EU-funded research project MAMEM.
 
 ## Structure
 ![Structure](media/Structure.png)
