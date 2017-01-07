@@ -8,7 +8,7 @@
 
 #include "include/cef_app.h"
 #include "src/CEF/Extension/CefMediator.h"
-#include "src/CEF/RenderProcessHandler.h"
+#include "src/CEF/RenderProcess/RenderProcessHandler.h"
 
 class App :	public CefApp,
             public CefBrowserProcessHandler,

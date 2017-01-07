@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "src/CEF/App.h"
+#include "src/CEF/OtherProcess/DefaultCefApp.h"
 #include "src/CEF/ProcessTypeGetter.h"
 #include "include/cef_sandbox_win.h"
 
@@ -46,31 +47,40 @@ int APIENTRY wWinMain(
 	// ### PROCESS ###
 	// ###############
 
-	// Parse command-line arguments
+	// Parse command-line arguments.
 	CefRefPtr<CefCommandLine> commandLine = CefCommandLine::CreateCommandLine();
 	commandLine->InitFromString(::GetCommandLineW());
 
 	// Create an app of the correct type.
-	CefRefPtr<App> app;
+	CefRefPtr<CefApp> app;
+	CefRefPtr<App> mainProcessApp; // extra pointer to main process app implementation. Only filled on main process.
 	ProcessType processType = ProcessTypeGetter::GetProcessType(commandLine);
 	switch (processType)
 	{
 	case ProcessType::MAIN:
-		app = new App();
+
+		// Main process
+		mainProcessApp = new App();
+		app = mainProcessApp;
 		break;
+
 	case ProcessType::RENDER:
+
+		// Render process
 		app = new App(); // TODO: different app implementation
 		break;
+
 	default:
-		app = new App(); // TODO: different app implementation
+
+		// Any other process
+		app = new DefaultCefApp();
 		break;
 	}
 
-	// CEF applications have multiple sub-processes (render, plugin, GPU, etc)
-	// that share the same executable. This function checks the command-line and,
-	// if this is a sub-process, executes the appropriate logic.
+	// Execute process. Returns for main process zero.
 	int exit_code = CefExecuteProcess(main_args, app.get(), sandbox_info);
-	if (exit_code >= 0) {
+	if (exit_code >= 0)
+	{
 		// The sub-process has completed so return here.
 		return exit_code;
 	}
@@ -121,5 +131,5 @@ int APIENTRY wWinMain(
 	userDirectory.append("\\");
 
 	// Use common main now.
-	return CommonMain(main_args, settings, app, sandbox_info, userDirectory);
+	return CommonMain(main_args, settings, mainProcessApp, sandbox_info, userDirectory);
 }

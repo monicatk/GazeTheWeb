@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include "src/CEF/App.h"
+#include "src/CEF/OtherProcess/DefaultCefApp.h"
 #include "src/CEF/ProcessTypeGetter.h"
 #include "include/base/cef_logging.h"
 
@@ -25,17 +26,27 @@ int main(int argc, char* argv[])
 
 	// Create an app of the correct type.
 	CefRefPtr<CefApp> app;
+	CefRefPtr<App> mainProcessApp; // extra pointer to main process app implementation. Only filled on main process.
 	ProcessType processType = ProcessTypeGetter::GetProcessType(commandLine);
 	switch (processType)
 	{
 	case ProcessType::MAIN:
-		app = new App();
+
+		// Main process
+		mainProcessApp = new App();
+		app = mainProcessApp;
 		break;
+
 	case ProcessType::RENDER:
+
+		// Render process
 		app = new App(); // TODO: different app implementation
 		break;
+
 	default:
-		app = new App(); // TODO: different app implementation
+
+		// Any other process
+		app = new DefaultCefApp();
 		break;
 	}
 
@@ -43,7 +54,7 @@ int main(int argc, char* argv[])
     // that share the same executable. This function checks the command-line and,
     // if this is a sub-process, executes the appropriate logic.
     int exit_code = CefExecuteProcess(main_args, app.get(), NULL);
-    if (exit_code >= 0)
+    if (exit_code >= 0 || mainProcessApp.get() == nullptr)
     {
         // The sub-process has completed so return here.
         return exit_code;
@@ -87,5 +98,5 @@ int main(int argc, char* argv[])
     userDirectory.append("/");
 
     // Use common main now.
-    return CommonMain(main_args, settings, app, NULL, userDirectory);
+    return CommonMain(main_args, settings, mainProcessApp, NULL, userDirectory);
 }
