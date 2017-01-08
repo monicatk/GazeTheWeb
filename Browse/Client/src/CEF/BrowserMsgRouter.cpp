@@ -32,43 +32,6 @@ MsgHandler::MsgHandler(BrowserMsgRouter* pMsgRouter)
 	_pMsgRouter = pMsgRouter;
 }
 
-std::vector<std::string> MsgHandler::SplitBySeparator(std::string str, char separator)
-{
-	std::vector<std::string> output;
-	std::vector<char> buffer;
-
-	for (int i = 0; i < str.length(); i++)
-	{
-		const char read = str.at(i);
-		if (read == separator)
-		{
-			if (buffer.size() > 0)
-			{
-				const std::string bufferStr(buffer.begin(), buffer.end());
-				output.push_back(bufferStr);
-				buffer.clear();
-			}
-			// Insert empty strings between two separators, but not directly after first separator!
-			else if (i > 0 && buffer.size() == 0)
-			{
-				output.push_back("");
-			}
-		}
-		else
-		{
-			buffer.push_back(read);
-		}
-	}
-	if (buffer.size() > 0)
-	{
-		const std::string bufferStr(buffer.begin(), buffer.end());
-		output.push_back(bufferStr);
-		buffer.clear();
-	}
-
-	return output;
-}
-
 bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	CefRefPtr<CefFrame> frame,
 	int64 query_id,

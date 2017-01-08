@@ -6,6 +6,7 @@
 #ifndef CEF_BROWSERMSGROUTER_H_
 #define CEF_BROWSERMSGROUTER_H_
 
+#include "src/Utils/Helper.h"
 #include "include/wrapper/cef_message_router.h"
 #include <functional>
 
@@ -26,8 +27,6 @@ public:
 		const CefString& request,
 		bool persistent,
 		CefRefPtr<Callback> callback) OVERRIDE;
-
-	std::vector<std::string> SplitBySeparator(std::string str, char separator);
 
 	void RegisterJavascriptCallback(std::string prefix, std::function<void (std::string)>& callbackFunction)
 	{
