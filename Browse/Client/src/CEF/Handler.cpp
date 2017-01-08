@@ -14,15 +14,9 @@
 #include <string>
 #include <cmath>
 
-namespace
-{
-    Handler* g_instance = NULL;
-}  // namespace
 
 Handler::Handler(Mediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing(false)
 {
-  DCHECK(!g_instance);
-  g_instance = this;
   _pMediator = pMediator;
   _renderer = renderer;
   _msgRouter = new BrowserMsgRouter(pMediator);
@@ -30,13 +24,7 @@ Handler::Handler(Mediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing
 
 Handler::~Handler()
 {
-  g_instance = NULL;
-}
-
-// Static
-Handler* Handler::GetInstance()
-{
-  return g_instance;
+	// Nothing to do
 }
 
 void Handler::OnAfterCreated(CefRefPtr<CefBrowser> browser)

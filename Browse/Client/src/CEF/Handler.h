@@ -27,9 +27,6 @@ public:
     Handler(Mediator* pMediator, CefRefPtr<Renderer> renderer);
     ~Handler();
 
-    // Provide access to the single global instance of this object
-    static Handler* GetInstance();
-
     // Request that all existing browser windows close
     void CloseAllBrowsers(bool forceClose);
     bool IsClosing() const { return _isClosing; }
