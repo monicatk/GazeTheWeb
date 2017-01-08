@@ -29,4 +29,4 @@ private:
     IMPLEMENT_REFCOUNTING(RenderCefApp);
 };
 
-#endif  // CEF_RENDERCEFAPP_H_
+#endif // CEF_RENDERCEFAPP_H_
