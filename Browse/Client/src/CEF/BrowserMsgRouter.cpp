@@ -18,8 +18,6 @@ BrowserMsgRouter::BrowserMsgRouter(Mediator* pMediator)
 	CefMessageRouterConfig config;
 	config.js_query_function = "cefQuery";
 	config.js_cancel_function = "cefQueryCancel";
-
-	// Create and add the core message router
 	_router = CefMessageRouterBrowserSide::Create(config);
 
 	// Create and add msgRouter for msg handling

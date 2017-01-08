@@ -430,6 +430,10 @@ void Handler::IPCLogRenderer(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcess
     {
         LogDebug("Renderer: ", text, " (browserID = ", browserID, ")");
     }
+	else
+	{
+		LogInfo("Renderer: ", text, " (browserID = ", browserID, ")");
+	}
 }
 
 void Handler::OnFaviconURLChange(CefRefPtr<CefBrowser> browser,
