@@ -4,7 +4,6 @@
 //============================================================================
 
 #include "RenderProcessHandler.h"
-#include "include/wrapper/cef_message_router.h"
 #include "include/base/cef_logging.h"
 #include "include/wrapper/cef_helpers.h"
 #include <sstream>

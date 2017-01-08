@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "src/CEF/MainCefApp.h"
+#include "src/CEF/RenderProcess/RenderCefApp.h"
 #include "src/CEF/OtherProcess/DefaultCefApp.h"
 #include "src/CEF/ProcessTypeGetter.h"
 #include "include/cef_sandbox_win.h"
@@ -67,7 +68,7 @@ int APIENTRY wWinMain(
 	case ProcessType::RENDER:
 
 		// Render process
-		app = new MainCefApp(); // TODO: different app implementation
+		//app = new RenderCefApp();
 		break;
 
 	default:

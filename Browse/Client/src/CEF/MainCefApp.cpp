@@ -14,7 +14,7 @@
 
 MainCefApp::MainCefApp() : Mediator()
 {
-    _renderProcessHandler = new RenderProcessHandler();
+	// Nothing to do here
 }
 
 void MainCefApp::OnContextInitialized()

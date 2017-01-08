@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include "src/CEF/MainCefApp.h"
+#include "src/CEF/RenderProcess/RenderCefApp.h"
 #include "src/CEF/OtherProcess/DefaultCefApp.h"
 #include "src/CEF/ProcessTypeGetter.h"
 #include "include/base/cef_logging.h"
@@ -40,7 +41,7 @@ int main(int argc, char* argv[])
 	case ProcessType::RENDER:
 
 		// Render process
-		app = new MainCefApp(); // TODO: different app implementation
+		app = new RenderCefApp();
 		break;
 
 	default:

@@ -8,11 +8,9 @@
 
 #include "include/cef_app.h"
 #include "src/CEF/Mediator.h"
-#include "src/CEF/RenderProcess/RenderProcessHandler.h"
 
 class MainCefApp :	public CefApp,
 					public CefBrowserProcessHandler,
-					// expanding CefApp by our mediator interface
 					public Mediator
 {
 public:
@@ -26,13 +24,7 @@ public:
     virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() OVERRIDE { return this; }
     virtual void OnContextInitialized() OVERRIDE;
 
-    // Called for IPC message navigation
-    CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() OVERRIDE {	return _renderProcessHandler; }
-
 private:
-
-    // Keep a reference to RenderProcessHandler
-    CefRefPtr<RenderProcessHandler> _renderProcessHandler;
 
     // Include CEF'S default reference counting implementation
     IMPLEMENT_REFCOUNTING(MainCefApp);

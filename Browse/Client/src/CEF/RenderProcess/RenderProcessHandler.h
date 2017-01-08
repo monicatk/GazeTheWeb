@@ -7,6 +7,7 @@
 #define CEF_RENDERPROCESSHANDLER_H_
 
 #include "src/CEF/JSCode.h"
+#include "include/wrapper/cef_message_router.h"
 #include "include/cef_render_process_handler.h"
 
 // Forward declaration
