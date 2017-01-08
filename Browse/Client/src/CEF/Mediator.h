@@ -9,7 +9,6 @@
 #include "src/MasterNotificationInterface.h"
 #include "src/CEF/Handler.h"
 #include "include/cef_browser.h"
-#include "include/cef_base.h"
 #include "src/CEF/Data/DOMNodeType.h"
 #include <set>
 #include <map>
@@ -30,7 +29,7 @@ class OverflowElement;
 
 typedef int BrowserID;
 
-class Mediator : public CefBase
+class Mediator
 {
 public:
 
@@ -175,8 +174,6 @@ protected:
 
 	// Pointer to master (but only functions exposed through the interface)
 	MasterNotificationInterface* _pMaster = NULL;
-
-    IMPLEMENT_REFCOUNTING(Mediator);
 };
 
 

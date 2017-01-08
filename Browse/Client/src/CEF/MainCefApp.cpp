@@ -21,14 +21,11 @@ void MainCefApp::OnContextInitialized()
 {
     CEF_REQUIRE_UI_THREAD();
 
-    // App is extended by CefMediator interface, so point to itself
-    CefRefPtr<Mediator> mediator = this;
-
     // Create Renderer
-    CefRefPtr<Renderer> renderer(new Renderer(mediator));
+    CefRefPtr<Renderer> renderer(new Renderer(this));
 
     // Create Handler with knowledge of CefMediator and Renderer
-	_handler = new Handler(mediator, renderer);
+	_handler = new Handler(this, renderer);
 }
 
 void MainCefApp::OnBeforeCommandLineProcessing(const CefString& process_type, CefRefPtr< CefCommandLine > command_line)

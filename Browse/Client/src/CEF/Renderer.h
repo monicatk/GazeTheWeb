@@ -18,7 +18,7 @@ class Renderer : public CefRenderHandler
 {
 public:
 
-    Renderer(CefRefPtr<Mediator> mediator);
+    Renderer(Mediator* pMediator);
 
     // Tell CEF3 the size of texture to render to
     bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) OVERRIDE;
@@ -41,7 +41,7 @@ private:
     /* MEMBERS */
 
     // Pointer to CefMediator in order to send rendering relevant information to Tabs etc.
-    CefRefPtr<Mediator> _mediator;
+    Mediator* _mediator;
 
     // Include CEF'S default reference counting implementation
     IMPLEMENT_REFCOUNTING(Renderer);

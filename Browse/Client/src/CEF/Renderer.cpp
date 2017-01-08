@@ -9,9 +9,9 @@
 #include "src/Utils/Logger.h"
 #include "include/wrapper/cef_helpers.h"
 
-Renderer::Renderer(CefRefPtr<Mediator> mediator)
+Renderer::Renderer(Mediator* pMediator)
 {
-    _mediator = mediator;
+    _mediator = pMediator;
 }
 
 bool Renderer::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect)
