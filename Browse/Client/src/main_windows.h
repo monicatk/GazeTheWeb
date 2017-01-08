@@ -68,7 +68,7 @@ int APIENTRY wWinMain(
 	case ProcessType::RENDER:
 
 		// Render process
-		//app = new RenderCefApp();
+		app = new RenderCefApp();
 		break;
 
 	default:
