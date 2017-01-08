@@ -3,6 +3,7 @@
 // Author: Daniel Mueller (muellerd@uni-koblenz.de)
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
+// CefApp implementation for Render Process.
 
 #ifndef CEF_RENDERCEFAPP_H_
 #define CEF_RENDERCEFAPP_H_

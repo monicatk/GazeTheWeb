@@ -1,7 +1,11 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
 // Author: Daniel Mueller (muellerd@uni-koblenz.de)
+// Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
+// This class is delegated by RenderCefApp to handle the Render Process.
+// Handles the rendering of one tab aka CefBrowser. Has access to its V8
+// context.
 
 #ifndef CEF_RENDERPROCESSHANDLER_H_
 #define CEF_RENDERPROCESSHANDLER_H_
@@ -10,17 +14,13 @@
 #include "include/wrapper/cef_message_router.h"
 #include "include/cef_render_process_handler.h"
 
-// Forward declaration
-class CefMessageRouterRendererSide;
-
-/* All methods are called in the renderer process, IPC may be required (see process messages) */
 class RenderProcessHandler : public CefRenderProcessHandler {
 public:
 
+	// Constructor
 	RenderProcessHandler();
-    ~RenderProcessHandler() {}
 
-    // Callback, called when IPC message from e.g. browser process (see Handler) is received
+    // Callback, called when IPC message from e.g. main process (see Handler) is received
     bool OnProcessMessageReceived(
         CefRefPtr<CefBrowser> browser,
         CefProcessId sourceProcess,
@@ -43,21 +43,21 @@ public:
         CefRefPtr<CefFrame> frame,
         CefRefPtr<CefV8Context> context) OVERRIDE;
 
-
-	/* FETCHING DOM NODE DATA */
+	// Fetching DOM node data from V8 context
 	CefRefPtr<CefV8Value> FetchDOMObject(CefRefPtr<CefV8Context> context, int nodeType, int nodeID);
 	CefRefPtr<CefProcessMessage> UnwrapDOMTextInput(CefRefPtr<CefV8Context> context, CefRefPtr<CefV8Value> domObj, int nodeID);
 	CefRefPtr<CefProcessMessage> UnwrapDOMLink(CefRefPtr<CefV8Context> context, CefRefPtr<CefV8Value> domObj, int nodeID);
 
 private:
-    // Send text to be logged to browser process, otherwise logging won't work
-    void IPCLog(CefRefPtr<CefBrowser> browser, std::string text, bool debugLog=false);
-    void IPCLogDebug(CefRefPtr<CefBrowser> browser, std::string text);
 
-    /* MEMBERS */
+    // Send logs to main process
+    void IPCLog(CefRefPtr<CefBrowser> browser, std::string text, bool debugLog = false);
+	void IPCLogDebug(CefRefPtr<CefBrowser> browser, std::string text) { IPCLog(browser, text, true); };
+
+    // Message router instance
 	CefRefPtr<CefMessageRouterRendererSide> _msgRouter;
 
-    // Javascript code as Strings
+    // JavaScript code as Strings
 	const std::string _js_dom_update_sizes = GetJSCode(DOM_UPDATE_SIZES);
 	const std::string _js_dom_fill_arrays = GetJSCode(DOM_FILL_ARRAYS);
 	const std::string _js_favicon_create_img = GetJSCode(FAVICON_CREATE_IMG);
