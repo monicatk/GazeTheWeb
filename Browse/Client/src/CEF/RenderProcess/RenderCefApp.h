@@ -1,6 +1,7 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel Müller (muellerd@uni-koblenz.de)
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
+// Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
 #ifndef CEF_RENDERCEFAPP_H_
@@ -9,11 +10,14 @@
 #include "include/cef_app.h"
 #include "src/CEF/RenderProcess/RenderProcessHandler.h"
 
-class RenderCefApp :	public CefApp
+class RenderCefApp : public CefApp
 {
 public:
 
+	// Constructor
 	RenderCefApp();
+
+	// Getter for render process handle
     CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() OVERRIDE {	return _renderProcessHandler; }
 
 private:
