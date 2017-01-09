@@ -79,7 +79,7 @@ public:
 		int64 frameID,
 		int nodeID,
 		Rect rect,
-		std::string value);
+		std::string value = "");
 
 	std::string GetValue() const { return _value; }
 

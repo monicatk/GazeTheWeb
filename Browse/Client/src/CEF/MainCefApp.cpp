@@ -12,9 +12,27 @@
 #include "include/wrapper/cef_helpers.h"
 #include <string>
 
-MainCefApp::MainCefApp() : Mediator()
+void MainCefApp::OnBeforeCommandLineProcessing(const CefString& process_type, CefRefPtr< CefCommandLine > command_line)
 {
-	// Nothing to do here
+	// Enable WebGL part 2 (other is in CefMediator.cpp) (or not disable is better description)
+	if (!setup::ENABLE_WEBGL)
+	{
+		// Setup for offscreen rendering
+		command_line->AppendSwitch("disable-gpu");
+		command_line->AppendSwitch("disable-gpu-compositing");
+		command_line->AppendSwitch("enable-begin-frame-scheduling"); // breaks WebGL, but better for performance
+	}
+
+	command_line->AppendSwitch("enable-logging"); // get LOG(..) writes in console
+	// command_line->AppendSwitch("no-sandbox"); // enable logging in renderer process. Edit Raphael: Since loggin now over IPC, sandbox can be activated
+
+	// EXPERIMENTAL: slow loading?
+	// see end of https://bitbucket.org/chromiumembedded/cef/wiki/GeneralUsage#markdown-header-proxy-resolution
+	command_line->AppendSwitch("no-proxy-server");
+
+	// EXPERIMENTAL
+	// Javascript debugging?
+	//command_line->AppendArgument("remote-debugging-port=666");
 }
 
 void MainCefApp::OnContextInitialized()
@@ -26,27 +44,4 @@ void MainCefApp::OnContextInitialized()
 
     // Create Handler with knowledge of CefMediator and Renderer
 	_handler = new Handler(this, renderer);
-}
-
-void MainCefApp::OnBeforeCommandLineProcessing(const CefString& process_type, CefRefPtr< CefCommandLine > command_line)
-{
-    // Enable WebGL part 2 (other is in CefMediator.cpp) (or not disable is better description)
-    if(!setup::ENABLE_WEBGL)
-    {
-        // Setup for offscreen rendering
-        command_line->AppendSwitch("disable-gpu");
-        command_line->AppendSwitch("disable-gpu-compositing");
-        command_line->AppendSwitch("enable-begin-frame-scheduling"); // breaks WebGL, but better for performance
-    }
-
-    command_line->AppendSwitch("enable-logging");	// get LOG(..) writes in console
-    command_line->AppendSwitch("no-sandbox");		// enable logging in renderer process
-
-    // EXPERIMENTAL: slow loading?
-    // see end of https://bitbucket.org/chromiumembedded/cef/wiki/GeneralUsage#markdown-header-proxy-resolution
-    command_line->AppendSwitch("no-proxy-server");
-
-	// EXPERIMENTAL
-	// Javascript debugging?
-	//command_line->AppendArgument("remote-debugging-port=666");
 }

@@ -2,6 +2,7 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Daniel Mueller (muellerd@uni-koblenz.de)
 //============================================================================
+// Implementation of CefApp for Main Process. Does implement mediator.
 
 #ifndef CEF_MAINCEFAPP_H_
 #define CEF_MAINCEFAPP_H_
@@ -14,8 +15,6 @@ class MainCefApp :	public CefApp,
 					public Mediator
 {
 public:
-
-	MainCefApp();
 
     // Manipulate command line input
     virtual void OnBeforeCommandLineProcessing(const CefString& process_type, CefRefPtr< CefCommandLine > command_line) OVERRIDE;

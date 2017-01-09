@@ -43,7 +43,7 @@ DOMTextInput::DOMTextInput(DOMNodeType type,
 	int64 frameID,
 	int nodeID,
 	Rect rect,
-	std::string value = "") : DOMNode(type, frameID, nodeID, rect)
+	std::string value) : DOMNode(type, frameID, nodeID, rect)
 {
 	_value = value;
 
