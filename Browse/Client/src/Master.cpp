@@ -15,6 +15,7 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
+#include <fstream>
 
 // Namespace for text-csv
 namespace csv = ::text::csv;

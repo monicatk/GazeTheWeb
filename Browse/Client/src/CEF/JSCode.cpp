@@ -4,7 +4,11 @@
 //============================================================================
 
 #include "JSCode.h"
+#include <map>
+#include <fstream>
+#include <iostream> // as called from differen processes, one cannot simply use LogInfo / LogError :(
 
+// Folder with external JavaScript code
 const std::string src = CONTENT_PATH "/javascript/";
 
 // List of all available JS code file paths and how to access them with JSCode enum
@@ -28,9 +32,6 @@ std::string GetJSCode(JSFile file)
     if (findJSFile.find(file) != findJSFile.end())
     {
         const std::string filePath = findJSFile.at(file);
-
-        // Write file data to String, source: http://stackoverflow.com/questions/2602013/read-whole-ascii-file-into-c-stdstring
-
         std::ifstream t(filePath);
         if (t.is_open())
         {
@@ -43,52 +44,37 @@ std::string GetJSCode(JSFile file)
         }
         else
         {
-            std::cout << "ERROR: Couldn't open JS file!" << std::endl; // TODO: couts do not appear in console!
-            return "alert('ERROR: Could not open JS code file!');";
+            std::cout << "JSCode: Cannot open JS code file" << std::endl;
+            return "alert('JSCode: Cannot open JS code file');";
         }
     }
     else
     {
-        std::cout << "ERROR: JSCode has not found the requested code file!" << std::endl;
-        return "alert('ERROR: JSCode has not found the requested code file!');";
+        std::cout << "JSCode: Cannot find the requested JS code file" << std::endl;
+        return "alert('JSCode: Cannot find the requested JS code file');";
     }
 }
 
-// TODO: Delete this method and use CefV8Value::ExecuteFunction(WithContext)? Possible in Browser Thread without context->Enter()?
 std::string jsInputTextData(int inputID, std::string text, bool submit)
 {
 	std::string code = "var domObj = GetDOMObject(0," + std::to_string(inputID) + ");\
-                        domObj.setTextInput('" + text + "'," + std::to_string(submit) + ");";
-
-	// NOTE: Query Selector with ":required" for submitting forms or not?
-	// BTW: ":optional" for inputs without "required" attribute
-
-    return code;
-
-            /*
-            //alert('Done setting text input');\
-            //textInput[" + std::to_string(inputID) + "].onclick=function(){alert('Clicked!');};\
-            //textInput[" + std::to_string(inputID) + "].onkeypress=function(){alert('Key pressed!');};\
-            //textInput[" + std::to_string(inputID) + "].click();\
-            //textInput[" + std::to_string(inputID) + "].keypress();\
-            //alert('--- Done ---');";
-            */
+		domObj.setTextInput('" + text + "'," + std::to_string(submit) + ");";
+	return code;
 }
 
 std::string jsFavIconUpdate(std::string oldUrl)
 {
-    return
-    //alert('favIcon Update script');
-   "for (i = 0; i < links.length; i++)\
-    {\
-        if(links[i].rel == 'icon' || links[i].rel == 'shortcut icon')\
-        {\
-            window.favIconUrl = links[i].href;\
-        }\
-    }"
-    /*if(window.favIconUrl == '')\
-        alert('(Update) Searched '+links.length+', have not found iconURL...');\*/
-    "if(window.favIconUrl != " + oldUrl + ")\
-        favIconImg.src = window.favIconUrl;\
-    ";
+	std::string code = "for (i = 0; i < links.length; i++)\
+		{\
+			if(links[i].rel == 'icon' || links[i].rel == 'shortcut icon')\
+			{\
+				window.favIconUrl = links[i].href;\
+			}\
+		}"
+			/*if(window.favIconUrl == '')\
+			alert('(Update) Searched '+links.length+', have not found iconURL...');\*/
+			"if(window.favIconUrl != " + oldUrl + ")\
+			favIconImg.src = window.favIconUrl;\
+		";
+	return code;
 }

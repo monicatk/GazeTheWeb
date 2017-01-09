@@ -13,7 +13,6 @@ Features (End of January):
 - DOM Node boxes for images are only text height
 - Activate Sandbox on Application Side
 - C++ -> JS Communication
-- DevTools do not work anymore
 
 Test all MAMEM trial tasks! -> Sofias Document
 
