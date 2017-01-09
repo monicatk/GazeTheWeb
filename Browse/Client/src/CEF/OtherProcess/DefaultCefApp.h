@@ -1,6 +1,6 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel Mueller (muellerd@uni-koblenz.de)
+// Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // CefApp implementation for all processes but Main and Render.
 
