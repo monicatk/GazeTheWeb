@@ -7,6 +7,7 @@
 #include "src/Setup.h"
 #include "src/CEF/Handler.h"
 #include "src/CEF/Renderer.h"
+#include "src/CEF/DevToolsHandler.h"
 #include "include/cef_browser.h"
 #include "include/cef_command_line.h"
 #include "include/wrapper/cef_helpers.h"
@@ -24,7 +25,7 @@ void MainCefApp::OnBeforeCommandLineProcessing(const CefString& process_type, Ce
 	}
 
 	command_line->AppendSwitch("enable-logging"); // get LOG(..) writes in console
-	// command_line->AppendSwitch("no-sandbox"); // enable logging in renderer process. Edit Raphael: Since loggin now over IPC, sandbox can be activated
+	command_line->AppendSwitch("no-sandbox"); // for what necessary?
 
 	// EXPERIMENTAL: slow loading?
 	// see end of https://bitbucket.org/chromiumembedded/cef/wiki/GeneralUsage#markdown-header-proxy-resolution
@@ -39,9 +40,14 @@ void MainCefApp::OnContextInitialized()
 {
     CEF_REQUIRE_UI_THREAD();
 
+	// TODO: handlers are members in Mediator but created here. Looks strange
+
     // Create Renderer
     CefRefPtr<Renderer> renderer(new Renderer(this));
 
-    // Create Handler with knowledge of CefMediator and Renderer
+    // Create Handler
 	_handler = new Handler(this, renderer);
+
+	// Create handler for dev tools
+	_devToolsHandler = new DevToolsHandler();
 }

@@ -8,7 +8,6 @@
 #define CEF_DEVTOOLSHANDLER_H_
 
 #include "include/cef_client.h"
-
 #include <list>
 
 class DevToolsHandler :	public CefClient,
@@ -42,7 +41,7 @@ public:
 		const CefString& failedUrl) OVERRIDE;
 
 	// Request that all existing browser windows to close
-	void CloseAllBrowsers(bool force_close);
+	void CloseAllBrowsers(bool forceClose);
 	bool IsClosing() const { return is_closing_; }
 
 private:

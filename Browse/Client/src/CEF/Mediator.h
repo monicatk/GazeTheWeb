@@ -7,13 +7,15 @@
 #define CEF_MEDIATOR_H_
 
 #include "src/MasterNotificationInterface.h"
-#include "src/CEF/Handler.h"
 #include "include/cef_browser.h"
 #include "src/CEF/Data/DOMNodeType.h"
+#include "src/CEF/Handler.h"
+#include "src/CEF/DevToolsHandler.h"
 #include <set>
 #include <map>
 #include <memory>
 #include <queue>
+#include <functional>
 
 /**
 *	Expand CefApp by methods and attributes used to communicate with Master and
@@ -131,10 +133,7 @@ public:
 	// Master calls this method upon GLFW keyboard input in order to open new window with DevTools (for active Tab)
 	void ShowDevTools();
 
-	void RegisterJavascriptCallback(std::string prefix, std::function<void (std::string)>& callbackFunction)
-	{
-		_handler->RegisterJavascriptCallback(prefix, callbackFunction);
-	}
+	void RegisterJavascriptCallback(std::string prefix, std::function<void(std::string)>& callbackFunction);
 
 	// ### MOUSE INTERACTION ###
 
@@ -154,8 +153,9 @@ public:
 
 protected:
 
-    /* MEMBERS */
+    // Members
     CefRefPtr<Handler> _handler;
+	CefRefPtr<DevToolsHandler> _devToolsHandler;
 
     // Save corresponding (Tab, CefBrowser)-pairs in two maps
     std::map<TabCEFInterface*, CefRefPtr<CefBrowser>> _browsers;

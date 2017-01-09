@@ -4,6 +4,8 @@
 //============================================================================
 
 #include "src/CEF/Mediator.h"
+#include "src/CEF/Handler.h"
+#include "src/CEF/DevToolsHandler.h"
 #include "src/CEF/JSCode.h"
 #include "src/Setup.h"
 #include "src/State/Web/Tab/Interface/TabCEFInterface.h"
@@ -11,7 +13,7 @@
 #include "src/Utils/Logger.h"
 #include "include/cef_app.h"
 #include "include/wrapper/cef_helpers.h"
-#include "src/CEF/DevToolsHandler.h"
+
 
 void Mediator::SetMaster(MasterNotificationInterface* pMaster)
 {
@@ -495,27 +497,30 @@ void Mediator::ShowDevTools()
 {
 	LogInfo("CefMediator: Showing DevTools...");
 
-	CefRefPtr<DevToolsHandler> devToolsHandler(new DevToolsHandler());
-	CefWindowInfo window_info;
+	// Setup
+	CefWindowInfo windowInfo;
 	CefBrowserSettings settings;
 
 #if defined(OS_WIN)
 	// Set title one Windows
-	window_info.SetAsPopup(NULL, "DevTools");
+	windowInfo.SetAsPopup(NULL, "DevTools");
 #endif
 
 	// Show dev tools for active tab
-	if (_activeTab != NULL)
+	if (_activeTab != nullptr)
 	{
 		auto browser = GetBrowser(_activeTab);
-		if (browser)
+		if (browser != nullptr)
 		{
 			// Display dev tools of tab with handler of dev tools within extra window
-			LogInfo("CefMediator: Showing DevTools...2");
-			LogInfo(std::string(browser->GetMainFrame()->GetName()));
-			browser->GetHost()->ShowDevTools(window_info, devToolsHandler.get(), settings, CefPoint());
+			browser->GetHost()->ShowDevTools(windowInfo, _devToolsHandler, settings, CefPoint());
 		}
 	}
+}
+
+void Mediator::RegisterJavascriptCallback(std::string prefix, std::function<void(std::string)>& callbackFunction)
+{
+	_handler->RegisterJavascriptCallback(prefix, callbackFunction);
 }
 
 void Mediator::EmulateLeftMouseButtonDown(TabCEFInterface* pTab, double x, double y)

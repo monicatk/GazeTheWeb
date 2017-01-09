@@ -75,16 +75,24 @@ void DevToolsHandler::OnLoadError(
 	frame->LoadString(ss.str(), failedUrl);
 }
 
-void DevToolsHandler::CloseAllBrowsers(bool force_close)
+void DevToolsHandler::CloseAllBrowsers(bool forceClose)
 {
-	CEF_REQUIRE_UI_THREAD();
+	if (!CefCurrentlyOn(TID_UI))
+	{
+		// Execute on the UI thread.
+		CefPostTask(TID_UI,
+			base::Bind(&DevToolsHandler::CloseAllBrowsers, this, forceClose));
+		return;
+	}
 
 	if (browser_list_.empty())
-	return;
+	{
+		return;
+	}
 
 	BrowserList::const_iterator bit = browser_list_.begin();
 	for (; bit != browser_list_.end(); bit++)
 	{
-		(*bit)->GetHost()->CloseBrowser(force_close);
+		(*bit)->GetHost()->CloseBrowser(forceClose);
 	}
 }
