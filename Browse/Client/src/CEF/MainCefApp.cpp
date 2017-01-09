@@ -33,7 +33,7 @@ void MainCefApp::OnBeforeCommandLineProcessing(const CefString& process_type, Ce
 
 	// EXPERIMENTAL
 	// Javascript debugging?
-	//command_line->AppendArgument("remote-debugging-port=666");
+	command_line->AppendArgument("remote-debugging-port=2012");
 }
 
 void MainCefApp::OnContextInitialized()

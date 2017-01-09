@@ -21,16 +21,16 @@ void DevToolsHandler::OnTitleChange(
 void DevToolsHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
 {  
 	CEF_REQUIRE_UI_THREAD();
-	browser_list_.push_back(browser);
+	_browserList.push_back(browser);
 }
 
 bool DevToolsHandler::DoClose(CefRefPtr<CefBrowser> browser)
 {
 	CEF_REQUIRE_UI_THREAD();
-	if (browser_list_.size() == 1)
+	if (_browserList.size() == 1)
 	{
 		// All browsers closed, one is allowed to close the window
-		is_closing_ = true;
+		_isClosing = true;
 	}
 	return false;
 }
@@ -40,12 +40,12 @@ void DevToolsHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser)
 	CEF_REQUIRE_UI_THREAD();
 
 	// Remove from the list of existing browsers
-	BrowserList::iterator bit = browser_list_.begin();
-	for (; bit != browser_list_.end(); bit++)
+	BrowserList::iterator bit = _browserList.begin();
+	for (; bit != _browserList.end(); bit++)
 	{
 		if ((*bit)->IsSame(browser))
 		{
-			browser_list_.erase(bit);
+			_browserList.erase(bit);
 			break;
 		}
 	}
@@ -85,13 +85,13 @@ void DevToolsHandler::CloseAllBrowsers(bool forceClose)
 		return;
 	}
 
-	if (browser_list_.empty())
+	if (_browserList.empty())
 	{
 		return;
 	}
 
-	BrowserList::const_iterator bit = browser_list_.begin();
-	for (; bit != browser_list_.end(); bit++)
+	BrowserList::const_iterator bit = _browserList.begin();
+	for (; bit != _browserList.end(); bit++)
 	{
 		(*bit)->GetHost()->CloseBrowser(forceClose);
 	}

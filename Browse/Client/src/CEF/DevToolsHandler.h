@@ -42,14 +42,14 @@ public:
 
 	// Request that all existing browser windows to close
 	void CloseAllBrowsers(bool forceClose);
-	bool IsClosing() const { return is_closing_; }
+	bool IsClosing() const { return _isClosing; }
 
 private:
 
 	// Members
 	typedef std::list<CefRefPtr<CefBrowser> > BrowserList;
-	BrowserList browser_list_;
-	bool is_closing_ = false;
+	BrowserList _browserList;
+	bool _isClosing = false;
 
 	// Include CEF'S default reference counting implementation
 	IMPLEMENT_REFCOUNTING(DevToolsHandler);
