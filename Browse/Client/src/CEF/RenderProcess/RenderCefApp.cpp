@@ -3,15 +3,10 @@
 // Author: Daniel Mueller (muellerd@uni-koblenz.de)
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// DOM node types.
 
-#ifndef DOMNODETYPE_H_
-#define DOMNODETYPE_H_
+#include "RenderCefApp.h"
 
-enum DOMNodeType
+RenderCefApp::RenderCefApp()
 {
-	TextInput = 0,
-	TextLink = 1
-};
-
-#endif // DOMNODETYPE_H_
+    _renderProcessHandler = new RenderProcessHandler();
+}

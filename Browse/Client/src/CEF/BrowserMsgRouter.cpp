@@ -1,16 +1,16 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel Müller (muellerd@uni-koblenz.de)
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
 //============================================================================
 
 #include "BrowserMsgRouter.h"
-#include "src/CEF/Extension/CefMediator.h"
+#include "src/CEF/Mediator.h"
 #include "src/Utils/Logger.h"
 #include "src/CEF/Data/DOMNode.h"
 #include <cstdlib>
 #include <algorithm>
 
-BrowserMsgRouter::BrowserMsgRouter(CefMediator* pMediator)
+BrowserMsgRouter::BrowserMsgRouter(Mediator* pMediator)
 {
 	_pMediator = pMediator;
 
@@ -18,8 +18,6 @@ BrowserMsgRouter::BrowserMsgRouter(CefMediator* pMediator)
 	CefMessageRouterConfig config;
 	config.js_query_function = "cefQuery";
 	config.js_cancel_function = "cefQueryCancel";
-
-	// Create and add the core message router
 	_router = CefMessageRouterBrowserSide::Create(config);
 
 	// Create and add msgRouter for msg handling
@@ -30,43 +28,6 @@ BrowserMsgRouter::BrowserMsgRouter(CefMediator* pMediator)
 MsgHandler::MsgHandler(BrowserMsgRouter* pMsgRouter)
 {
 	_pMsgRouter = pMsgRouter;
-}
-
-std::vector<std::string> MsgHandler::SplitBySeparator(std::string str, char separator)
-{
-	std::vector<std::string> output;
-	std::vector<char> buffer;
-
-	for (int i = 0; i < str.length(); i++)
-	{
-		const char read = str.at(i);
-		if (read == separator)
-		{
-			if (buffer.size() > 0)
-			{
-				const std::string bufferStr(buffer.begin(), buffer.end());
-				output.push_back(bufferStr);
-				buffer.clear();
-			}
-			// Insert empty strings between two separators, but not directly after first separator!
-			else if (i > 0 && buffer.size() == 0)
-			{
-				output.push_back("");
-			}
-		}
-		else
-		{
-			buffer.push_back(read);
-		}
-	}
-	if (buffer.size() > 0)
-	{
-		const std::string bufferStr(buffer.begin(), buffer.end());
-		output.push_back(bufferStr);
-		buffer.clear();
-	}
-
-	return output;
 }
 
 bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,

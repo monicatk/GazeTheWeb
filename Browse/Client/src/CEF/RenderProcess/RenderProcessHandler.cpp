@@ -1,10 +1,10 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel Müller (muellerd@uni-koblenz.de)
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
+// Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
 #include "RenderProcessHandler.h"
-#include "include/wrapper/cef_message_router.h"
 #include "include/base/cef_logging.h"
 #include "include/wrapper/cef_helpers.h"
 #include <sstream>
@@ -30,7 +30,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
     // Handle request of DOM node data
     if (msgName == "GetDOMElements")
     {
-		IPCLogDebug(browser, "Renderer: Reached old code 'GetDOMElements' msg");
+		IPCLogDebug(browser, "Reached old code 'GetDOMElements' msg");
     }
 
     // EXPERIMENTAL: Handle request of favicon image bytes
@@ -203,7 +203,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 
 	if (msgName == "FetchDOMTextLink" || msgName == "FetchDOMTextInput")
 	{
-		IPCLogDebug(browser, "Renderer: Received deprecated "+msgName+" message!");
+		IPCLogDebug(browser, "Received deprecated "+msgName+" message!");
 	}
 
 	if (msgName == "LoadDOMNodeData")
@@ -357,11 +357,6 @@ void RenderProcessHandler::OnContextReleased(CefRefPtr<CefBrowser> browser,
 		// DEBUG
 		frame->ExecuteJavaScript("MutationObserverShutdown()", "", 0);
     }
-}
-
-void RenderProcessHandler::IPCLogDebug(CefRefPtr<CefBrowser> browser, std::string text)
-{
-    IPCLog(browser, text, true);
 }
 
 /**

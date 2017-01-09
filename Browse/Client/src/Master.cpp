@@ -15,6 +15,7 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
+#include <fstream>
 
 // Namespace for text-csv
 namespace csv = ::text::csv;
@@ -97,7 +98,7 @@ const std::string simpleFragmentShaderSource =
 "   fragColor = texture(tex, uv);\n"
 "}\n";
 
-Master::Master(CefMediator* pCefMediator, std::string userDirectory)
+Master::Master(Mediator* pCefMediator, std::string userDirectory)
 {
     // Save members
     _pCefMediator = pCefMediator;
@@ -685,7 +686,6 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
             case GLFW_KEY_S: { _upLabStream->Send("42"); break; } // TODO: testing
-
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
         }
     }

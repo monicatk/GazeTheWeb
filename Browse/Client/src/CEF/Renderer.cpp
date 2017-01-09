@@ -1,17 +1,18 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel Müller (muellerd@uni-koblenz.de)
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
+// Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
 #include "Renderer.h"
-#include "src/CEF/Extension/CefMediator.h"
+#include "src/CEF/Mediator.h"
 #include "src/Utils/Texture.h"
 #include "src/Utils/Logger.h"
 #include "include/wrapper/cef_helpers.h"
 
-Renderer::Renderer(CefRefPtr<CefMediator> mediator)
+Renderer::Renderer(Mediator* pMediator)
 {
-    _mediator = mediator;
+    _mediator = pMediator;
 }
 
 bool Renderer::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect)
@@ -39,7 +40,6 @@ void Renderer::OnPaint(
     {
         // Fill texture with rendered website
         spTexture->Fill(width, height, GL_BGRA, (const unsigned char*)buffer);
-        //std::cout << "INFO(Renderer): Page rendered and copied to texture." << std::endl;
     }
     else
     {
@@ -49,6 +49,6 @@ void Renderer::OnPaint(
 
 void Renderer::OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser, double x, double y)
 {
-    // Call CefMediator to set offset in corresponding Tab
+    // Call Mediator to set offset in corresponding Tab
     _mediator->OnScrollOffsetChanged(browser, x, y);
 }

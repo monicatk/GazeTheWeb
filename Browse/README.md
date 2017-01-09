@@ -2,9 +2,10 @@
 
 ![Logo](media/Logo.png)
 
-Gaze controlled web browser, part of the EU-funded research project MAMEM. There exists a rough prototype for testing purposes in [_Prototype_](Prototype) subfolder and the work in progress implementation of the full featured one in the [_Client_](Client) subfolder. Both will only compile on either Windows with Visual Studio 2015 as 32bit project or on Linux with GCC 5.x as 64bit project for the moment. In addition, your graphics card must support OpenGL 3.3 or higher (f.e. not the case for second generation Intel i-GPUs or lower, at least on Windows).
+Gaze-controlled Web browser, part of the EU-funded research project MAMEM. There exists a rough prototype for testing purposes in [_Prototype_](Prototype) subfolder and the work in progress implementation of the full featured one in the [_Client_](Client) subfolder. Both will only compile on either Windows with Visual Studio 2015 as 32bit project or on Linux with GCC 5.x as 64bit project for the moment. In addition, your graphics card must support OpenGL 3.3 or higher (f.e. not the case for second generation Intel i-GPUs or lower, at least on Windows).
 
 ## Videos
+* [Demonstration](https://www.youtube.com/watch?v=x1ESgaoQR9Y)
 * [Demonstration of prototype](https://www.youtube.com/watch?v=zj1u6QTmk5k)
 
 ## News

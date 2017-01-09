@@ -34,7 +34,7 @@ const std::string fragmentShaderSource =
 "   fragColor = vec4(color,1);\n"
 "}\n";
 
-Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std::string url)
+Tab::Tab(Master* pMaster, Mediator* pCefMediator, WebTabInterface* pWeb, std::string url)
 {
 	// Fill members
 	_pMaster = pMaster;
@@ -366,7 +366,7 @@ void Tab::Update(float tpf, Input& rInput)
 			for (const auto& rElement : rElements)
 			{
 				// Simple box test
-				if(rElement.isInside(CEFPixelGazeX, CEFPixelGazeY))
+				if(rElement.IsInside(CEFPixelGazeX, CEFPixelGazeY))
 				{
 					gazeUponFixed = true;
 					break;
@@ -429,7 +429,7 @@ void Tab::Update(float tpf, Input& rInput)
 					}
 
 					// Check if current gaze is inside of overflow element, if so execute scrolling method in corresponding Javascript object
-					if (rRect.isInside(scrolledCEFPixelGazeX, scrolledCEFPixelGazeY))
+					if (rRect.IsInside(scrolledCEFPixelGazeX, scrolledCEFPixelGazeY))
 					{
 						_pCefMediator->ScrollOverflowElement(this, rOverflowElement->GetId(), CEFPixelGazeX, CEFPixelGazeY);
 						break;
@@ -735,7 +735,7 @@ void Tab::DrawDebuggingOverlay() const
 		model = glm::mat4(1.0f);
 		model = glm::scale(model, glm::vec3(1.f / _pMaster->GetWindowWidth(), 1.f / _pMaster->GetWindowHeight(), 1.f));
 		model = glm::translate(model, glm::vec3(_upWebView->GetX() + rect.left, _upWebView->GetHeight() - (rect.bottom), 1));
-		model = glm::scale(model, glm::vec3(rect.width(), rect.height(), 0));
+		model = glm::scale(model, glm::vec3(rect.Width(), rect.Height(), 0));
 
 		// Combine matrics
 		matrix = projection * model;
@@ -822,7 +822,7 @@ void Tab::DrawDebuggingOverlay() const
 		for (const auto& rFixedElement : rFixedElements)
 		{
 			// Render rect
-			if(rFixedElement.height() > 0 && rFixedElement.width() > 0)
+			if(rFixedElement.Height() > 0 && rFixedElement.Width() > 0)
 				renderRect(rFixedElement, true);
 		}
 	}

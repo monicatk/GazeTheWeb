@@ -1,6 +1,6 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel Müller (muellerd@uni-koblenz.de)
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Class for tabs. Registers itself in CefMediator. Implements all Tab
@@ -38,7 +38,7 @@
 
 // Forward declaration
 class Master;
-class CefMediator;
+class Mediator;
 
 // Class
 class Tab : public TabInteractionInterface, public TabCEFInterface
@@ -50,7 +50,7 @@ public:
 	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Constructor
-    Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std::string url);
+    Tab(Master* pMaster, Mediator* pCefMediator, WebTabInterface* pWeb, std::string url);
 
     // Destructor
     virtual ~Tab();
@@ -474,7 +474,7 @@ private:
     double _zoomLevel = 1;
 
     // Pointer to mediator
-    CefMediator* _pCefMediator;
+    Mediator* _pCefMediator;
 
 	// RenderItem used for debug rendering
 	std::unique_ptr<RenderItem> _upDebugRenderItem;

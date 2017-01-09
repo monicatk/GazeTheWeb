@@ -1,5 +1,8 @@
 #include <windows.h>
-#include "src/CEF/App.h"
+#include "src/CEF/MainCefApp.h"
+#include "src/CEF/RenderProcess/RenderCefApp.h"
+#include "src/CEF/OtherProcess/DefaultCefApp.h"
+#include "src/CEF/ProcessTypeGetter.h"
 #include "include/cef_sandbox_win.h"
 
 #if defined(CEF_USE_SANDBOX)
@@ -7,20 +10,29 @@
 #endif
 
 // Forward declaration of common main
-int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app, void* windows_sandbox_info, std::string userDirectory);
+int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<MainCefApp> app, void* windows_sandbox_info, std::string userDirectory);
 
 // Following taken partly out of CefSimple example of Chromium Embedded Framework!
 
 // Entry point function for all processes.
-int APIENTRY wWinMain(HINSTANCE hInstance,
+int APIENTRY wWinMain(
+	HINSTANCE hInstance,
 	HINSTANCE hPrevInstance,
 	LPTSTR    lpCmdLine,
-	int       nCmdShow) {
+	int       nCmdShow)
+{
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	// Enable High-DPI support on Windows 7 or newer.
 	// CefEnableHighDPISupport();
+
+	// Provide CEF with command-line arguments.
+	CefMainArgs main_args(hInstance);
+
+	// ###############
+	// ### SANDBOX ###
+	// ###############
 
 	// Sandbox information.
 	void* sandbox_info = NULL;
@@ -32,21 +44,51 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 	sandbox_info = scoped_sandbox.sandbox_info();
 #endif
 
-	// Provide CEF with command-line arguments.
-	CefMainArgs main_args(hInstance);
+	// ###############
+	// ### PROCESS ###
+	// ###############
 
-	// App implements application-level callbacks. It will create the first
-	// browser instance in OnContextInitialized() after CEF has initialized.
-	CefRefPtr<App> app(new App);
+	// Parse command-line arguments.
+	CefRefPtr<CefCommandLine> commandLine = CefCommandLine::CreateCommandLine();
+	commandLine->InitFromString(::GetCommandLineW());
 
-	// CEF applications have multiple sub-processes (render, plugin, GPU, etc)
-	// that share the same executable. This function checks the command-line and,
-	// if this is a sub-process, executes the appropriate logic.
+	// Create an app of the correct type.
+	CefRefPtr<CefApp> app;
+	CefRefPtr<MainCefApp> mainProcessApp; // extra pointer to main process app implementation. Only filled on main process.
+	ProcessType processType = ProcessTypeGetter::GetProcessType(commandLine);
+	switch (processType)
+	{
+	case ProcessType::MAIN:
+
+		// Main process
+		mainProcessApp = new MainCefApp();
+		app = mainProcessApp;
+		break;
+
+	case ProcessType::RENDER:
+
+		// Render process
+		app = new RenderCefApp();
+		break;
+
+	default:
+
+		// Any other process
+		app = new DefaultCefApp();
+		break;
+	}
+
+	// Execute process. Returns for main process zero.
 	int exit_code = CefExecuteProcess(main_args, app.get(), sandbox_info);
-	if (exit_code >= 0) {
+	if (exit_code >= 0 || mainProcessApp.get() == nullptr)
+	{
 		// The sub-process has completed so return here.
 		return exit_code;
 	}
+
+	// ################
+	// ### SETTINGS ###
+	// ################
 
 	// Specify CEF global settings here.
 	CefSettings settings;
@@ -90,5 +132,5 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 	userDirectory.append("\\");
 
 	// Use common main now.
-	return CommonMain(main_args, settings, app, sandbox_info, userDirectory);
+	return CommonMain(main_args, settings, mainProcessApp, sandbox_info, userDirectory);
 }

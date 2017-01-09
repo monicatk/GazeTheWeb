@@ -1,10 +1,11 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel Müller (muellerd@uni-koblenz.de)
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
+// Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
 #include "src/CEF/Handler.h"
-#include "src/CEF/Extension/CefMediator.h"
+#include "src/CEF/Mediator.h"
 #include "src/Utils/Logger.h"
 #include "include/base/cef_bind.h"
 #include "include/cef_app.h"
@@ -14,15 +15,9 @@
 #include <string>
 #include <cmath>
 
-namespace
-{
-    Handler* g_instance = NULL;
-}  // namespace
 
-Handler::Handler(CefMediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing(false)
+Handler::Handler(Mediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing(false)
 {
-  DCHECK(!g_instance);
-  g_instance = this;
   _pMediator = pMediator;
   _renderer = renderer;
   _msgRouter = new BrowserMsgRouter(pMediator);
@@ -30,13 +25,7 @@ Handler::Handler(CefMediator* pMediator, CefRefPtr<Renderer> renderer) : _isClos
 
 Handler::~Handler()
 {
-  g_instance = NULL;
-}
-
-// Static
-Handler* Handler::GetInstance()
-{
-  return g_instance;
+	// Nothing to do
 }
 
 void Handler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
@@ -442,6 +431,10 @@ void Handler::IPCLogRenderer(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcess
     {
         LogDebug("Renderer: ", text, " (browserID = ", browserID, ")");
     }
+	else
+	{
+		LogInfo("Renderer: ", text, " (browserID = ", browserID, ")");
+	}
 }
 
 void Handler::OnFaviconURLChange(CefRefPtr<CefBrowser> browser,

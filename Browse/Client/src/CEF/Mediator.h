@@ -1,20 +1,22 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel Müller (muellerd@uni-koblenz.de)
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
+// Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
 #ifndef CEF_MEDIATOR_H_
 #define CEF_MEDIATOR_H_
 
 #include "src/MasterNotificationInterface.h"
-#include "src/CEF/Handler.h"
 #include "include/cef_browser.h"
-#include "include/cef_base.h"
 #include "src/CEF/Data/DOMNodeType.h"
+#include "src/CEF/Handler.h"
+#include "src/CEF/DevToolsHandler.h"
 #include <set>
 #include <map>
 #include <memory>
 #include <queue>
+#include <functional>
 
 /**
 *	Expand CefApp by methods and attributes used to communicate with Master and
@@ -30,7 +32,7 @@ class OverflowElement;
 
 typedef int BrowserID;
 
-class CefMediator : public CefBase
+class Mediator
 {
 public:
 
@@ -127,15 +129,12 @@ public:
 	void FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
 
 	// Activate rendering in given Tab and deactivate it for all other Tabs
-	void SetTabActive(TabCEFInterface* pTab);	// TODO(Raphael): Call this method when Tab is changed via GUI
+	void SetActiveTab(TabCEFInterface* pTab);	// TODO Raphael: Call this method when Tab is changed via GUI
 	
 	// Master calls this method upon GLFW keyboard input in order to open new window with DevTools (for active Tab)
 	void ShowDevTools();
 
-	void RegisterJavascriptCallback(std::string prefix, std::function<void (std::string)>& callbackFunction)
-	{
-		_handler->RegisterJavascriptCallback(prefix, callbackFunction);
-	}
+	void RegisterJavascriptCallback(std::string prefix, std::function<void(std::string)>& callbackFunction);
 
 	// ### MOUSE INTERACTION ###
 
@@ -155,8 +154,9 @@ public:
 
 protected:
 
-    /* MEMBERS */
+    // Members
     CefRefPtr<Handler> _handler;
+	CefRefPtr<DevToolsHandler> _devToolsHandler;
 
     // Save corresponding (Tab, CefBrowser)-pairs in two maps
     std::map<TabCEFInterface*, CefRefPtr<CefBrowser>> _browsers;
@@ -175,8 +175,6 @@ protected:
 
 	// Pointer to master (but only functions exposed through the interface)
 	MasterNotificationInterface* _pMaster = NULL;
-
-    IMPLEMENT_REFCOUNTING(CefMediator);
 };
 
 
