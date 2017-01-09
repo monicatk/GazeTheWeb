@@ -225,11 +225,13 @@ void Web::RemoveAllTabs()
 
 bool Web::SwitchToTab(int id)
 {
+	bool success = false;
+
     // Simple case
     if(id == _currentTabId)
     {
         // Success!
-        return true;
+		success = true;
     }
 
     // Verify that id exists
@@ -252,10 +254,16 @@ bool Web::SwitchToTab(int id)
             _tabs.at(_currentTabId)->Activate();
         }
 
-        return true;
+		success = true;
     }
 
-    return false;
+	// Tell Mediator and return
+	if (_currentTabId >= 0)
+	{
+		// Set active Tab in Mediator
+		_pCefMediator->SetActiveTab(_tabs.at(_currentTabId).get()); 
+	}
+    return success;
 }
 
 bool Web::SwitchToTabByIndex(int index)

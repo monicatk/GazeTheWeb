@@ -126,7 +126,7 @@ public:
 	void FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
 
 	// Activate rendering in given Tab and deactivate it for all other Tabs
-	void SetTabActive(TabCEFInterface* pTab);	// TODO(Raphael): Call this method when Tab is changed via GUI
+	void SetActiveTab(TabCEFInterface* pTab);	// TODO Raphael: Call this method when Tab is changed via GUI
 	
 	// Master calls this method upon GLFW keyboard input in order to open new window with DevTools (for active Tab)
 	void ShowDevTools();

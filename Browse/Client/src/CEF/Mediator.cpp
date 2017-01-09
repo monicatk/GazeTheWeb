@@ -278,7 +278,7 @@ void Mediator::FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefP
 	}
 }
 
-void Mediator::SetTabActive(TabCEFInterface * pTab)
+void Mediator::SetActiveTab(TabCEFInterface * pTab)
 {
 	// Remember currently active Tab
 	_activeTab = pTab;
@@ -296,7 +296,6 @@ void Mediator::SetTabActive(TabCEFInterface * pTab)
 			// Deactivate rendering of all other Tabs
 			browser->GetHost()->WasHidden(true);
 		}
-
 	}
 }
 
@@ -494,37 +493,29 @@ std::weak_ptr<DOMNode> Mediator::GetDOMNode(CefRefPtr<CefBrowser> browser, DOMNo
 
 void Mediator::ShowDevTools()
 {
-	LogDebug("CefMediator: Showing DevTools...");
+	LogInfo("CefMediator: Showing DevTools...");
 
-	CefRefPtr<SimpleHandler> devToolHandler(new SimpleHandler());
+	CefRefPtr<DevToolsHandler> devToolsHandler(new DevToolsHandler());
 	CefWindowInfo window_info;
-
-#if defined(OS_WIN)
-	// On Windows we need to specify certain flags that will be passed to
-	// CreateWindowEx().
-	window_info.SetAsPopup(NULL, "DevTools");
-#endif
 	CefBrowserSettings settings;
 
-	if (_activeTab)
+#if defined(OS_WIN)
+	// Set title one Windows
+	window_info.SetAsPopup(NULL, "DevTools");
+#endif
+
+	// Show dev tools for active tab
+	if (_activeTab != NULL)
 	{
 		auto browser = GetBrowser(_activeTab);
 		if (browser)
 		{
-			browser->GetHost()->ShowDevTools(window_info, devToolHandler.get(), settings, CefPoint());
+			// Display dev tools of tab with handler of dev tools within extra window
+			LogInfo("CefMediator: Showing DevTools...2");
+			LogInfo(std::string(browser->GetMainFrame()->GetName()));
+			browser->GetHost()->ShowDevTools(window_info, devToolsHandler.get(), settings, CefPoint());
 		}
 	}
-	// TODO: Delete "else" path with for-each loop when SetTabActive is integrated & called
-	else
-	{
-		for (const auto& key : _browsers)
-		{
-
-			CefRefPtr<CefBrowser> browser = key.second;
-			browser->GetHost()->ShowDevTools(window_info, devToolHandler.get(), settings, CefPoint());
-		}
-	}
-
 }
 
 void Mediator::EmulateLeftMouseButtonDown(TabCEFInterface* pTab, double x, double y)
