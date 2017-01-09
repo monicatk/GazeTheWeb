@@ -889,6 +889,35 @@ function RemoveOverflowElement(id)
 {
     if(id < window.overflowElements.length && id >= 0)
     {
+        /* HACK FOR REMOVAL OF GLOBAL OVERFLOW ELEMENT CAUSING SCROLL LAGG */
+        domLinks.forEach(function(obj){
+            if(obj !== null && obj !== undefined)
+            {
+                if(obj.node !== null && obj.node !== undefined)
+                {
+                    if(obj.overflowParent == window.overflowElements[id].node)
+                    {
+                        obj.overflowParent = null;
+                        obj.updateRects();
+                    }
+                }
+            }
+        });
+        domTextInputs.forEach(function(obj){
+            if(obj !== null && obj !== undefined)
+            {
+                if(obj.node !== null && obj.node !== undefined)
+                {
+                    if(obj.overflowParent == window.overflowElements[id].node)
+                    {
+                        obj.overflowParent = null;
+                        obj.updateRects();
+                    }
+                }
+            }
+        });
+        /* END OF HACK */
+
         window.overflowElements[id].node.removeAttribute("overflowId");
         delete window.overflowElements[id]; // TODO: Keep list space empty or fill when new OE is created?
 
