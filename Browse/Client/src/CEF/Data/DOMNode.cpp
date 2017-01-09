@@ -4,22 +4,9 @@
 //============================================================================
 
 #include "DOMNode.h"
-
-#include <iostream>
 #include "src/Utils/Logger.h"
 
 /* DOMNode methods*/
-
-// Get list of center points as vec2 of all Rects in list
-std::vector<glm::vec2> DOMNode::GetCenters() const
-{
-	std::vector<glm::vec2> centers;
-	for (int i = 0; i < (int)_rects.size(); i++)
-	{
-		centers.push_back(_rects[i].Center());
-	}
-	return centers;
-}
 
 glm::vec2 DOMNode::GetCenter() const
 {
@@ -35,12 +22,23 @@ glm::vec2 DOMNode::GetCenter() const
 	return center;
 }
 
+std::vector<glm::vec2> DOMNode::GetCenters() const
+{
+	std::vector<glm::vec2> centers;
+	for (int i = 0; i < (int)_rects.size(); i++)
+	{
+		centers.push_back(_rects[i].Center());
+	}
+	return centers;
+}
+
 void DOMNode::SetRects(std::shared_ptr<std::vector<Rect>> rects)
 {
 	_rects = *rects.get();
 }
 
 /* DOMTextInput methods*/
+
 DOMTextInput::DOMTextInput(DOMNodeType type,
 	int64 frameID,
 	int nodeID,
@@ -56,8 +54,8 @@ DOMTextInput::DOMTextInput(DOMNodeType type,
 		"\tvalue: ", _value);
 }
 
+/* DOMLink methods */
 
-/* DOMTextLink methods */
 DOMLink::DOMLink(DOMNodeType type,
 	int64 frameID,
 	int nodeID,
@@ -76,6 +74,8 @@ DOMLink::DOMLink(
 {
 	_url = url;
 }
+
+/* Overflow methods */
 
 void OverflowElement::UpdateRect(int rectId, std::shared_ptr<Rect> rect)
 {
