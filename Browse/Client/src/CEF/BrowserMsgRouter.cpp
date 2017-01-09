@@ -295,7 +295,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 
 							std::vector<Rect> rects;
 							// Read out each 4 float values und create 1 Rect with them
-							for (int i = 0; i + 3 < (int)rectData.size(); i += 4)
+							for (int i = 0; i + 3 < rectData.size(); i += 4)
 							{
 								Rect rect = Rect(rectData[i], rectData[i + 1], rectData[i + 2], rectData[i + 3]);
 								rects.push_back(rect);

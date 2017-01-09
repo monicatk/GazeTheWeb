@@ -2,8 +2,6 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// Geter for type of process. Used in main function implementation of
-// different operation systems.
 
 #ifndef CEF_PROCESSTYPEGETTER_H_
 #define CEF_PROCESSTYPEGETTER_H_

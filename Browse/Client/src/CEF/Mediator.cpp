@@ -251,7 +251,7 @@ void Mediator::FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefP
 		// Read out multiple Rects
 		std::vector<Rect> rects;
 
-		for (int i = index; i + 3 < (int)args->GetSize(); i += 4)
+		for (int i = index; i + 3 < args->GetSize(); i += 4)
 		{
 			rects.push_back(
 				Rect(

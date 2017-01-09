@@ -58,14 +58,14 @@ private:
 	CefRefPtr<CefMessageRouterRendererSide> _msgRouter;
 
     // JavaScript code as Strings
-	const std::string _js_dom_update_sizes = GetJSCode(JSFile::DOM_UPDATE_SIZES);
-	const std::string _js_dom_fill_arrays = GetJSCode(JSFile::DOM_FILL_ARRAYS);
-	const std::string _js_favicon_create_img = GetJSCode(JSFile::FAVICON_CREATE_IMG);
-	const std::string _js_favicon_copy_img_bytes_to_v8array = GetJSCode(JSFile::FAVICON_COPY_IMG_BYTES_TO_V8ARRAY);
-	const std::string _js_fixed_element_read_out = GetJSCode(JSFile::FIXED_ELEMENT_READ_OUT);
-	const std::string _js_mutation_observer_test = GetJSCode(JSFile::MUTATION_OBSERVER_TEST);
-	const std::string _js_dom_mutationobserver = GetJSCode(JSFile::DOM_MUTATIONOBSERVER);
-	const std::string _js_dom_fixed_elements = GetJSCode(JSFile::DOM_FIXED_ELEMENTS);
+	const std::string _js_dom_update_sizes = GetJSCode(DOM_UPDATE_SIZES);
+	const std::string _js_dom_fill_arrays = GetJSCode(DOM_FILL_ARRAYS);
+	const std::string _js_favicon_create_img = GetJSCode(FAVICON_CREATE_IMG);
+	const std::string _js_favicon_copy_img_bytes_to_v8array = GetJSCode(FAVICON_COPY_IMG_BYTES_TO_V8ARRAY);
+	const std::string _js_fixed_element_read_out = GetJSCode(FIXED_ELEMENT_READ_OUT);
+	const std::string _js_mutation_observer_test = GetJSCode(MUTATION_OBSERVER_TEST);
+	const std::string _js_dom_mutationobserver = GetJSCode(DOM_MUTATIONOBSERVER);
+	const std::string _js_dom_fixed_elements = GetJSCode(DOM_FIXED_ELEMENTS);
 
     // Include CEF'S default reference counting implementation
     IMPLEMENT_REFCOUNTING(RenderProcessHandler);
