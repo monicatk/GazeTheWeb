@@ -496,6 +496,10 @@ std::weak_ptr<DOMNode> Mediator::GetDOMNode(CefRefPtr<CefBrowser> browser, DOMNo
 
 void Mediator::ShowDevTools()
 {
+
+	// DEBUG/TEST
+	_handler->LogGlobalEventInBrowserContext("YOLO");
+
 	LogInfo("CefMediator: Showing DevTools...");
 
 	// Setup

@@ -539,3 +539,16 @@ void Handler::ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, i
 	browser->GetMainFrame()->ExecuteJavaScript(js_code, "",	0);
 
 }
+
+void Handler::LogGlobalEventInBrowserContext(std::string log)
+{
+	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("AddToJSLoggingMediator");
+	msg->GetArgumentList()->SetString(0, log);
+
+	// Send message to every browser
+	for (const auto& browser : _browserList)
+	{
+		browser->SendProcessMessage(PID_RENDERER, msg);
+	}
+	
+}

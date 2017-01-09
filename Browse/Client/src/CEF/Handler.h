@@ -121,6 +121,9 @@ public:
 		_msgRouter->RegisterJavascriptCallback(prefix, callbackFunction);
 	}
 
+	// Send log data to LoggingMediator instance in each browser context
+	void LogGlobalEventInBrowserContext(std::string log);
+
 private:
 
     /* METHODS */

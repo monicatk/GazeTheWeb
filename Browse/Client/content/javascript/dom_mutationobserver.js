@@ -2,7 +2,6 @@ window.domLinks = [];
 window.domTextInputs = [];
 window.overflowElements = [];
 
-
 /* TODOs
         - Write method 'InformCEF' -- DONE
         - Delete methods with equal name in old approach
@@ -719,7 +718,7 @@ function OverflowElement(node)
 
                 if(scrollX !== 0 || scrollY !== 0)
                 {
-                    console.log("Scrolled overflowId="+this.node.getAttribute("overflowId")+" by x="+scrollX+" and y="+scrollY);
+                    // console.log("Scrolled overflowId="+this.node.getAttribute("overflowId")+" by x="+scrollX+" and y="+scrollY);
 
                     // Update Rects of all child elements
                     ForEveryChild(this.node, function(child){

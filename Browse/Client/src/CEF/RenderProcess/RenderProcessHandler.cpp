@@ -27,6 +27,24 @@ bool RenderProcessHandler::OnProcessMessageReceived(
     const std::string& msgName = msg->GetName().ToString();
     //IPCLogDebug(browser, "Received '" + msgName + "' IPC msg in RenderProcessHandler");
 
+	if (msgName == "AddToJSLoggingMediator")
+	{
+		CefRefPtr<CefV8Value> log = CefV8Value::CreateString(msg->GetArgumentList()->GetString(0));
+
+		CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
+		if (context->Enter())
+		{
+			CefRefPtr<CefV8Value> window = context->GetGlobal();
+			CefRefPtr<CefV8Value> logMediator = window->GetValue("loggingMediator");
+			if (logMediator->IsObject())
+			{
+				logMediator->GetValue("log")->ExecuteFunction(logMediator, { log });
+			}
+
+			context->Exit();
+		}
+	}
+
     // Handle request of DOM node data
     if (msgName == "GetDOMElements")
     {
