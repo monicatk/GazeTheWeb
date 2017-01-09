@@ -30,7 +30,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
     // Handle request of DOM node data
     if (msgName == "GetDOMElements")
     {
-		IPCLogDebug(browser, "Renderer: Reached old code 'GetDOMElements' msg");
+		IPCLogDebug(browser, "Reached old code 'GetDOMElements' msg");
     }
 
     // EXPERIMENTAL: Handle request of favicon image bytes
@@ -203,7 +203,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 
 	if (msgName == "FetchDOMTextLink" || msgName == "FetchDOMTextInput")
 	{
-		IPCLogDebug(browser, "Renderer: Received deprecated "+msgName+" message!");
+		IPCLogDebug(browser, "Received deprecated "+msgName+" message!");
 	}
 
 	if (msgName == "LoadDOMNodeData")

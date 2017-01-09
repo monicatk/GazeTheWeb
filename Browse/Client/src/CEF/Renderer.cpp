@@ -39,7 +39,6 @@ void Renderer::OnPaint(
     {
         // Fill texture with rendered website
         spTexture->Fill(width, height, GL_BGRA, (const unsigned char*)buffer);
-        //std::cout << "INFO(Renderer): Page rendered and copied to texture." << std::endl;
     }
     else
     {
@@ -49,6 +48,6 @@ void Renderer::OnPaint(
 
 void Renderer::OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser, double x, double y)
 {
-    // Call CefMediator to set offset in corresponding Tab
+    // Call Mediator to set offset in corresponding Tab
     _mediator->OnScrollOffsetChanged(browser, x, y);
 }
