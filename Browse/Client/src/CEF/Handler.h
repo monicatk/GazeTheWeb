@@ -148,8 +148,8 @@ private:
 	CefRefPtr<BrowserMsgRouter> _msgRouter;
 
     // Javascript code as Strings
-    const std::string _js_remove_css_scrollbar = GetJSCode(REMOVE_CSS_SCROLLBAR);
-    const std::string _js_fixed_element_search = GetJSCode(FIXED_ELEMENT_SEARCH);
+    const std::string _js_remove_css_scrollbar = GetJSCode(JSFile::REMOVE_CSS_SCROLLBAR);
+    const std::string _js_fixed_element_search = GetJSCode(JSFile::FIXED_ELEMENT_SEARCH);
 
 	// Set for parsing strings (as char by accessing it with []) to numbers
 	std::set<char> digits = { '0', '1', '2', '3', '4', '5', '6' ,'7', '8', '9' };

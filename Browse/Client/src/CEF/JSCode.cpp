@@ -4,23 +4,27 @@
 //============================================================================
 
 #include "JSCode.h"
+#include "src/Utils/Logger.h"
+#include <map>
+#include <fstream>
 
+// Path to JavaScript in content folder
 const std::string src = CONTENT_PATH "/javascript/";
 
 // List of all available JS code file paths and how to access them with JSCode enum
 const std::map<JSFile, std::string> findJSFile =
 {
-    std::make_pair<JSFile, std::string>(REMOVE_CSS_SCROLLBAR, src + "remove_css_scrollbar.js"),
-    std::make_pair<JSFile, std::string>(DOM_UPDATE_SIZES, src + "dom_update_sizes.js"),
-    std::make_pair<JSFile, std::string>(DOM_FILL_ARRAYS, src + "dom_fill_arrays.js"),
-    std::make_pair<JSFile, std::string>(FAVICON_GET_URL_AND_RESOLUTION, src + "favicon_get_url_and_resolution.js"),
-    std::make_pair<JSFile, std::string>(FAVICON_CREATE_IMG, src + "favicon_create_img.js"),
-    std::make_pair<JSFile, std::string>(FAVICON_COPY_IMG_BYTES_TO_V8ARRAY, src + "favicon_copy_img_bytes_to_v8array.js"),
-    std::make_pair<JSFile, std::string>(MUTATION_OBSERVER_TEST, src + "mutation_observer_test.js"),
-    std::make_pair<JSFile, std::string>(FIXED_ELEMENT_SEARCH, src + "fixed_element_search.js"),
-    std::make_pair<JSFile, std::string>(FIXED_ELEMENT_READ_OUT, src + "fixed_element_read_out.js"),
-	std::make_pair<JSFile, std::string>(DOM_MUTATIONOBSERVER, src + "dom_mutationobserver.js"),
-	std::make_pair<JSFile, std::string>(DOM_FIXED_ELEMENTS, src + "dom_fixed_elements.js")
+    std::make_pair<JSFile, std::string>(JSFile::REMOVE_CSS_SCROLLBAR, src + "remove_css_scrollbar.js"),
+    std::make_pair<JSFile, std::string>(JSFile::DOM_UPDATE_SIZES, src + "dom_update_sizes.js"),
+    std::make_pair<JSFile, std::string>(JSFile::DOM_FILL_ARRAYS, src + "dom_fill_arrays.js"),
+    std::make_pair<JSFile, std::string>(JSFile::FAVICON_GET_URL_AND_RESOLUTION, src + "favicon_get_url_and_resolution.js"),
+    std::make_pair<JSFile, std::string>(JSFile::FAVICON_CREATE_IMG, src + "favicon_create_img.js"),
+    std::make_pair<JSFile, std::string>(JSFile::FAVICON_COPY_IMG_BYTES_TO_V8ARRAY, src + "favicon_copy_img_bytes_to_v8array.js"),
+    std::make_pair<JSFile, std::string>(JSFile::MUTATION_OBSERVER_TEST, src + "mutation_observer_test.js"),
+    std::make_pair<JSFile, std::string>(JSFile::FIXED_ELEMENT_SEARCH, src + "fixed_element_search.js"),
+    std::make_pair<JSFile, std::string>(JSFile::FIXED_ELEMENT_READ_OUT, src + "fixed_element_read_out.js"),
+	std::make_pair<JSFile, std::string>(JSFile::DOM_MUTATIONOBSERVER, src + "dom_mutationobserver.js"),
+	std::make_pair<JSFile, std::string>(JSFile::DOM_FIXED_ELEMENTS, src + "dom_fixed_elements.js")
 };
 
 std::string GetJSCode(JSFile file)
@@ -43,52 +47,44 @@ std::string GetJSCode(JSFile file)
         }
         else
         {
-            std::cout << "ERROR: Couldn't open JS file!" << std::endl; // TODO: couts do not appear in console!
-            return "alert('ERROR: Could not open JS code file!');";
+			LogError("JSCode: Cannot open JS code file");
+            return "alert('ERROR: Could not open JS code file');"; // return JavaScript code to create alert
         }
     }
     else
     {
-        std::cout << "ERROR: JSCode has not found the requested code file!" << std::endl;
-        return "alert('ERROR: JSCode has not found the requested code file!');";
+		LogError("JSCode: Cannot find the requested JS code file");
+        return "alert('ERROR: Cannot find the requested JS code file');"; // return JavaScript code to create alert
     }
 }
 
 // TODO: Delete this method and use CefV8Value::ExecuteFunction(WithContext)? Possible in Browser Thread without context->Enter()?
 std::string jsInputTextData(int inputID, std::string text, bool submit)
 {
-	std::string code = "var domObj = GetDOMObject(0," + std::to_string(inputID) + ");\
-                        domObj.setTextInput('" + text + "'," + std::to_string(submit) + ");";
+	const std::string code = "var domObj = GetDOMObject(0," + std::to_string(inputID) + ");\
+								domObj.setTextInput('" + text + "'," + std::to_string(submit) + ");";
 
 	// NOTE: Query Selector with ":required" for submitting forms or not?
 	// BTW: ":optional" for inputs without "required" attribute
 
     return code;
-
-            /*
-            //alert('Done setting text input');\
-            //textInput[" + std::to_string(inputID) + "].onclick=function(){alert('Clicked!');};\
-            //textInput[" + std::to_string(inputID) + "].onkeypress=function(){alert('Key pressed!');};\
-            //textInput[" + std::to_string(inputID) + "].click();\
-            //textInput[" + std::to_string(inputID) + "].keypress();\
-            //alert('--- Done ---');";
-            */
 }
 
 std::string jsFavIconUpdate(std::string oldUrl)
 {
-    return
-    //alert('favIcon Update script');
-   "for (i = 0; i < links.length; i++)\
-    {\
-        if(links[i].rel == 'icon' || links[i].rel == 'shortcut icon')\
-        {\
-            window.favIconUrl = links[i].href;\
-        }\
-    }"
-    /*if(window.favIconUrl == '')\
-        alert('(Update) Searched '+links.length+', have not found iconURL...');\*/
-    "if(window.favIconUrl != " + oldUrl + ")\
-        favIconImg.src = window.favIconUrl;\
-    ";
+	const std::string code = 
+	   "for (i = 0; i < links.length; i++)\
+		{\
+			if(links[i].rel == 'icon' || links[i].rel == 'shortcut icon')\
+			{\
+				window.favIconUrl = links[i].href;\
+			}\
+		}"
+		/*if(window.favIconUrl == '')\
+			alert('(Update) Searched '+links.length+', have not found iconURL...');\*/
+		"if(window.favIconUrl != " + oldUrl + ")\
+			favIconImg.src = window.favIconUrl;\
+		";
+
+	return code;
 }
