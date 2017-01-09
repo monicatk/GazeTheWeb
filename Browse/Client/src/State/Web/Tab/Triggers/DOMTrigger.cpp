@@ -50,7 +50,7 @@ bool DOMTrigger::Update(float tpf, TabInput& rTabInput)
     bool visible =
         _spNode->GetVisibility() // DOM node visible
         && !_spNode->GetRects().empty() // DOM node has rects
-        && _spNode->GetRects().front().width() != 0 && _spNode->GetRects().front().height() != 0; // At least the first rect is bigger than zero
+        && _spNode->GetRects().front().Width() != 0 && _spNode->GetRects().front().Height() != 0; // At least the first rect is bigger than zero
     if(_visible != visible)
     {
         _visible = visible;

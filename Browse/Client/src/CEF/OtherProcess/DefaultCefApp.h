@@ -2,6 +2,7 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Daniel Mueller (muellerd@uni-koblenz.de)
 //============================================================================
+// CefApp implementation for all processes but Main and Render.
 
 #ifndef CEF_DEFAULTCEFAPP_H_
 #define CEF_DEFAULTCEFAPP_H_
@@ -11,9 +12,13 @@
 class DefaultCefApp : public CefApp
 {
 public:
+
+	// Constructor
 	DefaultCefApp() {}
 
 private:
+
+	// Include CEF'S default reference counting implementation
 	IMPLEMENT_REFCOUNTING(DefaultCefApp);
 	DISALLOW_COPY_AND_ASSIGN(DefaultCefApp);
 };

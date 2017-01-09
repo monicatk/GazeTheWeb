@@ -2,6 +2,7 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Daniel Mueller (muellerd@uni-koblenz.de)
 //============================================================================
+// Rectangle structure used for bounding box of DOM nodes.
 
 #ifndef RECT_H_
 #define RECT_H_
@@ -15,14 +16,15 @@ class Rect
 public:
 
 	// Default constructor
-	Rect() {
+	Rect()
+	{
 		top = 0;
 		left = 0;
 		bottom = 0;
 		right = 0;
 	}
 
-	// Constructor
+	// Constructor taking single values
 	Rect(float t, float l, float b, float r)
 	{
 		top = t;
@@ -31,6 +33,7 @@ public:
 		right = r;
 	}
 
+	// Constructor taking vector of values
 	Rect(std::vector<float> data)
 	{
 		// Simulate default constructor if not enough data is given
@@ -53,20 +56,23 @@ public:
 	float right = 0.f;
 
 	// Methods
-	float width() const { return right - left; }
-	float height() const { return bottom - top; }
-	glm::vec2 center() const { return glm::vec2(left + (width() / 2.f), top + (height() / 2.f)); }
+	float Width() const { return right - left; }
+	float Height() const { return bottom - top; }
 
-	bool isZero() const { return (width() <= 0 || height() <= 0); }
-	std::string toString() const {
+	glm::vec2 Center() const { return glm::vec2(left + (Width() / 2.f), top + (Height() / 2.f)); }
+
+	bool IsZero() const { return (Width() <= 0 || Height() <= 0); }
+
+	std::string ToString() const
+	{
 		return "(" + std::to_string(top) + ", " + std::to_string(left) + ", "
 			+ std::to_string(bottom) + ", " + std::to_string(right) + ")";
 	}
-	bool isInside(float x, float y) const
+
+	bool IsInside(float x, float y) const
 	{
 		return y <= bottom && y >= top && x >= left && x <= right;
 	}
-
 };
 
 #endif

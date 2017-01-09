@@ -123,8 +123,8 @@ std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pagePixelCoordinate, 
             for(const auto& rRect : rLink->GetRects())
             {
                 // Distance
-                float dx = glm::max(glm::abs(pagePixelCoordinate.x - rRect.center().x) - (rRect.width() / 2.f), 0.f);
-                float dy = glm::max(glm::abs(pagePixelCoordinate.y - rRect.center().y) - (rRect.height() / 2.f), 0.f);
+                float dx = glm::max(glm::abs(pagePixelCoordinate.x - rRect.Center().x) - (rRect.Width() / 2.f), 0.f);
+                float dy = glm::max(glm::abs(pagePixelCoordinate.y - rRect.Center().y) - (rRect.Height() / 2.f), 0.f);
                 float distance = glm::sqrt((dx * dx) + (dy * dy));
 
                 // Check whether distance is smaller

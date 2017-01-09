@@ -16,7 +16,7 @@ std::vector<glm::vec2> DOMNode::GetCenters() const
 	std::vector<glm::vec2> centers;
 	for (int i = 0; i < (int)_rects.size(); i++)
 	{
-		centers.push_back(_rects[i].center());
+		centers.push_back(_rects[i].Center());
 	}
 	return centers;
 }
@@ -28,7 +28,7 @@ glm::vec2 DOMNode::GetCenter() const
 	{
 		for (int i = 0; i < (int)_rects.size(); i++)
 		{
-			center += _rects[i].center();
+			center += _rects[i].Center();
 		}
 		center /= _rects.size();
 	}
@@ -52,7 +52,7 @@ DOMTextInput::DOMTextInput(DOMNodeType type,
 	LogDebug("DOMTextInput constructed", "\n",
 		"\tFrameID: ", _frameID, "\n",
 		"\tnodeID: ", _nodeID, "\n",
-		"\tcoordinates: ", _rects[0].toString(), "\n",
+		"\tcoordinates: ", _rects[0].ToString(), "\n",
 		"\tvalue: ", _value);
 }
 
