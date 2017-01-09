@@ -64,7 +64,7 @@ EyeInput::EyeInput(bool useEmulation)
 				CONNECT procConnect = (CONNECT)GetProcAddress(_pluginHandle, "Connect");
 
 				// Fetch procedure for fetching gaze data
-				_procFetchGaze = (FETCH_GAZE)GetProcAddress(_pluginHandle, "GetKOrLessValidRawGazeEntries");
+				_procFetchGaze = (FETCH_GAZE)GetProcAddress(_pluginHandle, "FetchGaze");
 
 				// Check whether procedures could be loaded
 				if (procConnect != NULL && _procFetchGaze != NULL)
