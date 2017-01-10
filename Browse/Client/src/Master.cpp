@@ -377,7 +377,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// ### JavaScript to LSL ###
 
 	// Registers a JavaScript callback function that pipes JS callbacks starting with "lsl:" to LabStreamingLayer
-	_pCefMediator->RegisterJavascriptCallback("lsl:", [this](std::string message) { this->_upLabStream->Send(message); });
+	_pCefMediator->RegisterJavascriptCallback("lsl:", [this](std::string message) { this->_upLabStream->Send(message); LogInfo("LABBABAFDSFDSFKJKDSLFDSJF"); });
 
     // ### OTHER ###
 

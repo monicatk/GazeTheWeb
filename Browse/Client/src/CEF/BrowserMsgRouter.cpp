@@ -21,16 +21,11 @@ BrowserMsgRouter::BrowserMsgRouter(Mediator* pMediator)
 	_router = CefMessageRouterBrowserSide::Create(config);
 
 	// Create and add msgRouter for msg handling
-	CefMessageRouterBrowserSide::Handler* myHandler = new MsgHandler(this);
-	_router->AddHandler(myHandler, true);
+	CefMessageRouterBrowserSide::Handler* defaultHandler = new DefaultMsgHandler(_pMediator);
+	_router->AddHandler(defaultHandler, true);
 }
 
-MsgHandler::MsgHandler(BrowserMsgRouter* pMsgRouter)
-{
-	_pMsgRouter = pMsgRouter;
-}
-
-bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
+bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	CefRefPtr<CefFrame> frame,
 	int64 query_id,
 	const CefString& request,
@@ -66,7 +61,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			LogDebug("MsgRouter: Selected Text: '", selectionStr, "'");
 
 			// Set clipboard in mediator (TODO: what happens when two parallel string extractions are ongoing? some weird overwriting)
-			_pMsgRouter->GetMediator()->SetClipboardText(selectionStr);
+			_pMediator->SetClipboardText(selectionStr);
 		}
 	
 		return true;
@@ -86,7 +81,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			{
 
 				// Notify Tab via CefMediator, that a fixed element was removed
-				_pMsgRouter->GetMediator()->RemoveFixedElement(browser, atoi(id.c_str()));
+				_pMediator->RemoveFixedElement(browser, atoi(id.c_str()));
 
 				return true;
 			}
@@ -139,14 +134,14 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 
 			OverflowElement overflowElem = OverflowElement(id, rect, scrollLeftMax, scrollTopMax);
 
-			_pMsgRouter->GetMediator()->AddOverflowElement(browser, std::make_shared<OverflowElement>(overflowElem));
+			_pMediator->AddOverflowElement(browser, std::make_shared<OverflowElement>(overflowElem));
 
 			return true;
 		}
 		if (requestName.compare(9, 4, "rem#") == 0)
 		{
 			std::vector<std::string> dataStr = SplitBySeparator(requestName.substr(13), '#');
-			_pMsgRouter->GetMediator()->RemoveOverflowElement(browser, std::stoi(dataStr[0]));
+			_pMediator->RemoveOverflowElement(browser, std::stoi(dataStr[0]));
 
 			return true;
 		}
@@ -166,7 +161,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				// dataStr[2] contains data for given attributes value changes
 
 				// Get access to given Overflow Element in Tab
-				std::weak_ptr<OverflowElement> wpElem = _pMsgRouter->GetMediator()->GetOverflowElement(browser, id);
+				std::weak_ptr<OverflowElement> wpElem = _pMediator->GetOverflowElement(browser, id);
 				if (const auto& elem = wpElem.lock())
 				{
 					// Update Overflow Element's rect data
@@ -249,7 +244,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				//LogDebug("MsgHandler: Javascript says, that DOM node with type=", type, " & id=", id, " was found.");
 
 				// Create blank DOM node of given node type with nodeID
-				_pMsgRouter->GetMediator()->AddDOMNode(
+				_pMediator->AddDOMNode(
 					browser,
 					std::make_shared<DOMNode>(
 						type,
@@ -269,7 +264,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			// Node was removed
 			if (op.compare("rem") == 0)
 			{
-				_pMsgRouter->GetMediator()->RemoveDOMNode(browser, type, id);
+				_pMediator->RemoveDOMNode(browser, type, id);
 			}
 
 			// Node was updated
@@ -302,7 +297,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 							}
 
 							// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
-							if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
+							if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())
 							{
 								targetNode->SetRects(std::make_shared<std::vector<Rect>>(rects));
 							}
@@ -314,7 +309,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 							bool boolVal = attrData.at(0) != '0';
 
 							// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
-							if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
+							if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())
 							{
 								targetNode->SetFixed(boolVal);
 							}
@@ -327,7 +322,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 							bool boolVal = attrData.at(0) != '0';
 
 							// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
-							if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
+							if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())
 							{
 								targetNode->SetVisibility(boolVal);
 							}
@@ -336,7 +331,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 						}
 						// Node's text(Content) changed
 						case (3) : {
-							if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
+							if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())
 							{
 								targetNode->SetText(attrData);
 								//LogDebug("MsgRouter: Set node's text attribute to: '", attrData, "'");
@@ -345,7 +340,7 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 						}
 						// Node is set as password input field
 						case(4) : {
-							if (auto targetNode = _pMsgRouter->GetMediator()->GetDOMNode(browser, type, id).lock())
+							if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())
 							{
 								targetNode->SetAsPasswordField();
 								LogDebug("MsgRouter: Set input field node to password field!");
@@ -368,15 +363,30 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		return true;
 	}
 
-	// Check externals callback entries
-	if (SearchForExternalCallbacks(requestName))
+	// Print message to console and withdraw callback
+	//LogDebug("JavaScript: ", requestName);
+	//callback->Failure(0, "");
+
+	return false;
+}
+
+bool CallbackMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
+	CefRefPtr<CefFrame> frame,
+	int64 query_id,
+	const CefString& request,
+	bool persistent,
+	CefRefPtr<Callback> callback)
+{
+	const std::string requestName = request.ToString();
+	
+	// Compare prefix of request with given prefix
+	if (requestName.substr(0, _prefix.size()).compare(_prefix) == 0)
 	{
+		// Call callback (including prefix)
+		_callbackFunction(requestName);
+		callback->Success("success"); // tell JavaScript about success
 		return true;
 	}
-
-	// Print message to console and withdraw callback
-	LogDebug("JavaScript: ", requestName);
-	callback->Failure(0, "");
 
 	return false;
 }
