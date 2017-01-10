@@ -40,7 +40,7 @@ private:
 
 	std::map<std::string, std::function<void (std::string)>> _externalCallbacks;
 
-	void SearchForExternalCallbacks(std::string request)
+	bool SearchForExternalCallbacks(std::string request)
 	{
 		for (const auto& tupel : _externalCallbacks)
 		{
@@ -53,9 +53,10 @@ private:
 				(tupel.second)(request);
 
 				// Stop searching in list of prefixes
-				break;
+				return true;
 			}
 		}
+		return false;
 	}
 
 	//IMPLEMENT_REFCOUNTING(MsgHandler);

@@ -368,7 +368,11 @@ bool MsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		return true;
 	}
 
-	SearchForExternalCallbacks(requestName);
+	// Check externals callback entries
+	if (SearchForExternalCallbacks(requestName))
+	{
+		return true;
+	}
 
 	// Print message to console and withdraw callback
 	LogDebug("JavaScript: ", requestName);
