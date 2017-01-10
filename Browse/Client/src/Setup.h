@@ -24,7 +24,7 @@ namespace setup
 	static const int TEXT_SELECTION_MARGIN = 4; // area which is selected before / after zoom coordinate in CEFPixels
 
     // Debugging
-    static const bool LOG_DEBUG_MESSAGES = true;
+    static const bool LOG_DEBUG_MESSAGES = false;
     static const bool DRAW_DEBUG_OVERLAY = false;
 
     // Experiments

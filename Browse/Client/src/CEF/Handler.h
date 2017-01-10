@@ -122,7 +122,7 @@ public:
 	}
 
 	// Send log data to LoggingMediator instance in each browser context
-	void LogGlobalEventInBrowserContext(std::string log);
+	void SendToJSLoggingMediator(std::string message);
 
 private:
 

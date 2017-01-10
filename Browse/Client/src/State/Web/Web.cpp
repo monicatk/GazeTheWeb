@@ -12,6 +12,9 @@
 #include "src/Utils/MakeUnique.h"
 #include <algorithm>
 
+// Include singleton for mailing to JavaScript
+#include "src/JSMailer.h"
+
 Web::Web(Master* pMaster, Mediator* pCefMediator) : State(pMaster)
 {
     // Save member
@@ -99,6 +102,9 @@ int Web::AddTab(std::string URL, bool show)
 
 	// Update icon of tab overview button
 	UpdateTabOverviewIcon();
+
+	// Mail to JavaScript about it
+	JSMailer::instance().Send("New Tab Added");
 
     // Retun id of tab
     return id;

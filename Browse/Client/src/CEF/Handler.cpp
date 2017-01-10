@@ -7,6 +7,7 @@
 #include "src/CEF/Handler.h"
 #include "src/CEF/Mediator.h"
 #include "src/Utils/Logger.h"
+#include "src/JSMailer.h"
 #include "include/base/cef_bind.h"
 #include "include/cef_app.h"
 #include "include/wrapper/cef_closure_task.h"
@@ -21,6 +22,10 @@ Handler::Handler(Mediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing
   _pMediator = pMediator;
   _renderer = renderer;
   _msgRouter = new BrowserMsgRouter(pMediator);
+
+  // TODO: delete all this or do a nice rewrite
+  // Tell JSMailer singleton about the method to call
+  JSMailer::instance().SetHandler(this);
 }
 
 Handler::~Handler()
@@ -540,10 +545,10 @@ void Handler::ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, i
 
 }
 
-void Handler::LogGlobalEventInBrowserContext(std::string log)
+void Handler::SendToJSLoggingMediator(std::string message)
 {
-	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("AddToJSLoggingMediator");
-	msg->GetArgumentList()->SetString(0, log);
+	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("SendToLoggingMediator");
+	msg->GetArgumentList()->SetString(0, message);
 
 	// Send message to every browser
 	for (const auto& browser : _browserList)

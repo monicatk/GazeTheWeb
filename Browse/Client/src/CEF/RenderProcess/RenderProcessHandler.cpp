@@ -27,7 +27,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
     const std::string& msgName = msg->GetName().ToString();
     //IPCLogDebug(browser, "Received '" + msgName + "' IPC msg in RenderProcessHandler");
 
-	if (msgName == "AddToJSLoggingMediator")
+	if (msgName == "SendToLoggingMediator")
 	{
 		CefRefPtr<CefV8Value> log = CefV8Value::CreateString(msg->GetArgumentList()->GetString(0));
 
