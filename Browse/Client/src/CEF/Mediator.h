@@ -134,7 +134,7 @@ public:
 	// Master calls this method upon GLFW keyboard input in order to open new window with DevTools (for active Tab)
 	void ShowDevTools();
 
-	void RegisterJavascriptCallback(std::string prefix, std::function<void(std::string)>& callbackFunction);
+	void RegisterJavascriptCallback(std::string prefix, std::function<void(std::string)> callbackFunction);
 
 	// ### MOUSE INTERACTION ###
 

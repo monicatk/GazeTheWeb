@@ -371,13 +371,18 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
             geometryShaderSource,
             setup::BLUR_PERIPHERY ? blurFragmentShaderSource : simpleFragmentShaderSource));
 
+	// ### LabStreamingLayer ###
+	_upLabStream = std::unique_ptr<LabStream>(new LabStream);
+
+	// ### JavaScript to LSL ###
+
+	// Registers a JavaScript callback function that pipes JS callbacks starting with "lsl:" to LabStreamingLayer
+	_pCefMediator->RegisterJavascriptCallback("lsl:", [this](std::string message) { this->_upLabStream->Send(message); });
+
     // ### OTHER ###
 
     // Time
     _lastTime = glfwGetTime();
-
-    // Connection to LabStreamingLayer
-    _upLabStream = std::unique_ptr<LabStream>(new LabStream);
 }
 
 Master::~Master()

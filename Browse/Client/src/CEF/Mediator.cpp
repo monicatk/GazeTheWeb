@@ -519,7 +519,7 @@ void Mediator::ShowDevTools()
 	}
 }
 
-void Mediator::RegisterJavascriptCallback(std::string prefix, std::function<void(std::string)>& callbackFunction)
+void Mediator::RegisterJavascriptCallback(std::string prefix, std::function<void(std::string)> callbackFunction)
 {
 	_handler->RegisterJavascriptCallback(prefix, callbackFunction);
 }
