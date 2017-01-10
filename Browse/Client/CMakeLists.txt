@@ -89,6 +89,8 @@ else()
 	add_definitions(-DCONTENT_PATH="${CLIENT_CONTENT_PATH}")
 endif()
 
+add_subdirectory("${CLIENT_CONTENT_PATH}")
+
 ### SOURCES ####################################################################
 
 # Include directory
@@ -285,7 +287,7 @@ if(MSVC)
 		# Get the path of the file relative to ${CMAKE_CURRENT_SOURCE_DIR},
 		# then alter it (not compulsory)
 		file(RELATIVE_PATH SRCGR "${CMAKE_CURRENT_SOURCE_DIR}" ${f})
-		set(SRCGR "${LIBNAME}/${SRCGR}")
+		set(SRCGR "${SRCGR}")
 
 		# Extract the folder, ie remove the filename part
 		string(REGEX REPLACE "(.*)(/[^/]*)$" "\\1" SRCGR ${SRCGR})

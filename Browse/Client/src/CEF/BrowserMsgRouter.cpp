@@ -377,13 +377,16 @@ bool CallbackMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	bool persistent,
 	CefRefPtr<Callback> callback)
 {
-	const std::string requestName = request.ToString();
+	const std::string requestString = request.ToString();
 	
 	// Compare prefix of request with given prefix
-	if (requestName.substr(0, _prefix.size()).compare(_prefix) == 0)
+	if (requestString.substr(0, _prefix.size()).compare(_prefix) == 0)
 	{
-		// Call callback (including prefix)
-		_callbackFunction(requestName);
+		// Remove prefix
+		std::string message = requestString.substr(_prefix.size());
+
+		// Call callback
+		_callbackFunction(message);
 		callback->Success("success"); // tell JavaScript about success
 		return true;
 	}
