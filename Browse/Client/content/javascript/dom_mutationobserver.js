@@ -2,7 +2,6 @@ window.domLinks = [];
 window.domTextInputs = [];
 window.overflowElements = [];
 
-
 /* TODOs
         - Write method 'InformCEF' -- DONE
         - Delete methods with equal name in old approach
@@ -713,47 +712,43 @@ function OverflowElement(node)
                     scrollY += (maxScrollingPerFrame * (1 - (distBottom / tresholdY)));
                 }
 
-                // ConsolePrint("Executing OverflowElement scrolling by (x, y) = ("+scrollX+", "+scrollY+").");
-                
-                // // DEBUG 
-                // var id = this.node.getAttribute("overflowId");
-                // ConsolePrint(id+" before: scrollLeft: "+this.node.scrollLeft+" scrollTop: "+this.node.scrollTop);
-
                 // Execute scrolling
                 this.node.scrollLeft += scrollX;
                 this.node.scrollTop += scrollY;
 
-                // // DEBUG
-                // ConsolePrint(id+"after : ("+scrollX+", "+scrollY+")\t-- scrollLeft: "+this.node.scrollLeft+" scrollTop: "+this.node.scrollTop);
-                // ConsolePrint("class: "+this.node.className);
+                if(scrollX !== 0 || scrollY !== 0)
+                {
+                    // console.log("Scrolled overflowId="+this.node.getAttribute("overflowId")+" by x="+scrollX+" and y="+scrollY);
 
-                // Update Rects of all child elements
-                ForEveryChild(this.node, function(child){
-                    if(child.nodeType == 1)
-                    {
-                        if((nodeType = child.getAttribute("nodeType")) !== undefined && nodeType !== null)
+                    // Update Rects of all child elements
+                    ForEveryChild(this.node, function(child){
+                        if(child.nodeType == 1)
                         {
-                            var nodeID = child.getAttribute("nodeID");
-                            if((domObj = GetDOMObject(nodeType, nodeID)) !== undefined)
+                            if((nodeType = child.getAttribute("nodeType")) !== undefined && nodeType !== null)
                             {
-                                domObj.updateRects();
-                            } 
-                        }
-
-                        if((overflowId = child.getAttribute("overflowId")) !== undefined && overflowId !== null)
-                        {
-                            if((overflowObj = GetOverflowElement(overflowId)) !== undefined)
-                            {
-                                overflowObj.updateRects();
+                                var nodeID = child.getAttribute("nodeID");
+                                if((domObj = GetDOMObject(nodeType, nodeID)) !== undefined)
+                                {
+                                    domObj.updateRects();
+                                } 
                             }
-                        }
 
-                        
-                        // TODO: Update child OEs as well. Idea: Update Method which can be called for one node and checks if DomObj or OE
-                        // and executes updateRects
-                        // Maybe better: Add function pointer to node s.t. node.updateRects() is callable
-                    }
-                });
+                            if((overflowId = child.getAttribute("overflowId")) !== undefined && overflowId !== null)
+                            {
+                                if((overflowObj = GetOverflowElement(overflowId)) !== undefined)
+                                {
+                                    overflowObj.updateRects();
+                                }
+                            }
+
+                            
+                            // TODO: Update child OEs as well. Idea: Update Method which can be called for one node and checks if DomObj or OE
+                            // and executes updateRects
+                            // Maybe better: Add function pointer to node s.t. node.updateRects() is callable
+                        }
+                    });
+                }
+
 
                 // Return current scrolling position as feedback
                 return [this.node.scrollLeft, this.node.scrollTop];
@@ -893,6 +888,36 @@ function RemoveOverflowElement(id)
 {
     if(id < window.overflowElements.length && id >= 0)
     {
+        /* HACK FOR REMOVAL OF GLOBAL OVERFLOW ELEMENT CAUSING SCROLL LAGG */
+        domLinks.forEach(function(obj){
+            if(obj !== null && obj !== undefined)
+            {
+                if(obj.node !== null && obj.node !== undefined)
+                {
+                    if(obj.overflowParent == window.overflowElements[id].node)
+                    {
+                        obj.overflowParent = null;
+                        obj.updateRects();
+                    }
+                }
+            }
+        });
+        domTextInputs.forEach(function(obj){
+            if(obj !== null && obj !== undefined)
+            {
+                if(obj.node !== null && obj.node !== undefined)
+                {
+                    if(obj.overflowParent == window.overflowElements[id].node)
+                    {
+                        obj.overflowParent = null;
+                        obj.updateRects();
+                    }
+                }
+            }
+        });
+        /* END OF HACK */
+
+        window.overflowElements[id].node.removeAttribute("overflowId");
         delete window.overflowElements[id]; // TODO: Keep list space empty or fill when new OE is created?
 
         // Inform CEF about removed overflow element

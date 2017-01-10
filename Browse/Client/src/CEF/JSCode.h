@@ -1,16 +1,14 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel Müller (muellerd@uni-koblenz.de)
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
+// Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
+// Handles JavaScript code.
 
 #ifndef CEF_JSCODE_H_
 #define CEF_JSCODE_H_
 
 #include <string>
-#include <map>
-#include <sstream>
-#include <fstream>
-#include <iostream>
 
 /**
 *	This class loads externally saved Javascript code from .js files in CONTENT_PATH/javascript
@@ -41,10 +39,6 @@ enum JSFile
 };
 
 std::string GetJSCode(JSFile file);
-
-// TODO: Create solution for functions with input parameters
-
-// Functions
 std::string jsInputTextData(int inputID, std::string text, bool submit=false);
 std::string jsFavIconUpdate(std::string oldUrl);
 

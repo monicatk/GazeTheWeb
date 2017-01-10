@@ -1,25 +1,27 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel Müller (muellerd@uni-koblenz.de)
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
+// Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
-#include "CefMediator.h"
-#include "src/CEF/Extension/JSCode.h"
-#include "src/CEF/Extension/Container.h"
+#include "src/CEF/Mediator.h"
+#include "src/CEF/Handler.h"
+#include "src/CEF/DevToolsHandler.h"
+#include "src/CEF/JSCode.h"
 #include "src/Setup.h"
 #include "src/State/Web/Tab/Interface/TabCEFInterface.h"
 #include "src/CEF/Data/DOMNode.h"
 #include "src/Utils/Logger.h"
 #include "include/cef_app.h"
 #include "include/wrapper/cef_helpers.h"
-#include "src/CEF/DevToolsHandler.h"
 
-void CefMediator::SetMaster(MasterNotificationInterface* pMaster)
+
+void Mediator::SetMaster(MasterNotificationInterface* pMaster)
 {
 	_pMaster = pMaster;
 }
 
-void CefMediator::RegisterTab(TabCEFInterface* pTab)
+void Mediator::RegisterTab(TabCEFInterface* pTab)
 {
     CEF_REQUIRE_UI_THREAD();
 
@@ -58,7 +60,7 @@ void CefMediator::RegisterTab(TabCEFInterface* pTab)
     _pendingTab = NULL;
 }
 
-void CefMediator::UnregisterTab(TabCEFInterface* pTab)
+void Mediator::UnregisterTab(TabCEFInterface* pTab)
 {
     if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
     {
@@ -73,7 +75,7 @@ void CefMediator::UnregisterTab(TabCEFInterface* pTab)
     }
 }
 
-void CefMediator::RefreshTab(TabCEFInterface * pTab)
+void Mediator::RefreshTab(TabCEFInterface * pTab)
 {
     if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
     {
@@ -82,7 +84,7 @@ void CefMediator::RefreshTab(TabCEFInterface * pTab)
     }
 }
 
-void CefMediator::ReloadTab(TabCEFInterface * pTab)
+void Mediator::ReloadTab(TabCEFInterface * pTab)
 {
     if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
     {
@@ -90,7 +92,7 @@ void CefMediator::ReloadTab(TabCEFInterface * pTab)
     }
 }
 
-void CefMediator::GoBack(TabCEFInterface * pTab)
+void Mediator::GoBack(TabCEFInterface * pTab)
 {
     if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
     {
@@ -98,7 +100,7 @@ void CefMediator::GoBack(TabCEFInterface * pTab)
     }
 }
 
-void CefMediator::GoForward(TabCEFInterface * pTab)
+void Mediator::GoForward(TabCEFInterface * pTab)
 {
     if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
     {
@@ -106,18 +108,18 @@ void CefMediator::GoForward(TabCEFInterface * pTab)
     }
 }
 
-void CefMediator::OpenNewTab(std::string url)
+void Mediator::OpenNewTab(std::string url)
 {
     // TODO? When is it called (asks Raphael)
 	// Daniel: Seems as if it was planned but then obsolete.. whoops. :D
 }
 
-void CefMediator::DoMessageLoopWork()
+void Mediator::DoMessageLoopWork()
 {
     CefDoMessageLoopWork();
 }
 
-void CefMediator::EmulateMouseCursor(TabCEFInterface* pTab, double x, double y, bool leftButtonPressed)
+void Mediator::EmulateMouseCursor(TabCEFInterface* pTab, double x, double y, bool leftButtonPressed)
 {
     if(CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
     {
@@ -125,7 +127,7 @@ void CefMediator::EmulateMouseCursor(TabCEFInterface* pTab, double x, double y, 
     }
 }
 
-void CefMediator::EmulateLeftMouseButtonClick(TabCEFInterface * pTab, double x, double y)
+void Mediator::EmulateLeftMouseButtonClick(TabCEFInterface * pTab, double x, double y)
 {
     if(CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
     {
@@ -136,7 +138,7 @@ void CefMediator::EmulateLeftMouseButtonClick(TabCEFInterface * pTab, double x, 
     }
 }
 
-void CefMediator::EmulateMouseWheelScrolling(TabCEFInterface * pTab, double deltaX, double deltaY)
+void Mediator::EmulateMouseWheelScrolling(TabCEFInterface * pTab, double deltaX, double deltaY)
 {
     if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
     {
@@ -144,7 +146,7 @@ void CefMediator::EmulateMouseWheelScrolling(TabCEFInterface * pTab, double delt
     }
 }
 
-void CefMediator::ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
+void Mediator::ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
 {
     const std::string& msgName = msg->GetName().ToString();
 
@@ -197,7 +199,7 @@ void CefMediator::ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, Cef
     }
 }
 
-void CefMediator::ResetFavicon(CefRefPtr<CefBrowser> browser)
+void Mediator::ResetFavicon(CefRefPtr<CefBrowser> browser)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
     {
@@ -205,7 +207,7 @@ void CefMediator::ResetFavicon(CefRefPtr<CefBrowser> browser)
     }
 }
 
-void CefMediator::AddDOMNode(CefRefPtr<CefBrowser> browser, std::shared_ptr<DOMNode> spNode)
+void Mediator::AddDOMNode(CefRefPtr<CefBrowser> browser, std::shared_ptr<DOMNode> spNode)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
     {
@@ -214,7 +216,7 @@ void CefMediator::AddDOMNode(CefRefPtr<CefBrowser> browser, std::shared_ptr<DOMN
     }
 }
 
-void CefMediator::ClearDOMNodes(CefRefPtr<CefBrowser> browser)
+void Mediator::ClearDOMNodes(CefRefPtr<CefBrowser> browser)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
     {
@@ -225,7 +227,7 @@ void CefMediator::ClearDOMNodes(CefRefPtr<CefBrowser> browser)
     }
 }
 
-bool CefMediator::InputTextData(TabCEFInterface* tab, int64 frameID, int nodeID, std::string text, bool submit)
+bool Mediator::InputTextData(TabCEFInterface* tab, int64 frameID, int nodeID, std::string text, bool submit)
 {
     if (CefRefPtr<CefBrowser> browser = GetBrowser(tab))
     {
@@ -235,7 +237,7 @@ bool CefMediator::InputTextData(TabCEFInterface* tab, int64 frameID, int nodeID,
     return false;
 }
 
-void CefMediator::FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
+void Mediator::FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
@@ -279,7 +281,7 @@ void CefMediator::FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<C
 	}
 }
 
-void CefMediator::SetTabActive(TabCEFInterface * pTab)
+void Mediator::SetActiveTab(TabCEFInterface * pTab)
 {
 	// Remember currently active Tab
 	_activeTab = pTab;
@@ -297,13 +299,12 @@ void CefMediator::SetTabActive(TabCEFInterface * pTab)
 			// Deactivate rendering of all other Tabs
 			browser->GetHost()->WasHidden(true);
 		}
-
 	}
 }
 
 
 
-bool CefMediator::SetLoadingStatus(CefRefPtr<CefBrowser> browser, int64 frameID, bool isMain, bool isLoading)
+bool Mediator::SetLoadingStatus(CefRefPtr<CefBrowser> browser, int64 frameID, bool isMain, bool isLoading)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
@@ -317,7 +318,7 @@ bool CefMediator::SetLoadingStatus(CefRefPtr<CefBrowser> browser, int64 frameID,
 	
 }
 
-void CefMediator::ScrollOverflowElement(TabCEFInterface * pTab, int elemId, int x, int y)
+void Mediator::ScrollOverflowElement(TabCEFInterface * pTab, int elemId, int x, int y)
 {
 	if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
@@ -325,7 +326,7 @@ void CefMediator::ScrollOverflowElement(TabCEFInterface * pTab, int elemId, int 
 	}
 }
 
-void CefMediator::AddOverflowElement(CefRefPtr<CefBrowser> browser, std::shared_ptr<OverflowElement> overflowElem)
+void Mediator::AddOverflowElement(CefRefPtr<CefBrowser> browser, std::shared_ptr<OverflowElement> overflowElem)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
@@ -333,7 +334,7 @@ void CefMediator::AddOverflowElement(CefRefPtr<CefBrowser> browser, std::shared_
 	}
 }
 
-std::weak_ptr<OverflowElement> CefMediator::GetOverflowElement(CefRefPtr<CefBrowser> browser, int id)
+std::weak_ptr<OverflowElement> Mediator::GetOverflowElement(CefRefPtr<CefBrowser> browser, int id)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
@@ -342,7 +343,7 @@ std::weak_ptr<OverflowElement> CefMediator::GetOverflowElement(CefRefPtr<CefBrow
 	return std::weak_ptr<OverflowElement>();
 }
 
-void CefMediator::RemoveOverflowElement(CefRefPtr<CefBrowser> browser, int id)
+void Mediator::RemoveOverflowElement(CefRefPtr<CefBrowser> browser, int id)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
@@ -350,7 +351,7 @@ void CefMediator::RemoveOverflowElement(CefRefPtr<CefBrowser> browser, int id)
 	}
 }
 
-void CefMediator::ResetScrolling(TabCEFInterface * pTab)
+void Mediator::ResetScrolling(TabCEFInterface * pTab)
 {
     if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
     {
@@ -358,7 +359,7 @@ void CefMediator::ResetScrolling(TabCEFInterface * pTab)
     }
 }
 
-void CefMediator::SetURL(CefRefPtr<CefBrowser> browser)
+void Mediator::SetURL(CefRefPtr<CefBrowser> browser)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
     {
@@ -366,7 +367,7 @@ void CefMediator::SetURL(CefRefPtr<CefBrowser> browser)
     }
 }
 
-void CefMediator::SetCanGoBack(CefRefPtr<CefBrowser> browser, bool canGoBack)
+void Mediator::SetCanGoBack(CefRefPtr<CefBrowser> browser, bool canGoBack)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
     {
@@ -374,7 +375,7 @@ void CefMediator::SetCanGoBack(CefRefPtr<CefBrowser> browser, bool canGoBack)
     }
 }
 
-void CefMediator::SetCanGoForward(CefRefPtr<CefBrowser> browser, bool canGoForward)
+void Mediator::SetCanGoForward(CefRefPtr<CefBrowser> browser, bool canGoForward)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
     {
@@ -382,7 +383,7 @@ void CefMediator::SetCanGoForward(CefRefPtr<CefBrowser> browser, bool canGoForwa
     }
 }
 
-void CefMediator::SetZoomLevel(TabCEFInterface * pTab)
+void Mediator::SetZoomLevel(TabCEFInterface * pTab)
 {
     if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
     {
@@ -390,7 +391,7 @@ void CefMediator::SetZoomLevel(TabCEFInterface * pTab)
     }
 }
 
-double CefMediator::GetZoomLevel(CefRefPtr<CefBrowser> browser)
+double Mediator::GetZoomLevel(CefRefPtr<CefBrowser> browser)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
     {
@@ -399,7 +400,7 @@ double CefMediator::GetZoomLevel(CefRefPtr<CefBrowser> browser)
     return NAN;
 }
 
-void CefMediator::ReceivePageResolution(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
+void Mediator::ReceivePageResolution(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
     {
@@ -409,7 +410,7 @@ void CefMediator::ReceivePageResolution(CefRefPtr<CefBrowser> browser, CefRefPtr
     }
 }
 
-void CefMediator::GetPageResolution(TabCEFInterface * pTab)
+void Mediator::GetPageResolution(TabCEFInterface * pTab)
 {
     if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
     {
@@ -417,7 +418,7 @@ void CefMediator::GetPageResolution(TabCEFInterface * pTab)
     }
 }
 
-void CefMediator::ReceiveFixedElements(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
+void Mediator::ReceiveFixedElements(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
 {
     CefRefPtr<CefListValue> args = msg->GetArgumentList();
     int id = args->GetInt(0);
@@ -444,7 +445,7 @@ void CefMediator::ReceiveFixedElements(CefRefPtr<CefBrowser> browser, CefRefPtr<
     }
 }
 
-void CefMediator::RemoveFixedElement(CefRefPtr<CefBrowser> browser, int id)
+void Mediator::RemoveFixedElement(CefRefPtr<CefBrowser> browser, int id)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
     {
@@ -453,12 +454,12 @@ void CefMediator::RemoveFixedElement(CefRefPtr<CefBrowser> browser, int id)
     }
 }
 
-void CefMediator::Poll(float tpf)
+void Mediator::Poll(float tpf)
 {
     // TODO Daniel
 }
 
-void CefMediator::OnTabTitleChange(CefRefPtr<CefBrowser> browser, std::string title)
+void Mediator::OnTabTitleChange(CefRefPtr<CefBrowser> browser, std::string title)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
@@ -466,7 +467,7 @@ void CefMediator::OnTabTitleChange(CefRefPtr<CefBrowser> browser, std::string ti
 	}
 }
 
-void CefMediator::OpenPopupTab(CefRefPtr<CefBrowser> browser, std::string url)
+void Mediator::OpenPopupTab(CefRefPtr<CefBrowser> browser, std::string url)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
@@ -475,7 +476,7 @@ void CefMediator::OpenPopupTab(CefRefPtr<CefBrowser> browser, std::string url)
 }
 
 
-void CefMediator::RemoveDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID)
+void Mediator::RemoveDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
@@ -483,7 +484,7 @@ void CefMediator::RemoveDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type,
 	}
 }
 
-std::weak_ptr<DOMNode> CefMediator::GetDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID)
+std::weak_ptr<DOMNode> Mediator::GetDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
@@ -493,42 +494,37 @@ std::weak_ptr<DOMNode> CefMediator::GetDOMNode(CefRefPtr<CefBrowser> browser, DO
 }
 
 
-void CefMediator::ShowDevTools()
+void Mediator::ShowDevTools()
 {
-	LogDebug("CefMediator: Showing DevTools...");
+	LogInfo("CefMediator: Showing DevTools...");
 
-	CefRefPtr<SimpleHandler> devToolHandler(new SimpleHandler());
-	CefWindowInfo window_info;
-
-#if defined(OS_WIN)
-	// On Windows we need to specify certain flags that will be passed to
-	// CreateWindowEx().
-	window_info.SetAsPopup(NULL, "DevTools");
-#endif
+	// Setup
+	CefWindowInfo windowInfo;
 	CefBrowserSettings settings;
 
-	if (_activeTab)
+#if defined(OS_WIN)
+	// Set title one Windows
+	windowInfo.SetAsPopup(NULL, "DevTools");
+#endif
+
+	// Show dev tools for active tab
+	if (_activeTab != nullptr)
 	{
 		auto browser = GetBrowser(_activeTab);
-		if (browser)
+		if (browser != nullptr)
 		{
-			browser->GetHost()->ShowDevTools(window_info, devToolHandler.get(), settings, CefPoint());
+			// Display dev tools of tab with handler of dev tools within extra window
+			browser->GetHost()->ShowDevTools(windowInfo, _devToolsHandler, settings, CefPoint());
 		}
 	}
-	// TODO: Delete "else" path with for-each loop when SetTabActive is integrated & called
-	else
-	{
-		for (const auto& key : _browsers)
-		{
-
-			CefRefPtr<CefBrowser> browser = key.second;
-			browser->GetHost()->ShowDevTools(window_info, devToolHandler.get(), settings, CefPoint());
-		}
-	}
-
 }
 
-void CefMediator::EmulateLeftMouseButtonDown(TabCEFInterface* pTab, double x, double y)
+void Mediator::RegisterJavascriptCallback(std::string prefix, std::function<void(std::string)> callbackFunction)
+{
+	_handler->RegisterJavascriptCallback(prefix, callbackFunction);
+}
+
+void Mediator::EmulateLeftMouseButtonDown(TabCEFInterface* pTab, double x, double y)
 {
 	if (const CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
@@ -542,7 +538,7 @@ void CefMediator::EmulateLeftMouseButtonDown(TabCEFInterface* pTab, double x, do
 	}
 }
 
-void CefMediator::EmulateLeftMouseButtonUp(TabCEFInterface* pTab, double x, double y)
+void Mediator::EmulateLeftMouseButtonUp(TabCEFInterface* pTab, double x, double y)
 {
 	if (const CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
@@ -556,7 +552,7 @@ void CefMediator::EmulateLeftMouseButtonUp(TabCEFInterface* pTab, double x, doub
 	}
 }
 
-void CefMediator::InvokeCopy(TabCEFInterface * pTab)
+void Mediator::InvokeCopy(TabCEFInterface * pTab)
 {
 	LogDebug("CefMediator: InvokeCopy called.");
 
@@ -566,7 +562,7 @@ void CefMediator::InvokeCopy(TabCEFInterface * pTab)
 	}
 }
 
-void CefMediator::InvokePaste(TabCEFInterface * pTab, double x, double y)
+void Mediator::InvokePaste(TabCEFInterface * pTab, double x, double y)
 {
 	LogDebug("CefMediator: InvokePaste called on position (", x, ", ", y, ").");
 
@@ -583,7 +579,7 @@ void CefMediator::InvokePaste(TabCEFInterface * pTab, double x, double y)
 	}
 }
 
-void CefMediator::PutTextSelectionToClipboardAsync(TabCEFInterface* pTab)
+void Mediator::PutTextSelectionToClipboardAsync(TabCEFInterface* pTab)
 {
 	if (const CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
@@ -595,7 +591,7 @@ void CefMediator::PutTextSelectionToClipboardAsync(TabCEFInterface* pTab)
 	}
 }
 
-void CefMediator::SetClipboardText(std::string text)
+void Mediator::SetClipboardText(std::string text)
 {
 	// Set clipboard
 	_clipboard = text;
@@ -604,17 +600,17 @@ void CefMediator::SetClipboardText(std::string text)
 	_pMaster->PushNotificationByKey("notification:copied_to_clipboard");
 }
 
-std::string CefMediator::GetClipboardText() const
+std::string Mediator::GetClipboardText() const
 {
 	return _clipboard;
 }
 
-void CefMediator::ClearClipboardText()
+void Mediator::ClearClipboardText()
 {
 	_clipboard = "";
 }
 
-TabCEFInterface* CefMediator::GetTab(CefRefPtr<CefBrowser> browser) const
+TabCEFInterface* Mediator::GetTab(CefRefPtr<CefBrowser> browser) const
 {
     int browserID = browser->GetIdentifier();
     if (_tabs.find(browserID) != _tabs.end())
@@ -625,7 +621,7 @@ TabCEFInterface* CefMediator::GetTab(CefRefPtr<CefBrowser> browser) const
     return nullptr;
 }
 
-CefRefPtr<CefBrowser> CefMediator::GetBrowser(TabCEFInterface * pTab) const
+CefRefPtr<CefBrowser> Mediator::GetBrowser(TabCEFInterface * pTab) const
 {
     if (_browsers.find(pTab) != _browsers.end())
     {
@@ -636,7 +632,7 @@ CefRefPtr<CefBrowser> CefMediator::GetBrowser(TabCEFInterface * pTab) const
 }
 
 
-std::weak_ptr<Texture> CefMediator::GetTexture(CefRefPtr<CefBrowser> browser)
+std::weak_ptr<Texture> Mediator::GetTexture(CefRefPtr<CefBrowser> browser)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
     {
@@ -655,7 +651,7 @@ std::weak_ptr<Texture> CefMediator::GetTexture(CefRefPtr<CefBrowser> browser)
     }
 }
 
-void CefMediator::OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser, double x, double y)
+void Mediator::OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser, double x, double y)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
     {
@@ -664,7 +660,7 @@ void CefMediator::OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser, double x,
     }
 }
 
-void CefMediator::GetResolution(CefRefPtr<CefBrowser> browser, int& width, int& height) const
+void Mediator::GetResolution(CefRefPtr<CefBrowser> browser, int& width, int& height) const
 {
     if (TabCEFInterface* pTab = GetTab(browser))
     {
@@ -683,7 +679,7 @@ void CefMediator::GetResolution(CefRefPtr<CefBrowser> browser, int& width, int& 
     }
 }
 
-void CefMediator::ResizeTabs()
+void Mediator::ResizeTabs()
 {
     _handler->ResizeBrowsers();
 }

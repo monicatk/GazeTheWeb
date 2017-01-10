@@ -15,6 +15,7 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
+#include <fstream>
 
 // Namespace for text-csv
 namespace csv = ::text::csv;
@@ -97,7 +98,7 @@ const std::string simpleFragmentShaderSource =
 "   fragColor = texture(tex, uv);\n"
 "}\n";
 
-Master::Master(CefMediator* pCefMediator, std::string userDirectory)
+Master::Master(Mediator* pCefMediator, std::string userDirectory)
 {
     // Save members
     _pCefMediator = pCefMediator;
@@ -172,6 +173,9 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
 
 	// ### WINDOW ICON ###
 
+	// Set content path (before using it in the helper)
+	eyegui::setRootFilepath(CONTENT_PATH);
+
 	// Load window icons for GLFW
 	std::vector<unsigned char> icon16Data;
 	int icon16Width, icon16Height, icon16ChannelCount;
@@ -205,9 +209,6 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
 		icons.data());
 
     // ### EYEGUI ###
-
-    // Set content path
-    eyegui::setRootFilepath(CONTENT_PATH);
 
     // Set print callbacks
     std::function<void(std::string)> printGUICallback = [&](std::string message) { this->GUIPrintCallback(message); };
@@ -370,13 +371,18 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
             geometryShaderSource,
             setup::BLUR_PERIPHERY ? blurFragmentShaderSource : simpleFragmentShaderSource));
 
+	// ### LabStreamingLayer ###
+	_upLabStream = std::unique_ptr<LabStream>(new LabStream);
+
+	// ### JavaScript to LSL ###
+
+	// Registers a JavaScript callback function that pipes JS callbacks starting with "lsl:" to LabStreamingLayer
+	_pCefMediator->RegisterJavascriptCallback("lsl:", [this](std::string message) { this->_upLabStream->Send(message); });
+
     // ### OTHER ###
 
     // Time
     _lastTime = glfwGetTime();
-
-    // Connection to LabStreamingLayer
-    _upLabStream = std::unique_ptr<LabStream>(new LabStream);
 }
 
 Master::~Master()
@@ -581,7 +587,7 @@ void Master::Loop()
         _pCefMediator->DoMessageLoopWork();
 
         // Create input struct for own framework
-        Input input(usedEyeGUIInput.gazeX, usedEyeGUIInput.gazeY, usedEyeGUIInput.gazeUsed);
+        Input input(usedEyeGUIInput.gazeX, usedEyeGUIInput.gazeY, usedEyeGUIInput.gazeUsed, usedEyeGUIInput.instantInteraction);
 
         // Bind framebuffer
         _upFramebuffer->Bind();
@@ -685,7 +691,6 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
             case GLFW_KEY_S: { _upLabStream->Send("42"); break; } // TODO: testing
-
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
         }
     }

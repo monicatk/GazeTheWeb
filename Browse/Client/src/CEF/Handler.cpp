@@ -1,11 +1,13 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel Müller (muellerd@uni-koblenz.de)
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
+// Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
 #include "src/CEF/Handler.h"
-#include "src/CEF/Extension/CefMediator.h"
+#include "src/CEF/Mediator.h"
 #include "src/Utils/Logger.h"
+#include "src/JSMailer.h"
 #include "include/base/cef_bind.h"
 #include "include/cef_app.h"
 #include "include/wrapper/cef_closure_task.h"
@@ -14,29 +16,21 @@
 #include <string>
 #include <cmath>
 
-namespace
-{
-    Handler* g_instance = NULL;
-}  // namespace
 
-Handler::Handler(CefMediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing(false)
+Handler::Handler(Mediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing(false)
 {
-  DCHECK(!g_instance);
-  g_instance = this;
   _pMediator = pMediator;
   _renderer = renderer;
   _msgRouter = new BrowserMsgRouter(pMediator);
+
+  // TODO: delete all this or do a nice rewrite
+  // Tell JSMailer singleton about the method to call
+  JSMailer::instance().SetHandler(this);
 }
 
 Handler::~Handler()
 {
-  g_instance = NULL;
-}
-
-// Static
-Handler* Handler::GetInstance()
-{
-  return g_instance;
+	// Nothing to do
 }
 
 void Handler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
@@ -442,6 +436,10 @@ void Handler::IPCLogRenderer(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcess
     {
         LogDebug("Renderer: ", text, " (browserID = ", browserID, ")");
     }
+	else
+	{
+		LogInfo("Renderer: ", text, " (browserID = ", browserID, ")");
+	}
 }
 
 void Handler::OnFaviconURLChange(CefRefPtr<CefBrowser> browser,
@@ -545,4 +543,17 @@ void Handler::ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, i
 
 	browser->GetMainFrame()->ExecuteJavaScript(js_code, "",	0);
 
+}
+
+void Handler::SendToJSLoggingMediator(std::string message)
+{
+	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("SendToLoggingMediator");
+	msg->GetArgumentList()->SetString(0, message);
+
+	// Send message to every browser
+	for (const auto& browser : _browserList)
+	{
+		browser->SendProcessMessage(PID_RENDERER, msg);
+	}
+	
 }

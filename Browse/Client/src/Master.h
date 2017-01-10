@@ -10,7 +10,7 @@
 #define MASTER_H_
 
 #include "src/MasterNotificationInterface.h"
-#include "src/CEF/Extension/CefMediator.h"
+#include "src/CEF/Mediator.h"
 #include "src/State/Web/Web.h"
 #include "src/State/Settings/Settings.h"
 #include "src/Input/EyeInput.h"
@@ -32,7 +32,7 @@ class Master : public MasterNotificationInterface
 public:
 
     // Constructor takes pointer to CefMediator
-    Master(CefMediator* pCefMediator, std::string userDirectory);
+    Master(Mediator* pMediator, std::string userDirectory);
 
     // Destructor
     virtual ~Master();
@@ -74,6 +74,11 @@ public:
 
 	// Push notification to display taken from localization file
 	virtual void PushNotificationByKey(std::string key);
+
+	void RegisterJavascriptCallback(std::string prefix, std::function<void (std::string)>& callbackFunction)
+	{
+		_pCefMediator->RegisterJavascriptCallback(prefix, callbackFunction);
+	};
 
     // ### EYEGUI DELEGATION ###
 
@@ -134,7 +139,7 @@ private:
     GLFWwindow* _pWindow;
 
     // Layer between framework and CEF
-    CefMediator* _pCefMediator;
+    Mediator* _pCefMediator;
 
     // Pointer to eyeGUI
     eyegui::GUI* _pGUI;

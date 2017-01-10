@@ -25,6 +25,45 @@ function ConsolePrint(msg)
 	window.cefQuery({ request: (""+msg), persistent : false, onSuccess : function(response) {}, onFailure : function(error_code, error_message){} });
 }
 
+function SendLSLMessage(msg) {
+    window.cefQuery({ request: ("lsl:" + msg), persistent: false, onSuccess: function (response) { }, onFailure: function (error_code, error_message) { } });
+}
+
+function LoggingMediator()
+{
+	/* This function is indirectly called via this.log */
+    this.logFunction = null;
+
+	/* Register your own log function with this function */
+    this.registerFunction = function(f)
+    {
+        this.logFunction = f;
+    }
+
+	/* This function is called by CEF's renderer process */
+    this.log = function(logText)
+    {
+        try
+        {
+            if(this.logFunction !== null)
+                this.logFunction(logText);
+        }
+        catch(e)
+        {
+            console.log("LoggingMediator: Something went wrong while redirecting logging data.");
+            console.log(e);
+        }
+    }
+
+    /* Code, executed on object construction */
+    ConsolePrint("LoggingMediator instance was successfully created!");
+
+}
+
+window.loggingMediator = new LoggingMediator();
+
+
+
 function GetTextSelection()
 {
 	// Pipe message to C++ MsgRouter

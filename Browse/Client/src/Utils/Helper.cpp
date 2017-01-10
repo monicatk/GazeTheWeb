@@ -164,3 +164,42 @@ float StringToFloat(std::string value)
 	// Return result
 	return result;
 }
+
+std::vector<std::string> SplitBySeparator(std::string str, char separator)
+{
+	std::vector<std::string> output;
+	std::vector<char> buffer;
+
+	// Go over string
+	for (int i = 0; i < str.length(); i++)
+	{
+		// Read single character
+		const char read = str.at(i);
+		if (read == separator) // character is separator
+		{
+			if (buffer.size() > 0) // something is in buffer
+			{
+				output.push_back(std::string(buffer.begin(), buffer.end())); // add to output vector
+				buffer.clear(); // clear buffer
+			}
+			else if (i > 0 && buffer.size() == 0) // insert empty string between two separators, but not directly after first one
+			{
+				output.push_back(""); // add empty output
+			}
+		}
+		else // no separator
+		{
+			buffer.push_back(read); // just collect the character
+		}
+	}
+
+	// Add remaining characters to output
+	if (buffer.size() > 0)
+	{
+		output.push_back(std::string(buffer.begin(), buffer.end())); // add to output vector
+		buffer.clear(); // clear buffer
+	}
+
+	// Return output
+	return output;
+}

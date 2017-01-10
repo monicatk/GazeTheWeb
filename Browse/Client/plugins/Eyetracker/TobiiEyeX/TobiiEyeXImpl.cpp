@@ -3,11 +3,9 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
-#ifdef TOBII_SUPPORT
-
-#include "Tobii.h"
-#include "src/Input/Eyetracker/EyetrackerGlobal.h"
-#include "src/Global.h"
+#include "plugins/Eyetracker/Interface/Eyetracker.h"
+#include "plugins/Eyetracker/Common/EyetrackerData.h"
+#include "plugins/Eyetracker/TobiiEyeX/TobiiEyeXSDK/include/eyex/EyeX.h"
 
 // Global variables
 TX_CONTEXTHANDLE Context = TX_EMPTY_HANDLE;
@@ -37,7 +35,7 @@ void TX_CALLCONVENTION OnSnapshotCommitted(TX_CONSTHANDLE hAsyncData, TX_USERPAR
 	txGetAsyncDataResultCode(hAsyncData, &result);
 	/*if (result == TX_RESULT_OK || result == TX_RESULT_CANCELLED)
 	{
-		std::cout << "Ok." << std::endl;
+	std::cout << "Ok." << std::endl;
 	}*/
 }
 
@@ -46,21 +44,21 @@ void TX_CALLCONVENTION OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connect
 {
 	switch (connectionState)
 	{
-		case TX_CONNECTIONSTATE_CONNECTED:
+	case TX_CONNECTIONSTATE_CONNECTED:
+	{
+		bool success;
+		//std::cout << "Connected to EyeX Engine" << std::endl;
+		success = txCommitSnapshotAsync(GlobalInteractorSnapshot, OnSnapshotCommitted, NULL) == TX_RESULT_OK;
+		/*if (!success)
 		{
-			bool success;
-			//std::cout << "Connected to EyeX Engine" << std::endl;
-			success = txCommitSnapshotAsync(GlobalInteractorSnapshot, OnSnapshotCommitted, NULL) == TX_RESULT_OK;
-			/*if (!success)
-			{
-				std::cout << "Failed to initialize the data stream." << std::endl;
-			}
-			else
-			{
-				std::cout << "Waiting for gaze data to start streaming..." << std::endl;
-			}*/
+		std::cout << "Failed to initialize the data stream." << std::endl;
 		}
-		break;
+		else
+		{
+		std::cout << "Waiting for gaze data to start streaming..." << std::endl;
+		}*/
+	}
+	break;
 	case TX_CONNECTIONSTATE_DISCONNECTED:
 		//std::cout << "The connection state is now DISCONNECTED (We are disconnected from the EyeX Engine)" << std::endl;
 		break;
@@ -101,7 +99,8 @@ void TX_CALLCONVENTION HandleEvent(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userP
 	txReleaseObject(&hEvent);
 }
 
-bool Tobii::SpecialConnect()
+
+bool Connect()
 {
 	bool success = false;
 	TX_TICKET hConnectionStateChangedTicket = TX_INVALID_TICKET;
@@ -118,7 +117,7 @@ bool Tobii::SpecialConnect()
 	return success;
 }
 
-bool Tobii::SpecialDisconnect()
+bool Disconnect()
 {
 	bool success;
 
@@ -130,14 +129,17 @@ bool Tobii::SpecialDisconnect()
 	success &= txUninitializeEyeX() == TX_RESULT_OK;
 	/*if (!success)
 	{
-		std::cout << "EyeX could not be shut down cleanly. Did you remember to release all handles?" << std::endl;
+	std::cout << "EyeX could not be shut down cleanly. Did you remember to release all handles?" << std::endl;
 	}
 	else
 	{
-		printf("EyeX disconnected!\n");
+	printf("EyeX disconnected!\n");
 	}
 	*/
 	return success;
 }
 
-#endif // TOBII_SUPPORT
+void FetchGaze(int maxSampleCount, std::vector<double>& rGazeX, std::vector<double>& rGazeY)
+{
+	eyetracker_global::GetKOrLessValidRawGazeEntries(maxSampleCount, rGazeX, rGazeY);
+}

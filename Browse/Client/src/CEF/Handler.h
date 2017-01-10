@@ -1,20 +1,21 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel Müller (muellerd@uni-koblenz.de)
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
+// Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
 #ifndef CEF_HANDLER_H_
 #define CEF_HANDLER_H_
 
 #include "src/CEF/Renderer.h"
-#include "src/CEF/Extension/JSCode.h"
+#include "src/CEF/JSCode.h"
 #include "include/cef_client.h"
 #include "src/CEF/BrowserMsgRouter.h"
 #include <list>
 #include <set>
 
 // Forward declaration
-class CefMediator;
+class Mediator;
 class BrowserMsgRouter;
 
 class Handler : public CefClient,
@@ -24,11 +25,8 @@ class Handler : public CefClient,
 {
 public:
 
-    Handler(CefMediator* pMediator, CefRefPtr<Renderer> renderer);
+    Handler(Mediator* pMediator, CefRefPtr<Renderer> renderer);
     ~Handler();
-
-    // Provide access to the single global instance of this object
-    static Handler* GetInstance();
 
     // Request that all existing browser windows close
     void CloseAllBrowsers(bool forceClose);
@@ -118,6 +116,14 @@ public:
 	// Execute scrolling request from Tab in determined Overflow Element with elemId
 	void ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, int x, int y);
 
+	void RegisterJavascriptCallback(std::string prefix, std::function<void(std::string)> callbackFunction)
+	{
+		_msgRouter->RegisterJavascriptCallback(prefix, callbackFunction);
+	}
+
+	// Send log data to LoggingMediator instance in each browser context
+	void SendToJSLoggingMediator(std::string message);
+
 private:
 
     /* METHODS */
@@ -137,7 +143,7 @@ private:
     bool _isClosing;
 
     // Provide pointer to CefMediator in order to communicate with Tabs etc.
-    CefMediator* _pMediator;
+    Mediator* _pMediator;
 
     // Renderer, whose methods are called when rendering relevant actions take place
     CefRefPtr<Renderer> _renderer;

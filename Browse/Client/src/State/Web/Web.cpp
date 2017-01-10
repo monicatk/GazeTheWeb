@@ -12,7 +12,10 @@
 #include "src/Utils/MakeUnique.h"
 #include <algorithm>
 
-Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)
+// Include singleton for mailing to JavaScript
+#include "src/JSMailer.h"
+
+Web::Web(Master* pMaster, Mediator* pCefMediator) : State(pMaster)
 {
     // Save member
     _pCefMediator = pCefMediator;
@@ -99,6 +102,9 @@ int Web::AddTab(std::string URL, bool show)
 
 	// Update icon of tab overview button
 	UpdateTabOverviewIcon();
+
+	// Mail to JavaScript about it
+	JSMailer::instance().Send("New Tab Added");
 
     // Retun id of tab
     return id;
@@ -225,11 +231,13 @@ void Web::RemoveAllTabs()
 
 bool Web::SwitchToTab(int id)
 {
+	bool success = false;
+
     // Simple case
     if(id == _currentTabId)
     {
         // Success!
-        return true;
+		success = true;
     }
 
     // Verify that id exists
@@ -252,10 +260,16 @@ bool Web::SwitchToTab(int id)
             _tabs.at(_currentTabId)->Activate();
         }
 
-        return true;
+		success = true;
     }
 
-    return false;
+	// Tell Mediator and return
+	if (_currentTabId >= 0)
+	{
+		// Set active Tab in Mediator
+		_pCefMediator->SetActiveTab(_tabs.at(_currentTabId).get()); 
+	}
+    return success;
 }
 
 bool Web::SwitchToTabByIndex(int index)

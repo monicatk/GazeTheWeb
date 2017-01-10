@@ -74,16 +74,21 @@ void Tab::UnregisterButtonListenerInOverlay(std::string id)
 	_overlayButtonUpCallbacks.erase(id);
 }
 
-void Tab::RegisterKeyboardListenerInOverlay(std::string id, std::function<void(std::u16string)> callback)
+void Tab::RegisterKeyboardListenerInOverlay(std::string id, std::function<void()> selectCallback, std::function<void(std::u16string)> pressCallback)
 {
 	// Log bug when id already existing
-	auto iter = _overlayKeyboardCallbacks.find(id);
-	if (iter != _overlayKeyboardCallbacks.end())
+	auto iterSelect = _overlayKeyboardSelectCallbacks.find(id);
+	if (iterSelect != _overlayKeyboardSelectCallbacks.end())
 	{
-		LogBug("Tab: Element id exists already in overlay keyboard callbacks: ", id);
+		LogBug("Tab: Element id exists already in overlay keyboard key select callbacks: ", id);
 	}
-
-	_overlayKeyboardCallbacks.emplace(id, callback);
+	auto iterPress = _overlayKeyboardPressCallbacks.find(id);
+	if (iterPress != _overlayKeyboardPressCallbacks.end())
+	{
+		LogBug("Tab: Element id exists already in overlay keyboard key press callbacks: ", id);
+	}
+	_overlayKeyboardSelectCallbacks.emplace(id, selectCallback);
+	_overlayKeyboardPressCallbacks.emplace(id, pressCallback);
 
 	// Tell eyeGUI about it
 	eyegui::registerKeyboardListener(_pOverlayLayout, id, _spTabOverlayKeyboardListener);
@@ -91,12 +96,18 @@ void Tab::RegisterKeyboardListenerInOverlay(std::string id, std::function<void(s
 
 void Tab::UnregisterKeyboardListenerInOverlay(std::string id)
 {
-	_overlayKeyboardCallbacks.erase(id);
+	_overlayKeyboardSelectCallbacks.erase(id);
+	_overlayKeyboardPressCallbacks.erase(id);
 }
 
 void Tab::SetCaseOfKeyboardLetters(std::string id, bool upper)
 {
 	eyegui::setCaseOfKeyboard(_pOverlayLayout, id, upper ? eyegui::KeyboardCase::UPPER : eyegui::KeyboardCase::LOWER);
+}
+
+void Tab::ClassifyKey(std::string id, bool accept)
+{
+	eyegui::classifyKey(_pOverlayLayout, id, accept);
 }
 
 void Tab::RegisterWordSuggestListenerInOverlay(std::string id, std::function<void(std::u16string)> callback)

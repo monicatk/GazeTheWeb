@@ -23,7 +23,7 @@ bool LinkNavigationAction::Update(float tpf, TabInput tabInput)
     GetInputValue("coordinate", coordinate);
 
 	// Get whether should be visualized
-	int visualize;
+    int visualize = 0;
 	GetInputValue("visualize", visualize);
 
     // Decide what to click
@@ -48,7 +48,7 @@ bool LinkNavigationAction::Update(float tpf, TabInput tabInput)
             if(!sp->GetRects().empty())
             {
 				// Get coordinate in CEFPixel space
-                glm::vec2 linkCoordinate = sp->GetRects().front().center();
+                glm::vec2 linkCoordinate = sp->GetRects().front().Center();
 				CEFPixelX = linkCoordinate.x - scrollingX;
 				CEFPixelY = linkCoordinate.y - scrollingY;
             }

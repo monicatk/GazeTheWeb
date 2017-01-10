@@ -8,7 +8,7 @@
 #define HELPER_H_
 
 #include "src/Utils/glmWrapper.h"
-
+#include <vector>
 #include <string>
 
 // Convert color [0..1] to hexadecimal string
@@ -22,5 +22,8 @@ int MaximalMipMapLevel(int width, int height);
 
 // Helper to extract float from string
 float StringToFloat(std::string value);
+
+// Split string by separator
+std::vector<std::string> SplitBySeparator(std::string str, char separator);
 
 #endif // HELPER_H_

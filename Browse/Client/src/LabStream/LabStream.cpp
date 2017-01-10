@@ -18,7 +18,7 @@ LabStream::LabStream()
             "Markers",
             1,
             lsl::IRREGULAR_RATE,
-            lsl::cf_int32,
+            lsl::cf_string,
             setup::LAB_STREAM_OUTPUT_SOURCE_ID));
     _upStreamOutlet = std::unique_ptr<lsl::stream_outlet>(new lsl::stream_outlet(*(_upStreamInfo.get())));
 

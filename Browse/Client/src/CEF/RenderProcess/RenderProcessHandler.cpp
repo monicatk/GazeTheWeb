@@ -1,10 +1,10 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel Müller (muellerd@uni-koblenz.de)
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
+// Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
 #include "RenderProcessHandler.h"
-#include "include/wrapper/cef_message_router.h"
 #include "include/base/cef_logging.h"
 #include "include/wrapper/cef_helpers.h"
 #include <sstream>
@@ -27,10 +27,28 @@ bool RenderProcessHandler::OnProcessMessageReceived(
     const std::string& msgName = msg->GetName().ToString();
     //IPCLogDebug(browser, "Received '" + msgName + "' IPC msg in RenderProcessHandler");
 
+	if (msgName == "SendToLoggingMediator")
+	{
+		CefRefPtr<CefV8Value> log = CefV8Value::CreateString(msg->GetArgumentList()->GetString(0));
+
+		CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
+		if (context->Enter())
+		{
+			CefRefPtr<CefV8Value> window = context->GetGlobal();
+			CefRefPtr<CefV8Value> logMediator = window->GetValue("loggingMediator");
+			if (logMediator->IsObject())
+			{
+				logMediator->GetValue("log")->ExecuteFunction(logMediator, { log });
+			}
+
+			context->Exit();
+		}
+	}
+
     // Handle request of DOM node data
     if (msgName == "GetDOMElements")
     {
-		IPCLogDebug(browser, "Renderer: Reached old code 'GetDOMElements' msg");
+		IPCLogDebug(browser, "Reached old code 'GetDOMElements' msg");
     }
 
     // EXPERIMENTAL: Handle request of favicon image bytes
@@ -203,7 +221,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 
 	if (msgName == "FetchDOMTextLink" || msgName == "FetchDOMTextInput")
 	{
-		IPCLogDebug(browser, "Renderer: Received deprecated "+msgName+" message!");
+		IPCLogDebug(browser, "Received deprecated "+msgName+" message!");
 	}
 
 	if (msgName == "LoadDOMNodeData")
@@ -357,11 +375,6 @@ void RenderProcessHandler::OnContextReleased(CefRefPtr<CefBrowser> browser,
 		// DEBUG
 		frame->ExecuteJavaScript("MutationObserverShutdown()", "", 0);
     }
-}
-
-void RenderProcessHandler::IPCLogDebug(CefRefPtr<CefBrowser> browser, std::string text)
-{
-    IPCLog(browser, text, true);
 }
 
 /**

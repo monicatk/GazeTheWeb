@@ -1,8 +1,9 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel Müller (muellerd@uni-koblenz.de)
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
+// Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// DOMNode types.
+// DOM node types.
 
 #ifndef DOMNODETYPE_H_
 #define DOMNODETYPE_H_
