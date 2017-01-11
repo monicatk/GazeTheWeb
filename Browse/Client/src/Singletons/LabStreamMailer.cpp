@@ -15,27 +15,30 @@ void LabStreamMailer::Update()
 	// Poll incoming messages
 	auto messages = _labStream.Poll();
 
-	// Go over callbacks and use them
-	std::vector<int> toBeRemoved;
-	int i = 0;
-	for (auto& rwpCallback : _callbacks)
+	// Go over callbacks and use them, if messages are available
+	if (!messages.empty())
 	{
-		if (auto spCallback = rwpCallback.lock())
+		std::vector<int> toBeRemoved;
+		int i = 0;
+		for (auto& rwpCallback : _callbacks)
 		{
-			spCallback->Receive(messages);
+			if (auto spCallback = rwpCallback.lock())
+			{
+				spCallback->Receive(messages);
+			}
+			else
+			{
+				// Weak pointer got invalid, so remove it later
+				toBeRemoved.push_back(i);
+			}
+			i++; // increment index
 		}
-		else
-		{
-			// Weak pointer got invalid, so remove it later
-			toBeRemoved.push_back(i);
-		}
-		i++; // increment index
-	}
 
-	// Remove dead weak pointers
-	for (int j = toBeRemoved.size() - 1; j >= 0; j--) // do it backwards
-	{
-		_callbacks.erase(_callbacks.begin() + toBeRemoved.at(j));
+		// Remove dead weak pointers
+		for (int j = toBeRemoved.size() - 1; j >= 0; j--) // do it backwards
+		{
+			_callbacks.erase(_callbacks.begin() + toBeRemoved.at(j));
+		}
 	}
 }
 

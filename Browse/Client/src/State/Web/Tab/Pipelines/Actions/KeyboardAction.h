@@ -11,6 +11,7 @@
 #define KEYBOARDACTION_H_
 
 #include "src/State/Web/Tab/Pipelines/Actions/Action.h"
+#include "src/Singletons/LabStreamMailer.h"
 
 class KeyboardAction : public Action
 {
@@ -89,6 +90,9 @@ protected:
 
 	// Key selection classification time in seconds
 	float _classificationTime = 0.f;
+
+	// LabStreamMailer callback to receive classification of key
+	std::shared_ptr<LabStreamCallback> _spLabStreamCallback;
 };
 
 #endif // KEYBOARDACTION_H_
