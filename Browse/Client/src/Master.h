@@ -10,6 +10,7 @@
 #define MASTER_H_
 
 #include "src/MasterNotificationInterface.h"
+#include "src/Singletons/LabStreamMailer.h"
 #include "src/CEF/Mediator.h"
 #include "src/State/Web/Web.h"
 #include "src/State/Settings/Settings.h"
@@ -25,7 +26,6 @@
 // Forward declaration
 class Texture;
 struct GLFWwindow;
-class LabStream;
 
 class Master : public MasterNotificationInterface
 {
@@ -183,9 +183,6 @@ private:
     // Lerp value to show pause as dimming of whole screen
     LerpValue _pausedDimming;
 
-    // Communication with LabStreamingLayer
-    std::unique_ptr<LabStream> _upLabStream;
-
     // Framebuffer for complete rendering
     std::unique_ptr<Framebuffer> _upFramebuffer;
 
@@ -200,6 +197,9 @@ private:
 
 	// Stack with content for notifications
 	std::queue<std::u16string> _notificationStack;
+
+	// LabStreamMailer callback to print incoming messages to log
+	std::shared_ptr<LabStreamCallback> _spLabStreamCallback;
 
 	// Time of notification displaying
 	float _notificationTime;

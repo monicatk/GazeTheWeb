@@ -7,7 +7,7 @@
 #include "src/CEF/Handler.h"
 #include "src/CEF/Mediator.h"
 #include "src/Utils/Logger.h"
-#include "src/JSMailer.h"
+#include "src/Singletons/JSMailer.h"
 #include "include/base/cef_bind.h"
 #include "include/cef_app.h"
 #include "include/wrapper/cef_closure_task.h"
@@ -15,7 +15,6 @@
 #include <sstream>
 #include <string>
 #include <cmath>
-
 
 Handler::Handler(Mediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing(false)
 {

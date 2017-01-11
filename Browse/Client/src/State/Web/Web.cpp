@@ -13,7 +13,7 @@
 #include <algorithm>
 
 // Include singleton for mailing to JavaScript
-#include "src/JSMailer.h"
+#include "src/Singletons/JSMailer.h"
 
 Web::Web(Master* pMaster, Mediator* pCefMediator) : State(pMaster)
 {
