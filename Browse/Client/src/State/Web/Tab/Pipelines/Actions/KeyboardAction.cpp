@@ -62,7 +62,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 	// Keyboard
     _pTab->RegisterKeyboardListenerInOverlay(
         _overlayKeyboardId,
-		[&]() // select callback
+		[&](std::string value) // select callback
 		{
 			// ######################################################
 			// ### TODO CERTH #######################################
@@ -76,7 +76,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 			// ######################################################
 
 			// Send marker about key selection into lab streaming layer
-			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_");
+			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_" + value);
 
 		},
         [&](std::u16string value) // press callback

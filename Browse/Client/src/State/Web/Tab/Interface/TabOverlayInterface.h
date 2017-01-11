@@ -44,7 +44,7 @@ public:
     virtual void UnregisterButtonListenerInOverlay(std::string id) = 0;
 
     // Register keyboard listener in overlay
-    virtual void RegisterKeyboardListenerInOverlay(std::string id, std::function<void()> selectCallback, std::function<void(std::u16string)> pressCallback) = 0;
+    virtual void RegisterKeyboardListenerInOverlay(std::string id, std::function<void(std::string)> selectCallback, std::function<void(std::u16string)> pressCallback) = 0;
 
     // Unregister keyboard listener callback in overlay
     virtual void UnregisterKeyboardListenerInOverlay(std::string id) = 0;

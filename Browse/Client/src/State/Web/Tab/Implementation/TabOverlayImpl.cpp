@@ -74,7 +74,7 @@ void Tab::UnregisterButtonListenerInOverlay(std::string id)
 	_overlayButtonUpCallbacks.erase(id);
 }
 
-void Tab::RegisterKeyboardListenerInOverlay(std::string id, std::function<void()> selectCallback, std::function<void(std::u16string)> pressCallback)
+void Tab::RegisterKeyboardListenerInOverlay(std::string id, std::function<void(std::string)> selectCallback, std::function<void(std::u16string)> pressCallback)
 {
 	// Log bug when id already existing
 	auto iterSelect = _overlayKeyboardSelectCallbacks.find(id);
