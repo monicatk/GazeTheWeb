@@ -10,7 +10,7 @@
 #include "src/CEF/Renderer.h"
 #include "src/CEF/JSCode.h"
 #include "include/cef_client.h"
-#include "src/CEF/BrowserMsgRouter.h"
+#include "src/CEF/MessageRouter.h"
 #include <list>
 #include <set>
 
@@ -148,8 +148,8 @@ private:
     // Renderer, whose methods are called when rendering relevant actions take place
     CefRefPtr<Renderer> _renderer;
 
-	// Message router for Javascript induced C++ callbacks
-	CefRefPtr<BrowserMsgRouter> _msgRouter;
+	// Message router for JavaScript induced C++ callbacks
+	CefRefPtr<MessageRouter> _msgRouter;
 
     // Javascript code as Strings
     const std::string _js_remove_css_scrollbar = GetJSCode(REMOVE_CSS_SCROLLBAR);

@@ -39,7 +39,7 @@ enum JSFile
 };
 
 std::string GetJSCode(JSFile file);
-std::string jsInputTextData(int inputID, std::string text, bool submit=false);
+std::string jsInputTextData(int inputID, std::string text, bool submit = false);
 std::string jsFavIconUpdate(std::string oldUrl);
 
 #endif // CEF_JSCODE_H_

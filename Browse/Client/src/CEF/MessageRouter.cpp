@@ -3,24 +3,25 @@
 // Author: Daniel Mueller (muellerd@uni-koblenz.de)
 //============================================================================
 
-#include "BrowserMsgRouter.h"
+#include "MessageRouter.h"
 #include "src/CEF/Mediator.h"
 #include "src/Utils/Logger.h"
 #include "src/CEF/Data/DOMNode.h"
 #include <cstdlib>
 #include <algorithm>
 
-BrowserMsgRouter::BrowserMsgRouter(Mediator* pMediator)
+MessageRouter::MessageRouter(Mediator* pMediator)
 {
+	// Store pointer to mediator
 	_pMediator = pMediator;
 
-	// Create configuration for browser side message router
+	// Create configuration for CEF message router
 	CefMessageRouterConfig config;
 	config.js_query_function = "cefQuery";
 	config.js_cancel_function = "cefQueryCancel";
 	_router = CefMessageRouterBrowserSide::Create(config);
 
-	// Create and add msgRouter for msg handling
+	// Add the default handler for messages to the delegated router
 	CefMessageRouterBrowserSide::Handler* defaultHandler = new DefaultMsgHandler(_pMediator);
 	_router->AddHandler(defaultHandler, true);
 }
@@ -32,25 +33,35 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	bool persistent,
 	CefRefPtr<Callback> callback)
 {
-	const std::string requestName = request.ToString();
+	const std::string requestString = request.ToString();
 
-	if (requestName == "faviconBytesReady")
+	// ###############
+	// ### Favicon ###
+	// ###############
+
+	if (requestString == "faviconBytesReady")
 	{
-		callback->Success("GetFavIconBytes");
-		LogDebug("BrowserMsgRouter: Received 'faviconBytesReady' callback from Javascript");
+		// Logging
+		LogDebug("MessageRouter: Received 'faviconBytesReady' callback from Javascript");
 
 		// Tell renderer to read out favicon image's bytes
 		CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("GetFavIconBytes");
 		browser->SendProcessMessage(PID_RENDERER, msg);
 
+		// Success!
+		callback->Success("success");
 		return true;
 	}
 
+	// ######################
+	// ### Text Selection ###
+	// ######################
+
 	// Text selection callback, asynchronously called when CefMediator::EndTextSelection finishes
-	if (requestName.compare(0, 8, "#select#") == 0)
+	if (requestString.compare(0, 8, "#select#") == 0)
 	{
 		// Split result
-		auto split = SplitBySeparator(requestName, '#');
+		auto split = SplitBySeparator(requestString, '#');
 
 		// Check whether result is empty
 		if (split.size() > 1)
@@ -58,61 +69,77 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			// Extract selection
 			const std::string selectionStr = split.at(1);
 
+			// Logging
 			LogDebug("MsgRouter: Selected Text: '", selectionStr, "'");
 
 			// Set clipboard in mediator (TODO: what happens when two parallel string extractions are ongoing? some weird overwriting)
 			_pMediator->SetClipboardText(selectionStr);
 		}
 	
+		// Success!
+		callback->Success("success");
 		return true;
 	}
 
+	// #####################
+	// ### Fixed Element ###
+	// #####################
+
 	// Fixed element callbacks
-	if (requestName.compare(0, 9, "#fixElem#") == 0)
+	if (requestString.compare(0, 9, "#fixElem#") == 0)
 	{
-		std::vector<std::string> data = SplitBySeparator(requestName, '#');
+		std::vector<std::string> data = SplitBySeparator(requestString, '#');
 		const std::string& op = data[1];
 
 		if (data.size() > 2)
 		{
 			const std::string& id = data[2];
 
-			if (op.compare("rem") == 0)
+			if (op.compare("rem") == 0) // removing fixed element
 			{
-
-				// Notify Tab via CefMediator, that a fixed element was removed
+				// Notify Tab via Mediator that a fixed element was removed
 				_pMediator->RemoveFixedElement(browser, atoi(id.c_str()));
 
+				// Success!
+				callback->Success("success");
 				return true;
 			}
-			if (op.compare("add") == 0)
+			if (op.compare("add") == 0) // adding fixed element
 			{
-				// Tell Renderer to read out bounding rectangle coordinates belonging to the given ID
+				// Tell RenderProcessHandler to read out bounding rectangle coordinates belonging to the given ID
 				CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("FetchFixedElements");
 				msg->GetArgumentList()->SetInt(0, atoi(id.c_str()));
 				browser->SendProcessMessage(PID_RENDERER, msg);
+
+				// Success!
+				callback->Success("success");
 				return true;
 			}
 		}
 		else
 		{
+			// Failure!
 			LogDebug("MsgRouter: Expected more arguments for fixed elements. Aborting.");
+			callback->Failure(-1, "not enough arguments");
 			return true;
 		}
-		
 	}
 
-	if (requestName.compare(0, 9, "#ovrflow#") == 0)
+	// ########################
+	// ### Overflow Element ###
+	// ########################
+
+	if (requestString.compare(0, 9, "#ovrflow#") == 0)
 	{
-		if (requestName.compare(9, 4, "add#") == 0)
+		if (requestString.compare(9, 4, "add#") == 0) // adding overflow element
 		{
-			std::string dataStr = requestName.substr(13, requestName.length());
+			std::string dataStr = requestString.substr(13, requestString.length());
 			std::vector<std::string> data = SplitBySeparator(dataStr, '#');
 
-			//Extract OverflowElement ID from dataStr
+			// Extract OverflowElement ID from dataStr
 			int id = std::stoi(data[0]);
 
-			 //Extract Rect data from encoded String
+			// Extract rect data from encoded String
 			std::vector<float> rectData;
 			std::vector<std::string> rectStrData = SplitBySeparator(data[1], ';');
 			std::for_each(
@@ -123,31 +150,34 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			Rect rect = Rect(rectData);
 
 			// Extract maximum possible scrolling in x and y direction
-			std::vector<std::string> scrollMaxsStr = SplitBySeparator(data[2], ';');
-			if (scrollMaxsStr[0].compare("undefined") == 0 || scrollMaxsStr[1].compare("undefined") == 0)
+			std::vector<std::string> scrollMaxString = SplitBySeparator(data[2], ';');
+			if (scrollMaxString[0].compare("undefined") == 0 || scrollMaxString[1].compare("undefined") == 0)
 			{
 				LogDebug("MsgRouter: Error in OverflowElement creation: Missing max scrolling value(s)! Setting them to 0.");
 			}
-			int scrollLeftMax = (scrollMaxsStr[0].compare("undefined") == 0) ? 0 : std::stoi(scrollMaxsStr[0]);
-			int scrollTopMax = (scrollMaxsStr[1].compare("undefined") == 0) ? 0 : std::stoi(scrollMaxsStr[1]);
+			int scrollLeftMax = (scrollMaxString[0].compare("undefined") == 0) ? 0 : std::stoi(scrollMaxString[0]);
+			int scrollTopMax = (scrollMaxString[1].compare("undefined") == 0) ? 0 : std::stoi(scrollMaxString[1]);
 
+			// Add overflow element
+			_pMediator->AddOverflowElement(browser, std::make_shared<OverflowElement>(id, rect, scrollLeftMax, scrollTopMax));
 
-			OverflowElement overflowElem = OverflowElement(id, rect, scrollLeftMax, scrollTopMax);
-
-			_pMediator->AddOverflowElement(browser, std::make_shared<OverflowElement>(overflowElem));
-
+			// Success!
+			callback->Success("success");
 			return true;
 		}
-		if (requestName.compare(9, 4, "rem#") == 0)
+		if (requestString.compare(9, 4, "rem#") == 0) // removing overflow element
 		{
-			std::vector<std::string> dataStr = SplitBySeparator(requestName.substr(13), '#');
+			// Remove overflow element
+			std::vector<std::string> dataStr = SplitBySeparator(requestString.substr(13), '#');
 			_pMediator->RemoveOverflowElement(browser, std::stoi(dataStr[0]));
 
+			// Success!
+			callback->Success("success");
 			return true;
 		}
-		if (requestName.compare(9, 4, "upd#") == 0)
+		if (requestString.compare(9, 4, "upd#") == 0) // update overflow element
 		{
-			std::vector<std::string> dataStr = SplitBySeparator(requestName.substr(13), '#');
+			std::vector<std::string> dataStr = SplitBySeparator(requestString.substr(13), '#');
 
 			// Assuming elementId, attribute name & data are enough information (at this time)
 			if (dataStr.size() == 3)
@@ -185,44 +215,43 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					{
 						elem->UpdateFixation(std::stoi(dataStr[2]));
 					}
-
 				}
+
+				// Success!
+				callback->Success("success");
+				return true;
 			}
 			else
 			{
+				// Failure!
 				LogError("MsgRouter: An error occured in decoding the update String of an OverflowElement!");
-
+				callback->Failure(-1, "some error occured");
+				return true;
 			}
-
-			return true;
 		}
 	}
 
-	/* NOTES
-		Encoding of request strings for DOM node operations:
+	// ################
+	// ### DOM Node ###
+	// ################
+	// DOM#{add | rem | upd}#nodeType#nodeID{#attribute#data}#
+	// Definitions:
+	//	add--> send process message to Renderer to fetch V8 data
+	//	rem--> request removal of given node
+	//	upd--> update data of an specific node attribute
+	//	nodeType: int
+	//		0 : TextInput
+	//		1 : TextLink
+	//	nodeID : int
+	//	attribute : int
+	//		0 : Rect
+	//		1 : _fixed
+	//	data : depends on attribute
+	// Example: DOM#upd#7#1337#0#0.9;0.7;0.5;0.7#
 
-		DOM#{add | rem | upd}#nodeType#nodeID{#attribute#data}#
-
-
-		Definitions:
-		nodeType	: int
-			0 : TextInput
-			1 : TextLink
-		nodeID		: int
-		add --> send process message to Renderer to fetch V8 data
-		rem --> request removal of given node
-		upd --> update data of an specific node attribute
-		attribute	: int
-			0	: Rect
-			1	: _fixed
-		data	: depends on attribute
-	*/
-
-	// Identify general DOM request
-	// example: DOM#upd#7#1337#0#0.9;0.7;0.5;0.7#
-	if (requestName.compare(0, 4, "DOM#") == 0)
+	if (requestString.compare(0, 4, "DOM#") == 0)
 	{
-		std::vector<std::string> data = SplitBySeparator(requestName, '#');
+		std::vector<std::string> data = SplitBySeparator(requestString, '#');
 
 		if (data.size() > 3)
 		{
@@ -234,15 +263,12 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			DOMNodeType type;
 			switch (numeric_type)
 			{
-			case(0) : {type = DOMNodeType::TextInput; break;  };
-			case(1) : {type = DOMNodeType::TextLink; break;  };
+				case(0) : {type = DOMNodeType::TextInput; break;  };
+				case(1) : {type = DOMNodeType::TextLink; break;  };
 			}
 
-			// Node was added
-			if (op.compare("add") == 0)
+			if (op.compare("add") == 0) // adding of DOM node
 			{
-				//LogDebug("MsgHandler: Javascript says, that DOM node with type=", type, " & id=", id, " was found.");
-
 				// Create blank DOM node of given node type with nodeID
 				_pMediator->AddDOMNode(
 					browser,
@@ -261,14 +287,12 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				browser->SendProcessMessage(PID_RENDERER, msg);
 			}
 
-			// Node was removed
-			if (op.compare("rem") == 0)
+			if (op.compare("rem") == 0) // removing of DOM node
 			{
 				_pMediator->RemoveDOMNode(browser, type, id);
 			}
 
-			// Node was updated
-			if (op.compare("upd") == 0)
+			if (op.compare("upd") == 0) // updating of DOM node
 			{
 				if (data.size() > 5)
 				{
@@ -278,9 +302,11 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					switch (attr)
 					{
 						// List of Rects were updated
-						case(0) : {
+						case(0):
+						{
 							std::vector<std::string> rectDataStr = SplitBySeparator(attrData, ';');
 							std::vector<float> rectData;
+
 							// Extract each float value from string, earlier separated by ';', and convert string to numerical value
 							std::for_each(
 								rectDataStr.begin(),
@@ -288,8 +314,8 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 								[&rectData](std::string value) {rectData.push_back(std::stod(value)); }
 							);
 
-							std::vector<Rect> rects;
 							// Read out each 4 float values und create 1 Rect with them
+							std::vector<Rect> rects;
 							for (int i = 0; i + 3 < rectData.size(); i += 4)
 							{
 								Rect rect = Rect(rectData[i], rectData[i + 1], rectData[i + 2], rectData[i + 3]);
@@ -305,7 +331,8 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 						};
 
 						// Node's fixation status changed
-						case(1) : {
+						case(1):
+						{
 							bool boolVal = attrData.at(0) != '0';
 
 							// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
@@ -318,7 +345,8 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 						};
 
 						// Node's visibility has changed
-						case (2) : {
+						case (2) :
+						{
 							bool boolVal = attrData.at(0) != '0';
 
 							// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
@@ -329,17 +357,20 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 
 							break;
 						}
+
 						// Node's text(Content) changed
-						case (3) : {
+						case (3):
+						{
 							if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())
 							{
 								targetNode->SetText(attrData);
-								//LogDebug("MsgRouter: Set node's text attribute to: '", attrData, "'");
 							}
 							break;
 						}
+
 						// Node is set as password input field
-						case(4) : {
+						case(4):
+						{
 							if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())
 							{
 								targetNode->SetAsPasswordField();
@@ -347,25 +378,25 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 							}
 							break;
 						}
-						default: {
+
+						// Fallback
+						default:
+						{
 							LogDebug("MsgHandler: Received Javascript 'update' request of DOMNode attribute=", attr, ", which is not yet defined.");
 						}
 					}
 				}
 				else
 				{
-					LogDebug("MsgRouter: Expected more data in DOMObject update:\n", requestName, "\nAborting update.");
-					return true;
+					LogDebug("MsgRouter: Expected more data in DOMObject update:\n", requestString, "\nAborting update.");
 				}
 			}
 		}
-
+		
+		// Success! (TODO: there may be failures which can be passed to JavaScript)
+		callback->Success("success");
 		return true;
 	}
-
-	// Print message to console and withdraw callback
-	//LogDebug("JavaScript: ", requestName);
-	//callback->Failure(0, "");
 
 	return false;
 }

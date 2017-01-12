@@ -1,27 +1,29 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
 // Author: Daniel Mueller (muellerd@uni-koblenz.de)
+// Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
+// Handles messages from JavaScript on Main Process coming from webpage on
+// the Render Process.
 
-#ifndef CEF_BROWSERMSGROUTER_H_
-#define CEF_BROWSERMSGROUTER_H_
+#ifndef CEF_MESSAGEROUTER_H_
+#define CEF_MESSAGEROUTER_H_
 
 #include "src/Utils/Helper.h"
 #include "include/wrapper/cef_message_router.h"
 #include <functional>
 
-class Mediator;		// Forward declaration
-class BrowserMsgRouter; // Forward declaration
+class Mediator; // Forward declaration
 
 // Default handler for messages
-class DefaultMsgHandler :	public CefMessageRouterBrowserSide::Handler
+class DefaultMsgHandler : public CefMessageRouterBrowserSide::Handler
 {
 public:
 
 	// Constructor
 	DefaultMsgHandler(Mediator* pMediator) { _pMediator = pMediator; }
 
-	// Called when |cefQuery| was called in Javascript
+	// Called when |cefQuery| was called in JavaScript
 	virtual bool OnQuery(CefRefPtr<CefBrowser> browser,
 		CefRefPtr<CefFrame> frame,
 		int64 query_id,
@@ -47,7 +49,7 @@ public:
 		_callbackFunction = callbackFunction;
 	}
 
-	// Called when |cefQuery| was called in Javascript
+	// Called when |cefQuery| was called in JavaScript
 	virtual bool OnQuery(CefRefPtr<CefBrowser> browser,
 		CefRefPtr<CefFrame> frame,
 		int64 query_id,
@@ -60,26 +62,36 @@ private:
 	// Members
 	std::string _prefix;
 	std::function<void(std::string)> _callbackFunction;
-
 };
 
-// Router that owns multiple handlers of messages
-class BrowserMsgRouter : public CefBase
+// Router that owns multiple handlers for messages
+class MessageRouter : public CefBase
 {
 public:
-	BrowserMsgRouter(Mediator* pMediator);
 
-	// Redirecting all method calls to browser side message router
+	// Constructor
+	MessageRouter(Mediator* pMediator);
+
+	// Add new handler to process this callback
+	void RegisterJavascriptCallback(std::string prefix, std::function<void(std::string)> callbackFunction)
+	{
+		CefMessageRouterBrowserSide::Handler* callbackHandler = new CallbackMsgHandler(prefix, callbackFunction);
+		_router->AddHandler(callbackHandler, false);
+	}
+
+	// Redirecting onBeforeBrowse
 	void OnBeforeBrowse(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame) const
 	{
 		_router->OnBeforeBrowse(browser, frame);
 	}
 
+	// Redirecting OnBeforeClose
 	void OnBeforeClose(CefRefPtr<CefBrowser> browser) const
 	{ 
 		_router->OnBeforeClose(browser); 
 	}
 
+	// Redirecting OnProcessMessageReceived
 	bool OnProcessMessageReceived(
 		CefRefPtr<CefBrowser> browser,
 		CefProcessId source_process,
@@ -87,19 +99,10 @@ public:
 	{
 		return _router->OnProcessMessageReceived(browser, source_process, message);
 	}
-
+	// Redirect OnRenderProcessTerminated
 	void OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser) const
 	{
 		_router->OnRenderProcessTerminated(browser);
-	}
-
-	Mediator* GetMediator() const { return _pMediator; };
-
-	// Create new handler to process this callback
-	void RegisterJavascriptCallback(std::string prefix, std::function<void (std::string)> callbackFunction)
-	{
-		CefMessageRouterBrowserSide::Handler* callbackHandler = new CallbackMsgHandler(prefix, callbackFunction);
-		_router->AddHandler(callbackHandler, false);
 	}
 
 private:
@@ -107,12 +110,10 @@ private:
 	// Wrapping CEF browser side message router
 	CefRefPtr<CefMessageRouterBrowserSide> _router; // holds multiple handlers
 
-	// Keep reference to Handler class in order to communicate with whole CEF architecture
+	// Pointer to mediator. TODO: replace with some interface with less power and more control?
 	Mediator* _pMediator;
 
-	IMPLEMENT_REFCOUNTING(BrowserMsgRouter);
+	IMPLEMENT_REFCOUNTING(MessageRouter);
 };
 
-
-
-#endif // CEF_BROWSERMSGROUTER_H_
+#endif // CEF_MESSAGEROUTER_H_

@@ -20,7 +20,7 @@ Handler::Handler(Mediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing
 {
   _pMediator = pMediator;
   _renderer = renderer;
-  _msgRouter = new BrowserMsgRouter(pMediator);
+  _msgRouter = new MessageRouter(pMediator);
 
   // TODO: delete all this or do a nice rewrite
   // Tell JSMailer singleton about the method to call
