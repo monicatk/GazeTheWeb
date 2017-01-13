@@ -279,6 +279,7 @@ void RenderProcessHandler::OnContextCreated(
 
     if (frame->IsMain())
     {
+		// TODO (Daniel): Really necessary?
 		// Tell browser thread that context was created to discard all previous registered DOM nodes
 		CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("OnContextCreated");
 		browser->SendProcessMessage(PID_BROWSER, msg);
@@ -288,13 +289,10 @@ void RenderProcessHandler::OnContextCreated(
     // Variables here contain the amount of needed objects in order to allocate arrays, which are just big enough
         if (context->Enter())
         {
-			// DEBUG
-			IPCLogDebug(browser, "### Context created for main frame. ###");
-
             // Retrieve the context's window object.
 			CefRefPtr<CefV8Value> globalObj = context->GetGlobal();
 
-
+			// TODO (Daniel): Are those still neccessary? There might be a better way!
             // Add attributes with their pre-set values to JS object |window|
             globalObj->SetValue("_pageWidth", CefV8Value::CreateDouble(-1), V8_PROPERTY_ATTRIBUTE_NONE);
             globalObj->SetValue("_pageHeight", CefV8Value::CreateDouble(-1), V8_PROPERTY_ATTRIBUTE_NONE);
@@ -308,42 +306,13 @@ void RenderProcessHandler::OnContextCreated(
 			// Create an image object, which will later contain favicon image 
             frame->ExecuteJavaScript(_js_favicon_create_img, frame->GetURL(), 0);
 
-			//IPCLogDebug(browser, "DEBUG: Renderer reloads JS code for MutationObserver on EVERY context creation atm!");
-			//_js_mutation_observer_test = GetJSCode(MUTATION_OBSERVER_TEST);
-			//_js_dom_mutationobserver = GetJSCode(DOM_MUTATIONOBSERVER);
-
 			// Inject Javascript code which extends the current page's context by our methods
+			// and automatically creates a MutationObserver instance
 			frame->ExecuteJavaScript(_js_dom_mutationobserver, "", 0);
 			frame->ExecuteJavaScript(_js_mutation_observer_test, "", 0);
 			frame->ExecuteJavaScript(_js_dom_fixed_elements, "", 0);
-			// Execute previously injected code and start MutationObserver
-			frame->ExecuteJavaScript("MutationObserverInit();", "", 0);
 
-			// DEBUG
-			IPCLogDebug(browser, "Renderer: Called MutationObserverInit() on context creation!");
 
-			// TESTING
-		/*	CefRefPtr<CefV8Value> myObj = globalObj->GetValue("myObject");
-			CefV8ValueList args;
-			if (myObj->GetValue("getVal")->IsFunction())
-			{
-				IPCLogDebug(browser, "IsFunction!");
-				CefRefPtr<CefV8Value> returned = myObj->GetValue("getVal")->ExecuteFunctionWithContext(context, myObj, args);
-				if (returned)
-				{
-					if (returned->IsInt())
-						IPCLogDebug(browser, "Return value is an int");
-					if (returned->IsUndefined())
-						IPCLogDebug(browser, "Return value is undefined");
-					if (returned->IsNull())
-						IPCLogDebug(browser, "Return value is NULL");
-				}
-
-			}
-			else
-			{
-				IPCLogDebug(browser, "Is NOT a function!");
-			}*/
 
             context->Exit();
         }

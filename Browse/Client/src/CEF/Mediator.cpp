@@ -49,15 +49,17 @@ void Mediator::RegisterTab(TabCEFInterface* pTab)
 
     _pendingTab = pTab;
 
-    LogDebug("CefMediator: Creating new CefBrowser at Tab registration.");
+    LogDebug("Mediator: Creating new CefBrowser at Tab registration.");
     // Create new CefBrowser with given information
     CefRefPtr<CefBrowser> browser = CefBrowserHost::CreateBrowserSync(
-        window_info, _handler.get(), pTab->GetURL(), browser_settings, NULL);
+        window_info, _handler.get(), "about:blank", browser_settings, NULL);
 
     // Fill maps with correlating Tab and CefBrowsre
     _browsers.emplace(pTab, browser);
     _tabs.emplace(browser->GetIdentifier(), pTab);
     _pendingTab = NULL;
+
+	RefreshTab(pTab);
 }
 
 void Mediator::UnregisterTab(TabCEFInterface* pTab)
@@ -69,7 +71,7 @@ void Mediator::UnregisterTab(TabCEFInterface* pTab)
 
         // Delete corresponding key-value-pair
         BrowserID browserID = browser->GetIdentifier();
-        LogDebug("CefMediator: Unregistering Tab corresponding to browserID = ", browserID);
+        LogDebug("Mediator: Unregistering Tab corresponding to browserID = ", browserID);
         _tabs.erase(browserID);
         _browsers.erase(pTab);
     }
@@ -108,12 +110,6 @@ void Mediator::GoForward(TabCEFInterface * pTab)
     }
 }
 
-void Mediator::OpenNewTab(std::string url)
-{
-    // TODO? When is it called (asks Raphael)
-	// Daniel: Seems as if it was planned but then obsolete.. whoops. :D
-}
-
 void Mediator::DoMessageLoopWork()
 {
     CefDoMessageLoopWork();
@@ -131,7 +127,7 @@ void Mediator::EmulateLeftMouseButtonClick(TabCEFInterface * pTab, double x, dou
 {
     if(CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
     {
-        LogDebug("CefMediator: Emulating left mouse button click on position (x, y) = (", x, ", ", y, ").");
+        LogDebug("Mediator: Emulating left mouse button click on position (x, y) = (", x, ", ", y, ").");
 
         // Get Tab information and do browser work in Handler
         _handler->EmulateLeftMouseButtonClick(browser, x, y);
@@ -152,7 +148,7 @@ void Mediator::ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, CefRef
 
     if (msgName == "ReceiveFavIconBytes")
     {
-		LogDebug("CefMediator: Received Favicon Bytes...");
+		LogDebug("Mediator: Received Favicon Bytes...");
 
         CefRefPtr<CefListValue> args = msg->GetArgumentList();
         int index = 0;
@@ -163,7 +159,7 @@ void Mediator::ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, CefRef
 
             if (width <= 0 || height <= 0)
             {
-                LogDebug("CefMediator: Failure. Received favicon width or height less than zero!");
+                LogDebug("Mediator: Failure. Received favicon width or height less than zero!");
 
                 if (TabCEFInterface* pInnerTab = GetTab(browser))
                 {
@@ -173,7 +169,7 @@ void Mediator::ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, CefRef
             }
             else
             {
-                LogDebug("CefMediator: Success. Copying favicon bytes to Tab... (w= ", width, ", h=", height,")");
+                LogDebug("Mediator: Success. Copying favicon bytes to Tab... (w= ", width, ", h=", height,")");
 
                 // Extract width, height and byte information
                 std::unique_ptr<std::vector<unsigned char> > upData = std::unique_ptr<std::vector<unsigned char> >(new std::vector<unsigned char>);
@@ -222,8 +218,8 @@ void Mediator::ClearDOMNodes(CefRefPtr<CefBrowser> browser)
     {
         // Clear corresponding Tabs DOM Node list (implicitly destroy all DOM Node objects)
         pTab->ClearDOMNodes();
-		//LogDebug("CefMediator: ### DISABLED DOM CLEARING FOR LINK TESTING ###");
-        LogDebug("CefMediator: Cleared all DOM nodes belonging to browserID = ", browser->GetIdentifier());
+		//LogDebug("Mediator: ### DISABLED DOM CLEARING FOR LINK TESTING ###");
+        LogDebug("Mediator: Clearing Tab's DOM nodes belonging to browserID = ", browser->GetIdentifier());
     }
 }
 
@@ -231,7 +227,7 @@ bool Mediator::InputTextData(TabCEFInterface* tab, int64 frameID, int nodeID, st
 {
     if (CefRefPtr<CefBrowser> browser = GetBrowser(tab))
     {
-        LogDebug("CefMediator: Input text '", text, "' in frame id = ", frameID, " (nodeID = ", nodeID, ").");
+        LogDebug("Mediator: Input text '", text, "' in frame id = ", frameID, " (nodeID = ", nodeID, ").");
         return _handler->InputTextData(browser, frameID, nodeID, text, submit);
     }
     return false;
@@ -272,11 +268,11 @@ void Mediator::FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefP
 
 			// Set target node's visibility
 			targetNode->SetVisibility(visible);
-			//if (!visible) LogDebug("CefMediator: Set node's visibility to false after its creation");
+			//if (!visible) LogDebug("Mediator: Set node's visibility to false after its creation");
 		}
 		else
 		{
-			LogDebug("CefMediator: Trying to update node information but DOMNode object doesn't seem to exist!");
+			LogDebug("Mediator: Trying to update node information but DOMNode object doesn't seem to exist!");
 		}
 	}
 }
@@ -436,7 +432,7 @@ void Mediator::ReceiveFixedElements(CefRefPtr<CefBrowser> browser, CefRefPtr<Cef
     }
     if (TabCEFInterface* pTab = GetTab(browser))
     {
-      /*  LogDebug("CefMediator: Sending ", fixedCoords.size(), " fixed element coordinate tupel(s) to Tab for fixedID=", id, ".");
+      /*  LogDebug("Mediator: Sending ", fixedCoords.size(), " fixed element coordinate tupel(s) to Tab for fixedID=", id, ".");
         for (int i = 0; i < (int)fixedCoords.size(); i++)
         {
              LogDebug("\t-->", fixedCoords[i].top, ", ", fixedCoords[i].left, ", ", fixedCoords[i].bottom, ", ", fixedCoords[i].right);
@@ -449,7 +445,7 @@ void Mediator::RemoveFixedElement(CefRefPtr<CefBrowser> browser, int id)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
     {
-        //LogDebug("CefMediator: Removing fixed element with id=", id, " from Tab.");
+        //LogDebug("Mediator: Removing fixed element with id=", id, " from Tab.");
         pTab->RemoveFixedElement(id);
     }
 }
@@ -496,7 +492,7 @@ std::weak_ptr<DOMNode> Mediator::GetDOMNode(CefRefPtr<CefBrowser> browser, DOMNo
 
 void Mediator::ShowDevTools()
 {
-	LogInfo("CefMediator: Showing DevTools...");
+	LogInfo("Mediator: Showing DevTools...");
 
 	// Setup
 	CefWindowInfo windowInfo;
@@ -554,7 +550,7 @@ void Mediator::EmulateLeftMouseButtonUp(TabCEFInterface* pTab, double x, double 
 
 void Mediator::InvokeCopy(TabCEFInterface * pTab)
 {
-	LogDebug("CefMediator: InvokeCopy called.");
+	LogDebug("Mediator: InvokeCopy called.");
 
 	if (const CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
@@ -564,7 +560,7 @@ void Mediator::InvokeCopy(TabCEFInterface * pTab)
 
 void Mediator::InvokePaste(TabCEFInterface * pTab, double x, double y)
 {
-	LogDebug("CefMediator: InvokePaste called on position (", x, ", ", y, ").");
+	LogDebug("Mediator: InvokePaste called on position (", x, ", ", y, ").");
 
 	if (const CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
@@ -617,7 +613,7 @@ TabCEFInterface* Mediator::GetTab(CefRefPtr<CefBrowser> browser) const
     {
         return _tabs.at(browserID);
     }
-    LogDebug("CefMediator: The given CefBrowser pointer is not contained in key in Browser->Tab map (anymore).");
+    LogDebug("Mediator: The given CefBrowser pointer is not contained in key in Browser->Tab map (anymore).");
     return nullptr;
 }
 
@@ -627,7 +623,7 @@ CefRefPtr<CefBrowser> Mediator::GetBrowser(TabCEFInterface * pTab) const
     {
         return _browsers.at(pTab);
     }
-    LogDebug("CefMediator: The given Tab pointer is not contained in key in Tab->CefBrowser map (anymore).");
+    LogDebug("Mediator: The given Tab pointer is not contained in key in Tab->CefBrowser map (anymore).");
     return nullptr;
 }
 
@@ -640,12 +636,12 @@ std::weak_ptr<Texture> Mediator::GetTexture(CefRefPtr<CefBrowser> browser)
     }
     else if (_pendingTab)
     {
-        LogDebug("CefMediator: Pending Tab used for GetTexture.");
+        LogDebug("Mediator: Pending Tab used for GetTexture.");
         return _pendingTab->GetWebViewTexture();
     }
     else
     {
-        LogDebug("CefMediator: GetTexture did not find corresponding texture.");
+        LogDebug("Mediator: GetTexture did not find corresponding texture.");
         // Return empty weak pointer
         return std::weak_ptr<Texture>();
     }
@@ -668,14 +664,14 @@ void Mediator::GetResolution(CefRefPtr<CefBrowser> browser, int& width, int& hei
     }
     else if (_pendingTab)
     {
-        LogDebug("CefMediator: Getting resolution from Tab _pendingTab.");
+        LogDebug("Mediator: Getting resolution from Tab _pendingTab.");
         _pendingTab->GetWebRenderResolution(width, height);
     }
     else
     {
         width = 0;
         height = 0;
-        LogDebug("CefMediator: GetResolution returned (0,0).");
+        LogDebug("Mediator: GetResolution returned (0,0).");
     }
 }
 

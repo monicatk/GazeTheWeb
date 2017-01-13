@@ -14,17 +14,9 @@ window.dom_textinputs_rect = [[]];
 window.appendedSubtreeRoots = new Set();
 
 
-// TESTING CEF V8 ExecuteFunction
-// window.myObject = {val: '8', called: '0', getVal: function(){ConsolePrint('Objects function called!'); return 7;} };
-
-
-
 // Helper function for console output
 function ConsolePrint(msg)
 {
-	// DEBUG
-	console.log("Log fallback:" + msg);
-	
 	window.cefQuery({ request: (""+msg), persistent : false, onSuccess : function(response) {}, onFailure : function(error_code, error_message){} });
 }
 
@@ -104,64 +96,6 @@ function AdjustRectCoordinatesToWindow(rect)
 	return output;
 }
 
-
-// // Iterate over Set of already used fixedIds to find the next ID not yet used and assign it to node as attribute
-// function AddFixedElement(node)
-// {
-// 	// Determine fixed element ID
-// 	var id;
-
-// 	if(node.hasAttribute('fixedId'))
-// 	{
-// 		// node already in set, use existing ID
-// 		id = node.getAttribute('fixedId');
-
-// 		// Check if bounding Rect changes happened
-// 		UpdateSubtreesBoundingRect(node);
-// 	}
-// 	else
-// 	{
-// 		// Add node to set of fixed elements, if position is fixed
-// 		window.fixed_elements.add(node);
-
-// 		// Find smallest ID not yet in use
-// 		var found = false;
-// 		for(var i=0, n=window.fixed_IDlist.length; i < n; i++)
-// 		{
-// 			if(!window.fixed_IDlist[i])
-// 			{
-// 				window.fixed_IDlist[i] = true;
-// 				id = i;
-// 				found = true;
-// 			}
-// 		}
-// 		if(!found)
-// 		{
-// 			// Extend ID list by one entry
-// 			window.fixed_IDlist.push(true);
-// 			// Use new last position as ID
-// 			id = window.fixed_IDlist.length-1;
-// 		}
-
-// 		// Create attribute in node and store ID there
-// 		node.setAttribute('fixedId', id);
-
-// 		// DEBUG
-// 		// ConsolePrint("Adding fixed node #"+id);
-
-// 		// Write node's (and its children's) bounding rectangle coordinates to List
-// 		SaveBoundingRectCoordinates(node);
-// 	}
-
-// 	// TODO: Add attribute 'fixedId' to every child node
-
-
-
-// 	var zero = '';
-// 	if(id < 10) zero = '0';
-// 	// Tell CEF that fixed node was added
-// 	ConsolePrint('#fixElem#add#'+zero+id);
-// }
 
 
 function SaveBoundingRectCoordinates(node)
@@ -964,8 +898,13 @@ function MutationObserverInit()
 	// Konfiguration des Observers: alles melden - Änderungen an Daten, Kindelementen und Attributen
 	var config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: false, attributeOldValue: true};
 	
+	// DEBUG
+	window.used_document = window.document;
+
+
+
 	// eigentliche Observierung starten und Zielnode und Konfiguration übergeben
-	window.observer.observe(document, config);
+	window.observer.observe(window.document, config);
 
 	ConsolePrint('MutationObserver was told what to observe.');
 
@@ -976,6 +915,10 @@ function MutationObserverInit()
 	
 } // END OF MutationObserverInit()
 
+MutationObserverInit();
+
+
+
 function MutationObserverShutdown()
 {
 	window.observer.disconnect(); 
@@ -985,15 +928,8 @@ function MutationObserverShutdown()
 	ConsolePrint('Disconnected and deleted MutationObserver! ');
 }
 
-		  				// https://developer.mozilla.org/de/docs/Web/API/Node
-		  				// https://developer.mozilla.org/de/docs/Web/API/Element
-		  				// http://stackoverflow.com/questions/9979172/difference-between-node-object-and-element-object
-		  				// read also: http://www.backalleycoder.com/2013/03/18/cross-browser-event-based-element-resize-detection/
 
-		  												// offtopic: check if attributes exist
-								// if(nodes[i].hasOwnProperty('style'))
 
-			  					// http://ryanmorr.com/understanding-scope-and-context-in-javascript/
 
 var mutation_observer_working_time = 0;
 var load_starting_time;
@@ -1010,3 +946,30 @@ function StopPageLoadingTimer()
 	ConsolePrint("MutationObserver operations took "+mutation_observer_working_time+"ms, "+
 		(100*mutation_observer_working_time/page_load_duration)+"% of page load.");
 }
+
+
+// window.onchange = function(e){ConsolePrint("Window changes: "+e);};
+
+// ConsolePrint("Creating window_observer...");
+// window.window_observer = new MutationObserver(
+// 		function(mutations) {
+// 		  	mutations.forEach(
+// 		  		function(mutation)
+// 		  		{
+// 					ConsolePrint("Mutation in window object detected!");
+
+// 		  			if(mutation.attributeName == "document")
+// 					{
+// 						ConsolePrint("window object's 'document' attribute changed!");
+
+// 						var config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: false, attributeOldValue: true};
+// 						window.observer.observe(window.document, config);
+// 					}
+// 				}
+// 			);
+// 		}
+// );
+// var config = {attributes: true}
+// window.window_observer.observe(window, config );
+// ConsolePrint("... done");
+

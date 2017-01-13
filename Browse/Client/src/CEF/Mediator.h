@@ -42,11 +42,11 @@ public:
     // Receive tab specific commands
     void RegisterTab(TabCEFInterface* pTab);
     void UnregisterTab(TabCEFInterface* pClosing);
-    void RefreshTab(TabCEFInterface* pTab);
+    void RefreshTab(TabCEFInterface* pTab);	// Daniel: "This name is weird.. have been searching for method to load URL and this is the answer? :D
     void ReloadTab(TabCEFInterface* pTab);
     void GoBack(TabCEFInterface* pTab);
     void GoForward(TabCEFInterface* pTab);
-	void OpenNewTab(std::string url);
+
 
     // Renderer::OnPaint calls this method in order to receive corresponding Texture
     std::weak_ptr<Texture> GetTexture(CefRefPtr<CefBrowser> browser);
