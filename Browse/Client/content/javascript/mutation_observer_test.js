@@ -22,6 +22,9 @@ window.appendedSubtreeRoots = new Set();
 // Helper function for console output
 function ConsolePrint(msg)
 {
+	// DEBUG
+	console.log("Log fallback:" + msg);
+	
 	window.cefQuery({ request: (""+msg), persistent : false, onSuccess : function(response) {}, onFailure : function(error_code, error_message){} });
 }
 

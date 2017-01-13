@@ -398,6 +398,9 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		return true;
 	}
 
+	// If request is unknown & couldn't be handled, assume it to be a ConsolePrint call in JS and log it
+	LogDebug("Javascript: ", requestString);
+
 	return false;
 }
 

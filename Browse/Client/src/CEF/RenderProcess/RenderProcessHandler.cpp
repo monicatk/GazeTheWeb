@@ -312,10 +312,15 @@ void RenderProcessHandler::OnContextCreated(
 			//_js_mutation_observer_test = GetJSCode(MUTATION_OBSERVER_TEST);
 			//_js_dom_mutationobserver = GetJSCode(DOM_MUTATIONOBSERVER);
 
+			// Inject Javascript code which extends the current page's context by our methods
 			frame->ExecuteJavaScript(_js_dom_mutationobserver, "", 0);
 			frame->ExecuteJavaScript(_js_mutation_observer_test, "", 0);
 			frame->ExecuteJavaScript(_js_dom_fixed_elements, "", 0);
+			// Execute previously injected code and start MutationObserver
 			frame->ExecuteJavaScript("MutationObserverInit();", "", 0);
+
+			// DEBUG
+			IPCLogDebug(browser, "Renderer: Called MutationObserverInit() on context creation!");
 
 			// TESTING
 		/*	CefRefPtr<CefV8Value> myObj = globalObj->GetValue("myObject");

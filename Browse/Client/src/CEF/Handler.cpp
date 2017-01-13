@@ -370,16 +370,6 @@ void Handler::ResetMainFramesScrolling(CefRefPtr<CefBrowser> browser)
     browser->GetMainFrame()->ExecuteJavaScript(resetScrolling, browser->GetMainFrame()->GetURL(), 0);
 }
 
-void Handler::ReloadDOMNodes(CefRefPtr<CefBrowser> browser, std::string debug_info)
-{
-    //CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("GetDOMElements");
-    //msg->GetArgumentList()->SetDouble(0, (double)browser->GetMainFrame()->GetIdentifier());	// Cast int64 frameID  to (64bit) double, int only has 32
-    //browser->SendProcessMessage(PID_RENDERER, msg);
-    //LogDebug("Handler: Sent \"GetDOMElements\" msg to renderer, if any listed node type exists ", debug_info);
-
-	// TODO: Delete this method because of MutationObserver
-}
-
 void Handler::SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged)
 {
 
@@ -391,15 +381,8 @@ void Handler::SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged
 
         if (definitelyChanged)
         {
-            // Reload DOM nodes because of changed coordinates due to zooming
-            //_pMediator->ClearDOMNodes(browser);			// TODO: Rect update instead!
-
-            ReloadDOMNodes(browser);
-
             UpdatePageResolution(browser);				// TODO: Does a JS event exist for this?
 
-            // EXPERIMENTAL
-            //GetFixedElements(browser);
         }
     }
 }
