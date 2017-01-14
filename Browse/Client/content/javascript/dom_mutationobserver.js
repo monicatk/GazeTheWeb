@@ -2,6 +2,26 @@ window.domLinks = [];
 window.domTextInputs = [];
 window.overflowElements = [];
 
+
+function PerformTextInput(inputId, text, submit)
+{
+    var domObj = GetDOMObject(0, inputId);
+    if(domObj !== null)
+    {
+        // DEBUG
+        console.log("Text to input: "+text);
+        try
+        {
+            domObj.setTextInput(text, submit);
+            return true;
+        }
+        catch(e){return false;}
+
+    }
+    else return false;
+}
+
+
 /**
  * Constructor
  */
@@ -184,13 +204,16 @@ function DOMObject(node, nodeType)
         }
 
         this.setTextInput = function(text, submit){
+            ConsolePrint("tagName: "+this.node.tagName);
             ConsolePrint("setTextInput called with text='"+text+"' and submit="+submit);
+     
 
             // Only executable if DOMNode is TextInput field
             if(this.nodeType === 0)
             {
                 if(this.node.tagName == "TEXTAREA")
                 {
+
                     this.node.value = text;
                 }
                 else if (this.node.tagName == 'INPUT')

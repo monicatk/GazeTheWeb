@@ -334,18 +334,30 @@ bool Handler::InputTextData(CefRefPtr<CefBrowser> browser, int64 frameID, int no
 {
     //CEF_REQUIRE_UI_THREAD();
 
-    CefRefPtr<CefFrame> frame = browser->GetFrame(frameID);
-    if (frame->IsValid())
-    {
-        frame->ExecuteJavaScript(jsInputTextData(nodeID, text, submit), frame->GetURL(), 0);
+	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("ExecuteTextInput");
+	const auto& args = msg->GetArgumentList();
+	args->SetInt(0, nodeID);
+	args->SetString(1, text);
+	args->SetBool(2, submit);
+	browser->SendProcessMessage(PID_RENDERER, msg);
 
-        return true;
-    }
-    else
-    {
-        LogDebug("Handler: Tried to input text data, frame is not valid anymore.");
-        return false;
-    }
+	return true;
+
+  //  CefRefPtr<CefFrame> frame = browser->GetFrame(frameID);
+  //  if (frame->IsValid())
+  //  {
+		//std::string text_input_JS_code = jsInputTextData(nodeID, text, submit);
+		//text_input_JS_code = ""
+
+  //      frame->ExecuteJavaScript(text_input_JS_code, frame->GetURL(), 0);
+
+  //      return true;
+  //  }
+  //  else
+  //  {
+  //      LogDebug("Handler: Tried to input text data, frame is not valid anymore.");
+  //      return false;
+  //  }
 }
 
 void Handler::Reload(CefRefPtr<CefBrowser> browser)

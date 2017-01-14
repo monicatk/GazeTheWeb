@@ -13,12 +13,17 @@ Pause Tab Rendering / Script Execution
 
 # Refinement #
 
+>>> DOM Node data update:
+	[ ]	Read out values on direct callback in RenderProcessHandler without using MsgRouter on Browser Process
+		See: https://bitbucket.org/chromiumembedded/cef/wiki/GeneralUsage.md#markdown-header-asynchronous-javascript-bindings
+
 >>> Text Selection!
 	- 	Create clipboard in Master: std::vector<std::string> 
 		Clipboard might also contain pictures in the future
 
 >>>	Overflow Elements:
 	[ ]	Don't scroll OEs if not visible!
+	[ ] Support "Scroll top" button on OEs covering the whole page
 
 
 	-	FIXED overflow elements

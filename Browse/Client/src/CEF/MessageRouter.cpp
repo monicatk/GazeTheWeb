@@ -358,7 +358,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 							break;
 						}
 
-						// Node's text(Content) changed
+						// Node's text content changed
 						case (3):
 						{
 							if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())

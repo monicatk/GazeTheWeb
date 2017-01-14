@@ -27,6 +27,39 @@ bool RenderProcessHandler::OnProcessMessageReceived(
     const std::string& msgName = msg->GetName().ToString();
     //IPCLogDebug(browser, "Received '" + msgName + "' IPC msg in RenderProcessHandler");
 
+	if (msgName == "ExecuteTextInput")
+	{
+		// DEBUG
+		IPCLogDebug(browser, "Received 'ExecuteTextInput' request.");
+
+		CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
+
+		if (context->Enter())
+		{
+			const auto& args = msg->GetArgumentList();
+			const auto& inputId = CefV8Value::CreateInt(args->GetInt(0));
+			const auto& text = CefV8Value::CreateString(args->GetString(1));
+			const auto& submit = CefV8Value::CreateBool(args->GetBool(2));
+
+
+			CefRefPtr<CefV8Value> window = context->GetGlobal();
+			CefRefPtr<CefV8Value> input_function = window->GetValue("PerformTextInput");
+			if (input_function->IsFunction())
+			{
+				CefRefPtr<CefV8Value> return_value = 
+					input_function->ExecuteFunction(
+						input_function,				// function to be called
+						{ inputId, text, submit}	// input for called function
+					);
+
+				IPCLogDebug(browser, "Did execution of text input succeed? " + std::to_string(return_value->GetBoolValue()));
+			}
+
+
+			context->Exit();
+		}
+	}
+
 	if (msgName == "SendToLoggingMediator")
 	{
 		CefRefPtr<CefV8Value> log = CefV8Value::CreateString(msg->GetArgumentList()->GetString(0));
