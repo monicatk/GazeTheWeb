@@ -60,6 +60,12 @@ void Mediator::RegisterTab(TabCEFInterface* pTab)
     _pendingTab = NULL;
 
 	RefreshTab(pTab);
+
+	// TODO: MutationObserver observes wrong document object if browser is created by CreateBrowserSync with an URL,
+	// thus no mutations will be recognized on startup
+	// We are currently preventing this by creating the browser with "about:blank" and calling RefreshTab afterwards
+	// in order to load the 'real' URL. Then, MutationObserver observes the 'right' document
+	// But why does this scenario exist? Might be interesting to investigate in the future ;)
 }
 
 void Mediator::UnregisterTab(TabCEFInterface* pTab)
