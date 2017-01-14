@@ -18,10 +18,13 @@ Pause Tab Rendering / Script Execution
 		Clipboard might also contain pictures in the future
 
 >>>	Overflow Elements:
+	[ ]	Don't scroll OEs if not visible!
+
+
 	-	FIXED overflow elements
 	-	Remove overflowParent attribute from DOMObjects and do aquivalent visbility check for each child in OverflowElements
-	-	Calculate partial Rects if partially hidden by OverflowElements
-	-	Trigger childrens' Rect updates when scrolling happend
+	[X]	Calculate partial Rects if partially hidden by OverflowElements
+	[X]	Trigger childrens' Rect updates when scrolling happend
 	- 	OE containing another OE, keep outer OE scrollable
 		--> additional: scroll when looking outside at the edge of OE
 	-	Don't scroll in x-direction if there are only e.g. 30px for hiding the scrollbar

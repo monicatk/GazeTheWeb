@@ -777,58 +777,44 @@ function OverflowElement(node)
 
 /* ------------ CODE EXECUTED ON CONSTRUCTION OF OBJECT ---------------- */
 
+        // Extend DOM node by adding attribute that contains last used scrolling config
+        this.node.last_scroll_config_updated = {x: this.node.scrollLeft, y: this.node.scrollTop};
+
+        // Called when scrolling took place: Update child nodes
         this.node.onscroll = function(e){
-            console.log("Overflow element with id="+e.target.getAttribute("overflowId")+" was scrolled!")
+            if(e.target.last_scroll_config_updated !== undefined && 
+                (e.target.last_scroll_config_updated.x !== e.target.scrollLeft || e.target.last_scroll_config_updated.y !== e.target.scrollTop) )
+            {
+                // Perform update of children and save current scrolling config on whose basis update is performed
+                e.target.last_scroll_config_updated = {x: e.target.scrollLeft, y: e.target.scrollTop};
 
-             // DEBUG
-            var traversal_time = Date.now();
-            var update_rect_time = 0;
-            var update_rect_count = 0;
-
-            // Update Rects of all child elements
-            ForEveryChild(e.target, function(child){
-                if(child.nodeType == 1)
-                {
-                    if((nodeType = child.getAttribute("nodeType")) !== undefined && nodeType !== null)
+                // Update Rects of all child elements
+                ForEveryChild(e.target, function(child){
+                    if(child.nodeType == 1)
                     {
-                        var nodeID = child.getAttribute("nodeID");
-                        if((domObj = GetDOMObject(nodeType, nodeID)) !== undefined)
+                        if((nodeType = child.getAttribute("nodeType")) !== undefined && nodeType !== null)
                         {
-                            var start = Date.now();
+                            var nodeID = child.getAttribute("nodeID");
+                            if((domObj = GetDOMObject(nodeType, nodeID)) !== undefined)
+                            {
+                                domObj.updateRects();
+                            } 
+                        }
 
-                            domObj.updateRects();
-
-                            update_rect_time += (Date.now() - start);
-                            update_rect_count++;
-                        } 
-                    }
-
-                    if((overflowId = child.getAttribute("overflowId")) !== undefined && overflowId !== null)
-                    {
-                        if((overflowObj = GetOverflowElement(overflowId)) !== undefined)
+                        if((overflowId = child.getAttribute("overflowId")) !== undefined && overflowId !== null)
                         {
-                            var start = Date.now();
-
-                            overflowObj.updateRects();
-
-                            update_rect_time += (Date.now() - start);
-                            update_rect_time++;
+                            if((overflowObj = GetOverflowElement(overflowId)) !== undefined)
+                            {
+                                overflowObj.updateRects();
+                            }
                         }
                     }
-
-                    
-                    // TODO: Update child OEs as well. Idea: Update Method which can be called for one node and checks if DomObj or OE
-                    // and executes updateRects
-                    // Maybe better: Add function pointer to node s.t. node.updateRects() is callable
-                }
-            });
-
-            traversal_time = Date.now() - traversal_time;
-            console.log("Overflow scrolling ("+scrollX+", "+scrollY+") id#"+e.target.getAttribute("overflowId")+
-                            ": Child traversal took "+traversal_time+"ms, updateRect() was called "+
-                            update_rect_count+" times & took "+update_rect_time+"ms");
-
-        
+                });
+            }
+            // else
+            // {
+            //     console.log(e.target.getAttribute("overflowId")+": Scroll config hasn't changed, not perfoming any child updates.");
+            // }  
         };
 
 }
