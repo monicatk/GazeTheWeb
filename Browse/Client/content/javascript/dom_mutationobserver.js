@@ -2,14 +2,6 @@ window.domLinks = [];
 window.domTextInputs = [];
 window.overflowElements = [];
 
-/* TODOs
-        - Write method 'InformCEF' -- DONE
-        - Delete methods with equal name in old approach
-            > UpdateDOMRects()
-            > ...
-        - Adjust RenderProcessHandler to new approach
-*/
-
 /**
  * Constructor
  */
@@ -716,40 +708,6 @@ function OverflowElement(node)
                 this.node.scrollLeft += scrollX;
                 this.node.scrollTop += scrollY;
 
-                if(scrollX !== 0 || scrollY !== 0)
-                {
-                    // console.log("Scrolled overflowId="+this.node.getAttribute("overflowId")+" by x="+scrollX+" and y="+scrollY);
-
-                    // Update Rects of all child elements
-                    ForEveryChild(this.node, function(child){
-                        if(child.nodeType == 1)
-                        {
-                            if((nodeType = child.getAttribute("nodeType")) !== undefined && nodeType !== null)
-                            {
-                                var nodeID = child.getAttribute("nodeID");
-                                if((domObj = GetDOMObject(nodeType, nodeID)) !== undefined)
-                                {
-                                    domObj.updateRects();
-                                } 
-                            }
-
-                            if((overflowId = child.getAttribute("overflowId")) !== undefined && overflowId !== null)
-                            {
-                                if((overflowObj = GetOverflowElement(overflowId)) !== undefined)
-                                {
-                                    overflowObj.updateRects();
-                                }
-                            }
-
-                            
-                            // TODO: Update child OEs as well. Idea: Update Method which can be called for one node and checks if DomObj or OE
-                            // and executes updateRects
-                            // Maybe better: Add function pointer to node s.t. node.updateRects() is callable
-                        }
-                    });
-                }
-
-
                 // Return current scrolling position as feedback
                 return [this.node.scrollLeft, this.node.scrollTop];
             }
@@ -819,7 +777,59 @@ function OverflowElement(node)
 
 /* ------------ CODE EXECUTED ON CONSTRUCTION OF OBJECT ---------------- */
 
+        this.node.onscroll = function(e){
+            console.log("Overflow element with id="+e.target.getAttribute("overflowId")+" was scrolled!")
+
+             // DEBUG
+            var traversal_time = Date.now();
+            var update_rect_time = 0;
+            var update_rect_count = 0;
+
+            // Update Rects of all child elements
+            ForEveryChild(e.target, function(child){
+                if(child.nodeType == 1)
+                {
+                    if((nodeType = child.getAttribute("nodeType")) !== undefined && nodeType !== null)
+                    {
+                        var nodeID = child.getAttribute("nodeID");
+                        if((domObj = GetDOMObject(nodeType, nodeID)) !== undefined)
+                        {
+                            var start = Date.now();
+
+                            domObj.updateRects();
+
+                            update_rect_time += (Date.now() - start);
+                            update_rect_count++;
+                        } 
+                    }
+
+                    if((overflowId = child.getAttribute("overflowId")) !== undefined && overflowId !== null)
+                    {
+                        if((overflowObj = GetOverflowElement(overflowId)) !== undefined)
+                        {
+                            var start = Date.now();
+
+                            overflowObj.updateRects();
+
+                            update_rect_time += (Date.now() - start);
+                            update_rect_time++;
+                        }
+                    }
+
+                    
+                    // TODO: Update child OEs as well. Idea: Update Method which can be called for one node and checks if DomObj or OE
+                    // and executes updateRects
+                    // Maybe better: Add function pointer to node s.t. node.updateRects() is callable
+                }
+            });
+
+            traversal_time = Date.now() - traversal_time;
+            console.log("Overflow scrolling ("+scrollX+", "+scrollY+") id#"+e.target.getAttribute("overflowId")+
+                            ": Child traversal took "+traversal_time+"ms, updateRect() was called "+
+                            update_rect_count+" times & took "+update_rect_time+"ms");
+
         
+        };
 
 }
 
