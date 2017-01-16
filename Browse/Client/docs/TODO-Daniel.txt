@@ -13,6 +13,9 @@ Pause Tab Rendering / Script Execution
 
 # Refinement #
 
+>>> Extend usage of MutationObserver
+	[ ] Use observer to trigger updates in node visibility and to set overflow parents, remove those methods from DOM Objects
+
 >>> DOM Node data update:
 	[ ]	Read out values on direct callback in RenderProcessHandler without using MsgRouter on Browser Process
 		See: https://bitbucket.org/chromiumembedded/cef/wiki/GeneralUsage.md#markdown-header-asynchronous-javascript-bindings
@@ -23,7 +26,10 @@ Pause Tab Rendering / Script Execution
 
 >>>	Overflow Elements:
 	[ ]	Don't scroll OEs if not visible!
-	[ ] Support "Scroll top" button on OEs covering the whole page
+	[ ] Scrolling buttons on OEs covering the whole page:
+			[ ] Support "Scroll top" button on OEs covering the whole page?
+			[ ] Automatic scrolling works, but Scroll Buttons not shown
+	[ ] Do not update OE's contained nodes' rects, if OE not visible!
 
 
 	-	FIXED overflow elements
@@ -57,6 +63,8 @@ Pause Tab Rendering / Script Execution
 
 GMail Support:
 	when login in:
+
+
 		
 
 
