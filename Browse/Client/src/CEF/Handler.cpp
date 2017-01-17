@@ -6,6 +6,7 @@
 
 #include "src/CEF/Handler.h"
 #include "src/CEF/Mediator.h"
+#include "src/CEF/RequestHandler.h"
 #include "src/Utils/Logger.h"
 #include "src/Singletons/JSMailer.h"
 #include "include/base/cef_bind.h"
@@ -21,6 +22,7 @@ Handler::Handler(Mediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing
   _pMediator = pMediator;
   _renderer = renderer;
   _msgRouter = new MessageRouter(pMediator);
+  _requestHandler= new RequestHandler();
 
   // TODO: delete all this or do a nice rewrite
   // Tell JSMailer singleton about the method to call
