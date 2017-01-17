@@ -4,7 +4,6 @@
 //============================================================================
 
 #include "Master.h"
-#include "src/LabStream/LabStream.h"
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
 #include "submodules/glfw/include/GLFW/glfw3.h"
@@ -371,13 +370,26 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
             geometryShaderSource,
             setup::BLUR_PERIPHERY ? blurFragmentShaderSource : simpleFragmentShaderSource));
 
-	// ### LabStreamingLayer ###
-	_upLabStream = std::unique_ptr<LabStream>(new LabStream);
-
 	// ### JavaScript to LSL ###
 
 	// Registers a JavaScript callback function that pipes JS callbacks starting with "lsl:" to LabStreamingLayer
-	_pCefMediator->RegisterJavascriptCallback("lsl:", [this](std::string message) { this->_upLabStream->Send(message); });
+	_pCefMediator->RegisterJavascriptCallback("lsl:", [this](std::string message) { LabStreamMailer::instance().Send(message); });
+
+	// ### LabStreamCallback ###
+
+	// Create callback
+	_spLabStreamCallback = std::shared_ptr<LabStreamCallback>(new LabStreamCallback(
+		[](std::vector<std::string> messages)
+		{
+			for (const std::string& rMessage : messages)
+			{
+				LogInfo("LabStream: " + rMessage);
+			}
+		}
+	));
+
+	// Register callback
+	LabStreamMailer::instance().RegisterCallback(_spLabStreamCallback);
 
     // ### OTHER ###
 
@@ -470,12 +482,8 @@ void Master::Loop()
 			_timeUntilInput -= tpf;
 		}
 
-		// Poll lab streaming layer communication (TODO: testing)
-		auto labStreamInput = _upLabStream->Poll();
-		for (const std::string& rEvent : labStreamInput)
-		{
-			LogInfo("Master: LabStreamInput = ", rEvent);
-		}
+		// Update lab streaming layer mailer to get incoming messages
+		LabStreamMailer::instance().Update();
 
 		// Poll CefMediator
 		_pCefMediator->Poll(tpf);
@@ -690,7 +698,7 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_ESCAPE: { Exit(); break; }
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
-            case GLFW_KEY_S: { _upLabStream->Send("42"); break; } // TODO: testing
+			case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
         }
     }

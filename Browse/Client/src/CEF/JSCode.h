@@ -32,14 +32,12 @@ enum JSFile
     FAVICON_CREATE_IMG,
     FAVICON_COPY_IMG_BYTES_TO_V8ARRAY,
     MUTATION_OBSERVER_TEST,
-    FIXED_ELEMENT_SEARCH,
-    FIXED_ELEMENT_READ_OUT,
 	DOM_MUTATIONOBSERVER,
 	DOM_FIXED_ELEMENTS
 };
 
 std::string GetJSCode(JSFile file);
-std::string jsInputTextData(int inputID, std::string text, bool submit=false);
+std::string jsInputTextData(int inputID, std::string text, bool submit = false);
 std::string jsFavIconUpdate(std::string oldUrl);
 
 #endif // CEF_JSCODE_H_

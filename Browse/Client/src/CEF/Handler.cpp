@@ -7,7 +7,7 @@
 #include "src/CEF/Handler.h"
 #include "src/CEF/Mediator.h"
 #include "src/Utils/Logger.h"
-#include "src/JSMailer.h"
+#include "src/Singletons/JSMailer.h"
 #include "include/base/cef_bind.h"
 #include "include/cef_app.h"
 #include "include/wrapper/cef_closure_task.h"
@@ -16,12 +16,11 @@
 #include <string>
 #include <cmath>
 
-
 Handler::Handler(Mediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing(false)
 {
   _pMediator = pMediator;
   _renderer = renderer;
-  _msgRouter = new BrowserMsgRouter(pMediator);
+  _msgRouter = new MessageRouter(pMediator);
 
   // TODO: delete all this or do a nice rewrite
   // Tell JSMailer singleton about the method to call
@@ -335,18 +334,30 @@ bool Handler::InputTextData(CefRefPtr<CefBrowser> browser, int64 frameID, int no
 {
     //CEF_REQUIRE_UI_THREAD();
 
-    CefRefPtr<CefFrame> frame = browser->GetFrame(frameID);
-    if (frame->IsValid())
-    {
-        frame->ExecuteJavaScript(jsInputTextData(nodeID, text, submit), frame->GetURL(), 0);
+	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("ExecuteTextInput");
+	const auto& args = msg->GetArgumentList();
+	args->SetInt(0, nodeID);
+	args->SetString(1, text);
+	args->SetBool(2, submit);
+	browser->SendProcessMessage(PID_RENDERER, msg);
 
-        return true;
-    }
-    else
-    {
-        LogDebug("Handler: Tried to input text data, frame is not valid anymore.");
-        return false;
-    }
+	return true;
+
+  //  CefRefPtr<CefFrame> frame = browser->GetFrame(frameID);
+  //  if (frame->IsValid())
+  //  {
+		//std::string text_input_JS_code = jsInputTextData(nodeID, text, submit);
+		//text_input_JS_code = ""
+
+  //      frame->ExecuteJavaScript(text_input_JS_code, frame->GetURL(), 0);
+
+  //      return true;
+  //  }
+  //  else
+  //  {
+  //      LogDebug("Handler: Tried to input text data, frame is not valid anymore.");
+  //      return false;
+  //  }
 }
 
 void Handler::Reload(CefRefPtr<CefBrowser> browser)
@@ -371,16 +382,6 @@ void Handler::ResetMainFramesScrolling(CefRefPtr<CefBrowser> browser)
     browser->GetMainFrame()->ExecuteJavaScript(resetScrolling, browser->GetMainFrame()->GetURL(), 0);
 }
 
-void Handler::ReloadDOMNodes(CefRefPtr<CefBrowser> browser, std::string debug_info)
-{
-    //CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("GetDOMElements");
-    //msg->GetArgumentList()->SetDouble(0, (double)browser->GetMainFrame()->GetIdentifier());	// Cast int64 frameID  to (64bit) double, int only has 32
-    //browser->SendProcessMessage(PID_RENDERER, msg);
-    //LogDebug("Handler: Sent \"GetDOMElements\" msg to renderer, if any listed node type exists ", debug_info);
-
-	// TODO: Delete this method because of MutationObserver
-}
-
 void Handler::SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged)
 {
 
@@ -392,15 +393,8 @@ void Handler::SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged
 
         if (definitelyChanged)
         {
-            // Reload DOM nodes because of changed coordinates due to zooming
-            //_pMediator->ClearDOMNodes(browser);			// TODO: Rect update instead!
-
-            ReloadDOMNodes(browser);
-
             UpdatePageResolution(browser);				// TODO: Does a JS event exist for this?
 
-            // EXPERIMENTAL
-            //GetFixedElements(browser);
         }
     }
 }

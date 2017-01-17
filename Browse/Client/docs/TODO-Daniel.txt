@@ -13,15 +13,29 @@ Pause Tab Rendering / Script Execution
 
 # Refinement #
 
+>>> Extend usage of MutationObserver
+	[ ] Use observer to trigger updates in node visibility and to set overflow parents, remove those methods from DOM Objects
+
+>>> DOM Node data update:
+	[ ]	Read out values on direct callback in RenderProcessHandler without using MsgRouter on Browser Process
+		See: https://bitbucket.org/chromiumembedded/cef/wiki/GeneralUsage.md#markdown-header-asynchronous-javascript-bindings
+
 >>> Text Selection!
 	- 	Create clipboard in Master: std::vector<std::string> 
 		Clipboard might also contain pictures in the future
 
 >>>	Overflow Elements:
+	[ ]	Don't scroll OEs if not visible!
+	[ ] Scrolling buttons on OEs covering the whole page:
+			[ ] Support "Scroll top" button on OEs covering the whole page?
+			[ ] Automatic scrolling works, but Scroll Buttons not shown
+	[ ] Do not update OE's contained nodes' rects, if OE not visible!
+
+
 	-	FIXED overflow elements
 	-	Remove overflowParent attribute from DOMObjects and do aquivalent visbility check for each child in OverflowElements
-	-	Calculate partial Rects if partially hidden by OverflowElements
-	-	Trigger childrens' Rect updates when scrolling happend
+	[X]	Calculate partial Rects if partially hidden by OverflowElements
+	[X]	Trigger childrens' Rect updates when scrolling happend
 	- 	OE containing another OE, keep outer OE scrollable
 		--> additional: scroll when looking outside at the edge of OE
 	-	Don't scroll in x-direction if there are only e.g. 30px for hiding the scrollbar
@@ -49,6 +63,8 @@ Pause Tab Rendering / Script Execution
 
 GMail Support:
 	when login in:
+
+
 		
 
 

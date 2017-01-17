@@ -2,13 +2,65 @@ window.domLinks = [];
 window.domTextInputs = [];
 window.overflowElements = [];
 
-/* TODOs
-        - Write method 'InformCEF' -- DONE
-        - Delete methods with equal name in old approach
-            > UpdateDOMRects()
-            > ...
-        - Adjust RenderProcessHandler to new approach
-*/
+
+function PerformTextInput(inputId, text, submit)
+{
+    var domObj = GetDOMObject(0, inputId);
+    if(domObj !== null)
+    {
+        // DEBUG
+        console.log("Text to input: "+text);
+
+        domObj.setTextInput(text, submit);
+        return true;
+    }
+    else return false;
+}
+
+// TODO: Create own Rect class, remove all arrays used to represent rects, include Rect operations in Rect class
+
+/**
+ * Usage example: Determine what parts of a node's rect are visible when inside an overflowing element
+ */
+function CutRectOnRectWindow(innerRect, outerRect)
+{
+    if(!(innerRect.length > 0) || !(outerRect.length > 0))
+        return [0,0,0,0];
+
+    var t = Math.max(innerRect[0], outerRect[0]);
+    var l = Math.max(innerRect[1], outerRect[1]);
+    var b = Math.min(innerRect[2], outerRect[2]);
+    var r = Math.min(innerRect[3], outerRect[3]);
+    
+    // return size zero rect if edges flipped sides
+    if(t >= b || l >= r) 
+        return [0,0,0,0]
+
+    return [t, l, b, r]
+}
+
+/**
+ * Usage example: Starting at your current node, climb up DOM tree until overflow parent is found, which might hide this starting node
+ */
+function GetNextOverflowParent(node)
+{
+    var parent = node.parentNode;
+    while(parent !== null || parent === document.documentElement)
+    {
+        if(parent.nodeType === 1)
+        {
+            // style.overflow = {visible|hidden|scroll|auto|initial|inherit}
+            var overflow_prop = window.getComputedStyle(parent, null).getPropertyValue('overflow');
+            if(overflow_prop == 'hidden')
+            {
+                return parent;
+            }
+        }
+        parent = parent.parentNode;
+    }
+    // no overflow parent found
+    return null;
+}
 
 /**
  * Constructor
@@ -65,17 +117,15 @@ function DOMObject(node, nodeType)
 
                     var rects = AdjustClientRects(this.node.getClientRects());
                     var new_rects = [];
-                    for(var j = 0, n = rects.length; j < n; j++)
-                    {
-                        var rect = [];
-                        rect.push(Math.max(rects[j][0], oRect[0]));
-                        rect.push(Math.max(rects[j][1], oRect[1]));
-                        rect.push(Math.min(rects[j][2], oRect[2]));
-                        rect.push(Math.min(rects[j][3], oRect[3]));
-                        new_rects.push(rect);
-                    }
 
-                    // ConsolePrint("Cut-off on OverflowElements doesn't work correctly!");
+                    rects.forEach(
+                        function(rect){
+                            new_rects.push(
+                                CutRectOnRectWindow(rect, oRect)
+                            );
+                        }
+                    );
+              
                     return new_rects;
                 }
                 else
@@ -169,36 +219,21 @@ function DOMObject(node, nodeType)
 
         }
 
-        this.searchOverflows = function (){
-            // NOTE: Assuming there aren't a any overflows in an overflow
-            var parent = this.node.parentNode;
-            while(parent != null || parent === document.documentElement)
-            {
-                if(parent.nodeType == 1)
-                {
-                    // style.overflow = {visible|hidden|scroll|auto|initial|inherit}
-                    var overflowProp = window.getComputedStyle(parent, null).getPropertyValue('overflow');
-                    if(overflowProp == 'hidden')
-                    {
-                        // Add node as overflow parent and compute own visibility with Rect of overflow parent
-                        this.overflowParent = parent;
-                        // DEBUG
-                        // ConsolePrint("Found an overflow parent!");
-                        return;
-                    }
-                }
-                parent = parent.parentNode;
-            }
+        this.searchOverflows = function(){
+            this.overflowParent = GetNextOverflowParent(this.node);
         }
 
         this.setTextInput = function(text, submit){
+            ConsolePrint("tagName: "+this.node.tagName);
             ConsolePrint("setTextInput called with text='"+text+"' and submit="+submit);
+     
 
             // Only executable if DOMNode is TextInput field
             if(this.nodeType === 0)
             {
                 if(this.node.tagName == "TEXTAREA")
                 {
+
                     this.node.value = text;
                 }
                 else if (this.node.tagName == 'INPUT')
@@ -653,6 +688,7 @@ function OverflowElement(node)
         this.node = node;
         this.rects = AdjustClientRects(this.node.getClientRects());
         this.fixed = false;
+        this.overflowParent = GetNextOverflowParent(node);  // TODO: This should be performed by MutationObserver in order to be efficient!
 
         // this.overflowParent = undefined;
 
@@ -670,14 +706,17 @@ function OverflowElement(node)
             return this.node.scrollLeft;
         }
         this.scroll = function(gazeX, gazeY){
-            // DEBUG
-            // ConsolePrint("OverflowElement: Scrolling request received x: "+x+", y: "+y+". Executing...");
-            
+
+            // Do not use cut-off rect and keep scrolling velocity untouched if partially hidden
+            var rects = AdjustClientRects(this.node.getClientRects());
+            //  var rect = this.getRects()[0];
+
             // Update scrolling position according to current gaze coordinates
             // Idea: Only scroll if gaze is somewhere near the overflow elements edges
-            if(this.rects.length > 0)
+            if(rects.length > 0)
             {
-                var rect = this.rects[0];
+                var rect = rects[0];
+
                 var centerX = rect[1] + Math.round(rect.width / 2);
                 var centerY =  rect[0] + Math.round(rect.height / 2);
 
@@ -716,40 +755,6 @@ function OverflowElement(node)
                 this.node.scrollLeft += scrollX;
                 this.node.scrollTop += scrollY;
 
-                if(scrollX !== 0 || scrollY !== 0)
-                {
-                    // console.log("Scrolled overflowId="+this.node.getAttribute("overflowId")+" by x="+scrollX+" and y="+scrollY);
-
-                    // Update Rects of all child elements
-                    ForEveryChild(this.node, function(child){
-                        if(child.nodeType == 1)
-                        {
-                            if((nodeType = child.getAttribute("nodeType")) !== undefined && nodeType !== null)
-                            {
-                                var nodeID = child.getAttribute("nodeID");
-                                if((domObj = GetDOMObject(nodeType, nodeID)) !== undefined)
-                                {
-                                    domObj.updateRects();
-                                } 
-                            }
-
-                            if((overflowId = child.getAttribute("overflowId")) !== undefined && overflowId !== null)
-                            {
-                                if((overflowObj = GetOverflowElement(overflowId)) !== undefined)
-                                {
-                                    overflowObj.updateRects();
-                                }
-                            }
-
-                            
-                            // TODO: Update child OEs as well. Idea: Update Method which can be called for one node and checks if DomObj or OE
-                            // and executes updateRects
-                            // Maybe better: Add function pointer to node s.t. node.updateRects() is callable
-                        }
-                    });
-                }
-
-
                 // Return current scrolling position as feedback
                 return [this.node.scrollLeft, this.node.scrollTop];
             }
@@ -768,21 +773,48 @@ function OverflowElement(node)
             // Get new Rect data
             var updatedRectsData = AdjustClientRects(this.node.getClientRects());
 
-            
+            // Cut rects on overflow parent, if existing
+            if(this.overflowParent !== null)
+            {
+                // console.log("Checking cut-off of overflow element id: "+this.node.getAttribute("overflowId"))
+                var overflowObj = GetOverflowElement(this.overflowParent.getAttribute("overflowId"));
+
+                if(overflowObj !== null & overflowObj !== undefined)
+                {
+                    // console.log("Fetching OE parent should work")
+                    var overflow_rect = overflowObj.getRects()[0];
+                    // console.log(overflow_rect);
+                    var cut_rect = [];
+                    for(var i = 0; i < updatedRectsData.length; i++)
+                    {
+                        cut_rect.push(
+                            CutRectOnRectWindow(updatedRectsData[i], overflow_rect)
+                        );
+                    }
+                    updatedRectsData = cut_rect;
+                }
+
+            }
+             
             if(this.fixed)
             {
-                updatedRectsData.map( function(rectData){ rectData = SubstractScrollingOffset(rectData);} );
+                updatedRectsData.map( 
+                    function(rectData){ 
+                        rectData = SubstractScrollingOffset(rectData);
+                    } 
+                );
             }
 
 
             // Compare new and old Rect data
             var equal = CompareClientRectsData(updatedRectsData, this.rects);
 
-            var id = this.node.getAttribute("overflowId");
+            
 
             // Rect updates occured and new Rect data is accessible
             if(!equal && updatedRectsData !== undefined)
             {
+                var id = this.node.getAttribute("overflowId");
                 this.rects = updatedRectsData;
 
                 var encodedCommand = "#ovrflow#upd#"+id+"#rect#";
@@ -819,7 +851,45 @@ function OverflowElement(node)
 
 /* ------------ CODE EXECUTED ON CONSTRUCTION OF OBJECT ---------------- */
 
-        
+        // Extend DOM node by adding attribute that contains last used scrolling config
+        this.node.last_scroll_config_updated = {x: this.node.scrollLeft, y: this.node.scrollTop};
+
+        // Called when scrolling took place: Update child nodes
+        this.node.onscroll = function(e){
+            if(e.target.last_scroll_config_updated !== undefined && 
+                (e.target.last_scroll_config_updated.x !== e.target.scrollLeft || e.target.last_scroll_config_updated.y !== e.target.scrollTop) )
+            {
+                // Perform update of children and save current scrolling config on whose basis update is performed
+                e.target.last_scroll_config_updated = {x: e.target.scrollLeft, y: e.target.scrollTop};
+
+                // Update Rects of all child elements
+                ForEveryChild(e.target, function(child){
+                    if(child.nodeType == 1)
+                    {
+                        if((nodeType = child.getAttribute("nodeType")) !== undefined && nodeType !== null)
+                        {
+                            var nodeID = child.getAttribute("nodeID");
+                            if((domObj = GetDOMObject(nodeType, nodeID)) !== undefined)
+                            {
+                                domObj.updateRects();
+                            } 
+                        }
+
+                        if((overflowId = child.getAttribute("overflowId")) !== undefined && overflowId !== null)
+                        {
+                            if((overflowObj = GetOverflowElement(overflowId)) !== undefined)
+                            {
+                                overflowObj.updateRects();
+                            }
+                        }
+                    }
+                });
+            }
+            // else
+            // {
+            //     console.log(e.target.getAttribute("overflowId")+": Scroll config hasn't changed, not perfoming any child updates.");
+            // }  
+        };
 
 }
 

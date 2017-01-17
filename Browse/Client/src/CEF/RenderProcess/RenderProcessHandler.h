@@ -62,7 +62,6 @@ private:
 	const std::string _js_dom_fill_arrays = GetJSCode(DOM_FILL_ARRAYS);
 	const std::string _js_favicon_create_img = GetJSCode(FAVICON_CREATE_IMG);
 	const std::string _js_favicon_copy_img_bytes_to_v8array = GetJSCode(FAVICON_COPY_IMG_BYTES_TO_V8ARRAY);
-	const std::string _js_fixed_element_read_out = GetJSCode(FIXED_ELEMENT_READ_OUT);
 	const std::string _js_mutation_observer_test = GetJSCode(MUTATION_OBSERVER_TEST);
 	const std::string _js_dom_mutationobserver = GetJSCode(DOM_MUTATIONOBSERVER);
 	const std::string _js_dom_fixed_elements = GetJSCode(DOM_FIXED_ELEMENTS);

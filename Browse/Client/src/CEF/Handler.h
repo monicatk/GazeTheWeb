@@ -10,7 +10,7 @@
 #include "src/CEF/Renderer.h"
 #include "src/CEF/JSCode.h"
 #include "include/cef_client.h"
-#include "src/CEF/BrowserMsgRouter.h"
+#include "src/CEF/MessageRouter.h"
 #include <list>
 #include <set>
 
@@ -131,9 +131,6 @@ private:
     // Log messages from renderer process on receiving logging relevant IPC messages
     void IPCLogRenderer(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
 
-    // Send request to renderer process in order to update DOM node information
-    void ReloadDOMNodes(CefRefPtr<CefBrowser> browser, std::string debug_info = "");
-
     /* MEMBERS */
 
     // List of existing browser windows. Only accessed on the CEF UI thread
@@ -148,12 +145,11 @@ private:
     // Renderer, whose methods are called when rendering relevant actions take place
     CefRefPtr<Renderer> _renderer;
 
-	// Message router for Javascript induced C++ callbacks
-	CefRefPtr<BrowserMsgRouter> _msgRouter;
+	// Message router for JavaScript induced C++ callbacks
+	CefRefPtr<MessageRouter> _msgRouter;
 
     // Javascript code as Strings
     const std::string _js_remove_css_scrollbar = GetJSCode(REMOVE_CSS_SCROLLBAR);
-    const std::string _js_fixed_element_search = GetJSCode(FIXED_ELEMENT_SEARCH);
 
 	// Set for parsing strings (as char by accessing it with []) to numbers
 	std::set<char> digits = { '0', '1', '2', '3', '4', '5', '6' ,'7', '8', '9' };

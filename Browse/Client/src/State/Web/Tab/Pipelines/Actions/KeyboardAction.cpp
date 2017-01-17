@@ -62,7 +62,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 	// Keyboard
     _pTab->RegisterKeyboardListenerInOverlay(
         _overlayKeyboardId,
-		[&]() // select callback
+		[&](std::string value) // select callback
 		{
 			// ######################################################
 			// ### TODO CERTH #######################################
@@ -70,10 +70,14 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 			// This lambda function is called when ANY key on keyboard is selected by user.
 			// In this example, the timer for classification is reset.
 
-			// Start classification here
+			// Start classification here (send something to LSL)
 			_classificationTime = CLASSIFICATION_DURATION;
 
 			// ######################################################
+
+			// Send marker about key selection into lab streaming layer
+			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_" + value);
+
 		},
         [&](std::u16string value) // press callback
         {
@@ -219,6 +223,28 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 		_pTab->MoveCursorOverLettersInTextEdit(_overlayTextEditId, -1);
 	},
 	[]() {}); // up callback
+
+	// Create callback for lab streaming layer to send classificatoin
+	_spLabStreamCallback = std::shared_ptr<LabStreamCallback>(new LabStreamCallback(
+		[this](std::vector<std::string> messages)
+	{
+		for (const std::string& rMessage : messages)
+		{
+			// ######################################################
+			// ### TODO CERTH #######################################
+			// ######################################################
+			
+			// Parse string and check for classification. If available,
+			// set some member in keyboard action to know in update
+			// that classification is done and how to proceed
+
+			// ######################################################
+		}
+	}
+	));
+
+	// Register that callback
+	LabStreamMailer::instance().RegisterCallback(_spLabStreamCallback);
 }
 
 KeyboardAction::~KeyboardAction()

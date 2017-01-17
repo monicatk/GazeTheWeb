@@ -30,8 +30,8 @@ namespace setup
     // Experiments
     static const std::string LAB_STREAM_OUTPUT_NAME = "BrowserOutputStream";
     static const std::string LAB_STREAM_OUTPUT_SOURCE_ID = "myuniquesourceid23443";
-	static const std::string LAB_STREAM_INPUT_NAME = "BrowserOutputStream"; // "MiddlewareStream"; // may be set to same value as LAB_STREAM_OUTPUT_NAME to receive own events for debugging purposes
-    static const bool LOG_INTERACTIONS = false;
+	static const std::string LAB_STREAM_INPUT_NAME = LAB_STREAM_OUTPUT_NAME; // "MiddlewareStream"; // may be set to same value as LAB_STREAM_OUTPUT_NAME to receive own events for debugging purposes
+	static const bool LOG_INTERACTIONS = false;
 
     // Other
     static const bool ENABLE_WEBGL = false; // only on Windows
