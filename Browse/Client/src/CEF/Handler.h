@@ -45,7 +45,7 @@ public:
 
 	// TODO: Might be useful in the future
 	virtual CefRefPtr<CefJSDialogHandler> GetJSDialogHandler() {
-		return NULL;
+		return _jsDialogHandler;
 	}
 
     // Life span handling of CefBrowsers
@@ -160,6 +160,8 @@ private:
 
 	// Used for adblocking
 	CefRefPtr<CefRequestHandler> _requestHandler;
+
+	CefRefPtr<CefJSDialogHandler> _jsDialogHandler;
 
     // Javascript code as Strings
     const std::string _js_remove_css_scrollbar = GetJSCode(REMOVE_CSS_SCROLLBAR);

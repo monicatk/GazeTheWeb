@@ -4,8 +4,8 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
-#ifndef CEF_REQUESTHANDLER_H_
-#define CEF_REQUESTHANDLER_H_
+#ifndef REQUESTHANDLER_H_
+#define REQUESTHANDLER_H_
 
 #include "include/cef_request_handler.h"
 
@@ -31,4 +31,4 @@ private:
     IMPLEMENT_REFCOUNTING(RequestHandler);
 };
 
-#endif  // CEF_REQUESTHANDLER_H_
+#endif  // REQUESTHANDLER_H_
