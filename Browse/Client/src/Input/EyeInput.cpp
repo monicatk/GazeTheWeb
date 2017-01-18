@@ -5,8 +5,8 @@
 
 #include "EyeInput.h"
 #include "src/Utils/Logger.h"
-
 #include <cmath>
+#include <functional>
 
 EyeInput::EyeInput(bool useEmulation)
 {
@@ -18,68 +18,59 @@ EyeInput::EyeInput(bool useEmulation)
 		// Define procedure signature for connection
 		typedef bool(__cdecl *CONNECT)();
 
+		// Function to connect to eye tracker via plugin
+		std::function<void(std::string)> ConnectEyeTracker = [&](std::string plugin)
+		{
+			std::string dllName = plugin + ".dll";
+			_pluginHandle = LoadLibraryA(dllName.c_str());
+
+			// Try to connect to eyetracker
+			if (_pluginHandle != NULL)
+			{
+				LogInfo("EyeInput: Loaded " + plugin +".");
+
+				// Fetch procedure for connecting
+				CONNECT procConnect = (CONNECT)GetProcAddress(_pluginHandle, "Connect");
+
+				// Fetch procedure for fetching gaze data
+				_procFetchGaze = (FETCH_GAZE)GetProcAddress(_pluginHandle, "FetchGaze");
+
+				// Check whether procedures could be loaded
+				if (procConnect != NULL && _procFetchGaze != NULL)
+				{
+					_connected = procConnect();
+					if (_connected)
+					{
+						LogInfo("EyeInput: Connecting eyetracker successful.");
+					}
+					else
+					{
+						_procFetchGaze = NULL;
+					}
+				}
+			}
+			else
+			{
+				LogInfo("EyeInput: Failed to load " + plugin + ".");
+			}
+		};
+
 		// Try to load SMI iViewX plugin
 		if (!_connected)
 		{
-			_pluginHandle = LoadLibrary(TEXT("SMIiViewXPlugin.dll"));
-
-			// Try to connect to eyetracker
-			if (_pluginHandle != NULL)
-			{
-				LogInfo("EyeInput: Loaded SMIiViewPlugin.");
-
-				// Fetch procedure for connecting
-				CONNECT procConnect = (CONNECT)GetProcAddress(_pluginHandle, "Connect");
-
-				// Fetch procedure for fetching gaze data
-				_procFetchGaze = (FETCH_GAZE)GetProcAddress(_pluginHandle, "FetchGaze");
-
-				// Check whether procedures could be loaded
-				if (procConnect != NULL && _procFetchGaze != NULL)
-				{
-					_connected = procConnect();
-					if (_connected)
-					{
-						LogInfo("EyeInput: Connecting eyetracker successful.");
-					}
-					else
-					{
-						_procFetchGaze = NULL;
-					}
-				}
-			}
+			ConnectEyeTracker("SMIiViewXPlugin");
 		}
 
-		// Ok, SMI iViewX could not be connected. Try Tobii EyeX
+		// Try to load SMI myGaze plugin
 		if (!_connected)
 		{
-			_pluginHandle = LoadLibrary(TEXT("TobiiEyeXPlugin.dll"));
+			ConnectEyeTracker("SMImyGazePlugin");
+		}
 
-			// Try to connect to eyetracker
-			if (_pluginHandle != NULL)
-			{
-				LogInfo("EyeInput: Loaded TobiiEyeXPlugin.");
-
-				// Fetch procedure for connecting
-				CONNECT procConnect = (CONNECT)GetProcAddress(_pluginHandle, "Connect");
-
-				// Fetch procedure for fetching gaze data
-				_procFetchGaze = (FETCH_GAZE)GetProcAddress(_pluginHandle, "FetchGaze");
-
-				// Check whether procedures could be loaded
-				if (procConnect != NULL && _procFetchGaze != NULL)
-				{
-					_connected = procConnect();
-					if (_connected)
-					{
-						LogInfo("EyeInput: Connecting eyetracker successful.");
-					}
-					else
-					{
-						_procFetchGaze = NULL;
-					}
-				}
-			}
+		// Try to load Tobii EyeX plugin
+		if (!_connected)
+		{
+			ConnectEyeTracker("TobiiEyeXPlugin");
 		}
 	}
 
