@@ -35,6 +35,11 @@ function LoggingMediator()
         this.logFunction = f;
     }
 
+    /* Unregister the log function with this function */
+    this.unregisterFunction = function() {
+        this.logFunction = null;
+    }
+
 	/* This function is called by CEF's renderer process */
     this.log = function(logText)
     {
