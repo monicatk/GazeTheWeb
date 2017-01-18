@@ -5,14 +5,9 @@ Features (End of January):
 			Worry about it later? I don't think that handling not encrypted Strings is great.. :D
 	- Raphael: Secure Password Keyboard mode?
 - Daniel: Copy URL (from links and images)
-- Ad blocking
-- Word prediction improvement (and add typed words) and make extra one for URL Input
 - Page fullscreen handling
-- First loading sometimes fails in terms of DOM Node creation
-- Javascript PopUp handling
 - DOM Node boxes for images are only text height
 - Activate Sandbox on Application Side
-- C++ -> JS Communication
 
 Test all MAMEM trial tasks! -> Sofias Document
 
@@ -25,4 +20,3 @@ Furthermore:
 - Right click and _own_ context menus (see JS Window Object)
 	- (Javascript Popup Handling)
 - z-Layering of (fixed, text input) DOM elements (like Google.com)
-- DOM Nodes of image have incorrect rectangle
