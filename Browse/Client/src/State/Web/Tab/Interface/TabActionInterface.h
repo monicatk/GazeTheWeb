@@ -56,6 +56,9 @@ public:
 	// Convert CEFPixel coordinate to WebViewPixel coordinate
 	virtual void ConvertToWebViewPixel(double& rCEFPixelX, double& rCEFPixelY) const = 0;
 
+	// Reply JavaScript dialog callback
+	virtual void ReplyJSDialog(bool clickedOk, std::string userInput) = 0;
+
     // ### METHODS WHICH SET PARAMETERS THAT MUST BE RESET WHEN NO PIPELINE / ACTION IS ACTIVE ###
 
     // Reset method (called by pipeline at destruction, finish and abort)

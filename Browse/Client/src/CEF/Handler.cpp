@@ -7,7 +7,6 @@
 #include "src/CEF/Handler.h"
 #include "src/CEF/Mediator.h"
 #include "src/CEF/RequestHandler.h"
-#include "src/CEF/JSDialogHandler.h"
 #include "src/Utils/Logger.h"
 #include "src/Singletons/JSMailer.h"
 #include "include/base/cef_bind.h"
@@ -24,7 +23,6 @@ Handler::Handler(Mediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing
   _renderer = renderer;
   _msgRouter = new MessageRouter(pMediator);
   _requestHandler= new RequestHandler();
-  _jsDialogHandler = new JSDialogHandler();
 
   // TODO: delete all this or do a nice rewrite
   // Tell JSMailer singleton about the method to call
@@ -272,6 +270,62 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
     return _msgRouter->OnProcessMessageReceived(browser, source_process, msg);
 }
 
+bool Handler::OnJSDialog(
+	CefRefPtr<CefBrowser> browser,
+	const CefString& origin_url,
+	const CefString& accept_lang,
+	JSDialogType dialog_type,
+	const CefString& message_text,
+	const CefString& default_prompt_text,
+	CefRefPtr<CefJSDialogCallback> callback,
+	bool& suppress_message)
+{
+	/*
+	// HOW TO ANSWER DIALOG CALLBACK
+	bool clicked_ok;
+	std::string users_answer;
+	callback->Continue(clicked_ok, users_answer);
+
+	//return true;
+	*/
+
+	// Remember that callback
+	_jsDialogCallbacks[browser->GetIdentifier()] = callback;
+
+	// Decide type of dialog
+	JavaScriptDialogType type = JavaScriptDialogType::ALERT;
+	if (dialog_type == JSDialogType::JSDIALOGTYPE_CONFIRM)
+	{
+		type = JavaScriptDialogType::CONFIRM;
+	}
+	else if (dialog_type == JSDialogType::JSDIALOGTYPE_PROMPT)
+	{
+		type = JavaScriptDialogType::PROMPT;
+	}
+
+	// Tell Tab about it so it can react and execute callback later
+	_pMediator->RequestJSDialog(browser, type, message_text);
+
+	// Dialog handled!
+	return true;
+}
+
+bool Handler::OnBeforeUnloadDialog(
+	CefRefPtr<CefBrowser> browser,
+	const CefString& message_text,
+	bool is_reload,
+	CefRefPtr<CefJSDialogCallback> callback)
+{
+	// Remember that callback
+	_jsDialogCallbacks[browser->GetIdentifier()] = callback;
+
+	// Tell Tab about it so it can react and execute callback later
+	_pMediator->RequestJSDialog(browser, JavaScriptDialogType::LEAVE_PAGE, message_text);
+
+	// Dialog handled!
+	return true;
+}
+
 void Handler::ResizeBrowsers()
 {
     CEF_REQUIRE_UI_THREAD();
@@ -378,6 +432,16 @@ void Handler::GoBack(CefRefPtr<CefBrowser> browser)
 void Handler::GoForward(CefRefPtr<CefBrowser> browser)
 {
     browser->GoForward();
+}
+
+void Handler::ReplyJSDialog(CefRefPtr<CefBrowser> browser, bool clicked_ok, std::string user_input)
+{
+	auto callback = _jsDialogCallbacks.find(browser->GetIdentifier());
+
+	if (callback != _jsDialogCallbacks.end())
+	{
+		callback->second->Continue(clicked_ok, user_input);
+	}
 }
 
 void Handler::ResetMainFramesScrolling(CefRefPtr<CefBrowser> browser)

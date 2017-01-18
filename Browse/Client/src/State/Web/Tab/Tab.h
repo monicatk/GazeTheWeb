@@ -222,9 +222,6 @@ public:
 	// Set text in text input field
 	virtual void InputTextData(int64 frameID, int nodeID, std::string text, bool submit);
 
-    // Set WebViewParameters for WebView
-    virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }
-
     // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available. Distance in page pixels
     virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pagePixelCoordinate, float& rDistance) const;
 
@@ -236,6 +233,12 @@ public:
 
 	// Convert CEFPixel coordinate to WebViewPixel coordinate
 	void ConvertToWebViewPixel(double& rCEFPixelX, double& rCEFPixelY) const;
+
+	// Reply JavaScript dialog callback
+	virtual void ReplyJSDialog(bool clickedOk, std::string userInput);
+
+	// Set WebViewParameters for WebView
+	virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }
 
     // #########################
     // ### TAB CEF INTERFACE ###
@@ -295,9 +298,13 @@ public:
 	// Receive current loading status of each frame
 	virtual void SetLoadingStatus(int64 frameID, bool isMain, bool isLoading);
 	
+	// Overflow elements
 	virtual void AddOverflowElement(std::shared_ptr<OverflowElement> overflowElem);
 	virtual std::shared_ptr<OverflowElement> GetOverflowElement(int id);
 	virtual void RemoveOverflowElement(int id);
+
+	// Tell about JavaScript dialog
+	virtual void RequestJSDialog(JavaScriptDialogType type, std::string message);
 
 private:
 
