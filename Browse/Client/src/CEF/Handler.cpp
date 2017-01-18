@@ -7,7 +7,6 @@
 #include "src/CEF/Handler.h"
 #include "src/CEF/Mediator.h"
 #include "src/CEF/RequestHandler.h"
-#include "src/CEF/JSDialogHandler.h"
 #include "src/Utils/Logger.h"
 #include "src/Singletons/JSMailer.h"
 #include "include/base/cef_bind.h"
@@ -24,7 +23,6 @@ Handler::Handler(Mediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing
   _renderer = renderer;
   _msgRouter = new MessageRouter(pMediator);
   _requestHandler= new RequestHandler();
-  _jsDialogHandler = new JSDialogHandler();
 
   // TODO: delete all this or do a nice rewrite
   // Tell JSMailer singleton about the method to call
@@ -270,6 +268,58 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 	}
 
     return _msgRouter->OnProcessMessageReceived(browser, source_process, msg);
+}
+
+bool Handler::OnJSDialog(
+	CefRefPtr<CefBrowser> browser,
+	const CefString& origin_url,
+	const CefString& accept_lang,
+	JSDialogType dialog_type,
+	const CefString& message_text,
+	const CefString& default_prompt_text,
+	CefRefPtr<CefJSDialogCallback> callback,
+	bool& suppress_message)
+{
+	// NOTE:
+	// "If a custom dialog is used the application must execute
+	// |callback| once the custom dialog is dismissed."
+
+	// default_prompt_text only used in prompts, obviously.
+
+	// Required
+	// alert: single ok button
+	// confirm: ok & cancel button
+	// prompt: text input field, ok & cancel button
+
+
+	LogInfo("JSDialogHandler: Dialog information provided ",
+		"\ndialog_type: ", dialog_type,
+		"\ndefault_prompt_text: ", default_prompt_text.ToString(),
+		"\nmsg_txt: ", message_text.ToString(),
+		"\naccept_lang: ", accept_lang.ToString(),
+		"\norigin_url: ", origin_url.ToString());
+
+	// TODO: Show own dialog popup, see given dialog type & parameters
+
+	/*
+	// HOW TO ANSWER DIALOG CALLBACK
+	bool clicked_ok;
+	std::string users_answer;
+	callback->Continue(clicked_ok, users_answer);
+
+	//return true;
+	*/
+
+	return true;
+}
+
+bool Handler::OnBeforeUnloadDialog(
+	CefRefPtr<CefBrowser> browser,
+	const CefString& message_text,
+	bool is_reload,
+	CefRefPtr<CefJSDialogCallback> callback)
+{
+	return false;
 }
 
 void Handler::ResizeBrowsers()

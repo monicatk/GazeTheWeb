@@ -21,7 +21,8 @@ class BrowserMsgRouter;
 class Handler : public CefClient,
                 public CefDisplayHandler,
                 public CefLifeSpanHandler,
-                public CefLoadHandler
+                public CefLoadHandler,
+				public CefJSDialogHandler
 {
 public:
 
@@ -36,16 +37,13 @@ public:
     virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() OVERRIDE { return this; }
     virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() OVERRIDE { return this; }
     virtual CefRefPtr<CefLoadHandler> GetLoadHandler() OVERRIDE { return this; }
+	virtual CefRefPtr<CefJSDialogHandler> GetJSDialogHandler() OVERRIDE { return this; }
     virtual CefRefPtr<CefRenderHandler> GetRenderHandler() OVERRIDE { return _renderer; }
-
-	// Used for adblocking
-	virtual CefRefPtr<CefRequestHandler> GetRequestHandler() OVERRIDE{
+	
+	// Request handler
+	virtual CefRefPtr<CefRequestHandler> GetRequestHandler() OVERRIDE
+	{
 		return _requestHandler;
-	}
-
-	// TODO: Might be useful in the future
-	virtual CefRefPtr<CefJSDialogHandler> GetJSDialogHandler() {
-		return _jsDialogHandler;
 	}
 
     // Life span handling of CefBrowsers
@@ -86,6 +84,24 @@ public:
         CefRefPtr<CefBrowser> browser,
         CefProcessId source_process,
         CefRefPtr<CefProcessMessage> message) OVERRIDE;
+
+	// Called when JavaScript dialog is received
+	virtual bool OnJSDialog(
+		CefRefPtr<CefBrowser> browser,
+		const CefString& origin_url,
+		const CefString& accept_lang,
+		JSDialogType dialog_type,
+		const CefString& message_text,
+		const CefString& default_prompt_text,
+		CefRefPtr<CefJSDialogCallback> callback,
+		bool& suppress_message) OVERRIDE;
+
+	// Called when the user wants to leave a page
+	virtual bool OnBeforeUnloadDialog(
+		CefRefPtr<CefBrowser> browser,
+		const CefString& message_text,
+		bool is_reload,
+		CefRefPtr<CefJSDialogCallback> callback) OVERRIDE;
 
     // Load URL in specific browser
     void LoadPage(CefRefPtr<CefBrowser> browser, std::string url);
@@ -160,8 +176,6 @@ private:
 
 	// Used for adblocking
 	CefRefPtr<CefRequestHandler> _requestHandler;
-
-	CefRefPtr<CefJSDialogHandler> _jsDialogHandler;
 
     // Javascript code as Strings
     const std::string _js_remove_css_scrollbar = GetJSCode(REMOVE_CSS_SCROLLBAR);
