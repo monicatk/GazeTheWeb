@@ -38,6 +38,16 @@ public:
     virtual CefRefPtr<CefLoadHandler> GetLoadHandler() OVERRIDE { return this; }
     virtual CefRefPtr<CefRenderHandler> GetRenderHandler() OVERRIDE { return _renderer; }
 
+	// Used for adblocking
+	virtual CefRefPtr<CefRequestHandler> GetRequestHandler() OVERRIDE{
+		return _requestHandler;
+	}
+
+	// TODO: Might be useful in the future
+	virtual CefRefPtr<CefJSDialogHandler> GetJSDialogHandler() {
+		return _jsDialogHandler;
+	}
+
     // Life span handling of CefBrowsers
     virtual void OnAfterCreated(CefRefPtr<CefBrowser> browser) OVERRIDE;
     virtual bool DoClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
@@ -147,6 +157,11 @@ private:
 
 	// Message router for JavaScript induced C++ callbacks
 	CefRefPtr<MessageRouter> _msgRouter;
+
+	// Used for adblocking
+	CefRefPtr<CefRequestHandler> _requestHandler;
+
+	CefRefPtr<CefJSDialogHandler> _jsDialogHandler;
 
     // Javascript code as Strings
     const std::string _js_remove_css_scrollbar = GetJSCode(REMOVE_CSS_SCROLLBAR);
