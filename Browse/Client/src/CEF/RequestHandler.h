@@ -3,6 +3,7 @@
 // Author: Daniel Mueller (muellerd@uni-koblenz.de)
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
+// Used for ad blocking.
 
 #ifndef REQUESTHANDLER_H_
 #define REQUESTHANDLER_H_
@@ -14,9 +15,7 @@ class RequestHandler : public CefRequestHandler
 {
 public:
 
-	RequestHandler() {};
-	~RequestHandler() {};
-
+	// Called before resource is loaded
 	CefRequestHandler::ReturnValue OnBeforeResourceLoad(
 		CefRefPtr<CefBrowser> browser,
 		CefRefPtr<CefFrame> frame,
@@ -24,8 +23,6 @@ public:
 		CefRefPtr<CefRequestCallback> callback) OVERRIDE;
 
 private:
-
-
 
     // Include CEF'S default reference counting implementation
     IMPLEMENT_REFCOUNTING(RequestHandler);
