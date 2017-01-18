@@ -557,6 +557,7 @@ void Tab::GoBack()
 void Tab::Reload()
 {
 	_pCefMediator->ReloadTab(this);
+	this->AbortAndClearPipelines();
 }
 
 void Tab::SetPipelineActivity(bool active)

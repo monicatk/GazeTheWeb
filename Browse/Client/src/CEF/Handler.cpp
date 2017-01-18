@@ -280,27 +280,6 @@ bool Handler::OnJSDialog(
 	CefRefPtr<CefJSDialogCallback> callback,
 	bool& suppress_message)
 {
-	// NOTE:
-	// "If a custom dialog is used the application must execute
-	// |callback| once the custom dialog is dismissed."
-
-	// default_prompt_text only used in prompts, obviously.
-
-	// Required
-	// alert: single ok button
-	// confirm: ok & cancel button
-	// prompt: text input field, ok & cancel button
-
-
-	LogInfo("JSDialogHandler: Dialog information provided ",
-		"\ndialog_type: ", dialog_type,
-		"\ndefault_prompt_text: ", default_prompt_text.ToString(),
-		"\nmsg_txt: ", message_text.ToString(),
-		"\naccept_lang: ", accept_lang.ToString(),
-		"\norigin_url: ", origin_url.ToString());
-
-	// TODO: Show own dialog popup, see given dialog type & parameters
-
 	/*
 	// HOW TO ANSWER DIALOG CALLBACK
 	bool clicked_ok;
@@ -310,6 +289,24 @@ bool Handler::OnJSDialog(
 	//return true;
 	*/
 
+	// Remember that callback
+	_jsDialogCallbacks[browser->GetIdentifier()] = callback;
+
+	// Decide type of dialog
+	JavaScriptDialogType type = JavaScriptDialogType::ALERT;
+	if (dialog_type == JSDialogType::JSDIALOGTYPE_CONFIRM)
+	{
+		type = JavaScriptDialogType::CONFIRM;
+	}
+	else if (dialog_type == JSDialogType::JSDIALOGTYPE_PROMPT)
+	{
+		type = JavaScriptDialogType::PROMPT;
+	}
+
+	// Tell Tab about it so it can react and execute callback later
+	_pMediator->RequestJSDialog(browser, type, message_text);
+
+	// Dialog handled!
 	return true;
 }
 
@@ -319,7 +316,14 @@ bool Handler::OnBeforeUnloadDialog(
 	bool is_reload,
 	CefRefPtr<CefJSDialogCallback> callback)
 {
-	return false;
+	// Remember that callback
+	_jsDialogCallbacks[browser->GetIdentifier()] = callback;
+
+	// Tell Tab about it so it can react and execute callback later
+	_pMediator->RequestJSDialog(browser, JavaScriptDialogType::LEAVE_PAGE, message_text);
+
+	// Dialog handled!
+	return true;
 }
 
 void Handler::ResizeBrowsers()
@@ -428,6 +432,16 @@ void Handler::GoBack(CefRefPtr<CefBrowser> browser)
 void Handler::GoForward(CefRefPtr<CefBrowser> browser)
 {
     browser->GoForward();
+}
+
+void Handler::ReplyJSDialog(CefRefPtr<CefBrowser> browser, bool clicked_ok, std::string user_input)
+{
+	auto callback = _jsDialogCallbacks.find(browser->GetIdentifier());
+
+	if (callback != _jsDialogCallbacks.end())
+	{
+		callback->second->Continue(clicked_ok, user_input);
+	}
 }
 
 void Handler::ResetMainFramesScrolling(CefRefPtr<CefBrowser> browser)

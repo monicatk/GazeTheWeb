@@ -111,6 +111,9 @@ public:
     void GoBack(CefRefPtr<CefBrowser> browser);
     void GoForward(CefRefPtr<CefBrowser> browser);
 
+	// Reply JavaScript dialog callback
+	void ReplyJSDialog(CefRefPtr<CefBrowser> browser, bool clicked_ok, std::string user_input);
+
     // Called by CefMediator, when window resize happens
     void ResizeBrowsers();
 
@@ -177,11 +180,14 @@ private:
 	// Used for adblocking
 	CefRefPtr<CefRequestHandler> _requestHandler;
 
-    // Javascript code as Strings
+    // JavaScript code as Strings
     const std::string _js_remove_css_scrollbar = GetJSCode(REMOVE_CSS_SCROLLBAR);
 
 	// Set for parsing strings (as char by accessing it with []) to numbers
 	std::set<char> digits = { '0', '1', '2', '3', '4', '5', '6' ,'7', '8', '9' };
+
+	// Map of browser identifier to JavaScript dialog callbacks that can be answered (may be never answered or to late TODO: problem?)
+	std::map<int, CefRefPtr<CefJSDialogCallback> > _jsDialogCallbacks;
 
     // Include CEF'S default reference counting implementation
     IMPLEMENT_REFCOUNTING(Handler);

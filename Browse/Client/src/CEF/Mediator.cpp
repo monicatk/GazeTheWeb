@@ -116,6 +116,22 @@ void Mediator::GoForward(TabCEFInterface * pTab)
     }
 }
 
+void Mediator::RequestJSDialog(CefRefPtr<CefBrowser> browser, JavaScriptDialogType type, std::string message)
+{
+	if (auto pTab = GetTab(browser))
+	{
+		pTab->RequestJSDialog(type, message);
+	}
+}
+
+void Mediator::ReplyJSDialog(TabCEFInterface* pTab, bool clicked_ok, std::string user_input)
+{
+	if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
+	{
+		_handler->ReplyJSDialog(browser, clicked_ok, user_input);
+	}
+}
+
 void Mediator::DoMessageLoopWork()
 {
     CefDoMessageLoopWork();
