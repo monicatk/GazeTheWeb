@@ -103,9 +103,6 @@ int Web::AddTab(std::string URL, bool show)
 	// Update icon of tab overview button
 	UpdateTabOverviewIcon();
 
-	// Mail to JavaScript about it
-	JSMailer::instance().Send("New Tab Added");
-
     // Retun id of tab
     return id;
 }
@@ -809,10 +806,12 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
         if (id == "tab_overview")
         {
             _pWeb->ShowTabOverview(true);
+			JSMailer::instance().Send("tabs");
         }
         else if (id == "settings")
         {
             _pWeb->_goToSettings = true;
+			JSMailer::instance().Send("settings");
         }
         else if (id == "back")
         {
@@ -837,16 +836,19 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
         if(id == "close")
         {
             _pWeb->ShowTabOverview(false);
+			JSMailer::instance().Send("close");
         }
 		else if (id == "history")
 		{
 			_pWeb->ShowTabOverview(false);
 			_pWeb->_upHistory->Activate(_pWeb->_currentTabId);
+			JSMailer::instance().Send("history");
 		}
         else if (id == "edit_url")
         {
             _pWeb->ShowTabOverview(false);
             _pWeb->_upURLInput->Activate(_pWeb->_currentTabId);
+			JSMailer::instance().Send("edit");
         }
 		else if (id == "bookmark_tab")
 		{
@@ -869,6 +871,8 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_existing");
 				}
 				
+				JSMailer::instance().Send("bookmark_add");
+
 			}
 		}
         else if (id == "reload_tab")
@@ -912,6 +916,8 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 
             // Open URLInput to type in URL which should be loaded in new tab
             _pWeb->_upURLInput->Activate(tabId);
+
+			JSMailer::instance().Send("new_tab");
         }
         else if(id == "tab_button_0")
         {

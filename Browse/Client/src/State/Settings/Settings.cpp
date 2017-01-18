@@ -9,6 +9,9 @@
 #include "src/Utils/Logger.h"
 #include "submodules/eyeGUI/externals/TinyXML2/tinyxml2.h"
 
+// Include singleton for mailing to JavaScript
+#include "src/Singletons/JSMailer.h"
+
 Settings::Settings(Master* pMaster) : State(pMaster)
 {
 	// Initialize members
@@ -204,10 +207,12 @@ void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string
 		if (id == "close")
 		{
 			_pSettings->_goToWeb = true;
+			JSMailer::instance().Send("close");
 		}
 		else if (id == "general")
 		{
 			eyegui::setVisibilityOfLayout(_pSettings->_pGeneralLayout, true, true, true);
+			JSMailer::instance().Send("general");
 		}
 		else if (id == "info")
 		{
@@ -220,6 +225,7 @@ void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string
 	}
 	else if (pLayout == _pSettings->_pGeneralLayout)
 	{
+
 		// ### General layout ###
 		if (id == "back")
 		{
@@ -232,6 +238,7 @@ void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string
 		else if (id == "toggle_gaze_visualization")
 		{
             _pSettings->_globalSetup.showGazeVisualization = true;
+			JSMailer::instance().Send("gaze_on");
 		}
 
 		// Apply and save
@@ -259,6 +266,7 @@ void Settings::SettingsButtonListener::up(eyegui::Layout* pLayout, std::string i
         else if (id == "toggle_gaze_visualization")
         {
             _pSettings->_globalSetup.showGazeVisualization = false;
+			JSMailer::instance().Send("gaze_off");
         }
 
         // Apply and save
