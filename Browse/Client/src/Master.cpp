@@ -320,7 +320,8 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     _upWeb->Activate();
 
     // ### HOMEPAGE ###
-	_upWeb->AddTab(_upSettings->GetHomepage());
+	// _upWeb->AddTab(_upSettings->GetHomepage());
+	_upWeb->AddTab("https://www.tutorialspoint.com/javascript/javascript_dialog_boxes.htm");
 
     // ### SUPER LAYOUT ###
 
