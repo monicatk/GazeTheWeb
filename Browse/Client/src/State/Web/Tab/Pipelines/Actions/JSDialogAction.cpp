@@ -58,7 +58,8 @@ JSDialogAction::JSDialogAction(TabInteractionInterface* pTab, std::string messag
 	// Set content of text block
 	_pTab->SetContentOfTextBlock(_overlayTextBlockId, message16);
 
-	// TODO: disable cancel button if necessary
+	// Set activity of cancel button
+	if (!enableCancel) { _pTab->SetElementActivity(_overlayCancelButtonId, false, false); }
 }
 
 JSDialogAction::~JSDialogAction()
