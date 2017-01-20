@@ -86,6 +86,9 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 			// Add content from keyboard
 			_pTab->AddContentAtCursorInTextEdit(_overlayTextEditId, value);
 
+			// Do logging about it
+			JSMailer::instance().Send("keystroke");
+
 			// Refresh suggestions
             _pTab->DisplaySuggestionsInWordSuggest(
 				_overlayWordSuggestId,
@@ -288,7 +291,6 @@ bool KeyboardAction::Update(float tpf, TabInput tabInput)
 		if (_classificationTime <= 0)
 		{
 			_pTab->ClassifyKey(_overlayKeyboardId, true); // true for accept
-			JSMailer::instance().Send("keystroke");
 		}
 	}
 
