@@ -282,12 +282,13 @@ bool KeyboardAction::Update(float tpf, TabInput tabInput)
 	if (_classificationTime > 0)
 	{
 		_classificationTime -= tpf; // decrement timer
-		_classificationTime = glm::max(0.f, _classificationTime); // lower limir of timer
+		_classificationTime = glm::max(0.f, _classificationTime); // lower limit of timer
 
 		// When timer is complete, accept selection
 		if (_classificationTime <= 0)
 		{
 			_pTab->ClassifyKey(_overlayKeyboardId, true); // true for accept
+			JSMailer::instance().Send("keystroke");
 		}
 	}
 
