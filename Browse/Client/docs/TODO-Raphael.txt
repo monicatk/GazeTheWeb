@@ -10,3 +10,4 @@
 - Bookmark Manager GUI
 - GUI for setting homepage
 - Create empty xml files to avoid warnings at startups
+- JavaScript Dialog Pipeline: Prompt displays keyboard even when cancel has been chosen

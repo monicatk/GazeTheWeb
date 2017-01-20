@@ -440,6 +440,7 @@ void Handler::ReplyJSDialog(CefRefPtr<CefBrowser> browser, bool clicked_ok, std:
 
 	if (callback != _jsDialogCallbacks.end())
 	{
+		LogInfo(clicked_ok);
 		callback->second->Continue(clicked_ok, user_input);
 	}
 }

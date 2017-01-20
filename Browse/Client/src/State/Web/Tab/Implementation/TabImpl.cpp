@@ -358,6 +358,9 @@ void Tab::Update(float tpf, Input& rInput)
 		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpSensorFrameIndex, showScrollUp, false, true);
 		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownSensorFrameIndex, showScrollDown, false, true);
 
+		// Set activity of scroll to top button
+		eyegui::setElementActivity(_pPanelLayout, "scroll_to_top", showScrollUp, true);
+
 		// Check, that gaze is not upon a fixed element
 		ConvertToCEFPixel(CEFPixelGazeX, CEFPixelGazeY);
 		bool gazeUponFixed = false;

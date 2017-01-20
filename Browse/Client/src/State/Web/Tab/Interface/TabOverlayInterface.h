@@ -92,6 +92,9 @@ public:
 	// Move cursor over words in text edit. Positive word count means rightward movement, else leftward
 	virtual void MoveCursorOverWordsInTextEdit(std::string id, int wordCount) = 0;
 
+	// Set activity of element
+	virtual void SetElementActivity(std::string id, bool active, bool fade) = 0;
+
 	// Getter for values of interest
 	virtual int GetWebViewX() const = 0;
 	virtual int GetWebViewY() const = 0;
