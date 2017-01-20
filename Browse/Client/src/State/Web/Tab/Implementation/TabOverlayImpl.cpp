@@ -193,6 +193,11 @@ void Tab::MoveCursorOverWordsInTextEdit(std::string id, int wordCount)
 	eyegui::moveCursorOverWordsInTextEdit(_pOverlayLayout, id, wordCount);
 }
 
+void Tab::SetElementActivity(std::string id, bool active, bool fade)
+{
+	eyegui::setElementActivity(_pOverlayLayout, id, active, fade);
+}
+
 int Tab::GetWebViewX() const
 {
 	return _upWebView->GetX();

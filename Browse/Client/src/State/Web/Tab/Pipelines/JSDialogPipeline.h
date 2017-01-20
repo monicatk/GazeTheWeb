@@ -2,7 +2,7 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// Pipeline handling JavaScript callbacks.
+// Pipeline handling JavaScript dialogs by asynchronous replies.
 
 #ifndef JSDIALOGPIPELINE_H_
 #define JSDIALOGPIPELINE_H_
