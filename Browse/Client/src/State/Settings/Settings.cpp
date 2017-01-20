@@ -225,7 +225,6 @@ void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string
 	}
 	else if (pLayout == _pSettings->_pGeneralLayout)
 	{
-
 		// ### General layout ###
 		if (id == "back")
 		{

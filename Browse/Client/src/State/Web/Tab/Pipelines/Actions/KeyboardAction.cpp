@@ -7,7 +7,7 @@
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 
-#include "../../src/Singletons/JSMailer.h"
+#include "src/Singletons/JSMailer.h"
 
 KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 {
