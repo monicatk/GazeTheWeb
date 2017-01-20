@@ -55,6 +55,9 @@ Web::Web(Master* pMaster, Mediator* pCefMediator) : State(pMaster)
 	_upURLregex = std::make_unique<std::regex>(
 		_pURLregexExpression,
 		std::regex_constants::icase);
+	_upIPregex = std::make_unique<std::regex>(
+		_pIPregexExpression,
+		std::regex_constants::icase);
 }
 
 Web::~Web()
@@ -768,14 +771,24 @@ void Web::UpdateTabOverviewIcon()
 
 bool Web::ValidateURL(const std::string& rURL) const
 {
+	bool valid = false;
+
+	// Check for URL
 	try
 	{
-		return std::regex_match(rURL, *(_upURLregex.get()));
+		valid |= std::regex_match(rURL, *(_upURLregex.get()));
 	}
-	catch (...)
+	catch (...) { valid = true; } // in case of failed validation, assume it is a URL since it seems to be complicated
+
+	// Check for IP
+	try
 	{
-		return true; // in case of failed validation, assume it is a URL since it seems to be complicated
+		valid |= std::regex_match(rURL, *(_upIPregex.get()));
 	}
+	catch (...) { valid = true; } // in case of failed validation, assume it is a IP since it seems to be complicated
+	
+	// Return result
+	return valid;
 }
 
 Web::TabJob::TabJob(Tab* pCaller)

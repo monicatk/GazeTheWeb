@@ -21,7 +21,8 @@ class BrowserMsgRouter;
 class Handler : public CefClient,
                 public CefDisplayHandler,
                 public CefLifeSpanHandler,
-                public CefLoadHandler
+                public CefLoadHandler,
+				public CefJSDialogHandler
 {
 public:
 
@@ -36,7 +37,14 @@ public:
     virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() OVERRIDE { return this; }
     virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() OVERRIDE { return this; }
     virtual CefRefPtr<CefLoadHandler> GetLoadHandler() OVERRIDE { return this; }
+	virtual CefRefPtr<CefJSDialogHandler> GetJSDialogHandler() OVERRIDE { return this; }
     virtual CefRefPtr<CefRenderHandler> GetRenderHandler() OVERRIDE { return _renderer; }
+	
+	// Request handler
+	virtual CefRefPtr<CefRequestHandler> GetRequestHandler() OVERRIDE
+	{
+		return _requestHandler;
+	}
 
     // Life span handling of CefBrowsers
     virtual void OnAfterCreated(CefRefPtr<CefBrowser> browser) OVERRIDE;
@@ -77,6 +85,24 @@ public:
         CefProcessId source_process,
         CefRefPtr<CefProcessMessage> message) OVERRIDE;
 
+	// Called when JavaScript dialog is received
+	virtual bool OnJSDialog(
+		CefRefPtr<CefBrowser> browser,
+		const CefString& origin_url,
+		const CefString& accept_lang,
+		JSDialogType dialog_type,
+		const CefString& message_text,
+		const CefString& default_prompt_text,
+		CefRefPtr<CefJSDialogCallback> callback,
+		bool& suppress_message) OVERRIDE;
+
+	// Called when the user wants to leave a page
+	virtual bool OnBeforeUnloadDialog(
+		CefRefPtr<CefBrowser> browser,
+		const CefString& message_text,
+		bool is_reload,
+		CefRefPtr<CefJSDialogCallback> callback) OVERRIDE;
+
     // Load URL in specific browser
     void LoadPage(CefRefPtr<CefBrowser> browser, std::string url);
 
@@ -84,6 +110,9 @@ public:
     void Reload(CefRefPtr<CefBrowser> browser);
     void GoBack(CefRefPtr<CefBrowser> browser);
     void GoForward(CefRefPtr<CefBrowser> browser);
+
+	// Reply JavaScript dialog callback
+	void ReplyJSDialog(CefRefPtr<CefBrowser> browser, bool clicked_ok, std::string user_input);
 
     // Called by CefMediator, when window resize happens
     void ResizeBrowsers();
@@ -148,11 +177,17 @@ private:
 	// Message router for JavaScript induced C++ callbacks
 	CefRefPtr<MessageRouter> _msgRouter;
 
-    // Javascript code as Strings
+	// Used for adblocking
+	CefRefPtr<CefRequestHandler> _requestHandler;
+
+    // JavaScript code as Strings
     const std::string _js_remove_css_scrollbar = GetJSCode(REMOVE_CSS_SCROLLBAR);
 
 	// Set for parsing strings (as char by accessing it with []) to numbers
 	std::set<char> digits = { '0', '1', '2', '3', '4', '5', '6' ,'7', '8', '9' };
+
+	// Map of browser identifier to JavaScript dialog callbacks that can be answered (may be never answered or to late TODO: problem?)
+	std::map<int, CefRefPtr<CefJSDialogCallback> > _jsDialogCallbacks;
 
     // Include CEF'S default reference counting implementation
     IMPLEMENT_REFCOUNTING(Handler);

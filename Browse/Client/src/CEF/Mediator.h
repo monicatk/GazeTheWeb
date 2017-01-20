@@ -12,6 +12,7 @@
 #include "src/CEF/Data/DOMNodeType.h"
 #include "src/CEF/Handler.h"
 #include "src/CEF/DevToolsHandler.h"
+#include "src/CEF/JavaScriptDialogType.h"
 #include <set>
 #include <map>
 #include <memory>
@@ -47,6 +48,9 @@ public:
     void GoBack(TabCEFInterface* pTab);
     void GoForward(TabCEFInterface* pTab);
 
+	// Request / Reply JavaScript dialog callback
+	void RequestJSDialog(CefRefPtr<CefBrowser> browser, JavaScriptDialogType type, std::string message);
+	void ReplyJSDialog(TabCEFInterface* pTab, bool clicked_ok, std::string user_input);
 
     // Renderer::OnPaint calls this method in order to receive corresponding Texture
     std::weak_ptr<Texture> GetTexture(CefRefPtr<CefBrowser> browser);
