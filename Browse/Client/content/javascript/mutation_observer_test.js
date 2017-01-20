@@ -409,6 +409,27 @@ Document.prototype.importNode = function(importedNode, deep){
 	return origImportNode.apply(this, arguments);
 }
 
+// DEBUG
+// _send = XMLHttpRequest.prototype.send;
+// XMLHttpRequest.prototype.send = function() {
+
+//     /* Wrap onreadystaechange callback */
+//     var callback = this.onreadystatechange;
+//     this.onreadystatechange = function() {             
+//          if (this.readyState == 4) {
+
+//              /* We are in response; do something, like logging or anything you want */
+// 				 console.log("XMLHttpRequest: Response type is "+this.responseType )
+
+// 			//  console.log("response: "+this.responseText);
+//          }
+
+//          callback.apply(this, arguments);
+//     }
+
+//     _send.apply(this, arguments);
+// }
+
 /* Modify appendChild in order to get notifications when this function is called */
 var originalAppendChild = Element.prototype.appendChild;
 Element.prototype.appendChild = function(child){
@@ -416,6 +437,14 @@ Element.prototype.appendChild = function(child){
 	// appendChild extension: Check if root is already part of DOM tree
     if(this.nodeType == 1 || this.nodeType > 8)
     {
+		// DEBUG0
+		// if(child.tagName === "IFRAME")
+		// {
+		// 	console.log("Found iframe!");
+		// 	console.log(child);
+		// 	return;
+		// }
+
 		var subtreeRoot = this;
 
 		// Stop going up the tree when parentNode is documentElement or doesn't exist (null or undefined)
