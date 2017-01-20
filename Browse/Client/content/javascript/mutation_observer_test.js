@@ -1,4 +1,7 @@
-// https://developer.mozilla.org/de/docs/Web/API/MutationObserver
+//============================================================================
+// Distributed under the Apache License, Version 2.0.
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
+//============================================================================
 
 // Global variables in which DOM relevant information is stored
 window.fixed_elements = new Set();
@@ -289,6 +292,10 @@ document.onclick = function(){
 	UpdateDOMRects();
 	
 }
+document.addEventListener("click", function(e){
+	ConsolePrint("### Realized that click event was fired!");
+	console.log(e.target);
+});
 
 // Trigger DOM data update on changing document loading status
 document.onreadystatechange = function()
@@ -302,6 +309,9 @@ document.onreadystatechange = function()
 
 	if(document.readyState == 'interactive')
 	{
+		// GMail fix
+		ForEveryChild(document.documentElement, AnalyzeNode);
+
 		UpdateDOMRects();
 
 		// GMail
@@ -310,6 +320,9 @@ document.onreadystatechange = function()
 
 	if(document.readyState == 'complete')
 	{
+		// GMail fix
+		ForEveryChild(document.documentElement, AnalyzeNode);
+
 		UpdateDOMRects();
 
 		ConsolePrint('<----- Page fully loaded. -------|');
@@ -569,39 +582,9 @@ function AnalyzeNode(node)
 
 	if( (node.nodeType == 1 || node.nodeType > 8) && (node.hasAttribute && !node.hasAttribute("nodeType")) && (node !== window)) // 1 == ELEMENT_NODE
 	{
-		// EXPERIMENTAL
-		// if(node.tagName == 'SCRIPT')
-		// {
-			// Detect when external scripts start and end execution
-		// 	node.textContent = "ConsolePrint('# Script START #); var f = function(){ "+node.textContent+"}; f(); ConsolePrint('# Script END #');";
-		// }
-
-
 		if(window.appendedSubtreeRoots.delete(node))
 		{
-			// ConsolePrint("My children have to be checked separatedly! "+node.tagName+ " class: "+node.getAttribute('class'));
-			// node.style.backgroundColor = "#00ff00";
-
-			// COLOR LEGEND
-			// roots, not found by observer:	red
-			// roots, found by observer:		green
-			// children, not found by observer:	magenta
-			// children, found by observer:		blue-green
-
-			// ForEveryChild(node, function(child){ 
-				// if(child.nodeType == 1 && 'style' in child) // child.style 
-			// 		child.style.backgroundColor = '#00ffff'; 
-			// });
-
-
 			ForEveryChild(node, AnalyzeNode);
-			// DEBUG
-			// ForEveryChild(node.parentNode.parentNode.parentNode, AnalyzeNode);
-			
-
-		
-
-			window.appendedSubtreeRoots.delete(node);
 		}
 
 		var computedStyle = window.getComputedStyle(node, null);
@@ -661,6 +644,17 @@ function AnalyzeNode(node)
 			CreateDOMLink(node);
 		}
 
+		// GMail: Make mail receiver clickable (again)
+		if(node.tagName === "DIV" && node.className === "vR")
+		{
+			console.log("GMail mail receiver fix: Found <div> with class 'vR'. I will assume it will be clickable.");
+			CreateDOMLink(node);
+		}
+		if(node.tagName === "SPAN" && node.tagName === "aQ2")
+		{
+			console.log("GMail mail receiver fix: Found <span> with class 'aQ2'. I will assume it will be clickable.");
+			CreateDOMLink(node);
+		}
 
 		var rect = node.getBoundingClientRect();
 
@@ -681,7 +675,6 @@ function AnalyzeNode(node)
 
 		// Update whole <form> if transition happens in form's subtree
 		// (For shifting elements in form (e.g. Google Login) )
-		// TODO: Find out why transition events aren't fired properly
 		if(node.tagName == 'FORM')
 		{
 
@@ -709,8 +702,6 @@ function AnalyzeNode(node)
 
 	}
 }
-
-var debug_mutation_list = [];
 
 // Instantiate and initialize the MutationObserver
 function MutationObserverInit()
