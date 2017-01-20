@@ -8,6 +8,7 @@
 #include "src/Utils/Logger.h"
 #include "src/Setup.h"
 #include "src/State/Web/Managers/HistoryManager.h"
+#include "src/State/Web/Tab/Pipelines/JSDialogPipeline.h"
 #include <algorithm>
 
 void Tab::GetWebRenderResolution(int& rWidth, int& rHeight) const
@@ -349,6 +350,10 @@ void Tab::RemoveOverflowElement(int id)
 	else
 	{
 		LogDebug("Tab: Error, could not find OverflowElement with id=", id," while trying to remove it.");
-
 	}
+}
+
+void Tab::RequestJSDialog(JavaScriptDialogType type, std::string message)
+{
+	this->PushBackPipeline(std::unique_ptr<Pipeline>(new JSDialogPipeline(this, type, message)));
 }

@@ -230,7 +230,13 @@ private:
 		"([\\da-z\\.-]+)"	// domain name (any number, dot and character from a to z)
 		"\\."				// dot between name and domain
 		"([a-z\\.]{2,6})"	// domain itself
-		"([/\\w\\.-:]*)*"	// folder structure
+		"([/\\w\\.:-]*)*"	// folder structure
+		"/?";				// optional last dash
+	std::unique_ptr<std::regex> _upIPregex;
+	const char* _pIPregexExpression =
+		"(https?://)?"		// optional http or https
+		"(\\d{1,3}(\\.\\d{1,3}){3})" // ip address
+		"([/\\w\\.:-]*)*"	// folder structure
 		"/?";				// optional last dash
 };
 

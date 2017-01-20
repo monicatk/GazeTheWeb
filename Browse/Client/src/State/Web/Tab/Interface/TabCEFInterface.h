@@ -13,6 +13,7 @@
 #include "src/CEF/Data/Rect.h"
 #include "src/Utils/glmWrapper.h"
 #include "src/CEF/Data/DOMNodeType.h"
+#include "src/CEF/JavaScriptDialogType.h"
 
 // Forward declaration
 class Texture;
@@ -23,7 +24,7 @@ class TabCEFInterface
 {
 public:
 
-     // Tell CEF callback which resolution web view texture should have
+    // Tell CEF callback which resolution web view texture should have
     virtual void GetWebRenderResolution(int& rWidth, int& rHeight) const = 0;
 
     // Getter and setter for favicon URL
@@ -75,9 +76,13 @@ public:
 	// Receive current loading status of each frame
 	virtual void SetLoadingStatus(int64 frameID, bool isMain, bool isLoading) = 0;
 
+	// Overflow elements
 	virtual void AddOverflowElement(std::shared_ptr<OverflowElement> overflowElem) = 0;
 	virtual std::shared_ptr<OverflowElement> GetOverflowElement(int id) = 0;
 	virtual void RemoveOverflowElement(int id) = 0;
+
+	// Tell about JavaScript dialog
+	virtual void RequestJSDialog(JavaScriptDialogType type, std::string message) = 0;
 };
 
 #endif // TABCEFINTERFACE_H_

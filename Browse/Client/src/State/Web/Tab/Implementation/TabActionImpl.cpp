@@ -158,3 +158,8 @@ void Tab::ConvertToWebViewPixel(double& rCEFPixelX, double& rCEFPixelY) const
 	rCEFPixelX = (rCEFPixelX / (double)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
 	rCEFPixelY = (rCEFPixelY / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
 }
+
+void Tab::ReplyJSDialog(bool clickedOk, std::string userInput)
+{
+	_pCefMediator->ReplyJSDialog(this, clickedOk, userInput);
+}

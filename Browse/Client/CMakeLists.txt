@@ -8,6 +8,7 @@ set(CLIENT_DEPLOYMENT OFF CACHE BOOL "Setup for Deployment.")
 
 if(OS_WINDOWS) # Windows
 	set(CLIENT_BUILD_SMI_IVIEWX_PLUGIN ON CACHE BOOL "Build plugin for SMI iViewX.")
+	set(CLIENT_BUILD_SMI_MYGAZE_PLUGIN ON CACHE BOOL "Build plugin for SMI myGaze.")
 	set(CLIENT_BUILD_TOBII_EYEX_PLUGIN ON CACHE BOOL "Build plugin for Tobii EyeX.")
 endif()
 
@@ -46,6 +47,31 @@ if(${CLIENT_BUILD_SMI_IVIEWX_PLUGIN})
 
 	# Tell user about it
 	message("Plugin for SMI iViewX will be built.")
+	
+endif()
+
+# Plugin for SMI myGaze
+if(${CLIENT_BUILD_SMI_MYGAZE_PLUGIN})
+
+	# SMI myGaze SDK
+	set(SMI_MYGAZE_SDK_DIRECTORY "${EYETRACKER_PLUGIN_DIRECTORY}/SMImyGaze/myGaze")
+	include_directories("${SMI_MYGAZE_SDK_DIRECTORY}/include")
+	set(SMI_MYGAZE_SDK_LIBRARIES "${SMI_MYGAZE_SDK_DIRECTORY}/myGazeAPI.lib")
+
+	# Plugin project
+	add_library(
+		SMImyGazePlugin
+		MODULE
+		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
+		${EYETRACKER_PLUGIN_DIRECTORY}/SMImyGaze/SMImyGazeImpl.cpp)
+	
+	# Link SDK
+	target_link_libraries(SMImyGazePlugin ${SMI_MYGAZE_SDK_LIBRARIES})
+
+	# Tell user about it
+	message("Plugin for SMI myGaze will be built.")
 	
 endif()
 
