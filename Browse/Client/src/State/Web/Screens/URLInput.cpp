@@ -172,6 +172,7 @@ void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		{
 			// Show bookmarks
 			_pURLInput->ShowBookmarks();
+			JSMailer::instance().Send("bookmarks");
 		}
 		else if (id == "delete")
 		{
@@ -214,6 +215,8 @@ void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				_pURLInput->_collectedURL = URL16;
 				_pURLInput->_finished = true;
 			}
+
+			JSMailer::instance().Send("open_bookmark");
 		}
 	}
 }

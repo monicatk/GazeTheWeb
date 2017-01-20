@@ -855,7 +855,6 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		{
 			_pWeb->ShowTabOverview(false);
 			_pWeb->_upHistory->Activate(_pWeb->_currentTabId);
-			JSMailer::instance().Send("history");
 		}
         else if (id == "edit_url")
         {
@@ -883,10 +882,9 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				{
 					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_existing");
 				}
-				
-				JSMailer::instance().Send("bookmark_add");
-
 			}
+
+			JSMailer::instance().Send("bookmark_add");
 		}
         else if (id == "reload_tab")
         {
@@ -937,6 +935,7 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
             if(_pWeb->SwitchToTabByIndex(0 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
             {
                 _pWeb->ShowTabOverview(false);
+				JSMailer::instance().Send("tab0");
             }
         }
         else if(id == "tab_button_1")
