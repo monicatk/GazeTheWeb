@@ -8,6 +8,9 @@
 #include "src/Master.h"
 #include "src/Utils/Helper.h"
 
+// Include singleton for mailing to JavaScript
+#include "src/Singletons/JSMailer.h"
+
 URLInput::URLInput(Master* pMaster, BookmarkManager const * pBookmarkManager)
 {
     // Fill members
@@ -162,6 +165,8 @@ void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			// Reset URL input to empty to indicate abortion
 			_pURLInput->_collectedURL = u"";
 			_pURLInput->_finished = true;
+
+			JSMailer::instance().Send("close");
 		}
 		else if (id == "bookmarks")
 		{

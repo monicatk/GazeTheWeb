@@ -7,6 +7,8 @@
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 
+#include "../../src/Singletons/JSMailer.h"
+
 KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 {
     // Add in- and output data slots
@@ -299,6 +301,8 @@ bool KeyboardAction::Update(float tpf, TabInput tabInput)
 
         // Submit text directly if wished
         SetOutputValue("submit", _submit);
+
+		JSMailer::instance().Send("submit");
 
         // Action is now finished
         return true;
