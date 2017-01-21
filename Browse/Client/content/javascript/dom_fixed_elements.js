@@ -1,3 +1,8 @@
+//============================================================================
+// Distributed under the Apache License, Version 2.0.
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
+//============================================================================
+
 ConsolePrint("Importing JS code for FixedElements...");
 
 
@@ -129,6 +134,7 @@ function FixedElement(node)
     this.updateRects();
 }
 
+// TODO: Other Getters for DOM objects work with numbers, not with nodes. Rename this one?
 function GetFixedElement(node)
 {
     if(node.nodeType === 1)

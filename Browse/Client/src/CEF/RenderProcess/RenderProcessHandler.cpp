@@ -27,6 +27,37 @@ bool RenderProcessHandler::OnProcessMessageReceived(
     const std::string& msgName = msg->GetName().ToString();
     //IPCLogDebug(browser, "Received '" + msgName + "' IPC msg in RenderProcessHandler");
 
+
+	if (msgName == "ScrollOverflowElement")
+	{
+		const auto& args = msg->GetArgumentList();
+
+		CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
+
+		if (context->Enter())
+		{
+			CefRefPtr<CefV8Value> elemId = CefV8Value::CreateInt(args->GetInt(0));
+			CefRefPtr<CefV8Value> x = CefV8Value::CreateInt(args->GetInt(1));
+			CefRefPtr<CefV8Value> y = CefV8Value::CreateInt(args->GetInt(2));
+			CefRefPtr<CefV8Value> fixedIds = CefV8Value::CreateArray(args->GetSize() - 3);
+
+			for (int i = 3; i < args->GetSize(); i++)
+			{
+				fixedIds->SetValue(i - 3, CefV8Value::CreateInt(args->GetInt(i)));
+			}
+
+			CefRefPtr<CefV8Value> window = context->GetGlobal();
+
+			CefRefPtr<CefV8Value> scrollFunction = window->GetValue("ScrollOverflowElement");
+
+			scrollFunction->ExecuteFunction(window, { elemId, x, y, fixedIds });
+
+			context->Exit();
+			
+		}
+		return true;
+	}
+
 	if (msgName == "ExecuteTextInput")
 	{
 		// DEBUG
@@ -77,12 +108,6 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			context->Exit();
 		}
 	}
-
-    // Handle request of DOM node data
-    if (msgName == "GetDOMElements")
-    {
-		IPCLogDebug(browser, "Reached old code 'GetDOMElements' msg");
-    }
 
     // EXPERIMENTAL: Handle request of favicon image bytes
     if (msgName == "GetFavIconBytes")

@@ -22,22 +22,28 @@ function PerformTextInput(inputId, text, submit)
     else return false;
 }
 
-function ScrollOverflowElement(elemId, gazeX, gazeY, fixedId)
+function ScrollOverflowElement(elemId, gazeX, gazeY, fixedIds)
 {
+    // console.log(fixedIds);
+
     var overflowObj = GetOverflowElement(elemId);
     if(overflowObj !== null && overflowObj !== undefined)
     {
-        if(fixedId !== -1)
-        {
-            var childFixedId = overflowObj.node.getAttribute("childFixedId");
-            if(childFixedId !== null && childFixedId !== fixedId)
-            {
-                // Skip scrolling, because overflow is hidden by fixed element with "fixedId"
-                return;
-            }
-        }
+        // if(fixedId !== -1)
+        // {
+        //     var childFixedId = overflowObj.node.getAttribute("childFixedId");
+        //     // DEBUG
+        //     console.print("Scrolling OE id="+elemId+", childFixedId="+childFixedId+", fixedIds="+fixedId);
+
+        //     if(childFixedId !== null && childFixedId !== fixedId)
+        //     {
+        //         // Skip scrolling, because overflow is hidden by fixed element with "fixedId"
+        //         return 3;
+        //     }
+        // }
         overflowObj.scroll(gazeX,gazeY);
     }
+    return 7;
 }
 
 // TODO: Create own Rect class, remove all arrays used to represent rects, include Rect operations in Rect class

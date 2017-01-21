@@ -144,7 +144,23 @@ std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pagePixelCoordinate, 
 
 void Tab::ScrollOverflowElement(int elemId, int x, int y)
 {
-	_pCefMediator->ScrollOverflowElement(this, elemId, x, y);
+	std::vector<int> inside_fixed_element;
+	for (int i = 0; i < _fixedElements.size(); i++)
+	{
+		for (int j = 0; j < _fixedElements[i].size(); j++)
+		{
+			if (_fixedElements[i][j].IsInside(x, y))
+			{
+				inside_fixed_element.push_back(i);
+				break;
+			}
+		}
+	}
+	//for (const auto& i : inside_fixed_element)
+	//{
+	//	LogDebug("DEBUG: Scrolling is performed in fixed element=", i);
+	//}
+	_pCefMediator->ScrollOverflowElement(this, elemId, x, y, inside_fixed_element);
 }
 
 void Tab::ConvertToCEFPixel(double& rWebViewPixelX, double& rWebViewPixelY) const

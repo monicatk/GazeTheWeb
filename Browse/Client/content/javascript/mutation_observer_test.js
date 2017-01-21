@@ -17,6 +17,44 @@ window.dom_textinputs_rect = [[]];
 window.appendedSubtreeRoots = new Set();
 
 
+function DrawRect(rect, color)
+{
+	//Position parameters used for drawing the rectangle
+	var x = rect[1];
+	var y = rect[0];
+	var width = rect[3] - rect[1];
+	var height = rect[2] - rect[0];
+
+	var canvas = document.createElement('canvas'); //Create a canvas element
+	//Set canvas width/height
+	canvas.style.width='100%';
+	canvas.style.height='100%';
+	//Set canvas drawing area width/height
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+	//Position canvas
+	canvas.style.position='absolute';
+	canvas.style.left=0;
+	canvas.style.top=0;
+	canvas.style.zIndex=100000;
+	canvas.style.pointerEvents='none'; //Make sure you can click 'through' the canvas
+	document.body.appendChild(canvas); //Append canvas to body element
+	var context = canvas.getContext('2d');
+	//Draw rectangle
+	context.rect(x, y, width, height);
+	context.fillStyle = color;
+	context.fill();
+}
+
+function DrawObject(obj)
+{
+	var colors = ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#FFFFFF"];
+	for(var i = 0; i < obj.rects.length; i++)
+	{
+		DrawRect(obj.rects[i], colors[i % 6]);
+	}
+}
+
 // Helper function for console output
 function ConsolePrint(msg)
 {
@@ -579,7 +617,6 @@ function ForEveryChild(parentNode, applyFunction, depth)
 
 function AnalyzeNode(node)
 {
-
 	if( (node.nodeType == 1 || node.nodeType > 8) && (node.hasAttribute && !node.hasAttribute("nodeType")) && (node !== window)) // 1 == ELEMENT_NODE
 	{
 		if(window.appendedSubtreeRoots.delete(node))
@@ -590,7 +627,8 @@ function AnalyzeNode(node)
 		var computedStyle = window.getComputedStyle(node, null);
 
 		// Identify fixed elements on appending them to DOM tree
-		if(computedStyle.getPropertyValue('position') == 'fixed') 
+		if(computedStyle.getPropertyValue('position') == 'fixed' ||
+			(node.tagName == "DIV" && node.getAttribute("role") == "dialog")) 
 		{
 			// Returns true if new FixedElement was added; false if already linked to FixedElement Object
 			if(AddFixedElement(node))
@@ -892,13 +930,6 @@ function MutationObserverInit()
 
 					mutation_observer_working_time += (Date.now() - working_time_start);
 
-					// console.log("Finished mutation");
-					if(Date.now() - working_time_start >= 100)
-					{
-						console.log(debug_mutation_list.length+": "+(Date.now() - working_time_start)+"ms at mutation type: "+mutation.type+", target: "+mutation.target);
-						debug_mutation_list.push(mutation);
-						// throw "DaFuckNigga"
-					}
 						
 		  		} // END forEach mutation
 
