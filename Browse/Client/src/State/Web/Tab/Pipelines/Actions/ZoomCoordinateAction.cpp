@@ -128,7 +128,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	}
 	else if ( // zooming is high enough for coordinate to be accurate
 		_logZoom <= 0.075f // just zoomed so far into that coordinate is used
-		|| ((_logZoom <= 0.5f) && (_deviation < 0.0125f))) // coordinate seems to be quite fixed, just do it
+		|| ((_logZoom <= 0.45f) && (_deviation < 0.01f))) // coordinate seems to be quite fixed, just do it
 	{
 		int zoomDataIndex = -1;
 
