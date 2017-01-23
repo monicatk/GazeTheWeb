@@ -6,7 +6,12 @@ Features (End of January):
 	- Raphael: Secure Password Keyboard mode?
 - Daniel: Copy URL (from links and images)
 - Page fullscreen handling
+<<<<<<< HEAD
+- First loading sometimes fails in terms of DOM Node creation
 	--> fixed by circumventing a specific setup at the beginning
+- Javascript PopUp handling
+=======
+>>>>>>> 4b6b552974df9ead164a316675dfc3fa9a7b8cdc
 - DOM Node boxes for images are only text height
 - Activate Sandbox on Application Side
 

@@ -1,3 +1,8 @@
+//============================================================================
+// Distributed under the Apache License, Version 2.0.
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
+//============================================================================
+
 window.domLinks = [];
 window.domTextInputs = [];
 window.overflowElements = [];
@@ -15,6 +20,24 @@ function PerformTextInput(inputId, text, submit)
         return true;
     }
     else return false;
+}
+
+function ScrollOverflowElement(elemId, gazeX, gazeY, fixedId)
+{
+    var overflowObj = GetOverflowElement(elemId);
+    if(overflowObj !== null && overflowObj !== undefined)
+    {
+        if(fixedId !== -1)
+        {
+            var childFixedId = overflowObj.node.getAttribute("childFixedId");
+            if(childFixedId !== null && childFixedId !== fixedId)
+            {
+                // Skip scrolling, because overflow is hidden by fixed element with "fixedId"
+                return;
+            }
+        }
+        overflowObj.scroll(gazeX,gazeY);
+    }
 }
 
 // TODO: Create own Rect class, remove all arrays used to represent rects, include Rect operations in Rect class
@@ -51,7 +74,7 @@ function GetNextOverflowParent(node)
         {
             // style.overflow = {visible|hidden|scroll|auto|initial|inherit}
             var overflow_prop = window.getComputedStyle(parent, null).getPropertyValue('overflow');
-            if(overflow_prop == 'hidden')
+            if(overflow_prop !== 'visible')
             {
                 return parent;
             }
@@ -107,13 +130,15 @@ function DOMObject(node, nodeType)
 
         // Returns float[4] for each Rect with adjusted coordinates
         this.getRects = function(){
-            if(this.visible && this.overflowParent !== null && this.overflowParent !== undefined)
+            if(this.visible && this.overflowParent !== null && this.overflowParent !== undefined && 
+                (id = this.overflowParent.getAttribute("overflowId")) ) 
             {
                 // TODO: Work on OverflowElemen Objects and their getRects method instead!
-                var bb_overflow = this.overflowParent.getBoundingClientRect();
-                if(bb_overflow.height > 0 && bb_overflow.width > 0)
+                // var bb_overflow = this.overflowParent.getBoundingClientRect();
+                var obj = GetOverflowElement(id);
+                if(obj !== null && obj !== undefined )
                 {
-                    var oRect = AdjustClientRects([bb_overflow])[0];
+                    var oRect = obj.getRects()[0];
 
                     var rects = AdjustClientRects(this.node.getClientRects());
                     var new_rects = [];
