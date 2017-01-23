@@ -326,13 +326,13 @@ function CompareArrays(array1, array2)
 
 // TESTING PURPOSE
 document.onclick = function(){
-	ConsolePrint("### document.onclick() triggered! Calling UpdateDOMRects! ###");
-	UpdateDOMRects();
+	// ConsolePrint("### document.onclick() triggered! Calling UpdateDOMRects! ###");
+	// UpdateDOMRects();
 	
 }
 document.addEventListener("click", function(e){
-	ConsolePrint("### Realized that click event was fired!");
-	console.log(e.target);
+	ConsolePrint("JS Debug: Realized that click event was fired! Target is listed in DevTools Console.");
+	console.log("Clicked target: "+e.target);
 });
 
 // Trigger DOM data update on changing document loading status
@@ -370,8 +370,6 @@ document.onreadystatechange = function()
 		
 	}
 }
-
-// http://stackoverflow.com/questions/18323757/how-do-you-detect-that-a-script-was-loaded-and-executed-in-a-chrome-extension
 
 
 window.onresize = function()
@@ -627,8 +625,13 @@ function AnalyzeNode(node)
 		var computedStyle = window.getComputedStyle(node, null);
 
 		// Identify fixed elements on appending them to DOM tree
-		if(computedStyle.getPropertyValue('position') == 'fixed' ||
-			(node.tagName == "DIV" && node.getAttribute("role") == "dialog")) 
+		if(
+			// computedStyle.getPropertyValue('display') !==  "none" && // NOTE: if display == 'none' -> rect is zero
+			(
+				computedStyle.getPropertyValue('position') == 'fixed' ||
+				node.tagName == "DIV" && node.getAttribute("role") == "dialog"
+			)
+		) 
 		{
 			// Returns true if new FixedElement was added; false if already linked to FixedElement Object
 			if(AddFixedElement(node))
@@ -682,7 +685,7 @@ function AnalyzeNode(node)
 			CreateDOMLink(node);
 		}
 
-		// GMail: Make mail receiver clickable (again)
+		// GMail: Trying to make mail receiver clickable (again)
 		if(node.tagName === "DIV" && node.className === "vR")
 		{
 			console.log("GMail mail receiver fix: Found <div> with class 'vR'. I will assume it will be clickable.");
@@ -693,21 +696,30 @@ function AnalyzeNode(node)
 			console.log("GMail mail receiver fix: Found <span> with class 'aQ2'. I will assume it will be clickable.");
 			CreateDOMLink(node);
 		}
+		if(node.tagName == "IMG" && node.getAttribute("data-tooltip") !== null)
+		{
+			CreateDOMLink(node);
+		}
 
 		var rect = node.getBoundingClientRect();
 
 		// Detect scrollable elements inside of webpage
-		if( node.tagName === "DIV" && 
-			(   (computedStyle.getPropertyValue("overflow") !== "visible" )
-				|| (computedStyle.getPropertyValue("overflow-x") !== "visible")
-				|| (computedStyle.getPropertyValue("overflow-y") !== "visible" )
-			)
-			&& rect.width > 0 
-			&& rect.height > 0
-			// && ( (node.scrollWidth - Math.round(rect.width) > 0) || (node.scrollHeight - Math.round(rect.height) > 0) )	// =false for Facebook Chat Window bottom-right...
-		)
+		if(node.tagName === "DIV" && rect.width > 0 && rect.height > 0)
 		{
-			CreateOverflowElement(node);
+			var overflow = computedStyle.getPropertyValue("overflow");
+			if(overflow === "auto" || overflow === "scroll")
+			{
+				CreateOverflowElement(node);
+			}
+			else
+			{
+				var overflowX = computedStyle.getPropertyValue("overflow-x");
+				var overflowY = computedStyle.getPropertyValue("overflow-y");
+				if(overflowX === "auto" || overflowX === "scroll" || overflowY === "auto" || overflowY === "scroll")
+				{
+					CreateOverflowElement(node);
+				}
+			}
 		}
 
 

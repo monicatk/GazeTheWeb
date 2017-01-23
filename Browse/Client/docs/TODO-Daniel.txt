@@ -1,17 +1,12 @@
-# Bugs?
-	- golem.de needs time to function properly after a couple of seconds at the beginning
-		--> something with still loading subframes
-	- sometimes scroll button up is displayed, although it is scrolled to the top
-		then, everything seems to stay broken. Wrong positions of Rects and loading new page results in the same error, staying forever
-	- C++ debug console produces the same error message over and over again:
-	Exception thrown at 0x7626A6F2 in Client.exe: Microsoft C++ exception: lslboost::exception_detail::clone_impl<lslboost::exception_detail::error_info_injector<lslboost::system::system_error> > at memory location 0x14C7E454.
-	 	--> Why?
+### BUGS ###
+	?
 
-# Extra #
+### EXTRA ###
 Pause Tab Rendering / Script Execution
-  - Useful during zooming at click emulation
+  - Useful during zooming at click emulation 
+  	--> You can not really stop any script, but you might block the whole renderer thread :D (like JS dialogs do)
 
-# Refinement #
+### REFINEMENT###
 
 >>> Extend usage of MutationObserver
 	[ ] Use observer to trigger updates in node visibility and to set overflow parents, remove those methods from DOM Objects
@@ -24,16 +19,21 @@ Pause Tab Rendering / Script Execution
 	- 	Create clipboard in Master: std::vector<std::string> 
 		Clipboard might also contain pictures in the future
 
+Other
+[ ]	Copy childFixedId to C++ Tab in order to determine parenthood of fixed elements to other DOM objects
+
 >>>	Overflow Elements:
-	[ ]	Don't scroll OEs if not visible!
+	[X]	Don't scroll OEs if not visible!
+		[ ]	Use edge of fixed element if OEs edge is partially covered by a fixed element
+
+	[ ] Separate possible vertical and horizontal scrolling in Overflow objects and only execute scrolling in those given directions
+
 	[ ] Scrolling buttons on OEs covering the whole page:
 			[ ] Support "Scroll top" button on OEs covering the whole page?
 			[ ] Automatic scrolling works, but Scroll Buttons not shown
 	[ ] Do not update OE's contained nodes' rects, if OE not visible!
-
-
-	-	FIXED overflow elements
-	-	Remove overflowParent attribute from DOMObjects and do aquivalent visbility check for each child in OverflowElements
+	[X]	FIXED overflow elements
+	-	?? Remove overflowParent attribute from DOMObjects and do aquivalent visbility check for each child in OverflowElements
 	[X]	Calculate partial Rects if partially hidden by OverflowElements
 	[X]	Trigger childrens' Rect updates when scrolling happend
 	- 	OE containing another OE, keep outer OE scrollable
@@ -45,6 +45,7 @@ Pause Tab Rendering / Script Execution
 		Example: Message list on Fb when clicking on message button in topmost menu bar
 
 >>>	Fixed Elements
+	[ ]	Cut-off rects if fixed element covers another DOM object
 	-	Add z-index for layers of fixed elements
 		Example: Facebook chat popup in the right corner in contrast to mainpage in the background, consisting partly of other fixed elements
 	-	Better union of all child Rects (not simple bounding boxes)
@@ -52,9 +53,12 @@ Pause Tab Rendering / Script Execution
 
 >>>	Other:
 	- 	Emulate Enter button and send Fb message within chat window
-	- 	Find EVERY DOM node on its creation/appending to DOM
-		Example: See GMail
+	- 	Find EVERY DOM node on its creation/appending to DOM (see GMail)
 	-	Remove 0x IDs for nodes etc. in JS & use SeparateBy method in C++ (BrowserMsgRouter) to decode
+
+
+
+
 
 
 

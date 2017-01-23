@@ -26,67 +26,77 @@ function FixedElement(node)
 
     this.updateRects = function()
     {
-        // Compute fitting bounding box for fixed node and all its children
-        // Starting with ClientRects of this parent node
-        var domRectList = [];
-        for(var i = 0, rects = this.node.getClientRects(); i < rects.length; i ++)
-        {
-            domRectList.push(rects[i]);
-        }
-        
-
-        // Check if child is already contained in one of the DOMRects
-        ForEveryChild(this.node,
-            function(child)
-            {
-                if(child.nodeType === 1)
-                {
-                    var rects = child.getClientRects();
-                    for(var i = 0, n = rects.length; i < n; i++)
-                    {
-                        var rect = rects[i];
-                        var contained = false;
-
-                        // Iterate over all current bounding rects
-                        domRectList.forEach(
-                            function(container)
-                            {
-                                if(!contained) // Stop checking if rect is contained, when already contained in another rect
-                                {
-                                    contained = IsRectContained(rect, container);
-                                }
-                            }
-                        ); // domRectList.forEach
-
-                        // Another rect must be added if current rect isn't contained in any 
-                        if(!contained)
-                        {
-                            domRectList.push(rects[i]);
-                        }
-
-                    } // for rects.length
-                } // if nodeType === 1
-            }
-        ); // ForEveryChild
-
         var updatedRectsData = [];
-        // Convert DOMRects to [t,l,b,r] float lists and adjust coordinates if zoomed
-        domRectList.forEach(
-            function(domRect)
-            { 
-                updatedRectsData.push(AdjustRectToZoom(domRect));
+
+        // NOTE: Fix for GMail. There exist DIVs without any children, whose rects cover the whole page and they are fixed
+        // although this does not seem to influence anything
+        if(this.node.tagName === "DIV" && this.node.children.length === 0)
+        {
+            this.rects = [[0,0,0,0]];
+        }
+        else
+        {
+            // Compute fitting bounding box for fixed node and all its children
+            // Starting with ClientRects of this parent node
+            var domRectList = [];
+            for(var i = 0, rects = this.node.getClientRects(); i < rects.length; i ++)
+            {
+                domRectList.push(rects[i]);
             }
-        );
+            
+
+            // Check if child is already contained in one of the DOMRects
+            ForEveryChild(this.node,
+                function(child)
+                {
+                    if(child.nodeType === 1)
+                    {
+                        var rects = child.getClientRects();
+                        for(var i = 0, n = rects.length; i < n; i++)
+                        {
+                            var rect = rects[i];
+                            var contained = false;
+
+                            // Iterate over all current bounding rects
+                            domRectList.forEach(
+                                function(container)
+                                {
+                                    if(!contained) // Stop checking if rect is contained, when already contained in another rect
+                                    {
+                                        contained = IsRectContained(rect, container);
+                                    }
+                                }
+                            ); // domRectList.forEach
+
+                            // Another rect must be added if current rect isn't contained in any 
+                            if(!contained)
+                            {
+                                domRectList.push(rects[i]);
+                            }
+
+                        } // for rects.length
+                    } // if nodeType === 1
+                }
+            ); // ForEveryChild
+
+            // Convert DOMRects to [t,l,b,r] float lists and adjust coordinates if zoomed
+            domRectList.forEach(
+                function(domRect)
+                { 
+                    updatedRectsData.push(AdjustRectToZoom(domRect));
+                }
+            );
+        }
+
+
+
 
         // Check if Rect data changed, if yes, inform CEF about changes
         var n = this.rects.length;
         var changed = (updatedRectsData.length !== n);
-        if(!changed)
+        for(var i = 0; i < n && !changed; i++)
         {
-            for(var i = 0; i < n && !changed; i++)
-            {
-                changed = (updatedRectsData[i] !== this.rects[i]);
-            }
+            changed = (updatedRectsData[i] !== this.rects[i]);
         }
 
         // Save updated rect data in FixedElement objects attribute
@@ -158,6 +168,11 @@ function AddFixedElement(node)
 {
     if(node.nodeType === 1)
     {
+        if(node.hasAttribute("childFixedId"))
+        {
+            return false;
+        }
+
         if(node.hasAttribute("fixedId"))
         {
             var id = node.getAttribute("fixedId")

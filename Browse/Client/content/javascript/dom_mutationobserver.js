@@ -29,21 +29,22 @@ function ScrollOverflowElement(elemId, gazeX, gazeY, fixedIds)
     var overflowObj = GetOverflowElement(elemId);
     if(overflowObj !== null && overflowObj !== undefined)
     {
-        // if(fixedId !== -1)
-        // {
-        //     var childFixedId = overflowObj.node.getAttribute("childFixedId");
-        //     // DEBUG
-        //     console.print("Scrolling OE id="+elemId+", childFixedId="+childFixedId+", fixedIds="+fixedId);
-
-        //     if(childFixedId !== null && childFixedId !== fixedId)
-        //     {
-        //         // Skip scrolling, because overflow is hidden by fixed element with "fixedId"
-        //         return 3;
-        //     }
-        // }
+        // TODO: Move scrolling computation to C++ Tab::ScrollOverflowElement
+        // Add solution for scrolling if edge of overflow is covered by a fixed element and scroll at the edge of fixed element
+        if(fixedIds !== null && fixedIds.length > 0)
+        {
+            var childFixedId = overflowObj.node.getAttribute("childFixedId");
+            
+            if(childFixedId === null || 
+                (childFixedId !== null && fixedIds.indexOf(childFixedId) === -1)  // child id not contained in list
+            )
+            {
+                // Skip scrolling, because overflow is hidden by fixed element with "fixedId"
+                return;
+            }
+        }
         overflowObj.scroll(gazeX,gazeY);
     }
-    return 7;
 }
 
 // TODO: Create own Rect class, remove all arrays used to represent rects, include Rect operations in Rect class
@@ -66,6 +67,40 @@ function CutRectOnRectWindow(innerRect, outerRect)
         return [0,0,0,0]
 
     return [t, l, b, r]
+}
+
+/**
+ * Usage example: Cut-off |target| rect parts covered by an overlying fixed element |overlay|
+ */
+function CutOutRect(target, overlay)
+{
+    if(overlay.length === 0 || target.length === 0)
+        return target;
+
+    // TODO: This procedure needs to be refined, with possible multi-rect output, if covered partially
+    // and it should be moved to C++ Tab, when C++ DOM objects are extended by childFixedId
+
+    // NOTE: This is a quick fix for GMails Mail Header, which can't be clicked due to click correction on links in the background
+    // Only cutting of right and left parts of target
+
+    var cutoff = CutRectOnRectWindow(target, overlay);
+
+    // DEBUG
+    // DrawRect(cutoff);
+
+    if(cutoff.reduce(function(a,b){return a+b},0) === 0)    // Add all elements in list, the functional way :)
+        return target;  // Nothing cut-off
+
+    // Cut-off part is on the right
+    if(cutoff[1] > target[1])
+    {
+        target[3] = cutoff[1];
+    }
+    else // Cut-off part is on the right
+    {
+        target[1] = cutoff[3];
+    }
+    return target;
 }
 
 /**
@@ -118,6 +153,31 @@ function DOMObject(node, nodeType)
             {
                 updatedRectsData.map( function(rectData){ rectData = SubstractScrollingOffset(rectData);} );
             }
+
+
+            // NOTE: GMail fix
+            if(this.nodeType !== 0)
+            {
+                for(var i = 0; i < domFixedElements.length; i++)
+                {
+                    var fixedObj = domFixedElements[i];
+                    if(fixedObj !== null && fixedObj !== undefined)
+                    {
+                        updatedRectsData.map(
+                            function(rectData)
+                            {
+                                rectData = fixedObj.rects.reduce(
+                                    function(target, overlay){
+                                        return CutOutRect(target, overlay);
+                                    }, 
+                                    rectData
+                                );
+                            }
+                        );
+                    }
+                }
+            }
+ 
 
             // Compare new and old Rect data
             var equal = CompareClientRectsData(updatedRectsData, this.rects);
