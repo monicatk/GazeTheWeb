@@ -336,11 +336,11 @@ bool Mediator::SetLoadingStatus(CefRefPtr<CefBrowser> browser, int64 frameID, bo
 	
 }
 
-void Mediator::ScrollOverflowElement(TabCEFInterface * pTab, int elemId, int x, int y)
+void Mediator::ScrollOverflowElement(TabCEFInterface * pTab, int elemId, int x, int y, std::vector<int> fixedIds)
 {
 	if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
-		_handler->ScrollOverflowElement(browser, elemId, x, y);
+		_handler->ScrollOverflowElement(browser, elemId, x, y, fixedIds);
 	}
 }
 

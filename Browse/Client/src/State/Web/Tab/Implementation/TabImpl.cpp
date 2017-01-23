@@ -434,7 +434,7 @@ void Tab::Update(float tpf, Input& rInput)
 					// Check if current gaze is inside of overflow element, if so execute scrolling method in corresponding Javascript object
 					if (rRect.IsInside(scrolledCEFPixelGazeX, scrolledCEFPixelGazeY))
 					{
-						_pCefMediator->ScrollOverflowElement(this, rOverflowElement->GetId(), CEFPixelGazeX, CEFPixelGazeY);
+						ScrollOverflowElement(rOverflowElement->GetId(), CEFPixelGazeX, CEFPixelGazeY);
 						break;
 					}
 				}

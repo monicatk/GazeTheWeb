@@ -143,7 +143,7 @@ public:
 		const CefString& title) OVERRIDE;
 
 	// Execute scrolling request from Tab in determined Overflow Element with elemId
-	void ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, int x, int y, int fixedId = -1);
+	void ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, int x, int y, std::vector<int> fixedId = {});
 
 	void RegisterJavascriptCallback(std::string prefix, std::function<void(std::string)> callbackFunction)
 	{
