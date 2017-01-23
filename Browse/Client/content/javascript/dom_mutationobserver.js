@@ -751,8 +751,8 @@ function OverflowElement(node)
                 var distBottom = rect[2] - gazeY;
 
                 // Treshold for actual scrolling taking place, maximum distance to border where scrolling takes place
-                var tresholdX = 1 / 5 * ((rect[3]-rect[1]) / 2);
-                var tresholdY = 1 / 5 * ((rect[2]-rect[0]) / 2);
+                var tresholdX = 1 / 2.5 * ((rect[3]-rect[1]) / 2);
+                var tresholdY = 1 / 2.5 * ((rect[2]-rect[0]) / 2);
 
                 var maxScrollingPerFrame = 10;
                 // Actual scrolling, added afterwards
