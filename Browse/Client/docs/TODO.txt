@@ -1,4 +1,5 @@
-Features (End of January):
+Features:
+- Drop Down menu support!
 - Auto Fill / Password Manager
 	- Daniel: Passwort / Sign in form recognition
 		--> What about secure password insertion?
