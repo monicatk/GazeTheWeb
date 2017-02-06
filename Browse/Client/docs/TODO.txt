@@ -16,6 +16,7 @@ Features:
 - DOM Node boxes for images are only text height
 - Activate Sandbox on Application Side
 - C++ -> JS Communication
+- Click emulation -> pipe gaze position as mouse position?
 
 Test all MAMEM trial tasks! -> Sofias Document
 
