@@ -55,6 +55,6 @@ static const float NOTIFICATION_HEIGHT = 0.06f;
 static const float NOTIFICATION_DISPLAY_DURATION = 5.f;
 static const float CLICK_VISUALIZATION_DURATION = 0.75f;
 static const float CLICK_VISUALIZATION_RELATIVE_SIZE = 0.4f;
-static const std::string SEARCH_PREFIX = "duckduckgo.com?q="; // TODO: move to some kind of config or let the user choose
+static const std::string SEARCH_PREFIX = ""; // TODO: move to some kind of config or let the user choose
 
 #endif // GLOBAL_H_

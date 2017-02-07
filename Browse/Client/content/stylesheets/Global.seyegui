@@ -7,6 +7,7 @@ default
 	background-color = 0x505659FF
 	threshold-color = 0x00FFFFFF
 	mark-color = 0xFFFFFF33
+	selection-color = 0x00000000
 }
 
 default_noback : default

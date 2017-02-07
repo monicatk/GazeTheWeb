@@ -6,7 +6,6 @@
 #include "KeyboardAction.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
-
 KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 {
     // Add in- and output data slots
@@ -91,38 +90,43 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
         });
 
 	// Complete button
+	/*
     _pTab->RegisterButtonListenerInOverlay(
         _overlayCompleteButtonId,
         [&]() // down callback
         {
+			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_OVERLAYCOMPLETE");
             this->_complete = true;
         },
 		[](){}); // up callback
 
 	// Submit button
+	
     _pTab->RegisterButtonListenerInOverlay(
         _overlaySubmitButtonId,
         [&]() // down callback
         {
+			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_SUBMIT");
             this->_submit = true;
             this->_complete = true;
         },
 		[](){}); // up callback
-
+		*/
 	// Delete character button
     _pTab->RegisterButtonListenerInOverlay(
         _overlayDeleteCharacterButtonId,
         [&]() // down callback
         {
-			// Delete an letter from content
+			// Delete a letter from content
 			_pTab->DeleteContentAtCursorInTextEdit(_overlayTextEditId, -1);
-
+			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_BACKSPACE");
 			// Refresh suggestions
 			_pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, _pTab->GetActiveEntityContentInTextEdit(_overlayTextEditId));
         },
 		[](){}); // up callback
 
 	// Paste button
+	/*
 	_pTab->RegisterButtonListenerInOverlay(
 		_overlayPasteButtonId,
 		[&]() // down callback
@@ -131,7 +135,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 		std::string clipboard = _pTab->GetClipboardText();
 		std::u16string clipboard16;
 		eyegui_helper::convertUTF8ToUTF16(clipboard, clipboard16);
-
+		LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_PASTE");
 		// Add text from clipboard to collected text
 		_pTab->AddContentAtCursorInTextEdit(_overlayTextEditId, clipboard16);
 
@@ -139,6 +143,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 		_pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, _pTab->GetActiveEntityContentInTextEdit(_overlayTextEditId));
 	},
 		[]() {}); // up callback
+		*/
 
 	// Space button
     _pTab->RegisterButtonListenerInOverlay(
@@ -147,21 +152,22 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
         {
 			// Add space to content
 			_pTab->AddContentAtCursorInTextEdit(_overlayTextEditId, u" ");
-
+			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_SPACE");
 			// Clear suggestions
 			_pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, u"");
+
         },
 		[](){}); // up callback
 
 	// Word suggestion
-    _pTab->RegisterWordSuggestListenerInOverlay(
+   /* _pTab->RegisterWordSuggestListenerInOverlay(
         _overlayWordSuggestId,
         [&](std::u16string value)
         {
 			// Fill chosen suggestion into text edit
+			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_WORD_SUGGEST_" + str);
 			_pTab->SetActiveEntityContentInTextEdit(_overlayTextEditId, value);
         });
-
 	// Shift button (switch)
 	_pTab->RegisterButtonListenerInOverlay(
 		_overlayShiftButtonId,
@@ -173,7 +179,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 		{
 			this->_pTab->SetCaseOfKeyboardLetters(_overlayKeyboardId, false);
 		});
-
+	
 	// New line button
 	_pTab->RegisterButtonListenerInOverlay(
 		_overlayNewLineButtonId,
@@ -223,7 +229,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 		_pTab->MoveCursorOverLettersInTextEdit(_overlayTextEditId, -1);
 	},
 	[]() {}); // up callback
-
+	*/
 	// Create callback for lab streaming layer to send classificatoin
 	_spLabStreamCallback = std::shared_ptr<LabStreamCallback>(new LabStreamCallback(
 		[this](std::vector<std::string> messages)
