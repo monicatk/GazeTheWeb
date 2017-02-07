@@ -765,7 +765,7 @@ void Tab::DrawDebuggingOverlay() const
 		// Render rects
 		for (const auto rRect : rDOMTrigger->GetDOMRects())
 		{
-			if (rDOMTrigger->GetDOMVisibility())
+			if (true) // rDOMTrigger->GetDOMVisibility())
 			{
 				if (!rDOMTrigger->GetDOMIsPasswordField())
 				{
