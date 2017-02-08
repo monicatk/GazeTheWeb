@@ -396,8 +396,44 @@ bool Handler::InputTextData(CefRefPtr<CefBrowser> browser, int64 frameID, int no
 	const auto& args = msg->GetArgumentList();
 	args->SetInt(0, nodeID);
 	args->SetString(1, text);
-	args->SetBool(2, submit);
+
+	// TODO: Disabled in order to test the enter key interaction
+	// args->SetBool(2, submit);
+
+	args->SetBool(2, false);
 	browser->SendProcessMessage(PID_RENDERER, msg);
+
+	/*
+	CefKeyEvent keyEvent;
+	keyEvent.windows_key_code = 13;
+	keyEvent.native_key_code = 13;
+	keyEvent.type = KEYEVENT_KEYDOWN;
+	browser->GetHost()->SendKeyEvent(keyEvent);
+	keyEvent.type = KEYEVENT_KEYUP;
+	browser->GetHost()->SendKeyEvent(keyEvent);
+	*/
+
+	// TODO: enter key interaction testing
+	CefKeyEvent event;
+	event.is_system_key = false;
+	event.modifiers = 0;
+
+	// Enter key. Everywhere
+	event.windows_key_code = 13;
+	event.native_key_code = 13;
+	event.character = event.unmodified_character = 13;
+
+	// Down
+	event.type = KEYEVENT_RAWKEYDOWN;
+	browser->GetHost()->SendKeyEvent(event);
+
+	// Character
+	event.type = KEYEVENT_CHAR;
+	browser->GetHost()->SendKeyEvent(event);
+
+	// Up
+	event.type = KEYEVENT_KEYUP;
+	browser->GetHost()->SendKeyEvent(event);
 
 	return true;
 
