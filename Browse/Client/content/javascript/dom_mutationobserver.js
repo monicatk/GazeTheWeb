@@ -16,8 +16,7 @@ function PerformTextInput(inputId, text, submit)
         // DEBUG
         console.log("Text to input: "+text);
 
-        domObj.setTextInput(text, submit);
-        return true;
+        return domObj.setTextInput(text, submit);
     }
     else return false;
 }
@@ -366,30 +365,40 @@ function DOMObject(node, nodeType)
                 
                 // ConsolePrint("Input text was set!");
 
-                if(submit)
-                {
-                    // NOTE: Emulate pressing Enter in input field?
+                // if(submit)
+                // {
+                //     // NOTE: Emulate pressing Enter in input field?
 
-                    var parent = this.node.parentNode;
-                    var no_form_found = false;
-                    while(parent.nodeName != 'FORM')
-                    {
-                        parent = parent.parentNode;
-                        if(parent === document.documentElement)
-                        {
-                            ConsolePrint('Could not submit text input: No child of any form element.');
-                            no_form_found = true;
-                            break;
-                        }
-                    }
-                    if(!no_form_found)
-                    {
-                        parent.submit();
-                        ConsolePrint("Input text was submitted.");
-                    }
+                //     var parent = this.node.parentNode;
+                //     var no_form_found = false;
+                //     while(parent.nodeName != 'FORM')
+                //     {
+                //         parent = parent.parentNode;
+                //         if(parent === document.documentElement)
+                //         {
+                //             ConsolePrint('Could not submit text input: No child of any form element.');
+                //             no_form_found = true;
+                //             break;
+                //         }
+                //     }
+                //     if(!no_form_found)
+                //     {
+                //         parent.submit();
+                //         ConsolePrint("Input text was submitted.");
+                //     }
                 
-                }
+                // }
 
+                if(this.rects.length > 0)
+                {
+                    var rect = this.rects[0];
+                    var xy = {  'x': rect[1] + (rect[3]-rect[1])/2, 
+                                'y': rect[0] + (rect[2]-rect[0])/2};
+                    ConsolePrint("Returning rect's center: "+xy.x+", "+xy.y);
+                    return xy;
+                }
+                else
+                    return null;
             }
         };
 
