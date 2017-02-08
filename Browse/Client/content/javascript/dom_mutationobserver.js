@@ -188,6 +188,12 @@ function DOMObject(node, nodeType)
                 this.rects = updatedRectsData;
                 InformCEF(this, ['update', 'rects']); 
             }
+
+            // Also, update text content if input field
+            if(this.nodeType == 0)   // Only needed for text inputs
+            {
+                this.updateText();
+            }
             
             return !equal;
         };
@@ -387,6 +393,27 @@ function DOMObject(node, nodeType)
             }
         };
 
+        this.updateText = function()
+        {
+                var old_text = this.text;
+
+                if(this.node.tagName == "INPUT") // this.node.tagName == "TEXTAREA" ||  // for tweets at people
+                {
+                    if(this.node.value !== undefined && this.node.value !== null)
+                        this.text = this.node.value;
+                }
+                else
+                {
+                    if(this.node.textContent !== undefined && this.node.textContent !== null)
+                    this.text = this.node.textContent;
+                }
+                if(old_text !== this.text)
+                {
+                    InformCEF(this, ["update", "text"]);
+                }
+
+        }
+
 /* -------------- Code, executed on object construction -------------- */
         
         // Push to list and determined by DOMObjects position in type specific list
@@ -419,17 +446,7 @@ function DOMObject(node, nodeType)
             // TODO/IDEA: (External) function returning node's text attribute, corresponding to node's tagName & type
             if(this.nodeType == 0)   // Only needed for text inputs
             {
-                if(this.node.tagName == "TEXTAREA" || this.node.tagName == "INPUT")
-                {
-                    if(this.node.value !== undefined && this.node.value !== null)
-                        this.text = this.node.value;
-                }
-                else
-                {
-                    if(this.node.textContent !== undefined && this.node.textContent !== null)
-                    this.text = this.node.textContent;
-                }
-                InformCEF(this, ["update", "text"]);
+                this.updateText();
             }
 
             if(this.node.tagName == "INPUT" && this.node.type == "password")

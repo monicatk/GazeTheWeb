@@ -905,6 +905,13 @@ function MutationObserverInit()
 					
 			  			}
 
+						// if(nodes.length > 0)
+						// {
+						// 	ConsolePrint("Child added, updating all childrens' rects.");
+						// 	UpdateChildrensDOMRects(mutation.target);
+							
+						// }
+
 
 
 
