@@ -765,7 +765,7 @@ void Tab::DrawDebuggingOverlay() const
 		// Render rects
 		for (const auto rRect : rDOMTrigger->GetDOMRects())
 		{
-			if (true) // rDOMTrigger->GetDOMVisibility())
+			if (rDOMTrigger->GetDOMVisibility())
 			{
 				if (!rDOMTrigger->GetDOMIsPasswordField())
 				{
@@ -777,8 +777,6 @@ void Tab::DrawDebuggingOverlay() const
 					renderRect(rRect, rDOMTrigger->GetDOMFixed());
 					_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_TRIGGER_DEBUG_COLOR);
 				}
-
-
 			}
 				
 		}
