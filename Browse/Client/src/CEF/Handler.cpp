@@ -495,8 +495,8 @@ void Handler::UpdatePageResolution(CefRefPtr<CefBrowser> browser)
 	const std::string getPageResolution = "\
             if(document.documentElement)\
 			{\
-			window._pageWidth = document.documentElement.scrollWidth;\
-            window._pageHeight = document.documentElement.scrollHeight;\
+			window._pageWidth = document.body.scrollWidth;\
+            window._pageHeight = document.body.scrollHeight;\
 			}\
 			else\
 				console.log('Handler::UpdatePageResolution: Could not access document.documentElement!');\
