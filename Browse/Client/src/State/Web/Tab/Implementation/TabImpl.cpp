@@ -305,7 +305,7 @@ void Tab::Update(float tpf, Input& rInput)
         // STANDARD GUI IS VISIBLE
 
         // Gaze mouse
-        if(_gazeMouse)
+        if(_gazeMouse && !(_pMaster->IsPaused()))
         {
             EmulateMouseCursor(tabInput.webViewPixelGazeX, tabInput.webViewPixelGazeY);
         }
