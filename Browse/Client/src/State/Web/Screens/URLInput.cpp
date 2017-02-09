@@ -153,6 +153,9 @@ void URLInput::URLKeyboardListener::keyPressed(eyegui::Layout* pLayout, std::str
 {
     _pURLInput->_collectedURL += value;
     eyegui::setContentOfTextBlock(_pURLInput->_pLayout, "text_block", _pURLInput->_collectedURL + u"|");
+
+	// Do logging about it
+	JSMailer::instance().Send("keystroke");
 }
 
 void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
