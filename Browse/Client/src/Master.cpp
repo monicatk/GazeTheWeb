@@ -699,8 +699,10 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_ESCAPE: { Exit(); break; }
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
-			case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
-			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
+			// case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
+			// case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
+			case GLFW_KEY_F: { eyegui::setValueOfConfigAttribute(_pGUI, "keyboard-key-selection-duration", "0.5"); LabStreamMailer::instance().Send("Key-Selection-Duration to 0.5 seconds"); break; }
+			case GLFW_KEY_S: { eyegui::setValueOfConfigAttribute(_pGUI, "keyboard-key-selection-duration", "1.0"); LabStreamMailer::instance().Send("Key-Selection-Duration to 1.0 seconds"); break; }
         }
     }
 }
