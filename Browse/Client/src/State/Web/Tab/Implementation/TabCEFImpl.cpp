@@ -113,6 +113,17 @@ void Tab::AddDOMNode(std::shared_ptr<DOMSelectField> spNode)
 	// Add node to ID->node map
 	_SelectFieldMap.emplace(spNode->GetNodeID(), spNode);
 
+	// Create DOMTrigger
+	std::unique_ptr<DOMTrigger> upDOMTrigger = std::unique_ptr<DOMTrigger>(new DOMTrigger(this, spNode));
+
+	// Activate trigger
+	if (!_pipelineActive)
+	{
+		upDOMTrigger->Activate();
+	}
+
+	// Push it to vector
+	_DOMTriggers.push_back(std::move(upDOMTrigger));
 }
 
 void Tab::AddDOMNode(std::shared_ptr<DOMNode> spNode)
