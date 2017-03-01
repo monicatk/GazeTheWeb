@@ -185,11 +185,17 @@ void Tab::ClearDOMNodes()
 	_TextLinkMap.clear();
 	_TextInputMap.clear();
 
+	// Clear SelectField nodes
+	_SelectFieldMap.clear();
+	_DOMSelectFields.clear();
+
 	// Clear fixed elements
 	_fixedElements.clear();
 
 	// Clear overflow elements
 	_overflowElements.clear();
+
+
 }
 
 void Tab::RemoveDOMNode(DOMNodeType type, int nodeID)
