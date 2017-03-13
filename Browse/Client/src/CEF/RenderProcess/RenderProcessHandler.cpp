@@ -360,7 +360,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			if (context->Enter())
 			{
 				msg = CefProcessMessage::Create("InitializeDOMSelectField");
-				auto& args = msg->GetArgumentList();
+                                auto args = msg->GetArgumentList();
 				args->SetInt(0, type);
 				args->SetInt(1, nodeID);
 

@@ -270,8 +270,8 @@ void Mediator::SetSelectionIndex(TabCEFInterface * tab, int nodeId, int index)
 {
 	if (const auto& browser = GetBrowser(tab))
 	{
-		auto& msg = CefProcessMessage::Create("SetSelectionIndex");
-		auto& args = msg->GetArgumentList();
+                auto msg = CefProcessMessage::Create("SetSelectionIndex");
+                auto args = msg->GetArgumentList();
 		args->SetInt(0, nodeId);
 		args->SetInt(1, index);
 		browser->SendProcessMessage(PID_RENDERER, msg);
