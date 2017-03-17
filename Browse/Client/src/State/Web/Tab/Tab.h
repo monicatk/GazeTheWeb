@@ -505,6 +505,9 @@ private:
 	std::unique_ptr<RenderItem> _upDebugLineQuad;
 	std::unique_ptr<RenderItem> _upDebugFillQuad;
 
+	// Save some gaze input for debugging purposes
+	std::deque<glm::vec2> _gazeDebuggingQueue;
+
     // Frame indices of scroll up and down overlays
     unsigned int _scrollUpProgressFrameIndex = 0;
     unsigned int _scrollDownProgressFrameIndex = 0;

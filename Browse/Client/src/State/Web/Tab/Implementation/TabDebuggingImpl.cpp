@@ -200,22 +200,28 @@ void Tab::DrawDebuggingOverlay() const
 		}
 	}
 
-	// Visualize exact gaze points
+	// ### EXACT GAZE INPUT VISUALIZTION ###
 
-	// Calculate model matrix
-	model = glm::mat4(1.0f);
-	model = glm::scale(model, glm::vec3(1.f / _pMaster->GetWindowWidth(), 1.f / _pMaster->GetWindowHeight(), 1.f));
-	model = glm::translate(model, glm::vec3(_upWebView->GetX() + 500, _upWebView->GetHeight() - 100, 1));
-	model = glm::scale(model, glm::vec3(200, 100, 0));
-
-	// Combine matrics
-	matrix = projection * model;
-
-	// Fill uniform with matrix
+	// Bind render item and set color
 	_upDebugFillQuad->Bind();
 	_upDebugFillQuad->GetShader()->UpdateValue("color", glm::vec3(255.f / 255.f, 127.f / 255.f, 35.f / 255.f));
-	_upDebugFillQuad->GetShader()->UpdateValue("matrix", matrix);
 
-	// Render rectangle
-	_upDebugFillQuad->Draw(GL_TRIANGLES);
+	// Do it for each gaze sample
+	for (const glm::vec2& rGaze : _gazeDebuggingQueue)
+	{
+		// Calculate model matrix
+		model = glm::mat4(1.0f);
+		model = glm::scale(model, glm::vec3(1.f / _pMaster->GetWindowWidth(), 1.f / _pMaster->GetWindowHeight(), 1.f));
+		model = glm::translate(model, glm::vec3(rGaze.x, _pMaster->GetWindowHeight() - rGaze.y, 1));
+		model = glm::scale(model, glm::vec3(2, 2, 0));
+
+		// Combine matrics
+		matrix = projection * model;
+
+		// Fill uniform with matrix
+		_upDebugFillQuad->GetShader()->UpdateValue("matrix", matrix);
+
+		// Render rectangle
+		_upDebugFillQuad->Draw(GL_TRIANGLES);
+	}
 }

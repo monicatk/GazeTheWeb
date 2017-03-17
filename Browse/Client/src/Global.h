@@ -28,6 +28,7 @@ static const float TAB_SCROLLING_SENSOR_HEIGHT = 0.1f;
 static const float TAB_SCROLLING_SENSOR_PADDING = 0.025f;
 static const float TAB_LOADING_ICON_FRAME_DURATION = 0.25f;
 static const float TAB_GET_PAGE_RES_INTERVAL = 1.0f;
+static const int TAB_DEBUGGING_GAZE_COUNT = 10;
 static const float MASTER_PAUSE_ALPHA = 0.35f;
 static const float EYEINPUT_MOUSE_OVERRIDE_INIT_FRAME_DURATION = 0.25f; // duration between mouse movement is expected. Triggered by initial movement
 static const float EYEINPUT_MOUSE_OVERRIDE_INIT_DISTANCE = 100.f; // pixels on screen (not best but works)
