@@ -19,6 +19,10 @@ ZoomCoordinateAction::ZoomCoordinateAction(TabInteractionInterface* pTab, bool d
 
 bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 {
+	// TODO
+	// - delta for zoom coordinate maybe on page coordinates, not with web view (makes more sense)
+	// - play around with deviation and move duration
+
 	// ### Preparation ###
 
 	// Speed of zooming
