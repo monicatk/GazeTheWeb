@@ -55,7 +55,7 @@ protected:
 	const float DEVIATION_FADING_DURATION = 1.0f;
 
 	// Multiplier of movement towards center
-	const float CENTER_OFFSET_MULTIPLIER = 0.5f;
+	const float CENTER_OFFSET_MULTIPLIER = 0.0f; // TODO debugging 0.5f;
 
 	// Duration to replace current coordinate with input
 	const float MOVE_DURATION = 0.75f;
@@ -95,6 +95,9 @@ protected:
 
 	// Datas saved before drift correction zooming starts
 	ZoomData _zoomData;
+
+	// TODO: debugging
+	bool _doDebugging = false;
 };
 
 #endif // ZOOMCOORDINATEACTION_H_

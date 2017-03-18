@@ -139,6 +139,11 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 		// Return success
 		finished = true;
 	}
+	else if (_doDebugging) // TODO debugging
+	{
+		_logZoom = 1.f;
+		_coordinateCenterOffset = glm::vec2(0, 0);
+	}
 	else
 	{
 		if (!_driftCorrection) // still refining zoom coordinate
@@ -171,7 +176,8 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 				SetOutputValue("coordinate", pixelFixationCoordinate);
 
 				// Return success
-				finished = true;
+				// finished = true; // TODO debugging
+				_doDebugging = true;
 			}
 		}
 	}
@@ -196,9 +202,24 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 
 void ZoomCoordinateAction::Draw() const
 {
+	// Pixels in web view
+	int webViewWidth = _pTab->GetWebViewWidth();
+	int webViewHeight = _pTab->GetWebViewHeight();
+
+	// Draw zoom coordinate
+	if (_doDebugging)
+	{
+		_pTab->Debug_DrawRectangle(_zoomData.pixelZoomCoordinate, glm::vec2(5, 5), glm::vec3(1, 0, 0));
+		glm::vec2 pixelFixationCoordinate;
+		GetOutputValue("coordinate", pixelFixationCoordinate);
+		_pTab->Debug_DrawRectangle(pixelFixationCoordinate, glm::vec2(5, 5), glm::vec3(1, 1, 0));
+	}
+
+	// Draw click coordinate
+	// _pTab->Debug_DrawRectangle(glm::vec2(100, 100), glm::vec2(5, 5), glm::vec3(1, 1, 0));
+
 	// TODO: TESTING debugging
-	_pTab->Debug_DrawRectangle(glm::vec2(100, 100), glm::vec2(20, 20), glm::vec3(1, 0, 0));
-	_pTab->Debug_DrawLine(glm::vec2(400, 100), glm::vec2(200, 50), glm::vec3(1, 0, 1));
+	// _pTab->Debug_DrawLine(glm::vec2(400, 100), glm::vec2(200, 50), glm::vec3(1, 0, 1));
 }
 
 void ZoomCoordinateAction::Activate()
