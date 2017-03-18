@@ -14,7 +14,7 @@ class Primitive
 public:
 
 	// Enumeration for different primitive types
-	enum class Type { QUAD_TRIANGLES, QUAD_LINES_WITH_DIAGONAL };
+	enum class Type { QUAD_TRIANGLES, QUAD_LINES_WITH_DIAGONAL, LINE };
 
     // Constructor
 	Primitive(Type type = Type::QUAD_TRIANGLES);

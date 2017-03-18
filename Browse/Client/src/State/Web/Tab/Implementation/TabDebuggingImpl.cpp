@@ -48,6 +48,13 @@ void Tab::InitDebuggingOverlay()
 			vertexShaderSource,
 			fragmentShaderSource,
 			Primitive::Type::QUAD_TRIANGLES));
+
+	// Line
+	_upDebugLine = std::unique_ptr<RenderItem>(
+		new PrimitiveRenderItem(
+			vertexShaderSource,
+			fragmentShaderSource,
+			Primitive::Type::LINE));
 }
 
 void Tab::DrawDebuggingOverlay() const
@@ -240,9 +247,9 @@ void Tab::Debug_DrawRectangle(glm::vec2 coordinate, glm::vec2 size, glm::vec3 co
 	model = glm::scale(model, glm::vec3(1.f / _pMaster->GetWindowWidth(), 1.f / _pMaster->GetWindowHeight(), 1.f));
 	model = glm::translate(model, 
 		glm::vec3(
-			glm::vec2(coordinate.x - (size.x / 2.f), _pMaster->GetWindowHeight() - (coordinate.y - (size.y / 2.f))) // coordinate in center of rectangular in correct system TODO: breaks when web view is not filling complete height
+			glm::vec2(coordinate.x - (size.x / 2.f), _pMaster->GetWindowHeight() - coordinate.y - (size.y / 2.f)) // coordinate in center of rectangular in correct system TODO: breaks when web view is not filling complete height
 			+ glm::vec2(_upWebView->GetX(), _upWebView->GetY()), 1)); // offset of web view
-	model = glm::scale(model, glm::vec3(size, 0));
+	model = glm::scale(model, glm::vec3(size, 0.f));
 
 	// Combine matrics
 	auto matrix = projection * model;
@@ -256,5 +263,29 @@ void Tab::Debug_DrawRectangle(glm::vec2 coordinate, glm::vec2 size, glm::vec3 co
 
 void Tab::Debug_DrawLine(glm::vec2 originCoordinate, glm::vec2 targetCoordinate, glm::vec3 color) const
 {
-	// TODO
+	// Bind render item and set color
+	_upDebugLine->Bind();
+	_upDebugLine->GetShader()->UpdateValue("color", color);
+
+	// Projection
+	glm::mat4 projection = glm::ortho(0, 1, 0, 1);
+
+	// Calculate model matrix
+	auto model = glm::mat4(1.0f);
+	model = glm::scale(model, glm::vec3(1.f / _pMaster->GetWindowWidth(), 1.f / _pMaster->GetWindowHeight(), 1.f));
+	model = glm::translate(model,
+		glm::vec3(
+			glm::vec2(originCoordinate.x, _pMaster->GetWindowHeight() - (originCoordinate.y)) // coordinate in correct system TODO: breaks when web view is not filling complete height
+			+ glm::vec2(_upWebView->GetX(), _upWebView->GetY()), 1)); // offset of web view
+	model = glm::rotate(model, std::atan2(targetCoordinate.x - originCoordinate.x, - (targetCoordinate.y - originCoordinate.y)), glm::vec3(0, 0, -1)); // TODO: breaks when web view is not filling complete height
+	model = glm::scale(model, glm::vec3(glm::distance(originCoordinate, targetCoordinate), 0.f, 0.f));
+	
+	// Combine matrics
+	auto matrix = projection * model;
+
+	// Fill uniform with matrix
+	_upDebugLine->GetShader()->UpdateValue("matrix", matrix);
+
+	// Render line
+	_upDebugLine->Draw(GL_LINES);
 }

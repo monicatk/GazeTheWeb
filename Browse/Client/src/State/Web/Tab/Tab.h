@@ -517,6 +517,7 @@ private:
 	// RenderItems used for debug rendering. Initialized and used in TabDebuggingImpl.cpp
 	std::unique_ptr<RenderItem> _upDebugLineQuad;
 	std::unique_ptr<RenderItem> _upDebugFillQuad;
+	std::unique_ptr<RenderItem> _upDebugLine;
 
 	// Save some gaze input for debugging purposes
 	std::deque<glm::vec2> _gazeDebuggingQueue;
