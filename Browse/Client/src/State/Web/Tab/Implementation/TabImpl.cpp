@@ -202,16 +202,6 @@ void Tab::Update(float tpf, Input& rInput)
 	}
 	_upWebView->SetHighlightRects(rects);
 
-	// Push back current gaze for debugging purposes
-	_gazeDebuggingQueue.push_front(glm::vec2(rInput.gazeX, rInput.gazeY));
-
-	// Limit length of queue
-	int toPop = (int)_gazeDebuggingQueue.size() - TAB_DEBUGGING_GAZE_COUNT;
-	for(int i = 0; i < toPop; i++)
-	{
-		_gazeDebuggingQueue.pop_back();
-	}
-
 	// ###########################
 	// ### UPDATE COLOR OF GUI ###
 	// ###########################
@@ -244,6 +234,17 @@ void Tab::Update(float tpf, Input& rInput)
     // ### UPDATE DEBUG LAYOUT ###
 	// ###########################
 
+	// Push back current gaze for debugging purposes
+	_gazeDebuggingQueue.push_front(glm::vec2(rInput.gazeX, rInput.gazeY));
+
+	// Limit length of queue
+	int toPop = (int)_gazeDebuggingQueue.size() - TAB_DEBUGGING_GAZE_COUNT;
+	for (int i = 0; i < toPop; i++)
+	{
+		_gazeDebuggingQueue.pop_back();
+	}
+
+	// Update text in layout
     eyegui::setContentOfTextBlock(
         _pDebugLayout,
         "web_view_coordinate",
