@@ -196,7 +196,8 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 
 void ZoomCoordinateAction::Draw() const
 {
-
+	// TODO: TESTING debugging
+	_pTab->Debug_DrawRectangle(glm::vec2(100, 100), glm::vec2(20, 20), glm::vec3(1, 0, 0));
 }
 
 void ZoomCoordinateAction::Activate()

@@ -212,7 +212,7 @@ void Tab::DrawDebuggingOverlay() const
 		// Calculate model matrix
 		model = glm::mat4(1.0f);
 		model = glm::scale(model, glm::vec3(1.f / _pMaster->GetWindowWidth(), 1.f / _pMaster->GetWindowHeight(), 1.f));
-		model = glm::translate(model, glm::vec3(rGaze.x, _pMaster->GetWindowHeight() - rGaze.y, 1));
+		model = glm::translate(model, glm::vec3(rGaze.x, _pMaster->GetWindowHeight() - rGaze.y, 1)); // TODO: breaks when web view is not filling complete height
 		model = glm::scale(model, glm::vec3(2, 2, 0));
 
 		// Combine matrics
@@ -224,4 +224,32 @@ void Tab::DrawDebuggingOverlay() const
 		// Render rectangle
 		_upDebugFillQuad->Draw(GL_TRIANGLES);
 	}
+}
+
+void Tab::Debug_DrawRectangle(glm::vec2 coordinate, glm::vec2 size, glm::vec3 color) const
+{
+	// Bind render item and set color
+	_upDebugFillQuad->Bind();
+	_upDebugFillQuad->GetShader()->UpdateValue("color", color);
+
+	// Projection
+	glm::mat4 projection = glm::ortho(0, 1, 0, 1);
+
+	// Calculate model matrix
+	auto model = glm::mat4(1.0f);
+	model = glm::scale(model, glm::vec3(1.f / _pMaster->GetWindowWidth(), 1.f / _pMaster->GetWindowHeight(), 1.f));
+	model = glm::translate(model, 
+		glm::vec3(
+			glm::vec2(coordinate.x - (size.x / 2.f), _pMaster->GetWindowHeight() - (coordinate.y - (size.y / 2.f))) // coordinate in center of rectangular in correct system TODO: breaks when web view is not filling complete height
+			+ glm::vec2(_upWebView->GetX(), _upWebView->GetY()), 1)); // offset of web view
+	model = glm::scale(model, glm::vec3(size, 0));
+
+	// Combine matrics
+	auto matrix = projection * model;
+
+	// Fill uniform with matrix
+	_upDebugFillQuad->GetShader()->UpdateValue("matrix", matrix);
+
+	// Render rectangle
+	_upDebugFillQuad->Draw(GL_TRIANGLES);
 }

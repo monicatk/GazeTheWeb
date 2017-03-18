@@ -312,6 +312,16 @@ public:
 	// Tell about JavaScript dialog
 	virtual void RequestJSDialog(JavaScriptDialogType type, std::string message);
 
+	// ###############################
+	// ### TAB DEBUGGING INTERFACE ###
+	// ###############################
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	// >>> Implemented in TabDebuggingImpl.cpp >>>
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	// Size in pixels, coordinate system is WebViewPixel
+	virtual void Debug_DrawRectangle(glm::vec2 coordinate, glm::vec2 size, glm::vec3 color) const;
+
 private:
 
 	// Enumeration for icon state of tab
