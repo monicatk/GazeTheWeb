@@ -198,7 +198,7 @@ void ZoomCoordinateAction::Draw() const
 {
 	// TODO: TESTING debugging
 	_pTab->Debug_DrawRectangle(glm::vec2(100, 100), glm::vec2(20, 20), glm::vec3(1, 0, 0));
-	_pTab->Debug_DrawLine(glm::vec2(100, 100), glm::vec2(200, 200), glm::vec3(1, 0, 1));
+	_pTab->Debug_DrawLine(glm::vec2(400, 100), glm::vec2(200, 50), glm::vec3(1, 0, 1));
 }
 
 void ZoomCoordinateAction::Activate()
