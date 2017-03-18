@@ -7,7 +7,7 @@
 #include "src/State/Web/Tab/Tab.h"
 #include "src/Master.h"
 #include "src/Setup.h"
-#include "src/Utils/QuadRenderItem.h"
+#include "src/Utils/PrimitiveRenderItem.h"
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
 #include "submodules/glm/glm/gtc/matrix_transform.hpp"
@@ -37,17 +37,17 @@ void Tab::InitDebuggingOverlay()
 {
 	// Line quad
 	_upDebugLineQuad = std::unique_ptr<RenderItem>(
-		new QuadRenderItem(
+		new PrimitiveRenderItem(
 			vertexShaderSource,
 			fragmentShaderSource,
-			Quad::Type::LINES_WITH_DIAGONAL));
+			Primitive::Type::QUAD_LINES_WITH_DIAGONAL));
 
 	// Fill quad
 	_upDebugFillQuad = std::unique_ptr<RenderItem>(
-		new QuadRenderItem(
+		new PrimitiveRenderItem(
 			vertexShaderSource,
 			fragmentShaderSource,
-			Quad::Type::TRIANGLES));
+			Primitive::Type::QUAD_TRIANGLES));
 }
 
 void Tab::DrawDebuggingOverlay() const
@@ -252,4 +252,9 @@ void Tab::Debug_DrawRectangle(glm::vec2 coordinate, glm::vec2 size, glm::vec3 co
 
 	// Render rectangle
 	_upDebugFillQuad->Draw(GL_TRIANGLES);
+}
+
+void Tab::Debug_DrawLine(glm::vec2 originCoordinate, glm::vec2 targetCoordinate, glm::vec3 color) const
+{
+	// TODO
 }
