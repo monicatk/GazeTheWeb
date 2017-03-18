@@ -203,7 +203,7 @@ void ZoomCoordinateAction::Draw() const
 
 void ZoomCoordinateAction::Activate()
 {
-
+	// Nothing to do
 }
 
 void ZoomCoordinateAction::Deactivate()
