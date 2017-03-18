@@ -73,7 +73,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 				_deviation = glm::min(1.f, glm::max(glm::length(delta), _deviation));
 
 				// If at the moment a high deviation is given, try to zoom out to give user more overview
-				zoomSpeed = ZOOM_SPEED - glm::min(1.f, 3.f * _deviation); // [-0.5, 0.5]
+				zoomSpeed = ZOOM_SPEED - glm::min(1.f, 5.f * _deviation); // TODO weight deviation more intelligent
 			}
 			else // first frame of execution
 			{
@@ -159,7 +159,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 		}
 		else // trying to correct gaze drift
 		{
-			if (_logZoom <= 0.05f)
+			if (_logZoom <= 0.5f)
 			{
 				// TODO check whether drift is significant or can be ignored (for very good calibration)
 

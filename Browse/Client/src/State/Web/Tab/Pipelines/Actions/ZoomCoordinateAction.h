@@ -58,7 +58,7 @@ protected:
 	const float CENTER_OFFSET_MULTIPLIER = 0.0f; // TODO debugging 0.5f;
 
 	// Duration to replace current coordinate with input
-	const float MOVE_DURATION = 0.75f;
+	const float MOVE_DURATION = 0.15f;
 
 	// Speed of zoom
 	const float ZOOM_SPEED = 0.4f;
