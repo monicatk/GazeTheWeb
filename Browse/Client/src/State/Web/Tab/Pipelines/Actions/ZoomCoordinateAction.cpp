@@ -159,7 +159,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 		}
 		else // trying to correct gaze drift
 		{
-			if (_logZoom <= 0.5f)
+			if (_logZoom <= 0.05f)
 			{
 				// TODO check whether drift is significant or can be ignored (for very good calibration)
 
@@ -206,10 +206,15 @@ void ZoomCoordinateAction::Draw() const
 	int webViewWidth = _pTab->GetWebViewWidth();
 	int webViewHeight = _pTab->GetWebViewHeight();
 
-	// Draw zoom coordinate
-	if (_doDebugging)
+	// Zoom coordinate (TODO: incorporate center offset)
+	if (_driftCorrection)
 	{
 		_pTab->Debug_DrawRectangle(_zoomData.pixelZoomCoordinate, glm::vec2(5, 5), glm::vec3(1, 0, 0));
+	}
+
+	// Draw info after click would have been performed
+	if (_doDebugging)
+	{
 		glm::vec2 pixelFixationCoordinate;
 		GetOutputValue("coordinate", pixelFixationCoordinate);
 		_pTab->Debug_DrawRectangle(pixelFixationCoordinate, glm::vec2(5, 5), glm::vec3(1, 1, 0));
