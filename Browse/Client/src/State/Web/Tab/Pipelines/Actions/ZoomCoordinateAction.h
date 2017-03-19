@@ -55,13 +55,13 @@ protected:
 	const float DEVIATION_FADING_DURATION = 1.0f;
 
 	// Multiplier of movement towards center
-	const float CENTER_OFFSET_MULTIPLIER = 0.5f; // TODO debugging 0.5f;
+	const float CENTER_OFFSET_MULTIPLIER = 0.75f; // TODO debugging 0.5f;
 
 	// Duration to replace current coordinate with input
-	const float MOVE_DURATION = 0.15f;
+	const float MOVE_DURATION = 0.5f;
 
 	// Speed of zoom
-	const float ZOOM_SPEED = 0.4f;
+	const float ZOOM_SPEED = 0.3f;
 
     // Coordinate which is updated and later output. In relative web view space
     glm::vec2 _coordinate; // aka zoom coordinate
