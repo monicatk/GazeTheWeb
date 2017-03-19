@@ -2,25 +2,25 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// Quad to render with OpenGL. Coordinates are from 0 to 1.
+// Primitive to render with OpenGL. Coordinates are from 0 to 1.
 
-#ifndef QUAD_H_
-#define QUAD_H_
+#ifndef PRIMITIVE_H_
+#define PRIMITIVE_H_
 
 #include "externals/OGL/gl_core_3_3.h"
 
-class Quad
+class Primitive
 {
 public:
 
-	// Enumeration for different quad types
-	enum class Type { TRIANGLES, LINES_WITH_DIAGONAL };
+	// Enumeration for different primitive types
+	enum class Type { QUAD_TRIANGLES, QUAD_LINES_WITH_DIAGONAL, LINE };
 
     // Constructor
-    Quad(Type type = Type::TRIANGLES);
+	Primitive(Type type = Type::QUAD_TRIANGLES);
 
     // Destructor
-    virtual ~Quad();
+    virtual ~Primitive();
 
     // Getter of handles
     GLuint GetVBO() const { return _vbo; }
@@ -41,4 +41,4 @@ private:
 	int mVertexCount = 0;
 };
 
-#endif // QUAD_H_
+#endif // PRIMITIVE_H_

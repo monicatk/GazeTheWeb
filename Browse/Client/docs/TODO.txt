@@ -8,6 +8,7 @@ Features:
 		- Page fullscreen handling -> for video would be cool to replace tab bar with video controls and for all: escape from fullscreen
 	- DOM Node boxes for images are only text height
 - Activate Sandbox on Application Side
+- Debugging control via define
 
 Furthermore:
 - Word prediction improvement (and add typed words) and make extra one for URL Input

@@ -37,10 +37,9 @@ public:
 
 protected:
 
-	// Struct which is used to record data while execution
+	// Zoom data at point in time of execution
 	struct ZoomData
 	{
-		float lifetime = 0.f; // time since data was created
 		glm::vec2 pixelGazeCoordinate; // gaze on web view in pixels. Already free of zooming and center moving offset
 		glm::vec2 pixelZoomCoordinate; // coordinate of zooming in pixels
 		float logZoom; // value of log zoom at that time
@@ -56,30 +55,24 @@ protected:
 	const float DEVIATION_FADING_DURATION = 1.0f;
 
 	// Multiplier of movement towards center
-	const float CENTER_OFFSET_MULTIPLIER = 0.5f;
+	const float CENTER_OFFSET_MULTIPLIER = 0.5f; // TODO debugging 0.5f;
 
 	// Duration to replace current coordinate with input
-	const float MOVE_DURATION = 0.75f;
+	const float MOVE_DURATION = 0.15f;
 
 	// Speed of zoom
 	const float ZOOM_SPEED = 0.4f;
 
-	// Maximal time which is looked back at compensation of calibration errors
-	const float LOOK_BACK_TIME = 0.5f;
-
-	// Maximal angle between gaze drift and zoom coordinate drift in degree
-	const float DRIFT_MAX_ANGLE_DEGREE = 10.f;
-
     // Coordinate which is updated and later output. In relative web view space
-    glm::vec2 _coordinate;
+    glm::vec2 _coordinate; // aka zoom coordinate
 
     // Log zooming amount (used for rendering)
 	// Calculated as 1.f - log(_linZoom), so becoming smaller at higher zoom levels
-    float _logZoom = 1.f;
+    float _logZoom = 1.f; // [0..1]
 
-    // Linear zooming amout (used for calculations)
+    // Linear zooming amount (used for calculations)
 	// Increasing while zooming
-    float _linZoom = 1.f;
+    float _linZoom = 1.f; // [1..]
 
     // Offset to center of webview
     glm::vec2 _coordinateCenterOffset = glm::vec2(0, 0);
@@ -94,11 +87,17 @@ protected:
 	// Dimming
 	float _dimming = 0.f;
 
-	// Queue for recording data which is used as click to compensate calibration errors
-	std::deque<ZoomData> _zoomDataQueue;
-
 	// Do dimming
 	bool _doDimming = true;
+
+	// In drift correction mode (while off, zoom coordinate is improved. while on, just zooming happens)
+	bool _driftCorrection = false;
+
+	// Datas saved before drift correction zooming starts
+	ZoomData _zoomData;
+
+	// TODO: debugging
+	bool _doDebugging = false;
 };
 
 #endif // ZOOMCOORDINATEACTION_H_

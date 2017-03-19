@@ -4,6 +4,7 @@
 //============================================================================
 
 #include "EyeInput.h"
+#include "src/Setup.h"
 #include "src/Utils/Logger.h"
 #include <cmath>
 #include <functional>
@@ -134,6 +135,8 @@ bool EyeInput::Update(
 	int windowWidth,
 	int windowHeight)
 {
+	// ### MOUSE OVERRIDE ###
+
     // Mouse override of eyetracker
     if(_mouseOverride)
     {
@@ -166,7 +169,7 @@ bool EyeInput::Update(
                 // Check whether mouse cursor movement was enough to trigger override
                 float x = (float)(mouseX - _mouseOverrideX);
                 float y = (float)(mouseY - _mouseOverrideY);
-                float distance = std::sqrt(x*x + y*y);
+                float distance = std::sqrt((x*x) + (y*y));
                 if(distance >= EYEINPUT_MOUSE_OVERRIDE_INIT_DISTANCE)
                 {
                     // Activate override
@@ -193,6 +196,8 @@ bool EyeInput::Update(
             }
         }
     }
+
+	// ### Aquire data from eyetracker ###
 
 	// Update gaze by eyetracker
 	double filteredGazeX = 0;
@@ -246,24 +251,37 @@ bool EyeInput::Update(
 
 #endif
 
-    // Bool to indicate mouse usage for gaze coordinates
-    bool mouseCursorUsed = !_connected || _mouseOverride;
+	// ### Gaze Emulation ###
 
-    // Save mouse cursor coordinate in members
+    // Bool to indicate mouse usage for gaze coordinates
+    bool gazeEmulated = !_connected || _mouseOverride;
+
+    // Save mouse cursor coordinate in members for calculating mouse override
     _mouseX = mouseX;
     _mouseY = mouseY;
 
-    // Return whether gaze coordinates comes from eyetracker
-    if (mouseCursorUsed)
+    // Use mouse when gaze is emulated
+    if (gazeEmulated)
     {
-        rGazeX = mouseX;
-        rGazeY = mouseY;
-        return false;
+		filteredGazeX = mouseX;
+		filteredGazeY = mouseY;
     }
-    else
-    {
-        rGazeX = filteredGazeX;
-        rGazeY = filteredGazeY;
-        return true;
-    }
+
+	// ### Gaze distortion ###
+
+	// Add optional noise and bias for testing purposes
+	if (setup::EYEINPUT_DISTORT_GAZE)
+	{
+		filteredGazeX += setup::EYEINPUT_DISTORT_GAZE_BIAS_X;
+		filteredGazeY += setup::EYEINPUT_DISTORT_GAZE_BIAS_Y;
+	}
+
+	// ### Return ###
+
+	// Fill return values
+	rGazeX = filteredGazeX;
+	rGazeY = filteredGazeY;
+
+	// Return whether gaze coordinates comes from eyetracker
+    return !gazeEmulated;
 }

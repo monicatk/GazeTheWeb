@@ -14,6 +14,7 @@
 // - CEFPixel Coordinates: Pixel coordinates as rendered by CEF (is the only one known to code in CEF folder)
 // - PagePixel Coordinates: Pixel coordinates as rendered by CEF inclusive scrolling
 // All coordinate system have their origin at the upper left corner!
+// TODO: y-axis always from top to down?
 
 #ifndef TAB_H_
 #define TAB_H_
@@ -311,6 +312,19 @@ public:
 	// Tell about JavaScript dialog
 	virtual void RequestJSDialog(JavaScriptDialogType type, std::string message);
 
+	// ###############################
+	// ### TAB DEBUGGING INTERFACE ###
+	// ###############################
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	// >>> Implemented in TabDebuggingImpl.cpp >>>
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	// Size in pixels, coordinate system is WebViewPixel
+	virtual void Debug_DrawRectangle(glm::vec2 coordinate, glm::vec2 size, glm::vec3 color) const;
+
+	// Coordinate system is WebViewPixel
+	virtual void Debug_DrawLine(glm::vec2 originCoordinate, glm::vec2 targetCoordinate, glm::vec3 color) const;
+
 private:
 
 	// Enumeration for icon state of tab
@@ -420,14 +434,21 @@ private:
     // Method to update and pipe accent color to eyeGUI
     void UpdateAccentColor(float tpf);
 
-	// Draw debugging overlay
-	void DrawDebuggingOverlay() const;
-
     // Pushes back click visualization which fades out. X and y are in pixels
     void PushBackClickVisualization(double x, double y);
 
 	// Unique name for favicon which is stored in eyeGUI
 	std::string GetFaviconIdentifier() const;
+
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	// >>> Implemented in TabDebuggingImpl.cpp >>>
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	// Initialize debugging overlay rendering
+	void InitDebuggingOverlay();
+
+	// Draw debugging overlay
+	void DrawDebuggingOverlay() const;
 
 	// ###############
 	// ### MEMBERS ###
@@ -441,7 +462,6 @@ private:
 
 	// Vector with DOMTextLinks
 	std::vector<std::shared_ptr<DOMNode> >_DOMTextLinks;
-
 
 	// Vector with DOMSelectFields
 	std::vector<std::shared_ptr<DOMSelectField> > _DOMSelectFields;
@@ -494,8 +514,13 @@ private:
     // Pointer to mediator
     Mediator* _pCefMediator;
 
-	// RenderItem used for debug rendering
-	std::unique_ptr<RenderItem> _upDebugRenderItem;
+	// RenderItems used for debug rendering. Initialized and used in TabDebuggingImpl.cpp
+	std::unique_ptr<RenderItem> _upDebugLineQuad;
+	std::unique_ptr<RenderItem> _upDebugFillQuad;
+	std::unique_ptr<RenderItem> _upDebugLine;
+
+	// Save some gaze input for debugging purposes
+	std::deque<glm::vec2> _gazeDebuggingQueue;
 
     // Frame indices of scroll up and down overlays
     unsigned int _scrollUpProgressFrameIndex = 0;

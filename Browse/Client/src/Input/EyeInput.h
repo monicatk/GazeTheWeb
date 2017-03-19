@@ -29,7 +29,7 @@ public:
     // Destructor
     virtual ~EyeInput();
 
-    // Update. Returns whether gaze is currently used (or mouse when false)
+    // Update. Returns whether gaze is currently used (or emulation via mouse when false)
 	// Taking information about window to enable eyetracking in windowed mode
 	bool Update(
 		float tpf,
