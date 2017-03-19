@@ -6,6 +6,7 @@
 #include "ZoomCoordinateAction.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 #include "submodules/glm/glm/gtx/vector_angle.hpp"
+#include "submodules/glm/glm/gtx/component_wise.hpp"
 #include <algorithm>
 
 ZoomCoordinateAction::ZoomCoordinateAction(TabInteractionInterface* pTab, bool doDimming) : Action(pTab)
@@ -31,6 +32,17 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	// Pixels in web view
 	int webViewWidth = _pTab->GetWebViewWidth();
 	int webViewHeight = _pTab->GetWebViewHeight();
+	glm::vec2 webViewPixels(webViewWidth, webViewHeight);
+
+	// Function caclulate position of relative coordinate on actual CEFPixelSpace. Takes relative coordinate
+	const std::function<void(glm::vec2&)> pageCoordinate = [&](glm::vec2& rRelativeCoordinate)
+	{
+		rRelativeCoordinate += _coordinateCenterOffset; // add center offset
+		rRelativeCoordinate -= _coordinate; // move zoom position to origin
+		rRelativeCoordinate *= _logZoom; // apply zoom
+		rRelativeCoordinate += _coordinate; // move back
+		rRelativeCoordinate *= webViewPixels; // into pixel space
+	};
 
 	// ### Update zoom speed and center offset ###
 
@@ -50,34 +62,23 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			// Update coordinate
 			if (!_firstUpdate)
 			{
-				// Delta of new relative position
-				glm::vec2 rawDelta = newCoordinate - _coordinate;
+				// Get coordinates on actual page
+				glm::vec2 pixelNewCoordinate = newCoordinate;
+				pageCoordinate(pixelNewCoordinate);
+				glm::vec2 pixelCoordinate = _coordinate;
+				pageCoordinate(pixelCoordinate);
+
+				// Delta of coordinates
+				glm::vec2 delta = (pixelNewCoordinate - pixelCoordinate) / glm::compMax(webViewPixels); // [0..1]
 
 				// Move to new click position
-				_coordinate += rawDelta * (tpf / MOVE_DURATION);
-
-				// Aspect ratio correction
-				glm::vec2 aspectRatioCorrection(1.f, 1.f);
-				if (webViewWidth != 0 && webViewHeight != 0)
-				{
-					if (webViewWidth > webViewHeight)
-					{
-						aspectRatioCorrection.x = (float)webViewWidth / (float)webViewHeight;
-					}
-					else
-					{
-						aspectRatioCorrection.y = (float)webViewHeight / (float)webViewWidth;
-					}
-				}
-
-				// Do aspect correction for delta
-				glm::vec2 delta = rawDelta / aspectRatioCorrection;
+				_coordinate += delta * (tpf / MOVE_DURATION);
 
 				// Set length of delta to deviation if bigger than current deviation
 				_deviation = glm::min(1.f, glm::max(glm::length(delta), _deviation));
 
 				// If at the moment a high deviation is given, try to zoom out to give user more overview
-				zoomSpeed = ZOOM_SPEED - glm::min(1.f, 5.f * _deviation); // TODO weight deviation more intelligent
+				zoomSpeed = ZOOM_SPEED - glm::min(1.f, 3.f * _deviation); // TODO weight deviation more intelligent
 			}
 			else // first frame of execution
 			{
@@ -116,11 +117,11 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 
 	// ### Update values ###
 
-	// Vector with web view pixel resolution
-	glm::vec2 webViewPixels(webViewWidth, webViewHeight);
-
 	// Calculate coordinate for current gaze value
-	glm::vec2 pixelGazeCoordinate =
+	glm::vec2 pixelGazeCoordinate = glm::vec2(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY);
+	pageCoordinate(pixelGazeCoordinate);
+
+	/*
 		glm::vec2(
 			tabInput.webViewGazeRelativeX,
 			tabInput.webViewGazeRelativeY)
@@ -129,6 +130,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	pixelGazeCoordinate *= _logZoom; // apply zoom
 	pixelGazeCoordinate += _coordinate; // move back
 	pixelGazeCoordinate *= webViewPixels; // into pixel space
+	*/
 
 	// Calculate coordinate for zoom coordinate
 	glm::vec2 pixelZoomCoordinate = _coordinate * webViewPixels;
@@ -231,9 +233,10 @@ void ZoomCoordinateAction::Draw() const
 		glm::vec2 pixelFixationCoordinate;
 		GetOutputValue("coordinate", pixelFixationCoordinate);
 		_pTab->Debug_DrawRectangle(pixelFixationCoordinate, glm::vec2(5, 5), glm::vec3(1, 1, 0));
-	}
 
-	// _pTab->Debug_DrawLine(glm::vec2(400, 100), glm::vec2(200, 50), glm::vec3(1, 0, 1));
+		// Line
+		_pTab->Debug_DrawLine(zoomCoordinate * webViewPixels, pixelFixationCoordinate, glm::vec3(1, 0, 1));
+	}
 }
 
 void ZoomCoordinateAction::Activate()
