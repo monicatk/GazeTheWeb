@@ -209,12 +209,21 @@ void ZoomCoordinateAction::Draw() const
 	// Pixels in web view
 	int webViewWidth = _pTab->GetWebViewWidth();
 	int webViewHeight = _pTab->GetWebViewHeight();
+	glm::vec2 webViewPixels(webViewWidth, webViewHeight);
 
-	// Zoom coordinate (TODO: incorporate center offset)
-	if (_driftCorrection)
+	// Function to move coordinate according to current zoom. Takes relative coordinate
+	const std::function<void(glm::vec2&)> applyZooming = [&](glm::vec2& rRelativeCoordinate)
 	{
-		_pTab->Debug_DrawRectangle(_zoomData.pixelZoomCoordinate, glm::vec2(5, 5), glm::vec3(1, 0, 0));
-	}
+		rRelativeCoordinate -= _coordinate;
+		rRelativeCoordinate /= _logZoom;
+		rRelativeCoordinate += _coordinate;
+		rRelativeCoordinate -= _coordinateCenterOffset;
+	};
+
+	// Zoom coordinate
+	glm::vec2 zoomCoordinate(_coordinate); // relative coordiante
+	applyZooming(zoomCoordinate);
+	_pTab->Debug_DrawRectangle(zoomCoordinate * webViewPixels, glm::vec2(5, 5), glm::vec3(1, 0, 0));
 
 	// Draw info after click would have been performed
 	if (_doDebugging)
@@ -224,10 +233,6 @@ void ZoomCoordinateAction::Draw() const
 		_pTab->Debug_DrawRectangle(pixelFixationCoordinate, glm::vec2(5, 5), glm::vec3(1, 1, 0));
 	}
 
-	// Draw click coordinate
-	// _pTab->Debug_DrawRectangle(glm::vec2(100, 100), glm::vec2(5, 5), glm::vec3(1, 1, 0));
-
-	// TODO: TESTING debugging
 	// _pTab->Debug_DrawLine(glm::vec2(400, 100), glm::vec2(200, 50), glm::vec3(1, 0, 1));
 }
 
