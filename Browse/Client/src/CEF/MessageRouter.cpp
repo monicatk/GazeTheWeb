@@ -207,13 +207,14 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 						);
 
 						// Use float coordinates to update Rect #0
-						elem->UpdateRect(0, std::make_shared<Rect>(rect));
+						//elem->UpdateRect(0, std::make_shared<Rect>(rect));	// DEPRECATED
+						elem->SetRects(std::make_shared<std::vector<Rect> >(rect));
 					}
 
 					// Update OverflowElement's fixation status
 					if (attr == "fixed")
 					{
-						elem->UpdateFixation(std::stoi(dataStr[2]));
+						elem->SetFixedId(std::stoi(dataStr[2]));
 					}
 				}
 

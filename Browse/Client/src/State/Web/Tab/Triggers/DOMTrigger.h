@@ -38,10 +38,7 @@ public:
     std::vector<Rect> GetDOMRects() const { return _spNode->GetRects(); }
 
     // Get whether DOMNode is marked as fixed
-    bool GetDOMFixed() const { return _spNode->GetFixed(); }
-
-	// Get whether DOMNode is visible or not
-	bool GetDOMVisibility() const { return _spNode->GetVisibility(); }
+    bool GetDOMFixed() const { return _spNode->GetFixedId(); }
 
 	// Identify input field as password input or not
 	bool GetDOMIsPasswordField() const { return _spNode->IsPasswordField(); }
@@ -52,7 +49,7 @@ private:
     void CalculatePositionOfOverlayButton(float& rRelativePositionX, float& rRelativePositionY) const;
 
     // Shared pointer to node
-    std::shared_ptr<DOMNode> _spNode;
+    std::shared_ptr<DOMTextInput> _spNode;
 
     // Index of floating frame in Tab's overlay
     int _overlayFrameIndex = -1;

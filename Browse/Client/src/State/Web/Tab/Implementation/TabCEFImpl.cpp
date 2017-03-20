@@ -105,13 +105,12 @@ void Tab::ResetFaviconBytes()
     _faviconLoaded = false;
 }
 
-void Tab::AddDOMNode(std::shared_ptr<DOMSelectField> spNode)
+void Tab::AddDOMTextInput(int id)
 {
-	// Just add it to vector
-	_DOMSelectFields.push_back(spNode);
+	std::shared_ptr<DOMSelectField> spNode = std::make_shared<DOMSelectField>(id);
 
 	// Add node to ID->node map
-	_SelectFieldMap.emplace(spNode->GetNodeID(), spNode);
+	_TextInputMap.emplace(id, spNode);
 
 	// Create DOMTrigger
 	std::unique_ptr<DOMTrigger> upDOMTrigger = std::unique_ptr<DOMTrigger>(new DOMTrigger(this, spNode));
@@ -123,138 +122,94 @@ void Tab::AddDOMNode(std::shared_ptr<DOMSelectField> spNode)
 	}
 
 	// Push it to vector
-	_DOMTriggers.push_back(std::move(upDOMTrigger));
+	_DOMTriggers.emplace(std::weak_ptr<DOMNode>(spNode), std::move(upDOMTrigger));
 }
 
-void Tab::AddDOMNode(std::shared_ptr<DOMNode> spNode)
+void Tab::AddDOMLink(int id)
 {
-	//LogDebug("Tab: Adding new DOM node with id=", spNode->GetNodeID(), " & type=", spNode->GetType());
-
-	// Decide what to do with node
-	switch (spNode->GetType())
-	{
-	case DOMNodeType::TextInput:
-	{
-		// Add node to ID->node map
-		_TextInputMap.emplace(spNode->GetNodeID(), spNode);
-
-		// Create DOMTrigger
-		std::unique_ptr<DOMTrigger> upDOMTrigger = std::unique_ptr<DOMTrigger>(new DOMTrigger(this, spNode));
-
-		// Activate trigger
-		if (!_pipelineActive)
-		{
-			upDOMTrigger->Activate();
-		}
-
-		// Push it to vector
-		_DOMTriggers.push_back(std::move(upDOMTrigger));
-
-		break;
-	}
-
-	case DOMNodeType::TextLink:
-	{
-		// Just add it to vector
-		_DOMTextLinks.push_back(spNode);
-
-		// Add node to ID->node map
-		_TextLinkMap.emplace(spNode->GetNodeID(), spNode);
-
-		break;
-	}
-
-	}
+	_TextLinkMap.emplace(id, std::make_shared<DOMSelectField>(id));
 }
+
+void Tab::AddDOMSelectField(int id)
+{
+	std::shared_ptr<DOMSelectField> spNode = std::make_shared<DOMSelectField>(id);
+
+	// Add node to ID->node map
+	_SelectFieldMap.emplace(id, spNode);
+
+	// Create DOMTrigger
+	std::unique_ptr<DOMTrigger> upDOMTrigger = std::unique_ptr<DOMTrigger>(new DOMTrigger(this, spNode));
+
+	// Activate trigger
+	if (!_pipelineActive)
+	{
+		upDOMTrigger->Activate();
+	}
+
+	
+	// Push it to vector
+	_DOMTriggers.emplace(std::weak_ptr<DOMNode>(spNode), std::move(upDOMTrigger));	// TODO: Can Trigger really be deleted if they hold a shared_ptr to the same DOMNode?
+}
+
+
+std::weak_ptr<DOMTextInput> Tab::GetDOMTextInput(int id)
+{
+	return (_TextInputMap.find(id) != _TextInputMap.end()) ? _TextInputMap.at(id) : std::weak_ptr<DOMTextInput>();
+}
+
+std::weak_ptr<DOMLink> Tab::GetDOMLink(int id)
+{
+	return (_TextLinkMap.find(id) != _TextLinkMap.end()) ? _TextLinkMap.at(id) : std::weak_ptr<DOMLink>();
+}
+
+std::weak_ptr<DOMSelectField> Tab::GetDOMSelectField(int id)
+{
+	return (_SelectFieldMap.find(id) != _SelectFieldMap.end()) ? _SelectFieldMap.at(id) : std::weak_ptr<DOMSelectField>();
+}
+
 
 void Tab::ClearDOMNodes()
 {
 	// Deactivate all DOMTriggers
-	for (auto& upDOMTrigger : _DOMTriggers)
+	for (auto& upDOMTriggerPair : _DOMTriggers)
 	{
-		upDOMTrigger->Deactivate();
+		upDOMTriggerPair.second->Deactivate();
 	}
 
 	// Clear vector with triggers
 	_DOMTriggers.clear();
 
-	// Clear vector with text links
-	_DOMTextLinks.clear();
 
 	// Clear ID->node maps
 	_TextLinkMap.clear();
 	_TextInputMap.clear();
-
-	// Clear SelectField nodes
 	_SelectFieldMap.clear();
-	_DOMSelectFields.clear();
+
 
 	// Clear fixed elements
 	_fixedElements.clear();
 
 	// Clear overflow elements
 	_overflowElements.clear();
-
-
 }
 
-void Tab::RemoveDOMNode(DOMNodeType type, int nodeID)
+void Tab::RemoveDOMTextInput(int id)
 {
+	if (_TextInputMap.find(id) != _TextInputMap.end()) { _TextInputMap.erase(id); }
 
-	std::map<int, std::shared_ptr<DOMNode> >* pMap = nullptr;
-	std::vector<std::shared_ptr<DOMNode> >* pList = nullptr;
-
-	switch (type)
-	{
-	case(DOMNodeType::TextInput) : { pMap = &_TextInputMap; break; }
-	case(DOMNodeType::TextLink) : { pMap = &_TextLinkMap; pList = &_DOMTextLinks; break; }
-	}
-
-	// Remove node's ID from map
-	if (pMap != nullptr && pMap->find(nodeID) != pMap->end())
-	{
-		pMap->erase(nodeID);
-	}
-
-	// TODO: List for all types of nodes?
-	// TODO (maybe Raphael): Remove one specific DOMTrigger belonging to input field with id= nodeID
-	if (pList != nullptr)
-	{
-		// Remove node from list of all nodes, if condition holds
-		std::remove_if(
-			pList->begin(),
-			pList->end(),
-			[nodeID](const std::shared_ptr<DOMNode>& node) {
-			return node->GetNodeID() == nodeID;
-		}
-		);
-	}
+	// TODO: Remove DOMTrigger, if corresponding DOMTextInput gets removed and destroyed?
 }
 
-std::weak_ptr<DOMNode> Tab::GetDOMNode(DOMNodeType type, int nodeID)
+void Tab::RemoveDOMLink(int id)
 {
-	switch (type)
-	{
-		case DOMNodeType::TextInput: { 
-			return (_TextInputMap.find(nodeID) != _TextInputMap.end()) ? _TextInputMap.at(nodeID) : std::weak_ptr<DOMNode>(); 
-		}
-		case DOMNodeType::TextLink: {
-			return (_TextLinkMap.find(nodeID) != _TextLinkMap.end()) ? _TextLinkMap.at(nodeID) : std::weak_ptr<DOMNode>();
-		}
-		case DOMNodeType::SelectField: {
-			return (_SelectFieldMap.find(nodeID) != _SelectFieldMap.end()) ? _SelectFieldMap.at(nodeID) : std::weak_ptr<DOMSelectField>();
-		}
-		default: {
-			LogDebug("Tab: Unknown DOMNodeType in Tab::GetDOMNode!");
-		};
-	}
-	return std::weak_ptr<DOMNode>();
+	if (_TextLinkMap.find(id) != _TextLinkMap.end()) { _TextLinkMap.erase(id); }
 }
 
-std::weak_ptr<DOMSelectField> Tab::GetDOMSelectFieldNode(int nodeId)
+void Tab::RemoveDOMSelectField(int id)
 {
-	return (_SelectFieldMap.find(nodeId) != _SelectFieldMap.end()) ? _SelectFieldMap.at(nodeId) : std::weak_ptr<DOMSelectField>();
+	if (_SelectFieldMap.find(id) != _SelectFieldMap.end()) { _SelectFieldMap.erase(id); }
 }
+
 
 void Tab::SetScrollingOffset(double x, double y)
 {

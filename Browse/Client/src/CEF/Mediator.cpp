@@ -225,22 +225,28 @@ void Mediator::ResetFavicon(CefRefPtr<CefBrowser> browser)
     }
 }
 
-void Mediator::AddDOMNode(CefRefPtr<CefBrowser> browser, std::shared_ptr<DOMSelectField> spNode)
+void Mediator::AddDOMTextInput(CefRefPtr<CefBrowser> browser, int id)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
-		// Find corresponding Tab and add DOM Node to its list of nodes
-		pTab->AddDOMNode(spNode);
+		pTab->AddDOMSelectField(id);
 	}
 }
 
-void Mediator::AddDOMNode(CefRefPtr<CefBrowser> browser, std::shared_ptr<DOMNode> spNode)
+void Mediator::AddDOMLink(CefRefPtr<CefBrowser> browser, int id)
 {
-    if (TabCEFInterface* pTab = GetTab(browser))
-    {
-        // Find corresponding Tab and add DOM Node to its list of nodes
-        pTab->AddDOMNode(spNode);
-    }
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		pTab->AddDOMLink(id);
+	}
+}
+
+void Mediator::AddDOMSelectField(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		pTab->AddDOMSelectField(id);
+	}
 }
 
 void Mediator::ClearDOMNodes(CefRefPtr<CefBrowser> browser)
@@ -252,6 +258,30 @@ void Mediator::ClearDOMNodes(CefRefPtr<CefBrowser> browser)
 		//LogDebug("Mediator: ### DISABLED DOM CLEARING FOR LINK TESTING ###");
         LogDebug("Mediator: Clearing Tab's DOM nodes belonging to browserID = ", browser->GetIdentifier());
     }
+}
+
+void Mediator::RemoveDOMTextInput(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (auto pTab = GetTab(browser))
+	{
+		pTab->RemoveDOMTextInput(id);
+	}
+}
+
+void Mediator::RemoveDOMLink(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (auto pTab = GetTab(browser))
+	{
+		pTab->RemoveDOMLink(id);
+	}
+}
+
+void Mediator::RemoveDOMSelectField(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (auto pTab = GetTab(browser))
+	{
+		pTab->RemoveDOMSelectField(id);
+	}
 }
 
 bool Mediator::InputTextData(TabCEFInterface* tab, int64 frameID, int nodeID, std::string text, bool submit)
@@ -276,6 +306,33 @@ void Mediator::SetSelectionIndex(TabCEFInterface * tab, int nodeId, int index)
 		args->SetInt(1, index);
 		browser->SendProcessMessage(PID_RENDERER, msg);
 	}
+}
+
+std::weak_ptr<DOMTextInput> Mediator::GetDOMTextInput(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (auto pTab = GetTab(browser))
+	{
+		return pTab->GetDOMTextInput(id);
+	}
+	return std::weak_ptr<DOMTextInput>();
+}
+
+std::weak_ptr<DOMLink> Mediator::GetDOMLink(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (auto pTab = GetTab(browser))
+	{
+		return pTab->GetDOMLink(id);
+	}
+	return std::weak_ptr<DOMLink>();
+}
+
+std::weak_ptr<DOMSelectField> Mediator::GetDOMSelectField(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (auto pTab = GetTab(browser))
+	{
+		return pTab->GetDOMSelectField(id);
+	}
+	return std::weak_ptr<DOMSelectField>();
 }
 
 void Mediator::FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
@@ -312,7 +369,7 @@ void Mediator::FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefP
 			targetNode->SetRects(std::make_shared<std::vector<Rect>>(rects));
 
 			// Set target node's visibility
-			targetNode->SetVisibility(visible);
+			//targetNode->SetVisibility(visible);	// DEPRECATED
 			//if (!visible) LogDebug("Mediator: Set node's visibility to false after its creation");
 		}
 		else

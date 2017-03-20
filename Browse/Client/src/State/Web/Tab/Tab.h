@@ -272,12 +272,18 @@ public:
     virtual std::weak_ptr<Texture> GetWebViewTexture() { return _upWebView->GetTexture(); }
 
     // Add, remove and update Tab's current DOMNodes
-    virtual void AddDOMNode(std::shared_ptr<DOMNode> spNode);
-	virtual void AddDOMNode(std::shared_ptr<DOMSelectField> spNode);
-	virtual std::weak_ptr<DOMNode> GetDOMNode(DOMNodeType type, int nodeID);
-	virtual std::weak_ptr<DOMSelectField> GetDOMSelectFieldNode(int nodeId);
-    virtual void ClearDOMNodes();
-	virtual void RemoveDOMNode(DOMNodeType type, int nodeID);
+	virtual void AddDOMTextInput(int id);
+	virtual void AddDOMLink(int id);
+	virtual void AddDOMSelectField(int id);
+
+	virtual std::weak_ptr<DOMTextInput> GetDOMTextInput(int id);
+	virtual std::weak_ptr<DOMLink> GetDOMLink(int id);
+	virtual std::weak_ptr<DOMSelectField> GetDOMSelectField(int id);
+
+	virtual void RemoveDOMTextInput(int id);
+	virtual void RemoveDOMLink(int id);
+	virtual void RemoveDOMSelectField(int id);
+	virtual void ClearDOMNodes();
 
     // Receive callbacks from CefMediator upon scrolling offset changes
     virtual void SetScrollingOffset(double x, double y);
@@ -437,18 +443,11 @@ private:
     std::string _url = "";
 
     // Vector with DOMTriggers (take DOM input node as input...)
-    std::vector<std::unique_ptr<DOMTrigger> >_DOMTriggers;
-
-	// Vector with DOMTextLinks
-	std::vector<std::shared_ptr<DOMNode> >_DOMTextLinks;
-
-
-	// Vector with DOMSelectFields
-	std::vector<std::shared_ptr<DOMSelectField> > _DOMSelectFields;
+    std::map<std::weak_ptr<DOMNode>, std::unique_ptr<DOMTrigger> >_DOMTriggers;
 
 	// Map nodeID to node itself, in order to access it when it has to be updated
-	std::map<int, std::shared_ptr<DOMNode> > _TextLinkMap;
-	std::map<int, std::shared_ptr<DOMNode> > _TextInputMap;
+	std::map<int, std::shared_ptr<DOMLink> > _TextLinkMap;
+	std::map<int, std::shared_ptr<DOMTextInput> > _TextInputMap;
 	std::map<int, std::shared_ptr<DOMSelectField> > _SelectFieldMap;
 
     // Web view in which website is rendered and displayed

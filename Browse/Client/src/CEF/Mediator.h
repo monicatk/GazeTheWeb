@@ -118,15 +118,27 @@ public:
 
 	/* DOM relevant methods */
 
-	// Used by BrowserMsgRouter to pass blank DOMNodes to Tab
-	void AddDOMNode(CefRefPtr<CefBrowser> browser, std::shared_ptr<DOMNode> spNode);
-	void AddDOMNode(CefRefPtr<CefBrowser> browser, std::shared_ptr<DOMSelectField> spNode);
+	// Called by MsgRouter, will create blank DOMNodes in Tab
+	void AddDOMTextInput(CefRefPtr<CefBrowser> browser, int id);
+	void AddDOMLink(CefRefPtr<CefBrowser> browser, int id);
+	void AddDOMSelectField(CefRefPtr<CefBrowser> browser, int id);
+	
 	void ClearDOMNodes(CefRefPtr<CefBrowser> browser);
-	void RemoveDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID);
+
+	void RemoveDOMTextInput(CefRefPtr<CefBrowser> browser, int id);			// RemoveNode<DOMTextInput>(int id)
+	void RemoveDOMLink(CefRefPtr<CefBrowser> browser, int id);
+	void RemoveDOMSelectField(CefRefPtr<CefBrowser> browser, int id);
+
+	// Receive weak_ptr, only perform Initialize(objMsg) and Update(attr) operations
+	std::weak_ptr<DOMTextInput> GetDOMTextInput(CefRefPtr<CefBrowser> browser, int id);
+	std::weak_ptr<DOMLink> GetDOMLink(CefRefPtr<CefBrowser> browser, int id);
+	std::weak_ptr<DOMSelectField> GetDOMSelectField(CefRefPtr<CefBrowser> browser, int id);
+
+	// TODO: Update(attr) & Initialize(objMsg) functions needed for every DOMNode subclass?
+
 	void FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
 	void InitializeDOMNode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
-	std::weak_ptr<DOMNode> GetDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID); // Used by BrowserMsgRouter
-	std::weak_ptr<DOMSelectField> GetDOMSelectFieldNode(CefRefPtr<CefBrowser> browser, int nodeId);
+
 
 	/* Interaction with DOM nodes */
 

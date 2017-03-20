@@ -17,9 +17,11 @@
 
 // Forward declaration
 class Texture;
-class DOMNode;
-class OverflowElement;
+class DOMTextInput;
+class DOMLink;
 class DOMSelectField;
+class OverflowElement;
+
 
 class TabCEFInterface
 {
@@ -47,12 +49,18 @@ public:
     virtual std::weak_ptr<Texture> GetWebViewTexture() = 0;
 
 	// Add, remove and update Tab's current DOMNodes
-    virtual void AddDOMNode(std::shared_ptr<DOMNode> spNode) = 0;
-	virtual void AddDOMNode(std::shared_ptr<DOMSelectField> spNode) = 0;
-	virtual std::weak_ptr<DOMNode> GetDOMNode(DOMNodeType type, int nodeID) = 0;
-	virtual std::weak_ptr<DOMSelectField> GetDOMSelectFieldNode(int nodeId) = 0;
-    virtual void ClearDOMNodes() = 0;
-	virtual void RemoveDOMNode(DOMNodeType type, int nodeID) = 0;
+    virtual void AddDOMTextInput(int id) = 0;
+	virtual void AddDOMLink(int id) = 0;
+	virtual void AddDOMSelectField(int id) = 0;
+
+	virtual std::weak_ptr<DOMTextInput> GetDOMTextInput(int id) = 0;
+	virtual std::weak_ptr<DOMLink> GetDOMLink(int id) = 0;
+	virtual std::weak_ptr<DOMSelectField> GetDOMSelectField(int id) = 0;
+
+	virtual void RemoveDOMTextInput(int id) = 0;
+	virtual void RemoveDOMLink(int id) = 0;
+	virtual void RemoveDOMSelectField(int id) = 0;
+	virtual void ClearDOMNodes() = 0;
 
     // Receive callbacks from CefMediator upon scrolling offset changes
     virtual void SetScrollingOffset(double x, double y) = 0;
