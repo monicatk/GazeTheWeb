@@ -1,21 +1,22 @@
 # GazeTheWeb
 
-Software developed by Institute for Web Science and Technologies at University of Koblenz Landau in the context of the project Horizon 2020, MAMEM, for accessing the web using eye-tracking. Visit the [**wiki**](https://github.com/MAMEM/GazeTheWeb/wiki) for troubleshooting.
+Software developed by Institute for Web Science and Technologies at University of Koblenz Landau in the context of the project Horizon 2020, MAMEM, for accessing the Web using eye tracking. Visit the [**wiki**](https://github.com/MAMEM/GazeTheWeb/wiki) for troubleshooting.
 
 ## Cloning
 
 This project uses Git submodules. Please check it out using:
 ```
 git clone https://github.com/MAMEM/GazeTheWeb
+cd GazeTheWeb
 git submodule init
 git submodule update
 ```
-When submodules are updated, one has to execute that again.
+When submodules are updated, one has to execute this manual update call again.
 
 ## Projects
 
 * [**Browse**](Browse) Web browser controlled by your gaze
-* [**Tweet**](Tweet) Twitter application developed by students in research lab
+* [**Tweet**](Tweet) Twitter application developed by students in research lab *(no longer in development)*
 
 ## Links
 * [Institute for Web Science and Technologies](http://west.uni-koblenz.de) Website of our institute

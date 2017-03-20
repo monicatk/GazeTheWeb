@@ -81,7 +81,7 @@ void HistoryManager::AddPage(Page page)
 
 	// Check length of vector and delete history if too many pages have been saved
 	int pagesSize = (int)_pages.size();
- 	if (pagesSize > setup::HISTORY_MAX_PAGE_COUNT)
+    if (pagesSize > (int)setup::HISTORY_MAX_PAGE_COUNT)
 	{
 		// Count of pages that should be deleted
 		int deleteCount = pagesSize - setup::HISTORY_MAX_PAGE_COUNT;
@@ -121,7 +121,7 @@ std::deque<HistoryManager::Page> HistoryManager::GetHistory(int count) const
 	}
 
 	// Count is limited by size of page deque
-	if (count > _pages.size())
+    if (count > (int)_pages.size())
 	{
 		count = _pages.size();
 	}

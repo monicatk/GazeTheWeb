@@ -45,7 +45,7 @@
 						<column size="20%">
 							<stack separator="0.5%">
 								<boxbutton id="complete" icon="icons/Ok.png" desckey="action_keyboard:complete"/>
-								<boxbutton id="submit" icon="icons/Forward.png" desckey="action_keyboard:submit"/>
+								<boxbutton id="submit" icon="icons/Submit.png" desckey="action_keyboard:submit"/>
 							</stack>
 						</column>
 					</row>

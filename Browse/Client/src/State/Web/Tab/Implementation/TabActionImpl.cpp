@@ -5,8 +5,9 @@
 //============================================================================
 
 #include "src/State/Web/Tab/Tab.h"
-#include "src/CEF/Extension/CefMediator.h"
+#include "src/CEF/Mediator.h"
 #include "src/Utils/Texture.h"
+#include "src/Singletons/LabStreamMailer.h"
 
 void Tab::PushBackPipeline(std::unique_ptr<Pipeline> upPipeline)
 {
@@ -41,6 +42,8 @@ void Tab::EmulateLeftMouseButtonClick(double x, double y, bool visualize, bool i
 	{
 		ConvertToCEFPixel(x, y);
 	}
+
+	LabStreamMailer::instance().Send("Click performed");
 
 	// Tell mediator about the click
 	_pCefMediator->EmulateLeftMouseButtonClick(this, x, y);
@@ -99,6 +102,14 @@ std::string Tab::GetClipboardText() const
 
 void Tab::InputTextData(int64 frameID, int nodeID, std::string text, bool submit)
 {
+	if (submit)
+	{
+		LabStreamMailer::instance().Send("Submitting Text: " + text);
+	}
+	else
+	{
+		LabStreamMailer::instance().Send("Inputting Text: " + text);
+	}
 	_pCefMediator->InputTextData(this, frameID, nodeID, text, submit);
 }
 
@@ -123,8 +134,8 @@ std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pagePixelCoordinate, 
             for(const auto& rRect : rLink->GetRects())
             {
                 // Distance
-                float dx = glm::max(glm::abs(pagePixelCoordinate.x - rRect.center().x) - (rRect.width() / 2.f), 0.f);
-                float dy = glm::max(glm::abs(pagePixelCoordinate.y - rRect.center().y) - (rRect.height() / 2.f), 0.f);
+                float dx = glm::max(glm::abs(pagePixelCoordinate.x - rRect.Center().x) - (rRect.Width() / 2.f), 0.f);
+                float dy = glm::max(glm::abs(pagePixelCoordinate.y - rRect.Center().y) - (rRect.Height() / 2.f), 0.f);
                 float distance = glm::sqrt((dx * dx) + (dy * dy));
 
                 // Check whether distance is smaller
@@ -144,7 +155,23 @@ std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pagePixelCoordinate, 
 
 void Tab::ScrollOverflowElement(int elemId, int x, int y)
 {
-	_pCefMediator->ScrollOverflowElement(this, elemId, x, y);
+	std::vector<int> inside_fixed_element;
+	for (int i = 0; i < _fixedElements.size(); i++)
+	{
+		for (int j = 0; j < _fixedElements[i].size(); j++)
+		{
+			if (_fixedElements[i][j].IsInside(x, y))
+			{
+				inside_fixed_element.push_back(i);
+				break;
+			}
+		}
+	}
+	//for (const auto& i : inside_fixed_element)
+	//{
+	//	LogDebug("DEBUG: Scrolling is performed in fixed element=", i);
+	//}
+	_pCefMediator->ScrollOverflowElement(this, elemId, x, y, inside_fixed_element);
 }
 
 void Tab::ConvertToCEFPixel(double& rWebViewPixelX, double& rWebViewPixelY) const
@@ -157,4 +184,9 @@ void Tab::ConvertToWebViewPixel(double& rCEFPixelX, double& rCEFPixelY) const
 {
 	rCEFPixelX = (rCEFPixelX / (double)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
 	rCEFPixelY = (rCEFPixelY / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
+}
+
+void Tab::ReplyJSDialog(bool clickedOk, std::string userInput)
+{
+	_pCefMediator->ReplyJSDialog(this, clickedOk, userInput);
 }

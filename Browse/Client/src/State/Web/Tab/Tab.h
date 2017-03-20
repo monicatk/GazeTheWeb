@@ -1,6 +1,6 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel Müller (muellerd@uni-koblenz.de)
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Class for tabs. Registers itself in CefMediator. Implements all Tab
@@ -38,7 +38,7 @@
 
 // Forward declaration
 class Master;
-class CefMediator;
+class Mediator;
 
 // Class
 class Tab : public TabInteractionInterface, public TabCEFInterface
@@ -50,7 +50,7 @@ public:
 	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Constructor
-    Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std::string url);
+    Tab(Master* pMaster, Mediator* pCefMediator, WebTabInterface* pWeb, std::string url);
 
     // Destructor
     virtual ~Tab();
@@ -130,13 +130,16 @@ public:
     virtual void UnregisterButtonListenerInOverlay(std::string id);
 
     // Register keyboard listener in overlay
-    virtual void RegisterKeyboardListenerInOverlay(std::string id, std::function<void(std::u16string)> callback);
+    virtual void RegisterKeyboardListenerInOverlay(std::string id, std::function<void(std::string)> selectCallback, std::function<void(std::u16string)> pressCallback);
 
     // Unregister keyboard listener callback in overlay
     virtual void UnregisterKeyboardListenerInOverlay(std::string id);
 
     // Set case of keyboard letters
-    virtual void SetCaseOfKeyboardLetters(std::string id, bool upper);
+    virtual void SetCaseOfKeyboardLetters(std::string id, bool accept);
+
+	// Classify currently selected key
+	virtual void ClassifyKey(std::string id, bool accept);
 
     // Register word suggest listener in overlay
     virtual void RegisterWordSuggestListenerInOverlay(std::string id, std::function<void(std::u16string)> callback);
@@ -174,6 +177,9 @@ public:
 
 	// Move cursor over words in text edit. Positive word count means rightward movement, else leftward
 	virtual void MoveCursorOverWordsInTextEdit(std::string id, int wordCount);
+
+	// Set activity of element
+	virtual void SetElementActivity(std::string id, bool active, bool fade);
 
 	// Getter for values of interest
 	virtual int GetWebViewX() const;
@@ -219,9 +225,6 @@ public:
 	// Set text in text input field
 	virtual void InputTextData(int64 frameID, int nodeID, std::string text, bool submit);
 
-    // Set WebViewParameters for WebView
-    virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }
-
     // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available. Distance in page pixels
     virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pagePixelCoordinate, float& rDistance) const;
 
@@ -233,6 +236,12 @@ public:
 
 	// Convert CEFPixel coordinate to WebViewPixel coordinate
 	void ConvertToWebViewPixel(double& rCEFPixelX, double& rCEFPixelY) const;
+
+	// Reply JavaScript dialog callback
+	virtual void ReplyJSDialog(bool clickedOk, std::string userInput);
+
+	// Set WebViewParameters for WebView
+	virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }
 
     // #########################
     // ### TAB CEF INTERFACE ###
@@ -249,7 +258,7 @@ public:
     virtual void SetFavIconURL(std::string url) { _favIconUrl = url; }
 
     // Setter of URL. Does not load it. Should be called by CefMediator only
-	virtual void SetURL(std::string URL) { _url = URL; }
+	virtual void SetURL(std::string URL);
 
     // Setter for can go back / go forward
     virtual void SetCanGoBack(bool canGoBack) { _canGoBack = canGoBack;	}
@@ -263,10 +272,18 @@ public:
     virtual std::weak_ptr<Texture> GetWebViewTexture() { return _upWebView->GetTexture(); }
 
     // Add, remove and update Tab's current DOMNodes
-    virtual void AddDOMNode(std::shared_ptr<DOMNode> spNode);
-	virtual std::weak_ptr<DOMNode> GetDOMNode(DOMNodeType type, int nodeID);
-    virtual void ClearDOMNodes();
-	virtual void RemoveDOMNode(DOMNodeType type, int nodeID);
+	virtual void AddDOMTextInput(int id);
+	virtual void AddDOMLink(int id);
+	virtual void AddDOMSelectField(int id);
+
+	virtual std::weak_ptr<DOMTextInput> GetDOMTextInput(int id);
+	virtual std::weak_ptr<DOMLink> GetDOMLink(int id);
+	virtual std::weak_ptr<DOMSelectField> GetDOMSelectField(int id);
+
+	virtual void RemoveDOMTextInput(int id);
+	virtual void RemoveDOMLink(int id);
+	virtual void RemoveDOMSelectField(int id);
+	virtual void ClearDOMNodes();
 
     // Receive callbacks from CefMediator upon scrolling offset changes
     virtual void SetScrollingOffset(double x, double y);
@@ -292,9 +309,13 @@ public:
 	// Receive current loading status of each frame
 	virtual void SetLoadingStatus(int64 frameID, bool isMain, bool isLoading);
 	
+	// Overflow elements
 	virtual void AddOverflowElement(std::shared_ptr<OverflowElement> overflowElem);
 	virtual std::shared_ptr<OverflowElement> GetOverflowElement(int id);
 	virtual void RemoveOverflowElement(int id);
+
+	// Tell about JavaScript dialog
+	virtual void RequestJSDialog(JavaScriptDialogType type, std::string message);
 
 private:
 
@@ -365,6 +386,8 @@ private:
     public:
 
         TabOverlayKeyboardListener(Tab* pTab) { _pTab = pTab; }
+		virtual void keySelected(eyegui::Layout* pLayout, std::string id, std::u16string value) {}
+		virtual void keySelected(eyegui::Layout* pLayout, std::string id, std::string value);
         virtual void keyPressed(eyegui::Layout* pLayout, std::string id, std::u16string value);
         virtual void keyPressed(eyegui::Layout* pLayout, std::string id, std::string value) {}
 
@@ -420,14 +443,12 @@ private:
     std::string _url = "";
 
     // Vector with DOMTriggers (take DOM input node as input...)
-    std::vector<std::unique_ptr<DOMTrigger> >_DOMTriggers;
-
-	// Vector with DOMTextLinks
-	std::vector<std::shared_ptr<DOMNode> >_DOMTextLinks;
+    std::map<std::weak_ptr<DOMNode>, std::unique_ptr<DOMTrigger> >_DOMTriggers;
 
 	// Map nodeID to node itself, in order to access it when it has to be updated
-	std::map<int, std::shared_ptr<DOMNode> > _TextLinkMap;
-	std::map<int, std::shared_ptr<DOMNode> > _TextInputMap;
+	std::map<int, std::shared_ptr<DOMLink> > _TextLinkMap;
+	std::map<int, std::shared_ptr<DOMTextInput> > _TextInputMap;
+	std::map<int, std::shared_ptr<DOMSelectField> > _SelectFieldMap;
 
     // Web view in which website is rendered and displayed
     std::unique_ptr<WebView> _upWebView;
@@ -464,13 +485,13 @@ private:
     float _autoScrollingValue = 0; // [-1..1]
 
     // Gaze mouse
-    bool _gazeMouse = false;
+    bool _gazeMouse = true;
 
     // Level of zooming
     double _zoomLevel = 1;
 
     // Pointer to mediator
-    CefMediator* _pCefMediator;
+    Mediator* _pCefMediator;
 
 	// RenderItem used for debug rendering
 	std::unique_ptr<RenderItem> _upDebugRenderItem;
@@ -484,7 +505,8 @@ private:
     // Ids of elements in overlay (added / removed by triggers or actions)
     std::map<std::string, std::function<void(void)> > _overlayButtonDownCallbacks;
     std::map<std::string, std::function<void(void)> > _overlayButtonUpCallbacks;
-    std::map<std::string, std::function<void(std::u16string)> > _overlayKeyboardCallbacks;
+	std::map<std::string, std::function<void(std::string)> > _overlayKeyboardSelectCallbacks;
+    std::map<std::string, std::function<void(std::u16string)> > _overlayKeyboardPressCallbacks;
     std::map<std::string, std::function<void(std::u16string)> > _overlayWordSuggestCallbacks;
 
     // Time until Cef is asked for page resolution

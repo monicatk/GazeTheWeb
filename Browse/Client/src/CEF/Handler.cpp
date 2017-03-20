@@ -1,11 +1,14 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
-// Author: Daniel Müller (muellerd@uni-koblenz.de)
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
+// Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
 #include "src/CEF/Handler.h"
-#include "src/CEF/Extension/CefMediator.h"
+#include "src/CEF/Mediator.h"
+#include "src/CEF/RequestHandler.h"
 #include "src/Utils/Logger.h"
+#include "src/Singletons/JSMailer.h"
 #include "include/base/cef_bind.h"
 #include "include/cef_app.h"
 #include "include/wrapper/cef_closure_task.h"
@@ -14,29 +17,21 @@
 #include <string>
 #include <cmath>
 
-namespace
+Handler::Handler(Mediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing(false)
 {
-    Handler* g_instance = NULL;
-}  // namespace
-
-Handler::Handler(CefMediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing(false)
-{
-  DCHECK(!g_instance);
-  g_instance = this;
   _pMediator = pMediator;
   _renderer = renderer;
-  _msgRouter = new BrowserMsgRouter(pMediator);
+  _msgRouter = new MessageRouter(pMediator);
+  _requestHandler= new RequestHandler();
+
+  // TODO: delete all this or do a nice rewrite
+  // Tell JSMailer singleton about the method to call
+  JSMailer::instance().SetHandler(this);
 }
 
 Handler::~Handler()
 {
-  g_instance = NULL;
-}
-
-// Static
-Handler* Handler::GetInstance()
-{
-  return g_instance;
+	// Nothing to do
 }
 
 void Handler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
@@ -230,49 +225,145 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 {
     const std::string& msgName = msg->GetName().ToString();
 
-    if (msgName == "ReceiveDOMElements")
-    {
-        LogDebug("Handler: OLD APPROACH! DELETE! ... ReceiveDOMElements msg received -> redirect to CefMediator.");
+	if (msgName == "SubmitInput")
+	{
+		LogDebug("Handler: Emulating a centered click and 'Enter' being pressed, in order to submit input.");
 
-        //_pMediator->ClearDOMNodes(browser);
+		// Emulate left mouse click on input fields center
+		bool submit = msg->GetArgumentList()->GetBool(0);
+		double x = msg->GetArgumentList()->GetDouble(1);
+		double y = msg->GetArgumentList()->GetDouble(2);
+		EmulateLeftMouseButtonClick(browser, x, y);
 
-        // Pipe IPC message to CefMediator in order to create DOM nodes
-       /* _pMediator->ReceiveIPCMessageforDOM(browser, msg);*/
-        return true;
-    }
+		if (submit) 
+		{
+			// Emulate pressing 'Enter' down, pressed and up
+			CefKeyEvent event;
+			event.is_system_key = false;
+			event.modifiers = 0;
+
+			// Enter key. Everywhere
+			event.windows_key_code = 13;
+			event.native_key_code = 13;
+			event.character = event.unmodified_character = 13;
+
+			// Down
+			event.type = KEYEVENT_RAWKEYDOWN;
+			browser->GetHost()->SendKeyEvent(event);
+
+			// Character
+			event.type = KEYEVENT_CHAR;
+			browser->GetHost()->SendKeyEvent(event);
+
+			// Up
+			event.type = KEYEVENT_KEYUP;
+			browser->GetHost()->SendKeyEvent(event);
+		}
+
+	}
+
     if (msgName == "ReceiveFavIconBytes")
     {
         _pMediator->ReceiveIPCMessageforFavIcon(browser, msg);
+		return true;
     }
     if (msgName == "ReceivePageResolution")
     {
         _pMediator->ReceivePageResolution(browser, msg);
+		return true;
     }
     if (msgName == "ReceiveFixedElements")
     {
         _pMediator->ReceiveFixedElements(browser, msg);
+		return true;
     }
     if (msgName == "IPCLog")
     {
         IPCLogRenderer(browser, msg);
+		return true;
     }
 
 	if (msgName == "OnContextCreated")
 	{
 		_pMediator->ClearDOMNodes(browser);
+		return true;
 	}
 	if (msgName == "SendDOMNodeData")
 	{
 		//_pMediator->HandleDOMNodeIPCMsg(browser, msg);
 		LogDebug("Handler: Received old IPC msg 'SendDOMNodeData'!");
+		return true;
 	}
 
 	if (msgName.substr(0, 9) == "CreateDOM")
 	{
 		_pMediator->FillDOMNodeWithData(browser, msg);
+		return true;
+	}
+
+	if (msgName == "InitializeDOMSelectField")
+	{
+		_pMediator->InitializeDOMNode(browser, msg);
+		return true;
 	}
 
     return _msgRouter->OnProcessMessageReceived(browser, source_process, msg);
+}
+
+bool Handler::OnJSDialog(
+	CefRefPtr<CefBrowser> browser,
+	const CefString& origin_url,
+	const CefString& accept_lang,
+	JSDialogType dialog_type,
+	const CefString& message_text,
+	const CefString& default_prompt_text,
+	CefRefPtr<CefJSDialogCallback> callback,
+	bool& suppress_message)
+{
+	/*
+	// HOW TO ANSWER DIALOG CALLBACK
+	bool clicked_ok;
+	std::string users_answer;
+	callback->Continue(clicked_ok, users_answer);
+
+	//return true;
+	*/
+
+	// Remember that callback
+	_jsDialogCallbacks[browser->GetIdentifier()] = callback;
+
+	// Decide type of dialog
+	JavaScriptDialogType type = JavaScriptDialogType::ALERT;
+	if (dialog_type == JSDialogType::JSDIALOGTYPE_CONFIRM)
+	{
+		type = JavaScriptDialogType::CONFIRM;
+	}
+	else if (dialog_type == JSDialogType::JSDIALOGTYPE_PROMPT)
+	{
+		type = JavaScriptDialogType::PROMPT;
+	}
+
+	// Tell Tab about it so it can react and execute callback later
+	_pMediator->RequestJSDialog(browser, type, message_text);
+
+	// Dialog handled!
+	return true;
+}
+
+bool Handler::OnBeforeUnloadDialog(
+	CefRefPtr<CefBrowser> browser,
+	const CefString& message_text,
+	bool is_reload,
+	CefRefPtr<CefJSDialogCallback> callback)
+{
+	// Remember that callback
+	_jsDialogCallbacks[browser->GetIdentifier()] = callback;
+
+	// Tell Tab about it so it can react and execute callback later
+	_pMediator->RequestJSDialog(browser, JavaScriptDialogType::LEAVE_PAGE, message_text);
+
+	// Dialog handled!
+	return true;
 }
 
 void Handler::ResizeBrowsers()
@@ -341,20 +432,16 @@ bool Handler::InputTextData(CefRefPtr<CefBrowser> browser, int64 frameID, int no
 {
     //CEF_REQUIRE_UI_THREAD();
 
-    CefRefPtr<CefFrame> frame = browser->GetFrame(frameID);
-    if (frame->IsValid())
-    {
-        frame->ExecuteJavaScript(jsInputTextData(nodeID, text, submit), frame->GetURL(), 0);
+	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("ExecuteTextInput");
+	const auto& args = msg->GetArgumentList();
+	args->SetInt(0, nodeID);
+	args->SetString(1, text);
+	args->SetBool(2, submit);
 
-        return true;
-    }
-    else
-    {
-        LogDebug("Handler: Tried to input text data, frame is not valid anymore.");
-        return false;
-    }
+	browser->SendProcessMessage(PID_RENDERER, msg);
+
+	return true;
 }
-
 void Handler::Reload(CefRefPtr<CefBrowser> browser)
 {
     LogDebug("Handler: Reloading browser (id = ", browser->GetIdentifier(), ") on page ", browser->GetMainFrame()->GetURL().ToString());
@@ -371,20 +458,21 @@ void Handler::GoForward(CefRefPtr<CefBrowser> browser)
     browser->GoForward();
 }
 
+void Handler::ReplyJSDialog(CefRefPtr<CefBrowser> browser, bool clicked_ok, std::string user_input)
+{
+	auto callback = _jsDialogCallbacks.find(browser->GetIdentifier());
+
+	if (callback != _jsDialogCallbacks.end())
+	{
+		LogInfo(clicked_ok);
+		callback->second->Continue(clicked_ok, user_input);
+	}
+}
+
 void Handler::ResetMainFramesScrolling(CefRefPtr<CefBrowser> browser)
 {
     const std::string resetScrolling = "document.body.scrollTop=0; document.body.scrollLeft=0;";
     browser->GetMainFrame()->ExecuteJavaScript(resetScrolling, browser->GetMainFrame()->GetURL(), 0);
-}
-
-void Handler::ReloadDOMNodes(CefRefPtr<CefBrowser> browser, std::string debug_info)
-{
-    //CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("GetDOMElements");
-    //msg->GetArgumentList()->SetDouble(0, (double)browser->GetMainFrame()->GetIdentifier());	// Cast int64 frameID  to (64bit) double, int only has 32
-    //browser->SendProcessMessage(PID_RENDERER, msg);
-    //LogDebug("Handler: Sent \"GetDOMElements\" msg to renderer, if any listed node type exists ", debug_info);
-
-	// TODO: Delete this method because of MutationObserver
 }
 
 void Handler::SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged)
@@ -398,30 +486,25 @@ void Handler::SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged
 
         if (definitelyChanged)
         {
-            // Reload DOM nodes because of changed coordinates due to zooming
-            //_pMediator->ClearDOMNodes(browser);			// TODO: Rect update instead!
-
-            ReloadDOMNodes(browser);
-
             UpdatePageResolution(browser);				// TODO: Does a JS event exist for this?
 
-            // EXPERIMENTAL
-            //GetFixedElements(browser);
         }
     }
 }
 
 void Handler::UpdatePageResolution(CefRefPtr<CefBrowser> browser)
 {
+	// TODO: Return these values by calling a function (in Renderer Process), get rid of these window variables
+
     // Javascript code for receiving the current page width & height
 	const std::string getPageResolution = "\
-            if(document.documentElement)\
+            if(document.documentElement && document.body !== null && document.body !== undefined)\
 			{\
-			window._pageWidth = document.documentElement.scrollWidth;\
-            window._pageHeight = document.documentElement.scrollHeight;\
+			window._pageWidth = document.body.scrollWidth;\
+            window._pageHeight = document.body.scrollHeight;\
 			}\
 			else\
-				console.log('Handler::UpdatePageResolution: Could not access document.documentElement!');\
+				console.log('Handler::UpdatePageResolution: Could not access document.documentElement or document.body!');\
             ";
 
     browser->GetMainFrame()->ExecuteJavaScript(getPageResolution, browser->GetMainFrame()->GetURL(), 0);
@@ -442,6 +525,10 @@ void Handler::IPCLogRenderer(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcess
     {
         LogDebug("Renderer: ", text, " (browserID = ", browserID, ")");
     }
+	else
+	{
+		LogInfo("Renderer: ", text, " (browserID = ", browserID, ")");
+	}
 }
 
 void Handler::OnFaviconURLChange(CefRefPtr<CefBrowser> browser,
@@ -535,14 +622,32 @@ bool Handler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
 	return true;
 }
 
-void Handler::ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, int x, int y)
+void Handler::ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, int x, int y, std::vector<int> fixedIds)
 {
-	//DEBUG
-	//LogDebug("Handler: Scrolling overflow element with id: ", elemId);
+	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("ScrollOverflowElement");
+	const auto& args = msg->GetArgumentList();
+	args->SetInt(0, elemId);
+	args->SetInt(1, x);
+	args->SetInt(2, y);
 
-	std::string js_code = "var overflowObj = GetOverflowElement(" + std::to_string(elemId) + ");"\
-		"if(overflowObj) overflowObj.scroll(" + std::to_string(x) + ", " + std::to_string(y) + ");";
+	int count = 3;
+	for (const auto& id : fixedIds)
+	{
+		args->SetInt(count++, id);
+	}
 
-	browser->GetMainFrame()->ExecuteJavaScript(js_code, "",	0);
+	browser->SendProcessMessage(PID_RENDERER, msg);
+}
 
+void Handler::SendToJSLoggingMediator(std::string message)
+{
+	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("SendToLoggingMediator");
+	msg->GetArgumentList()->SetString(0, message);
+
+	// Send message to every browser
+	for (const auto& browser : _browserList)
+	{
+		browser->SendProcessMessage(PID_RENDERER, msg);
+	}
+	
 }

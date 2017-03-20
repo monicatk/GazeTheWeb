@@ -1,95 +1,262 @@
 //============================================================================
 // Distributed under the Apache License, Version 2.0.
 // Author: Daniel Mueller (muellerd@uni-koblenz.de)
+// Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
 #include "DOMNode.h"
-
-#include <iostream>
 #include "src/Utils/Logger.h"
 
-/* DOMNode methods*/
+/*
+   ___  ____  __  ____  __        __      
+  / _ \/ __ \/  |/  / |/ /__  ___/ /__ ___
+ / // / /_/ / /|_/ /    / _ \/ _  / -_|_-<
+/____/\____/_/  /_/_/|_/\___/\_,_/\__/___/
+*/
+const std::vector<DOMAttribute> DOMNode::_description = {
+	Rects, FixedId, OverflowId
+};
 
-// Get list of center points as vec2 of all Rects in list
-std::vector<glm::vec2> DOMNode::GetCenters() const
+int DOMNode::Initialize(CefRefPtr<CefProcessMessage> msg)
 {
-	std::vector<glm::vec2> centers;
-	for (int i = 0; i < (int)_rects.size(); i++)
+	const auto args = msg->GetArgumentList();
+	if (args->GetSize() < _description.size() + 1)
 	{
-		centers.push_back(_rects[i].center());
-	}
-	return centers;
-}
-
-glm::vec2 DOMNode::GetCenter() const
-{
-	glm::vec2 center(0, 0);
-	if (_rects.size() > 0)
-	{
-		for (int i = 0; i < (int)_rects.size(); i++)
-		{
-			center += _rects[i].center();
-		}
-		center /= _rects.size();
-	}
-	return center;
-}
-
-void DOMNode::SetRects(std::shared_ptr<std::vector<Rect>> rects)
-{
-	_rects = *rects.get();
-}
-
-/* DOMTextInput methods*/
-DOMTextInput::DOMTextInput(DOMNodeType type,
-	int64 frameID,
-	int nodeID,
-	Rect rect,
-	std::string value = "") : DOMNode(type, frameID, nodeID, rect)
-{
-	_value = value;
-
-	LogDebug("DOMTextInput constructed", "\n",
-		"\tFrameID: ", _frameID, "\n",
-		"\tnodeID: ", _nodeID, "\n",
-		"\tcoordinates: ", _rects[0].toString(), "\n",
-		"\tvalue: ", _value);
-}
-
-
-/* DOMTextLink methods */
-DOMLink::DOMLink(DOMNodeType type,
-	int64 frameID,
-	int nodeID,
-	Rect rect,
-	std::string url) : DOMNode(type, frameID, nodeID, rect)
-{
-	_url = url;
-}
-
-DOMLink::DOMLink(
-	DOMNodeType type,
-	int64 frameID,
-	int nodeID,
-	std::vector<Rect> rects,
-	std::string url) : DOMNode(type, frameID, nodeID, rects)
-{
-	_url = url;
-}
-
-void OverflowElement::UpdateRect(int rectId, std::shared_ptr<Rect> rect)
-{
-	if (rectId < _rects.size() && rectId >= 0)
-	{
-		_rects[rectId] = *rect.get();
+		LogError("DOMNode: On initialization: Object description and message size do not match!");
 	}
 	else
 	{
-		LogBug("OverflowElement: Tried to update ", rectId, "th Rect, but it doesn't exist.");
+		for (int i = 0; i < _description.size(); i++)
+		{
+			if (!Update(_description[i], args->GetValue(i + 1)))
+			{
+				LogError("DOMNode: Failed to assign value of type ", args->GetValue(i + 1)->GetType(),
+					" to attribute ", _description[i], "!");
+			}
+		}
 	}
+	return _description.size() + 1;
 }
 
-void OverflowElement::UpdateFixation(int fixed)
+bool DOMNode::Update(DOMAttribute attr, CefRefPtr<CefValue> data)
 {
-	_fixed = fixed;
+	switch (attr) {
+		case DOMAttribute::Rects:			return IPCSetRects(data);
+		case DOMAttribute::FixedId:			return IPCSetFixedId(data);
+		case DOMAttribute::OverflowId:		return IPCSetOverflowId(data);
+	}
+	LogError("DOMNode: Could not find attribute ", attr, " in order to assign data of type", data->GetType());
+	return false;
+}
+
+bool DOMNode::IPCSetRects(CefRefPtr<CefValue> data)
+{
+	if (data->GetType() != CefValueType::VTYPE_LIST)
+		return false;
+
+	const auto rectList = data->GetList();
+	std::vector<Rect> rects;
+	for (int i = 0; i < rectList->GetSize(); i++)
+	{
+		const auto rectData = rectList->GetValue(i)->GetList();
+		std::vector<float> rect;
+		for (int j = 0; j < rectData->GetSize(); j++)
+		{
+			rect.push_back(rectData->GetValue(j)->GetDouble());
+		}
+		rects.push_back(Rect(rect));
+	}
+
+	SetRects(rects);
+	return true;
+}
+
+bool DOMNode::IPCSetFixedId(CefRefPtr<CefValue> data)
+{
+	if (data->GetType() != CefValueType::VTYPE_INT)
+		return false;
+
+	SetFixedId(data->GetInt());
+	return true;
+}
+
+bool DOMNode::IPCSetOverflowId(CefRefPtr<CefValue> data)
+{
+	if (data->GetType() != CefValueType::VTYPE_INT)
+		return false;
+
+	SetOverflowId(data->GetInt());
+	return true;
+}
+
+/*
+   ___  ____  __  _________        __  ____               __    
+  / _ \/ __ \/  |/  /_  __/____ __/ /_/  _/__  ___  __ __/ /____
+ / // / /_/ / /|_/ / / / / -_) \ / __// // _ \/ _ \/ // / __(_-<
+/____/\____/_/  /_/ /_/  \__/_\_\\__/___/_//_/ .__/\_,_/\__/___/
+                                            /_/ 
+*/
+const std::vector<DOMAttribute> DOMTextInput::_description = {
+	Text, IsPassword
+};
+
+int DOMTextInput::Initialize(CefRefPtr<CefProcessMessage> msg)
+{
+	// First list element to start interpretation as this class's attributes
+	int pivot = super::Initialize(msg);
+
+	const auto args = msg->GetArgumentList();
+	if (args->GetSize() < _description.size() + pivot)
+	{
+		LogError("DOMTextInput: On initialization: Object description and message size do not match!");
+	}
+	else
+	{
+		for (int i = 0; i < _description.size(); i++)
+		{
+			if (!Update(_description[i], args->GetValue(i + 1)))
+			{
+				LogError("DOMTextInput: Failed to assign value of type ", args->GetValue(i + 1)->GetType(),
+					" to attribute ", _description[i], "!");
+			}
+		}
+	}
+	return _description.size() + pivot;
+}
+
+bool DOMTextInput::Update(DOMAttribute attr, CefRefPtr<CefValue> data)
+{
+	switch (attr) {
+		case DOMAttribute::Text:			return IPCSetText(data);
+		case DOMAttribute::IsPassword:		return IPCSetPassword(data);
+	}
+	return super::Update(attr, data);
+}
+
+bool DOMTextInput::IPCSetText(CefRefPtr<CefValue> data)
+{
+	if (data->GetType() != CefValueType::VTYPE_STRING)
+		return false;
+
+	SetText(data->GetString());
+	return true;
+}
+
+bool DOMTextInput::IPCSetPassword(CefRefPtr<CefValue> data)
+{
+	if (data->GetType() != CefValueType::VTYPE_BOOL)
+		return false;
+
+	SetPassword(data->GetBool());
+	return true;
+}
+
+
+/*
+   ___  ____  __  _____   _      __      
+  / _ \/ __ \/  |/  / /  (_)__  / /__ ___
+ / // / /_/ / /|_/ / /__/ / _ \/  '_/(_-<
+/____/\____/_/  /_/____/_/_//_/_/\_\/___/
+*/
+const std::vector<DOMAttribute> DOMLink::_description = {
+	Text, Url
+};
+
+int DOMLink::Initialize(CefRefPtr<CefProcessMessage> msg)
+{
+	// First list element to start interpretation as this class's attributes
+	int pivot = super::Initialize(msg);
+
+	const auto args = msg->GetArgumentList();
+	if (args->GetSize() < _description.size() + pivot)
+	{
+		LogError("DOMLink: On initialization: Object description and message size do not match!");
+	}
+	else
+	{
+		for (int i = 0; i < _description.size(); i++)
+		{
+			if (!Update(_description[i], args->GetValue(i + 1)))
+			{
+				LogError("DOMLink: Failed to assign value of type ", args->GetValue(i + 1)->GetType(),
+					" to attribute ", _description[i], "!");
+			}
+		}
+	}
+	return _description.size() + pivot;
+}
+
+bool DOMLink::Update(DOMAttribute attr, CefRefPtr<CefValue> data)
+{
+	switch (attr) {
+		case DOMAttribute::Text:			return IPCSetText(data);
+		case DOMAttribute::Url:		return IPCSetUrl(data);
+	}
+	return super::Update(attr, data);
+}
+
+bool DOMLink::IPCSetText(CefRefPtr<CefValue> data)
+{
+	if (data->GetType() != CefValueType::VTYPE_STRING)
+		return false;
+
+	SetText(data->GetString());
+	return true;
+}
+
+bool DOMLink::IPCSetUrl(CefRefPtr<CefValue> data)
+{
+	if (data->GetType() != CefValueType::VTYPE_STRING)
+		return false;
+
+	SetUrl(data->GetString());
+	return true;
+}
+
+/*
+   __________   _______________  ______________   ___  ____
+  / __/ __/ /  / __/ ___/_  __/ / __/  _/ __/ /  / _ \/ __/
+ _\ \/ _// /__/ _// /__  / /   / _/_/ // _// /__/ // /\ \  
+/___/___/____/___/\___/ /_/   /_/ /___/___/____/____/___/
+*/
+
+const std::vector<DOMAttribute> DOMSelectField::_description = {
+	Options
+};
+
+int DOMSelectField::Initialize(CefRefPtr<CefProcessMessage> msg)
+{
+	// First list element to start interpretation as this class's attributes
+	int pivot = super::Initialize(msg);
+
+	const auto args = msg->GetArgumentList();
+	if (args->GetSize() < _description.size() + pivot)
+	{
+		LogError("DOMSelectField: On initialization: Object description and message size do not match!");
+	}
+	else
+	{
+		for (int i = 0; i < _description.size(); i++)
+		{
+			if (!Update(_description[i], args->GetValue(i + 1)))
+			{
+				LogError("DOMSelectField: Failed to assign value of type ", args->GetValue(i + 1)->GetType(),
+					" to attribute ", _description[i], "!");
+			}
+		}
+	}
+	return _description.size() + pivot;
+}
+
+bool DOMSelectField::Update(DOMAttribute attr, CefRefPtr<CefValue> data)
+{
+	switch (attr) {
+		case DOMAttribute::Options:		return IPCSetOptions(data);
+	}
+	return super::Update(attr, data);
+}
+
+bool DOMSelectField::IPCSetOptions(CefRefPtr<CefValue> data)
+{
+	return false;
 }

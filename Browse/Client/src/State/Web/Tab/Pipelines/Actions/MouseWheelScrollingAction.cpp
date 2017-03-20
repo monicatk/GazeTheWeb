@@ -17,9 +17,7 @@ bool MouseWheelScrollingAction::Update(float tpf, TabInput tabInput)
     // Get coordinate from input slot
     glm::vec2 scrolling;
     GetInputValue("scrolling", scrolling);
-
     _pTab->EmulateMouseWheelScrolling(scrolling.x, scrolling.y);
-
     return true;
 }
 

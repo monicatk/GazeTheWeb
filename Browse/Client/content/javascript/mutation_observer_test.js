@@ -1,29 +1,99 @@
-// https://developer.mozilla.org/de/docs/Web/API/MutationObserver
+//============================================================================
+// Distributed under the Apache License, Version 2.0.
+// Author: Daniel Mueller (muellerd@uni-koblenz.de)
+//============================================================================
 
-// Global variables in which DOM relevant information is stored
-window.fixed_elements = new Set();
-window.fixed_IDlist = [];				// Position |i| contains boolean information if ID |i| is currently used
-window.fixed_coordinates = [[]];		// 2D list of bounding rectangle coordinates, fill with bounding rect coordinates of fixed node and its children (if position == 'relative')
-
-window.dom_links = [];
-window.dom_links_rect = [[]];
-
-window.dom_textinputs = [];
-window.dom_textinputs_rect = [[]];
 
 window.appendedSubtreeRoots = new Set();
 
 
-// TESTING CEF V8 ExecuteFunction
-// window.myObject = {val: '8', called: '0', getVal: function(){ConsolePrint('Objects function called!'); return 7;} };
+function DrawRect(rect, color)
+{
+	//Position parameters used for drawing the rectangle
+	var x = rect[1];
+	var y = rect[0];
+	var width = rect[3] - rect[1];
+	var height = rect[2] - rect[0];
 
+	var canvas = document.createElement('canvas'); //Create a canvas element
+	//Set canvas width/height
+	canvas.style.width='100%';
+	canvas.style.height='100%';
+	//Set canvas drawing area width/height
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+	//Position canvas
+	canvas.style.position='absolute';
+	canvas.style.left=0;
+	canvas.style.top=0;
+	canvas.style.zIndex=100000;
+	canvas.style.pointerEvents='none'; //Make sure you can click 'through' the canvas
+	document.body.appendChild(canvas); //Append canvas to body element
+	var context = canvas.getContext('2d');
+	//Draw rectangle
+	context.rect(x, y, width, height);
+	context.fillStyle = color;
+	context.fill();
+}
 
+function DrawObject(obj)
+{
+	var colors = ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#FFFFFF"];
+	for(var i = 0; i < obj.rects.length; i++)
+	{
+		DrawRect(obj.rects[i], colors[i % 6]);
+	}
+}
 
 // Helper function for console output
 function ConsolePrint(msg)
 {
 	window.cefQuery({ request: (""+msg), persistent : false, onSuccess : function(response) {}, onFailure : function(error_code, error_message){} });
 }
+
+function SendLSLMessage(msg) {
+    window.cefQuery({ request: ("lsl:" + msg), persistent: false, onSuccess: function (response) { }, onFailure: function (error_code, error_message) { } });
+}
+
+function LoggingMediator()
+{
+	/* This function is indirectly called via this.log */
+    this.logFunction = null;
+
+	/* Register your own log function with this function */
+    this.registerFunction = function(f)
+    {
+        this.logFunction = f;
+    }
+
+    /* Unregister the log function with this function */
+    this.unregisterFunction = function() {
+        this.logFunction = null;
+    }
+
+	/* This function is called by CEF's renderer process */
+    this.log = function(logText)
+    {
+        try
+        {
+            if(this.logFunction !== null)
+                this.logFunction(logText);
+        }
+        catch(e)
+        {
+            console.log("LoggingMediator: Something went wrong while redirecting logging data.");
+            console.log(e);
+        }
+    }
+
+    /* Code, executed on object construction */
+    ConsolePrint("LoggingMediator instance was successfully created!");
+
+}
+
+window.loggingMediator = new LoggingMediator();
+
+
 
 function GetTextSelection()
 {
@@ -63,84 +133,9 @@ function AdjustRectCoordinatesToWindow(rect)
 }
 
 
-// // Iterate over Set of already used fixedIds to find the next ID not yet used and assign it to node as attribute
-// function AddFixedElement(node)
-// {
-// 	// Determine fixed element ID
-// 	var id;
-
-// 	if(node.hasAttribute('fixedId'))
-// 	{
-// 		// node already in set, use existing ID
-// 		id = node.getAttribute('fixedId');
-
-// 		// Check if bounding Rect changes happened
-// 		UpdateSubtreesBoundingRect(node);
-// 	}
-// 	else
-// 	{
-// 		// Add node to set of fixed elements, if position is fixed
-// 		window.fixed_elements.add(node);
-
-// 		// Find smallest ID not yet in use
-// 		var found = false;
-// 		for(var i=0, n=window.fixed_IDlist.length; i < n; i++)
-// 		{
-// 			if(!window.fixed_IDlist[i])
-// 			{
-// 				window.fixed_IDlist[i] = true;
-// 				id = i;
-// 				found = true;
-// 			}
-// 		}
-// 		if(!found)
-// 		{
-// 			// Extend ID list by one entry
-// 			window.fixed_IDlist.push(true);
-// 			// Use new last position as ID
-// 			id = window.fixed_IDlist.length-1;
-// 		}
-
-// 		// Create attribute in node and store ID there
-// 		node.setAttribute('fixedId', id);
-
-// 		// DEBUG
-// 		// ConsolePrint("Adding fixed node #"+id);
-
-// 		// Write node's (and its children's) bounding rectangle coordinates to List
-// 		SaveBoundingRectCoordinates(node);
-// 	}
-
-// 	// TODO: Add attribute 'fixedId' to every child node
-
-
-
-// 	var zero = '';
-// 	if(id < 10) zero = '0';
-// 	// Tell CEF that fixed node was added
-// 	ConsolePrint('#fixElem#add#'+zero+id);
-// }
-
-
-function SaveBoundingRectCoordinates(node)
-{
-	ConsolePrint("WARNING: SaveBoundingRectCoordinates called. DEPRECATED!");
-}
-
-
 // parent & child are 1D arrays of length 4
 function ComputeBoundingRect(parent, child)
 {
-	// OLD APPROACH: Minimum Bounding Box for all children and parent
-	// // if(parent.height == 0 || parent.width == 0)
-	// if(parent[2]-parent[0] == 0 || parent[3]-parent[1] == 0)
-	// 	return child;
-
-	// return [Math.min(parent[0], child[0]),
-	// 		Math.min(parent[1], child[1]),
-	// 		Math.max(parent[2], child[2]),
-	// 		Math.max(parent[3], child[3])];
-
 	// top, left, bottom, right
 
 	var bbs = [];
@@ -159,132 +154,6 @@ function ComputeBoundingRect(parent, child)
 	return bbs;
 }
 
-function ComputeBoundingRectOfAllChilds(node, depth, fixedId)
-{
-	ConsolePrint("WARNING: ComputeBoundingRectOfAllChilds called. DEPRECATED!")
-
-	// Check if node's bounding rectangle is outside of the current union of rectangles in |window.fixed_coordinates[id]|
-	if(node.nodeType == 1) // 1 == ELEMENT_NODE
-	{
-
-		// Add attribute 'fixedId' in order to indicate being a child of a fixed node
-		if(!node.hasAttribute('fixedId'))
-		{
-			node.setAttribute('fixedId', fixedId);
-		}
-
-		// Inform CEF that DOM node is child of a fixed element
-		if(node.hasAttribute('nodeType') || node.hasAttribute("overflowId"))
-		{
-			SetFixationStatus(node, true);
-		}
-
-		var rect = node.getBoundingClientRect();
-
-		// Compare nodes to current bounding rectangle of all child nodes
-		var rect_coords = AdjustRectToZoom(rect);
-
-		// Traverse all child nodes
-		if(node.children && node.children.length > 0)
-		{
-			var n = node.children.length;
-
-			for(var i=0; i < n ; i++)
-			{		
-				// Compare previously computed bounding rectangle with the one computed by traversing the child node
-				rect_coords = 
-					ComputeBoundingRect(
-						rect_coords,
-						ComputeBoundingRectOfAllChilds(node.children.item(i), depth+1, fixedId)
-					);
-			}
-		}
-
-
-		return rect_coords;
-	}
-
-	// Error case
-	return [-1,-1,-1,-1]; // TODO: nodeType != 1 possible? May ruin the whole computation
-}
-
-0// For fixed elements: Traverse subtree starting with given childNode as root
-function UpdateSubtreesBoundingRect(childNode)
-{
-	ConsolePrint("WARNING: UpdateSubtreesBoundingRect called. DEPRECATED!");
-
-	var id = childNode.getAttribute('fixedId');
-
-	// ConsolePrint('Checking #'+id+' for updates...');
-
-	// Read out old rectangle coordinates
-	var old_coords = window.fixed_coordinates[id];
-	// Update bounding rectangles (only for subtree, starting with node where changes happend)
-	var child_coords = ComputeBoundingRectOfAllChilds(childNode, 0, id);
-
-	// ConsolePrint('child: '+child_coords);
-	// ConsolePrint('old  : '+old_coords);
-	var inform_about_changes = false;
-	var parent_rect = old_coords.slice(0, 4);
-
-	// Parent rect hasn't been containing all child rects
-	if(old_coords.length > 4)
-	{
-		var old_child_rect = old_coords.slice(4);
-
-		// Check if new child rect is contained in parent rect
-		child_coords = ComputeBoundingRect(parent_rect, child_coords);
-
-		// Inform CEF that coordinates have to be updated
-		if(!CompareArrays(child_coords, parent_rect) && !CompareArrays(child_coords, old_child_rect))
-		{
-
-			// Update childrens' combined bounding rect 
-			window.fixed_coordinates[id] = parent_rect.concat(child_coords);
-			// alert('new: '+new_coords+'; old: '+old_coords);
-			// ConsolePrint("Updated subtree's bounding rect: "+window.fixed_coordinates[id]);
-
-			inform_about_changes = true;
-		}
-	}
-	else // Parent rect has been containing all child rects
-	{
-		// Check if new child rect is contained in parent rect
-		child_coords = ComputeBoundingRect(parent_rect, child_coords);
-
-		if(!CompareArrays(parent_rect, child_coords))
-		{
-			window.fixed_coordinates[id] = parent_rect.concat(child_coords);
-
-			inform_about_changes = true;
-		}
-		// else: Parent rect still contains updated child rect
-
-
-		// TODO: Rewrite code here.. confusing af. Also, it seems to inform_about_changes, although none have taken place!
-	}
-
-
-	if(inform_about_changes)
-	{
-		var zero = '';
-		if(id < 10) zero = '0';
-		// Tell CEF that fixed node's coordinates were updated
-		ConsolePrint('#fixElem#add#'+zero+id);
-
-		// //DEBUG
-		// ConsolePrint('Updated a fixed element');
-		// for(var i = 0, n = window.fixed_coordinates.length; i < n ; i++)
-		// {
-		// 	var str = (i == id) ? '<---' : '';
-		// 	ConsolePrint(i+': '+window.fixed_coordinates[i]+str);
-		// }
-
-		// DEBUG
-		// ConsolePrint("UpdateSubtreesBoundingRect()");
-	}
-
-}
 
 function CompareArrays(array1, array2)
 {
@@ -304,10 +173,16 @@ function CompareArrays(array1, array2)
 
 // TESTING PURPOSE
 document.onclick = function(){
-	ConsolePrint("### document.onclick() triggered! Calling UpdateDOMRects! ###");
-	UpdateDOMRects();
+	// ConsolePrint("### document.onclick() triggered! Calling UpdateDOMRects! ###");
+	// UpdateDOMRects();
 	
 }
+// TESTING TWITTER, no updates through clicking right now
+// document.addEventListener("click", function(e){
+// 	ConsolePrint("JS Debug: Realized that click event was fired! Target is listed in DevTools Console.");
+// 	console.log("Clicked target: "+e.target);
+// 	UpdateDOMRects();
+// });
 
 // Trigger DOM data update on changing document loading status
 document.onreadystatechange = function()
@@ -321,6 +196,9 @@ document.onreadystatechange = function()
 
 	if(document.readyState == 'interactive')
 	{
+		// GMail fix
+		ForEveryChild(document.documentElement, AnalyzeNode);
+
 		UpdateDOMRects();
 
 		// GMail
@@ -329,6 +207,9 @@ document.onreadystatechange = function()
 
 	if(document.readyState == 'complete')
 	{
+		// GMail fix
+		ForEveryChild(document.documentElement, AnalyzeNode);
+
 		UpdateDOMRects();
 
 		ConsolePrint('<----- Page fully loaded. -------|');
@@ -338,8 +219,6 @@ document.onreadystatechange = function()
 		
 	}
 }
-
-// http://stackoverflow.com/questions/18323757/how-do-you-detect-that-a-script-was-loaded-and-executed-in-a-chrome-extension
 
 
 window.onresize = function()
@@ -358,7 +237,7 @@ document.addEventListener('transitionend', function(event){
 
 	// If first node is fixed element, only call fixed objects update rects method
 	// it triggers rect updates for all its children
-	if((fixedObj = GetFixedElement(tree)) !== undefined && fixedObj !== null)
+	if((fixedObj = GetFixedElementByNode(tree)) !== undefined && fixedObj !== null)
 	{
 		fixedObj.updateRects();
 	}
@@ -393,8 +272,8 @@ document.addEventListener('transitionend', function(event){
 
 				if(child.hasAttribute("fixedId") !== undefined)
 				{
-					var fixedObj = GetFixedElement(child);
-					if(fixedObj !== undefined)
+					var fixedObj = GetFixedElementByNode(child);
+					if(fixedObj !== undefined && fixedObj !== null)
 					{
 						fixedObj.updateRects();
 					}
@@ -433,6 +312,27 @@ Document.prototype.importNode = function(importedNode, deep){
 	return origImportNode.apply(this, arguments);
 }
 
+// DEBUG
+// _send = XMLHttpRequest.prototype.send;
+// XMLHttpRequest.prototype.send = function() {
+
+//     /* Wrap onreadystaechange callback */
+//     var callback = this.onreadystatechange;
+//     this.onreadystatechange = function() {             
+//          if (this.readyState == 4) {
+
+//              /* We are in response; do something, like logging or anything you want */
+// 				 console.log("XMLHttpRequest: Response type is "+this.responseType )
+
+// 			//  console.log("response: "+this.responseText);
+//          }
+
+//          callback.apply(this, arguments);
+//     }
+
+//     _send.apply(this, arguments);
+// }
+
 /* Modify appendChild in order to get notifications when this function is called */
 var originalAppendChild = Element.prototype.appendChild;
 Element.prototype.appendChild = function(child){
@@ -440,6 +340,14 @@ Element.prototype.appendChild = function(child){
 	// appendChild extension: Check if root is already part of DOM tree
     if(this.nodeType == 1 || this.nodeType > 8)
     {
+		// DEBUG0
+		// if(child.tagName === "IFRAME")
+		// {
+		// 	console.log("Found iframe!");
+		// 	console.log(child);
+		// 	return;
+		// }
+
 		var subtreeRoot = this;
 
 		// Stop going up the tree when parentNode is documentElement or doesn't exist (null or undefined)
@@ -492,6 +400,8 @@ Element.prototype.appendChild = function(child){
 	// DocumentFragment as parent: children disappear when fragment is appended to DOM tree
 	if(child.nodeType === 11)
 	{
+		// console.log("Document Fragment was appended to ", this);
+
 		// ConsolePrint("DocumentFragment as child (appendChild)");
 		for(var i = 0, n = child.childNodes.length; i < n; i++)
 		{
@@ -523,81 +433,50 @@ Document.prototype.createDocumentFragment = function() {
 	return fragment;
 };
 
-// argument |applyFunction| has to take a node as only parameter
-function ForEveryChild(parentNode, applyFunction)
-{
-	var depth = '-';
-	ForEveryChild(parentNode, applyFunction, depth);
-}
 
-function ForEveryChild(parentNode, applyFunction, depth)
+function ForEveryChild(parentNode, applyFunction, abortFunction)
 {
 	var childs = parentNode.childNodes;
+
+	// Abort further processing of child nodes if abort conditions are met
+	if(abortFunction !== undefined && abortFunction(parentNode))
+	{
+		return;
+	}
+
+
 	if(childs && applyFunction)
 	{
-		// ConsolePrint(depth+"Executing ForEveryChild...");
-
 		var n = childs.length;
 		for(var i = 0; i < n; i++)
 		{
-			// ConsolePrint(depth+""+(i+1)+". child...");
 			applyFunction(childs[i]);
-			ForEveryChild(childs[i], applyFunction, (depth+'---'));
-			
-		
-			// ConsolePrint(depth+""+(i+1)+". ... finished");
-		}
 
-		// ConsolePrint(depth+"... finished ForEveryChild");
+			ForEveryChild(childs[i], applyFunction, abortFunction);
+		}
 	}
-	// else
-		// ConsolePrint(depth+" No children / no function");
+
 }
 
 function AnalyzeNode(node)
 {
-
 	if( (node.nodeType == 1 || node.nodeType > 8) && (node.hasAttribute && !node.hasAttribute("nodeType")) && (node !== window)) // 1 == ELEMENT_NODE
 	{
-		// EXPERIMENTAL
-		// if(node.tagName == 'SCRIPT')
-		// {
-			// Detect when external scripts start and end execution
-		// 	node.textContent = "ConsolePrint('# Script START #); var f = function(){ "+node.textContent+"}; f(); ConsolePrint('# Script END #');";
-		// }
-
-
 		if(window.appendedSubtreeRoots.delete(node))
 		{
-			// ConsolePrint("My children have to be checked separatedly! "+node.tagName+ " class: "+node.getAttribute('class'));
-			// node.style.backgroundColor = "#00ff00";
-
-			// COLOR LEGEND
-			// roots, not found by observer:	red
-			// roots, found by observer:		green
-			// children, not found by observer:	magenta
-			// children, found by observer:		blue-green
-
-			// ForEveryChild(node, function(child){ 
-				// if(child.nodeType == 1 && 'style' in child) // child.style 
-			// 		child.style.backgroundColor = '#00ffff'; 
-			// });
-
-
 			ForEveryChild(node, AnalyzeNode);
-			// DEBUG
-			// ForEveryChild(node.parentNode.parentNode.parentNode, AnalyzeNode);
-			
-
-		
-
-			window.appendedSubtreeRoots.delete(node);
 		}
 
 		var computedStyle = window.getComputedStyle(node, null);
 
 		// Identify fixed elements on appending them to DOM tree
-		if(computedStyle.getPropertyValue('position') == 'fixed') 
+		if(
+			// computedStyle.getPropertyValue('display') !==  "none" && // NOTE: if display == 'none' -> rect is zero
+			(
+				computedStyle.getPropertyValue('position') == 'fixed'
+				//  ||	node.tagName == "DIV" && node.getAttribute("role") == "dialog"	// role == dialog isn't sufficient
+			)
+		) 
 		{
 			// Returns true if new FixedElement was added; false if already linked to FixedElement Object
 			if(AddFixedElement(node))
@@ -606,6 +485,12 @@ function AnalyzeNode(node)
 			}
 		}
 
+
+		if(node.tagName === "SELECT")
+		{
+
+			CreateDOMSelectField(node);
+		}
 
 
 		// Find text links
@@ -651,27 +536,46 @@ function AnalyzeNode(node)
 			CreateDOMLink(node);
 		}
 
+		// GMail: Trying to make mail receiver clickable (again)
+		if(node.tagName === "DIV" && node.className === "vR")
+		{
+			console.log("GMail mail receiver fix: Found <div> with class 'vR'. I will assume it will be clickable.");
+			CreateDOMLink(node);
+		}
+		if(node.tagName === "SPAN" && node.tagName === "aQ2")
+		{
+			console.log("GMail mail receiver fix: Found <span> with class 'aQ2'. I will assume it will be clickable.");
+			CreateDOMLink(node);
+		}
+		if(node.tagName == "IMG" && node.getAttribute("data-tooltip") !== null)
+		{
+			CreateDOMLink(node);
+		}
 
 		var rect = node.getBoundingClientRect();
 
 		// Detect scrollable elements inside of webpage
-		if( node.tagName === "DIV" && 
-			(   (computedStyle.getPropertyValue("overflow") !== "visible" )
-				|| (computedStyle.getPropertyValue("overflow-x") !== "visible")
-				|| (computedStyle.getPropertyValue("overflow-y") !== "visible" )
-			)
-			&& rect.width > 0 
-			&& rect.height > 0
-			// && ( (node.scrollWidth - Math.round(rect.width) > 0) || (node.scrollHeight - Math.round(rect.height) > 0) )	// =false for Facebook Chat Window bottom-right...
-		)
+		if(node.tagName === "DIV" && rect.width > 0 && rect.height > 0)
 		{
-			CreateOverflowElement(node);
+			var overflow = computedStyle.getPropertyValue("overflow");
+			if(overflow === "auto" || overflow === "scroll")
+			{
+				CreateOverflowElement(node);
+			}
+			else
+			{
+				var overflowX = computedStyle.getPropertyValue("overflow-x");
+				var overflowY = computedStyle.getPropertyValue("overflow-y");
+				if(overflowX === "auto" || overflowX === "scroll" || overflowY === "auto" || overflowY === "scroll")
+				{
+					CreateOverflowElement(node);
+				}
+			}
 		}
 
 
 		// Update whole <form> if transition happens in form's subtree
 		// (For shifting elements in form (e.g. Google Login) )
-		// TODO: Find out why transition events aren't fired properly
 		if(node.tagName == 'FORM')
 		{
 
@@ -700,7 +604,7 @@ function AnalyzeNode(node)
 	}
 }
 
-var debug_mutation_list = [];
+window.debug = false;
 
 // Instantiate and initialize the MutationObserver
 function MutationObserverInit()
@@ -712,13 +616,19 @@ function MutationObserverInit()
 		  	mutations.forEach(
 		  		function(mutation)
 		  		{
+					if(debug)
+					console.log(mutation.type, "\t", mutation.attributeName, "\t", mutation.oldValue, "\t", mutation.target);
+					
 					var working_time_start = Date.now();
 
 			  		var node;
 					
-		  			if(mutation.type == 'attributes')
+		  			if(mutation.type === 'attributes')
 		  			{
 		  				node = mutation.target;
+
+						//   if(node.tagName === "SCRIPT")
+						//   	return;
 
 			  			var attr; // attribute name of attribute which has changed
 
@@ -726,6 +636,42 @@ function MutationObserverInit()
 		  				if(node.nodeType == 1) // 1 == ELEMENT_NODE
 		  				{
 		  					attr = mutation.attributeName;
+
+							if(node === document.body && (attr === "scrollWidth" || attr === "scrollHeight"))
+							{
+								// Does not work!
+								console.log("document.body: mutation in attribute ", attr, "=", node.getAttribute(attr));
+							}
+
+							// Automatically fix or unfix children, if given attribute changed
+							if(attr === "fixedid" || attr === "childfixedid")
+							{
+								
+								var id = node.getAttribute(attr);
+								var id_set = (id !== null && id !== undefined);
+
+								// console.log(attr, "\t", id, "\t", id_set);
+								
+								var i = 0, n = node.childNodes.length;
+								for(; i < n; i++)
+								{
+									var child = node.childNodes[i];
+									if(child.nodeType === 1)
+									{
+										if(id_set)
+										{
+											child.setAttribute("childFixedId", id);
+										}
+										else
+										{
+											child.removeAttribute("childFixedId");
+										}
+										
+										SetFixationStatus(child, id_set);
+									}
+								}
+							}
+							
 
 		  					if(attr == 'style' ||  (document.readyState != 'loading' && attr == 'class') )
 		  					{
@@ -744,75 +690,80 @@ function MutationObserverInit()
 									// Checks if node corresponds to fixedObj and removes it, when true
 									RemoveFixedElement(node);
 								}
+							}
+
+
+							if(attr == "style")
+							{
+
+								// Goal: Recognise changes in e.g. style.display
+								// 'solution': Trigger rect update if changes in style took place. Direct change in style would be
+								// value assignment, which will be recognised in MutationObserver
+								UpdateNodesRect(node);
+								UpdateChildrensDOMRects(node);
+
+								// TODO: Changes in style may occure when scrolling some elements ... might be a lot of Rect Update calls!
 								
 		  					} // END attr == 'style'
+
 
 							// Changes in attribute 'class' may indicate that bounding rect update is needed, if node is child node of a fixed element
 							if(attr == 'class')
 							{
-								if((fixedObj = GetFixedElement(node)) !== null && fixedObj !== undefined)
+								var parent_updated = false;
+								var childFixedId = node.getAttribute("childFixedId");
+								if(childFixedId !== null && childFixedId !== null)
 								{
-									if(fixedObj.updateRects())
+									var fixedObj = GetFixedElementById(childFixedId);
+									if(fixedObj !== null && fixedObj !== undefined)
+									{
+										fixedObj.updateRects();
+										UpdateChildrensDOMRects(fixedObj.node);
+										parent_updated = true;
+									}
+								}
+
+								if(!parent_updated)
+								{
+									var update_needed = false;
+
+									if((fixedObj = GetFixedElementByNode(node)) !== null && fixedObj !== undefined)
+									{
+										update_needed |= fixedObj.updateRects()
+									}
+
+						
+									// Update DOMObj / OverflowElement Rect, if node is linked to one
+									// TODO: Simple UpdateRects for one DOMObj & OverflowElement?
+									var nodeType = node.getAttribute('nodeType');
+									if(nodeType !== null)
+									{
+										var nodeID = node.getAttribute('nodeID');
+										var domObj = GetDOMObject(nodeType, nodeID);
+										if(domObj !== null && domObj !== undefined)
+										{
+											// domObj.checkVisibility(); // included in updateRects()
+											update_needed |= domObj.updateRects();
+
+										}
+									}
+
+									var overflowId = node.getAttribute("overflowId");
+									if(overflowId !== null)
+									{
+										var overflowObj = GetOverflowElement(overflowId);
+										if(overflowObj !== null && overflowObj !== undefined)
+										{
+											update_needed |= overflowObj.updateRects();
+										}
+									}
+
+									if(update_needed)
 									{
 										UpdateChildrensDOMRects(node);
 									}
-								}
 
-								// Update DOMObj / OverflowElement Rect, if node is linked to one
-								// TODO: Simple UpdateRects for one DOMObj & OverflowElement?
-								var nodeType = node.getAttribute('nodeType');
-								if(nodeType !== null)
-								{
-									var nodeID = node.getAttribute('nodeID');
-									var domObj = GetDOMObject(nodeType, nodeID);
-									if(domObj !== null && domObj !== undefined)
-									{
-										// domObj.checkVisibility(); // included in updateRects()
-										domObj.updateRects();
-
-									}
-								}
-
-								var overflowId = node.getAttribute("overflowId");
-								if(overflowId !== null)
-								{
-									var overflowObj = GetOverflowElement(overflowId);
-									if(overflowObj !== null && overflowObj !== undefined)
-									{
-										overflowObj.updateRects();
-									}
-								}
-
-								// Update Rects and visibility for all children if they are linked to DOMObjects or OverflowElements
-								ForEveryChild(node, 
-									function(child){
-										if(child.nodeType == 1)
-										{	
-											var nodeType = child.getAttribute('nodeType');
-											if(nodeType !== null)
-											{
-												var nodeID = child.getAttribute('nodeID');
-												var domObj = GetDOMObject(nodeType, nodeID);
-												if(domObj !== null && domObj !== undefined)
-												{
-													domObj.updateRects();
-												}
-											}
-											else
-											{
-												var overflowId = child.getAttribute("overflowId");
-												if(overflowId !== null)
-												{
-													var overflowObj = GetOverflowElement(overflowId);
-													if(overflowObj !== null && overflowObj !== undefined)
-													{
-														overflowObj.updateRects();
-													}
-												}
-											}
-										}
-									}
-								); // end of ForEveryChild
+								} // !parent_updated
 							}
 
 		  				} // END node.nodeType == 1
@@ -825,37 +776,75 @@ function MutationObserverInit()
 
 
 
-		  			if(mutation.type == 'childList') // TODO: Called upon each appending of a child node??
+		  			if(mutation.type === 'childList') // TODO: Called upon each appending of a child node??
 		  			{
+						// console.log("type: ", mutation.type,"\ttarget: ", mutation.target, "\tnodeType: ", mutation.target.nodeType);
+
 		  				// Check if fixed nodes have been added as child nodes
-			  			var nodes = mutation.addedNodes; // concat(mutation.target.childNodes);
+			  			var nodes = mutation.addedNodes;
+						var parent = mutation.target;
 						
 			  			for(var i=0, n=nodes.length; i < n; i++)
 			  			{
-			  				node = nodes[i]; // TODO: lots of data copying here??
 
-							// if(node.nodeType == 1 && node.getAttribute('class') == 'tag-home__wrapper')//'tag-home  tag-home--slide  no-js__hide  js-tag-home')
-							// {
-							// 	ConsolePrint("Observer found shifting root DIV on its appending to DOM");
-							// 	ConsolePrint("Observer: node has "+node.childNodes.length+" already");
-							// }
+			  				node = nodes[i]; // TODO: lots of data copying here??
+							// console.log("-- ", node);
+
+
+							// if(node.nodeType === 11)
+			  					// console.log("Document Fragment got appended to: ", parent);
+
+							// if(mutation.target === "#document-fragment")
+							// 	console.log("### WOW! ###");	  
 						
 							// Mark child nodes of DocumentFragment, in order to analyze their subtrees
 							if(mutation.target.nodeType === 11)
 							{
+								// console.log("Node was appended to a Document Fragment! ", node);
+
 								window.appendedSubtreeRoots.add(node);
 								ForEveryChild(node, function(child){ window.appendedSubtreeRoots.delete(child); });
 							}
 							
 			  				AnalyzeNode(node);
 
+							if(parent.nodeType === 1 && node.nodeType === 1)
+							{
+								var id = parent.getAttribute("childfixedid");
+								if(id === null || id === undefined)
+								{
+									id = parent.getAttribute("fixedid");
+								}
+								if(id !== null && id !== undefined)
+								{
+									node.setAttribute("childfixedid", id);
+									SetFixationStatus(node, true);
+								}
+							}
 	
 					
 			  			}
 
+						// if(nodes.length > 0)
+						// {
+						// 	ConsolePrint("Child added, updating all childrens' rects.");
+						// 	UpdateChildrensDOMRects(mutation.target);
+							
+						// }
+						if(parent.nodeType === 1)
+						{
+							var fix_id = parent.getAttribute("childFixedId");
+							if(fix_id !== null && fix_id !== undefined)
+							{
+								var fixObj = GetFixedElementById(fix_id);
+								if(fixObj !== null && fixObj !== undefined)
+								{
+									fixObj.updateRects();
+								}
+							}
+						}
 
-
-
+						
 
 			  			// Check if fixed nodes have been removed as child nodes and if yes, delete them from list of fixed elements
 			  			var removed_nodes = mutation.removedNodes;
@@ -873,31 +862,20 @@ function MutationObserverInit()
 									RemoveOverflowElement(overflowId);
 								}
 
-								// TODO: Removal of relevant DOM node types??
+								// TODO: How to trigger update/remove used DOM Objects?
 			  				}
-			  			}
 
-						// At least one node was removed from DOM tree
-						if(removed_nodes.length > 0)
-						{
-							// update_starting_time = Date.now();
+							UpdateNodesRect(node);
 							// Trigger Rect Updates after removal of (several) node(s)
-							UpdateChildrensDOMRects(mutation.target);
-							// console.log("UpdateChildrensDOMRects(): "+(Date.now() - update_starting_time)+"ms");
-						}
+							UpdateChildrensDOMRects(node);
+						
+			  			}
 
 
 		  			} // END mutation.type == 'childList'
 
 					mutation_observer_working_time += (Date.now() - working_time_start);
 
-					// console.log("Finished mutation");
-					if(Date.now() - working_time_start >= 100)
-					{
-						console.log(debug_mutation_list.length+": "+(Date.now() - working_time_start)+"ms at mutation type: "+mutation.type+", target: "+mutation.target);
-						debug_mutation_list.push(mutation);
-						// throw "DaFuckNigga"
-					}
 						
 		  		} // END forEach mutation
 
@@ -921,9 +899,9 @@ function MutationObserverInit()
 		
 	// Konfiguration des Observers: alles melden - Änderungen an Daten, Kindelementen und Attributen
 	var config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: false, attributeOldValue: true};
-	
+
 	// eigentliche Observierung starten und Zielnode und Konfiguration übergeben
-	window.observer.observe(document, config);
+	window.observer.observe(window.document, config);
 
 	ConsolePrint('MutationObserver was told what to observe.');
 
@@ -934,6 +912,10 @@ function MutationObserverInit()
 	
 } // END OF MutationObserverInit()
 
+MutationObserverInit();
+
+
+
 function MutationObserverShutdown()
 {
 	window.observer.disconnect(); 
@@ -943,15 +925,8 @@ function MutationObserverShutdown()
 	ConsolePrint('Disconnected and deleted MutationObserver! ');
 }
 
-		  				// https://developer.mozilla.org/de/docs/Web/API/Node
-		  				// https://developer.mozilla.org/de/docs/Web/API/Element
-		  				// http://stackoverflow.com/questions/9979172/difference-between-node-object-and-element-object
-		  				// read also: http://www.backalleycoder.com/2013/03/18/cross-browser-event-based-element-resize-detection/
 
-		  												// offtopic: check if attributes exist
-								// if(nodes[i].hasOwnProperty('style'))
 
-			  					// http://ryanmorr.com/understanding-scope-and-context-in-javascript/
 
 var mutation_observer_working_time = 0;
 var load_starting_time;
@@ -968,3 +943,30 @@ function StopPageLoadingTimer()
 	ConsolePrint("MutationObserver operations took "+mutation_observer_working_time+"ms, "+
 		(100*mutation_observer_working_time/page_load_duration)+"% of page load.");
 }
+
+
+// window.onchange = function(e){ConsolePrint("Window changes: "+e);};
+
+// ConsolePrint("Creating window_observer...");
+// window.window_observer = new MutationObserver(
+// 		function(mutations) {
+// 		  	mutations.forEach(
+// 		  		function(mutation)
+// 		  		{
+// 					ConsolePrint("Mutation in window object detected!");
+
+// 		  			if(mutation.attributeName == "document")
+// 					{
+// 						ConsolePrint("window object's 'document' attribute changed!");
+
+// 						var config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: false, attributeOldValue: true};
+// 						window.observer.observe(window.document, config);
+// 					}
+// 				}
+// 			);
+// 		}
+// );
+// var config = {attributes: true}
+// window.window_observer.observe(window, config );
+// ConsolePrint("... done");
+

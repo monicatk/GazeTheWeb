@@ -34,7 +34,7 @@ const std::string fragmentShaderSource =
 "   fragColor = vec4(color,1);\n"
 "}\n";
 
-Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std::string url)
+Tab::Tab(Master* pMaster, Mediator* pCefMediator, WebTabInterface* pWeb, std::string url)
 {
 	// Fill members
 	_pMaster = pMaster;
@@ -205,6 +205,7 @@ void Tab::Update(float tpf, Input& rInput)
 		rInput.gazeX,
 		rInput.gazeY,
 		rInput.gazeUsed,
+		rInput.instantInteraction,
 		webViewPixelGazeX,
 		webViewPixelGazeY,
 		webViewGazeRelativeX,
@@ -217,7 +218,8 @@ void Tab::Update(float tpf, Input& rInput)
 	std::vector<Rect> rects;
 	for (const auto& rDOMNode : _DOMTextLinks)
 	{
-		if (rDOMNode->GetVisibility()) // only proceed if currently visible
+		// TODO(Daniel): Getting rid of visibility attribute
+		if(true) // if (rDOMNode->GetVisibility()) // only proceed if currently visible
 		{
 			for (const auto& rRect : rDOMNode->GetRects())
 			{
@@ -304,7 +306,7 @@ void Tab::Update(float tpf, Input& rInput)
         // STANDARD GUI IS VISIBLE
 
         // Gaze mouse
-        if(_gazeMouse)
+        if(_gazeMouse && !(_pMaster->IsPaused()))
         {
             EmulateMouseCursor(tabInput.webViewPixelGazeX, tabInput.webViewPixelGazeY);
         }
@@ -357,6 +359,9 @@ void Tab::Update(float tpf, Input& rInput)
 		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpSensorFrameIndex, showScrollUp, false, true);
 		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownSensorFrameIndex, showScrollDown, false, true);
 
+		// Set activity of scroll to top button
+		eyegui::setElementActivity(_pPanelLayout, "scroll_to_top", showScrollUp, true);
+
 		// Check, that gaze is not upon a fixed element
 		ConvertToCEFPixel(CEFPixelGazeX, CEFPixelGazeY);
 		bool gazeUponFixed = false;
@@ -365,7 +370,7 @@ void Tab::Update(float tpf, Input& rInput)
 			for (const auto& rElement : rElements)
 			{
 				// Simple box test
-				if(rElement.isInside(CEFPixelGazeX, CEFPixelGazeY))
+				if(rElement.IsInside(CEFPixelGazeX, CEFPixelGazeY))
 				{
 					gazeUponFixed = true;
 					break;
@@ -385,7 +390,7 @@ void Tab::Update(float tpf, Input& rInput)
 										 // yOffset = (glm::max(0.f, yOffset - 0.05f) / 0.95f); // In the center of view no movement
 			yOffset = negative ? -yOffset : yOffset; // [-1..1]
 
-													 // Update the auto scrolling value (TODO: not frame rate independend)
+			// Update the auto scrolling value (TODO: not frame rate independend)
 			_autoScrollingValue += tpf * (yOffset - _autoScrollingValue);
 		}
 		else if (_autoScrollingValue != 0)
@@ -428,9 +433,9 @@ void Tab::Update(float tpf, Input& rInput)
 					}
 
 					// Check if current gaze is inside of overflow element, if so execute scrolling method in corresponding Javascript object
-					if (rRect.isInside(scrolledCEFPixelGazeX, scrolledCEFPixelGazeY))
+					if (rRect.IsInside(scrolledCEFPixelGazeX, scrolledCEFPixelGazeY))
 					{
-						_pCefMediator->ScrollOverflowElement(this, rOverflowElement->GetId(), CEFPixelGazeX, CEFPixelGazeY);
+						ScrollOverflowElement(rOverflowElement->GetId(), CEFPixelGazeX, CEFPixelGazeY);
 						break;
 					}
 				}
@@ -556,6 +561,7 @@ void Tab::GoBack()
 void Tab::Reload()
 {
 	_pCefMediator->ReloadTab(this);
+	this->AbortAndClearPipelines();
 }
 
 void Tab::SetPipelineActivity(bool active)
@@ -633,74 +639,55 @@ void Tab::UpdateAccentColor(float tpf)
 		backgroundAccentColor.b,
 		backgroundAccentColor.a * backgroundAlpha);
 
-	// Set color of tab_panel style in pipeline abort overlay
-	eyegui::setValueOfStyleAttribute(
-		_pPipelineAbortLayout,
+	// Set color of tab_panel style
+	_pMaster->SetStyleTreePropertyValue(
 		"tab_panel",
-		"color",
-		RGBAToHexString(colorAccent));
+		eyegui::StylePropertyVec4::Color,
+		RGBAToHexString(colorAccent)
+	);
 
-	// Set color of tab_panel style in layout
-	eyegui::setValueOfStyleAttribute(
-		_pPanelLayout,
-		"tab_panel",
-		"color",
-		RGBAToHexString(colorAccent));
-
-	// Set color of tab_overlay style in overlay layout
-	eyegui::setValueOfStyleAttribute(
-		_pOverlayLayout,
+	// Set color of tab_overlay style
+	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay",
-		"color",
-		RGBAToHexString(colorAccent));
-	eyegui::setValueOfStyleAttribute(
-		_pOverlayLayout,
+		eyegui::StylePropertyVec4::Color,
+		RGBAToHexString(colorAccent)
+	);
+	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay",
-		"background-color",
-		RGBAToHexString(backgroundAccentColor));
+		eyegui::StylePropertyVec4::BackgroundColor,
+		RGBAToHexString(backgroundAccentColor)
+	);
 
-	// Set color of tab_overlay_noback style in overlay layout
-	eyegui::setValueOfStyleAttribute(
-		_pOverlayLayout,
+	// Set color of tab_overlay_noback style
+	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_noback",
-		"color",
-		RGBAToHexString(colorAccent));
-	eyegui::setValueOfStyleAttribute(
-		_pOverlayLayout,
-		"tab_overlay_noback",
-		"color",
-		RGBAToHexString(colorAccent));
+		eyegui::StylePropertyVec4::Color,
+		RGBAToHexString(colorAccent)
+	);
 
-	// Set color of tab_overlay_panel style in overlay layout
-	eyegui::setValueOfStyleAttribute(
-		_pOverlayLayout,
+	// Set color of tab_overlay_panel style
+	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_panel",
-		"color",
-		RGBAToHexString(backgroundAccentColor));
-	eyegui::setValueOfStyleAttribute(
-		_pOverlayLayout,
+		eyegui::StylePropertyVec4::Color,
+		RGBAToHexString(backgroundAccentColor)
+	);
+	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_panel",
-		"background-color",
-		RGBAToHexString(panelBackgroundAccentColor));
+		eyegui::StylePropertyVec4::BackgroundColor,
+		RGBAToHexString(panelBackgroundAccentColor)
+	);
 
-	// Set color of tab_overlay style in scrolling overlay layout
-	eyegui::setValueOfStyleAttribute(
-		_pScrollingOverlayLayout,
-		"tab_overlay",
-		"color",
-		RGBAToHexString(colorAccent));
-
-	// Set color and background of tab_overlay_scroll_progress style in scrolling overlay layout
-	eyegui::setValueOfStyleAttribute(
-		_pScrollingOverlayLayout,
+	// Set color and background of tab_overlay_scroll_progress
+	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_scroll_progress",
-		"color",
-		RGBAToHexString(transparentColorAccent));
-	eyegui::setValueOfStyleAttribute(
-		_pScrollingOverlayLayout,
+		eyegui::StylePropertyVec4::Color,
+		RGBAToHexString(transparentColorAccent)
+	);
+	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_scroll_progress",
-		"background-color",
-		RGBAToHexString(transparentBackgroundColorAccent));
+		eyegui::StylePropertyVec4::BackgroundColor,
+		RGBAToHexString(transparentBackgroundColorAccent)
+	);
 }
 
 void Tab::DrawDebuggingOverlay() const
@@ -734,7 +721,7 @@ void Tab::DrawDebuggingOverlay() const
 		model = glm::mat4(1.0f);
 		model = glm::scale(model, glm::vec3(1.f / _pMaster->GetWindowWidth(), 1.f / _pMaster->GetWindowHeight(), 1.f));
 		model = glm::translate(model, glm::vec3(_upWebView->GetX() + rect.left, _upWebView->GetHeight() - (rect.bottom), 1));
-		model = glm::scale(model, glm::vec3(rect.width(), rect.height(), 0));
+		model = glm::scale(model, glm::vec3(rect.Width(), rect.Height(), 0));
 
 		// Combine matrics
 		matrix = projection * model;
@@ -760,7 +747,7 @@ void Tab::DrawDebuggingOverlay() const
 		// Render rects
 		for (const auto rRect : rDOMTrigger->GetDOMRects())
 		{
-			if (rDOMTrigger->GetDOMVisibility())
+			if (true)//rDOMTrigger->GetDOMVisibility())
 			{
 				if (!rDOMTrigger->GetDOMIsPasswordField())
 				{
@@ -772,8 +759,6 @@ void Tab::DrawDebuggingOverlay() const
 					renderRect(rRect, rDOMTrigger->GetDOMFixed());
 					_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_TRIGGER_DEBUG_COLOR);
 				}
-
-
 			}
 				
 		}
@@ -809,6 +794,19 @@ void Tab::DrawDebuggingOverlay() const
 			renderRect(rDOMTextLink->GetRects()[1], rDOMTextLink->GetFixed());
 	}
 
+	// ### SELECT FIELDS ###
+	// Set rendering up for DOMSelectFields
+	_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_SELECT_FIELD_DEBUG_COLOR);
+	for (const auto& rDOMSelectField : _DOMSelectFields)
+	{
+		// Render rects
+		for (const auto rRect : rDOMSelectField->GetRects())
+		{
+			renderRect(rRect, rDOMSelectField->GetFixed());
+		}
+	}
+
+
 	// ### FIXED ELEMENTS ###
 
 	// Set rendering up for fixed element
@@ -821,7 +819,7 @@ void Tab::DrawDebuggingOverlay() const
 		for (const auto& rFixedElement : rFixedElements)
 		{
 			// Render rect
-			if(rFixedElement.height() > 0 && rFixedElement.width() > 0)
+			if(rFixedElement.Height() > 0 && rFixedElement.Width() > 0)
 				renderRect(rFixedElement, true);
 		}
 	}

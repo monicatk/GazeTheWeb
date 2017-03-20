@@ -36,8 +36,8 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	int webViewHeight = _pTab->GetWebViewHeight();
 
 	// Only allow zoom in when gaze upon web view
-    if(!tabInput.gazeUsed && tabInput.insideWebView) // TODO: gazeUsed really good idea here? Maybe later null pointer?
-    {
+	if (!tabInput.gazeUsed && tabInput.insideWebView) // TODO: gazeUsed really good idea here? Maybe later null pointer?
+	{
 		// Calculate current raw coordinate in web view relative coordinates. The filtered coordinate will move towards that position
 		glm::vec2 newCoordinate(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY);
 		newCoordinate += _coordinateCenterOffset;
@@ -45,11 +45,11 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 		// Update deviation value (fade away deviation)
 		_deviation = glm::max(_deviation - (tpf / DEVIATION_FADING_DURATION), 0.f);
 
-        // Update coordinate
-        if (!_firstUpdate)
-        {
-            // Delta of new relative position
-            glm::vec2 rawDelta = newCoordinate - _coordinate;
+		// Update coordinate
+		if (!_firstUpdate)
+		{
+			// Delta of new relative position
+			glm::vec2 rawDelta = newCoordinate - _coordinate;
 
 			// Move to new click position
 			_coordinate += rawDelta * (tpf / MOVE_DURATION);
@@ -72,19 +72,19 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			glm::vec2 delta = rawDelta / aspectRatioCorrection;
 
 			// Set length of delta to deviation if bigger than current deviation
-			_deviation = glm::min(1.f, glm::max(glm::length(delta), _deviation));			
+			_deviation = glm::min(1.f, glm::max(glm::length(delta), _deviation));
 
 			// If at the moment a high deviation is given, try to zoom out to give user more overview
 			zoomSpeed = ZOOM_SPEED - glm::min(1.f, 3.f * _deviation); // [-0.5, 0.5]
-        }
-        else // first frame of execution
-        {
+		}
+		else // first frame of execution
+		{
 			// Use raw coordinate as new coordinate
-            _coordinate = newCoordinate;
+			_coordinate = newCoordinate;
 
 			// Since only for first frame, do not do it again
-            _firstUpdate = false;
-        }
+			_firstUpdate = false;
+		}
 	}
 
 	// Update linear zoom
@@ -102,8 +102,8 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 		* (1.f - _logZoom) // weight with zoom (starting at zero) to have more centered version at higher zoom level
 		* (_coordinate - 0.5f); // vector from current zoom coordinate to center of web view center
 
-    // Vector with web view pixel resolution
-    glm::vec2 webViewPixels(webViewWidth, webViewHeight);
+	// Vector with web view pixel resolution
+	glm::vec2 webViewPixels(webViewWidth, webViewHeight);
 
 	// Calculate coordinate for current gaze value
 	glm::vec2 pixelGazeCoordinate =
@@ -116,10 +116,19 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	pixelGazeCoordinate += _coordinate; // move back
 	pixelGazeCoordinate *= webViewPixels; // into pixel space
 
-	// Check, whether click is done
-	if (
+	// Decide whether zooming is finished
+	bool finished = false;
+	if (!tabInput.gazeUsed && tabInput.instantInteraction) // user demands on instant interaction
+	{
+		// Set coordinate in output value. Use current gaze position
+		SetOutputValue("coordinate", pixelGazeCoordinate);
+
+		// Return success
+		finished = true;
+	}
+	else if ( // zooming is high enough for coordinate to be accurate
 		_logZoom <= 0.075f // just zoomed so far into that coordinate is used
-		|| ((_logZoom <= 0.5f) && (_deviation < 0.0125f))) // coordinate seems to be quite fixed, just do it
+		|| ((_logZoom <= 0.45f) && (_deviation < 0.01f))) // coordinate seems to be quite fixed, just do it
 	{
 		int zoomDataIndex = -1;
 
@@ -176,12 +185,8 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
             SetOutputValue("coordinate", glm::vec2(_coordinate * webViewPixels));
 		}
 
-        // Reset web view
-        WebViewParameters webViewParameters;
-        _pTab->SetWebViewParameters(webViewParameters);
-
 		// Return success
-		return true;
+		finished = true;
 	}
 
 	// Decrement dimming
@@ -203,8 +208,8 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	zoomData.logZoom = _logZoom;
 	_zoomDataQueue.push_back(zoomData);
 
-    // Not finished, yet
-    return false;
+    // Return whether finished
+    return finished;
 }
 
 void ZoomCoordinateAction::Draw() const
@@ -219,7 +224,9 @@ void ZoomCoordinateAction::Activate()
 
 void ZoomCoordinateAction::Deactivate()
 {
-
+	// Reset web view (necessary because of dimming)
+	WebViewParameters webViewParameters;
+	_pTab->SetWebViewParameters(webViewParameters);
 }
 
 void ZoomCoordinateAction::Abort()

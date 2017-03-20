@@ -10,7 +10,8 @@
 #define MASTER_H_
 
 #include "src/MasterNotificationInterface.h"
-#include "src/CEF/Extension/CefMediator.h"
+#include "src/Singletons/LabStreamMailer.h"
+#include "src/CEF/Mediator.h"
 #include "src/State/Web/Web.h"
 #include "src/State/Settings/Settings.h"
 #include "src/Input/EyeInput.h"
@@ -25,14 +26,13 @@
 // Forward declaration
 class Texture;
 struct GLFWwindow;
-class LabStream;
 
 class Master : public MasterNotificationInterface
 {
 public:
 
     // Constructor takes pointer to CefMediator
-    Master(CefMediator* pCefMediator, std::string userDirectory);
+    Master(Mediator* pMediator, std::string userDirectory);
 
     // Destructor
     virtual ~Master();
@@ -46,6 +46,9 @@ public:
 
     // Get time provided by GLFW
     double GetTime() const;
+
+	// Get whether paused
+	bool IsPaused() const { return _paused; }
 
     // Exit
     void Exit();
@@ -90,6 +93,10 @@ public:
 
 	// Fetch localization string by key
 	std::u16string FetchLocalization(std::string key) const;
+
+	// Set value of style property in style tree
+	void SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyFloat type, std::string value);
+	void SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyVec4 type, std::string value);
 
 	// ### SETTINGS ACCESS ###
 
@@ -139,7 +146,7 @@ private:
     GLFWwindow* _pWindow;
 
     // Layer between framework and CEF
-    CefMediator* _pCefMediator;
+    Mediator* _pCefMediator;
 
     // Pointer to eyeGUI
     eyegui::GUI* _pGUI;
@@ -183,9 +190,6 @@ private:
     // Lerp value to show pause as dimming of whole screen
     LerpValue _pausedDimming;
 
-    // Communication with LabStreamingLayer
-    std::unique_ptr<LabStream> _upLabStream;
-
     // Framebuffer for complete rendering
     std::unique_ptr<Framebuffer> _upFramebuffer;
 
@@ -200,6 +204,9 @@ private:
 
 	// Stack with content for notifications
 	std::queue<std::u16string> _notificationStack;
+
+	// LabStreamMailer callback to print incoming messages to log
+	std::shared_ptr<LabStreamCallback> _spLabStreamCallback;
 
 	// Time of notification displaying
 	float _notificationTime;

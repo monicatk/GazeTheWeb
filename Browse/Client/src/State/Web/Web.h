@@ -20,14 +20,14 @@
 #include <regex>
 
 // Forward declaration
-class CefMediator;
+class Mediator;
 
 class Web : public State, public WebTabInterface
 {
 public:
 
     // Constructor
-    Web(Master* pMaster, CefMediator* pCefMediator);
+    Web(Master* pMaster, Mediator* pCefMediator);
 
     // Destructor
     virtual ~Web();
@@ -203,7 +203,7 @@ private:
     int _tabOverviewPage = 0;
 
     // Pointer to mediator
-    CefMediator* _pCefMediator;
+    Mediator* _pCefMediator;
 
     // Bool to remind it should be switched to settings
     bool _goToSettings = false;
@@ -230,7 +230,13 @@ private:
 		"([\\da-z\\.-]+)"	// domain name (any number, dot and character from a to z)
 		"\\."				// dot between name and domain
 		"([a-z\\.]{2,6})"	// domain itself
-		"([/\\w\\.-:]*)*"	// folder structure
+		"([/\\w\\.:-]*)*"	// folder structure
+		"/?";				// optional last dash
+	std::unique_ptr<std::regex> _upIPregex;
+	const char* _pIPregexExpression =
+		"(https?://)?"		// optional http or https
+		"(\\d{1,3}(\\.\\d{1,3}){3})" // ip address
+		"([/\\w\\.:-]*)*"	// folder structure
 		"/?";				// optional last dash
 };
 

@@ -12,7 +12,10 @@
 #include "src/Utils/MakeUnique.h"
 #include <algorithm>
 
-Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)
+// Include singleton for mailing to JavaScript
+#include "src/Singletons/JSMailer.h"
+
+Web::Web(Master* pMaster, Mediator* pCefMediator) : State(pMaster)
 {
     // Save member
     _pCefMediator = pCefMediator;
@@ -51,6 +54,9 @@ Web::Web(Master* pMaster, CefMediator* pCefMediator) : State(pMaster)
 	// Regular expression for URL validation
 	_upURLregex = std::make_unique<std::regex>(
 		_pURLregexExpression,
+		std::regex_constants::icase);
+	_upIPregex = std::make_unique<std::regex>(
+		_pIPregexExpression,
 		std::regex_constants::icase);
 }
 
@@ -225,11 +231,13 @@ void Web::RemoveAllTabs()
 
 bool Web::SwitchToTab(int id)
 {
+	bool success = false;
+
     // Simple case
     if(id == _currentTabId)
     {
         // Success!
-        return true;
+		success = true;
     }
 
     // Verify that id exists
@@ -252,10 +260,16 @@ bool Web::SwitchToTab(int id)
             _tabs.at(_currentTabId)->Activate();
         }
 
-        return true;
+		success = true;
     }
 
-    return false;
+	// Tell Mediator and return
+	if (_currentTabId >= 0)
+	{
+		// Set active Tab in Mediator
+		_pCefMediator->SetActiveTab(_tabs.at(_currentTabId).get()); 
+	}
+    return success;
 }
 
 bool Web::SwitchToTabByIndex(int index)
@@ -603,16 +617,14 @@ void Web::UpdateTabOverview()
             }
         }
 
-        // Set style
+		// Styling
         if (tabId == _currentTabId)
         {
-            eyegui::setStyleOfElement(_pTabOverviewLayout, brickId, "current_tab_preview");
-            eyegui::setStyleOfElement(_pTabOverviewLayout, textblockId, "current_tab_preview");
+			_pMaster->SetStyleTreePropertyValue("tab_preview_" + std::to_string(i), eyegui::StylePropertyVec4::BackgroundColor, "0x50BAA6FF");
         }
         else
         {
-            eyegui::setStyleOfElement(_pTabOverviewLayout, brickId, "tab_preview");
-            eyegui::setStyleOfElement(_pTabOverviewLayout, textblockId, "tab_preview");
+			_pMaster->SetStyleTreePropertyValue("tab_preview_" + std::to_string(i), eyegui::StylePropertyVec4::BackgroundColor, "0x607d8bFF");
         }
     }
 
@@ -722,7 +734,7 @@ void Web::UpdateTabOverview()
         eyegui::setContentOfTextBlock(_pTabOverviewLayout, "url", " ");
 
         // Show placeholder in preview
-        eyegui::replaceElementWithPicture(_pTabOverviewLayout, "preview", "icons/Nothing.png", eyegui::ImageAlignment::ZOOMED, true);
+		eyegui::replaceElementWithBrick(_pTabOverviewLayout, "preview", "bricks/Nothing.beyegui", true);
 
 		// Reset icon of bookmark tab button
 		eyegui::setIconOfIconElement(_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_false.png");
@@ -757,14 +769,24 @@ void Web::UpdateTabOverviewIcon()
 
 bool Web::ValidateURL(const std::string& rURL) const
 {
+	bool valid = false;
+
+	// Check for URL
 	try
 	{
-		return std::regex_match(rURL, *(_upURLregex.get()));
+		valid |= std::regex_match(rURL, *(_upURLregex.get()));
 	}
-	catch (...)
+	catch (...) { valid = true; } // in case of failed validation, assume it is a URL since it seems to be complicated
+
+	// Check for IP
+	try
 	{
-		return true; // in case of failed validation, assume it is a URL since it seems to be complicated
+		valid |= std::regex_match(rURL, *(_upIPregex.get()));
 	}
+	catch (...) { valid = true; } // in case of failed validation, assume it is a IP since it seems to be complicated
+	
+	// Return result
+	return valid;
 }
 
 Web::TabJob::TabJob(Tab* pCaller)
@@ -795,10 +817,13 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
         if (id == "tab_overview")
         {
             _pWeb->ShowTabOverview(true);
+			JSMailer::instance().Send("tabs");
+			LabStreamMailer::instance().Send("Open Tab Overview");
         }
         else if (id == "settings")
         {
             _pWeb->_goToSettings = true;
+			JSMailer::instance().Send("settings");
         }
         else if (id == "back")
         {
@@ -807,6 +832,7 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
             {
                 _pWeb->_tabs[tabId]->GoBack();
             }
+			LabStreamMailer::instance().Send("Go back");
         }
         else if (id == "forward")
         {
@@ -815,6 +841,7 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
             {
                 _pWeb->_tabs[tabId]->GoForward();
             }
+			LabStreamMailer::instance().Send("Go forward");
         }
     }
     else
@@ -823,16 +850,21 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
         if(id == "close")
         {
             _pWeb->ShowTabOverview(false);
+			JSMailer::instance().Send("close");
+			LabStreamMailer::instance().Send("Close Tab Overview");
         }
 		else if (id == "history")
 		{
 			_pWeb->ShowTabOverview(false);
 			_pWeb->_upHistory->Activate(_pWeb->_currentTabId);
+			LabStreamMailer::instance().Send("Access History");
 		}
         else if (id == "edit_url")
         {
             _pWeb->ShowTabOverview(false);
             _pWeb->_upURLInput->Activate(_pWeb->_currentTabId);
+			JSMailer::instance().Send("edit");
+			LabStreamMailer::instance().Send("Edit URL");
         }
 		else if (id == "bookmark_tab")
 		{
@@ -854,8 +886,9 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				{
 					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_existing");
 				}
-				
 			}
+
+			JSMailer::instance().Send("bookmark_add");
 		}
         else if (id == "reload_tab")
         {
@@ -865,6 +898,7 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
                 _pWeb->_tabs[tabId]->Reload();
                 _pWeb->ShowTabOverview(false);
             }
+			LabStreamMailer::instance().Send("Reload tab");
         }
         else if (id == "close_tab")
         {
@@ -873,6 +907,7 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
                 _pWeb->RemoveTab(_pWeb->_currentTabId);
                 _pWeb->UpdateTabOverview();
             }
+			LabStreamMailer::instance().Send("Close tab");
         }
         else if (id == "back")
         {
@@ -898,12 +933,16 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 
             // Open URLInput to type in URL which should be loaded in new tab
             _pWeb->_upURLInput->Activate(tabId);
+
+			JSMailer::instance().Send("new_tab");
+			LabStreamMailer::instance().Send("Open new tab");
         }
         else if(id == "tab_button_0")
         {
             if(_pWeb->SwitchToTabByIndex(0 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
             {
                 _pWeb->ShowTabOverview(false);
+				JSMailer::instance().Send("tab0");
             }
         }
         else if(id == "tab_button_1")

@@ -8,7 +8,7 @@
 #include "src/State/Web/Tab/Pipelines/ZoomClickPipeline.h"
 #include "src/State/Web/Tab/Pipelines/PivotMenuPipeline.h"
 #include "src/State/Web/Tab/Pipelines/TextSelectionPipeline.h"
-#include "src/CEF/Extension/CefMediator.h"
+#include "src/CEF/Mediator.h"
 #include "src/Utils/MakeUnique.h"
 
 void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
@@ -133,11 +133,22 @@ void Tab::TabOverlayButtonListener::up(eyegui::Layout* pLayout, std::string id)
 	}
 }
 
+void Tab::TabOverlayKeyboardListener::keySelected(eyegui::Layout* pLayout, std::string id, std::string value)
+{
+	// Search for id in map
+	auto iter = _pTab->_overlayKeyboardSelectCallbacks.find(id);
+	if (iter != _pTab->_overlayKeyboardSelectCallbacks.end())
+	{
+		// Execute callback
+		iter->second(value);
+	}
+}
+
 void Tab::TabOverlayKeyboardListener::keyPressed(eyegui::Layout* pLayout, std::string id, std::u16string value)
 {
 	// Search for id in map
-	auto iter = _pTab->_overlayKeyboardCallbacks.find(id);
-	if (iter != _pTab->_overlayKeyboardCallbacks.end())
+	auto iter = _pTab->_overlayKeyboardPressCallbacks.find(id);
+	if (iter != _pTab->_overlayKeyboardPressCallbacks.end())
 	{
 		// Execute callback
 		iter->second(value);

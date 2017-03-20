@@ -5,14 +5,13 @@
 
 #include "DOMTrigger.h"
 #include "src/State/Web/Tab/Pipelines/TextInputPipeline.h"
+#include "src/Singletons/LabStreamMailer.h"
 #include <map>
 
 DOMTrigger::DOMTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMNode> spNode) : Trigger(pTab)
 {
     // Save member
     _spNode = spNode;
-
-    // TODO: Check type of DOMNode
 
     // Create id, which is unique in overlay
     _overlayButtonId = "dom_trigger" + std::to_string(_spNode->GetFrameID()) + "_" + std::to_string(_spNode->GetNodeID());
@@ -26,7 +25,17 @@ DOMTrigger::DOMTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMNode> s
     CalculatePositionOfOverlayButton(x, y);
 
     // Add overlay
-    _overlayFrameIndex = _pTab->AddFloatingFrameToOverlay("bricks/triggers/TextInput.beyegui", x, y, _size, _size, idMapper);
+	switch (_spNode->GetType())
+	{
+	case DOMNodeType::TextInput:
+		_overlayFrameIndex = _pTab->AddFloatingFrameToOverlay("bricks/triggers/TextInput.beyegui", x, y, _size, _size, idMapper);
+		break;
+	case DOMNodeType::SelectField:
+		_overlayFrameIndex = _pTab->AddFloatingFrameToOverlay("bricks/triggers/SelectField.beyegui", x, y, _size, _size, idMapper);
+		break;
+	default:
+		LogError("Unkown DOM Node Type as trigger");
+	}
 
     // Register listener
     _pTab->RegisterButtonListenerInOverlay(
@@ -50,7 +59,7 @@ bool DOMTrigger::Update(float tpf, TabInput& rTabInput)
     bool visible =
         _spNode->GetVisibility() // DOM node visible
         && !_spNode->GetRects().empty() // DOM node has rects
-        && _spNode->GetRects().front().width() != 0 && _spNode->GetRects().front().height() != 0; // At least the first rect is bigger than zero
+        && _spNode->GetRects().front().Width() != 0 && _spNode->GetRects().front().Height() != 0; // At least the first rect is bigger than zero
     if(_visible != visible)
     {
         _visible = visible;
@@ -68,16 +77,34 @@ bool DOMTrigger::Update(float tpf, TabInput& rTabInput)
     if(_triggered)
     {
         _triggered = false;
-		_pTab->PushBackPipeline(
-			std::move(
-				std::unique_ptr<TextInputPipeline>(
-					new TextInputPipeline(
-						_pTab,
-						_spNode))));
+
+		// Decide which pipline to execute
+		switch (_spNode->GetType())
+		{
+		case DOMNodeType::TextInput:
+		{
+			LabStreamMailer::instance().Send("Text input started");
+			_pTab->PushBackPipeline(
+				std::move(
+					std::unique_ptr<TextInputPipeline>(
+						new TextInputPipeline(
+							_pTab,
+							_spNode))));
+		}
+			break;
+		case DOMNodeType::SelectField:
+			// TODO
+			break;
+		default:
+			LogError("Unkown DOM Node Type as trigger");
+		}
+
+		// Return successful activation
         return true;
     }
     else
     {
+		// Still waiting for activation
         return false;
     }
 }

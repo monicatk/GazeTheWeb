@@ -15,7 +15,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="Back.svg">
+   sodipodi:docname="PreviousLetter.svg">
   <defs
      id="defs4" />
   <sodipodi:namedview
@@ -26,8 +26,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4142136"
-     inkscape:cx="187.58398"
-     inkscape:cy="113.72694"
+     inkscape:cx="190.05885"
+     inkscape:cy="118.67669"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -75,9 +75,8 @@
      transform="translate(0,-698.03155)">
     <path
        style="opacity:1;fill:#f2f2f2;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:4.38505936;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 209.31836,89.154297 c -1.60545,0.003 -3.17932,0.444001 -4.55274,1.275391 -46.87077,28.219562 -140.099604,86.511722 -140.099604,86.511722 0,0 93.228834,58.2902 140.099604,86.50976 1.37342,0.83139 2.94729,1.27239 4.55274,1.27539 4.8731,0 8.82226,-3.95112 8.82226,-8.82422 l 0,-39.70507 71.5254,0 0,-78.51368 -71.5254,0 0,-39.705074 c 0,-4.8731 -3.94916,-8.824219 -8.82226,-8.824219 z"
-       transform="translate(0,698.03153)"
-       id="path3335"
+       d="m 209.31768,787.41074 c -1.60545,0 -3.17932,0.444 -4.55274,1.2754 -46.87076,28.2196 -140.099586,86.51169 -140.099586,86.51169 0,0 93.228826,58.2903 140.099586,86.5098 1.37342,0.8314 2.94729,1.2724 4.55274,1.2754 4.8731,0 8.82226,-3.9511 8.82226,-8.8242 l 0,-48.9619 71.52541,0 0,-59.99999 -71.52541,0 0,-48.962 c 0,-4.8731 -3.94916,-8.8242 -8.82226,-8.8242 z"
+       id="path3335-0"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cccccsccccsc" />
   </g>

@@ -4,7 +4,6 @@
 //============================================================================
 
 #include "Master.h"
-#include "src/LabStream/LabStream.h"
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
 #include "submodules/glfw/include/GLFW/glfw3.h"
@@ -15,6 +14,7 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
+#include <fstream>
 
 // Namespace for text-csv
 namespace csv = ::text::csv;
@@ -97,7 +97,7 @@ const std::string simpleFragmentShaderSource =
 "   fragColor = texture(tex, uv);\n"
 "}\n";
 
-Master::Master(CefMediator* pCefMediator, std::string userDirectory)
+Master::Master(Mediator* pCefMediator, std::string userDirectory)
 {
     // Save members
     _pCefMediator = pCefMediator;
@@ -172,6 +172,9 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
 
 	// ### WINDOW ICON ###
 
+	// Set content path (before using it in the helper)
+	eyegui::setRootFilepath(CONTENT_PATH);
+
 	// Load window icons for GLFW
 	std::vector<unsigned char> icon16Data;
 	int icon16Width, icon16Height, icon16ChannelCount;
@@ -206,9 +209,6 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
 
     // ### EYEGUI ###
 
-    // Set content path
-    eyegui::setRootFilepath(CONTENT_PATH);
-
     // Set print callbacks
     std::function<void(std::string)> printGUICallback = [&](std::string message) { this->GUIPrintCallback(message); };
     eyegui::setErrorCallback(printGUICallback);
@@ -226,6 +226,7 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
 
 	// Create splash screen GUI, render it one time and throw it away
 	eyegui::GUI* pSplashGUI = guiBuilder.construct();
+	eyegui::loadStyleSheet(pSplashGUI, "stylesheets/Global.seyegui"); // load styling
 	eyegui::addLayout(pSplashGUI, "layouts/Splash.xeyegui"); // TODO: fill version string
 	eyegui::updateGUI(pSplashGUI, 1.f, eyegui::Input()); // update GUI one time for resizing
 	eyegui::drawGUI(pSplashGUI);
@@ -238,9 +239,9 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
     _pSuperGUI = guiBuilder.construct(); // GUI which is rendered on top of everything else
     LogInfo("..done.");
 
-    // Load configuration
-    eyegui::loadConfig(_pGUI, "configuration/Global.ceyegui");
-    eyegui::loadConfig(_pSuperGUI, "configuration/Global.ceyegui");
+    // Load styling
+    eyegui::loadStyleSheet(_pGUI, "stylesheets/Global.seyegui");
+	eyegui::loadStyleSheet(_pSuperGUI, "stylesheets/Global.seyegui");
 
     // Set resize callback of GUI
     std::function<void(int, int)> resizeGUICallback = [&](int width, int height) { this->GUIResizeCallback(width, height); };
@@ -320,7 +321,8 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
     _upWeb->Activate();
 
     // ### HOMEPAGE ###
-	_upWeb->AddTab(_upSettings->GetHomepage());
+	_upWeb->AddTab("https://www.tutorialspoint.com/html/html_select_tag.htm");
+	// _upWeb->AddTab(_upSettings->GetHomepage());
 
     // ### SUPER LAYOUT ###
 
@@ -370,13 +372,31 @@ Master::Master(CefMediator* pCefMediator, std::string userDirectory)
             geometryShaderSource,
             setup::BLUR_PERIPHERY ? blurFragmentShaderSource : simpleFragmentShaderSource));
 
+	// ### JavaScript to LSL ###
+
+	// Registers a JavaScript callback function that pipes JS callbacks starting with "lsl:" to LabStreamingLayer
+	_pCefMediator->RegisterJavascriptCallback("lsl:", [this](std::string message) { LabStreamMailer::instance().Send(message); });
+
+	// ### LabStreamCallback ###
+
+	// Create callback
+	_spLabStreamCallback = std::shared_ptr<LabStreamCallback>(new LabStreamCallback(
+		[](std::vector<std::string> messages)
+		{
+			for (const std::string& rMessage : messages)
+			{
+				LogInfo("LabStream: " + rMessage);
+			}
+		}
+	));
+
+	// Register callback
+	LabStreamMailer::instance().RegisterCallback(_spLabStreamCallback);
+
     // ### OTHER ###
 
     // Time
     _lastTime = glfwGetTime();
-
-    // Connection to LabStreamingLayer
-    _upLabStream = std::unique_ptr<LabStream>(new LabStream);
 }
 
 Master::~Master()
@@ -442,6 +462,16 @@ std::u16string Master::FetchLocalization(std::string key) const
 	return eyegui::fetchLocalization(_pGUI, key);
 }
 
+void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyFloat type, std::string value)
+{
+	eyegui::setStyleTreePropertyValue(_pGUI, styleClass, type, value);
+}
+
+void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyVec4 type, std::string value)
+{
+	eyegui::setStyleTreePropertyValue(_pGUI, styleClass, type, value);
+}
+
 void Master::Loop()
 {
 	while (!_exit)
@@ -464,12 +494,8 @@ void Master::Loop()
 			_timeUntilInput -= tpf;
 		}
 
-		// Poll lab streaming layer communication (TODO: testing)
-		auto labStreamInput = _upLabStream->Poll();
-		for (const std::string& rEvent : labStreamInput)
-		{
-			LogInfo("Master: LabStreamInput = ", rEvent);
-		}
+		// Update lab streaming layer mailer to get incoming messages
+		LabStreamMailer::instance().Update();
 
 		// Poll CefMediator
 		_pCefMediator->Poll(tpf);
@@ -544,10 +570,10 @@ void Master::Loop()
 
         // Pause visualization
         _pausedDimming.update(tpf, !_paused);
-        eyegui::setValueOfStyleAttribute(
-            _pSuperLayout,
+        eyegui::setStyleTreePropertyValue(
+			_pSuperGUI,
             "pause_background",
-            "background-color",
+			eyegui::StylePropertyVec4::BackgroundColor,
             RGBAToHexString(glm::vec4(0, 0, 0, MASTER_PAUSE_ALPHA * _pausedDimming.getValue())));
 
         // Input struct for eyeGUI
@@ -581,7 +607,7 @@ void Master::Loop()
         _pCefMediator->DoMessageLoopWork();
 
         // Create input struct for own framework
-        Input input(usedEyeGUIInput.gazeX, usedEyeGUIInput.gazeY, usedEyeGUIInput.gazeUsed);
+        Input input(usedEyeGUIInput.gazeX, usedEyeGUIInput.gazeY, usedEyeGUIInput.gazeUsed, usedEyeGUIInput.instantInteraction);
 
         // Bind framebuffer
         _upFramebuffer->Bind();
@@ -684,8 +710,7 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_ESCAPE: { Exit(); break; }
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
-            case GLFW_KEY_S: { _upLabStream->Send("42"); break; } // TODO: testing
-
+			case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
         }
     }

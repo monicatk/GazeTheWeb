@@ -15,7 +15,7 @@
 #include "src/Utils/Logger.h"
 
 // Execute function to have Master object on stack which might be faster than on heap
-void Execute(CefRefPtr<App> app, std::string userDirectory)
+void Execute(CefRefPtr<MainCefApp> app, std::string userDirectory)
 {
     // Initialize master
     Master master(app.get(), userDirectory);
@@ -30,7 +30,7 @@ void Execute(CefRefPtr<App> app, std::string userDirectory)
 }
 
 // Common main for linux and windows
-int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app, void* windows_sandbox_info, std::string userDirectory)
+int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<MainCefApp> app, void* windows_sandbox_info, std::string userDirectory)
 {
 
 #ifdef DEPLOYMENT

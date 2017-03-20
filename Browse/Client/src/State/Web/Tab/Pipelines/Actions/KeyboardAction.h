@@ -11,6 +11,7 @@
 #define KEYBOARDACTION_H_
 
 #include "src/State/Web/Tab/Pipelines/Actions/Action.h"
+#include "src/Singletons/LabStreamMailer.h"
 
 class KeyboardAction : public Action
 {
@@ -83,6 +84,15 @@ protected:
 
     // Bool which indicates whether text should submitted directly
     bool _submit = false;
+
+	// Key selection classification duration in seconds
+	const float CLASSIFICATION_DURATION = 0.01f; // set low since currently not used
+
+	// Key selection classification time in seconds
+	float _classificationTime = 0.f;
+
+	// LabStreamMailer callback to receive classification of key
+	std::shared_ptr<LabStreamCallback> _spLabStreamCallback;
 };
 
 #endif // KEYBOARDACTION_H_

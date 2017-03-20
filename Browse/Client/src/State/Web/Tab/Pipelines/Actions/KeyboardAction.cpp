@@ -7,6 +7,8 @@
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 
+#include "src/Singletons/JSMailer.h"
+
 KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 {
     // Add in- and output data slots
@@ -62,13 +64,35 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 	// Keyboard
     _pTab->RegisterKeyboardListenerInOverlay(
         _overlayKeyboardId,
-        [&](std::u16string value)
+		[&](std::string value) // select callback
+		{
+			// ######################################################
+			// ### TODO CERTH #######################################
+			// ######################################################
+			// This lambda function is called when ANY key on keyboard is selected by user.
+			// In this example, the timer for classification is reset.
+
+			// Start classification here (send something to LSL)
+			_classificationTime = CLASSIFICATION_DURATION;
+
+			// ######################################################
+
+			// Send marker about key selection into lab streaming layer
+			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_" + value);
+
+		},
+        [&](std::u16string value) // press callback
         {
 			// Add content from keyboard
 			_pTab->AddContentAtCursorInTextEdit(_overlayTextEditId, value);
 
+			// Do logging about it
+			JSMailer::instance().Send("keystroke");
+
 			// Refresh suggestions
-            _pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, _pTab->GetActiveEntityContentInTextEdit(_overlayTextEditId));
+            _pTab->DisplaySuggestionsInWordSuggest(
+				_overlayWordSuggestId,
+				_pTab->GetActiveEntityContentInTextEdit(_overlayTextEditId));
         });
 
 	// Complete button
@@ -204,6 +228,28 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 		_pTab->MoveCursorOverLettersInTextEdit(_overlayTextEditId, -1);
 	},
 	[]() {}); // up callback
+
+	// Create callback for lab streaming layer to send classificatoin
+	_spLabStreamCallback = std::shared_ptr<LabStreamCallback>(new LabStreamCallback(
+		[this](std::vector<std::string> messages)
+	{
+		for (const std::string& rMessage : messages)
+		{
+			// ######################################################
+			// ### TODO CERTH #######################################
+			// ######################################################
+			
+			// Parse string and check for classification. If available,
+			// set some member in keyboard action to know in update
+			// that classification is done and how to proceed
+
+			// ######################################################
+		}
+	}
+	));
+
+	// Register that callback
+	LabStreamMailer::instance().RegisterCallback(_spLabStreamCallback);
 }
 
 KeyboardAction::~KeyboardAction()
@@ -229,6 +275,28 @@ KeyboardAction::~KeyboardAction()
 
 bool KeyboardAction::Update(float tpf, TabInput tabInput)
 {
+	// ######################################################
+	// ### TODO CERTH #######################################
+	// ######################################################
+	// When classification timer is set, it is decremted at each update.
+	// When timer is zero, selection is ALWAYS accepted. Please change as required.
+
+	// Check classification
+	if (_classificationTime > 0)
+	{
+		_classificationTime -= tpf; // decrement timer
+		_classificationTime = glm::max(0.f, _classificationTime); // lower limit of timer
+
+		// When timer is complete, accept selection
+		if (_classificationTime <= 0)
+		{
+			_pTab->ClassifyKey(_overlayKeyboardId, true); // true for accept
+		}
+	}
+
+	// ######################################################
+
+	// Decide whether action is complete
     if (_complete)
     {
         // Fill collected input to output
@@ -236,6 +304,8 @@ bool KeyboardAction::Update(float tpf, TabInput tabInput)
 
         // Submit text directly if wished
         SetOutputValue("submit", _submit);
+
+		JSMailer::instance().Send("submit");
 
         // Action is now finished
         return true;
