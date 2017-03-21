@@ -62,7 +62,7 @@ public:
 	int GetWidth() const;
 	int GetHeight() const;
 
-	// Getter for web view resolution
+	// Getter for web view resolution (aka CEFPixels)
 	int GetResolutionX() const;
 	int GetResolutionY() const;
 

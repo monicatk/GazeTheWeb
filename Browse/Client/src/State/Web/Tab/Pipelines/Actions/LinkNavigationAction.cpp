@@ -29,7 +29,6 @@ bool LinkNavigationAction::Update(float tpf, TabInput tabInput)
     // Decide what to click
 	double CEFPixelX = coordinate.x;
 	double CEFPixelY = coordinate.y;
-	_pTab->ConvertToCEFPixel(CEFPixelX, CEFPixelY);
     double scrollingX, scrollingY;
     _pTab->GetScrollingOffset(scrollingX, scrollingY);
 

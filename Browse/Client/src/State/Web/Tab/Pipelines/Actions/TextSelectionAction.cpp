@@ -15,8 +15,12 @@ TextSelectionAction::TextSelectionAction(TabInteractionInterface *pTab) : ZoomCo
 
 bool TextSelectionAction::Update(float tpf, TabInput tabInput)
 {
+	
+
 	// Call standard zoom coordinate update function
 	bool done = ZoomCoordinateAction::Update(tpf, tabInput);
+
+	/* TODO: reintegrate
 
 	// Calculate current coordinate in WebViewPixel space
 	glm::vec2 webViewPixels(_pTab->GetWebViewWidth(), _pTab->GetWebViewHeight());
@@ -36,6 +40,8 @@ bool TextSelectionAction::Update(float tpf, TabInput tabInput)
 		// Keep emulating mouse cursor
 		_pTab->EmulateMouseCursor(coordinate.x, coordinate.y, true, setup::TEXT_SELECTION_MARGIN);
 	}
+
+	*/
 
     return done;
 }

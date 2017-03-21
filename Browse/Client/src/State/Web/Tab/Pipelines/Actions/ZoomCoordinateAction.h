@@ -4,7 +4,7 @@
 //============================================================================
 // Action to zoom to a coordinate with gaze.
 // - Input: none
-// - Output: vec2 coordinate in WebViewPixel space
+// - Output: vec2 coordinate in CEFPixel space
 
 #ifndef ZOOMCOORDINATEACTION_H_
 #define ZOOMCOORDINATEACTION_H_
@@ -37,11 +37,14 @@ public:
 
 protected:
 
+	// States of zooming
+	enum class State { ORIENTATE, ZOOM, WAIT, DEBUG };
+
 	// Zoom data at point in time of execution
 	struct ZoomData
 	{
-		glm::vec2 pixelGazeCoordinate; // gaze on web view in pixels. Already free of zooming and center moving offset
-		glm::vec2 pixelZoomCoordinate; // coordinate of zooming in pixels
+		glm::vec2 pixelGazeCoordinate; // gaze in cef pixels
+		glm::vec2 pixelZoomCoordinate; // center of zooming in cef pixels
 		float logZoom; // value of log zoom at that time
 	};
 
@@ -58,13 +61,16 @@ protected:
 	const float CENTER_OFFSET_MULTIPLIER = 0.75f; // TODO debugging 0.5f;
 
 	// Duration to replace current coordinate with input
-	const float MOVE_DURATION = 0.5f;
+	const float MOVE_DURATION = 0.75f;
 
 	// Speed of zoom
-	const float ZOOM_SPEED = 0.3f;
+	const float ZOOM_SPEED = 0.25f;
 
-    // Coordinate which is updated and later output. In relative web view space
-    glm::vec2 _coordinate; // aka zoom coordinate
+    // Coordinate of center of zooming in relative CEFPixel space
+    glm::vec2 _pixelZoomCoordinate; // aka zoom coordinate
+
+	// Offset to center of WebView in CEFPixel space
+	glm::vec2 _pixelCenterOffset = glm::vec2(0, 0);
 
     // Log zooming amount (used for rendering)
 	// Calculated as 1.f - log(_linZoom), so becoming smaller at higher zoom levels
@@ -73,9 +79,6 @@ protected:
     // Linear zooming amount (used for calculations)
 	// Increasing while zooming
     float _linZoom = 1.f; // [1..]
-
-    // Offset to center of webview
-    glm::vec2 _coordinateCenterOffset = glm::vec2(0, 0);
 
     // Bool to indicate first update
     bool _firstUpdate = true;
@@ -90,14 +93,14 @@ protected:
 	// Do dimming
 	bool _doDimming = true;
 
-	// In drift correction mode (while off, zoom coordinate is improved. while on, just zooming happens)
-	bool _driftCorrection = false;
-
 	// Datas saved before drift correction zooming starts
 	ZoomData _zoomData;
 
-	// TODO: debugging
-	bool _doDebugging = false;
+	// Time after zooming to wait for gaze to calm down
+	float _gazeCalmDownTime = 0.5f;
+
+	// State of action
+	State _state = State::ORIENTATE;
 };
 
 #endif // ZOOMCOORDINATEACTION_H_

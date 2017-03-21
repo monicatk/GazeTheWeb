@@ -23,8 +23,8 @@ namespace setup
     static const float LINK_CORRECTION_MAX_PIXEL_DISTANCE = 5.f;
 	static const int TEXT_SELECTION_MARGIN = 4; // area which is selected before / after zoom coordinate in CEFPixels
 	static const bool EYEINPUT_DISTORT_GAZE = true;
-	static const float EYEINPUT_DISTORT_GAZE_BIAS_X = 16.f; // pixels
-	static const float EYEINPUT_DISTORT_GAZE_BIAS_Y = 64.f; // pixels
+	static const float EYEINPUT_DISTORT_GAZE_BIAS_X = 64.f; // pixels
+	static const float EYEINPUT_DISTORT_GAZE_BIAS_Y = 32.f; // pixels
 
     // Debugging
     static const bool LOG_DEBUG_MESSAGES = true;
