@@ -28,19 +28,20 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	// Pixels in cef pixels
 	glm::vec2 cefPixels(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY());
 
-	// Function transforms from relative coordinates to CEFPixel coordinates
+	// Function transforms from relative WebView coordinates to CEFPixel coordinates
 	const std::function<void(glm::vec2&)> pageCoordinate = [&](glm::vec2& rRelativeCoordinate)
 	{
 		// Analogous to shader in WebView
-		rRelativeCoordinate *= cefPixels; // into pixel space of CEF
-		rRelativeCoordinate += _pixelCenterOffset; // add center offset
-		rRelativeCoordinate -= _pixelZoomCoordinate; // move zoom position to origin
+		rRelativeCoordinate += _relativeCenterOffset; // add center offset
+		rRelativeCoordinate -= _relativeZoomCoordinate; // move zoom position to origin
 		rRelativeCoordinate *= _logZoom; // apply zoom
-		rRelativeCoordinate += _pixelZoomCoordinate; // move back
+		rRelativeCoordinate += _relativeZoomCoordinate; // move back
+		rRelativeCoordinate *= cefPixels; // into pixel space of CEF
 	};
 
-	// Current gaze in CEFPixel coordinates
-	glm::vec2 pixelGazeCoordinate = glm::vec2(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY);
+	// Current gaze
+	glm::vec2 relativeGazeCoordiante = glm::vec2(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY);
+	glm::vec2 pixelGazeCoordinate = relativeGazeCoordiante; // CEFPixel space
 	pageCoordinate(pixelGazeCoordinate);
 
 	// ### Update zoom speed and center offset ###
@@ -58,14 +59,12 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			// Update coordinate
 			if (!_firstUpdate)
 			{
-				// Delta of coordinates in CEFPixel space
-				glm::vec2 delta = (pixelGazeCoordinate - _pixelZoomCoordinate);
-
-				// Move to new click position
-				_pixelZoomCoordinate += delta * (tpf / MOVE_DURATION);
+				// Move towards new coordinate
+				glm::vec2 relativeDelta = (relativeGazeCoordiante + _relativeCenterOffset) - _relativeZoomCoordinate; // TODO: why + relativeCenterOffset?
+				_relativeZoomCoordinate += relativeDelta * glm::min(1.f, (tpf / MOVE_DURATION));
 
 				// Set length of delta to deviation if bigger than current deviation
-				_deviation = glm::min(1.f, glm::max(glm::length(delta) / glm::compMax(cefPixels), _deviation)); // make delta in [0..1]
+				_deviation = glm::min(1.f, glm::max(glm::length(relativeDelta), _deviation)); // [0..1]
 
 				// If at the moment a high deviation is given, try to zoom out to give user more overview
 				zoomSpeed = ZOOM_SPEED - glm::min(1.f, 3.f * _deviation); // TODO weight deviation more intelligent
@@ -73,17 +72,17 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			else // first frame of execution
 			{
 				// Use current gaze coordinate as new coordinate
-				_pixelZoomCoordinate = pixelGazeCoordinate;
+				_relativeZoomCoordinate = relativeGazeCoordiante;
 
 				// Since only for first frame, do not do it again
 				_firstUpdate = false;
 			}
 
 			// Calculated center offset
-			_pixelCenterOffset =
+			_relativeCenterOffset =
 				CENTER_OFFSET_MULTIPLIER
 				* (1.f - _logZoom) // weight with zoom (starting at zero) to have more centered version at higher zoom level
-				* (_pixelZoomCoordinate - (cefPixels * 0.5f)); // vector from current zoom coordinate to center of web view
+				* (_relativeZoomCoordinate - 0.5f); // vector from current zoom coordinate to center of web view
 
 			// Get out of case
 			break;
@@ -177,7 +176,6 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			break;
 		}
 	}
-
 	*/
 
 	// ### Update WebView ###
@@ -188,9 +186,9 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 
 	// Tell web view about zoom and dimming
 	WebViewParameters webViewParameters;
-	webViewParameters.centerOffset = _pixelCenterOffset / cefPixels;
+	webViewParameters.centerOffset = _relativeCenterOffset;
 	webViewParameters.zoom = _logZoom;
-	webViewParameters.zoomPosition = _pixelZoomCoordinate / cefPixels;
+	webViewParameters.zoomPosition = _relativeZoomCoordinate;
 	if (_doDimming) { webViewParameters.dim = DIMMING_VALUE * (_dimming / DIMMING_DURATION); }
 	_pTab->SetWebViewParameters(webViewParameters);
 
@@ -200,64 +198,28 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 
 void ZoomCoordinateAction::Draw() const
 {
-	// TODO: Does not work :C
-	glm::vec2 cefPixels(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY());
+	// WebView pixels
 	glm::vec2 webViewPixels(_pTab->GetWebViewWidth(), _pTab->GetWebViewHeight());
 
-	// TODO: CEFPixel VS WebViewPixels
-	// Function to move coordinate according to current zoom. Takes CEFPixel coordinate
+	// Function to move coordinate according to current zoom. Takes relative WebView coordinate
 	const std::function<void(glm::vec2&)> applyZooming = [&](glm::vec2& rCoordinate)
 	{
-		rCoordinate += _pixelCenterOffset;
-		rCoordinate -= _pixelZoomCoordinate;
-		rCoordinate *= _logZoom;
-		rCoordinate += _pixelZoomCoordinate;
+		rCoordinate -= _relativeZoomCoordinate;
+		rCoordinate /= _logZoom; // inverse to WebView shader
+		rCoordinate += _relativeZoomCoordinate;
+		rCoordinate -= _relativeCenterOffset; // inverse to WebView shader
+		rCoordinate *= webViewPixels;
 	};
 
 	// Zoom coordinate
-	glm::vec2 zoomCoordinate(_pixelZoomCoordinate);
+	glm::vec2 zoomCoordinate(_relativeZoomCoordinate);
 	applyZooming(zoomCoordinate);
 	_pTab->Debug_DrawRectangle(zoomCoordinate, glm::vec2(5, 5), glm::vec3(1, 0, 0));
 
 	// Testing visualization
-	glm::vec2 testCoordinate(100, 400);
+	glm::vec2 testCoordinate(0.3f, 0.5f);
 	applyZooming(testCoordinate);
 	_pTab->Debug_DrawRectangle(testCoordinate, glm::vec2(5, 5), glm::vec3(0, 0, 1));
-
-	/*
-	// Pixels in web view
-	int webViewWidth = ;
-	int webViewHeight = ;
-	
-
-	// Function to move coordinate according to current zoom. Takes relative coordinate
-	const std::function<void(glm::vec2&)> applyZooming = [&](glm::vec2& rRelativeCoordinate)
-	{
-		rRelativeCoordinate -= _relativeZoomCoordinate;
-		rRelativeCoordinate /= _logZoom;
-		rRelativeCoordinate += _relativeZoomCoordinate;
-		rRelativeCoordinate -= _relativeCenterOffset;
-		rRelativeCoordinate *= webViewPixels;
-	};
-
-	// Zoom coordinate
-	glm::vec2 zoomCoordinate(_relativeZoomCoordinate); // relative coordinate
-	applyZooming(zoomCoordinate);
-	_pTab->Debug_DrawRectangle(zoomCoordinate, glm::vec2(5, 5), glm::vec3(1, 0, 0));
-
-	// Draw info after click would have been performed
-	if (_state == State::DEBUG)
-	{
-		glm::vec2 pixelFixationCoordinate;
-		GetOutputValue("coordinate", pixelFixationCoordinate);
-		_pTab->Debug_DrawRectangle(pixelFixationCoordinate, glm::vec2(5, 5), glm::vec3(1, 1, 0));
-	}
-
-	// Testing visualization
-	glm::vec2 testCoordinate(0.3f, 0.4f); // relative coordinate
-	applyZooming(testCoordinate);
-	_pTab->Debug_DrawRectangle(testCoordinate, glm::vec2(5, 5), glm::vec3(0, 0, 1));
-	*/
 }
 
 void ZoomCoordinateAction::Activate()

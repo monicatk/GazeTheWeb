@@ -66,11 +66,11 @@ protected:
 	// Speed of zoom
 	const float ZOOM_SPEED = 0.25f;
 
-    // Coordinate of center of zooming in relative CEFPixel space
-    glm::vec2 _pixelZoomCoordinate; // aka zoom coordinate
+    // Coordinate of center of zooming in relative WebView space
+    glm::vec2 _relativeZoomCoordinate; // aka zoom coordinate
 
-	// Offset to center of WebView in CEFPixel space
-	glm::vec2 _pixelCenterOffset = glm::vec2(0, 0);
+	// Offset to center of WebView in relative space
+	glm::vec2 _relativeCenterOffset = glm::vec2(0, 0);
 
     // Log zooming amount (used for rendering)
 	// Calculated as 1.f - log(_linZoom), so becoming smaller at higher zoom levels
