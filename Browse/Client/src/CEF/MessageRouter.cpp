@@ -257,37 +257,21 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		if (data.size() > 3)
 		{
 			const std::string& op = data[1];
-			const int& numeric_type = std::stoi(data[2]);
+			const int& type = std::stoi(data[2]);
 			const int& id = std::stoi(data[3]);
-			
-			// Identify type as string with DOMNodeType
-			DOMNodeType type;
-			switch (numeric_type)
-			{
-				case(0) : {type = DOMNodeType::TextInput; break;  };
-				case(1) : {type = DOMNodeType::TextLink; break;  };
-				case(2) : {type = DOMNodeType::SelectField; break;  };
-				default: {
-					LogError("MsgRouter: Can't process the following incoming msg:\n", requestString, "\nCAUSE: Unknown DOMNodeType: ", numeric_type);
-					return true;
-				}
-			}
-
+		
+			// ADD
 			if (op.compare("add") == 0) // adding of DOM node
 			{
-				// TODO(Daniel): Create different AddDOMNode methods in Tab for different object types
-				if (type == DOMNodeType::SelectField)
+				// Create blank node object in corresponding Tab object
+				switch (type)
 				{
-					// DEBUG
-					//LogDebug("MsgRouter: Added blank DOM SelectField node, sending IPC msg in order to fill it with data.");
-
-					// Create blank DOM node of given node type with nodeID
-					_pMediator->AddDOMNode(browser,	std::make_shared<DOMSelectField>(id));
-				}
-				else
-				{
-					// Create blank DOM node of given node type with nodeID
-					_pMediator->AddDOMNode(browser, std::make_shared<DOMNode>(type, id));
+					case(0): {_pMediator->AddDOMTextInput(browser, id); break; }
+					case(1): {_pMediator->AddDOMLink(browser, id); break; }
+					case(2): {_pMediator->AddDOMSelectField(browser, id); break; }
+					default: {
+						LogError("MsgRouter: Adding DOMNode - Unknown type of DOMNode! type=", type);
+					}
 				}
 
 				// Instruct Renderer Process to initialize empty DOM Nodes with data
@@ -297,110 +281,47 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				browser->SendProcessMessage(PID_RENDERER, msg);
 			}
 
+			// REMOVE
 			if (op.compare("rem") == 0) // removing of DOM node
 			{
-				_pMediator->RemoveDOMNode(browser, type, id);
+				switch (type)
+				{
+					case(0): {_pMediator->RemoveDOMTextInput(browser, id); break; }
+					case(1): {_pMediator->RemoveDOMLink(browser, id); break; }
+					case(2): {_pMediator->RemoveDOMSelectField(browser, id); break; }
+					default: {
+						LogError("MsgRouter: Removing DOMNode - Unknown type of DOMNode! type=", type);
+					}
+				}
 			}
 
+			// UPDATE
 			if (op.compare("upd") == 0) // updating of DOM node
 			{
+				std::weak_ptr<DOMNode> target;
+				switch (type)
+				{
+					case(0): {target = _pMediator->GetDOMTextInput(browser, id); break; }
+					case(1): {target = _pMediator->GetDOMLink(browser, id); break; }
+					case(2): {target = _pMediator->GetDOMSelectField(browser, id); break; }
+					default: {
+						LogError("MsgRouter: Updating DOMNode - Unknown type of DOMNode! type=", type);
+					}
+				}
+
 				if (data.size() > 5)
 				{
-					const int& attr = std::stoi(data[4]);
+					// See DOMNode.h enum DOMAttribute for numeric interpretation
+					const DOMAttribute& attr = (DOMAttribute) std::stoi(data[4]);
 					const std::string& attrData = data[5];
-					
-					switch (attr)
+
+					// Perform node update
+					if (auto node = target.lock())
 					{
-						// List of Rects were updated
-						case(0):
-						{
-							std::vector<std::string> rectDataStr = SplitBySeparator(attrData, ';');
-							std::vector<float> rectData;
-
-							// Extract each float value from string, earlier separated by ';', and convert string to numerical value
-							std::for_each(
-								rectDataStr.begin(),
-								rectDataStr.end(), 
-								[&rectData](std::string value) {rectData.push_back(std::stod(value)); }
-							);
-
-							// Read out each 4 float values und create 1 Rect with them
-							std::vector<Rect> rects;
-							for (int i = 0; i + 3 < rectData.size(); i += 4)
-							{
-								Rect rect = Rect(rectData[i], rectData[i + 1], rectData[i + 2], rectData[i + 3]);
-								rects.push_back(rect);
-							}
-
-							if (type == DOMNodeType::SelectField)
-							{
-								if (auto targetNode = _pMediator->GetDOMSelectFieldNode(browser, id).lock())
-								{
-									targetNode->SetRects(std::make_shared<std::vector<Rect>>(rects));
-								}
-							}
-							// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
-							else if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())
-							{
-								targetNode->SetRects(std::make_shared<std::vector<Rect>>(rects));
-							}
-							break;
-						};
-
-						// Node's fixation status changed
-						case(1):
-						{
-							bool boolVal = attrData.at(0) != '0';
-
-							// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
-							if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())
-							{
-								targetNode->SetFixed(boolVal);
-							}
-
-							break;
-						};
-
-						// Node's visibility has changed
-						case (2) :
-						{
-							bool boolVal = attrData.at(0) != '0';
-
-							// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
-							if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())
-							{
-								targetNode->SetVisibility(boolVal);
-							}
-
-							break;
-						}
-
-						// Node's text content changed
-						case (3):
-						{
-							if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())
-							{
-								targetNode->SetText(attrData);
-							}
-							break;
-						}
-
-						// Node is set as password input field
-						case(4):
-						{
-							if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())
-							{
-								targetNode->SetAsPasswordField();
-								LogDebug("MsgRouter: Set input field node to password field!");
-							}
-							break;
-						}
-
-						// Fallback
-						default:
-						{
-							LogDebug("MsgHandler: Received Javascript 'update' request of DOMNode attribute=", attr, ", which is not yet defined.");
-						}
+						node->Update(
+							(DOMAttribute) attr,
+							ExtractAttributeDataFromString((DOMAttribute) attr, attrData)
+						);
 					}
 				}
 				else

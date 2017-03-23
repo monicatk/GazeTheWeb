@@ -6,6 +6,8 @@
 
 #include "DOMNode.h"
 #include "src/Utils/Logger.h"
+#include "src/Utils/Helper.h"
+#include <algorithm>
 
 /*
    ___  ____  __  ____  __        __      
@@ -38,7 +40,7 @@ int DOMNode::Initialize(CefRefPtr<CefProcessMessage> msg)
 	return _description.size() + 1;
 }
 
-bool DOMNode::Update(DOMAttribute attr, CefRefPtr<CefValue> data)
+bool DOMNode::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 {
 	switch (attr) {
 		case DOMAttribute::Rects:			return IPCSetRects(data);
@@ -49,12 +51,13 @@ bool DOMNode::Update(DOMAttribute attr, CefRefPtr<CefValue> data)
 	return false;
 }
 
-bool DOMNode::IPCSetRects(CefRefPtr<CefValue> data)
+bool DOMNode::IPCSetRects(CefRefPtr<CefListValue> data)
 {
-	if (data->GetType() != CefValueType::VTYPE_LIST)
+	// TODO: Unterscheidung CefListValue und CefValue...
+	if (data->GetSize() != 1 && data->GetValue(0)->GetType() != CefValueType::VTYPE_LIST)
 		return false;
 
-	const auto rectList = data->GetList();
+	const auto rectList = data->GetValue(0)->GetList();
 	std::vector<Rect> rects;
 	for (int i = 0; i < rectList->GetSize(); i++)
 	{
@@ -71,7 +74,7 @@ bool DOMNode::IPCSetRects(CefRefPtr<CefValue> data)
 	return true;
 }
 
-bool DOMNode::IPCSetFixedId(CefRefPtr<CefValue> data)
+bool DOMNode::IPCSetFixedId(CefRefPtr<CefListValue> data)
 {
 	if (data->GetType() != CefValueType::VTYPE_INT)
 		return false;
@@ -80,7 +83,7 @@ bool DOMNode::IPCSetFixedId(CefRefPtr<CefValue> data)
 	return true;
 }
 
-bool DOMNode::IPCSetOverflowId(CefRefPtr<CefValue> data)
+bool DOMNode::IPCSetOverflowId(CefRefPtr<CefListValue> data)
 {
 	if (data->GetType() != CefValueType::VTYPE_INT)
 		return false;
@@ -124,7 +127,7 @@ int DOMTextInput::Initialize(CefRefPtr<CefProcessMessage> msg)
 	return _description.size() + pivot;
 }
 
-bool DOMTextInput::Update(DOMAttribute attr, CefRefPtr<CefValue> data)
+bool DOMTextInput::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 {
 	switch (attr) {
 		case DOMAttribute::Text:			return IPCSetText(data);
@@ -133,7 +136,7 @@ bool DOMTextInput::Update(DOMAttribute attr, CefRefPtr<CefValue> data)
 	return super::Update(attr, data);
 }
 
-bool DOMTextInput::IPCSetText(CefRefPtr<CefValue> data)
+bool DOMTextInput::IPCSetText(CefRefPtr<CefListValue> data)
 {
 	if (data->GetType() != CefValueType::VTYPE_STRING)
 		return false;
@@ -142,12 +145,12 @@ bool DOMTextInput::IPCSetText(CefRefPtr<CefValue> data)
 	return true;
 }
 
-bool DOMTextInput::IPCSetPassword(CefRefPtr<CefValue> data)
+bool DOMTextInput::IPCSetPassword(CefRefPtr<CefListValue> data)
 {
 	if (data->GetType() != CefValueType::VTYPE_BOOL)
 		return false;
 
-	SetPassword(data->GetBool());
+	SetPassword(data->GetBool(0));
 	return true;
 }
 
@@ -186,7 +189,7 @@ int DOMLink::Initialize(CefRefPtr<CefProcessMessage> msg)
 	return _description.size() + pivot;
 }
 
-bool DOMLink::Update(DOMAttribute attr, CefRefPtr<CefValue> data)
+bool DOMLink::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 {
 	switch (attr) {
 		case DOMAttribute::Text:			return IPCSetText(data);
@@ -195,7 +198,7 @@ bool DOMLink::Update(DOMAttribute attr, CefRefPtr<CefValue> data)
 	return super::Update(attr, data);
 }
 
-bool DOMLink::IPCSetText(CefRefPtr<CefValue> data)
+bool DOMLink::IPCSetText(CefRefPtr<CefListValue> data)
 {
 	if (data->GetType() != CefValueType::VTYPE_STRING)
 		return false;
@@ -204,7 +207,7 @@ bool DOMLink::IPCSetText(CefRefPtr<CefValue> data)
 	return true;
 }
 
-bool DOMLink::IPCSetUrl(CefRefPtr<CefValue> data)
+bool DOMLink::IPCSetUrl(CefRefPtr<CefListValue> data)
 {
 	if (data->GetType() != CefValueType::VTYPE_STRING)
 		return false;
@@ -248,7 +251,7 @@ int DOMSelectField::Initialize(CefRefPtr<CefProcessMessage> msg)
 	return _description.size() + pivot;
 }
 
-bool DOMSelectField::Update(DOMAttribute attr, CefRefPtr<CefValue> data)
+bool DOMSelectField::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 {
 	switch (attr) {
 		case DOMAttribute::Options:		return IPCSetOptions(data);
@@ -256,7 +259,7 @@ bool DOMSelectField::Update(DOMAttribute attr, CefRefPtr<CefValue> data)
 	return super::Update(attr, data);
 }
 
-bool DOMSelectField::IPCSetOptions(CefRefPtr<CefValue> data)
+bool DOMSelectField::IPCSetOptions(CefRefPtr<CefListValue> data)
 {
 	return false;
 }

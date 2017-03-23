@@ -30,6 +30,8 @@ class TabCEFInterface;
 class Texture;
 class DOMNode;
 class OverflowElement;
+class DOMTextInput;
+class DOMLink;
 class DOMSelectField;
 
 typedef int BrowserID;
@@ -133,11 +135,6 @@ public:
 	std::weak_ptr<DOMTextInput> GetDOMTextInput(CefRefPtr<CefBrowser> browser, int id);
 	std::weak_ptr<DOMLink> GetDOMLink(CefRefPtr<CefBrowser> browser, int id);
 	std::weak_ptr<DOMSelectField> GetDOMSelectField(CefRefPtr<CefBrowser> browser, int id);
-
-	// TODO: Update(attr) & Initialize(objMsg) functions needed for every DOMNode subclass?
-
-	void FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
-	void InitializeDOMNode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
 
 
 	/* Interaction with DOM nodes */

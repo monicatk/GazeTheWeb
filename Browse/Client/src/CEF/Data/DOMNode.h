@@ -11,19 +11,13 @@
 //#include "src/Typedefs.h"
 #include "src/CEF/Data/Rect.h"
 #include "src/Utils/glmWrapper.h"
+#include "src/CEF/Data/DOMExtraction.h"
 //#include "src/CEF/Data/DOMNodeType.h"
 #include <vector>
 #include <string>
 #include <memory>
 #include <include/cef_process_message.h>
 
-#include <map>
-#include <functional>
-
-enum DOMAttribute {
-	Rects, FixedId, OverflowId,
-	Text, IsPassword, Url, Options
-};
 
 /*
    ___  ____  __  ____  __        __      
@@ -40,7 +34,7 @@ public:
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
 	// CefProcessMessage to C++ object
-	virtual bool Update(DOMAttribute attr, CefRefPtr<CefValue> data);
+	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data);
 
 	const std::vector<DOMAttribute> GetDescription();
 	
@@ -55,9 +49,9 @@ private:
 	void SetFixedId(int fixedId) { _fixedId = fixedId; }
 	void SetOverflowId(int overflowId) { _overflowId = overflowId; }
 
-	bool IPCSetRects(CefRefPtr<CefValue> data);
-	bool IPCSetFixedId(CefRefPtr<CefValue> data);
-	bool IPCSetOverflowId(CefRefPtr<CefValue> data);
+	bool IPCSetRects(CefRefPtr<CefListValue> data);
+	bool IPCSetFixedId(CefRefPtr<CefListValue> data);
+	bool IPCSetOverflowId(CefRefPtr<CefListValue> data);
 
 	static const std::vector<DOMAttribute> _description;
 	int _id;
@@ -85,7 +79,7 @@ public:
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
 	// CefProcessMessage to C++ object
-	virtual bool Update(DOMAttribute attr, CefRefPtr<CefValue> data);
+	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data);
 
 	std::string GetText() const { return _text; }
 	bool IsPasswordField() const { return _isPassword; }
@@ -96,8 +90,8 @@ private:
 	void SetText(std::string text) { _text = text; }
 	void SetPassword(bool isPwd) { _isPassword = isPwd; }
 
-	bool IPCSetText(CefRefPtr<CefValue> data);
-	bool IPCSetPassword(CefRefPtr<CefValue> data);
+	bool IPCSetText(CefRefPtr<CefListValue> data);
+	bool IPCSetPassword(CefRefPtr<CefListValue> data);
 
 	static const std::vector<DOMAttribute> _description;
 	std::string _text = NULL;
@@ -121,7 +115,7 @@ public:
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
 	// CefProcessMessage to C++ object
-	virtual bool Update(DOMAttribute attr, CefRefPtr<CefValue> data);
+	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data);
 
 
 	std::string GetText() const { return _text; }
@@ -133,8 +127,8 @@ private:
 	void SetText(std::string text) { _text = text; }
 	void SetUrl(std::string url) { _url = url; }
 
-	bool IPCSetText(CefRefPtr<CefValue> data);
-	bool IPCSetUrl(CefRefPtr<CefValue> data);
+	bool IPCSetText(CefRefPtr<CefListValue> data);
+	bool IPCSetUrl(CefRefPtr<CefListValue> data);
 
 	static const std::vector<DOMAttribute> _description;
 	std::string _text = NULL;
@@ -160,17 +154,16 @@ public:
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
 	// CefProcessMessage to C++ object
-	virtual bool Update(DOMAttribute attr, CefRefPtr<CefValue> data);
+	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data);
 
 	std::vector<std::string> GetOptions() const { return _options; }
 
 private:
 	typedef DOMNode super;
 
-
 	void SetOptions(std::vector<std::string> options) { _options = options; }
 
-	bool IPCSetOptions(CefRefPtr<CefValue> data);
+	bool IPCSetOptions(CefRefPtr<CefListValue> data);
 
 	static const std::vector<DOMAttribute> _description;
 	std::vector<std::string> _options = {};		// Entries might be NULL, if weirdly indexed on JS side (but chances are really low)
