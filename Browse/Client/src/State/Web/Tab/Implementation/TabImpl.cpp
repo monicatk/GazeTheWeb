@@ -216,15 +216,11 @@ void Tab::Update(float tpf, Input& rInput)
 	// Update highlight rectangle of webview
 	// TODO: alternative: give webview shared pointer to DOM nodes
 	std::vector<Rect> rects;
-	for (const auto& rDOMNode : _DOMTextLinks)
+	for (const auto& rIdNodePair : _TextLinkMap)
 	{
-		// TODO(Daniel): Getting rid of visibility attribute
-		if(true) // if (rDOMNode->GetVisibility()) // only proceed if currently visible
+		for (const auto& rRect : rIdNodePair.second->GetRects())
 		{
-			for (const auto& rRect : rDOMNode->GetRects())
-			{
-				rects.push_back(rRect);
-			}
+			rects.push_back(rRect);
 		}
 	}
 	_upWebView->SetHighlightRects(rects);
@@ -416,8 +412,9 @@ void Tab::Update(float tpf, Input& rInput)
 
 		// Autoscroll inside of OverflowElement if gazed upon
 		bool overflowScrolling = false;
-		for (const auto& rOverflowElement : _overflowElements)
+		for (const auto& rIdOverflowPair : _overflowElementMap)
 		{
+			const auto& rOverflowElement = rIdOverflowPair.second;
 			if (rOverflowElement)
 			{
 				for (const auto& rRect : rOverflowElement->GetRects())
@@ -426,7 +423,7 @@ void Tab::Update(float tpf, Input& rInput)
 					int scrolledCEFPixelGazeY = CEFPixelGazeY;
 
 					// Do NOT add scrolling offset if element is fixed
-					if (!rOverflowElement->GetFixed())
+					if (!rOverflowElement->GetFixedId())
 					{
 						scrolledCEFPixelGazeX += _scrollingOffsetX;
 						scrolledCEFPixelGazeY += _scrollingOffsetY;
@@ -451,8 +448,9 @@ void Tab::Update(float tpf, Input& rInput)
 		// ### Update triggers ###
 		// #######################
 
-		for (auto& upDOMTrigger : _DOMTriggers)
+		for (auto& rNodeTriggerPair : _DOMTriggers)
 		{
+			const auto& upDOMTrigger = rNodeTriggerPair.second;
 			upDOMTrigger->Update(tpf, tabInput);
 		}
 	}
@@ -477,8 +475,9 @@ void Tab::Draw() const
 	else
 	{
 		// Draw triggers
-		for (const auto& upDOMTrigger : _DOMTriggers)
+		for (const auto& rNodeTriggerPair : _DOMTriggers)
 		{
+			const auto& upDOMTrigger = rNodeTriggerPair.second;
 			upDOMTrigger->Draw();
 		}
 
@@ -572,9 +571,9 @@ void Tab::SetPipelineActivity(bool active)
 		eyegui::setVisibilityOfLayout(_pPipelineAbortLayout, true, true, true);
 
 		// Deactivate all triggers
-		for (auto& upDOMTrigger : _DOMTriggers)
+		for (auto& rNodeTriggerPair : _DOMTriggers)
 		{
-			upDOMTrigger->Deactivate();
+			rNodeTriggerPair.second->Deactivate();
 		}
 
 		// Deactivate scrolling overlay
@@ -586,8 +585,9 @@ void Tab::SetPipelineActivity(bool active)
 		eyegui::setVisibilityOfLayout(_pPipelineAbortLayout, false, false, true);
 
 		// Activate all triggers
-		for (auto& upDOMTrigger : _DOMTriggers)
+		for (auto& rNodeTriggerPair : _DOMTriggers)
 		{
+			auto& upDOMTrigger = rNodeTriggerPair.second;
 			upDOMTrigger->Activate();
 		}
 
@@ -742,8 +742,9 @@ void Tab::DrawDebuggingOverlay() const
 	_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_TRIGGER_DEBUG_COLOR);
 
 	// Go over all DOMTriggers
-	for (const auto& rDOMTrigger : _DOMTriggers)
+	for (const auto& rNodeTriggerPair : _DOMTriggers)
 	{
+		const auto& rDOMTrigger = rNodeTriggerPair.second;
 		// Render rects
 		for (const auto rRect : rDOMTrigger->GetDOMRects())
 		{
@@ -770,39 +771,35 @@ void Tab::DrawDebuggingOverlay() const
 	_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_TEXT_LINKS_DEBUG_COLOR);
 
 	// Go over all DOMTextLinks
-	for (const auto& rDOMTextLink : _DOMTextLinks)
+	for (const auto& rIdLinkPair : _TextLinkMap)
 	{
+		const auto& rDOMTextLink = rIdLinkPair.second;
 		// Render rects
 		for (const auto rRect : rDOMTextLink->GetRects())
 		{
-			if(rDOMTextLink->GetVisibility())
-				renderRect(rRect, rDOMTextLink->GetFixed());
-			else
-			{
-				_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(1.0f, 0.f, 1.f));
-				renderRect(rRect, rDOMTextLink->GetFixed());
-				_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_TEXT_LINKS_DEBUG_COLOR);
-			}
+			renderRect(rRect, rDOMTextLink->GetFixedId());
 		}
 	}
 
 	// DEBUG - links containing line break are shown in another color
 	_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(1.f, 0.f, 1.f));
-	for (const auto& rDOMTextLink : _DOMTextLinks)
+	for (const auto& rIdLinkPair : _TextLinkMap)
 	{
-		if(rDOMTextLink->GetRects().size() == 2 && rDOMTextLink->GetVisibility())
-			renderRect(rDOMTextLink->GetRects()[1], rDOMTextLink->GetFixed());
+		const auto& rDOMTextLink = rIdLinkPair.second;
+		if(rDOMTextLink->GetRects().size() == 2)
+			renderRect(rDOMTextLink->GetRects()[1], rDOMTextLink->GetFixedId());
 	}
 
 	// ### SELECT FIELDS ###
 	// Set rendering up for DOMSelectFields
 	_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_SELECT_FIELD_DEBUG_COLOR);
-	for (const auto& rDOMSelectField : _DOMSelectFields)
+	for (const auto& rIdSelectFieldPair : _SelectFieldMap)
 	{
+		const auto& rDOMSelectField = rIdSelectFieldPair.second;
 		// Render rects
 		for (const auto rRect : rDOMSelectField->GetRects())
 		{
-			renderRect(rRect, rDOMSelectField->GetFixed());
+			renderRect(rRect, rDOMSelectField->GetFixedId());
 		}
 	}
 
@@ -827,12 +824,13 @@ void Tab::DrawDebuggingOverlay() const
 	// ### OVERFLOW ELEMENTS ###
 	_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(255.f/255.f, 127.f/255.f, 35.f/255.f));
 
-	for (const auto& rOverflowElement : _overflowElements)
+	for (const auto& rIdOverflowPair : _overflowElementMap)
 	{
+		const auto& rOverflowElement = rIdOverflowPair.second;
 		if (rOverflowElement) // Note: Can be NULL if aquivalent element in JS got deleted. (see Tab::RemoveOverflowElement)
 		{
 			for (const auto& rect : rOverflowElement->GetRects())
-				renderRect(rect, rOverflowElement->GetFixed());
+				renderRect(rect, rOverflowElement->GetFixedId());
 		}
 
 	}

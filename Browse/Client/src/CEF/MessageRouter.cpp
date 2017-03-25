@@ -7,6 +7,7 @@
 #include "src/CEF/Mediator.h"
 #include "src/Utils/Logger.h"
 #include "src/CEF/Data/DOMNode.h"
+#include "src/CEF/Data/DOMExtraction.h"
 #include <cstdlib>
 #include <algorithm>
 
@@ -139,6 +140,8 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			// Extract OverflowElement ID from dataStr
 			int id = std::stoi(data[0]);
 
+			_pMediator->AddOverflowElement(browser, id);
+
 			// Extract rect data from encoded String
 			std::vector<float> rectData;
 			std::vector<std::string> rectStrData = SplitBySeparator(data[1], ';');
@@ -260,7 +263,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			const int& type = std::stoi(data[2]);
 			const int& id = std::stoi(data[3]);
 		
-			// ADD
+			// ADDING DOMNODE
 			if (op.compare("add") == 0) // adding of DOM node
 			{
 				// Create blank node object in corresponding Tab object
@@ -281,8 +284,8 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				browser->SendProcessMessage(PID_RENDERER, msg);
 			}
 
-			// REMOVE
-			if (op.compare("rem") == 0) // removing of DOM node
+			// REMOVE DOMNODE
+			if (op.compare("rem") == 0)
 			{
 				switch (type)
 				{
@@ -295,8 +298,8 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				}
 			}
 
-			// UPDATE
-			if (op.compare("upd") == 0) // updating of DOM node
+			// UPDATE DOMNODE
+			if (op.compare("upd") == 0)
 			{
 				std::weak_ptr<DOMNode> target;
 				switch (type)
@@ -311,7 +314,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 
 				if (data.size() > 5)
 				{
-					// See DOMNode.h enum DOMAttribute for numeric interpretation
+					// See DOM.h enum DOMAttribute for numeric interpretation
 					const DOMAttribute& attr = (DOMAttribute) std::stoi(data[4]);
 					const std::string& attrData = data[5];
 
@@ -320,7 +323,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					{
 						node->Update(
 							(DOMAttribute) attr,
-							ExtractAttributeDataFromString((DOMAttribute) attr, attrData)
+							StringToCefListValue::ExtractAttributeData((DOMAttribute) attr, attrData)
 						);
 					}
 				}

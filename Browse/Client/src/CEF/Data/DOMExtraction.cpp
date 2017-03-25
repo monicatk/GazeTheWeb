@@ -50,6 +50,26 @@ const CefRefPtr<CefListValue> V8ToCefListValue::ListOfStrings(CefRefPtr<CefV8Val
 	return list;
 }
 
+const CefRefPtr<CefListValue> V8ToCefListValue::ListOfIntegers(CefRefPtr<CefV8Value> attrData)
+{
+	if (!attrData->IsArray())
+		return CefRefPtr<CefListValue>();
+
+	CefRefPtr<CefListValue> list = CefListValue::Create();
+	for (int i = 0; i < attrData->GetArrayLength(); i++)
+	{
+		CefRefPtr<CefValue> val = CefValue::Create();
+
+		if (!attrData->GetValue(i)->IsInt())
+			continue;
+
+		val->SetInt(attrData->GetValue(i)->GetIntValue());
+		list->SetValue(i, val);
+	}
+
+	return list;
+}
+
 const CefRefPtr<CefListValue> V8ToCefListValue::Boolean(CefRefPtr<CefV8Value> attrData)
 {
 	if (!attrData->IsBool())
@@ -125,6 +145,21 @@ const CefRefPtr<CefListValue> StringToCefListValue::ListOfStrings(std::string at
 	{
 		CefRefPtr<CefValue> option = CefValue::Create();
 		option->SetString(options[i]);
+		extracted_data->SetValue(i, option);
+	}
+
+	return extracted_data;
+}
+
+const CefRefPtr<CefListValue> StringToCefListValue::ListOfIntegers(std::string attrData)
+{
+	CefRefPtr<CefListValue> extracted_data = CefValue::Create();
+
+	std::vector<std::string> options = SplitBySeparator(attrData, ';');
+	for (int i = 0; i < options.size(); i++)
+	{
+		CefRefPtr<CefValue> option = CefValue::Create();
+		option->SetInt(std::stoi(options[i]));
 		extracted_data->SetValue(i, option);
 	}
 

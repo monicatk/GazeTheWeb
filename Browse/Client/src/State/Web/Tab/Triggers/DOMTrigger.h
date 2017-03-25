@@ -17,7 +17,7 @@ class DOMTrigger : public Trigger
 public:
 
     // Constructor
-    DOMTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMNode> spNode);
+    DOMTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMNode> spDomNode);
 
     // Destructor
     virtual ~DOMTrigger();
@@ -35,21 +35,18 @@ public:
     virtual void Deactivate();
 
 	// Get rects of DOMNode
-    std::vector<Rect> GetDOMRects() const { return _spNode->GetRects(); }
+    std::vector<Rect> GetDOMRects() const { return _spDomNode->GetRects(); }
 
     // Get whether DOMNode is marked as fixed
-    bool GetDOMFixed() const { return _spNode->GetFixedId(); }
+    bool GetDOMFixed() const { return _spDomNode->GetFixedId(); }
 
-	// Identify input field as password input or not
-	bool GetDOMIsPasswordField() const { return _spNode->IsPasswordField(); }
 
-private:
-
+protected:
     // Calculate position of overlay button
     void CalculatePositionOfOverlayButton(float& rRelativePositionX, float& rRelativePositionY) const;
 
     // Shared pointer to node
-    std::shared_ptr<DOMTextInput> _spNode;
+    std::shared_ptr<DOMNode> _spDomNode;
 
     // Index of floating frame in Tab's overlay
     int _overlayFrameIndex = -1;
@@ -65,6 +62,43 @@ private:
 
     // Visibility of overlay
     bool _visible = false;
+};
+
+
+
+class DOMTextInputTrigger : public DOMTrigger
+{
+public:
+	DOMTextInputTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInput> spNode);
+
+	// Update
+	virtual bool Update(float tpf, TabInput& rTabInput);
+
+	// Identify input field as password input or not
+	bool GetDOMIsPasswordField() const { return _spNode->IsPasswordField(); }
+
+private:
+	typedef DOMTrigger super;
+
+	std::shared_ptr<DOMTextInput> _spNode;
+};
+
+
+
+class DOMSelectFieldTrigger : public DOMTrigger
+{
+public:
+	DOMSelectFieldTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMSelectField> spNode);
+
+	// Update
+	virtual bool Update(float tpf, TabInput& rTabInput);
+
+	/* Define SelectField specific calls here */
+
+private:
+	typedef DOMTrigger super;
+
+	std::shared_ptr<DOMTextInput> _spNode;
 };
 
 #endif // TRIGGER_H_

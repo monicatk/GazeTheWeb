@@ -249,6 +249,14 @@ void Mediator::AddDOMSelectField(CefRefPtr<CefBrowser> browser, int id)
 	}
 }
 
+void Mediator::AddOverflowElement(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		pTab->AddOverflowElement(id);
+	}
+}
+
 void Mediator::ClearDOMNodes(CefRefPtr<CefBrowser> browser)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
@@ -335,94 +343,6 @@ std::weak_ptr<DOMSelectField> Mediator::GetDOMSelectField(CefRefPtr<CefBrowser> 
 	return std::weak_ptr<DOMSelectField>();
 }
 
-void Mediator::FillDOMNodeWithData(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
-{
-	if (TabCEFInterface* pTab = GetTab(browser))
-	{
-		int index = 0;
-		CefRefPtr<CefListValue> args = msg->GetArgumentList();
-		int type = args->GetInt(index++);
-		int nodeID = args->GetInt(index++);
-		bool visible = args->GetBool(index++);
-
-		// TODO(Daniel): Call an update of different attributes for different node types
-
-		// Read out multiple Rects
-		std::vector<Rect> rects;
-
-		for (int i = index; i + 3 < args->GetSize(); i += 4)
-		{
-			rects.push_back(
-				Rect(
-					args->GetDouble(i),
-					args->GetDouble(i + 1),
-					args->GetDouble(i + 2),
-					args->GetDouble(i + 3)
-					)
-				);
-		}
-
-		// Receive weak_ptr to target node and use it as shared_ptr targetNode
-		if (auto targetNode = pTab->GetDOMNode((DOMNodeType) type, nodeID).lock())
-		{
-			// Update target nodes Rects
-			targetNode->SetRects(std::make_shared<std::vector<Rect>>(rects));
-
-			// Set target node's visibility
-			//targetNode->SetVisibility(visible);	// DEPRECATED
-			//if (!visible) LogDebug("Mediator: Set node's visibility to false after its creation");
-		}
-		else
-		{
-			LogDebug("Mediator: Trying to update node information but DOMNode object doesn't seem to exist!");
-		}
-	}
-}
-
-// TODO: Use only this method for initialization of nodes, which were created empty
-void Mediator::InitializeDOMNode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
-{
-	if (TabCEFInterface* pTab = GetTab(browser))
-	{
-		const auto& args = msg->GetArgumentList();
-		const int type = args->GetInt(0);
-		const int id = args->GetInt(1);
-
-		if (type == 2)
-		{
-			if (auto node = pTab->GetDOMSelectFieldNode(id).lock())
-			{
-				// Extract rect data
-				std::vector<Rect> rects;
-				CefRefPtr<CefListValue> rectList = args->GetList(2);
-				for (int i = 0; i < rectList->GetSize(); i++)
-				{
-					CefRefPtr<CefListValue> rectEntry = rectList->GetList(i);
-					std::vector<float> data;
-					for (int j = 0; j < rectEntry->GetSize(); j++)
-					{
-						data.push_back(rectEntry->GetDouble(j));
-					}
-					rects.push_back(Rect(data));
-				}
-				node->SetRects(std::make_shared<std::vector<Rect>>(rects));
-
-				// Extract options data
-				std::vector<std::string> options;
-				CefRefPtr<CefListValue> optionsList = args->GetList(3);
-				for (int i = 0; i < optionsList->GetSize(); i++)
-				{
-					options.push_back(optionsList->GetString(i));
-				}
-				node->SetOptions(options);
-
-			}
-		}
-
-
-	}
-}
-
 void Mediator::SetActiveTab(TabCEFInterface * pTab)
 {
 	// Remember currently active Tab
@@ -465,14 +385,6 @@ void Mediator::ScrollOverflowElement(TabCEFInterface * pTab, int elemId, int x, 
 	if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
 		_handler->ScrollOverflowElement(browser, elemId, x, y, fixedIds);
-	}
-}
-
-void Mediator::AddOverflowElement(CefRefPtr<CefBrowser> browser, std::shared_ptr<OverflowElement> overflowElem)
-{
-	if (TabCEFInterface* pTab = GetTab(browser))
-	{
-		pTab->AddOverflowElement(overflowElem);
 	}
 }
 
@@ -616,33 +528,6 @@ void Mediator::OpenPopupTab(CefRefPtr<CefBrowser> browser, std::string url)
 	{
         pTab->AddTabAfter(url);
 	}
-}
-
-
-void Mediator::RemoveDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID)
-{
-	if (TabCEFInterface* pTab = GetTab(browser))
-	{
-		pTab->RemoveDOMNode(type, nodeID);
-	}
-}
-
-std::weak_ptr<DOMNode> Mediator::GetDOMNode(CefRefPtr<CefBrowser> browser, DOMNodeType type, int nodeID)
-{
-	if (TabCEFInterface* pTab = GetTab(browser))
-	{
-		return pTab->GetDOMNode(type, nodeID);
-	}
-	return std::weak_ptr<DOMNode>();
-}
-
-std::weak_ptr<DOMSelectField> Mediator::GetDOMSelectFieldNode(CefRefPtr<CefBrowser> browser, int nodeId)
-{
-	if (TabCEFInterface* pTab = GetTab(browser))
-	{
-		return pTab->GetDOMSelectFieldNode(nodeId);
-	}
-	return std::weak_ptr<DOMSelectField>();
 }
 
 

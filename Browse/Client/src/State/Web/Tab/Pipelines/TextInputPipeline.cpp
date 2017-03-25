@@ -10,7 +10,7 @@
 #include "src/State/Web/Tab/Pipelines/Actions/TextInputAction.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 
-TextInputPipeline::TextInputPipeline(TabInteractionInterface* pTab, std::shared_ptr<DOMNode> spNode) : Pipeline(pTab)
+TextInputPipeline::TextInputPipeline(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInput> spNode) : Pipeline(pTab)
 {
 	// Get current text from node
 	std::string text = spNode->GetText();
@@ -27,12 +27,17 @@ TextInputPipeline::TextInputPipeline(TabInteractionInterface* pTab, std::shared_
 	_actions.push_back(spTextInputAction);
 
     // Fill some values directly
-    glm::vec2 clickCEFPixelCoordinates = spNode->GetCenter();
-	double webViewPixelX = clickCEFPixelCoordinates.x;
-	double webViewPixelY = clickCEFPixelCoordinates.y;
-	_pTab->ConvertToWebViewPixel(webViewPixelX, webViewPixelY);
-    spTextInputAction->SetInputValue("frameId", spNode->GetFrameID());
-    spTextInputAction->SetInputValue("nodeId", spNode->GetNodeID());
+	if (spNode->GetRects().size() > 0)
+	{
+		const auto& rect = spNode->GetRects()[0];
+		glm::vec2 clickCEFPixelCoordinates = rect.Center();
+		double webViewPixelX = clickCEFPixelCoordinates.x;
+		double webViewPixelY = clickCEFPixelCoordinates.y;
+		_pTab->ConvertToWebViewPixel(webViewPixelX, webViewPixelY);
+	}
+
+    //spTextInputAction->SetInputValue("frameId", spNode->GetFrameID());	// DEPRECATED
+    spTextInputAction->SetInputValue("nodeId", spNode->GetId());
 
     // Connect those actions
     std::unique_ptr<ActionConnector> upConnector =

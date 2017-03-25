@@ -12,7 +12,6 @@
 #include <vector>
 #include "src/CEF/Data/Rect.h"
 #include "src/Utils/glmWrapper.h"
-#include "src/CEF/Data/DOMNodeType.h"
 #include "src/CEF/JavaScriptDialogType.h"
 
 // Forward declaration
@@ -52,14 +51,17 @@ public:
     virtual void AddDOMTextInput(int id) = 0;
 	virtual void AddDOMLink(int id) = 0;
 	virtual void AddDOMSelectField(int id) = 0;
+	virtual void AddOverflowElement(int id) = 0;
 
 	virtual std::weak_ptr<DOMTextInput> GetDOMTextInput(int id) = 0;
 	virtual std::weak_ptr<DOMLink> GetDOMLink(int id) = 0;
 	virtual std::weak_ptr<DOMSelectField> GetDOMSelectField(int id) = 0;
+	virtual std::weak_ptr<OverflowElement> GetOverflowElement(int id) = 0;
 
 	virtual void RemoveDOMTextInput(int id) = 0;
 	virtual void RemoveDOMLink(int id) = 0;
 	virtual void RemoveDOMSelectField(int id) = 0;
+	virtual void RemoveOverflowElement(int id) = 0;
 	virtual void ClearDOMNodes() = 0;
 
     // Receive callbacks from CefMediator upon scrolling offset changes
@@ -87,10 +89,7 @@ public:
 	// Receive current loading status of each frame
 	virtual void SetLoadingStatus(int64 frameID, bool isMain, bool isLoading) = 0;
 
-	// Overflow elements
-	virtual void AddOverflowElement(std::shared_ptr<OverflowElement> overflowElem) = 0;
-	virtual std::shared_ptr<OverflowElement> GetOverflowElement(int id) = 0;
-	virtual void RemoveOverflowElement(int id) = 0;
+
 
 	// Tell about JavaScript dialog
 	virtual void RequestJSDialog(JavaScriptDialogType type, std::string message) = 0;

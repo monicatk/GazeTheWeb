@@ -297,13 +297,15 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 
 	if (msgName.substr(0, 9) == "CreateDOM")
 	{
-		_pMediator->FillDOMNodeWithData(browser, msg);
+		/*_pMediator->FillDOMNodeWithData(browser, msg);*/
+		LogBug("Handler: Received deprecated 'CreateDOM' msg!");
 		return true;
 	}
 
 	if (msgName == "InitializeDOMSelectField")
 	{
-		_pMediator->InitializeDOMNode(browser, msg);
+		//_pMediator->InitializeDOMNode(browser, msg);
+		LogBug("Handler: Received deprecated '", msgName, "' msg!");
 		return true;
 	}
 

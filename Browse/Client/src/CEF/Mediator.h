@@ -9,7 +9,6 @@
 
 #include "src/MasterNotificationInterface.h"
 #include "include/cef_browser.h"
-#include "src/CEF/Data/DOMNodeType.h"
 #include "src/CEF/Handler.h"
 #include "src/CEF/DevToolsHandler.h"
 #include "src/CEF/JavaScriptDialogType.h"
@@ -113,10 +112,6 @@ public:
 
 	// Execute scrolling request from Tab in determined Overflow Element with elemId
 	void ScrollOverflowElement(TabCEFInterface* pTab, int elemId, int x, int y, std::vector<int> fixedIds = {});
-	// Add OverflowElement to corresponding Tab
-	void AddOverflowElement(CefRefPtr<CefBrowser> browser, std::shared_ptr<OverflowElement> overflowElem);
-	std::weak_ptr<OverflowElement> GetOverflowElement(CefRefPtr<CefBrowser> browser, int id);
-	void RemoveOverflowElement(CefRefPtr<CefBrowser> browser, int id);
 
 	/* DOM relevant methods */
 
@@ -124,17 +119,20 @@ public:
 	void AddDOMTextInput(CefRefPtr<CefBrowser> browser, int id);
 	void AddDOMLink(CefRefPtr<CefBrowser> browser, int id);
 	void AddDOMSelectField(CefRefPtr<CefBrowser> browser, int id);
+	void AddOverflowElement(CefRefPtr<CefBrowser> browser, int id);
 	
 	void ClearDOMNodes(CefRefPtr<CefBrowser> browser);
 
-	void RemoveDOMTextInput(CefRefPtr<CefBrowser> browser, int id);			// RemoveNode<DOMTextInput>(int id)
+	void RemoveDOMTextInput(CefRefPtr<CefBrowser> browser, int id);
 	void RemoveDOMLink(CefRefPtr<CefBrowser> browser, int id);
 	void RemoveDOMSelectField(CefRefPtr<CefBrowser> browser, int id);
+	void RemoveOverflowElement(CefRefPtr<CefBrowser> browser, int id);
 
 	// Receive weak_ptr, only perform Initialize(objMsg) and Update(attr) operations
 	std::weak_ptr<DOMTextInput> GetDOMTextInput(CefRefPtr<CefBrowser> browser, int id);
 	std::weak_ptr<DOMLink> GetDOMLink(CefRefPtr<CefBrowser> browser, int id);
 	std::weak_ptr<DOMSelectField> GetDOMSelectField(CefRefPtr<CefBrowser> browser, int id);
+	std::weak_ptr<OverflowElement> GetOverflowElement(CefRefPtr<CefBrowser> browser, int id);
 
 
 	/* Interaction with DOM nodes */

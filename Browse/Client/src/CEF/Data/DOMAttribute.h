@@ -1,18 +1,16 @@
-//============================================================================
 // Distributed under the Apache License, Version 2.0.
 // Author: Daniel Mueller (muellerd@uni-koblenz.de)
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// DOM node types.
 
-#ifndef DOMNODETYPE_H_
-#define DOMNODETYPE_H_
+#ifndef DOMATTRIBUTE_H_
+#define DOMATTRIBUTE_H_
 
-enum DOMNodeType
-{
-	TextInput = 0,
-	TextLink = 1,
-	SelectField = 2
+enum DOMAttribute {
+	Rects = 0, FixedId, OverflowId,
+	Text, IsPassword, Url, Options,
+	MaxScrolling, CurrentScrolling
 };
 
-#endif // DOMNODETYPE_H_
+
+#endif // DOMATTRIBUTE_H_
