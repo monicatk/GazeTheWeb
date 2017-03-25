@@ -16,13 +16,6 @@
 #include <memory>
 #include <include/cef_process_message.h>
 
-enum class DOMNodeType {
-	TextInput,
-	Link,
-	SelectField,
-	OverflowElement
-};
-
 /*
    ___  ____  __  ____  __        __      
   / _ \/ __ \/  |/  / |/ /__  ___/ /__ ___
@@ -40,17 +33,12 @@ public:
 	// CefProcessMessage to C++ object
 	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data);
 
-
-	virtual DOMNodeType GetNodeType() = 0;
-
 	const std::vector<DOMAttribute> GetDescription();
 	
 	int GetId() const { return _id; }
 	std::vector<Rect> GetRects() const { return _rects; }
 	virtual int GetFixedId() const { return _fixedId; }
 	virtual int GetOverflowId() const { return _overflowId; }
-
-	// TODO: Add GetCenter() method for rects again?
 
 private:
 	void SetId(int id) { _id = id; }

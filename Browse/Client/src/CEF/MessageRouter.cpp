@@ -140,29 +140,22 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			// Extract OverflowElement ID from dataStr
 			int id = std::stoi(data[0]);
 
+			// Create blank node object
 			_pMediator->AddOverflowElement(browser, id);
 
-			// Extract rect data from encoded String
-			std::vector<float> rectData;
-			std::vector<std::string> rectStrData = SplitBySeparator(data[1], ';');
-			std::for_each(
-				rectStrData.begin(),
-				rectStrData.end(), 
-				[&rectData](std::string str) {rectData.push_back(std::stod(str)); }
-			);
-			Rect rect = Rect(rectData);
-
-			// Extract maximum possible scrolling in x and y direction
-			std::vector<std::string> scrollMaxString = SplitBySeparator(data[2], ';');
-			if (scrollMaxString[0].compare("undefined") == 0 || scrollMaxString[1].compare("undefined") == 0)
+			auto wpNode = _pMediator->GetOverflowElement(browser, id);
+			if (auto spNode = wpNode.lock())
 			{
-				LogDebug("MsgRouter: Error in OverflowElement creation: Missing max scrolling value(s)! Setting them to 0.");
-			}
-			int scrollLeftMax = (scrollMaxString[0].compare("undefined") == 0) ? 0 : std::stoi(scrollMaxString[0]);
-			int scrollTopMax = (scrollMaxString[1].compare("undefined") == 0) ? 0 : std::stoi(scrollMaxString[1]);
+				spNode->Update(
+					DOMAttribute::Rects,
+					StringToCefListValue::ExtractAttributeData(DOMAttribute::Rects, data[1])
+					);
 
-			// Add overflow element
-			_pMediator->AddOverflowElement(browser, std::make_shared<OverflowElement>(id, rect, scrollLeftMax, scrollTopMax));
+				spNode->Update(
+					DOMAttribute::MaxScrolling,
+					StringToCefListValue::ExtractAttributeData(DOMAttribute::MaxScrolling, data[2])
+					);
+			}
 
 			// Success!
 			callback->Success("success");
@@ -192,6 +185,9 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				std::string attr = dataStr[1];
 
 				// dataStr[2] contains data for given attributes value changes
+
+				// TODO:
+				// Use DOMAttribute enum on Javascript side to encode attributes in a string!
 
 				// Get access to given Overflow Element in Tab
 				std::weak_ptr<OverflowElement> wpElem = _pMediator->GetOverflowElement(browser, id);
@@ -314,7 +310,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 
 				if (data.size() > 5)
 				{
-					// See DOM.h enum DOMAttribute for numeric interpretation
+					// See DOMAttribute.h enum DOMAttribute for numeric interpretation
 					const DOMAttribute& attr = (DOMAttribute) std::stoi(data[4]);
 					const std::string& attrData = data[5];
 

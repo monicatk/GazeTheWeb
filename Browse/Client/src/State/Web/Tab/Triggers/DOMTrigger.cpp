@@ -11,10 +11,29 @@
 DOMTrigger::DOMTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMNode> spNode) : Trigger(pTab)
 {
     // Save member
-    _spDomNode = spNode;
+    _spNode = spNode;
+
+    // TODO: Check type of DOMNode
 
     // Create id, which is unique in overlay
-    _overlayButtonId = "dom_trigger_" + std::to_string(_spDomNode->GetId());
+    _overlayButtonId = "dom_trigger_" + std::to_string(_spNode->GetId());
+
+    // Id mapper for brick
+    std::map<std::string, std::string> idMapper;
+    idMapper.emplace("button", _overlayButtonId);
+
+    // Calculate position of overlay button
+    float x, y;
+    CalculatePositionOfOverlayButton(x, y);
+
+    // Add overlay
+    _overlayFrameIndex = _pTab->AddFloatingFrameToOverlay("bricks/triggers/TextInput.beyegui", x, y, _size, _size, idMapper);
+
+    // Register listener
+    _pTab->RegisterButtonListenerInOverlay(
+		_overlayButtonId,
+		[&]() { this->_triggered = true; }, // it is checked for triggered in update
+		[](){}); // no down
 }
 
 DOMTrigger::~DOMTrigger()
@@ -30,9 +49,9 @@ bool DOMTrigger::Update(float tpf, TabInput& rTabInput)
 {
     // Decide visibility
     bool visible =
-        //_spNode->GetVisibility() && // DOM node visible --> DEPRECATED 
-		!_spDomNode->GetRects().empty() // DOM node has rects
-        && _spDomNode->GetRects().front().Width() != 0 && _spDomNode->GetRects().front().Height() != 0; // At least the first rect is bigger than zero
+        // _spNode->GetVisibility() && // NOTE: I completely removed this attribute (like frameId)
+		!_spNode->GetRects().empty() // DOM node has rects
+        && _spNode->GetRects().front().Width() != 0 && _spNode->GetRects().front().Height() != 0; // At least the first rect is bigger than zero
     if(_visible != visible)
     {
         _visible = visible;
@@ -50,34 +69,17 @@ bool DOMTrigger::Update(float tpf, TabInput& rTabInput)
     if(_triggered)
     {
         _triggered = false;
-
-		// Decide which pipline to execute
-		switch (_spNode->GetNodeType())
-		{
-		case DOMNodeType::TextInput:
-		{
-			LabStreamMailer::instance().Send("Text input started");
-			_pTab->PushBackPipeline(
-				std::move(
-					std::unique_ptr<TextInputPipeline>(
-						new TextInputPipeline(
-							_pTab,
-							_spNode))));
-		}
-			break;
-		case DOMNodeType::SelectField:
-			// TODO
-			break;
-		default:
-			LogError("Unkown DOM Node Type as trigger");
-		}
-
-		// Return successful activation
+		LabStreamMailer::instance().Send("Text input started");
+		_pTab->PushBackPipeline(
+			std::move(
+				std::unique_ptr<TextInputPipeline>(
+					new TextInputPipeline(
+						_pTab,
+						_spNode))));
         return true;
     }
     else
     {
-		// Still waiting for activation
         return false;
     }
 }
@@ -102,17 +104,17 @@ void DOMTrigger::CalculatePositionOfOverlayButton(float& rRelativePositionX, flo
 	// Scrolling offset only when not fixed
 	double scrollingOffsetX = 0;
 	double scrollingOffsetY = 0;
-	if (!_spDomNode->GetFixedId())
+	if (!_spNode->GetFixedId())
 	{
 		_pTab->GetScrollingOffset(scrollingOffsetX, scrollingOffsetY);
 	}
 
-	if (_spDomNode->GetRects().size() > 0)
+	if (_spNode->GetRects().size() > 0)
 	{
-		const auto& rectCenter = _spDomNode->GetRects()[0].Center();
+		const auto& nodeCenter = _spNode->GetRects()[0].Center();
 		// Center of node in WebViewPixel space
-		double webViewPixelX = rectCenter.x - scrollingOffsetX;
-		double webViewPixelY = rectCenter.y - scrollingOffsetY;
+		double webViewPixelX = nodeCenter.x - scrollingOffsetX;
+		double webViewPixelY = nodeCenter.y - scrollingOffsetY;
 		_pTab->ConvertToWebViewPixel(webViewPixelX, webViewPixelY);
 
 		// Calculate coordinates and size
@@ -123,49 +125,4 @@ void DOMTrigger::CalculatePositionOfOverlayButton(float& rRelativePositionX, flo
 		rRelativePositionX -= _size / 2.f;
 		rRelativePositionY -= _size / 2.f;
 	}
-}
-
-DOMTextInputTrigger::DOMTextInputTrigger(TabInteractionInterface * pTab, std::shared_ptr<DOMTextInput> spNode)
-	: DOMTrigger(pTab, spNode)
-{
-
-	// Id mapper for brick
-	std::map<std::string, std::string> idMapper;
-	idMapper.emplace("button", _overlayButtonId);
-
-	// Calculate position of overlay button
-	float x, y;
-	CalculatePositionOfOverlayButton(x, y);
-
-	// Add overlay
-	_overlayFrameIndex = _pTab->AddFloatingFrameToOverlay("bricks/triggers/TextInput.beyegui", x, y, _size, _size, idMapper);
-
-	// Register listener
-	_pTab->RegisterButtonListenerInOverlay(
-		_overlayButtonId,
-		[&]() { this->_triggered = true; }, // it is checked for triggered in update
-		[]() {}); // no down
-}
-
-DOMSelectFieldTrigger::DOMSelectFieldTrigger(TabInteractionInterface * pTab, std::shared_ptr<DOMSelectField> spNode)
-	: DOMTrigger(pTab, spNode)
-{
-	
-	// Id mapper for brick
-	std::map<std::string, std::string> idMapper;
-	idMapper.emplace("button", _overlayButtonId);
-
-	// Calculate position of overlay button
-	float x, y;
-	CalculatePositionOfOverlayButton(x, y);
-
-	// Add overlay
-	_overlayFrameIndex = _pTab->AddFloatingFrameToOverlay("bricks/triggers/TextInput.beyegui", x, y, _size, _size, idMapper);
-	_overlayFrameIndex = _pTab->AddFloatingFrameToOverlay("bricks/triggers/SelectField.beyegui", x, y, _size, _size, idMapper);
-
-	// Register listener
-	_pTab->RegisterButtonListenerInOverlay(
-		_overlayButtonId,
-		[&]() { this->_triggered = true; }, // it is checked for triggered in update
-		[]() {}); // no down
 }
