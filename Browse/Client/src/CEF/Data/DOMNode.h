@@ -16,6 +16,15 @@
 #include <memory>
 #include <include/cef_process_message.h>
 
+namespace DOM
+{
+	static void GetJSRepresentation(
+		std::string nodeType,
+		std::vector<const std::vector<DOMAttribute>* >& description,
+		std::string& obj_getter_name
+		);
+}
+
 /*
    ___  ____  __  ____  __        __      
   / _ \/ __ \/  |/  / |/ /__  ___/ /__ ___
@@ -33,7 +42,9 @@ public:
 	// CefProcessMessage to C++ object
 	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data);
 
-	const std::vector<DOMAttribute> GetDescription();
+	static void GetDescription(std::vector<const std::vector<DOMAttribute>* >* descriptions) {
+		descriptions->push_back(&_description);
+	}
 	
 	int GetId() const { return _id; }
 	std::vector<Rect> GetRects() const { return _rects; }
@@ -54,7 +65,7 @@ private:
 	int _id;
 	std::vector<Rect> _rects = {};
 	int _fixedId = NULL;				// first FixedElement's ID, which is hierarchically above this node, if any
-	int _overflowId = NULL;				// first OverflowElement's ID, which is hierarchically above this node, if any
+	int _overflowId = NULL;				// first DOMOverflowElement's ID, which is hierarchically above this node, if any
 
 };
 
@@ -77,6 +88,15 @@ public:
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
 	// CefProcessMessage to C++ object
 	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data);
+
+	static void GetDescription(std::vector<const std::vector<DOMAttribute>* >* descriptions) {
+		super::GetDescription(descriptions);
+		descriptions->push_back(&_description);
+	}
+
+	static const std::string GetJSObjectGetter() {
+		return "GetDOMTextInput";
+	}
 
 	std::string GetText() const { return _text; }
 	bool IsPasswordField() const { return _isPassword; }
@@ -113,6 +133,16 @@ public:
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
 	// CefProcessMessage to C++ object
 	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data);
+
+
+	static void GetDescription(std::vector<const std::vector<DOMAttribute>* >* descriptions) {
+		super::GetDescription(descriptions);
+		descriptions->push_back(&_description);
+	}
+
+	static const std::string GetJSObjectGetter() {
+		return "GetDOMLink";
+	}
 
 	std::string GetText() const { return _text; }
 	std::string GetUrl() const { return _url; }
@@ -152,6 +182,16 @@ public:
 	// CefProcessMessage to C++ object
 	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data);
 
+
+	static void GetDescription(std::vector<const std::vector<DOMAttribute>* >* descriptions) {
+		super::GetDescription(descriptions);
+		descriptions->push_back(&_description);
+	}
+
+	static const std::string GetJSObjectGetter() {
+		return "GetDOMSelectField";
+	}
+
 	std::vector<std::string> GetOptions() const { return _options; }
 
 private:
@@ -173,16 +213,26 @@ private:
 \____/|___/\__/_/ /_//_/\___/__,__/___/_/\__/_/_/_/\__/_//_/\__/___/
 */
 
-class OverflowElement : public DOMNode
+class DOMOverflowElement : public DOMNode
 {
 public:
 	// Empty construction
-	OverflowElement(int id) : DOMNode(id) {};
+	DOMOverflowElement(int id) : DOMNode(id) {};
 
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
 	// CefProcessMessage to C++ object
 	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data);
+
+
+	static void GetDescription(std::vector<const std::vector<DOMAttribute>* >* descriptions) {
+		super::GetDescription(descriptions);
+		descriptions->push_back(&_description);
+	}
+
+	static const std::string GetJSObjectGetter() {
+		return "GetDOMOverflowElement";
+	}
 
 	std::pair<int, int> GetMaxScrolling() const { return std::make_pair(_scrollLeftMax, _scrollTopMax); }
 	std::pair<int, int> GetCurrentScrolling() const { return std::make_pair(_scrollLeft, _scrollTop); }

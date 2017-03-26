@@ -275,17 +275,17 @@ public:
 	virtual void AddDOMTextInput(int id);
 	virtual void AddDOMLink(int id);
 	virtual void AddDOMSelectField(int id);
-	virtual void AddOverflowElement(int id);
+	virtual void AddDOMOverflowElement(int id);
 
 	virtual std::weak_ptr<DOMTextInput> GetDOMTextInput(int id);
 	virtual std::weak_ptr<DOMLink> GetDOMLink(int id);
 	virtual std::weak_ptr<DOMSelectField> GetDOMSelectField(int id);
-	virtual std::weak_ptr<OverflowElement> GetOverflowElement(int id);
+	virtual std::weak_ptr<DOMOverflowElement> GetDOMOverflowElement(int id);
 
 	virtual void RemoveDOMTextInput(int id);
 	virtual void RemoveDOMLink(int id);
 	virtual void RemoveDOMSelectField(int id);
-	virtual void RemoveOverflowElement(int id);
+	virtual void RemoveDOMOverflowElement(int id);
 	virtual void ClearDOMNodes();
 
     // Receive callbacks from CefMediator upon scrolling offset changes
@@ -447,7 +447,7 @@ private:
 	std::map<int, std::shared_ptr<DOMLink> > _TextLinkMap;
 	std::map<int, std::shared_ptr<DOMTextInput> > _TextInputMap;
 	std::map<int, std::shared_ptr<DOMSelectField> > _SelectFieldMap;
-	std::map<int, std::shared_ptr<OverflowElement> > _overflowElementMap;
+	std::map<int, std::shared_ptr<DOMOverflowElement> > _OverflowElementMap;
 
     // Web view in which website is rendered and displayed
     std::unique_ptr<WebView> _upWebView;

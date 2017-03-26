@@ -151,9 +151,9 @@ void Tab::AddDOMSelectField(int id)
 	_DOMTriggers.emplace(std::weak_ptr<DOMNode>(spNode), std::move(upDOMTrigger));	// TODO: Can Trigger really be deleted if they hold a shared_ptr to the same DOMNode?
 }
 
-void Tab::AddOverflowElement(int id)
+void Tab::AddDOMOverflowElement(int id)
 {
-	_overflowElementMap.emplace(id, std::make_shared<OverflowElement>(id));
+	_OverflowElementMap.emplace(id, std::make_shared<DOMOverflowElement>(id));
 }
 
 
@@ -172,9 +172,9 @@ std::weak_ptr<DOMSelectField> Tab::GetDOMSelectField(int id)
 	return (_SelectFieldMap.find(id) != _SelectFieldMap.end()) ? _SelectFieldMap.at(id) : std::weak_ptr<DOMSelectField>();
 }
 
-std::weak_ptr<OverflowElement> Tab::GetOverflowElement(int id)
+std::weak_ptr<DOMOverflowElement> Tab::GetDOMOverflowElement(int id)
 {
-	return (_overflowElementMap.find(id) != _overflowElementMap.end()) ? _overflowElementMap.at(id) : std::weak_ptr<OverflowElement>();
+	return (_OverflowElementMap.find(id) != _OverflowElementMap.end()) ? _OverflowElementMap.at(id) : std::weak_ptr<DOMOverflowElement>();
 }
 
 
@@ -200,7 +200,7 @@ void Tab::ClearDOMNodes()
 	_fixedElements.clear();
 
 	// Clear overflow elements
-	_overflowElementMap.clear();
+	_OverflowElementMap.clear();
 }
 
 void Tab::RemoveDOMTextInput(int id)
@@ -220,9 +220,9 @@ void Tab::RemoveDOMSelectField(int id)
 	if (_SelectFieldMap.find(id) != _SelectFieldMap.end()) { _SelectFieldMap.erase(id); }
 }
 
-void Tab::RemoveOverflowElement(int id)
+void Tab::RemoveDOMOverflowElement(int id)
 {
-	if (_overflowElementMap.find(id) != _overflowElementMap.end()) { _overflowElementMap.erase(id); }
+	if (_OverflowElementMap.find(id) != _OverflowElementMap.end()) { _OverflowElementMap.erase(id); }
 }
 
 

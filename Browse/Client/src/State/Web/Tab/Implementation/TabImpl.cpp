@@ -410,9 +410,9 @@ void Tab::Update(float tpf, Input& rInput)
             _pCefMediator->EmulateMouseWheelScrolling(this, 0.0, (double)(20.f * _autoScrollingValue));
         }
 
-		// Autoscroll inside of OverflowElement if gazed upon
+		// Autoscroll inside of DOMOverflowElement if gazed upon
 		bool overflowScrolling = false;
-		for (const auto& rIdOverflowPair : _overflowElementMap)
+		for (const auto& rIdOverflowPair : _OverflowElementMap)
 		{
 			const auto& rOverflowElement = rIdOverflowPair.second;
 			if (rOverflowElement)
@@ -824,7 +824,7 @@ void Tab::DrawDebuggingOverlay() const
 	// ### OVERFLOW ELEMENTS ###
 	_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(255.f/255.f, 127.f/255.f, 35.f/255.f));
 
-	for (const auto& rIdOverflowPair : _overflowElementMap)
+	for (const auto& rIdOverflowPair : _OverflowElementMap)
 	{
 		const auto& rOverflowElement = rIdOverflowPair.second;
 		if (rOverflowElement) // Note: Can be NULL if aquivalent element in JS got deleted. (see Tab::RemoveOverflowElement)

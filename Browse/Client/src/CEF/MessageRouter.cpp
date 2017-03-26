@@ -126,111 +126,6 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		}
 	}
 
-	// ########################
-	// ### Overflow Element ###
-	// ########################
-
-	if (requestString.compare(0, 9, "#ovrflow#") == 0)
-	{
-		if (requestString.compare(9, 4, "add#") == 0) // adding overflow element
-		{
-			std::string dataStr = requestString.substr(13, requestString.length());
-			std::vector<std::string> data = SplitBySeparator(dataStr, '#');
-
-			// Extract OverflowElement ID from dataStr
-			int id = std::stoi(data[0]);
-
-			// Create blank node object
-			_pMediator->AddOverflowElement(browser, id);
-
-			auto wpNode = _pMediator->GetOverflowElement(browser, id);
-			if (auto spNode = wpNode.lock())
-			{
-				spNode->Update(
-					DOMAttribute::Rects,
-					StringToCefListValue::ExtractAttributeData(DOMAttribute::Rects, data[1])
-					);
-
-				spNode->Update(
-					DOMAttribute::MaxScrolling,
-					StringToCefListValue::ExtractAttributeData(DOMAttribute::MaxScrolling, data[2])
-					);
-			}
-
-			// Success!
-			callback->Success("success");
-			return true;
-		}
-		if (requestString.compare(9, 4, "rem#") == 0) // removing overflow element
-		{
-			// Remove overflow element
-			std::vector<std::string> dataStr = SplitBySeparator(requestString.substr(13), '#');
-			_pMediator->RemoveOverflowElement(browser, std::stoi(dataStr[0]));
-
-			// Success!
-			callback->Success("success");
-			return true;
-		}
-		if (requestString.compare(9, 4, "upd#") == 0) // update overflow element
-		{
-			std::vector<std::string> dataStr = SplitBySeparator(requestString.substr(13), '#');
-
-			// Assuming elementId, attribute name & data are enough information (at this time)
-			if (dataStr.size() == 3)
-			{
-				// Overflow Element ID
-				int id = std::stoi(dataStr[0]);
-
-				// Overflow Elements attribute as string, which gets updated
-				std::string attr = dataStr[1];
-
-				// dataStr[2] contains data for given attributes value changes
-
-				// TODO:
-				// Use DOMAttribute enum on Javascript side to encode attributes in a string!
-
-				// Get access to given Overflow Element in Tab
-				std::weak_ptr<OverflowElement> wpElem = _pMediator->GetOverflowElement(browser, id);
-				if (const auto& elem = wpElem.lock())
-				{
-					// Update Overflow Element's rect data
-					if (attr == "rect")
-					{
-						std::vector<std::string> rectData = SplitBySeparator(dataStr[2], ';');
-						std::vector<float> rect;
-						// Convert Rect coordinates from string to float
-						std::for_each(
-							rectData.begin(),
-							rectData.end(),
-							[&rect](std::string str) {rect.push_back(std::stof(str)); }
-						);
-
-						// Use float coordinates to update Rect #0
-						//elem->UpdateRect(0, std::make_shared<Rect>(rect));	// DEPRECATED
-						elem->SetRects(std::make_shared<std::vector<Rect> >(rect));
-					}
-
-					// Update OverflowElement's fixation status
-					if (attr == "fixed")
-					{
-						elem->SetFixedId(std::stoi(dataStr[2]));
-					}
-				}
-
-				// Success!
-				callback->Success("success");
-				return true;
-			}
-			else
-			{
-				// Failure!
-				LogError("MsgRouter: An error occured in decoding the update String of an OverflowElement!");
-				callback->Failure(-1, "some error occured");
-				return true;
-			}
-		}
-	}
-
 	// ################
 	// ### DOM Node ###
 	// ################
@@ -268,6 +163,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					case(0): {_pMediator->AddDOMTextInput(browser, id); break; }
 					case(1): {_pMediator->AddDOMLink(browser, id); break; }
 					case(2): {_pMediator->AddDOMSelectField(browser, id); break; }
+					case(3): {_pMediator->AddDOMOverflowElement(browser, id); break; }
 					default: {
 						LogError("MsgRouter: Adding DOMNode - Unknown type of DOMNode! type=", type);
 					}
@@ -288,6 +184,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					case(0): {_pMediator->RemoveDOMTextInput(browser, id); break; }
 					case(1): {_pMediator->RemoveDOMLink(browser, id); break; }
 					case(2): {_pMediator->RemoveDOMSelectField(browser, id); break; }
+					case(3) : {_pMediator->RemoveDOMOverflowElement(browser, id); break; }
 					default: {
 						LogError("MsgRouter: Removing DOMNode - Unknown type of DOMNode! type=", type);
 					}
@@ -303,6 +200,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					case(0): {target = _pMediator->GetDOMTextInput(browser, id); break; }
 					case(1): {target = _pMediator->GetDOMLink(browser, id); break; }
 					case(2): {target = _pMediator->GetDOMSelectField(browser, id); break; }
+					case(3) : {target = _pMediator->GetDOMOverflowElement(browser, id); break; }
 					default: {
 						LogError("MsgRouter: Updating DOMNode - Unknown type of DOMNode! type=", type);
 					}

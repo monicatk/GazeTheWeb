@@ -136,6 +136,7 @@ bool DOMTextInput::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 	return super::Update(attr, data);
 }
 
+
 bool DOMTextInput::IPCSetText(CefRefPtr<CefListValue> data)
 {
 	if (data->GetSize() < 1 || data->GetValue(0) ->GetType() != CefValueType::VTYPE_STRING)
@@ -273,11 +274,11 @@ bool DOMSelectField::IPCSetOptions(CefRefPtr<CefListValue> data)
 \____/|___/\__/_/ /_//_/\___/__,__/___/_/\__/_/_/_/\__/_//_/\__/___/
 */
 
-const std::vector<DOMAttribute> OverflowElement::_description = {
+const std::vector<DOMAttribute> DOMOverflowElement::_description = {
 	MaxScrolling, CurrentScrolling
 };
 
-int OverflowElement::Initialize(CefRefPtr<CefProcessMessage> msg)
+int DOMOverflowElement::Initialize(CefRefPtr<CefProcessMessage> msg)
 {
 	// First list element to start interpretation as this class's attributes
 	int pivot = super::Initialize(msg);
@@ -301,7 +302,7 @@ int OverflowElement::Initialize(CefRefPtr<CefProcessMessage> msg)
 	return _description.size() + pivot;
 }
 
-bool OverflowElement::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
+bool DOMOverflowElement::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 {
 	switch (attr) {
 	case DOMAttribute::MaxScrolling:		return IPCSetMaxScrolling(data);
@@ -310,7 +311,7 @@ bool OverflowElement::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 	return super::Update(attr, data);
 }
 
-bool OverflowElement::IPCSetMaxScrolling(CefRefPtr<CefListValue> data)
+bool DOMOverflowElement::IPCSetMaxScrolling(CefRefPtr<CefListValue> data)
 {
 	if(data->GetSize() <= 0 || data->GetType(0) != CefValueType::VTYPE_INT || data->GetType(1) != CefValueType::VTYPE_INT)
 		return false;
@@ -319,11 +320,40 @@ bool OverflowElement::IPCSetMaxScrolling(CefRefPtr<CefListValue> data)
 	return true;
 }
 
-bool OverflowElement::IPCSetCurrentScrolling(CefRefPtr<CefListValue> data)
+bool DOMOverflowElement::IPCSetCurrentScrolling(CefRefPtr<CefListValue> data)
 {
 	if (data->GetSize() <= 0 || data->GetType(0) != CefValueType::VTYPE_INT || data->GetType(1) != CefValueType::VTYPE_INT)
 		return false;
 
 	SetCurrentScrolling(data->GetValue(0)->GetInt(), data->GetValue(1)->GetInt());
 	return true;
+}
+void DOM::GetJSRepresentation(
+	std::string nodeType,
+	std::vector<const std::vector<DOMAttribute>*>& description,
+	std::string & obj_getter_name)
+{
+	if (nodeType == "TextInputData")
+	{
+		DOMTextInput::GetDescription(&description);
+		obj_getter_name = DOMTextInput::GetJSObjectGetter();
+
+	}
+	if (nodeType == "LinkData")
+	{
+		DOMLink::GetDescription(&description);
+		obj_getter_name = DOMLink::GetJSObjectGetter();
+
+	}
+	if (nodeType == "SelectFieldData")
+	{
+		DOMSelectField::GetDescription(&description);
+		obj_getter_name = DOMSelectField::GetJSObjectGetter();
+
+	}
+	if (nodeType == "OverflowElementData")
+	{
+		DOMOverflowElement::GetDescription(&description);
+		obj_getter_name = DOMOverflowElement::GetJSObjectGetter();
+	}
 }

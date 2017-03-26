@@ -249,11 +249,11 @@ void Mediator::AddDOMSelectField(CefRefPtr<CefBrowser> browser, int id)
 	}
 }
 
-void Mediator::AddOverflowElement(CefRefPtr<CefBrowser> browser, int id)
+void Mediator::AddDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
-		pTab->AddOverflowElement(id);
+		pTab->AddDOMOverflowElement(id);
 	}
 }
 
@@ -388,20 +388,20 @@ void Mediator::ScrollOverflowElement(TabCEFInterface * pTab, int elemId, int x, 
 	}
 }
 
-std::weak_ptr<OverflowElement> Mediator::GetOverflowElement(CefRefPtr<CefBrowser> browser, int id)
+std::weak_ptr<DOMOverflowElement> Mediator::GetDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
-		return pTab->GetOverflowElement(id);
+		return pTab->GetDOMOverflowElement(id);
 	}
-	return std::weak_ptr<OverflowElement>();
+	return std::weak_ptr<DOMOverflowElement>();
 }
 
-void Mediator::RemoveOverflowElement(CefRefPtr<CefBrowser> browser, int id)
+void Mediator::RemoveDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
-		pTab->RemoveOverflowElement(id);
+		pTab->RemoveDOMOverflowElement(id);
 	}
 }
 

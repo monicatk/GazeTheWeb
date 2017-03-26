@@ -9,6 +9,9 @@
 #include "include/wrapper/cef_helpers.h"
 #include <sstream>
 
+#include "src/CEF/Data/DOMExtraction.h"
+#include "src/CEF/Data/DOMNode.h"		// TODO: Move descriptions to DOMExtraction to not need to include this header?
+
 RenderProcessHandler::RenderProcessHandler()
 {
 	CefMessageRouterConfig config;
@@ -330,96 +333,56 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 		IPCLogDebug(browser, "Received deprecated "+msgName+" message!");
 	}
 
-	if (msgName == "LoadDOMNodeData")
+	if (msgName.substr(0, 6) == "LoadDOM")
 	{
-		//IPCLogDebug(browser, "Received 'LoadDOMNodeData' msg...");
+		const std::string nodeType = msgName.substr(7, msgName.size());
+		const int id = msg->GetArgumentList()->GetInt(0);
 
-		// Generic fetching of node data of 'nodeID' for a specific node type 'type'
-		CefRefPtr<CefListValue> args = msg->GetArgumentList();
+		// Fetch node type's attribute description
+		std::vector<const std::vector<DOMAttribute>* > description;
+		std::string js_obj_getter_name;
 
-		int type = args->GetInt(0);
-		int nodeID = args->GetInt(1);
+		DOM::GetJSRepresentation(nodeType, description, js_obj_getter_name);
+
+		if (description.size() == 0)
+		{
+			IPCLog(browser, "Renderer: Could not find fitting description for " + nodeType);
+			return true;
+		}
 
 		CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
-		// Get DOMObject which wraps the DOM node itself
-		CefRefPtr<CefV8Value> domObj = FetchDOMObject(context, type, nodeID);
-
-		// Unwrap DOMObject and specify its node type
-		switch (type)
+		if (context->Enter())
 		{
-			case 0: { msg = UnwrapDOMTextInput(context, domObj, nodeID); break; };
-			case 1: { msg = UnwrapDOMLink(context, domObj, nodeID); break; };
-			case 2: { break; }
-			default: { msg = NULL; break; };
-		}
+			CefRefPtr<CefV8Value> objGetter = context->GetGlobal()->GetValue(js_obj_getter_name);
 
-
-		// TODO: More general object fetching for all kinds of DOMNodes! Maybe like the following
-		if (type == 2 && !domObj->IsUndefined() && !domObj->IsNull())
-		{
-			if (context->Enter())
+			if (!objGetter->IsFunction())
 			{
-				msg = CefProcessMessage::Create("InitializeDOMSelectField");
-                                auto args = msg->GetArgumentList();
-				args->SetInt(0, type);
-				args->SetInt(1, nodeID);
+				IPCLog(browser, "Renderer: Could not find JS object getter function '" + js_obj_getter_name + "'.");
+				return true;
+			}
 
-				CefRefPtr<CefV8Value> getRectsFunc = domObj->GetValue("getRects"),
-					getOptionsFunc = domObj->GetValue("getOptions");
+			// Call object getter and save returned object
+			CefRefPtr<CefV8Value> domObj = objGetter->ExecuteFunction(context->GetGlobal(), { CefV8Value::CreateInt(id) });
 
-				// Read out Rect data
-				CefRefPtr<CefListValue> rectList = CefListValue::Create();
-				if (getRectsFunc->IsNull() || getRectsFunc->IsUndefined() || !getRectsFunc->IsFunction())
+			// Fill reply message with extracted attribute data
+			CefRefPtr<CefProcessMessage> reply = CefProcessMessage::Create("ExtractedDOM" + nodeType);
+			const auto& args = reply->GetArgumentList();
+			int args_count = 0;
+
+			for (const auto& desc : description)
+			{
+				for (const auto& attr : *desc)
 				{
-					IPCLogDebug(browser, "Couldn't access 'getRects' function, when trying to initialize DOMNode data.");
+					args->SetList(
+						args_count++, 
+						V8ToCefListValue::ExtractAttributeData(attr, domObj)
+					);
 				}
-				else
-				{
-					CefRefPtr<CefV8Value> rects = getRectsFunc->ExecuteFunction(domObj, {});
-					for (int i = 0; i < rects->GetArrayLength(); i++)
-					{
-						CefRefPtr<CefListValue> rectEntry = CefListValue::Create();
-						CefRefPtr<CefV8Value> rect = rects->GetValue(i);
-						for (int j = 0; j < rect->GetArrayLength(); j++)
-						{
-							rectEntry->SetDouble(j, rect->GetValue(j)->GetDoubleValue());
-						}
-						rectList->SetList(i, rectEntry);
-					}
-				}
-				args->SetList(2, rectList);
+			}
 
+			browser->SendProcessMessage(PID_BROWSER, reply);
 
-				// Read out options data
-				CefRefPtr<CefListValue> optionsList = CefListValue::Create();
-				if (getOptionsFunc->IsNull() || getOptionsFunc->IsUndefined() || !getOptionsFunc->IsFunction())
-				{
-					IPCLogDebug(browser, "Couldn't access 'getOptions' function, when trying to initialize DOMNode data.");
-				}
-				else
-				{
-					CefRefPtr<CefV8Value> options = getOptionsFunc->ExecuteFunction(domObj, {});
-					for (int i = 0; i < options->GetArrayLength(); i++)
-					{
-						optionsList->SetString(i, options->GetValue(i)->GetStringValue());
-					}
-				}
-				args->SetList(3, optionsList);
-
-				
-				context->Exit();
-				}
-		}
-
-
-		if (msg && msg->GetArgumentList()->GetSize() > 0)
-		{
-			// Send DOMNode data to browser process
-			browser->SendProcessMessage(PID_BROWSER, msg);
-		}
-		else
-		{
-			IPCLogDebug(browser, "ERROR: Could not create DOMNode id=" + std::to_string(nodeID) + ", type=" + std::to_string(type) + "!");
+			context->Exit();
 		}
 
 		return true;
@@ -519,117 +482,6 @@ void RenderProcessHandler::OnContextReleased(CefRefPtr<CefBrowser> browser,
 		// DEBUG
 		frame->ExecuteJavaScript("MutationObserverShutdown()", "", 0);
     }
-}
-
-/**
- *	Returns the JS DOMObject which wraps the DOMNode with the given type and ID
- */
-CefRefPtr<CefV8Value> RenderProcessHandler::FetchDOMObject(CefRefPtr<CefV8Context> context, int nodeType, int nodeID)
-{
-	CefRefPtr<CefV8Value> result = CefV8Value::CreateNull();
-
-	if (context->Enter())
-	{
-		CefRefPtr<CefV8Value> jsWindow = context->GetGlobal();
-
-		// Only try to execute function, if function exists
-		if (jsWindow->GetValue("GetDOMObject")->IsFunction())
-		{
-			result = jsWindow->GetValue("GetDOMObject")->ExecuteFunction(
-				NULL, 
-				{ CefV8Value::CreateInt(nodeType), CefV8Value::CreateInt(nodeID) }
-			);
-		}
-		else
-		{
-			IPCLogDebug(context->GetBrowser(), "ERROR: Could not find function 'GetDOMObject(nodeType, nodeID)' in Javascript context!");
-		}
-
-		context->Exit();
-
-	}
-	else // Couldn't enter context
-	{
-		IPCLogDebug(context->GetBrowser(), "ERROR: Could not load DOMTextInput with id="+std::to_string(nodeID)+ ", because context could not be entered!");
-	}
-
-	return result;
-}
-
-CefRefPtr<CefProcessMessage> RenderProcessHandler::UnwrapDOMTextInput(
-	CefRefPtr<CefV8Context> context, 
-	CefRefPtr<CefV8Value> domObj, 
-	int nodeID)
-{
-	CefRefPtr<CefProcessMessage> result = CefProcessMessage::Create("CreateDOMTextInput");
-	CefRefPtr<CefListValue> args = result->GetArgumentList();
-
-	if (!domObj->IsNull() && !domObj->IsUndefined())
-	{
-		if (context->Enter())
-		{
-			int index = 0;
-			args->SetInt(index++, 0);	// nodeType = 0 for DOMTextInput
-			args->SetInt(index++, nodeID);
-			args->SetBool(index++, domObj->GetValue("visible")->GetBoolValue());
-
-			// Get V8 list of floats, representing all Rect coordinates of the given domObj
-			CefRefPtr<CefV8Value> rectsData = domObj->GetValue("getRects")->ExecuteFunction(domObj, {});
-			for (int i = 0; i < rectsData->GetArrayLength(); i++)
-			{
-				for (int j = 0; j < 4; j++)
-				{
-					args->SetDouble(index++, rectsData->GetValue(i)->GetValue(j)->GetDoubleValue());
-				}
-			}
-
-			context->Exit();
-		}
-	}
-	else
-	{
-		IPCLogDebug(context->GetBrowser(), "ERROR: Given DOMObject is NULL! Could not read out DOMTextInput");
-	}
-
-	return result;
-}
-
-CefRefPtr<CefProcessMessage> RenderProcessHandler::UnwrapDOMLink(
-	CefRefPtr<CefV8Context> context,
-	CefRefPtr<CefV8Value> domObj,
-	int nodeID)
-{
-	CefRefPtr<CefProcessMessage> result = CefProcessMessage::Create("CreateDOMLink");
-	CefRefPtr<CefListValue> args = result->GetArgumentList();
-
-	if (!domObj->IsNull() && !domObj->IsUndefined())
-	{
-		if (context->Enter())
-		{
-			int index = 0;
-			args->SetInt(index++, 1);	// nodeType = 1 for DOMLinks
-			args->SetInt(index++, nodeID);
-			args->SetBool(index++, domObj->GetValue("visible")->GetBoolValue());
-
-			// Get V8 list of floats, representing all Rect coordinates of the given domObj
-			CefRefPtr<CefV8Value> rectsData = domObj->GetValue("getRects")->ExecuteFunction(domObj, {});
-			for (int i = 0; i < rectsData->GetArrayLength(); i++)
-			{
-				for (int j = 0; j < 4; j++)
-				{
-					args->SetDouble(index++, rectsData->GetValue(i)->GetValue(j)->GetDoubleValue());
-				}
-			}
-
-			context->Exit();
-		}
-	}
-	else
-	{
-		IPCLogDebug(context->GetBrowser(), "ERROR: Given DOMObject is NULL! Could not read out DOMLink");
-	}
-
-	return result;
 }
 
 void RenderProcessHandler::IPCLog(CefRefPtr<CefBrowser> browser, std::string text, bool debugLog)

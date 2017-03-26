@@ -43,11 +43,6 @@ public:
         CefRefPtr<CefFrame> frame,
         CefRefPtr<CefV8Context> context) OVERRIDE;
 
-	// Fetching DOM node data from V8 context
-	CefRefPtr<CefV8Value> FetchDOMObject(CefRefPtr<CefV8Context> context, int nodeType, int nodeID);
-	CefRefPtr<CefProcessMessage> UnwrapDOMTextInput(CefRefPtr<CefV8Context> context, CefRefPtr<CefV8Value> domObj, int nodeID);
-	CefRefPtr<CefProcessMessage> UnwrapDOMLink(CefRefPtr<CefV8Context> context, CefRefPtr<CefV8Value> domObj, int nodeID);
-
 private:
 
     // Send logs to main process
