@@ -40,11 +40,11 @@ protected:
 	// States of zooming
 	enum class State { ORIENTATE, ZOOM, WAIT, DEBUG };
 
-	// Zoom data at point in time of execution
-	struct ZoomData
+	// Sample data
+	struct SampleData
 	{
-		glm::vec2 pixelGazeCoordinate; // gaze in cef pixels
-		glm::vec2 pixelZoomCoordinate; // center of zooming in cef pixels
+		glm::vec2 relativeGazeCoordinate;
+		glm::vec2 pixelGazeCoordinate;
 		float logZoom; // value of log zoom at that time
 	};
 
@@ -94,16 +94,13 @@ protected:
 	bool _doDimming = true;
 
 	// Datas saved before drift correction zooming starts
-	ZoomData _zoomData;
+	SampleData _sampleData;
 
 	// Time after zooming to wait for gaze to calm down
 	float _gazeCalmDownTime = 0.5f;
 
 	// State of action
 	State _state = State::ORIENTATE;
-
-	// TODO: Debugging
-	glm::vec2 finalPixelGazeCoordinate;
 };
 
 #endif // ZOOMCOORDINATEACTION_H_

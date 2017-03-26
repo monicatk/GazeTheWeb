@@ -135,17 +135,14 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			// Zoom is deep enough for zoom coordinate
 			if (_logZoom <= 0.75f)
 			{
-				// Calculate pixel gaze coordiante
+				// Pixel gaze coordinate
 				glm::vec2 pixelGazeCoordinate = relativeGazeCoordiante; // CEFPixel space
 				pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, pixelGazeCoordinate);
 
-				// Zoom coordiante in CEFPixel space
-				glm::vec2 pixelZoomCoordinate = _relativeZoomCoordinate  * cefPixels; // do not apply center offset here
-				
 				// Store sample from that time
-				_zoomData.logZoom = _logZoom;
-				_zoomData.pixelGazeCoordinate = pixelGazeCoordinate;
-				_zoomData.pixelZoomCoordinate = pixelZoomCoordinate;
+				_sampleData.logZoom = _logZoom;
+				_sampleData.relativeGazeCoordinate = relativeGazeCoordiante;
+				_sampleData.pixelGazeCoordinate = pixelGazeCoordinate;
 				_state = State::ZOOM;
 			}
 			break;
@@ -165,18 +162,17 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			{
 				// TODO check whether drift is significant or can be ignored (for very good calibration)
 
-				// TODO something is wrong here. In which space should be the new gaze coordiante be transferred?
-				finalPixelGazeCoordinate = relativeGazeCoordiante;
-				pageCoordinate(_zoomData.logZoom, _relativeZoomCoordinate, _relativeCenterOffset, finalPixelGazeCoordinate);
-
 				// Calculate drift of gaze
-				glm::vec2 pixelGazeDrift = finalPixelGazeCoordinate - _zoomData.pixelGazeCoordinate; // drift of gaze coordinates
+				glm::vec2 relativeGazeDrift = relativeGazeCoordiante - _sampleData.relativeGazeCoordinate; // drift of gaze coordinates
+
+				// Bring drift into coordinates after orientation
+				glm::vec2 pixelGazeDrift = relativeGazeDrift * cefPixels * _sampleData.logZoom; // TODO: does not seem to be correct. Why?
 
 				// Radius around old zoom coordinate where actual fixation point should be
-				float pixelRadius = glm::length(pixelGazeDrift) / (_zoomData.logZoom - _logZoom);
+				float pixelRadius = glm::length(pixelGazeDrift) / (_sampleData.logZoom - _logZoom);
 
 				// Calculate fixation coordinate with corrected drift
-				glm::vec2 pixelFixationCoordinate = (glm::normalize(pixelGazeDrift) * pixelRadius) + _zoomData.pixelGazeCoordinate;
+				glm::vec2 pixelFixationCoordinate = (glm::normalize(pixelGazeDrift) * pixelRadius) + _sampleData.pixelGazeCoordinate;
 
 				// Set coordinate in output value 
 				SetOutputValue("coordinate", pixelFixationCoordinate);
@@ -247,10 +243,10 @@ void ZoomCoordinateAction::Draw() const
 		// TODO: convert from CEF Pixel space to WebView Pixel space
 
 		// Gaze after orientation
-		_pTab->Debug_DrawRectangle(_zoomData.pixelGazeCoordinate, glm::vec2(5, 5), glm::vec3(1, 1, 0));
+		// _pTab->Debug_DrawRectangle(_zoomData.pixelGazeCoordinate, glm::vec2(5, 5), glm::vec3(1, 1, 0));
 
 		// Gaze after wait
-		_pTab->Debug_DrawRectangle(finalPixelGazeCoordinate, glm::vec2(5, 5), glm::vec3(1, 0, 1));
+		// pTab->Debug_DrawRectangle(finalPixelGazeCoordinate, glm::vec2(5, 5), glm::vec3(1, 0, 1));
 	}
 
 	// Testing visualization
