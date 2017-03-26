@@ -101,6 +101,9 @@ protected:
 
 	// State of action
 	State _state = State::ORIENTATE;
+
+	// TODO: Debugging
+	glm::vec2 finalPixelGazeCoordinate;
 };
 
 #endif // ZOOMCOORDINATEACTION_H_
