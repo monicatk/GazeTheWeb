@@ -3,29 +3,29 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
-#include "QuadRenderItem.h"
+#include "PrimitiveRenderItem.h"
 
-QuadRenderItem::QuadRenderItem(std::string vertSource, std::string fragSource, Quad::Type type)
+PrimitiveRenderItem::PrimitiveRenderItem(std::string vertSource, std::string fragSource, Primitive::Type type)
 : RenderItem(vertSource, fragSource)
 {
-    InitQuad(type);
+	InitPrimitive(type);
 }
 
-QuadRenderItem::QuadRenderItem(std::string vertSource, std::string geomSource, std::string fragSource, Quad::Type type)
+PrimitiveRenderItem::PrimitiveRenderItem(std::string vertSource, std::string geomSource, std::string fragSource, Primitive::Type type)
 : RenderItem(vertSource, geomSource, fragSource)
 {
-    InitQuad(type);
+	InitPrimitive(type);
 }
 
-void QuadRenderItem::Draw(GLenum mode) const
+void PrimitiveRenderItem::Draw(GLenum mode) const
 {
-    glDrawArrays(mode, 0, _upQuad->GetVertexCount());
+    glDrawArrays(mode, 0, _upPrimitve->GetVertexCount());
 }
 
-void QuadRenderItem::InitQuad(Quad::Type type)
+void PrimitiveRenderItem::InitPrimitive(Primitive::Type type)
 {
     // Create mesh
-    _upQuad = std::unique_ptr<Quad>(new Quad(type));
+	_upPrimitve = std::unique_ptr<Primitive>(new Primitive(type));
 
     // Bring both with vertex array buffer together
     glBindVertexArray(_vao);
@@ -33,13 +33,13 @@ void QuadRenderItem::InitQuad(Quad::Type type)
     // Vertices
     int posAttr = glGetAttribLocation(_upShader->GetProgram(), "posAttr");
     glEnableVertexAttribArray(posAttr);
-    glBindBuffer(GL_ARRAY_BUFFER, _upQuad->GetVBO());
+    glBindBuffer(GL_ARRAY_BUFFER, _upPrimitve->GetVBO());
     glVertexAttribPointer(posAttr, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
     // Texture coordinates
     int uvAttrib = glGetAttribLocation(_upShader->GetProgram(), "uvAttr");
     glEnableVertexAttribArray(uvAttrib);
-    glBindBuffer(GL_ARRAY_BUFFER, _upQuad->GetUVBO());
+    glBindBuffer(GL_ARRAY_BUFFER, _upPrimitve->GetUVBO());
     glVertexAttribPointer(uvAttrib, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 
     // Unbind everything

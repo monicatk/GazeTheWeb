@@ -462,7 +462,17 @@ private:
     std::string _url = "";
 
     // Vector with DOMTriggers (take DOM input node as input...)
+<<<<<<< HEAD
     std::map<std::weak_ptr<DOMNode>, std::unique_ptr<DOMTrigger> >_DOMTriggers;
+=======
+    std::vector<std::unique_ptr<DOMTrigger> >_DOMTriggers;
+
+	// Vector with DOMTextLinks
+	std::vector<std::shared_ptr<DOMNode> >_DOMTextLinks;
+
+	// Vector with DOMSelectFields
+	std::vector<std::shared_ptr<DOMSelectField> > _DOMSelectFields;
+>>>>>>> 8b272ae4531b09d4a30ed895b31dfc4a9898867e
 
 	// Map nodeID to node itself, in order to access it when it has to be updated
 	std::map<int, std::shared_ptr<DOMLink> > _TextLinkMap;

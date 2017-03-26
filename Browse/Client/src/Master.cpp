@@ -537,13 +537,12 @@ void Master::Loop()
         double currentMouseY;
         glfwGetCursorPos(_pWindow, &currentMouseX, &currentMouseY);
 
-        // Update eye input
+		// Update eye input
 		int windowX = 0;
 		int windowY = 0;
 		glfwGetWindowPos(_pWindow, &windowX, &windowY);
-        double gazeX;
-        double gazeY;
-        bool gazeUsed = _upEyeInput->Update(
+		double gazeX, gazeY; // result of EyeInput update
+		bool gazeUsed = _upEyeInput->Update(
 			tpf,
 			currentMouseX,
 			currentMouseY,
@@ -554,14 +553,14 @@ void Master::Loop()
 			_width,
 			_height);
 
-        // Update cursor
+        // Update cursor with original mouse input
         eyegui::setVisibilityOfLayout(_pCursorLayout, !gazeUsed, false, true);
         float halfRelativeMouseCursorSize = MOUSE_CURSOR_RELATIVE_SIZE / 2.f;
         eyegui::setPositionOfFloatingFrame(
             _pCursorLayout,
             _cursorFrameIndex,
-            (gazeX / _width) - halfRelativeMouseCursorSize,
-            (gazeY / _height) - halfRelativeMouseCursorSize);
+            (currentMouseX / _width) - halfRelativeMouseCursorSize,
+            (currentMouseY / _height) - halfRelativeMouseCursorSize);
         eyegui::setSizeOfFloatingFrame(
             _pCursorLayout,
             _cursorFrameIndex,

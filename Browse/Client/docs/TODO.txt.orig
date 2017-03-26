@@ -9,10 +9,13 @@ Features:
 		- Page fullscreen handling -> for video would be cool to replace tab bar with video controls and for all: escape from fullscreen
 	- DOM Node boxes for images are only text height
 - Activate Sandbox on Application Side
-- Debugging control via define
+<<<<<<< HEAD
 - Fullscreen Handling
 	- Do CEF callbacks exist?
 	- Provide Esc Emulation when Fullscreen is on
+=======
+- Debugging control via define
+>>>>>>> 8b272ae4531b09d4a30ed895b31dfc4a9898867e
 
 Furthermore:
 - Word prediction improvement (and add typed words) and make extra one for URL Input

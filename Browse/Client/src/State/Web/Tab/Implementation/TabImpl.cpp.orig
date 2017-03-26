@@ -7,34 +7,11 @@
 #include "src/State/Web/Tab/Tab.h"
 #include "src/Master.h"
 #include "src/Setup.h"
-#include "src/Utils/QuadRenderItem.h"
 #include "src/Utils/Helper.h"
-#include "submodules/glm/glm/gtc/matrix_transform.hpp" // TODO: move to debug rendering class
-#include <algorithm>
 #include "src/Utils/Logger.h"
+#include <algorithm>
 
-// Shaders (For debugging rectangles)
-const std::string vertexShaderSource =
-"#version 330 core\n"
-"in vec3 posAttr;\n"
-"in vec2 uvAttr;\n"
-"out vec2 uv;\n"
-"uniform mat4 matrix;\n"
-"void main() {\n"
-"   uv = uvAttr;\n"
-"   gl_Position = matrix * vec4(posAttr, 1);\n"
-"}\n";
-
-const std::string fragmentShaderSource =
-"#version 330 core\n"
-"in vec2 uv;\n"
-"out vec4 fragColor;\n"
-"uniform vec3 color;\n"
-"void main() {\n"
-"   fragColor = vec4(color,1);\n"
-"}\n";
-
-Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std::string url)
+Tab::Tab(Master* pMaster, Mediator* pCefMediator, WebTabInterface* pWeb, std::string url)
 {
 	// Fill members
 	_pMaster = pMaster;
@@ -92,8 +69,12 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
 	_spTabSensorListener = std::shared_ptr<TabSensorListener>(new TabSensorListener(this));
 	eyegui::registerButtonListener(_pPanelLayout, "click_mode", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPanelLayout, "auto_scrolling", _spTabButtonListener);
-	eyegui::registerButtonListener(_pPanelLayout, "scroll_to_top", _spTabButtonListener);
+    eyegui::registerButtonListener(_pPanelLayout, "scroll_to_top", _spTabButtonListener);
+    // eyegui::registerButtonListener(_pPanelLayout, "pivot", _spTabButtonListener);
+    // eyegui::registerButtonListener(_pPanelLayout, "gaze_mouse", _spTabButtonListener);
+    eyegui::registerButtonListener(_pPanelLayout, "selection", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPanelLayout, "zoom", _spTabButtonListener);
+	// eyegui::registerButtonListener(_pPanelLayout, "test_button", _spTabButtonListener); // TODO: only for testing new features
 	eyegui::registerButtonListener(_pPipelineAbortLayout, "abort", _spTabButtonListener);
 	eyegui::registerSensorListener(_pScrollingOverlayLayout, "scroll_up_sensor", _spTabSensorListener);
 	eyegui::registerSensorListener(_pScrollingOverlayLayout, "scroll_down_sensor", _spTabSensorListener);
@@ -104,28 +85,23 @@ Tab::Tab(Master* pMaster, CefMediator* pCefMediator, WebTabInterface* pWeb, std:
 	_spTabOverlayWordSuggestListener = std::shared_ptr<TabOverlayWordSuggestListener>(new TabOverlayWordSuggestListener(this));
 
 	// Create WebView owned by Tab
-	int webRenderWidth, webRenderHeight = 0;
-	GetWebRenderResolution(webRenderWidth, webRenderHeight);
-	_upWebView = std::unique_ptr<WebView>(new WebView(webRenderWidth, webRenderHeight));
-
-	// Activate current mode
-	ActivateMode(_mode);
+	auto webViewInGUI = eyegui::getAbsolutePositionAndSizeOfElement(_pPanelLayout, "web_view");
+    _upWebView = std::unique_ptr<WebView>(new WebView(webViewInGUI.x, webViewInGUI.y, webViewInGUI.width, webViewInGUI.height));
 
 	// Register itself and painted texture in mediator to receive DOMNodes
 	_pCefMediator->RegisterTab(this);
 
-	// Prepare debug rendering
-	_upDebugRenderItem = std::unique_ptr<RenderItem>(
-		new QuadRenderItem(
-			vertexShaderSource,
-			fragmentShaderSource,
-			Quad::Type::LINES_WITH_DIAGONAL));
+	// Prepare debugging overlay
+	InitDebuggingOverlay();
 }
 
 Tab::~Tab()
 {
 	// Delete triggers before removing layout
 	_DOMTriggers.clear();
+
+	// Abort pipeline
+	AbortAndClearPipelines();
 
 	_pCefMediator->UnregisterTab(this);
 	_pMaster->RemoveLayout(_pPanelLayout);
@@ -137,17 +113,21 @@ Tab::~Tab()
 
 void Tab::Update(float tpf, Input& rInput)
 {
+	// #######################
 	// ### UPDATE WEB VIEW ###
+	// #######################
 
 	// Update WebView (get values from eyeGUI layout directly)
-	auto webViewPositionAndSize = CalculateWebViewPositionAndSize();
+	const auto webViewInGUI = eyegui::getAbsolutePositionAndSizeOfElement(_pPanelLayout, "web_view");
 	_upWebView->Update(
-		webViewPositionAndSize.x,
-		webViewPositionAndSize.y,
-		webViewPositionAndSize.width,
-		webViewPositionAndSize.height);
+		webViewInGUI.x,
+		webViewInGUI.y,
+		webViewInGUI.width,
+		webViewInGUI.height);
 
+	// ######################
 	// ### UPDATE OVERLAY ###
+	// ######################
 
 	// Update click visualization
 	for (int i = 0; i < (int)_clickVisualizations.size(); i++)
@@ -166,8 +146,8 @@ void Tab::Update(float tpf, Input& rInput)
 			float relativeSize = (_clickVisualizations.at(i).fading / CLICK_VISUALIZATION_DURATION) * CLICK_VISUALIZATION_RELATIVE_SIZE;
 
 			// Position of floating frame
-			float relativePositionX = (webViewPositionAndSize.x + _clickVisualizations.at(i).x) / (float)_pMaster->GetWindowWidth();
-			float relativePositionY = (webViewPositionAndSize.y + _clickVisualizations.at(i).y) / (float)_pMaster->GetWindowHeight();
+			float relativePositionX = (_upWebView->GetX() + _clickVisualizations.at(i).x) / (float)_pMaster->GetWindowWidth();
+			float relativePositionY = (_upWebView->GetY() + _clickVisualizations.at(i).y) / (float)_pMaster->GetWindowHeight();
 			relativePositionX -= relativeSize / 2.f;
 			relativePositionY -= relativeSize / 2.f;
 
@@ -185,39 +165,49 @@ void Tab::Update(float tpf, Input& rInput)
             [](const ClickVisualization& i) { return i.fading <= 0; }),
 		_clickVisualizations.end());
 
+	// ########################
 	// ### TAB INPUT STRUCT ###
+	// ########################
 
 	// Create tab input structure (like standard input but in addition with input coordinates in web view space)
-	int webViewGazeX = rInput.gazeX - webViewPositionAndSize.x;
-	int webViewGazeY = rInput.gazeY - webViewPositionAndSize.y;
-	float webViewGazeRelativeX = ((float)webViewGazeX) / ((float)webViewPositionAndSize.width);
-	float webViewGazeRelativeY = ((float)webViewGazeY) / ((float)webViewPositionAndSize.height);
+	int webViewPixelGazeX = rInput.gazeX - _upWebView->GetX();
+	int webViewPixelGazeY = rInput.gazeY - _upWebView->GetY();
+	float webViewGazeRelativeX = ((float)webViewPixelGazeX) / (float)(_upWebView->GetWidth());
+	float webViewGazeRelativeY = ((float)webViewPixelGazeY) / (float)(_upWebView->GetHeight());
 	TabInput tabInput(
 		rInput.gazeX,
 		rInput.gazeY,
 		rInput.gazeUsed,
-		webViewGazeX,
-		webViewGazeY,
+		rInput.instantInteraction,
+		webViewPixelGazeX,
+		webViewPixelGazeY,
 		webViewGazeRelativeX,
 		webViewGazeRelativeY);
+	double CEFPixelGazeX = tabInput.webViewPixelGazeX;
+	double CEFPixelGazeY = tabInput.webViewPixelGazeY;
 
 	// Update highlight rectangle of webview
 	// TODO: alternative: give webview shared pointer to DOM nodes
 	std::vector<Rect> rects;
-	for (const auto& rDOMNode : _DOMTextLinks)
+	for (const auto& rIdNodePair : _TextLinkMap)
 	{
-		for (const auto& rRect : rDOMNode->GetRects())
+		for (const auto& rRect : rIdNodePair.second->GetRects())
 		{
 			rects.push_back(rRect);
 		}
 	}
 	_upWebView->SetHighlightRects(rects);
 
+	// ###########################
 	// ### UPDATE COLOR OF GUI ###
+	// ###########################
 
 	UpdateAccentColor(tpf);
 
+	// ###################
 	// ### UPDATE ICON ###
+	// ###################
+
     if (_iconState == IconState::ICON_NOT_FOUND && _faviconLoaded)
 	{
         // Favicon has been loaded now
@@ -236,17 +226,32 @@ void Tab::Update(float tpf, Input& rInput)
 		eyegui::setImageOfPicture(_pPanelLayout, "icon", "icons/TabLoading_" + std::to_string(_loadingIconFrame) + ".png");
 	}
 
+	// ###########################
     // ### UPDATE DEBUG LAYOUT ###
+	// ###########################
 
+	// Push back current gaze for debugging purposes
+	_gazeDebuggingQueue.push_front(glm::vec2(rInput.gazeX, rInput.gazeY));
+
+	// Limit length of queue
+	int toPop = (int)_gazeDebuggingQueue.size() - TAB_DEBUGGING_GAZE_COUNT;
+	for (int i = 0; i < toPop; i++)
+	{
+		_gazeDebuggingQueue.pop_back();
+	}
+
+	// Update text in layout
     eyegui::setContentOfTextBlock(
         _pDebugLayout,
         "web_view_coordinate",
         "Fixed:\n"
-        + std::to_string(webViewGazeX) + ", " + std::to_string(webViewGazeY) + "\n"
+        + std::to_string(webViewPixelGazeX) + ", " + std::to_string(webViewPixelGazeY) + "\n"
         + "Scrolled:\n"
-        + std::to_string((int)(webViewGazeX + _scrollingOffsetX)) + ", " + std::to_string((int)(webViewGazeY + _scrollingOffsetY)));
+        + std::to_string((int)(webViewPixelGazeX + _scrollingOffsetX)) + ", " + std::to_string((int)(webViewPixelGazeY + _scrollingOffsetY)));
 
-	// ### UPDATE PIPELINES OR MODE ###
+	// #######################################
+    // ### UPDATE PIPELINE OR STANDARD GUI ###
+	// #######################################
 
 	// Decide what to update
 	if (_pipelineActive)
@@ -278,7 +283,13 @@ void Tab::Update(float tpf, Input& rInput)
 	}
 	else
 	{
-		// MODE GETS UPDATED. STANDARD GUI IS VISIBLE
+        // STANDARD GUI IS VISIBLE
+
+        // Gaze mouse
+        if(_gazeMouse && !(_pMaster->IsPaused()))
+        {
+            EmulateMouseCursor(tabInput.webViewPixelGazeX, tabInput.webViewPixelGazeY);
+        }
 
 		// Ask for page resolution
 		_timeUntilGetPageResolution -= tpf;
@@ -304,14 +315,14 @@ void Tab::Update(float tpf, Input& rInput)
 			}
 
 			// Scroll down
-			if ((_pageHeight - 1) > (_scrollingOffsetY + webViewPositionAndSize.height))
+			if ((_pageHeight - 1) > (_scrollingOffsetY + _upWebView->GetResolutionY()))
 			{
 				showScrollDown = true;
 			}
 		}
 
 		// Set progress of scrolling
-		float scrollableHeight = (_pageHeight - 1) - webViewPositionAndSize.height;
+		float scrollableHeight = (_pageHeight - 1) - _upWebView->GetResolutionY();
 		float progressUp = 1.f;
 		float progressDown = 1.f;
 		if (scrollableHeight > 0)
@@ -328,14 +339,18 @@ void Tab::Update(float tpf, Input& rInput)
 		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpSensorFrameIndex, showScrollUp, false, true);
 		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownSensorFrameIndex, showScrollDown, false, true);
 
+		// Set activity of scroll to top button
+		eyegui::setElementActivity(_pPanelLayout, "scroll_to_top", showScrollUp, true);
+
 		// Check, that gaze is not upon a fixed element
+		ConvertToCEFPixel(CEFPixelGazeX, CEFPixelGazeY);
 		bool gazeUponFixed = false;
 		for (const auto& rElements : _fixedElements)
 		{
 			for (const auto& rElement : rElements)
 			{
 				// Simple box test
-				if(rElement.isInside(tabInput.webViewGazeX, tabInput.webViewGazeY))
+				if(rElement.IsInside(CEFPixelGazeX, CEFPixelGazeY))
 				{
 					gazeUponFixed = true;
 					break;
@@ -355,7 +370,7 @@ void Tab::Update(float tpf, Input& rInput)
 										 // yOffset = (glm::max(0.f, yOffset - 0.05f) / 0.95f); // In the center of view no movement
 			yOffset = negative ? -yOffset : yOffset; // [-1..1]
 
-													 // Update the auto scrolling value (TODO: not frame rate independend)
+			// Update the auto scrolling value (TODO: not frame rate independend)
 			_autoScrollingValue += tpf * (yOffset - _autoScrollingValue);
 		}
 		else if (_autoScrollingValue != 0)
@@ -379,20 +394,29 @@ void Tab::Update(float tpf, Input& rInput)
             _pCefMediator->EmulateMouseWheelScrolling(this, 0.0, (double)(20.f * _autoScrollingValue));
         }
 
-		// Autoscroll inside of OverflowElement if gazed upon
+		// Autoscroll inside of DOMOverflowElement if gazed upon
 		bool overflowScrolling = false;
-		for (const auto& rOverflowElement : _overflowElements)
+		for (const auto& rIdOverflowPair : _OverflowElementMap)
 		{
+			const auto& rOverflowElement = rIdOverflowPair.second;
 			if (rOverflowElement)
 			{
 				for (const auto& rRect : rOverflowElement->GetRects())
 				{
-					if (rRect.isInside(tabInput.webViewGazeX + _scrollingOffsetX, tabInput.webViewGazeY + _scrollingOffsetY))
+					int scrolledCEFPixelGazeX = CEFPixelGazeX;
+					int scrolledCEFPixelGazeY = CEFPixelGazeY;
+
+					// Do NOT add scrolling offset if element is fixed
+					if (!rOverflowElement->GetFixedId())
 					{
-						// Call OverflowElements scroll(gazeX, gazeY) method with current webview gaze coordinates
-						// Scrolling will be executed in Javascript
-						// TODO/Note: Global scrolling parameters defining how/when is scrolled?
-						_pCefMediator->ScrollOverflowElement(this, rOverflowElement->GetId(), tabInput.webViewGazeX, tabInput.webViewGazeY);
+						scrolledCEFPixelGazeX += _scrollingOffsetX;
+						scrolledCEFPixelGazeY += _scrollingOffsetY;
+					}
+
+					// Check if current gaze is inside of overflow element, if so execute scrolling method in corresponding Javascript object
+					if (rRect.IsInside(scrolledCEFPixelGazeX, scrolledCEFPixelGazeY))
+					{
+						ScrollOverflowElement(rOverflowElement->GetId(), CEFPixelGazeX, CEFPixelGazeY);
 						break;
 					}
 				}
@@ -401,34 +425,17 @@ void Tab::Update(float tpf, Input& rInput)
 					break;
 				}
 			}
-
 		}
 		//LogDebug(tabInput.webViewGazeX, "\t",tabInput.webViewGazeY);
 
-		// Update triggers
-		for (auto& upDOMTrigger : _DOMTriggers)
+		// #######################
+		// ### Update triggers ###
+		// #######################
+
+		for (auto& rNodeTriggerPair : _DOMTriggers)
 		{
+			const auto& upDOMTrigger = rNodeTriggerPair.second;
 			upDOMTrigger->Update(tpf, tabInput);
-		}
-
-		// Check for mode change
-		if (_nextMode != _mode)
-		{
-			// Deactivate old mode
-			DeactivateMode(_mode);
-			_mode = _nextMode;
-			ActivateMode(_mode);
-		}
-
-		// Take a look at current mode
-		switch (_mode)
-		{
-		case TabMode::READ:
-			break;
-		case TabMode::INTERACTION:
-			break;
-		case TabMode::CURSOR:
-			break;
 		}
 	}
 }
@@ -452,27 +459,17 @@ void Tab::Draw() const
 	else
 	{
 		// Draw triggers
-		for (const auto& upDOMTrigger : _DOMTriggers)
+		for (const auto& rNodeTriggerPair : _DOMTriggers)
 		{
+			const auto& upDOMTrigger = rNodeTriggerPair.second;
 			upDOMTrigger->Draw();
 		}
+	}
 
-		// Pipeline is empty, so first take a look at current mode
-		switch (_mode)
-		{
-		case TabMode::READ:
-			break;
-		case TabMode::INTERACTION:
-			break;
-		case TabMode::CURSOR:
-			break;
-		}
-
-		// Draw debug overlay (do not so while pipeline is rendered)
-		if (setup::DRAW_DEBUG_OVERLAY)
-		{
-			DrawDebuggingOverlay();
-		}
+	// Draw debug overlay
+	if (setup::DRAW_DEBUG_OVERLAY)
+	{
+		DrawDebuggingOverlay();
 	}
 }
 
@@ -513,9 +510,18 @@ void Tab::Deactivate()
 
 void Tab::OpenURL(std::string URL)
 {
+	// Set URL
 	_url = URL;
-	_pCefMediator->RefreshTab(this);
+
+	// Abort any pipeline execution
 	AbortAndClearPipelines();
+
+	// Tell CEF to refresh this tab (which will fetch the URL and load it)
+	_pCefMediator->RefreshTab(this);
+
+	// Reset scrolling
+	_scrollingOffsetX = 0.0;
+	_scrollingOffsetY = 0.0;
 }
 
 void Tab::AbortAndClearPipelines()
@@ -538,11 +544,7 @@ void Tab::GoBack()
 void Tab::Reload()
 {
 	_pCefMediator->ReloadTab(this);
-}
-
-eyegui::AbsolutePositionAndSize Tab::CalculateWebViewPositionAndSize() const
-{
-	return eyegui::getAbsolutePositionAndSizeOfElement(_pPanelLayout, "web_view");
+	this->AbortAndClearPipelines();
 }
 
 void Tab::SetPipelineActivity(bool active)
@@ -553,9 +555,9 @@ void Tab::SetPipelineActivity(bool active)
 		eyegui::setVisibilityOfLayout(_pPipelineAbortLayout, true, true, true);
 
 		// Deactivate all triggers
-		for (auto& upDOMTrigger : _DOMTriggers)
+		for (auto& rNodeTriggerPair : _DOMTriggers)
 		{
-			upDOMTrigger->Deactivate();
+			rNodeTriggerPair.second->Deactivate();
 		}
 
 		// Deactivate scrolling overlay
@@ -567,8 +569,9 @@ void Tab::SetPipelineActivity(bool active)
 		eyegui::setVisibilityOfLayout(_pPipelineAbortLayout, false, false, true);
 
 		// Activate all triggers
-		for (auto& upDOMTrigger : _DOMTriggers)
+		for (auto& rNodeTriggerPair : _DOMTriggers)
 		{
+			auto& upDOMTrigger = rNodeTriggerPair.second;
 			upDOMTrigger->Activate();
 		}
 
@@ -620,149 +623,62 @@ void Tab::UpdateAccentColor(float tpf)
 		backgroundAccentColor.b,
 		backgroundAccentColor.a * backgroundAlpha);
 
-	// Set color of tab_panel style in pipeline abort overlay
-	eyegui::setValueOfStyleAttribute(
-		_pPipelineAbortLayout,
+	// Set color of tab_panel style
+	_pMaster->SetStyleTreePropertyValue(
 		"tab_panel",
-		"color",
-		RGBAToHexString(colorAccent));
+		eyegui::StylePropertyVec4::Color,
+		RGBAToHexString(colorAccent)
+	);
 
-	// Set color of tab_panel style in layout
-	eyegui::setValueOfStyleAttribute(
-		_pPanelLayout,
-		"tab_panel",
-		"color",
-		RGBAToHexString(colorAccent));
-
-	// Set color of tab_overlay style in overlay layout
-	eyegui::setValueOfStyleAttribute(
-		_pOverlayLayout,
+	// Set color of tab_overlay style
+	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay",
-		"color",
-		RGBAToHexString(colorAccent));
-	eyegui::setValueOfStyleAttribute(
-		_pOverlayLayout,
+		eyegui::StylePropertyVec4::Color,
+		RGBAToHexString(colorAccent)
+	);
+	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay",
-		"background-color",
-		RGBAToHexString(backgroundAccentColor));
+		eyegui::StylePropertyVec4::BackgroundColor,
+		RGBAToHexString(backgroundAccentColor)
+	);
 
-	// Set color of tab_overlay_noback style in overlay layout
-	eyegui::setValueOfStyleAttribute(
-		_pOverlayLayout,
+	// Set color of tab_overlay_noback style
+	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_noback",
-		"color",
-		RGBAToHexString(colorAccent));
-	eyegui::setValueOfStyleAttribute(
-		_pOverlayLayout,
-		"tab_overlay_noback",
-		"color",
-		RGBAToHexString(colorAccent));
+		eyegui::StylePropertyVec4::Color,
+		RGBAToHexString(colorAccent)
+	);
 
-	// Set color of tab_overlay_panel style in overlay layout
-	eyegui::setValueOfStyleAttribute(
-		_pOverlayLayout,
+	// Set color of tab_overlay_panel style
+	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_panel",
-		"color",
-		RGBAToHexString(backgroundAccentColor));
-	eyegui::setValueOfStyleAttribute(
-		_pOverlayLayout,
+		eyegui::StylePropertyVec4::Color,
+		RGBAToHexString(backgroundAccentColor)
+	);
+	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_panel",
-		"background-color",
-		RGBAToHexString(panelBackgroundAccentColor));
+		eyegui::StylePropertyVec4::BackgroundColor,
+		RGBAToHexString(panelBackgroundAccentColor)
+	);
 
-	// Set color of tab_overlay style in scrolling overlay layout
-	eyegui::setValueOfStyleAttribute(
-		_pScrollingOverlayLayout,
-		"tab_overlay",
-		"color",
-		RGBAToHexString(colorAccent));
-
-	// Set color and background of tab_overlay_scroll_progress style in scrolling overlay layout
-	eyegui::setValueOfStyleAttribute(
-		_pScrollingOverlayLayout,
+	// Set color and background of tab_overlay_scroll_progress
+	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_scroll_progress",
-		"color",
-		RGBAToHexString(transparentColorAccent));
-	eyegui::setValueOfStyleAttribute(
-		_pScrollingOverlayLayout,
+		eyegui::StylePropertyVec4::Color,
+		RGBAToHexString(transparentColorAccent)
+	);
+	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_scroll_progress",
-		"background-color",
-		RGBAToHexString(transparentBackgroundColorAccent));
+		eyegui::StylePropertyVec4::BackgroundColor,
+		RGBAToHexString(transparentBackgroundColorAccent)
+	);
 }
 
-void Tab::ActivateMode(TabMode mode)
-{
-	switch (mode)
-	{
-	case TabMode::READ:
-		ActivateReadMode();
-		break;
-	case TabMode::INTERACTION:
-		ActivateInteractionMode();
-		break;
-	case TabMode::CURSOR:
-		ActivateCursorMode();
-		break;
-	}
-}
-
-void Tab::DeactivateMode(TabMode mode)
-{
-	switch (mode)
-	{
-	case TabMode::READ:
-		DeactivateReadMode();
-		break;
-	case TabMode::INTERACTION:
-		DeactivateInteractionMode();
-		break;
-	case TabMode::CURSOR:
-		DeactivateCursorMode();
-		break;
-	}
-}
-
-void Tab::ActivateReadMode()
-{
-	// TODO
-}
-
-void Tab::DeactivateReadMode()
-{
-	// TODO
-}
-
-void Tab::ActivateInteractionMode()
-{
-	// TODO
-}
-
-void Tab::DeactivateInteractionMode()
-{
-	// TODO
-}
-
-void Tab::ActivateCursorMode()
-{
-	// TODO
-}
-
-void Tab::DeactivateCursorMode()
-{
-	// TODO
-}
-
+<<<<<<< HEAD
 void Tab::DrawDebuggingOverlay() const
 {
 	// Reserve variables
 	glm::mat4 model, matrix;
-
-	// WebView coordinats
-	int webViewX = 0;
-	int webViewY = 0;
-	int webViewWidth = 0;
-	int webViewHeight = 0;
-	this->CalculateWebViewPositionAndSize(webViewX, webViewY, webViewWidth, webViewHeight);
 
 	// Projection
 	glm::mat4 projection = glm::ortho(0, 1, 0, 1);
@@ -771,19 +687,26 @@ void Tab::DrawDebuggingOverlay() const
 	std::function<void(Rect, bool)> renderRect = [&](Rect rect, bool fixed)
 	{
 		// Fixed or not
-		float scrollX = 0;
-		float scrollY = 0;
 		if (!fixed)
 		{
-			scrollX = _scrollingOffsetX;
-			scrollY = _scrollingOffsetY;
+			// Subtract scrolling while coordinates are in CEFPixel space
+			rect.left -= _scrollingOffsetX;
+			rect.right -= _scrollingOffsetX;
+			rect.bottom -= _scrollingOffsetY;
+			rect.top -= _scrollingOffsetY;
 		}
+
+		// Scale from CEFPixel space to WebViewPixel
+		rect.left = (rect.left / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
+		rect.right = (rect.right / (float)_upWebView->GetResolutionX()) * (float)_upWebView->GetWidth();
+		rect.bottom = (rect.bottom / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
+		rect.top = (rect.top / (float)_upWebView->GetResolutionY()) * (float)_upWebView->GetHeight();
 
 		// Calculate model matrix
 		model = glm::mat4(1.0f);
 		model = glm::scale(model, glm::vec3(1.f / _pMaster->GetWindowWidth(), 1.f / _pMaster->GetWindowHeight(), 1.f));
-		model = glm::translate(model, glm::vec3(webViewX + rect.left - scrollX, webViewHeight - (rect.bottom - scrollY), 1));
-		model = glm::scale(model, glm::vec3(rect.width(), rect.height(), 0));
+		model = glm::translate(model, glm::vec3(_upWebView->GetX() + rect.left, _upWebView->GetHeight() - (rect.bottom), 1));
+		model = glm::scale(model, glm::vec3(rect.Width(), rect.Height(), 0));
 
 		// Combine matrics
 		matrix = projection * model;
@@ -804,13 +727,26 @@ void Tab::DrawDebuggingOverlay() const
 	_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_TRIGGER_DEBUG_COLOR);
 
 	// Go over all DOMTriggers
-	for (const auto& rDOMTrigger : _DOMTriggers)
+	for (const auto& rNodeTriggerPair : _DOMTriggers)
 	{
+		const auto& rDOMTrigger = rNodeTriggerPair.second;
 		// Render rects
 		for (const auto rRect : rDOMTrigger->GetDOMRects())
 		{
-			if(rDOMTrigger->GetDOMVisibility())
-				renderRect(rRect, rDOMTrigger->GetDOMFixed());
+			if (true)//rDOMTrigger->GetDOMVisibility())
+			{
+				if (!rDOMTrigger->GetDOMIsPasswordField())
+				{
+					renderRect(rRect, rDOMTrigger->GetDOMFixed());
+				}
+				else
+				{
+					_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(0.0f, 1.f, 1.f));
+					renderRect(rRect, rDOMTrigger->GetDOMFixed());
+					_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_TRIGGER_DEBUG_COLOR);
+				}
+			}
+				
 		}
 	}
 
@@ -820,28 +756,36 @@ void Tab::DrawDebuggingOverlay() const
 	_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_TEXT_LINKS_DEBUG_COLOR);
 
 	// Go over all DOMTextLinks
-	for (const auto& rDOMTextLink : _DOMTextLinks)
+	for (const auto& rIdLinkPair : _TextLinkMap)
 	{
+		const auto& rDOMTextLink = rIdLinkPair.second;
 		// Render rects
 		for (const auto rRect : rDOMTextLink->GetRects())
 		{
-			if(rDOMTextLink->GetVisibility())
-				renderRect(rRect, rDOMTextLink->GetFixed());
-			else
-			{
-				_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(1.0f, 0.f, 1.f));
-				renderRect(rRect, rDOMTextLink->GetFixed());
-				_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_TEXT_LINKS_DEBUG_COLOR);
-			}
+			renderRect(rRect, rDOMTextLink->GetFixedId());
 		}
 	}
 
 	// DEBUG - links containing line break are shown in another color
 	_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(1.f, 0.f, 1.f));
-	for (const auto& rDOMTextLink : _DOMTextLinks)
+	for (const auto& rIdLinkPair : _TextLinkMap)
 	{
-		if(rDOMTextLink->GetRects().size() == 2 && rDOMTextLink->GetVisibility())
-			renderRect(rDOMTextLink->GetRects()[1], rDOMTextLink->GetFixed());
+		const auto& rDOMTextLink = rIdLinkPair.second;
+		if(rDOMTextLink->GetRects().size() == 2)
+			renderRect(rDOMTextLink->GetRects()[1], rDOMTextLink->GetFixedId());
+	}
+
+	// ### SELECT FIELDS ###
+	// Set rendering up for DOMSelectFields
+	_upDebugRenderItem->GetShader()->UpdateValue("color", DOM_SELECT_FIELD_DEBUG_COLOR);
+	for (const auto& rIdSelectFieldPair : _SelectFieldMap)
+	{
+		const auto& rDOMSelectField = rIdSelectFieldPair.second;
+		// Render rects
+		for (const auto rRect : rDOMSelectField->GetRects())
+		{
+			renderRect(rRect, rDOMSelectField->GetFixedId());
+		}
 	}
 
 
@@ -857,7 +801,7 @@ void Tab::DrawDebuggingOverlay() const
 		for (const auto& rFixedElement : rFixedElements)
 		{
 			// Render rect
-			if(rFixedElement.height() > 0 && rFixedElement.width() > 0)
+			if(rFixedElement.Height() > 0 && rFixedElement.Width() > 0)
 				renderRect(rFixedElement, true);
 		}
 	}
@@ -865,30 +809,22 @@ void Tab::DrawDebuggingOverlay() const
 	// ### OVERFLOW ELEMENTS ###
 	_upDebugRenderItem->GetShader()->UpdateValue("color", glm::vec3(255.f/255.f, 127.f/255.f, 35.f/255.f));
 
-	for (const auto& rOverflowElement : _overflowElements)
+	for (const auto& rIdOverflowPair : _OverflowElementMap)
 	{
-<<<<<<< HEAD
+		const auto& rOverflowElement = rIdOverflowPair.second;
 		if (rOverflowElement) // Note: Can be NULL if aquivalent element in JS got deleted. (see Tab::RemoveOverflowElement)
 		{
 			for (const auto& rect : rOverflowElement->GetRects())
-				renderRect(rect, false);
+				renderRect(rect, rOverflowElement->GetFixedId());
 		}
 
-=======
-		for (const auto& rect : rOverflowElement->GetRects())
-		{
-			renderRect(rect, false);
-		}
-			
->>>>>>> 70768dc9acfff41791ebf102abdccb36f90dd90b
 	}
 }
 
+=======
+>>>>>>> 8b272ae4531b09d4a30ed895b31dfc4a9898867e
 void Tab::PushBackClickVisualization(double x, double y)
 {
-	// Coordinates of web view
-	auto webViewCoordinates = CalculateWebViewPositionAndSize();
-
 	// Structure for click visulization
 	ClickVisualization clickVisualization;
 	clickVisualization.x = x;
@@ -896,8 +832,8 @@ void Tab::PushBackClickVisualization(double x, double y)
 	clickVisualization.fading = CLICK_VISUALIZATION_DURATION;
 
 	// Position of floating frame
-	float relativePositionX = (webViewCoordinates.x + x) / (float)_pMaster->GetWindowWidth();
-	float relativePositionY = (webViewCoordinates.y + y) / (float)_pMaster->GetWindowHeight();
+	float relativePositionX = (_upWebView->GetX() + x) / (float)_pMaster->GetWindowWidth();
+	float relativePositionY = (_upWebView->GetY() + y) / (float)_pMaster->GetWindowHeight();
 	relativePositionX -= CLICK_VISUALIZATION_RELATIVE_SIZE / 2.f;
 	relativePositionY -= CLICK_VISUALIZATION_RELATIVE_SIZE / 2.f;
 
