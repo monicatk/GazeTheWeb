@@ -83,7 +83,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			_relativeCenterOffset =
 				CENTER_OFFSET_MULTIPLIER
 				* (1.f - _logZoom) // weight with zoom (starting at zero) to have more centered version at higher zoom level
-				* (_relativeZoomCoordinate - 0.5f); // vector from current zoom coordinate to center of WebView
+				* (_relativeZoomCoordinate - 0.5f); // vector from WebView center to current zoom coordinate
 
 			// Get out of case
 			break;

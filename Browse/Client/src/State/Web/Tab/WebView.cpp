@@ -215,7 +215,7 @@ void WebView::Draw(
             )); // normalized device coordinates
     _upCompositeRenderItem->GetShader()->UpdateValue("textureCoordinate", glm::vec4(0.f, 0.f, 1.f, 1.f)); // everything is rendered correctly into framebuffer, just display it
     _upCompositeRenderItem->GetShader()->UpdateValue("centerOffset", glm::vec2(parameters.centerOffset.x, -parameters.centerOffset.y)); // center offset y has to be taken negative because OpenGL coordinates
-    _upCompositeRenderItem->GetShader()->UpdateValue("zoomPosition", glm::vec2(parameters.zoomPosition.x, 1.f- parameters.zoomPosition.y)); // zoomPosition has origin in upper left but lower left is necessary
+    _upCompositeRenderItem->GetShader()->UpdateValue("zoomPosition", glm::vec2(parameters.zoomPosition.x, 1.f - parameters.zoomPosition.y)); // zoomPosition has origin in upper left but lower left is necessary
     _upCompositeRenderItem->GetShader()->UpdateValue("zoom", parameters.zoom);
     _upCompositeRenderItem->Draw(GL_POINTS);
 }
