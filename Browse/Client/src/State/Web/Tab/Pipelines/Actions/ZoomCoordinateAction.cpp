@@ -79,7 +79,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 				_firstUpdate = false;
 			}
 
-			// Calculated center offset
+			// Calculated center offset. This moves the WebView content towards the center for better precision
 			_relativeCenterOffset =
 				CENTER_OFFSET_MULTIPLIER
 				* (1.f - _logZoom) // weight with zoom (starting at zero) to have more centered version at higher zoom level
@@ -142,6 +142,8 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 				// Store sample from that time
 				_sampleData.logZoom = _logZoom;
 				_sampleData.relativeGazeCoordinate = relativeGazeCoordiante;
+				_sampleData.relativeZoomCoordinate = _relativeZoomCoordinate;
+				_sampleData.relativeCenterOffset = _relativeCenterOffset;
 				_sampleData.pixelGazeCoordinate = pixelGazeCoordinate;
 				_state = State::ZOOM;
 			}
@@ -165,14 +167,17 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 				// Calculate drift of gaze
 				glm::vec2 relativeGazeDrift = relativeGazeCoordiante - _sampleData.relativeGazeCoordinate; // drift of gaze coordinates
 
-				// Bring drift into coordinates after orientation
-				glm::vec2 pixelGazeDrift = relativeGazeDrift * cefPixels * _sampleData.logZoom; // TODO: does not seem to be correct. Why?
-
 				// Radius around old zoom coordinate where actual fixation point should be
-				float pixelRadius = glm::length(pixelGazeDrift) / (_sampleData.logZoom - _logZoom);
+				float relativeRadius = glm::length(relativeGazeDrift) / (_sampleData.logZoom - _logZoom);
 
 				// Calculate fixation coordinate with corrected drift
-				glm::vec2 pixelFixationCoordinate = (glm::normalize(pixelGazeDrift) * pixelRadius) + _sampleData.pixelGazeCoordinate;
+				glm::vec2 relativeFixationCoordinate = _sampleData.relativeGazeCoordinate;
+				relativeFixationCoordinate += _sampleData.relativeCenterOffset; // add center offset
+				relativeFixationCoordinate -= _sampleData.relativeZoomCoordinate; // move zoom position to origin
+				relativeFixationCoordinate *= _sampleData.logZoom; // apply zoom
+				relativeFixationCoordinate += _sampleData.relativeZoomCoordinate; // move back
+				glm::vec2 pixelFixationCoordinate = relativeFixationCoordinate; //  (glm::normalize(relativeGazeDrift) * relativeRadius) + relativeFixationCoordinate;
+				pixelFixationCoordinate *= cefPixels;
 
 				// Set coordinate in output value 
 				SetOutputValue("coordinate", pixelFixationCoordinate);
