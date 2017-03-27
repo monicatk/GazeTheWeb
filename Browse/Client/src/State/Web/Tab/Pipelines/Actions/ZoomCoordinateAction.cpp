@@ -41,7 +41,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	};
 
 	// Current gaze
-	glm::vec2 relativeGazeCoordiante = glm::vec2(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY); // relative WebView space
+	glm::vec2 relativeGazeCoordinate = glm::vec2(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY); // relative WebView space
 
 	// ### Update zoom speed, zoom center and center offset ###
 
@@ -60,7 +60,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			{
 				// Move towards new coordinate
 				glm::vec2 relativeDelta =
-					(relativeGazeCoordiante + _relativeCenterOffset) // Visually, the zoom coordinate is moved by relative center offset. So adapt input to this
+					(relativeGazeCoordinate + _relativeCenterOffset) // Visually, the zoom coordinate is moved by relative center offset. So adapt input to this
 					- _relativeZoomCoordinate;
 				_relativeZoomCoordinate += relativeDelta * glm::min(1.f, (tpf / MOVE_DURATION));
 
@@ -73,7 +73,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			else // first frame of execution
 			{
 				// Use current gaze coordinate as new coordinate
-				_relativeZoomCoordinate = relativeGazeCoordiante;
+				_relativeZoomCoordinate = relativeGazeCoordinate;
 
 				// Since only for first frame, do not do it again
 				_firstUpdate = false;
@@ -117,7 +117,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	if (!tabInput.gazeUsed && tabInput.instantInteraction) // user demands on instant interaction
 	{
 		// Calculate pixel gaze coordiante
-		glm::vec2 pixelGazeCoordinate = relativeGazeCoordiante; // CEFPixel space
+		glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate; // CEFPixel space
 		pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, pixelGazeCoordinate);
 
 		// Set coordinate in output value. Use current gaze position
@@ -136,12 +136,12 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			if (_logZoom <= 0.75f)
 			{
 				// Pixel gaze coordinate
-				glm::vec2 pixelGazeCoordinate = relativeGazeCoordiante; // CEFPixel space
+				glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate; // CEFPixel space
 				pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, pixelGazeCoordinate);
 
 				// Store sample from that time
 				_sampleData.logZoom = _logZoom;
-				_sampleData.relativeGazeCoordinate = relativeGazeCoordiante;
+				_sampleData.relativeGazeCoordinate = relativeGazeCoordinate;
 				_sampleData.relativeZoomCoordinate = _relativeZoomCoordinate;
 				_sampleData.relativeCenterOffset = _relativeCenterOffset;
 				_sampleData.pixelGazeCoordinate = pixelGazeCoordinate;
@@ -164,19 +164,30 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			{
 				// TODO check whether drift is significant or can be ignored (for very good calibration)
 
+				// Function to convert into relative system of page
+				const std::function<void(glm::vec2&)> relativePageCoordinate
+					= [&](glm::vec2& rRelativeCoordinate)
+				{
+					// Analogous to shader in WebView
+					rRelativeCoordinate += _sampleData.relativeCenterOffset; // add center offset
+					rRelativeCoordinate -= _sampleData.relativeZoomCoordinate; // move zoom position to origin
+					rRelativeCoordinate *= _sampleData.logZoom; // apply zoom
+					rRelativeCoordinate += _sampleData.relativeZoomCoordinate; // move back
+				};
+
+				glm::vec2 sampleRelativeGazePageCoordinate = _sampleData.relativeGazeCoordinate;
+				relativePageCoordinate(sampleRelativeGazePageCoordinate);
+				glm::vec2 relativeGazePageCoordinate = relativeGazeCoordinate;
+				relativePageCoordinate(relativeGazePageCoordinate);
+
 				// Calculate drift of gaze
-				glm::vec2 relativeGazeDrift = relativeGazeCoordiante - _sampleData.relativeGazeCoordinate; // drift of gaze coordinates
+				glm::vec2 relativeGazeDrift = relativeGazeCoordinate - _sampleData.relativeGazeCoordinate; // drift of gaze coordinates
 
 				// Radius around old zoom coordinate where actual fixation point should be
 				float relativeRadius = glm::length(relativeGazeDrift) / (_sampleData.logZoom - _logZoom);
 
-				// Calculate fixation coordinate with corrected drift
-				glm::vec2 relativeFixationCoordinate = _sampleData.relativeGazeCoordinate;
-				relativeFixationCoordinate += _sampleData.relativeCenterOffset; // add center offset
-				relativeFixationCoordinate -= _sampleData.relativeZoomCoordinate; // move zoom position to origin
-				relativeFixationCoordinate *= _sampleData.logZoom; // apply zoom
-				relativeFixationCoordinate += _sampleData.relativeZoomCoordinate; // move back
-				glm::vec2 pixelFixationCoordinate = relativeFixationCoordinate; //  (glm::normalize(relativeGazeDrift) * relativeRadius) + relativeFixationCoordinate;
+				// TODO Debugging
+				glm::vec2 pixelFixationCoordinate = (glm::normalize(relativeGazeDrift) * relativeRadius) + sampleRelativeGazePageCoordinate;
 				pixelFixationCoordinate *= cefPixels;
 
 				// Set coordinate in output value 
