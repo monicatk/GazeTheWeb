@@ -164,6 +164,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			{
 				// TODO check whether drift is significant or can be ignored (for very good calibration)
 
+				/*
 				// Function to convert into relative system of page
 				const std::function<void(glm::vec2&)> relativePageCoordinate
 					= [&](glm::vec2& rRelativeCoordinate)
@@ -192,6 +193,19 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 
 				// Set coordinate in output value 
 				SetOutputValue("coordinate", pixelFixationCoordinate);
+
+				*/
+
+				// Pixel gaze coordinate on page
+				glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate;
+				pageCoordinate(_sampleData.logZoom, _sampleData.relativeZoomCoordinate, _sampleData.relativeCenterOffset, pixelGazeCoordinate);
+
+				// Calculate correction with drift
+				glm::vec2 drift = pixelGazeCoordinate - _sampleData.pixelGazeCoordinate;
+				float radius = glm::length(drift) / ((1.f/_logZoom) - (1.f/_sampleData.logZoom));
+				glm::vec2 fixation = (glm::normalize(drift) * radius) + _sampleData.pixelGazeCoordinate;
+				SetOutputValue("coordinate", fixation);
+
 
 				// Return success
 				// finished = true; // TODO debugging
