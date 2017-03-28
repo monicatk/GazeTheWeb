@@ -10,6 +10,7 @@
 // Global variables
 TX_CONTEXTHANDLE Context = TX_EMPTY_HANDLE;
 TX_HANDLE GlobalInteractorSnapshot = TX_EMPTY_HANDLE;
+static TX_CONTEXTHANDLE TXContext = TX_EMPTY_HANDLE;
 const TX_STRING InteractorId = "GazeTheWeb-Browse";
 
 // Initializes GlobalInteractorSnapshot with an interactor that has the Gaze Point behavior
@@ -33,44 +34,60 @@ void TX_CALLCONVENTION OnSnapshotCommitted(TX_CONSTHANDLE hAsyncData, TX_USERPAR
 {
 	TX_RESULT result = TX_RESULT_UNKNOWN;
 	txGetAsyncDataResultCode(hAsyncData, &result);
-	/*if (result == TX_RESULT_OK || result == TX_RESULT_CANCELLED)
+}
+
+// Delegate used when state change received
+void OnStateReceived(TX_HANDLE hStateBag)
+{
+	TX_BOOL success;
+	TX_INTEGER eyeTrackingState;
+
+	success = (txGetStateValueAsInteger(hStateBag, TX_STATEPATH_EYETRACKINGSTATE, &eyeTrackingState) == TX_RESULT_OK);
+	if (success)
 	{
-	std::cout << "Ok." << std::endl;
-	}*/
+		switch (eyeTrackingState)
+		{
+		case TX_EYETRACKINGDEVICESTATUS_TRACKING:
+			// TODO: tracking
+			break;
+
+		default:
+			// TODO: not tracking
+		}
+	}
+}
+
+// On engine state changed callback
+void TX_CALLCONVENTION OnEngineStateChanged(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userParam)
+{
+	TX_RESULT result = TX_RESULT_UNKNOWN;
+	TX_HANDLE hStateBag = TX_EMPTY_HANDLE;
+
+	if (txGetAsyncDataResultCode(hAsyncData, &result) == TX_RESULT_OK &&
+		txGetAsyncDataContent(hAsyncData, &hStateBag) == TX_RESULT_OK)
+	{
+		OnStateReceived(hStateBag);
+		txReleaseObject(&hStateBag);
+	}
 }
 
 // Callback function invoked when the status of the connection to the EyeX Engine has changed
 void TX_CALLCONVENTION OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connectionState, TX_USERPARAM userParam)
 {
+	bool success = false;
 	switch (connectionState)
 	{
 	case TX_CONNECTIONSTATE_CONNECTED:
 	{
-		bool success;
-		//std::cout << "Connected to EyeX Engine" << std::endl;
 		success = txCommitSnapshotAsync(GlobalInteractorSnapshot, OnSnapshotCommitted, NULL) == TX_RESULT_OK;
-		/*if (!success)
-		{
-		std::cout << "Failed to initialize the data stream." << std::endl;
-		}
-		else
-		{
-		std::cout << "Waiting for gaze data to start streaming..." << std::endl;
-		}*/
+
+		// Async callback for device status
+		txGetStateAsync(TXContext, TX_STATEPATH_EYETRACKING, OnEngineStateChanged, NULL);
 	}
 	break;
-	case TX_CONNECTIONSTATE_DISCONNECTED:
-		//std::cout << "The connection state is now DISCONNECTED (We are disconnected from the EyeX Engine)" << std::endl;
-		break;
-	case TX_CONNECTIONSTATE_TRYINGTOCONNECT:
-		//std::cout << "The connection state is now TRYINGTOCONNECT (We are trying to connect to the EyeX Engine)" << std::endl;
-		break;
-	case TX_CONNECTIONSTATE_SERVERVERSIONTOOLOW:
-		//std::cout << "The connection state is now SERVER_VERSION_TOO_LOW: this application requires a more recent version of the EyeX Engine to run." << std::endl;
-		break;
-	case TX_CONNECTIONSTATE_SERVERVERSIONTOOHIGH:
-		//std::cout << "The connection state is now SERVER_VERSION_TOO_HIGH: this application requires an older version of the EyeX Engine to run." << std::endl;
-		break;
+	default:
+		success = false;
+		// TODO: failure
 	}
 }
 
@@ -103,6 +120,22 @@ void TX_CALLCONVENTION HandleEvent(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userP
 bool Connect()
 {
 	bool success = false;
+
+	// Check for EyeX engine
+	TX_EYEXAVAILABILITY availability;
+	if (txGetEyeXAvailability(&availability) == TX_RESULT_OK)
+	{
+		if (availability == TX_EYEXAVAILABILITY_NOTAVAILABLE)
+		{
+			return success;
+		}
+		else if (availability == TX_EYEXAVAILABILITY_NOTRUNNING)
+		{
+			return success;
+		}
+	}
+
+	// Reserve tickets
 	TX_TICKET hConnectionStateChangedTicket = TX_INVALID_TICKET;
 	TX_TICKET hEventHandlerTicket = TX_INVALID_TICKET;
 
@@ -114,28 +147,18 @@ bool Connect()
 	success &= txRegisterEventHandler(Context, &hEventHandlerTicket, HandleEvent, NULL) == TX_RESULT_OK;
 	success &= txEnableConnection(Context) == TX_RESULT_OK;
 
+	// Return success
 	return success;
 }
 
 bool Disconnect()
 {
 	bool success;
-
-	// Disable and delete the context.
 	txDisableConnection(Context);
 	txReleaseObject(&GlobalInteractorSnapshot);
 	success = txShutdownContext(Context, TX_CLEANUPTIMEOUT_DEFAULT, TX_FALSE) == TX_RESULT_OK;
 	success &= txReleaseContext(&Context) == TX_RESULT_OK;
 	success &= txUninitializeEyeX() == TX_RESULT_OK;
-	/*if (!success)
-	{
-	std::cout << "EyeX could not be shut down cleanly. Did you remember to release all handles?" << std::endl;
-	}
-	else
-	{
-	printf("EyeX disconnected!\n");
-	}
-	*/
 	return success;
 }
 
