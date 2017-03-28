@@ -46,7 +46,6 @@ protected:
 		glm::vec2 relativeGazeCoordinate;
 		glm::vec2 relativeZoomCoordinate;
 		glm::vec2 relativeCenterOffset;
-		glm::vec2 pixelGazeCoordinate;
 		float logZoom; // value of log zoom at that time
 	};
 
