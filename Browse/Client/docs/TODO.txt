@@ -1,5 +1,6 @@
 Features:
 - Drop Down menu support
+	- Only GUI missing
 - Auto Fill / Password Manager
 	- Keyboard has to feature this mode
 - New DOM node types (inclusive abstract superclass)
@@ -9,6 +10,10 @@ Features:
 	- DOM Node boxes for images are only text height
 - Activate Sandbox on Application Side
 - Debugging control via define
+- BUG: Text Selection does not work anymore
+- Hebrew / Greek Support
+- Integrate SMI calibration
+- Feedback function
 
 Furthermore:
 - Word prediction improvement (and add typed words) and make extra one for URL Input

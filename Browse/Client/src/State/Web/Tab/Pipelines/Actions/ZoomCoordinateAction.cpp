@@ -177,8 +177,8 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 				SetOutputValue("coordinate", fixation);
 
 				// Return success
-				// finished = true; // TODO debugging
-				_state = State::DEBUG;
+				finished = true; // TODO debugging
+				// _state = State::DEBUG;
 			}
 			break;
 		}

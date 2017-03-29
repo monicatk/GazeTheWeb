@@ -67,7 +67,7 @@ protected:
 	// Speed of zoom
 	const float ZOOM_SPEED = 0.25f;
 
-    // Coordinate of center of zooming in relative WebView space
+    // Coordinate of center of zooming in relative WebView space (or in relative webpage space???)
     glm::vec2 _relativeZoomCoordinate; // aka zoom coordinate
 
 	// Offset to center of WebView in relative space
@@ -98,7 +98,7 @@ protected:
 	SampleData _sampleData;
 
 	// Time after zooming to wait for gaze to calm down
-	float _gazeCalmDownTime = 0.5f;
+	float _gazeCalmDownTime = 0.1f;
 
 	// State of action
 	State _state = State::ORIENTATE;

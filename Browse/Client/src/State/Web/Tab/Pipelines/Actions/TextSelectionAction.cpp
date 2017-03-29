@@ -15,22 +15,22 @@ TextSelectionAction::TextSelectionAction(TabInteractionInterface *pTab) : ZoomCo
 
 bool TextSelectionAction::Update(float tpf, TabInput tabInput)
 {
-	
-
 	// Call standard zoom coordinate update function
 	bool done = ZoomCoordinateAction::Update(tpf, tabInput);
 
-	/* TODO: reintegrate
-
-	// Calculate current coordinate in WebViewPixel space
-	glm::vec2 webViewPixels(_pTab->GetWebViewWidth(), _pTab->GetWebViewHeight());
-	glm::vec2 coordinate = _coordinate * webViewPixels; // _coordinate is given by superclass
+	// Calculate current coordinate in CEFPixel space
+	glm::vec2 cefPixels(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY());
+	glm::vec2 zoomCoordinate = _relativeZoomCoordinate * cefPixels; // _coordinate is given by superclass
 
 	// When finished, set end position of text selection
 	if (done)
 	{
 		// End selection procedure
-		_pTab->EmulateLeftMouseButtonUp(coordinate.x, coordinate.y, true, setup::TEXT_SELECTION_MARGIN);
+		glm::vec2 coordinate;
+		this->GetOutputValue("coordinate", coordinate);
+		_pTab->EmulateLeftMouseButtonUp(coordinate.x, coordinate.y, false, setup::TEXT_SELECTION_MARGIN);
+
+		LogInfo("Up: ", coordinate.x, ", ", coordinate.y);
 
 		// Copy selected string to clipboard. Maybe create extra action for this later
 		_pTab->PutTextSelectionToClipboardAsync();
@@ -38,10 +38,8 @@ bool TextSelectionAction::Update(float tpf, TabInput tabInput)
 	else
 	{
 		// Keep emulating mouse cursor
-		_pTab->EmulateMouseCursor(coordinate.x, coordinate.y, true, setup::TEXT_SELECTION_MARGIN);
+		_pTab->EmulateMouseCursor(zoomCoordinate.x, zoomCoordinate.y, false, setup::TEXT_SELECTION_MARGIN);
 	}
-
-	*/
 
     return done;
 }
@@ -54,7 +52,9 @@ void TextSelectionAction::Activate()
 	// Set starting point of selection
 	glm::vec2 startCoordinate;
 	GetInputValue("coordinate", startCoordinate);
-	_pTab->EmulateLeftMouseButtonDown(startCoordinate.x, startCoordinate.y, true, -setup::TEXT_SELECTION_MARGIN);
+	_pTab->EmulateLeftMouseButtonDown(startCoordinate.x, startCoordinate.y, false, -setup::TEXT_SELECTION_MARGIN);
+
+	LogInfo("Down: ", startCoordinate.x, ", ", startCoordinate.y);
 }
 
 void TextSelectionAction::Deactivate()
