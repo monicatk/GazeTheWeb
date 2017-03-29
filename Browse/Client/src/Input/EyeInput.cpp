@@ -35,8 +35,11 @@ EyeInput::EyeInput(bool useEmulation)
 				// Fetch procedure for fetching gaze data
 				_procFetchGaze = (FETCH_GAZE)GetProcAddress(_pluginHandle, "FetchGaze");
 
+				// Fetch procedure to check tracking
+				_procIsTracking = (IS_TRACKING)GetProcAddress(_pluginHandle, "IsTracking");
+
 				// Check whether procedures could be loaded
-				if (procConnect != NULL && _procFetchGaze != NULL)
+				if (procConnect != NULL && _procFetchGaze != NULL && _procIsTracking != NULL)
 				{
 					_connected = procConnect();
 					if (_connected)
@@ -46,6 +49,7 @@ EyeInput::EyeInput(bool useEmulation)
 					else
 					{
 						_procFetchGaze = NULL;
+						_procIsTracking = NULL;
 					}
 				}
 			}
@@ -134,6 +138,70 @@ bool EyeInput::Update(
 	int windowWidth,
 	int windowHeight)
 {
+	// ### UPDATE GAZE INPUT ###
+
+	// Update gaze by eyetracker
+	double filteredGazeX = 0;
+	double filteredGazeY = 0;
+
+	// Bool whether eye tracker is tracking
+	bool isTracking = false;
+
+#ifdef _WIN32
+
+	if (_connected && _procFetchGaze != NULL && _procIsTracking != NULL)
+	{
+		// Prepare vectors to fill
+		std::vector<double> gazeXSamples, gazeYSamples;
+
+		// Fetch k or less valid samples
+		_procFetchGaze(EYETRACKER_AVERAGE_SAMPLE_COUNT, gazeXSamples, gazeYSamples);
+
+		// Convert parameters to double (use same values for all samples,
+		// although they could have been collected whil windows transformation has been different)
+		double windowXDouble = (double)windowX;
+		double windowYDouble = (double)windowY;
+		double windowWidthDouble = (double)windowWidth;
+		double windowHeightDouble = (double)windowHeight;
+
+		// Average the given samples
+		if (!gazeXSamples.empty())
+		{
+			double sum = 0;
+			for (double x : gazeXSamples)
+			{
+				// Do some clamping according to window coordinates
+				double clampedX = x - windowXDouble;
+				clampedX = clampedX > 0.0 ? clampedX : 0.0;
+				clampedX = clampedX < windowWidthDouble ? clampedX : windowWidthDouble;
+				sum += clampedX;
+			}
+			filteredGazeX = sum / gazeXSamples.size();
+		}
+		if (!gazeYSamples.empty())
+		{
+			double sum = 0;
+			for (double y : gazeYSamples)
+			{
+				// Do some clamping according to window coordinates
+				double clampedY = y - windowYDouble;
+				clampedY = clampedY > 0.0 ? clampedY : 0.0;
+				clampedY = clampedY < windowHeightDouble ? clampedY : windowHeightDouble;
+				sum += clampedY;
+			}
+			filteredGazeY = sum / gazeYSamples.size();
+		}
+
+		// Check, whether eye tracker is tracking
+		isTracking = _procIsTracking();
+	}
+
+#endif
+
+	LogInfo("Tracking: ", isTracking);
+
+	// ### MOUSE INPUT ###
+
     // Mouse override of eyetracker
     if(_mouseOverride)
     {
@@ -194,57 +262,7 @@ bool EyeInput::Update(
         }
     }
 
-	// Update gaze by eyetracker
-	double filteredGazeX = 0;
-	double filteredGazeY = 0;
-
-#ifdef _WIN32
-
-	if (_connected && _procFetchGaze != NULL)
-	{
-		// Prepare vectors to fill
-		std::vector<double> gazeXSamples, gazeYSamples;
-
-		// Fetch k or less valid samples
-		_procFetchGaze(EYETRACKER_AVERAGE_SAMPLE_COUNT, gazeXSamples, gazeYSamples);
-
-		// Convert parameters to double (use same values for all samples,
-		// although they could have been collected whil windows transformation has been different)
-		double windowXDouble = (double)windowX;
-		double windowYDouble = (double)windowY;
-		double windowWidthDouble = (double)windowWidth;
-		double windowHeightDouble = (double)windowHeight;
-
-		// Average the given samples
-		if (!gazeXSamples.empty())
-		{
-			double sum = 0;
-			for (double x : gazeXSamples)
-			{
-				// Do some clamping according to window coordinates
-				double clampedX = x - windowXDouble;
-				clampedX = clampedX > 0.0 ? clampedX : 0.0;
-				clampedX = clampedX < windowWidthDouble ? clampedX : windowWidthDouble;
-				sum += clampedX;
-			}
-			filteredGazeX = sum / gazeXSamples.size();
-		}
-		if (!gazeYSamples.empty())
-		{
-			double sum = 0;
-			for (double y : gazeYSamples)
-			{
-				// Do some clamping according to window coordinates
-				double clampedY = y - windowYDouble;
-				clampedY = clampedY > 0.0 ? clampedY : 0.0;
-				clampedY = clampedY < windowHeightDouble ? clampedY : windowHeightDouble;
-				sum += clampedY;
-			}
-			filteredGazeY = sum / gazeYSamples.size();
-		}
-	}
-
-#endif
+	// ### OUTPUT ###
 
     // Bool to indicate mouse usage for gaze coordinates
     bool mouseCursorUsed = !_connected || _mouseOverride;

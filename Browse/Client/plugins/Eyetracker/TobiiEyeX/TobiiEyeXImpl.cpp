@@ -12,6 +12,7 @@ TX_CONTEXTHANDLE Context = TX_EMPTY_HANDLE;
 TX_HANDLE GlobalInteractorSnapshot = TX_EMPTY_HANDLE;
 static TX_CONTEXTHANDLE TXContext = TX_EMPTY_HANDLE;
 const TX_STRING InteractorId = "GazeTheWeb-Browse";
+bool Tracking = false;
 
 // Initializes GlobalInteractorSnapshot with an interactor that has the Gaze Point behavior
 bool InitializeGlobalInteractorSnapshot(TX_CONTEXTHANDLE hContext)
@@ -48,11 +49,11 @@ void OnStateReceived(TX_HANDLE hStateBag)
 		switch (eyeTrackingState)
 		{
 		case TX_EYETRACKINGDEVICESTATUS_TRACKING:
-			// TODO: tracking
+			Tracking = true;
 			break;
 
 		default:
-			// TODO: not tracking
+			Tracking = false;
 		}
 	}
 }
@@ -116,7 +117,6 @@ void TX_CALLCONVENTION HandleEvent(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userP
 	txReleaseObject(&hEvent);
 }
 
-
 bool Connect()
 {
 	bool success = false;
@@ -149,6 +149,11 @@ bool Connect()
 
 	// Return success
 	return success;
+}
+
+bool IsTracking()
+{
+	return Tracking;
 }
 
 bool Disconnect()

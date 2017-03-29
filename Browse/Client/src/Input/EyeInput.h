@@ -17,6 +17,7 @@
 #ifdef _WIN32
 #include <windows.h>
 typedef void(__cdecl *FETCH_GAZE)(int, std::vector<double>&, std::vector<double>&);
+typedef bool(__cdecl *IS_TRACKING)();
 #endif
 
 class EyeInput
@@ -50,6 +51,9 @@ private:
 
 	// Handle to fetch gaze
 	FETCH_GAZE _procFetchGaze = NULL;
+
+	// Handle to check tracking
+	IS_TRACKING _procIsTracking = NULL;
 #endif
 
 	// Remember whether connection has been established

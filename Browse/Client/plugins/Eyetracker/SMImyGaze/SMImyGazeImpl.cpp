@@ -48,6 +48,11 @@ bool Connect()
 	return (ret_connect == RET_SUCCESS);
 }
 
+bool IsTracking()
+{
+	return true;
+}
+
 bool Disconnect()
 {
 	// Disable callbacks
