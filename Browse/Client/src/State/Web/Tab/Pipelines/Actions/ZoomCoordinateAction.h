@@ -59,7 +59,7 @@ protected:
 	const float DEVIATION_FADING_DURATION = 1.0f;
 
 	// Multiplier of movement towards center
-	const float CENTER_OFFSET_MULTIPLIER = 0.75f; // TODO debugging 0.5f;
+	const float CENTER_OFFSET_MULTIPLIER = 1.0f; // TODO make it more controllable (depending on maximum zoom that can be reached?)
 
 	// Duration to replace current coordinate with input
 	const float MOVE_DURATION = 0.75f;
