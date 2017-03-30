@@ -16,7 +16,7 @@ extern "C" {
 	// Connect eyetracker, returns whether succesfull
 	DLL_EXPORT bool Connect();
 
-	// Check whether tracking
+	// Check whether eyetracker is working (regardless of user presence)
 	DLL_EXPORT bool IsTracking();
 
 	// Disconnect eyetracker, returns whether succesfull

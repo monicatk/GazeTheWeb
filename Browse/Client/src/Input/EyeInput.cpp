@@ -198,8 +198,6 @@ bool EyeInput::Update(
 
 #endif
 
-	LogInfo("Tracking: ", isTracking);
-
 	// ### MOUSE INPUT ###
 
     // Mouse override of eyetracker
@@ -265,7 +263,10 @@ bool EyeInput::Update(
 	// ### OUTPUT ###
 
     // Bool to indicate mouse usage for gaze coordinates
-    bool mouseCursorUsed = !_connected || _mouseOverride;
+    bool mouseCursorUsed = 
+		!_connected // eyetracker not connected
+		|| _mouseOverride // eyetracker overriden by mouse
+		|| !isTracking; // eyetracker not available
 
     // Save mouse cursor coordinate in members
     _mouseX = mouseX;

@@ -9,49 +9,44 @@
 
 // Global variables
 TX_CONTEXTHANDLE Context = TX_EMPTY_HANDLE;
-TX_HANDLE GlobalInteractorSnapshot = TX_EMPTY_HANDLE; // snapshot containing interactor
 const TX_STRING InteractorId = "GazeTheWeb-Browse"; // id or interactor which covers complete screen and we just listen to gaze point behavior
-TX_TICKET hConnectionStateChangedTicket = TX_INVALID_TICKET;
-TX_TICKET hGazeTrackingStateChangedTicket = TX_INVALID_TICKET;
-TX_TICKET hEventHandlerTicket = TX_INVALID_TICKET;
-bool Tracking = true;
+TX_HANDLE GlobalInteractorSnapshot = TX_EMPTY_HANDLE; // snapshot containing interactor
+TX_TICKET ConnectionStateChangedTicket = TX_INVALID_TICKET;
+TX_TICKET TrackingStateChangedTicket = TX_INVALID_TICKET;
+TX_TICKET EventHandlerTicket = TX_INVALID_TICKET;
+bool Tracking = false;
 
-// Delegate used when state change received
-void OnStateReceived(TX_HANDLE hStateBag)
+// Callback function invoked when state changes
+void TX_CALLCONVENTION OnEngineStateChanged(TX_CONSTHANDLE hState, TX_USERPARAM userParam)
 {
-	TX_BOOL success;
-	TX_INTEGER gazeTracking;
-	success = (txGetStateValueAsInteger(hStateBag, TX_STATEPATH_GAZETRACKING, &gazeTracking) == TX_RESULT_OK);
+	// Preparation
+	TX_HANDLE hStateBag = TX_EMPTY_HANDLE;
+	TX_INTEGER eyeTrackingState;
+	bool success;
+	
+	// Fetch and process data
+	txGetAsyncDataContent(hState, &hStateBag);
+	success = (txGetStateValueAsInteger(hStateBag, TX_STATEPATH_EYETRACKINGSTATE, &eyeTrackingState) == TX_RESULT_OK);
 	if (success)
 	{
-		Tracking = gazeTracking == TX_GAZETRACKING_GAZETRACKED;
+		if (eyeTrackingState == TX_EYETRACKINGDEVICESTATUS_NOTAVAILABLE
+			|| eyeTrackingState == TX_EYETRACKINGDEVICESTATUS_INVALIDCONFIGURATION
+			|| eyeTrackingState == TX_EYETRACKINGDEVICESTATUS_DEVICENOTCONNECTED
+			|| eyeTrackingState == TX_EYETRACKINGDEVICESTATUS_TRACKINGPAUSED
+			|| eyeTrackingState == TX_EYETRACKINGDEVICESTATUS_UNKNOWNERROR
+			|| eyeTrackingState == TX_EYETRACKINGDEVICESTATUS_CONNECTIONERROR)
+		{
+			Tracking = false;
+		}
+		else
+		{
+			Tracking = true;
+		}
 	}
+	txReleaseObject(&hStateBag);
 }
 
-// On engine state changed callback
-void TX_CALLCONVENTION OnEngineStateChanged(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userParam)
-{
-	TX_RESULT result = TX_RESULT_UNKNOWN;
-	TX_HANDLE hStateBag = TX_EMPTY_HANDLE;
-
-	if (txGetAsyncDataResultCode(hAsyncData, &result) == TX_RESULT_OK &&
-		txGetAsyncDataContent(hAsyncData, &hStateBag) == TX_RESULT_OK)
-	{
-		OnStateReceived(hStateBag);
-		txReleaseObject(&hStateBag);
-	}
-}
-
-// Callback function invoked when the status of the connection to the EyeX Engine has changed
-void TX_CALLCONVENTION OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connectionState, TX_USERPARAM userParam)
-{
-	if (connectionState == TX_CONNECTIONSTATE_CONNECTED)
-	{
-		txGetStateAsync(Context, TX_STATEPATH_EYETRACKING, OnEngineStateChanged, NULL);
-	}
-}
-
-// Handles a gaze data behavior from the Gaze Point data stream
+// Callback function invoked when a gaze data behavior is received
 void OnGazeDataEvent(TX_HANDLE hGazeDataBehavior)
 {
 	TX_GAZEPOINTDATAEVENTPARAMS eventParams;
@@ -59,17 +54,19 @@ void OnGazeDataEvent(TX_HANDLE hGazeDataBehavior)
 	{
 		// Push back to array
 		eyetracker_global::PushBackRawData(eventParams.X, eventParams.Y, true);
+		Tracking = true; // kinda hack: initially, no onEngineStateChanged is triggered. So initial state is unkown and even txGetState does not work. This workaround sets Tracking at first gaze sample to true
 	}
 }
 
 // Callback function invoked when an event has been received from the EyeX Engine
 void TX_CALLCONVENTION HandleEvent(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userParam)
 {
+	// Preparation
 	TX_HANDLE hEvent = TX_EMPTY_HANDLE;
 	TX_HANDLE hBehavior = TX_EMPTY_HANDLE;
-	txGetAsyncDataContent(hAsyncData, &hEvent);
 
-	// Extract behavior of event (we are only interested in raw gaze points)
+	// Fetch and process data
+	txGetAsyncDataContent(hAsyncData, &hEvent);
 	if (txGetEventBehavior(hEvent, &hBehavior, TX_BEHAVIORTYPE_GAZEPOINTDATA) == TX_RESULT_OK)
 	{
 		OnGazeDataEvent(hBehavior);
@@ -77,6 +74,43 @@ void TX_CALLCONVENTION HandleEvent(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userP
 	}
 	txReleaseObject(&hEvent);
 }
+
+// Callback function invoked when snapshot has been commited
+void TX_CALLCONVENTION OnSnapshotCommitted(TX_CONSTHANDLE hAsyncData, TX_USERPARAM param)
+{
+	TX_RESULT result = TX_RESULT_UNKNOWN;
+	txGetAsyncDataResultCode(hAsyncData, &result);
+}
+
+// Callback function invoked when engine connection state changes
+void TX_CALLCONVENTION OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connectionState, TX_USERPARAM userParam)
+{
+	switch (connectionState)
+	{
+	case TX_CONNECTIONSTATE_CONNECTED:
+		{
+			txCommitSnapshotAsync(GlobalInteractorSnapshot, OnSnapshotCommitted, NULL) == TX_RESULT_OK;
+		}
+		break;
+
+	case TX_CONNECTIONSTATE_DISCONNECTED:
+		// TODO
+		break;
+
+	case TX_CONNECTIONSTATE_TRYINGTOCONNECT:
+		// TODO
+		break;
+
+	case TX_CONNECTIONSTATE_SERVERVERSIONTOOLOW:
+		// TODO
+		break;
+
+	case TX_CONNECTIONSTATE_SERVERVERSIONTOOHIGH:
+		// TODO
+		break;
+	}
+}
+
 
 // Intialization of global interactor snapshot with unfiltered gaze
 bool InitializeGlobalInteractorSnapshot(TX_CONTEXTHANDLE hContext)
@@ -89,37 +123,36 @@ bool InitializeGlobalInteractorSnapshot(TX_CONTEXTHANDLE hContext)
 		InteractorId,
 		&GlobalInteractorSnapshot,
 		&hInteractor) == TX_RESULT_OK;
-	success &= txCreateGazePointDataBehavior(hInteractor, &params) == TX_RESULT_OK;
+	success &= txCreateGazePointDataBehavior(hInteractor, &params) == TX_RESULT_OK; // behavior for gaze point
 	txReleaseObject(&hInteractor);
 	return success;
 }
 
-
 bool Connect()
 {
-	bool success = false;
-
 	// Check for EyeX engine
 	TX_EYEXAVAILABILITY availability;
 	if (txGetEyeXAvailability(&availability) == TX_RESULT_OK)
 	{
 		if (availability == TX_EYEXAVAILABILITY_NOTAVAILABLE)
 		{
-			return success;
+			return false;
 		}
 		else if (availability == TX_EYEXAVAILABILITY_NOTRUNNING)
 		{
-			return success;
+			return false;
 		}
 	}
+
+	bool success = false;
 
 	// Initialize and enable the context that is the link to the EyeX Engine
 	success = txInitializeEyeX(TX_EYEXCOMPONENTOVERRIDEFLAG_NONE, NULL, NULL, NULL, NULL) == TX_RESULT_OK; // initialize library
 	success &= txCreateContext(&Context, TX_FALSE) == TX_RESULT_OK; // context used over complete lifetime
 	success &= InitializeGlobalInteractorSnapshot(Context); // initialize snapshot and handle it over at connection
-	success &= txRegisterConnectionStateChangedHandler(Context, &hConnectionStateChangedTicket, OnEngineConnectionStateChanged, NULL) == TX_RESULT_OK; // register handler for engine connection state change
-	success &= txRegisterStateChangedHandler(Context, &hGazeTrackingStateChangedTicket, TX_STATEPATH_GAZETRACKING, OnEngineStateChanged, NULL) == TX_RESULT_OK; // register handler for gaze tracking state change
-	success &= txRegisterEventHandler(Context, &hEventHandlerTicket, HandleEvent, NULL) == TX_RESULT_OK; // register handler for events
+	success &= txRegisterConnectionStateChangedHandler(Context, &ConnectionStateChangedTicket, OnEngineConnectionStateChanged, NULL) == TX_RESULT_OK; // register handler for connection state change
+	success &= txRegisterStateChangedHandler(Context, &TrackingStateChangedTicket, TX_STATEPATH_EYETRACKINGSTATE, OnEngineStateChanged, NULL) == TX_RESULT_OK; // register handler for eyetracking state change
+	success &= txRegisterEventHandler(Context, &EventHandlerTicket, HandleEvent, NULL) == TX_RESULT_OK; // register handler for events
 	success &= txEnableConnection(Context) == TX_RESULT_OK; // do connect to EyeX engine
 
 	// Return success
@@ -134,9 +167,9 @@ bool IsTracking()
 bool Disconnect()
 {
 	bool success;
-	txUnregisterConnectionStateChangedHandler(Context, hConnectionStateChangedTicket); // unregister connection state change handler
-	txUnregisterStateChangedHandler(Context, hGazeTrackingStateChangedTicket); // unregister gaze tracking state change handler
-	txUnregisterEventHandler(Context, hEventHandlerTicket); // unregister event handler (which receives behavior)
+	txUnregisterConnectionStateChangedHandler(Context, ConnectionStateChangedTicket); // unregister connection state handler
+	txUnregisterStateChangedHandler(Context, TrackingStateChangedTicket); // unregister eyetracking state change handler
+	txUnregisterEventHandler(Context, EventHandlerTicket); // unregister event handler (which receives behavior)
 	txDisableConnection(Context); // disable connection to EyeX engine
 	txReleaseObject(&GlobalInteractorSnapshot); // release snapshot containing interactor
 	success = txShutdownContext(Context, TX_CLEANUPTIMEOUT_DEFAULT, TX_FALSE) == TX_RESULT_OK; // shutdown context
