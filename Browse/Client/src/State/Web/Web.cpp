@@ -58,6 +58,9 @@ Web::Web(Master* pMaster, Mediator* pCefMediator) : State(pMaster)
 	_upIPregex = std::make_unique<std::regex>(
 		_pIPregexExpression,
 		std::regex_constants::icase);
+	_upFILEregex = std::make_unique<std::regex>(
+		_pFILEregexExpression,
+		std::regex_constants::icase);
 }
 
 Web::~Web()
@@ -784,6 +787,13 @@ bool Web::ValidateURL(const std::string& rURL) const
 		valid |= std::regex_match(rURL, *(_upIPregex.get()));
 	}
 	catch (...) { valid = true; } // in case of failed validation, assume it is a IP since it seems to be complicated
+
+	// Check for file
+	try
+	{
+		valid |= std::regex_match(rURL, *(_upFILEregex.get()));
+	}
+	catch (...) { valid = true; } // in case of failed validation, assume it is a file since it seems to be complicated
 	
 	// Return result
 	return valid;
