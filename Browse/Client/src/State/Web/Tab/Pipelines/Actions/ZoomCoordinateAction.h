@@ -58,16 +58,22 @@ protected:
 	// Deviation fading duration (how many seconds until full deviation is back to zero)
 	const float DEVIATION_FADING_DURATION = 1.0f;
 
-	// Multiplier of movement towards center
-	const float CENTER_OFFSET_MULTIPLIER = 1.0f; // TODO make it more controllable (depending on maximum zoom that can be reached?)
+	// Multiplier of movement towards center (one means, that on maximum zoom the outermost corner is moved into center)
+	const float CENTER_OFFSET_MULTIPLIER = 0.25f;
 
 	// Duration to replace current coordinate with input
-	const float MOVE_DURATION = 0.75f;
+	const float MOVE_DURATION = 0.5f;
 
 	// Speed of zoom
 	const float ZOOM_SPEED = 0.25f;
 
-    // Coordinate of center of zooming in relative WebView space (or in relative webpage space???)
+	// Maximum log zoom level of orientation phase
+	const float MAX_ORIENTATION_LOG_ZOOM = 0.75f;
+
+	// Drift correction zoom level (must be lower than MAX_LOG_ZOOM)
+	const float MAX_DRIFT_CORRECTION_LOG_ZOOM = 0.5f;
+
+    // Coordinate of center of zooming in relative page coordinates (not WebView, page!)
     glm::vec2 _relativeZoomCoordinate; // aka zoom coordinate
 
 	// Offset to center of WebView in relative space
@@ -75,7 +81,7 @@ protected:
 
     // Log zooming amount (used for rendering)
 	// Calculated as 1.f - log(_linZoom), so becoming smaller at higher zoom levels
-    float _logZoom = 1.f; // [0..1]
+    float _logZoom = 1.f; // [1..0]
 
     // Linear zooming amount (used for calculations)
 	// Increasing while zooming
@@ -84,8 +90,7 @@ protected:
     // Bool to indicate first update
     bool _firstUpdate = true;
 
-	// Deviation of coordinate (not of gaze!; relative coordiantes, no pixels!)
-	// Not really in relative coordinates, since aspect ratio corrected...
+	// Deviation of coordinate
 	float _deviation = 0.f; // [0..1]
 
 	// Dimming

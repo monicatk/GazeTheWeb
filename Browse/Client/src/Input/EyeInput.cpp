@@ -5,6 +5,7 @@
 
 #include "EyeInput.h"
 #include "src/Utils/Logger.h"
+#include "src/Setup.h"
 #include <cmath>
 #include <functional>
 
@@ -260,29 +261,40 @@ bool EyeInput::Update(
 		}
 	}
 
-	// ### OUTPUT ###
+	// ### GAZE EMULATION ###
 
 	// Bool to indicate mouse usage for gaze coordinates
-	bool mouseCursorUsed =
+	bool gazeEmulated =
 		!_connected // eyetracker not connected
 		|| _mouseOverride // eyetracker overriden by mouse
 		|| !isTracking; // eyetracker not available
 
-						// Save mouse cursor coordinate in members
+	// Save mouse cursor coordinate in members for calculating mouse override
 	_mouseX = mouseX;
 	_mouseY = mouseY;
 
+	// Use mouse when gaze is emulated
+	if (gazeEmulated)
+	{
+		filteredGazeX = mouseX;
+		filteredGazeY = mouseY;
+	}
+
+	// ### GAZE DISTORTION ###
+
+	// Add optional noise and bias for testing purposes
+	if (setup::EYEINPUT_DISTORT_GAZE)
+	{
+		filteredGazeX += setup::EYEINPUT_DISTORT_GAZE_BIAS_X;
+		filteredGazeY += setup::EYEINPUT_DISTORT_GAZE_BIAS_Y;
+	}
+
+	// ### OUTPUT ###
+
+	// Fill return values
+	rGazeX = filteredGazeX;
+	rGazeY = filteredGazeY;
+
 	// Return whether gaze coordinates comes from eyetracker
-	if (mouseCursorUsed)
-	{
-		rGazeX = mouseX;
-		rGazeY = mouseY;
-		return false;
-	}
-	else
-	{
-		rGazeX = filteredGazeX;
-		rGazeY = filteredGazeY;
-		return true;
-	}
+	return !gazeEmulated;
 }
