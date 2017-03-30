@@ -20,11 +20,11 @@ const std::string geometryShaderSource =
 "layout(triangle_strip, max_vertices = 4) out;\n"
 "out vec2 uv;\n"
 "out vec2 pos;\n" // relative position within quad in OpenGL space
-//"float out vec2 size;\n" // size of quad (relative values)
+"out vec2 size;\n" // size of quad (relative values)
 "uniform vec4 position;\n" // minX, minY, maxX, maxY. OpenGL coordinate system!
 "uniform vec4 textureCoordinate;\n" // minU, minV, maxU, maxV. OpenGL coordinate system!
 "void main() {\n"
-//"    size = vec2(position.z - position.x, position.w - position.y);\n" // relative size of quad
+"    size = vec2(position.z - position.x, position.w - position.y);\n" // relative size of quad
 "    gl_Position = vec4(position.zw, 0.0, 1.0);\n" // upper right corner
 "    uv = vec2(textureCoordinate.zw);\n"
 "    pos = vec2(1,1);\n"
@@ -59,14 +59,14 @@ const std::string highlightFragmentShaderSource =
 "#version 330 core\n"
 "in vec2 uv;\n"
 "in vec2 pos;\n"
-//"flat in vec2 scale;\n"
+"in vec2 size;\n"
 "out vec4 fragColor;\n"
 "uniform sampler2D tex;\n"
 "uniform float dim;\n"
 "void main() {\n"
 "	vec4 color = texture(tex, uv);\n"
-// "   fragColor = vec4(color.rgb * (1.0 - dim), color.a);\n"
-"   fragColor = vec4(pos,1, color.a);\n"
+// TODO: use size and pos to display something in the center
+"   fragColor = vec4(color.rgb * (1.0 - dim), 1.0);\n"
 "}\n";
 
 const std::string compositionFragmentShaderSource =
