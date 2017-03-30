@@ -72,7 +72,8 @@ private:
     std::shared_ptr<Texture> _spTexture;
 
     // Render item
-    std::unique_ptr<RenderItem> _upSimpleRenderItem;
+    std::unique_ptr<RenderItem> _upWebpageRenderItem;
+	std::unique_ptr<RenderItem> _upHighlightRenderItem;
     std::unique_ptr<RenderItem> _upCompositeRenderItem;
 
     // Current values
