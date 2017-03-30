@@ -7,7 +7,7 @@
 #include "include/base/cef_logging.h"
 
 // Forward declaration of common main
-int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<App> app, void* windows_sandbox_info, std::string userDirectory);
+int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<MainCefApp> app, void* windows_sandbox_info, std::string userDirectory);
 
 // Following taken partly out of CefSimple example of Chromium Embedded Framework!
 
@@ -22,8 +22,8 @@ int main(int argc, char* argv[])
 	// ###############
 
 	// Parse command-line arguments
-	CefRefPtr<CefCommandLine> command_line = CefCommandLine::CreateCommandLine();
-	command_line->InitFromArgv(argc, argv);
+    CefRefPtr<CefCommandLine> commandLine = CefCommandLine::CreateCommandLine();
+    commandLine->InitFromArgv(argc, argv);
 
 	// Create an app of the correct type.
 	CefRefPtr<CefApp> app;
@@ -54,11 +54,11 @@ int main(int argc, char* argv[])
     // CEF applications have multiple sub-processes (render, plugin, GPU, etc)
     // that share the same executable. This function checks the command-line and,
     // if this is a sub-process, executes the appropriate logic.
-    int exit_code = CefExecuteProcess(main_args, app.get(), NULL);
-    if (exit_code >= 0 || mainProcessApp.get() == nullptr)
+    int exitCode = CefExecuteProcess(main_args, app.get(), NULL);
+    if (exitCode >= 0 || mainProcessApp.get() == nullptr)
     {
         // The sub-process has completed so return here.
-        return exit_code;
+        return exitCode;
     }
 
 	// ################

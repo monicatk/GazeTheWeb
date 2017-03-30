@@ -238,6 +238,10 @@ private:
 		"(\\d{1,3}(\\.\\d{1,3}){3})" // ip address
 		"([/\\w\\.:-]*)*"	// folder structure
 		"/?";				// optional last dash
+	std::unique_ptr<std::regex> _upFILEregex;
+	const char* _pFILEregexExpression =
+		"file:///"			// file prefix
+		".*";				// followed by anything
 };
 
 #endif // WEB_H_

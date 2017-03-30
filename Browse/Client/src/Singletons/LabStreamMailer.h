@@ -71,5 +71,5 @@ private:
 	// Private copy / asignment constructors
 	LabStreamMailer() {}
 	LabStreamMailer(const LabStreamMailer&) {}
-	LabStreamMailer& operator = (const LabStreamMailer &) {}
+        LabStreamMailer& operator = (const LabStreamMailer &) { return *this; }
 };
