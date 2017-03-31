@@ -63,10 +63,19 @@ const std::string highlightFragmentShaderSource =
 "out vec4 fragColor;\n"
 "uniform sampler2D tex;\n"
 "uniform float dim;\n"
+"uniform float aspectRatio;\n"
 "void main() {\n"
 "	vec4 color = texture(tex, uv);\n"
-// TODO: use size and pos to display something in the center
-"   fragColor = vec4(color.rgb * (1.0 - dim), 1.0);\n"
+"	vec2 circle = vec2(0.015, 0.015);\n" // inner circle to display
+"	circle.y *= aspectRatio;\n" // aspect ratio correction
+"   circle /= size;\n" // realtive size of circle within mesh
+"	vec2 halfCircle = circle/2;\n" // half circle necessary
+"	float inside = min(length(abs(pos - 0.5) / halfCircle),1);\n" // calculate whether pos inside circle to display
+"   inside = inside * inside;\n" // make circle stronger
+"   inside = inside * inside;\n" // make circle stronger, again
+"   inside = inside * inside;\n" // make circle stronger, again
+"   vec3 mixture = mix(vec3(1, 0, 0), color.rgb * (1.0 - dim), min(inside + 0.4, 1));\n" // mix overlay circle and normal color
+"   fragColor = vec4(mixture, 1.0);\n"
 "}\n";
 
 const std::string compositionFragmentShaderSource =
@@ -79,10 +88,10 @@ const std::string compositionFragmentShaderSource =
 "uniform float zoom;\n"
 "void main() {\n"
 "   vec2 coords = uv;\n"
-"   coords += centerOffset;" // Move towards center
-"   coords -= zoomPosition;" // Move zoom position to origin
-"   coords *= zoom;" // Scale coords
-"   coords += zoomPosition;" // Move it back
+"   coords += centerOffset;" // move towards center
+"   coords -= zoomPosition;" // move zoom position to origin
+"   coords *= zoom;" // scale coords
+"   coords += zoomPosition;" // move it back
 "   fragColor = texture(tex, coords);\n"
 "}\n";
 
@@ -175,6 +184,9 @@ void WebView::Draw(
         // TODO: use value from highlight or so
         // For now: just reset dimming to zero for the rect rendering
 		_upHighlightRenderItem->GetShader()->UpdateValue("dim", 0.f);
+
+		// Aspect ratio of web view
+		_upHighlightRenderItem->GetShader()->UpdateValue("aspectRatio", (float)_width / (float)_height);
 
         // Go over rects and render them
         for(Rect rect : _rects)
