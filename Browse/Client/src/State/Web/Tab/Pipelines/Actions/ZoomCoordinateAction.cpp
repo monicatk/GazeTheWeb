@@ -163,6 +163,8 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 				// TODO: Filter multiple sample data sets
 
 				// Primary TODO: remove global movement from calculation
+				// The moving zoom coordinate makes the fixated area being less zoomed than expected, since it moves towards it and the
+				// zoom has less effect on it. think about "how to compensate this"
 
 				// Determine movement of zoom coordinate between current and sample
 				glm::vec2 pixelZoomCoordinateDelta = _relativeZoomCoordinate - _sampleData.front().relativeZoomCoordinate; // in relative page coordinates
