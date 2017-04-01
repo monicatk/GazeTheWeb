@@ -61,7 +61,7 @@ protected:
 		glm::vec2 relativeGazeCoordinate;
 		glm::vec2 relativeZoomCoordinate;
 		glm::vec2 relativeCenterOffset;
-		float lifetime = 0.1f; // intial lifetime in seconds
+		float lifetime = 0.25f; // intial lifetime in seconds
 	};
 
 	// Dimming duration
@@ -74,7 +74,7 @@ protected:
 	const float DEVIATION_FADING_DURATION = 1.0f;
 
 	// Multiplier of movement towards center (one means, that on maximum zoom the outermost corner is moved into center)
-	const float CENTER_OFFSET_MULTIPLIER = 0.25f;
+	const float CENTER_OFFSET_MULTIPLIER = 0.f; // 0.25f; TODO Debugging
 
 	// Duration to replace current coordinate with input
 	const float MOVE_DURATION = 0.5f;
