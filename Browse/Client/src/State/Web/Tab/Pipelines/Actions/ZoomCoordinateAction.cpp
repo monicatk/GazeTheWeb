@@ -157,11 +157,13 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	{
 		case State::ZOOM:
 		{
+			// TODO: Filter multiple sample data sets
+
 			// TODO: Use some other concept to finish pointing than a maximum zoom level
+			// First, check page position of zoom coordinate. if not really changed, no drift has happened
+			// Then, check for angle between zoom coordinate drift and (somehow) gaze (maybe not gaze drift), if small, calculate drift
 			if (_logZoom < 0.5f)
 			{
-				// TODO: Filter multiple sample data sets
-
 				// Primary TODO: remove global movement from calculation
 				// The moving zoom coordinate makes the fixated area being less zoomed than expected, since it moves towards it and the
 				// zoom has less effect on it. think about "how to compensate this"
@@ -182,7 +184,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 				pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, samplePixelGazeCoordinate);
 
 				// Calculate drift corrected fixation coordinate
-				glm::vec2 drift = (pixelGazeCoordinate - samplePixelGazeCoordinate);
+				glm::vec2 drift = (pixelGazeCoordinate - samplePixelGazeCoordinate) + pixelZoomCoordinateDelta; // TODO: idea not bad, just adding not correct
 				float radius = glm::length(drift) / ((1.f / _logZoom) - (1.f / _sampleData.front().logZoom));
 				glm::vec2 fixation = (glm::normalize(drift) * radius) + samplePixelGazeCoordinate;
 				SetOutputValue("coordinate", fixation);
