@@ -43,10 +43,10 @@ protected:
 	// Sample data
 	struct SampleData
 	{
+		float logZoom;
 		glm::vec2 relativeGazeCoordinate;
 		glm::vec2 relativeZoomCoordinate;
 		glm::vec2 relativeCenterOffset;
-		float logZoom; // value of log zoom at that time
 	};
 
 	// Dimming duration

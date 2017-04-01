@@ -21,7 +21,7 @@ ZoomCoordinateAction::ZoomCoordinateAction(TabInteractionInterface* pTab, bool d
 
 bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 {
-	// ### Preparation ###
+	// ### PREPARATION ###
 
 	// Speed of zooming
 	float zoomSpeed = 0.f;
@@ -48,7 +48,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	// Current gaze
 	glm::vec2 relativeGazeCoordinate = glm::vec2(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY); // relative WebView space
 
-	// ### Update zoom speed, zoom center and center offset ###
+	// ### UPDATE ZOOM SPEED, ZOOM CENTER AND CENTER OFFSET ###
 
 	// Only allow zoom in when gaze upon WebView and not yet used
 	if (tabInput.insideWebView && !tabInput.gazeUsed) // TODO: gazeUsed really good idea here? Maybe later null pointer?
@@ -110,7 +110,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 		}
 	}
 
-	// ### Update zoom ###
+	// ### UPDATE ZOOM ###
 
 	// Update linear zoom
 	_linZoom += tpf * zoomSpeed; // frame rate depended? at least complex
@@ -121,7 +121,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	// Make zoom better with log function
 	_logZoom = 1.f - glm::max(glm::log(_linZoom), 0.f); // log zooming is starting at one and getting smaller with higher _linZoom
 
-	// ### Update values ###
+	// ### UPDATE VALUES ###
 
 	// Decide whether zooming is finished
 	bool finished = false;
@@ -205,7 +205,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 		}
 	}
 
-	// ### Update WebView ###
+	// ### UPDATE WEBVIEW ###
 
 	// Decrement dimming
 	_dimming += tpf;
