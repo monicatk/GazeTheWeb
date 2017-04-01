@@ -11,7 +11,7 @@
 
 #include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 #include "src/Utils/LerpValue.h"
-#include <deque>
+#include <vector>
 
 class ZoomCoordinateAction : public Action
 {
@@ -38,15 +38,30 @@ public:
 protected:
 
 	// States of zooming
-	enum class State { ORIENTATE, ZOOM, WAIT, DEBUG };
+	enum class State { ZOOM, DEBUG };
 
 	// Sample data
 	struct SampleData
 	{
+		// Constructor
+		SampleData(
+			float logZoom,
+			glm::vec2 relativeGazeCoordinate,
+			glm::vec2 relativeZoomCoordinate,
+			glm::vec2 relativeCenterOffset)
+		{
+			this->logZoom = logZoom;
+			this->relativeGazeCoordinate  = relativeGazeCoordinate;
+			this->relativeZoomCoordinate = relativeZoomCoordinate;
+			this->relativeCenterOffset = relativeCenterOffset;
+		}
+
+		// Values
 		float logZoom;
 		glm::vec2 relativeGazeCoordinate;
 		glm::vec2 relativeZoomCoordinate;
 		glm::vec2 relativeCenterOffset;
+		float lifetime = 0.1f; // intial lifetime in seconds
 	};
 
 	// Dimming duration
@@ -99,14 +114,11 @@ protected:
 	// Do dimming
 	bool _doDimming = true;
 
-	// Datas saved before drift correction zooming starts
-	SampleData _sampleData;
-
-	// Time after zooming to wait for gaze to calm down
-	float _gazeCalmDownTime = 0.1f;
+	// Sample data
+	std::vector<SampleData> _sampleData;
 
 	// State of action
-	State _state = State::ORIENTATE;
+	State _state = State::ZOOM;
 };
 
 #endif // ZOOMCOORDINATEACTION_H_

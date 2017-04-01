@@ -55,7 +55,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	{
 		switch (_state)
 		{
-		case State::ORIENTATE:
+		case State::ZOOM:
 		{
 			// Update deviation value (fade away deviation)
 			_deviation = glm::max(0.f, _deviation - (tpf / DEVIATION_FADING_DURATION));
@@ -101,10 +101,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			// Get out of case
 			break;
 		}
-		case State::ZOOM:
-			zoomSpeed = 0.25f;
-			break;
-		default:
+		case State::DEBUG:
 			zoomSpeed = 0.f;
 			break;
 		}
@@ -140,54 +137,42 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 		finished = true;
 	}
 
+	// Update samples
+	std::for_each(_sampleData.begin(), _sampleData.end(), [&](SampleData& rSampleData) { rSampleData.lifetime -= tpf; });
+	_sampleData.erase(
+		std::remove_if(
+			_sampleData.begin(),
+			_sampleData.end(),
+			[&](const SampleData& rSampleData) { return rSampleData.lifetime <= 0.f; }),
+		_sampleData.end());
+
+	// Add new sample
+	_sampleData.push_back(SampleData(_logZoom, relativeGazeCoordinate, _relativeZoomCoordinate, _relativeCenterOffset));
+
+	
 	// Proceed depending on the state
 	switch (_state)
 	{
-		case State::ORIENTATE:
-		{
-			if (_logZoom <= MAX_ORIENTATION_LOG_ZOOM)
-			{
-				// Pixel gaze coordinate
-				glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate; // CEFPixel space
-				pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, pixelGazeCoordinate);
-
-				// Store sample from that time
-				_sampleData.logZoom = _logZoom;
-				_sampleData.relativeGazeCoordinate = relativeGazeCoordinate;
-				_sampleData.relativeZoomCoordinate = _relativeZoomCoordinate;
-				_sampleData.relativeCenterOffset = _relativeCenterOffset;
-
-				// End orientation
-				_state = State::ZOOM;
-			}
-			break;
-		}
 		case State::ZOOM:
 		{
-			if (_logZoom <= MAX_DRIFT_CORRECTION_LOG_ZOOM)
+			// TODO: Use some other concept to finish pointing than zoom level
+			if (_logZoom < 0.5f)
 			{
-				_state = State::WAIT;
-			}
-			break;
-		}
-		case State::WAIT:
-		{
-			_gazeCalmDownTime -= tpf;
-			if (_gazeCalmDownTime < 0)
-			{
-				// TODO check whether drift is significant or can be ignored (for very good calibration)
+				// TODO: Filter multiple sample data sets
+
+				// Primary TODO: remove global movement from calculation
 
 				// Current pixel gaze coordinate on page with values as sample was taken
 				glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate;
-				pageCoordinate(_sampleData.logZoom, _sampleData.relativeZoomCoordinate, _sampleData.relativeCenterOffset, pixelGazeCoordinate);
+				pageCoordinate(_sampleData.front().logZoom, _sampleData.front().relativeZoomCoordinate, _sampleData.front().relativeCenterOffset, pixelGazeCoordinate);
 
 				// Sample pixel gaze coordinate on page
-				glm::vec2 samplePixelGazeCoordinate = _sampleData.relativeGazeCoordinate;
+				glm::vec2 samplePixelGazeCoordinate = _sampleData.front().relativeGazeCoordinate;
 				pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, samplePixelGazeCoordinate);
 
 				// Calculate drift corrected fixation coordinate
 				glm::vec2 drift = pixelGazeCoordinate - samplePixelGazeCoordinate;
-				float radius = glm::length(drift) / ((1.f/_logZoom) - (1.f/_sampleData.logZoom));
+				float radius = glm::length(drift) / ((1.f / _logZoom) - (1.f / _sampleData.front().logZoom));
 				glm::vec2 fixation = (glm::normalize(drift) * radius) + samplePixelGazeCoordinate;
 				SetOutputValue("coordinate", fixation);
 
