@@ -147,10 +147,6 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 		{
 			if (_logZoom <= MAX_ORIENTATION_LOG_ZOOM)
 			{
-				// Pixel gaze coordinate
-				glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate; // CEFPixel space
-				pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, pixelGazeCoordinate);
-
 				// Store sample from that time
 				_sampleData.logZoom = _logZoom;
 				_sampleData.relativeGazeCoordinate = relativeGazeCoordinate;
