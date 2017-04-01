@@ -74,7 +74,6 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 					(relativeGazeCoordinate + _relativeCenterOffset) // Visually, the zoom coordinate is moved by relative center offset. So adapt input to this
 					- _relativeZoomCoordinate;
 				_relativeZoomCoordinate += relativeDelta * glm::min(1.f, (tpf / MOVE_DURATION));
-				_relativeZoomCoordinate = glm::clamp(_relativeZoomCoordinate, glm::vec2(0.f), glm::vec2(1.f)); // clamp within page
 
 				// Set length of delta to deviation if bigger than current deviation
 				_deviation = glm::min(1.f, glm::max(pixelDelta / glm::max(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY()), _deviation));
@@ -92,11 +91,12 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			}
 
 			// Calculated center offset. This moves the WebView content towards the center for better gaze precision
+			glm::vec2 clampedRelativeZoom = glm::clamp(_relativeZoomCoordinate, glm::vec2(0.f), glm::vec2(1.f)); // clamp within page for determining relative center offset
 			float zoomWeight = ((1.f - _logZoom) / (1.f - MAX_ORIENTATION_LOG_ZOOM)); // projects zoom level to [0..1]
 			_relativeCenterOffset =
 				CENTER_OFFSET_MULTIPLIER
 				* zoomWeight // weight with zoom (starting at zero) to have more centered version at higher zoom level
-				* (_relativeZoomCoordinate - 0.5f); // vector from WebView center to current zoom coordinate
+				* (clampedRelativeZoom - 0.5f); // vector from WebView center to current zoom coordinate
 
 			// Get out of case
 			break;
