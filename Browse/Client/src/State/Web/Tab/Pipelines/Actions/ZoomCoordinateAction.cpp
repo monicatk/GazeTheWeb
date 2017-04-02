@@ -160,6 +160,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			// TODO: Filter multiple sample data sets
 
 			// TODO: Use some other concept to finish pointing than a maximum zoom level
+			// Check whether current log zoom is smaller than sample's?
 			// First, check page position of zoom coordinate. if not really changed, no drift has happened
 			// Then, check for angle between zoom coordinate drift and (somehow) gaze (maybe not gaze drift), if small, calculate drift
 			if (_logZoom < 0.5f)
