@@ -163,35 +163,44 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			// Check whether current log zoom is smaller than sample's?
 			// First, check page position of zoom coordinate. if not really changed, no drift has happened
 			// Then, check for angle between zoom coordinate drift and (somehow) gaze (maybe not gaze drift), if small, calculate drift
-			if (_logZoom < 0.5f)
+			if (_logZoom < 0.4f)
 			{
 				// Primary TODO: remove global movement from calculation
 				// The moving zoom coordinate makes the fixated area being less zoomed than expected, since it moves towards it and the
 				// zoom has less effect on it. think about "how to compensate this"
 
-				// Determine movement of zoom coordinate between current and sample
-				glm::vec2 pixelZoomCoordinateDelta = _relativeZoomCoordinate - _sampleData.front().relativeZoomCoordinate; // in relative page coordinates
-				pixelZoomCoordinateDelta *= cefPixels;
+				// Choose sample
+				SampleData sample = _sampleData.front();
 
-				// Determine movement of center offset between current and sample
-				// glm::vec2 relativeCenterOffsetDelta = _relativeCenterOffset - _sampleData.front().relativeCenterOffset; // in relative WebView coordinates
+				// Inverse zooms
+				float zoom = 1.f / _logZoom;
+				float sampleZoom = 1.f / sample.logZoom;
+
+				// Determine movement of zoom coordinate between current and sample
+				glm::vec2 zoomCoordinateDelta = _relativeZoomCoordinate - sample.relativeZoomCoordinate; // in relative page coordinates
+				zoomCoordinateDelta *= cefPixels;
 
 				// Current pixel gaze coordinate on page with values as sample was taken
 				glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate; // subtract movement which the user had to follow
-				pageCoordinate(_sampleData.front().logZoom, _sampleData.front().relativeZoomCoordinate, _sampleData.front().relativeCenterOffset, pixelGazeCoordinate);
+				pageCoordinate(sample.logZoom, sample.relativeZoomCoordinate, sample.relativeCenterOffset, pixelGazeCoordinate);
 
 				// Pixel gaze coordinate on page at time where sample has been taken
-				glm::vec2 samplePixelGazeCoordinate = _sampleData.front().relativeGazeCoordinate;
+				glm::vec2 samplePixelGazeCoordinate = sample.relativeGazeCoordinate;
 				pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, samplePixelGazeCoordinate);
 
-				// Calculate drift corrected fixation coordinate
-				glm::vec2 drift = (pixelGazeCoordinate - samplePixelGazeCoordinate) + pixelZoomCoordinateDelta; // TODO: idea not bad, just adding not correct
-				float radius = glm::length(drift) / ((1.f / _logZoom) - (1.f / _sampleData.front().logZoom));
-				glm::vec2 fixation = (glm::normalize(drift) * radius) + samplePixelGazeCoordinate;
+				// Delta of gaze
+				glm::vec2 gazeDelta = pixelGazeCoordinate - samplePixelGazeCoordinate;
+
+				// Radius where fixated coordinate lies
+				float radius = glm::length(gazeDelta) - glm::length(zoomCoordinateDelta) + (zoom * glm::length(zoomCoordinateDelta));
+				radius /= zoom - sampleZoom;
+
+				// Actual fixation point
+				glm::vec2 fixation = (glm::normalize(zoomCoordinateDelta) * radius) + samplePixelGazeCoordinate;
 				SetOutputValue("coordinate", fixation);
 
-				LogInfo("GazeDrift: ", drift.x, ", ", drift.y);
-				LogInfo("ZoomDrift: ", pixelZoomCoordinateDelta.x, ", ", pixelZoomCoordinateDelta.y);
+				LogInfo("GazeDelta: ", gazeDelta.x, ", ", gazeDelta.y);
+				LogInfo("ZoomDelta: ", zoomCoordinateDelta.x, ", ", zoomCoordinateDelta.y);
 
 				// Return success
 				// finished = true; // TODO debugging

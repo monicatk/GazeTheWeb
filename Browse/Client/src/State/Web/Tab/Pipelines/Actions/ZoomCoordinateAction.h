@@ -61,7 +61,7 @@ protected:
 		glm::vec2 relativeGazeCoordinate;
 		glm::vec2 relativeZoomCoordinate;
 		glm::vec2 relativeCenterOffset;
-		float lifetime = 0.25f; // intial lifetime in seconds
+		float lifetime = 0.5f; // intial lifetime in seconds
 	};
 
 	// Dimming duration
