@@ -157,28 +157,16 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	{
 		case State::ZOOM:
 		{
-			// TODO: Filter multiple sample data sets
+			// TODO: Reintegrate center offset and filter multiple sample data sets
 
-			// TODO: Use some other concept to finish pointing than a maximum zoom level
-			// Check whether current log zoom is smaller than sample's?
-			// First, check page position of zoom coordinate. if not really changed, no drift has happened
-			// Then, check for angle between zoom coordinate drift and (somehow) gaze (maybe not gaze drift), if small, calculate drift
-			if (_logZoom < 0.4f)
+			if (_logZoom < 0.75f) // wait until some samples exist
 			{
-				// Primary TODO: remove global movement from calculation
-				// The moving zoom coordinate makes the fixated area being less zoomed than expected, since it moves towards it and the
-				// zoom has less effect on it. think about "how to compensate this"
-
 				// Choose sample
 				SampleData sample = _sampleData.front();
 
-				// Inverse zooms
-				float zoom = 1.f / _logZoom;
-				float sampleZoom = 1.f / sample.logZoom;
-
 				// Determine movement of zoom coordinate between current and sample
-				glm::vec2 zoomCoordinateDelta = _relativeZoomCoordinate - sample.relativeZoomCoordinate; // in relative page coordinates
-				zoomCoordinateDelta *= cefPixels;
+				glm::vec2 zoomCoordinateDeltaVector = (_relativeZoomCoordinate - sample.relativeZoomCoordinate) * cefPixels;
+				float zoomCoordinateDelta = glm::length((_relativeZoomCoordinate - sample.relativeZoomCoordinate) * cefPixels);
 
 				// Current pixel gaze coordinate on page with values as sample was taken
 				glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate; // subtract movement which the user had to follow
@@ -189,22 +177,41 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 				pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, samplePixelGazeCoordinate);
 
 				// Delta of gaze
-				glm::vec2 gazeDelta = pixelGazeCoordinate - samplePixelGazeCoordinate;
+				glm::vec2 gazeDeltaVector = pixelGazeCoordinate - samplePixelGazeCoordinate;
+				float gazeDelta = glm::length(gazeDeltaVector);
 
-				// Radius where fixated coordinate lies
-				float radius = glm::length(gazeDelta) - glm::length(zoomCoordinateDelta) + (zoom * glm::length(zoomCoordinateDelta));
-				radius /= zoom - sampleZoom;
+				// Angle between zoomCoordinateDeltaVector and gazeDeltaVector
+				float deltaAngle = glm::degrees(glm::angle(glm::normalize(gazeDeltaVector), glm::normalize(zoomCoordinateDeltaVector)));
+				LogInfo("DriftAngle: ", deltaAngle);
 
-				// Actual fixation point
-				glm::vec2 fixation = (glm::normalize(zoomCoordinateDelta) * radius) + samplePixelGazeCoordinate;
-				SetOutputValue("coordinate", fixation);
+				// Decide to go directly for zoom coordinate (good calibration) or drift corrected coordinate (poor calibration) or continue zooming
+				if (zoomCoordinateDelta < 3.f) // zoom coordinate has not changed in pixels on page
+				{
+					SetOutputValue("coordinate", _relativeZoomCoordinate * cefPixels);
+					// finished = true; // TODO debugging
+					_state = State::DEBUG;
+					LogInfo("DEBUG: Zoom Coordinate");
+				}
+				else if (deltaAngle <= 5 ) // angle of gazing is rather static TODO: should the delta be of some minimal size?
+				{
+					// Inverse zooms
+					float zoom = 1.f / _logZoom;
+					float sampleZoom = 1.f / sample.logZoom;
 
-				LogInfo("GazeDelta: ", gazeDelta.x, ", ", gazeDelta.y);
-				LogInfo("ZoomDelta: ", zoomCoordinateDelta.x, ", ", zoomCoordinateDelta.y);
+					// Radius where fixated coordinate lies
+					float radius = gazeDelta - zoomCoordinateDelta + (zoom * zoomCoordinateDelta);
+					radius /= zoom - sampleZoom;
 
-				// Return success
-				// finished = true; // TODO debugging
-				_state = State::DEBUG;
+					// Actual fixation point
+					glm::vec2 fixation = (glm::normalize(zoomCoordinateDeltaVector) * radius) + samplePixelGazeCoordinate;
+					SetOutputValue("coordinate", fixation);
+
+					// finished = true; // TODO debugging
+					_state = State::DEBUG;
+					LogInfo("DEBUG: Drift Correction");
+				}
+				
+				// else continue
 			}
 			break;
 		}
