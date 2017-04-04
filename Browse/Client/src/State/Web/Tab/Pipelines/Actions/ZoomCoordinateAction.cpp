@@ -185,7 +185,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 				LogInfo("DriftAngle: ", deltaAngle);
 
 				// Decide to go directly for zoom coordinate (good calibration) or drift corrected coordinate (poor calibration) or continue zooming
-				if (zoomCoordinateDelta < 3.f) // zoom coordinate has not changed in pixels on page
+				if (zoomCoordinateDelta < 1.f) // zoom coordinate has not changed in pixels on page
 				{
 					SetOutputValue("coordinate", _relativeZoomCoordinate * cefPixels);
 					// finished = true; // TODO debugging
@@ -259,10 +259,12 @@ void ZoomCoordinateAction::Draw() const
 			rCoordinate *= webViewPixels;
 		};
 
+		/*
 		// Zoom coordinate
 		glm::vec2 zoomCoordinate(_relativeZoomCoordinate);
 		applyZooming(zoomCoordinate);
 		_pTab->Debug_DrawRectangle(zoomCoordinate, glm::vec2(5, 5), glm::vec3(1, 0, 0));
+		*/
 
 		// Click coordinate
 		glm::vec2 coordinate;
