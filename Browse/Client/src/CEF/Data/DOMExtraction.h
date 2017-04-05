@@ -32,6 +32,7 @@ namespace V8ToCefListValue
 	const static CefRefPtr<CefListValue> Integer(CefRefPtr<CefV8Value> attrData);
 	const static CefRefPtr<CefListValue> String(CefRefPtr<CefV8Value> attrData);
 
+	// TODO: Static. And if so: Where is it stored?
 	const std::map<const DOMAttribute, const std::string> AttrGetter = {
 		{ DOMAttribute::Rects,				"getRects" },
 		{ DOMAttribute::FixedId,			"getFixedId" },
@@ -60,7 +61,7 @@ namespace V8ToCefListValue
 
 	const static CefRefPtr<CefListValue> ExtractAttributeData(DOMAttribute attr, CefRefPtr<CefV8Value> obj)
 	{
-		// Early exit
+		// Early exit TODO: check at compile time
 		if (AttrGetter.find(attr) == AttrGetter.end() || AttrConversion.find(attr) == AttrConversion.end())
 		{
 			LogError("V8ToCefListValue conversion: Insufficient information defined for DOMAttribute ", (int)attr, "! Abort.");
