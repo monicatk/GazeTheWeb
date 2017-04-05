@@ -74,7 +74,7 @@ protected:
 	const float DEVIATION_FADING_DURATION = 1.0f;
 
 	// Multiplier of movement towards center (one means, that on maximum zoom the outermost corner is moved into center)
-	const float CENTER_OFFSET_MULTIPLIER = 0.f; // 0.25f; TODO Debugging
+	const float CENTER_OFFSET_MULTIPLIER = 0.f; // TODO: 0.25f;
 
 	// Duration to replace current coordinate with input
 	const float MOVE_DURATION = 0.5f;

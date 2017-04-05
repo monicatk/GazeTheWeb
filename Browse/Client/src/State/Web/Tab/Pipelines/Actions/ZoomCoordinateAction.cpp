@@ -158,6 +158,9 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 		case State::ZOOM:
 		{
 			// TODO: Reintegrate center offset and filter multiple sample data sets
+			// -> All values should be in page coordinates (so relative to page, in pixels)
+
+			// TODO: limit zooming, maybe define maximum zoom level (something bigger than zero)
 
 			if (_logZoom < 0.75f) // wait until some samples exist
 			{
@@ -166,7 +169,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 
 				// Determine movement of zoom coordinate between current and sample
 				glm::vec2 zoomCoordinateDeltaVector = (_relativeZoomCoordinate - sample.relativeZoomCoordinate) * cefPixels;
-				float zoomCoordinateDelta = glm::length((_relativeZoomCoordinate - sample.relativeZoomCoordinate) * cefPixels);
+				float zoomCoordinateDelta = glm::length(zoomCoordinateDeltaVector);
 
 				// Current pixel gaze coordinate on page with values as sample was taken
 				glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate; // subtract movement which the user had to follow
@@ -182,7 +185,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 
 				// Angle between zoomCoordinateDeltaVector and gazeDeltaVector
 				float deltaAngle = glm::degrees(glm::angle(glm::normalize(gazeDeltaVector), glm::normalize(zoomCoordinateDeltaVector)));
-				LogInfo("DriftAngle: ", deltaAngle);
+				LogInfo("DriftAngle: ", deltaAngle); // TODO: which value interval is the angle in?
 
 				// Decide to go directly for zoom coordinate (good calibration) or drift corrected coordinate (poor calibration) or continue zooming
 				if (zoomCoordinateDelta < 1.f) // zoom coordinate has not changed in pixels on page
@@ -192,7 +195,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 					_state = State::DEBUG;
 					LogInfo("DEBUG: Zoom Coordinate");
 				}
-				else if (deltaAngle <= 5 ) // angle of gazing is rather static TODO: should the delta be of some minimal size?
+				else if (deltaAngle <= 5) // angle of gazing is rather static TODO: should the delta be of some minimal size?
 				{
 					// Inverse zooms
 					float zoom = 1.f / _logZoom;
