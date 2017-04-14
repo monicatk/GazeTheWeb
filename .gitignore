@@ -17,3 +17,6 @@ build
 
 # CLion files
 .idea
+
+# Other
+*.orig
