@@ -6,7 +6,7 @@
 window.domLinks = [];
 window.domTextInputs = [];
 window.domSelectFields = [];
-window.overflowElements = [];
+window.domOverflowElements = [];
 
 function GetDOMTextInput(id){ return GetDOMObject(0, id);}
 function GetDOMLink(id){ return GetDOMObject(1, id);}
@@ -254,12 +254,12 @@ function DOMObject(node, nodeType)
                         }
                     );
               
-                    ConsolePrint("getRects: "+new_rects);
+                    ConsolePrint("type: "+this.nodeType+"|id: "+this.node.getAttribute("nodeId")+"| getRects: "+new_rects);
                     return new_rects;
                 }
                 else
                 {
-                    ConsolePrint("getRects: "+new_rects);
+                    ConsolePrint("type: "+this.nodeType+"|id: "+this.node.getAttribute("nodeId")+"| getRects: "+this.rects);
                     return this.rects;
                 }
 
@@ -639,7 +639,7 @@ function UpdateDOMRects()
     );
 
     // ... and all OverflowElements
-    window.overflowElements.forEach(
+    window.domOverflowElements.forEach(
         function (overflowObj) {
             if(overflowObj !== null && overflowObj !== undefined)
                 overflowObj.updateRects(); 
@@ -814,7 +814,7 @@ function GetDOMObjectList(nodeType)
         case 2:
         case '2': { return window.domSelectFields; }
         case 3:
-        case '3': { return window.overflowElements; }
+        case '3': { return window.domOverflowElements; }
         // NOTE: Add more cases if new nodeTypes are added
         default:
         {
@@ -1113,13 +1113,13 @@ function CreateOverflowElement(node)
     {
         var overflowObj = new OverflowElement(node);
 
-        window.overflowElements.push(overflowObj);
+        window.domOverflowElements.push(overflowObj);
 
         // Prepare informing CEF about added OverflowElement
         var outStr = "DOM#add#3#";
 
 
-        var id = window.overflowElements.length - 1;
+        var id = window.domOverflowElements.length - 1;
         node.setAttribute("overflowId", id);
 
         outStr += (id + "#");
@@ -1134,11 +1134,11 @@ function CreateOverflowElement(node)
 // Called from CEF Handler
 function GetOverflowElement(id)
 {
-    if(id !== null && id !== undefined && id < window.overflowElements.length && id >= 0)
-        return window.overflowElements[id];     // This may return undefined
+    if(id !== null && id !== undefined && id < window.domOverflowElements.length && id >= 0)
+        return window.domOverflowElements[id];     // This may return undefined
     else
     {
-        // ConsolePrint("ERROR in GetOverflowElement: id="+id+", valid id should be in [0, "+(window.overflowElements.length-1)+"]!");
+        // ConsolePrint("ERROR in GetOverflowElement: id="+id+", valid id should be in [0, "+(window.domOverflowElements.length-1)+"]!");
         return null;
     }
         
@@ -1146,7 +1146,7 @@ function GetOverflowElement(id)
 
 function RemoveOverflowElement(id)
 {
-    if(id < window.overflowElements.length && id >= 0)
+    if(id < window.domOverflowElements.length && id >= 0)
     {
         /* HACK FOR REMOVAL OF GLOBAL OVERFLOW ELEMENT CAUSING SCROLL LAGG */
         domLinks.forEach(function(obj){
@@ -1154,7 +1154,7 @@ function RemoveOverflowElement(id)
             {
                 if(obj.node !== null && obj.node !== undefined)
                 {
-                    if(obj.overflowParent == window.overflowElements[id].node)
+                    if(obj.overflowParent == window.domOverflowElements[id].node)
                     {
                         obj.overflowParent = null;
                         obj.updateRects();
@@ -1167,7 +1167,7 @@ function RemoveOverflowElement(id)
             {
                 if(obj.node !== null && obj.node !== undefined)
                 {
-                    if(obj.overflowParent == window.overflowElements[id].node)
+                    if(obj.overflowParent == window.domOverflowElements[id].node)
                     {
                         obj.overflowParent = null;
                         obj.updateRects();
@@ -1177,8 +1177,8 @@ function RemoveOverflowElement(id)
         });
         /* END OF HACK */
 
-        window.overflowElements[id].node.removeAttribute("overflowId");
-        delete window.overflowElements[id]; // TODO: Keep list space empty or fill when new OE is created?
+        window.domOverflowElements[id].node.removeAttribute("overflowId");
+        delete window.domOverflowElements[id]; // TODO: Keep list space empty or fill when new OE is created?
 
         // Inform CEF about removed overflow element
         ConsolePrint("DOM#rem#3#"+id+"#");
