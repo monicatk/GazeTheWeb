@@ -415,13 +415,14 @@ StateType Web::Update(float tpf, Input& rInput)
     }
 
     // Only do it if there is some tab to update
-    if(_currentTabId >= 0)
+    if(_currentTabId >= 0 && _tabs.find(_currentTabId) != _tabs.end())
     {
         // Check whether tab can go back or forward and tell it eyeGUI
         eyegui::setElementActivity(_pWebLayout, "back", _tabs.at(_currentTabId)->CanGoBack(), true);
         eyegui::setElementActivity(_pWebLayout, "forward", _tabs.at(_currentTabId)->CanGoForward(), true);
 
-        _tabs.at(_currentTabId)->Update(tpf, rInput);
+		
+		_tabs.at(_currentTabId)->Update(tpf, rInput);
     }
 
     // Decide what to do next

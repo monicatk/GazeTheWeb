@@ -1030,7 +1030,7 @@ function OverflowElement(node)
                 var id = this.node.getAttribute("overflowId");
                 this.rects = updatedRectsData;
 
-                var encodedCommand = "DOM#upd#3#"+id+"#rect#";
+                var encodedCommand = "DOM#upd#3#"+id+"#0#";
                 
                 for (var i = 0; i < 4; i++)
                 {                 
@@ -1054,8 +1054,8 @@ function OverflowElement(node)
                 
                 // Inform CEF about changes in fixed attribute
                 var id = this.node.getAttribute("overflowId");
-                var numFixed = (fixed) ? 1 : 0;
-                var encodedCommand = "DOM#upd#3#"+id+"#fixed#"+numFixed+"#";
+                var fixedId = this.node.getAttribute("fixedID") | this.node.getAttribute("childFixedId");
+                var encodedCommand = "DOM#upd#3#"+id+"#1#"+fixedId+"#";
                 ConsolePrint(encodedCommand);
 
                 this.updateRects();
@@ -1122,30 +1122,7 @@ function CreateOverflowElement(node)
         var id = window.overflowElements.length - 1;
         node.setAttribute("overflowId", id);
 
-        var zero = (id < 10) ? "0" : "";
-        outStr += (zero + id + "#");
-        // DOM#add#[0]id#
-
-
-        // Note: Ignoring multiple Rects at this point...
-        var rects = overflowObj.getRects();
-        var rect = (rects.length > 0) ? rects[0] : [0,0,0,0];
-
-
-        for(var i = 0; i < 4; i++)
-        {
-            outStr += rect[i];
-            if(i !== 3) outStr += ";";  // Note: if-statement misses in DOMObjects --> different decoding atm
-        }
-        outStr += "#";
-        // DOM#add#[0]id#rect0;rect1;rect2;rect3#
-
-        outStr +=  overflowObj.getMaxLeftScrolling();
-        outStr += ";";
-        outStr += overflowObj.getMaxTopScrolling();
-        outStr += "#";
-        // DOM#add#[0]id#rect0;rect1;rect2;rect3#maxLeft;maxTop#
-
+        outStr += (id + "#");
         ConsolePrint(outStr);
 
         //DEBUG
@@ -1204,7 +1181,7 @@ function RemoveOverflowElement(id)
         delete window.overflowElements[id]; // TODO: Keep list space empty or fill when new OE is created?
 
         // Inform CEF about removed overflow element
-        ConsolePrint("DOM#rem#3#"+id);
+        ConsolePrint("DOM#rem#3#"+id+"#");
 
     }
     else

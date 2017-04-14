@@ -346,6 +346,10 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 
 		DOM::GetJSRepresentation(nodeType, description, js_obj_getter_name); // TODO: nodeType string is currently a kind of a quick fix...
 
+		// DEBUG
+		if (nodeType == "OverflowElementData") 
+			return true;
+
 		if (description.size() == 0)
 		{
 			IPCLog(browser, "Renderer: Could not find fitting description for " + nodeType);
@@ -377,11 +381,11 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			{
 				for (const auto& attr : *desc)
 				{
-					IPCLogDebug(browser, "Processing attr: " + std::to_string(attr) + " ... ");
+					//IPCLogDebug(browser, "Processing attr: " + std::to_string(attr) + " ... ");
 
 					CefRefPtr<CefListValue> listValue = V8ToCefListValue::ExtractAttributeData(attr, domObj);
 					
-					IPCLogDebug(browser, "... done");
+					//IPCLogDebug(browser, "... done");
 
 					args->SetList(args_count++, listValue);
 				}

@@ -154,7 +154,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			const int& type = std::stoi(data[2]);
 			const int& id = std::stoi(data[3]);
 		
-			if (type == 3)
+			if (type == 3) // DEBUG: OverflowElement
 				LogDebug("MsgRouter: Processing " + requestString);
 
 			// ADDING DOMNODE
