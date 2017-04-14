@@ -154,6 +154,9 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			const int& type = std::stoi(data[2]);
 			const int& id = std::stoi(data[3]);
 		
+			if (type == 3)
+				LogDebug("MsgRouter: Processing " + requestString);
+
 			// ADDING DOMNODE
 			if (op.compare("add") == 0) // adding of DOM node
 			{
@@ -169,8 +172,18 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					}
 				}
 
+				// TODO: This could be done in DOMExtraction
+				std::string ipcName = "";
+				switch (type) {
+				case(0) : ipcName = "TextInput"; break;
+				case(1) : ipcName = "Link"; break;
+				case(2) : ipcName = "SelectField"; break;
+				case(3) : ipcName = "OverflowElement"; break;
+				default: LogError(browser, "MsgRouter: - ERROR: Unknown numeric DOM node type value: ", type);
+				}
+
 				// Instruct Renderer Process to initialize empty DOM Nodes with data
-				CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("LoadDOMNodeData");
+				CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("LoadDOM" + ipcName + "Data");
 				msg->GetArgumentList()->SetInt(0, type);
 				msg->GetArgumentList()->SetInt(1, id);
 				browser->SendProcessMessage(PID_RENDERER, msg);
@@ -226,6 +239,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					LogDebug("MsgRouter: Expected more data in DOMObject update:\n", requestString, "\nAborting update.");
 				}
 			}
+
 		}
 		
 		// Success! (TODO: there may be failures which can be passed to JavaScript)

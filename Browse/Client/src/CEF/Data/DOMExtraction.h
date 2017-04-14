@@ -21,23 +21,23 @@
 namespace V8ToCefListValue
 {
 	// Nested lists
-	const static CefRefPtr<CefListValue> NestedListOfDoubles(CefRefPtr<CefV8Value> v8rects);
+	const CefRefPtr<CefListValue> NestedListOfDoubles(CefRefPtr<CefV8Value> v8rects);
 
 	// Lists
-	const static CefRefPtr<CefListValue> ListOfStrings(CefRefPtr<CefV8Value> attrData);
-	const static CefRefPtr<CefListValue> ListOfIntegers(CefRefPtr<CefV8Value> attrData);
+	const CefRefPtr<CefListValue> ListOfStrings(CefRefPtr<CefV8Value> attrData);
+	const CefRefPtr<CefListValue> ListOfIntegers(CefRefPtr<CefV8Value> attrData);
 
 	// Primitive types - TODO: There certainly exists a more generic approach for each primitive type!
-	const static CefRefPtr<CefListValue> Boolean(CefRefPtr<CefV8Value> attrData);
-	const static CefRefPtr<CefListValue> Integer(CefRefPtr<CefV8Value> attrData);
-	const static CefRefPtr<CefListValue> String(CefRefPtr<CefV8Value> attrData);
+	const CefRefPtr<CefListValue> Boolean(CefRefPtr<CefV8Value> attrData);
+	const CefRefPtr<CefListValue> Integer(CefRefPtr<CefV8Value> attrData);
+	const CefRefPtr<CefListValue> String(CefRefPtr<CefV8Value> attrData);
 
 	const std::map<const DOMAttribute, const std::string> AttrGetter = {
 		{ DOMAttribute::Rects,				"getRects" },
 		{ DOMAttribute::FixedId,			"getFixedId" },
 		{ DOMAttribute::OverflowId,			"getOverflowId" },
 		{ DOMAttribute::Text,				"getText" },
-		{ DOMAttribute::IsPassword,			"getPassword" },
+		{ DOMAttribute::IsPassword,			"getIsPassword" },
 		{ DOMAttribute::Url,				"getUrl" },
 		{ DOMAttribute::Options,			"getOptions" },
 		{ DOMAttribute::MaxScrolling,		"getMaxScrolling"},
@@ -54,31 +54,38 @@ namespace V8ToCefListValue
 		{ DOMAttribute::Url,				&String },
 		{ DOMAttribute::Options,			&ListOfStrings },
 		{ DOMAttribute::MaxScrolling,		&ListOfIntegers },
-		{DOMAttribute::CurrentScrolling,	&ListOfIntegers }
+		{ DOMAttribute::CurrentScrolling,	&ListOfIntegers }
 	
 	};
 
+	// NOTE: Debug output won't reach the user's console, because this code is run in the Renderer process
 	const static CefRefPtr<CefListValue> ExtractAttributeData(DOMAttribute attr, CefRefPtr<CefV8Value> obj)
 	{
+		if (obj->IsNull() || obj->IsUndefined())
+			return CefRefPtr<CefListValue>();
+
 		// Early exit
 		if (AttrGetter.find(attr) == AttrGetter.end() || AttrConversion.find(attr) == AttrConversion.end())
 		{
 			LogError("V8ToCefListValue conversion: Insufficient information defined for DOMAttribute ", (int)attr, "! Abort.");
-			return CefV8Value::CreateNull();
+			return CefRefPtr<CefListValue>();
 		}
 
 		// Return getter function,
 		CefRefPtr<CefV8Value> getter = obj->GetValue(AttrGetter.at(attr));
 
 		// Check if getter function is valid
-		if (!getter->IsFunction())
+		if (getter->IsUndefined() || getter->IsNull() || !getter->IsFunction())
 		{
 			LogBug("V8ToCefListValue conversion: Could not access getter function for DOMAttribute ", (int)attr, " in Javascript object.");
-			return CefV8Value::CreateNull();
+			return CefRefPtr<CefListValue>();
 		}
 
 		// Execute getter function
 		CefRefPtr<CefV8Value> data = getter->ExecuteFunction(obj, {});
+
+		if (data->IsUndefined() || data->IsNull())
+			return CefRefPtr<CefListValue>();
 
 		// Convert returned V8Value to CefListValue
 		return AttrConversion.at(attr)(data);
@@ -89,16 +96,16 @@ namespace V8ToCefListValue
 namespace StringToCefListValue
 {
 	// Nested lists
-	const static CefRefPtr<CefListValue> NestedListOfDoubles(std::string attrData);
+	const CefRefPtr<CefListValue> NestedListOfDoubles(std::string attrData);
 
 	// Lists
-	const static CefRefPtr<CefListValue> ListOfStrings(std::string attrData);
-	const static CefRefPtr<CefListValue> ListOfIntegers(std::string attrData);
+	const CefRefPtr<CefListValue> ListOfStrings(std::string attrData);
+	const CefRefPtr<CefListValue> ListOfIntegers(std::string attrData);
 
 	// Primitive types
-	const static CefRefPtr<CefListValue> Boolean(std::string attrData);
-	const static CefRefPtr<CefListValue> Integer(std::string attrData);
-	const static CefRefPtr<CefListValue> String(std::string attrData);
+	const CefRefPtr<CefListValue> Boolean(std::string attrData);
+	const CefRefPtr<CefListValue> Integer(std::string attrData);
+	const CefRefPtr<CefListValue> String(std::string attrData);
 
 	const std::map<const DOMAttribute, const std::function<CefRefPtr<CefListValue>(std::string)> > AttrConversion =
 	{

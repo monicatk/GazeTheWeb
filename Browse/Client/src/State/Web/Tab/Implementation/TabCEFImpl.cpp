@@ -107,7 +107,7 @@ void Tab::ResetFaviconBytes()
 
 void Tab::AddDOMTextInput(int id)
 {
-	std::shared_ptr<DOMSelectField> spNode = std::make_shared<DOMSelectField>(id);
+	std::shared_ptr<DOMTextInput> spNode = std::make_shared<DOMTextInput>(id);
 
 	// Add node to ID->node map
 	_TextInputMap.emplace(id, spNode);
@@ -122,12 +122,12 @@ void Tab::AddDOMTextInput(int id)
 	}
 
 	// Push it to vector
-	_DOMTriggers.emplace(std::weak_ptr<DOMNode>(spNode), std::move(upDOMTrigger));
+	_DOMTriggers.emplace(id, std::move(upDOMTrigger));
 }
 
 void Tab::AddDOMLink(int id)
 {
-	_TextLinkMap.emplace(id, std::make_shared<DOMSelectField>(id));
+	_TextLinkMap.emplace(id, std::make_shared<DOMLink>(id));
 }
 
 void Tab::AddDOMSelectField(int id)
@@ -137,7 +137,8 @@ void Tab::AddDOMSelectField(int id)
 	// Add node to ID->node map
 	_SelectFieldMap.emplace(id, spNode);
 
-	// Create DOMTrigger
+	/*
+	// Create DOMTrigger // TODO(Raphael): Add SelectField DOMTrigger class :)
 	std::unique_ptr<DOMTrigger> upDOMTrigger = std::unique_ptr<DOMTrigger>(new DOMTrigger(this, spNode));
 
 	// Activate trigger
@@ -149,6 +150,7 @@ void Tab::AddDOMSelectField(int id)
 	
 	// Push it to vector
 	_DOMTriggers.emplace(std::weak_ptr<DOMNode>(spNode), std::move(upDOMTrigger));	// TODO: Can Trigger really be deleted if they hold a shared_ptr to the same DOMNode?
+	*/
 }
 
 void Tab::AddDOMOverflowElement(int id)

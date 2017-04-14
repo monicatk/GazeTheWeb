@@ -333,16 +333,18 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 		IPCLogDebug(browser, "Received deprecated "+msgName+" message!");
 	}
 
-	if (msgName.substr(0, 6) == "LoadDOM")
+	if (msgName.substr(0, 7) == "LoadDOM")
 	{
 		const std::string nodeType = msgName.substr(7, msgName.size());
+		//IPCLogDebug(browser, "msg: '" + msgName + "'");
+		//IPCLogDebug(browser, "nodeType: '" + nodeType + "'");
 		const int id = msg->GetArgumentList()->GetInt(0);
 
 		// Fetch node type's attribute description
 		std::vector<const std::vector<DOMAttribute>* > description;
 		std::string js_obj_getter_name;
 
-		DOM::GetJSRepresentation(nodeType, description, js_obj_getter_name);
+		DOM::GetJSRepresentation(nodeType, description, js_obj_getter_name); // TODO: nodeType string is currently a kind of a quick fix...
 
 		if (description.size() == 0)
 		{
@@ -369,14 +371,19 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			const auto& args = reply->GetArgumentList();
 			int args_count = 0;
 
+			args->SetInt(args_count++, id);
+
 			for (const auto& desc : description)
 			{
 				for (const auto& attr : *desc)
 				{
-					args->SetList(
-						args_count++, 
-						V8ToCefListValue::ExtractAttributeData(attr, domObj)
-					);
+					IPCLogDebug(browser, "Processing attr: " + std::to_string(attr) + " ... ");
+
+					CefRefPtr<CefListValue> listValue = V8ToCefListValue::ExtractAttributeData(attr, domObj);
+					
+					IPCLogDebug(browser, "... done");
+
+					args->SetList(args_count++, listValue);
 				}
 			}
 

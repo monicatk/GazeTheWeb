@@ -5,8 +5,13 @@
 
 window.domLinks = [];
 window.domTextInputs = [];
-window.overflowElements = [];
 window.domSelectFields = [];
+window.overflowElements = [];
+
+function GetDOMTextInput(id){ return GetDOMObject(0, id);}
+function GetDOMLink(id){ return GetDOMObject(1, id);}
+function GetDOMSelectField(id){ return GetDOMObject(2, id); }
+function GetDOMOverflowElement(id){ return GetDOMObject(3, id); }
 
 
 function SetSelectionIndex(id, index)
@@ -249,10 +254,12 @@ function DOMObject(node, nodeType)
                         }
                     );
               
+                    ConsolePrint("getRects: "+new_rects);
                     return new_rects;
                 }
                 else
                 {
+                    ConsolePrint("getRects: "+new_rects);
                     return this.rects;
                 }
 
@@ -271,6 +278,32 @@ function DOMObject(node, nodeType)
                 this.updateRects();
             }
         };
+
+        // TODO: newly added - everything ok?
+        this.getFixedId = function(){
+            return this.node.getAttribute("fixedId") | this.node.getAttribute("childFixedId");
+        }
+
+         // TODO: newly added - everything ok?
+        this.getOverflowId = function(){
+            return -1; // TODO: Add attribute containing a pointer to overflow element, get its id, return it!
+        }
+
+        // TODO: newly added - everything ok?
+        this.getText = function(){
+            return this.text;
+        }
+
+        // TODO: newly added - everything ok?
+        this.getUrl = function(){
+            return "TODO";  // TODO!
+        }
+
+        // TODO: newly added - everything ok?
+        this.getIsPassword = function(){
+            return this.isPassword;
+        }
+        
 
         // DEPRECATED
         this.setVisibility = function(visible){
@@ -780,6 +813,8 @@ function GetDOMObjectList(nodeType)
         case '1': { return window.domLinks; };
         case 2:
         case '2': { return window.domSelectFields; }
+        case 3:
+        case '3': { return window.overflowElements; }
         // NOTE: Add more cases if new nodeTypes are added
         default:
         {
@@ -995,7 +1030,7 @@ function OverflowElement(node)
                 var id = this.node.getAttribute("overflowId");
                 this.rects = updatedRectsData;
 
-                var encodedCommand = "#ovrflow#upd#"+id+"#rect#";
+                var encodedCommand = "DOM#upd#3#"+id+"#rect#";
                 
                 for (var i = 0; i < 4; i++)
                 {                 
@@ -1020,7 +1055,7 @@ function OverflowElement(node)
                 // Inform CEF about changes in fixed attribute
                 var id = this.node.getAttribute("overflowId");
                 var numFixed = (fixed) ? 1 : 0;
-                var encodedCommand = "#ovrflow#upd#"+id+"#fixed#"+numFixed+"#";
+                var encodedCommand = "DOM#upd#3#"+id+"#fixed#"+numFixed+"#";
                 ConsolePrint(encodedCommand);
 
                 this.updateRects();
@@ -1081,7 +1116,7 @@ function CreateOverflowElement(node)
         window.overflowElements.push(overflowObj);
 
         // Prepare informing CEF about added OverflowElement
-        var outStr = "#ovrflow#add#";
+        var outStr = "DOM#add#3#";
 
 
         var id = window.overflowElements.length - 1;
@@ -1089,7 +1124,7 @@ function CreateOverflowElement(node)
 
         var zero = (id < 10) ? "0" : "";
         outStr += (zero + id + "#");
-        // #ovrflow#add#[0]id#
+        // DOM#add#[0]id#
 
 
         // Note: Ignoring multiple Rects at this point...
@@ -1103,13 +1138,13 @@ function CreateOverflowElement(node)
             if(i !== 3) outStr += ";";  // Note: if-statement misses in DOMObjects --> different decoding atm
         }
         outStr += "#";
-        // #ovrflow#add#[0]id#rect0;rect1;rect2;rect3#
+        // DOM#add#[0]id#rect0;rect1;rect2;rect3#
 
         outStr +=  overflowObj.getMaxLeftScrolling();
         outStr += ";";
         outStr += overflowObj.getMaxTopScrolling();
         outStr += "#";
-        // #ovrflow#add#[0]id#rect0;rect1;rect2;rect3#maxLeft;maxTop#
+        // DOM#add#[0]id#rect0;rect1;rect2;rect3#maxLeft;maxTop#
 
         ConsolePrint(outStr);
 
@@ -1169,7 +1204,7 @@ function RemoveOverflowElement(id)
         delete window.overflowElements[id]; // TODO: Keep list space empty or fill when new OE is created?
 
         // Inform CEF about removed overflow element
-        ConsolePrint("#ovrflow#rem#"+id);
+        ConsolePrint("DOM#rem#3#"+id);
 
     }
     else

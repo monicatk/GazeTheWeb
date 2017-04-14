@@ -30,7 +30,8 @@ int DOMNode::Initialize(CefRefPtr<CefProcessMessage> msg)
 	{
 		for (int i = 0; i < _description.size(); i++)
 		{
-			if (!Update(_description[i], args->GetValue(i + 1)))
+			CefRefPtr<CefListValue> data = args->GetList(i + 1);	
+			if (!Update(_description[i], data))
 			{
 				LogError("DOMNode: Failed to assign value of type ", args->GetValue(i + 1)->GetType(),
 					" to attribute ", _description[i], "!");
@@ -53,17 +54,17 @@ bool DOMNode::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 
 bool DOMNode::IPCSetRects(CefRefPtr<CefListValue> data)
 {
-	// TODO: Unterscheidung CefListValue und CefValue...
-	if (data->GetSize() != 1 && data->GetValue(0)->GetType() != CefValueType::VTYPE_LIST)
+	if (data->GetSize() > 0  && data->GetValue(0)->GetType() != CefValueType::VTYPE_LIST)
 		return false;
 
-	const auto rectList = data->GetValue(0)->GetList();
+	const auto rectList = data->GetList(0);
 	std::vector<Rect> rects;
+	//LogDebug("IPCSetRects: #Rects: ", rectList->GetSize());
 	for (int i = 0; i < rectList->GetSize(); i++)
 	{
-		const auto rectData = rectList->GetValue(i)->GetList();
+		const auto rectData = rectList->GetList(i);
 		std::vector<float> rect;
-		for (int j = 0; j < rectData->GetSize(); j++)
+		for (int j = 0; rectData && j < rectData->GetSize(); j++)
 		{
 			rect.push_back(rectData->GetValue(j)->GetDouble());
 		}
@@ -77,7 +78,10 @@ bool DOMNode::IPCSetRects(CefRefPtr<CefListValue> data)
 bool DOMNode::IPCSetFixedId(CefRefPtr<CefListValue> data)
 {
 	if (data->GetSize() < 1 || data->GetType(0) != CefValueType::VTYPE_INT)
+	{
+		LogDebug("Expected CefValueType: ", CefValueType::VTYPE_INT, ", but got: ", data->GetType(0));
 		return false;
+	}
 
 	SetFixedId(data->GetInt(0));
 	return true;
@@ -109,7 +113,7 @@ int DOMTextInput::Initialize(CefRefPtr<CefProcessMessage> msg)
 	int pivot = super::Initialize(msg);
 
 	const auto args = msg->GetArgumentList();
-	if (args->GetSize() < _description.size() + pivot)
+	if (args->GetSize() < _description.size() + pivot - 1)
 	{
 		LogError("DOMTextInput: On initialization: Object description and message size do not match!");
 	}
@@ -117,7 +121,9 @@ int DOMTextInput::Initialize(CefRefPtr<CefProcessMessage> msg)
 	{
 		for (int i = 0; i < _description.size(); i++)
 		{
-			if (!Update(_description[i], args->GetValue(i + 1)))
+			CefRefPtr<CefListValue> data = args->GetList(pivot + i);
+
+			if (!Update(_description[i], data))
 			{
 				LogError("DOMTextInput: Failed to assign value of type ", args->GetValue(i + 1)->GetType(),
 					" to attribute ", _description[i], "!");
@@ -139,7 +145,7 @@ bool DOMTextInput::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 
 bool DOMTextInput::IPCSetText(CefRefPtr<CefListValue> data)
 {
-	if (data->GetSize() < 1 || data->GetValue(0) ->GetType() != CefValueType::VTYPE_STRING)
+	if (data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_STRING)
 		return false;
 
 	SetText(data->GetString(0));
@@ -172,17 +178,33 @@ int DOMLink::Initialize(CefRefPtr<CefProcessMessage> msg)
 	int pivot = super::Initialize(msg);
 
 	const auto args = msg->GetArgumentList();
-	if (args->GetSize() < _description.size() + pivot)
+	if (args->GetSize() - 1 < _description.size() + pivot - 1)
 	{
-		LogError("DOMLink: On initialization: Object description and message size do not match!");
+		LogError("DOMLink: On initialization: Object description ", _description.size(), " + " , pivot, " and message size ", args->GetSize() ," do not match!");
 	}
 	else
 	{
 		for (int i = 0; i < _description.size(); i++)
 		{
-			if (!Update(_description[i], args->GetValue(i + 1)))
+			CefRefPtr<CefListValue> data = args->GetList(pivot + i);	// Access argument list, where super class has finished
+
+			// DEBUG
+	/*		if (_description[i] == DOMAttribute::Rects)
 			{
-				LogError("DOMLink: Failed to assign value of type ", args->GetValue(i + 1)->GetType(),
+				LogDebug("Initializing DOMAttribute::Rects :");
+				LogDebug("#rects: ", data->GetSize());
+				for (int i = 0; i < data->GetSize(); i++)
+				{
+					for (int j = 0; j < data->GetList(i)->GetSize(); j++)
+					{
+						LogDebug("  ", j, ": ", data->GetList(i)->GetDouble(j));
+					}
+				}
+			}
+*/
+			if (!Update(_description[i], data))
+			{
+				LogError("DOMLink: Failed to assign value of type ", data->GetValue(0)->GetType(), // TODO: Could this crash the renderer process if data is a CefListValue?
 					" to attribute ", _description[i], "!");
 			}
 		}
@@ -201,8 +223,12 @@ bool DOMLink::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 
 bool DOMLink::IPCSetText(CefRefPtr<CefListValue> data)
 {
-	if (data->GetSize() < 1 || data->GetType(0) != CefValueType::VTYPE_STRING)
+	if (data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_STRING)
+	{
+		LogDebug("data->type: ", data->GetValue(0)->GetType());
+		LogDebug("deeper type: ", data->GetList(0)->GetType(0));
 		return false;
+	}
 
 	SetText(data->GetString(0));
 	return true;
@@ -210,7 +236,7 @@ bool DOMLink::IPCSetText(CefRefPtr<CefListValue> data)
 
 bool DOMLink::IPCSetUrl(CefRefPtr<CefListValue> data)
 {
-	if (data->GetSize() < 1 ||data->GetType(0) != CefValueType::VTYPE_STRING)
+	if (data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_STRING)
 		return false;
 
 	SetUrl(data->GetString(0));
@@ -234,7 +260,7 @@ int DOMSelectField::Initialize(CefRefPtr<CefProcessMessage> msg)
 	int pivot = super::Initialize(msg);
 
 	const auto args = msg->GetArgumentList();
-	if (args->GetSize() < _description.size() + pivot)
+	if (args->GetSize() < _description.size() + pivot - 1)
 	{
 		LogError("DOMSelectField: On initialization: Object description and message size do not match!");
 	}
@@ -242,7 +268,9 @@ int DOMSelectField::Initialize(CefRefPtr<CefProcessMessage> msg)
 	{
 		for (int i = 0; i < _description.size(); i++)
 		{
-			if (!Update(_description[i], args->GetValue(i + 1)))
+			CefRefPtr<CefListValue> data = args->GetList(pivot + i);
+
+			if (!Update(_description[i], data))
 			{
 				LogError("DOMSelectField: Failed to assign value of type ", args->GetValue(i + 1)->GetType(),
 					" to attribute ", _description[i], "!");
@@ -284,7 +312,7 @@ int DOMOverflowElement::Initialize(CefRefPtr<CefProcessMessage> msg)
 	int pivot = super::Initialize(msg);
 
 	const auto args = msg->GetArgumentList();
-	if (args->GetSize() < _description.size() + pivot)
+	if (args->GetSize() < _description.size() + pivot - 1)
 	{
 		LogError("OverflowElement: On initialization: Object description and message size do not match!");
 	}
@@ -292,7 +320,9 @@ int DOMOverflowElement::Initialize(CefRefPtr<CefProcessMessage> msg)
 	{
 		for (int i = 0; i < _description.size(); i++)
 		{
-			if (!Update(_description[i], args->GetValue(i + 1)))
+			CefRefPtr<CefListValue> data = args->GetList(pivot + i);
+
+			if (!Update(_description[i], data))
 			{
 				LogError("OverflowElement: Failed to assign value of type ", args->GetValue(i + 1)->GetType(),
 					" to attribute ", _description[i], "!");
@@ -337,23 +367,27 @@ void DOM::GetJSRepresentation(
 	{
 		DOMTextInput::GetDescription(&description);
 		obj_getter_name = DOMTextInput::GetJSObjectGetter();
+		return;
 
 	}
 	if (nodeType == "LinkData")
 	{
 		DOMLink::GetDescription(&description);
 		obj_getter_name = DOMLink::GetJSObjectGetter();
+		return;
 
 	}
 	if (nodeType == "SelectFieldData")
 	{
 		DOMSelectField::GetDescription(&description);
 		obj_getter_name = DOMSelectField::GetJSObjectGetter();
+		return;
 
 	}
 	if (nodeType == "OverflowElementData")
 	{
 		DOMOverflowElement::GetDescription(&description);
-		obj_getter_name = DOMOverflowElement::GetJSObjectGetter();
+		obj_getter_name = DOMOverflowElement::GetJSObjectGetter(); 
+		return;
 	}
 }

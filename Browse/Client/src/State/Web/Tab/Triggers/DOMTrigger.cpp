@@ -8,7 +8,7 @@
 #include "src/Singletons/LabStreamMailer.h"
 #include <map>
 
-DOMTrigger::DOMTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMNode> spNode) : Trigger(pTab)
+DOMTrigger::DOMTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInput> spNode) : Trigger(pTab)
 {
     // Save member
     _spNode = spNode;

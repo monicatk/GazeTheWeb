@@ -16,6 +16,7 @@
 #include <sstream>
 #include <string>
 #include <cmath>
+#include "src/CEF/Data/DOMNode.h"
 
 Handler::Handler(Mediator* pMediator, CefRefPtr<Renderer> renderer) : _isClosing(false)
 {
@@ -307,6 +308,52 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 		//_pMediator->InitializeDOMNode(browser, msg);
 		LogBug("Handler: Received deprecated '", msgName, "' msg!");
 		return true;
+	}
+
+
+	// NEW DOMNODE STRUCTURE, TODO: Might be (partially) moved to DOMExtraction?
+	if (msgName.substr(0, 12) == "ExtractedDOM")
+	{
+		
+		const std::string type = msgName.substr(12, msgName.size() - 16); // NOTE: -4 + (-12) -> remove "Data" at the end
+		const int& id = msg->GetArgumentList()->GetInt(0);
+
+		if (type == "TextInput")
+		{
+			const auto& wpNode = _pMediator->GetDOMTextInput(browser, id);
+			if (const auto& node = wpNode.lock())
+			{
+				node->Initialize(msg);
+			}
+			return true;
+		}
+		if (type == "Link")
+		{
+			const auto& wpNode = _pMediator->GetDOMLink(browser, id);
+			if (const auto& node = wpNode.lock())
+			{
+				node->Initialize(msg);
+			}
+			return true;
+		}
+		if (type == "SelectField")
+		{
+			const auto& wpNode = _pMediator->GetDOMSelectField(browser, id);
+			if (const auto& node = wpNode.lock())
+			{
+				node->Initialize(msg);
+			}
+			return true;
+		}
+		if (type == "OverflowElement")
+		{
+			const auto& wpNode = _pMediator->GetDOMOverflowElement(browser, id);
+			if (const auto& node = wpNode.lock())
+			{
+				node->Initialize(msg);
+			}
+			return true;
+		}
 	}
 
     return _msgRouter->OnProcessMessageReceived(browser, source_process, msg);

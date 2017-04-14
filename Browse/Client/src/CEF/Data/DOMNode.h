@@ -18,7 +18,7 @@
 
 namespace DOM
 {
-	static void GetJSRepresentation(
+	void GetJSRepresentation(
 		std::string nodeType,
 		std::vector<const std::vector<DOMAttribute>* >& description,
 		std::string& obj_getter_name
@@ -157,8 +157,8 @@ private:
 	bool IPCSetUrl(CefRefPtr<CefListValue> data);
 
 	static const std::vector<DOMAttribute> _description;
-	std::string _text = NULL;
-	std::string _url = NULL;
+	std::string _text = "";
+	std::string _url = "";
 
 };
 

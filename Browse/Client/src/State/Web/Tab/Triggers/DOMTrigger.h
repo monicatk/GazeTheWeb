@@ -17,7 +17,7 @@ class DOMTrigger : public Trigger
 public:
 
     // Constructor
-    DOMTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMNode> spNode);
+    DOMTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInput> spNode);
 
     // Destructor
     virtual ~DOMTrigger();
@@ -49,7 +49,7 @@ private:
     void CalculatePositionOfOverlayButton(float& rRelativePositionX, float& rRelativePositionY) const;
 
     // Shared pointer to node
-    std::shared_ptr<DOMNode> _spNode;
+    std::shared_ptr<DOMTextInput> _spNode;
 
     // Index of floating frame in Tab's overlay
     int _overlayFrameIndex = -1;
