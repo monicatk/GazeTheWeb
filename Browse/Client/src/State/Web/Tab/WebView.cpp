@@ -19,25 +19,32 @@ const std::string geometryShaderSource =
 "layout(points) in;\n"
 "layout(triangle_strip, max_vertices = 4) out;\n"
 "out vec2 uv;\n"
+"out vec2 pos;\n" // relative position within quad in OpenGL space
+"out vec2 size;\n" // size of quad (relative values)
 "uniform vec4 position;\n" // minX, minY, maxX, maxY. OpenGL coordinate system!
 "uniform vec4 textureCoordinate;\n" // minU, minV, maxU, maxV. OpenGL coordinate system!
 "void main() {\n"
+"    size = vec2(position.z - position.x, position.w - position.y);\n" // relative size of quad
 "    gl_Position = vec4(position.zw, 0.0, 1.0);\n" // upper right corner
 "    uv = vec2(textureCoordinate.zw);\n"
+"    pos = vec2(1,1);\n"
 "    EmitVertex();\n"
 "    gl_Position = vec4(position.xw, 0.0, 1.0);\n" // upper left corner
 "    uv = vec2(textureCoordinate.xw);\n"
+"    pos = vec2(0,1);\n"
 "    EmitVertex();\n"
 "    gl_Position = vec4(position.zy, 0.0, 1.0);\n" // lower right corner
 "    uv = vec2(textureCoordinate.zy);\n"
+"    pos = vec2(1,0);\n"
 "    EmitVertex();\n"
 "    gl_Position = vec4(position.xy, 0.0, 1.0);\n" // lower left corner
 "    uv = vec2(textureCoordinate.xy);\n"
+"    pos = vec2(0,0);\n"
 "    EmitVertex();\n"
 "    EndPrimitive();\n"
 "}\n";
 
-const std::string simpleFragmentShaderSource =
+const std::string webpageFragmentShaderSource =
 "#version 330 core\n"
 "in vec2 uv;\n"
 "out vec4 fragColor;\n"
@@ -45,7 +52,30 @@ const std::string simpleFragmentShaderSource =
 "uniform float dim;\n"
 "void main() {\n"
 "	vec4 color = texture(tex, uv);\n"
-"   fragColor = vec4(color.rgb * (1.0 - dim), color.a);\n"
+"   fragColor = vec4(color.rgb * (1.0 - dim), 1.0);\n"
+"}\n";
+
+const std::string highlightFragmentShaderSource =
+"#version 330 core\n"
+"in vec2 uv;\n"
+"in vec2 pos;\n"
+"in vec2 size;\n"
+"out vec4 fragColor;\n"
+"uniform sampler2D tex;\n"
+"uniform float dim;\n"
+"uniform float aspectRatio;\n"
+"void main() {\n"
+"	vec4 color = texture(tex, uv);\n"
+"	vec2 circle = vec2(0.015, 0.015);\n" // inner circle to display
+"	circle.y *= aspectRatio;\n" // aspect ratio correction
+"   circle /= size;\n" // realtive size of circle within mesh
+"	vec2 halfCircle = circle/2;\n" // half circle necessary
+"	float inside = min(length(abs(pos - 0.5) / halfCircle),1);\n" // calculate whether pos inside circle to display
+"   inside = inside * inside;\n" // make circle stronger
+"   inside = inside * inside;\n" // make circle stronger, again
+"   inside = inside * inside;\n" // make circle stronger, again
+"   vec3 mixture = mix(vec3(1, 0, 0), color.rgb * (1.0 - dim), min(inside + 0.4, 1));\n" // mix overlay circle and normal color
+"   fragColor = vec4(mixture, 1.0);\n"
 "}\n";
 
 const std::string compositionFragmentShaderSource =
@@ -58,10 +88,10 @@ const std::string compositionFragmentShaderSource =
 "uniform float zoom;\n"
 "void main() {\n"
 "   vec2 coords = uv;\n"
-"   coords += centerOffset;" // Move towards center
-"   coords -= zoomPosition;" // Move zoom position to origin
-"   coords *= zoom;" // Scale coords
-"   coords += zoomPosition;" // Move it back
+"   coords += centerOffset;" // move towards center
+"   coords -= zoomPosition;" // move zoom position to origin
+"   coords *= zoom;" // scale coords
+"   coords += zoomPosition;" // move it back
 "   fragColor = texture(tex, coords);\n"
 "}\n";
 
@@ -77,7 +107,8 @@ WebView::WebView(int x, int y, int width, int height)
     _spTexture = std::shared_ptr<Texture>(new Texture(_width, _height, GL_RGBA, Texture::Filter::LINEAR, Texture::Wrap::BORDER));
 
     // Render items
-    _upSimpleRenderItem = std::unique_ptr<RenderItem>(new RenderItem(vertexShaderSource, geometryShaderSource, simpleFragmentShaderSource));
+	_upWebpageRenderItem = std::unique_ptr<RenderItem>(new RenderItem(vertexShaderSource, geometryShaderSource, webpageFragmentShaderSource));
+    _upHighlightRenderItem = std::unique_ptr<RenderItem>(new RenderItem(vertexShaderSource, geometryShaderSource, highlightFragmentShaderSource));
     _upCompositeRenderItem = std::unique_ptr<RenderItem>(new RenderItem(vertexShaderSource, geometryShaderSource, compositionFragmentShaderSource));
 
     // Framebuffer
@@ -130,26 +161,32 @@ void WebView::Draw(
     glGetIntegerv(GL_VIEWPORT, viewport);
     glViewport(0, 0, _width, _height);
 
-    // Bind render item
-    _upSimpleRenderItem->Bind();
+    // Bind render item for web page
+	_upWebpageRenderItem->Bind();
 
     // Bind texture with rendered web page
     _spTexture->Bind();
 
     // Fill uniforms
-    _upSimpleRenderItem->GetShader()->UpdateValue("position", glm::vec4(-1.f, -1.f, 1.f, 1.f)); // normalized device coordinates
-    _upSimpleRenderItem->GetShader()->UpdateValue("textureCoordinate", glm::vec4(0.f, 1.f, 1.f, 0.f)); // using texture coordinates to flip image in v direction
-    _upSimpleRenderItem->GetShader()->UpdateValue("dim", parameters.dim);
+	_upWebpageRenderItem->GetShader()->UpdateValue("position", glm::vec4(-1.f, -1.f, 1.f, 1.f)); // normalized device coordinates
+	_upWebpageRenderItem->GetShader()->UpdateValue("textureCoordinate", glm::vec4(0.f, 1.f, 1.f, 0.f)); // using texture coordinates to flip image in v direction
+	_upWebpageRenderItem->GetShader()->UpdateValue("dim", parameters.dim);
 
     // Draw webpage completely into framebuffer
-    _upSimpleRenderItem->Draw(GL_POINTS);
+	_upWebpageRenderItem->Draw(GL_POINTS);
 
     // Render highlighting
     if(parameters.dim > 0.f)
     {
+		// Bind render item for highlighting
+		_upHighlightRenderItem->Bind();
+
         // TODO: use value from highlight or so
         // For now: just reset dimming to zero for the rect rendering
-        _upSimpleRenderItem->GetShader()->UpdateValue("dim", 0.f);
+		_upHighlightRenderItem->GetShader()->UpdateValue("dim", 0.f);
+
+		// Aspect ratio of web view
+		_upHighlightRenderItem->GetShader()->UpdateValue("aspectRatio", (float)_width / (float)_height);
 
         // Go over rects and render them
         for(Rect rect : _rects)
@@ -167,7 +204,7 @@ void WebView::Draw(
 			rect.top = (rect.top / (float)GetResolutionY()) * (float)_height;
 
             // Setup position
-            _upSimpleRenderItem->GetShader()->UpdateValue(
+			_upHighlightRenderItem->GetShader()->UpdateValue(
                 "position",
                 glm::vec4(
                     (((float)rect.left / (float)_width) * 2.f) - 1.f,
@@ -176,7 +213,7 @@ void WebView::Draw(
                     ((((float)(_height - rect.top)) / (float)_height) * 2.f) - 1.f)); // normalized device coordinates
 
             // Setup texture coordinate
-            _upSimpleRenderItem->GetShader()->UpdateValue(
+			_upHighlightRenderItem->GetShader()->UpdateValue(
                 "textureCoordinate",
                 glm::vec4(
                     (float)rect.left / (float)_width,
@@ -185,7 +222,7 @@ void WebView::Draw(
                     1.f - (float)(_height - rect.top) / (float)_height)); // using texture coordinates to flip image in v direction
 
             // Draw the quad
-            _upSimpleRenderItem->Draw(GL_POINTS);
+			_upHighlightRenderItem->Draw(GL_POINTS);
         }
     }
 
@@ -204,7 +241,7 @@ void WebView::Draw(
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _upFramebuffer->GetAttachment(0));
 
-    // Fill uniforms (TODO: here, coordinate sytem is not completely correctly translated. Would be only a problem at vertical transformation
+    // Fill uniforms (TODO: here, coordinate sytem is not completely correctly translated. Would be only a problem at vertical transformation)
     _upCompositeRenderItem->GetShader()->UpdateValue(
         "position",
         glm::vec4(
@@ -215,7 +252,7 @@ void WebView::Draw(
             )); // normalized device coordinates
     _upCompositeRenderItem->GetShader()->UpdateValue("textureCoordinate", glm::vec4(0.f, 0.f, 1.f, 1.f)); // everything is rendered correctly into framebuffer, just display it
     _upCompositeRenderItem->GetShader()->UpdateValue("centerOffset", glm::vec2(parameters.centerOffset.x, -parameters.centerOffset.y)); // center offset y has to be taken negative because OpenGL coordinates
-    _upCompositeRenderItem->GetShader()->UpdateValue("zoomPosition", glm::vec2(parameters.zoomPosition.x, 1.f- parameters.zoomPosition.y)); // zoomPosition has origin in upper left but lower left is necessary
+    _upCompositeRenderItem->GetShader()->UpdateValue("zoomPosition", glm::vec2(parameters.zoomPosition.x, 1.f - parameters.zoomPosition.y)); // zoomPosition has origin in upper left but lower left is necessary
     _upCompositeRenderItem->GetShader()->UpdateValue("zoom", parameters.zoom);
     _upCompositeRenderItem->Draw(GL_POINTS);
 }

@@ -5,8 +5,8 @@
 // Action for text selection. Utilizes zoom coordinate action to determine
 // end of text selection through being subclass of that action. Performs selection
 // of text within webpage.
-// - Input: vec2 coordinate in WebViewPixel space as start point of text selection
-// - Output: vec2 coordinate in WebViewPixel space as end point of text selection
+// - Input: vec2 coordinate in CEFPixel space as start point of text selection
+// - Output: vec2 coordinate in CEFPixel space as end point of text selection
 
 #ifndef TEXTSELECTIONACTION_H_
 #define TEXTSELECTIONACTION_H_

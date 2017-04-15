@@ -4,7 +4,7 @@
 //============================================================================
 // Action to zoom to a coordinate with gaze.
 // - Input: none
-// - Output: vec2 coordinate in WebViewPixel space
+// - Output: vec2 coordinate in CEFPixel space
 
 #ifndef ZOOMCOORDINATEACTION_H_
 #define ZOOMCOORDINATEACTION_H_
@@ -37,12 +37,16 @@ public:
 
 protected:
 
-	// Zoom data at point in time of execution
-	struct ZoomData
+	// States of zooming
+	enum class State { ORIENTATE, ZOOM, WAIT, DEBUG };
+
+	// Sample data
+	struct SampleData
 	{
-		glm::vec2 pixelGazeCoordinate; // gaze on web view in pixels. Already free of zooming and center moving offset
-		glm::vec2 pixelZoomCoordinate; // coordinate of zooming in pixels
-		float logZoom; // value of log zoom at that time
+		float logZoom;
+		glm::vec2 relativeGazeCoordinate;
+		glm::vec2 relativeZoomCoordinate;
+		glm::vec2 relativeCenterOffset;
 	};
 
 	// Dimming duration
@@ -54,34 +58,39 @@ protected:
 	// Deviation fading duration (how many seconds until full deviation is back to zero)
 	const float DEVIATION_FADING_DURATION = 1.0f;
 
-	// Multiplier of movement towards center
-	const float CENTER_OFFSET_MULTIPLIER = 0.75f; // TODO debugging 0.5f;
+	// Multiplier of movement towards center (one means, that on maximum zoom the outermost corner is moved into center)
+	const float CENTER_OFFSET_MULTIPLIER = 0.25f;
 
 	// Duration to replace current coordinate with input
 	const float MOVE_DURATION = 0.5f;
 
 	// Speed of zoom
-	const float ZOOM_SPEED = 0.3f;
+	const float ZOOM_SPEED = 0.25f;
 
-    // Coordinate which is updated and later output. In relative web view space
-    glm::vec2 _coordinate; // aka zoom coordinate
+	// Maximum log zoom level of orientation phase
+	const float MAX_ORIENTATION_LOG_ZOOM = 0.75f;
+
+	// Drift correction zoom level (must be lower than MAX_LOG_ZOOM)
+	const float MAX_DRIFT_CORRECTION_LOG_ZOOM = 0.5f;
+
+    // Coordinate of center of zooming in relative page coordinates (not WebView, page!)
+    glm::vec2 _relativeZoomCoordinate; // aka zoom coordinate
+
+	// Offset to center of WebView in relative space
+	glm::vec2 _relativeCenterOffset = glm::vec2(0, 0);
 
     // Log zooming amount (used for rendering)
 	// Calculated as 1.f - log(_linZoom), so becoming smaller at higher zoom levels
-    float _logZoom = 1.f; // [0..1]
+    float _logZoom = 1.f; // [1..0]
 
     // Linear zooming amount (used for calculations)
 	// Increasing while zooming
     float _linZoom = 1.f; // [1..]
 
-    // Offset to center of webview
-    glm::vec2 _coordinateCenterOffset = glm::vec2(0, 0);
-
     // Bool to indicate first update
     bool _firstUpdate = true;
 
-	// Deviation of coordinate (not of gaze!; relative coordiantes, no pixels!)
-	// Not really in relative coordinates, since aspect ratio corrected...
+	// Deviation of coordinate
 	float _deviation = 0.f; // [0..1]
 
 	// Dimming
@@ -90,14 +99,14 @@ protected:
 	// Do dimming
 	bool _doDimming = true;
 
-	// In drift correction mode (while off, zoom coordinate is improved. while on, just zooming happens)
-	bool _driftCorrection = false;
-
 	// Datas saved before drift correction zooming starts
-	ZoomData _zoomData;
+	SampleData _sampleData;
 
-	// TODO: debugging
-	bool _doDebugging = false;
+	// Time after zooming to wait for gaze to calm down
+	float _gazeCalmDownTime = 0.1f;
+
+	// State of action
+	State _state = State::ORIENTATE;
 };
 
 #endif // ZOOMCOORDINATEACTION_H_
