@@ -4,16 +4,13 @@
 //============================================================================
 
 #include "DOMTrigger.h"
-#include "src/State/Web/Tab/Pipelines/TextInputPipeline.h"
 #include "src/Singletons/LabStreamMailer.h"
 #include <map>
 
-DOMTrigger::DOMTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInput> spNode) : Trigger(pTab)
+DOMTrigger::DOMTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMNode> spNode, std::string brickPath) : Trigger(pTab)
 {
     // Save member
     _spNode = spNode;
-
-    // TODO: Check type of DOMNode
 
     // Create id, which is unique in overlay
     _overlayButtonId = "dom_trigger_" + std::to_string(_spNode->GetId());
@@ -27,7 +24,7 @@ DOMTrigger::DOMTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInp
     CalculatePositionOfOverlayButton(x, y);
 
     // Add overlay
-    _overlayFrameIndex = _pTab->AddFloatingFrameToOverlay("bricks/triggers/TextInput.beyegui", x, y, _size, _size, idMapper);
+    _overlayFrameIndex = _pTab->AddFloatingFrameToOverlay(brickPath, x, y, _size, _size, idMapper);
 
     // Register listener
     _pTab->RegisterButtonListenerInOverlay(
@@ -47,9 +44,8 @@ DOMTrigger::~DOMTrigger()
 
 bool DOMTrigger::Update(float tpf, TabInput& rTabInput)
 {
-    // Decide visibility
+    // Decide visibility (TODO: no visibility variable in DOMNode anymore?)
     bool visible =
-        // _spNode->GetVisibility() && // NOTE: I completely removed this attribute (like frameId)
 		!_spNode->GetRects().empty() // DOM node has rects
         && _spNode->GetRects().front().Width() != 0 && _spNode->GetRects().front().Height() != 0; // At least the first rect is bigger than zero
     if(_visible != visible)
@@ -65,23 +61,8 @@ bool DOMTrigger::Update(float tpf, TabInput& rTabInput)
     // Tell it floating frame
     _pTab->SetPositionOfFloatingFrameInOverlay(_overlayFrameIndex, x, y);
 
-    // Return whether triggered
-    if(_triggered)
-    {
-        _triggered = false;
-		LabStreamMailer::instance().Send("Text input started");
-		_pTab->PushBackPipeline(
-			std::move(
-				std::unique_ptr<TextInputPipeline>(
-					new TextInputPipeline(
-						_pTab,
-						_spNode))));
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    // Return true whether triggered
+	return _triggered;  
 }
 
 void DOMTrigger::Draw() const
@@ -112,6 +93,7 @@ void DOMTrigger::CalculatePositionOfOverlayButton(float& rRelativePositionX, flo
 	if (_spNode->GetRects().size() > 0)
 	{
 		const auto& nodeCenter = _spNode->GetRects()[0].Center();
+
 		// Center of node in WebViewPixel space
 		double webViewPixelX = nodeCenter.x - scrollingOffsetX;
 		double webViewPixelY = nodeCenter.y - scrollingOffsetY;

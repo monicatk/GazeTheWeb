@@ -115,14 +115,16 @@ void Tab::DrawDebuggingOverlay() const
 		for (const auto& rNodeTriggerPair : _DOMTriggers)
 		{
 			const auto& rDOMTrigger = rNodeTriggerPair.second;
+
 			// Render rects
 			for (const auto rRect : rDOMTrigger->GetDOMRects())
 			{
-				if (!rDOMTrigger->GetDOMIsPasswordField())
+				/*
+				if (!rDOMTrigger->GetDOMIsPasswordField()) // TODO: what is this? Different color for password fields?
 				{
 					renderRect(rRect, rDOMTrigger->GetDOMFixed());
 				}
-				else
+				else */
 				{
 					_upDebugLineQuad->GetShader()->UpdateValue("color", glm::vec3(0.0f, 1.f, 1.f));
 					renderRect(rRect, rDOMTrigger->GetDOMFixed());

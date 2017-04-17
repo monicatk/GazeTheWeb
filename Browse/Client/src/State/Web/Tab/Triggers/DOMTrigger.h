@@ -2,7 +2,7 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// Implementation of trigger generated from DOM elements.
+// Abstract trigger generated from DOM elements.
 
 #ifndef DOMTRIGGER_H_
 #define DOMTRIGGER_H_
@@ -17,10 +17,10 @@ class DOMTrigger : public Trigger
 public:
 
     // Constructor
-    DOMTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInput> spNode);
+	DOMTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMNode> spNode, std::string brickPath);
 
     // Destructor
-    virtual ~DOMTrigger();
+    virtual ~DOMTrigger() = 0;
 
     // Update
     virtual bool Update(float tpf, TabInput& rTabInput);
@@ -38,18 +38,17 @@ public:
     std::vector<Rect> GetDOMRects() const { return _spNode->GetRects(); }
 
     // Get whether DOMNode is marked as fixed
-    bool GetDOMFixed() const { return _spNode->GetFixedId(); }
+    bool GetDOMFixed() const { return _spNode->GetFixedId(); } // TODO: call real "isFixed" method so not checked for being zero
 
-	// Identify input field as password input or not
-	bool GetDOMIsPasswordField() const { return _spNode->IsPasswordField(); } // NOTE: Only DOMTextInput objects contain this method
+protected:
+
+	// Shared pointer to node
+	std::shared_ptr<DOMTextInput> _spNode;
 
 private:
 
     // Calculate position of overlay button
     void CalculatePositionOfOverlayButton(float& rRelativePositionX, float& rRelativePositionY) const;
-
-    // Shared pointer to node
-    std::shared_ptr<DOMTextInput> _spNode;
 
     // Index of floating frame in Tab's overlay
     int _overlayFrameIndex = -1;

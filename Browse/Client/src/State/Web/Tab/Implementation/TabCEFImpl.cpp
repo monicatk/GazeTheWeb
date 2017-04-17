@@ -10,6 +10,7 @@
 #include "src/State/Web/Managers/HistoryManager.h"
 #include "src/State/Web/Tab/Pipelines/JSDialogPipeline.h"
 #include "src/Singletons/LabStreamMailer.h"
+#include "src/State/Web/Tab/Triggers/TextInputTrigger.h"
 #include <algorithm>
 
 void Tab::GetWebRenderResolution(int& rWidth, int& rHeight) const
@@ -113,7 +114,7 @@ void Tab::AddDOMTextInput(int id)
 	_TextInputMap.emplace(id, spNode);
 
 	// Create DOMTrigger
-	std::unique_ptr<DOMTrigger> upDOMTrigger = std::unique_ptr<DOMTrigger>(new DOMTrigger(this, spNode));
+	std::unique_ptr<DOMTrigger> upDOMTrigger = std::unique_ptr<DOMTrigger>(new TextInputTrigger(this, spNode));
 
 	// Activate trigger
 	if (!_pipelineActive)
