@@ -10,7 +10,6 @@
 #include "src/State/Web/Managers/HistoryManager.h"
 #include "src/State/Web/Tab/Pipelines/JSDialogPipeline.h"
 #include "src/Singletons/LabStreamMailer.h"
-#include "src/State/Web/Tab/Triggers/TextInputTrigger.h"
 #include <algorithm>
 
 void Tab::GetWebRenderResolution(int& rWidth, int& rHeight) const
@@ -114,7 +113,7 @@ void Tab::AddDOMTextInput(int id)
 	_TextInputMap.emplace(id, spNode);
 
 	// Create DOMTrigger
-	std::unique_ptr<DOMTrigger> upDOMTrigger = std::unique_ptr<DOMTrigger>(new TextInputTrigger(this, spNode));
+	std::unique_ptr<TextInputTrigger> upDOMTrigger = std::unique_ptr<TextInputTrigger>(new TextInputTrigger(this, spNode));
 
 	// Activate trigger
 	if (!_pipelineActive)
@@ -123,7 +122,7 @@ void Tab::AddDOMTextInput(int id)
 	}
 
 	// Push it to vector
-	_DOMTriggers.emplace(id, std::move(upDOMTrigger));
+	_TextInputTriggers.emplace(id, std::move(upDOMTrigger));
 }
 
 void Tab::AddDOMLink(int id)
@@ -184,20 +183,18 @@ std::weak_ptr<DOMOverflowElement> Tab::GetDOMOverflowElement(int id)
 void Tab::ClearDOMNodes()
 {
 	// Deactivate all DOMTriggers
-	for (auto& upDOMTriggerPair : _DOMTriggers)
+	for (auto& upDOMTriggerPair : _TextInputTriggers)
 	{
 		upDOMTriggerPair.second->Deactivate();
 	}
 
 	// Clear vector with triggers
-	_DOMTriggers.clear();
-
+	_TextInputTriggers.clear();
 
 	// Clear ID->node maps
 	_TextLinkMap.clear();
 	_TextInputMap.clear();
 	_SelectFieldMap.clear();
-
 
 	// Clear fixed elements
 	_fixedElements.clear();

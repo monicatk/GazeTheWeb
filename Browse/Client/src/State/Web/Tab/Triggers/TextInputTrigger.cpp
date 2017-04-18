@@ -7,7 +7,7 @@
 #include "src/State/Web/Tab/Pipelines/TextInputPipeline.h"
 #include "src/Singletons/LabStreamMailer.h"
 
-TextInputTrigger::TextInputTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInput> spNode) : DOMTrigger(pTab, spNode, "bricks/triggers/TextInput.beyegui")
+TextInputTrigger::TextInputTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInput> spNode) : DOMTrigger<DOMTextInput>(pTab, spNode, "bricks/triggers/TextInput.beyegui")
 {
 	// Nothing to do here
 }
@@ -27,14 +27,12 @@ bool TextInputTrigger::Update(float tpf, TabInput& rTabInput)
 	{
 		LabStreamMailer::instance().Send("Text input started");
 
-		/*
 		_pTab->PushBackPipeline(
 			std::move(
 				std::unique_ptr<TextInputPipeline>(
 					new TextInputPipeline(
 						_pTab,
-						static_cast<std::shared_ptr<DOMTextInput> >(_spNode))))); // TODO: Make DOMTrigger a template taking DOMNode type!
-		*/
+						_spNode))));
 	}
 
 	// Return whether triggered

@@ -9,7 +9,7 @@
 
 #include "src/State/Web/Tab/Triggers/DOMTrigger.h"
 
-class TextInputTrigger : public DOMTrigger
+class TextInputTrigger : public DOMTrigger<DOMTextInput>
 {
 public:
 

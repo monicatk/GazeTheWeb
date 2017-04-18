@@ -25,7 +25,7 @@
 #include "src/CEF/Data/DOMNode.h"
 #include "src/State/Web/Tab/WebView.h"
 #include "src/State/Web/Tab/Pipelines/Pipeline.h"
-#include "src/State/Web/Tab/Triggers/DOMTrigger.h"
+#include "src/State/Web/Tab/Triggers/TextInputTrigger.h"
 #include "src/Utils/glmWrapper.h"
 #include "src/Utils/Input.h"
 #include "src/Global.h"
@@ -462,7 +462,7 @@ private:
     std::string _url = "";
 
     // Vector with DOMTriggers (take DOM input node as input...)
-	std::map<int, std::unique_ptr<DOMTrigger> >_DOMTriggers;	// TODO: This map is for TextInput Triggers only
+	std::map<int, std::unique_ptr<TextInputTrigger> >_TextInputTriggers;
 	// Planned to use weak_ptr<DOMTextInput> as keys, but some internal error occured because '<' operator
 	// was somehow used and its not possible with weak_ptrs
 

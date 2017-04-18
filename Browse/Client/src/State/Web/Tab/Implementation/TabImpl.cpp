@@ -101,7 +101,7 @@ Tab::Tab(Master* pMaster, Mediator* pCefMediator, WebTabInterface* pWeb, std::st
 Tab::~Tab()
 {
 	// Delete triggers before removing layout
-	_DOMTriggers.clear();
+	_TextInputTriggers.clear();
 
 	// Abort pipeline
 	AbortAndClearPipelines();
@@ -435,7 +435,7 @@ void Tab::Update(float tpf, Input& rInput)
 		// ### Update triggers ###
 		// #######################
 
-		for (auto& rNodeTriggerPair : _DOMTriggers)
+		for (auto& rNodeTriggerPair : _TextInputTriggers)
 		{
 			const auto& upDOMTrigger = rNodeTriggerPair.second;
 			upDOMTrigger->Update(tpf, tabInput);
@@ -462,7 +462,7 @@ void Tab::Draw() const
 	else
 	{
 		// Draw triggers
-		for (const auto& rNodeTriggerPair : _DOMTriggers)
+		for (const auto& rNodeTriggerPair : _TextInputTriggers)
 		{
 			const auto& upDOMTrigger = rNodeTriggerPair.second;
 			upDOMTrigger->Draw();
@@ -558,7 +558,7 @@ void Tab::SetPipelineActivity(bool active)
 		eyegui::setVisibilityOfLayout(_pPipelineAbortLayout, true, true, true);
 
 		// Deactivate all triggers
-		for (auto& rNodeTriggerPair : _DOMTriggers)
+		for (auto& rNodeTriggerPair : _TextInputTriggers)
 		{
 			rNodeTriggerPair.second->Deactivate();
 		}
@@ -572,7 +572,7 @@ void Tab::SetPipelineActivity(bool active)
 		eyegui::setVisibilityOfLayout(_pPipelineAbortLayout, false, false, true);
 
 		// Activate all triggers
-		for (auto& rNodeTriggerPair : _DOMTriggers)
+		for (auto& rNodeTriggerPair : _TextInputTriggers)
 		{
 			auto& upDOMTrigger = rNodeTriggerPair.second;
 			upDOMTrigger->Activate();
