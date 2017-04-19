@@ -22,13 +22,15 @@ const std::vector<DOMAttribute> DOMNode::_description = {
 int DOMNode::Initialize(CefRefPtr<CefProcessMessage> msg)
 {
 	const auto args = msg->GetArgumentList();
-	if (args->GetSize() < _description.size() + 1)
+	// Check if there are enough arguments in msg to initialize each attribute
+	if ((int) _description.size() > args->GetSize() - 1)
 	{
-		LogError("DOMNode: On initialization: Object description and message size do not match!");
+		LogError("DOMNode: On initialization: Object description (", _description.size(), ") and message (", args->GetSize(), 
+			") size do not match!");
 	}
 	else
 	{
-		for (int i = 0; i < _description.size(); i++)
+		for (unsigned int i = 0; i < _description.size(); i++)
 		{
 			CefRefPtr<CefListValue> data = args->GetList(i + 1);	
 			if (!Update(_description[i], data))
@@ -113,13 +115,14 @@ int DOMTextInput::Initialize(CefRefPtr<CefProcessMessage> msg)
 	int pivot = super::Initialize(msg);
 
 	const auto args = msg->GetArgumentList();
-	if (args->GetSize() < _description.size() + pivot - 1)
+	// Check if there are enough arguments in msg to initialize each attribute
+	if ((int)_description.size() > (int) args->GetSize() - pivot)
 	{
 		LogError("DOMTextInput: On initialization: Object description and message size do not match!");
 	}
 	else
 	{
-		for (int i = 0; i < _description.size(); i++)
+		for (unsigned int i = 0; i < _description.size(); i++)
 		{
 			CefRefPtr<CefListValue> data = args->GetList(pivot + i);
 
@@ -178,30 +181,17 @@ int DOMLink::Initialize(CefRefPtr<CefProcessMessage> msg)
 	int pivot = super::Initialize(msg);
 
 	const auto args = msg->GetArgumentList();
-	if (args->GetSize() - 1 < _description.size() + pivot - 1)
+	// Check if there are enough arguments in msg to initialize each attribute
+	if ((int)_description.size() > (int) args->GetSize() - pivot)
 	{
 		LogError("DOMLink: On initialization: Object description ", _description.size(), " + " , pivot, " and message size ", args->GetSize() ," do not match!");
 	}
 	else
 	{
-		for (int i = 0; i < _description.size(); i++)
+		for (unsigned int i = 0; i < _description.size(); i++)
 		{
 			CefRefPtr<CefListValue> data = args->GetList(pivot + i);	// Access argument list, where super class has finished
 
-			// DEBUG
-	/*		if (_description[i] == DOMAttribute::Rects)
-			{
-				LogDebug("Initializing DOMAttribute::Rects :");
-				LogDebug("#rects: ", data->GetSize());
-				for (int i = 0; i < data->GetSize(); i++)
-				{
-					for (int j = 0; j < data->GetList(i)->GetSize(); j++)
-					{
-						LogDebug("  ", j, ": ", data->GetList(i)->GetDouble(j));
-					}
-				}
-			}
-*/
 			if (!Update(_description[i], data))
 			{
 				LogError("DOMLink: Failed to assign value of type ", data->GetValue(0)->GetType(), // TODO: Could this crash the renderer process if data is a CefListValue?
@@ -260,13 +250,14 @@ int DOMSelectField::Initialize(CefRefPtr<CefProcessMessage> msg)
 	int pivot = super::Initialize(msg);
 
 	const auto args = msg->GetArgumentList();
-	if (args->GetSize() < _description.size() + pivot - 1)
+	// Check if there are enough arguments in msg to initialize each attribute
+	if ((int)_description.size() > (int) args->GetSize() - pivot)
 	{
 		LogError("DOMSelectField: On initialization: Object description and message size do not match!");
 	}
 	else
 	{
-		for (int i = 0; i < _description.size(); i++)
+		for (unsigned int i = 0; i < _description.size(); i++)
 		{
 			CefRefPtr<CefListValue> data = args->GetList(pivot + i);
 
@@ -312,13 +303,14 @@ int DOMOverflowElement::Initialize(CefRefPtr<CefProcessMessage> msg)
 	int pivot = super::Initialize(msg);
 
 	const auto args = msg->GetArgumentList();
-	if (args->GetSize() < _description.size() + pivot - 1)
+	// Check if there are enough arguments in msg to initialize each attribute
+	if ((int)_description.size() > (int) args->GetSize() - pivot)
 	{
 		LogError("OverflowElement: On initialization: Object description and message size do not match!");
 	}
 	else
 	{
-		for (int i = 0; i < _description.size(); i++)
+		for (unsigned int i = 0; i < _description.size(); i++)
 		{
 			CefRefPtr<CefListValue> data = args->GetList(pivot + i);
 
@@ -334,6 +326,7 @@ int DOMOverflowElement::Initialize(CefRefPtr<CefProcessMessage> msg)
 
 bool DOMOverflowElement::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 {
+	LogDebug("DOMOverflowElement: Updating attr: ", (int)attr);
 	switch (attr) {
 	case DOMAttribute::MaxScrolling:		return IPCSetMaxScrolling(data);
 	case DOMAttribute::CurrentScrolling:	return IPCSetCurrentScrolling(data);

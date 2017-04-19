@@ -254,12 +254,10 @@ function DOMObject(node, nodeType)
                         }
                     );
               
-                    ConsolePrint("type: "+this.nodeType+"|id: "+this.node.getAttribute("nodeId")+"| getRects: "+new_rects);
                     return new_rects;
                 }
                 else
                 {
-                    ConsolePrint("type: "+this.nodeType+"|id: "+this.node.getAttribute("nodeId")+"| getRects: "+this.rects);
                     return this.rects;
                 }
 
@@ -905,6 +903,22 @@ function OverflowElement(node)
 
         // this.overflowParent = undefined;
 
+
+        // TODO: Quick fix! Getter should make sense later! Or do they already? :p
+        this.getFixedId = function(){
+            return this.node.getAttribute("fixedId") | this.node.getAttribute("childFixedId");
+        }
+        this.getOverflowId = function(){
+            return (this.overflowParent !== null) ? this.overflowParent.getAttribute("overflowId") : -1;
+        }
+        this.getMaxScrolling = function(){
+            return [this.getMaxTopScrolling(), this.getMaxLeftScrolling()];
+        }
+        this.getCurrentScrolling = function(){
+            return [this.getTopScrolling(), this.getLeftScrolling()];
+        }
+
+
     /* Methods */
         this.getMaxTopScrolling = function(){
             return (this.node.scrollHeight - this.node.getBoundingClientRect().width);
@@ -976,6 +990,7 @@ function OverflowElement(node)
 
         this.getRects = function(){
             // TODO: Also check if maximal scrolling limits changed if Rect width or height changed
+            ConsolePrint("OverflowElement getRects: "+this.rects);
             return this.rects;
         }
 
@@ -1061,6 +1076,9 @@ function OverflowElement(node)
                 this.updateRects();
             }
         };
+
+
+        
 
 /* ------------ CODE EXECUTED ON CONSTRUCTION OF OBJECT ---------------- */
 
