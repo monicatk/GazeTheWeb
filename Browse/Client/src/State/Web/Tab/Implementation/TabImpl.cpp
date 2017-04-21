@@ -100,8 +100,8 @@ Tab::Tab(Master* pMaster, Mediator* pCefMediator, WebTabInterface* pWeb, std::st
 
 Tab::~Tab()
 {
-	// Delete triggers before removing layout
-	_TextInputTriggers.clear();
+	// Delete DOM Nodes and triggers (right now only DOMTriggers) before removing layout
+	ClearDOMNodes();
 
 	// Abort pipeline
 	AbortAndClearPipelines();
@@ -435,10 +435,9 @@ void Tab::Update(float tpf, Input& rInput)
 		// ### Update triggers ###
 		// #######################
 
-		for (auto& rNodeTriggerPair : _TextInputTriggers)
+		for (auto pTrigger : _triggers)
 		{
-			const auto& upDOMTrigger = rNodeTriggerPair.second;
-			upDOMTrigger->Update(tpf, tabInput);
+			pTrigger->Update(tpf, tabInput);
 		}
 	}
 }
@@ -462,10 +461,9 @@ void Tab::Draw() const
 	else
 	{
 		// Draw triggers
-		for (const auto& rNodeTriggerPair : _TextInputTriggers)
+		for (auto pTrigger : _triggers)
 		{
-			const auto& upDOMTrigger = rNodeTriggerPair.second;
-			upDOMTrigger->Draw();
+			pTrigger->Draw();
 		}
 	}
 
@@ -558,9 +556,9 @@ void Tab::SetPipelineActivity(bool active)
 		eyegui::setVisibilityOfLayout(_pPipelineAbortLayout, true, true, true);
 
 		// Deactivate all triggers
-		for (auto& rNodeTriggerPair : _TextInputTriggers)
+		for (auto pTrigger : _triggers)
 		{
-			rNodeTriggerPair.second->Deactivate();
+			pTrigger->Deactivate();
 		}
 
 		// Deactivate scrolling overlay
@@ -572,10 +570,9 @@ void Tab::SetPipelineActivity(bool active)
 		eyegui::setVisibilityOfLayout(_pPipelineAbortLayout, false, false, true);
 
 		// Activate all triggers
-		for (auto& rNodeTriggerPair : _TextInputTriggers)
+		for (auto pTrigger : _triggers)
 		{
-			auto& upDOMTrigger = rNodeTriggerPair.second;
-			upDOMTrigger->Activate();
+			pTrigger->Activate();
 		}
 
 		// Activate scrolling overlay

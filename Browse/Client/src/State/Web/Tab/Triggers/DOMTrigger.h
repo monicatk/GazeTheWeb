@@ -19,7 +19,7 @@ class DOMTrigger : public Trigger
 public:
 
     // Constructor
-	DOMTrigger(TabInteractionInterface* pTab, std::shared_ptr<T> spNode, std::string brickPath);
+	DOMTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection, std::shared_ptr<T> spNode, std::string brickPath);
 
     // Destructor
     virtual ~DOMTrigger() = 0;
@@ -73,7 +73,7 @@ private:
 // ######################
 
 template <class T>
-DOMTrigger<T>::DOMTrigger(TabInteractionInterface* pTab, std::shared_ptr<T> spNode, std::string brickPath) : Trigger(pTab)
+DOMTrigger<T>::DOMTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection, std::shared_ptr<T> spNode, std::string brickPath) : Trigger(pTab, rTriggerCollection)
 {
 	// Save member
 	_spNode = spNode;

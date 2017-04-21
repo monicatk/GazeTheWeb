@@ -461,10 +461,11 @@ private:
     // Current URL
     std::string _url = "";
 
-    // Vector with DOMTriggers (take DOM input node as input...)
-	std::map<int, std::unique_ptr<TextInputTrigger> >_TextInputTriggers;
-	// Planned to use weak_ptr<DOMTextInput> as keys, but some internal error occured because '<' operator
-	// was somehow used and its not possible with weak_ptrs
+    // Maps of triggers. Remember to add clearing in "ClearDOMNodes"
+	std::map<int, std::unique_ptr<TextInputTrigger> >_textInputTriggers;
+	
+	// Collection of all triggers
+	std::vector<Trigger*> _triggers;
 
 	// Map nodeID to node itself, in order to access it when it has to be updated
 	std::map<int, std::shared_ptr<DOMLink> > _TextLinkMap;

@@ -14,7 +14,7 @@ class TextInputTrigger : public DOMTrigger<DOMTextInput>
 public:
 
 	// Constructor
-	TextInputTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInput> spNode);
+	TextInputTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection, std::shared_ptr<DOMTextInput> spNode);
 
 	// Destructor
 	virtual ~TextInputTrigger();

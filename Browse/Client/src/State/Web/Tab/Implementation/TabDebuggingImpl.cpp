@@ -111,8 +111,8 @@ void Tab::DrawDebuggingOverlay() const
 		// Set rendering up for DOMTrigger
 		_upDebugLineQuad->GetShader()->UpdateValue("color", DOM_TRIGGER_DEBUG_COLOR);
 
-		// Go over all DOMTriggers
-		for (const auto& rNodeTriggerPair : _TextInputTriggers)
+		// Go over all TextInputTriggers
+		for (const auto& rNodeTriggerPair : _textInputTriggers)
 		{
 			const auto& rDOMTrigger = rNodeTriggerPair.second;
 

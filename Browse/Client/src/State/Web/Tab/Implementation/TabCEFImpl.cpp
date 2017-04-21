@@ -113,7 +113,7 @@ void Tab::AddDOMTextInput(int id)
 	_TextInputMap.emplace(id, spNode);
 
 	// Create DOMTrigger
-	std::unique_ptr<TextInputTrigger> upDOMTrigger = std::unique_ptr<TextInputTrigger>(new TextInputTrigger(this, spNode));
+	std::unique_ptr<TextInputTrigger> upDOMTrigger = std::unique_ptr<TextInputTrigger>(new TextInputTrigger(this, _triggers, spNode));
 
 	// Activate trigger
 	if (!_pipelineActive)
@@ -121,8 +121,8 @@ void Tab::AddDOMTextInput(int id)
 		upDOMTrigger->Activate();
 	}
 
-	// Push it to vector
-	_TextInputTriggers.emplace(id, std::move(upDOMTrigger));
+	// Place trigger in map
+	_textInputTriggers.emplace(id, std::move(upDOMTrigger));
 }
 
 void Tab::AddDOMLink(int id)
@@ -179,17 +179,16 @@ std::weak_ptr<DOMOverflowElement> Tab::GetDOMOverflowElement(int id)
 	return (_OverflowElementMap.find(id) != _OverflowElementMap.end()) ? _OverflowElementMap.at(id) : std::weak_ptr<DOMOverflowElement>();
 }
 
-
 void Tab::ClearDOMNodes()
 {
-	// Deactivate all DOMTriggers
-	for (auto& upDOMTriggerPair : _TextInputTriggers)
+	// Deactivate all triggers (TODO: when there are other triggers than only DOM based triggers, this has to be handled differently)
+	for (auto pTrigger : _triggers)
 	{
-		upDOMTriggerPair.second->Deactivate();
+		pTrigger->Deactivate();
 	}
 
 	// Clear vector with triggers
-	_TextInputTriggers.clear();
+	_textInputTriggers.clear();
 
 	// Clear ID->node maps
 	_TextLinkMap.clear();

@@ -9,15 +9,16 @@
 
 #include "src/Utils/TabInput.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
+#include <vector>
 
 class Trigger
 {
 public:
 
-    // Constructor
-    Trigger(TabInteractionInterface* pTab);
+    // Constructor which registers itself in trigger collection
+    Trigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection);
 
-    // Destructor
+    // Destructor, unregisters itself from trigger collection
     virtual ~Trigger() = 0;
 
     // Update, returns true if triggered
@@ -36,6 +37,9 @@ protected:
 
     // Pointer to tab interface
     TabInteractionInterface* _pTab;
+
+	// Keep reference to trigger collection
+	std::vector<Trigger*>* _pTriggerCollection;
 };
 
 #endif // TRIGGER_H_
