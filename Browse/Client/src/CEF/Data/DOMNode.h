@@ -64,8 +64,8 @@ private:
 	static const std::vector<DOMAttribute> _description;
 	int _id;
 	std::vector<Rect> _rects = {};
-	int _fixedId = NULL;				// first FixedElement's ID, which is hierarchically above this node, if any
-	int _overflowId = NULL;				// first DOMOverflowElement's ID, which is hierarchically above this node, if any
+	int _fixedId = -1;				// first FixedElement's ID, which is hierarchically above this node, if any
+	int _overflowId = -1;				// first DOMOverflowElement's ID, which is hierarchically above this node, if any
 
 };
 

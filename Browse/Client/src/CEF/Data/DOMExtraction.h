@@ -58,8 +58,20 @@ namespace V8ToCefListValue
 	
 	};
 
-	// NOTE: Debug output won't reach the user's console, because this code is run in the Renderer process
-	const static CefRefPtr<CefListValue> ExtractAttributeData(DOMAttribute attr, CefRefPtr<CefV8Value> obj)
+	// NOTE: Debug output wouldn't reach the user's console, because this code is run in the Renderer process
+	const static void _Log(std::string txt, CefRefPtr<CefBrowser> browser = nullptr)
+	{
+		if(browser != nullptr)
+		{
+			CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("IPCLog");
+			msg->GetArgumentList()->SetBool(0, true);
+			msg->GetArgumentList()->SetString(1, txt);
+			browser->SendProcessMessage(PID_BROWSER, msg);
+		}
+	}
+
+
+	const static CefRefPtr<CefListValue> ExtractAttributeData(DOMAttribute attr, CefRefPtr<CefV8Value> obj, CefRefPtr<CefBrowser> browser = nullptr)
 	{
 		if (obj->IsNull() || obj->IsUndefined())
 			return CefRefPtr<CefListValue>();
@@ -67,7 +79,7 @@ namespace V8ToCefListValue
 		// Early exit
 		if (AttrGetter.find(attr) == AttrGetter.end() || AttrConversion.find(attr) == AttrConversion.end())
 		{
-			LogError("V8ToCefListValue conversion: Insufficient information defined for DOMAttribute ", (int)attr, "! Abort.");
+			_Log("V8ToCefListValue conversion: Insufficient information defined for DOMAttribute "+std::to_string((int)attr)+"! Abort.", browser);
 			return CefRefPtr<CefListValue>();
 		}
 
@@ -77,7 +89,7 @@ namespace V8ToCefListValue
 		// Check if getter function is valid
 		if (getter->IsUndefined() || getter->IsNull() || !getter->IsFunction())
 		{
-			LogBug("V8ToCefListValue conversion: Could not access getter function for DOMAttribute ", (int)attr, " in Javascript object.");
+			_Log("V8ToCefListValue conversion: Could not access getter function for DOMAttribute "+std::to_string((int)attr)+" in Javascript object.", browser);
 			return CefRefPtr<CefListValue>();
 		}
 
@@ -87,9 +99,20 @@ namespace V8ToCefListValue
 		if (data->IsUndefined() || data->IsNull())
 			return CefRefPtr<CefListValue>();
 
+		//// DEBUG:
+		//_Log("V8TOCefListValue: Calling AttrConversion for attr: " + std::to_string(attr) +"...", browser);
+
+		//auto return_value = AttrConversion.at(attr)(data);
+
+		//_Log("V8ToCefListValue: ... done!", browser);
+
+		//return return_value;
+
 		// Convert returned V8Value to CefListValue
 		return AttrConversion.at(attr)(data);
 	}
+
+
 }
 
 
