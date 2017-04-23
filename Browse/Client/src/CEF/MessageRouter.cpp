@@ -226,6 +226,8 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					const DOMAttribute& attr = (DOMAttribute) std::stoi(data[4]);
 					const std::string& attrData = data[5];
 
+
+
 					// Perform node update
 					if (auto node = target.lock())
 					{

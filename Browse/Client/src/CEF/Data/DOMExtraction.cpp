@@ -62,7 +62,7 @@ const CefRefPtr<CefListValue> V8ToCefListValue::ListOfIntegers(CefRefPtr<CefV8Va
 	for (int i = 0; i < attrData->GetArrayLength(); i++)
 	{
 		if (!attrData->GetValue(i)->IsInt())
-			list->SetInt(i, -1);
+			list->SetInt(i, -1);	// TODO: Not the best choice for a default value
 		else
 			list->SetInt(i, attrData->GetValue(i)->GetIntValue());
 	}
@@ -82,11 +82,14 @@ const CefRefPtr<CefListValue> V8ToCefListValue::Boolean(CefRefPtr<CefV8Value> at
 
 const CefRefPtr<CefListValue> V8ToCefListValue::Integer(CefRefPtr<CefV8Value> attrData)
 {
-	if (attrData->IsNull() || attrData->IsUndefined() || !attrData->IsInt()) // TODO: Check everywhere for null and undefined!
-		return CefRefPtr<CefListValue>();
 
 	CefRefPtr<CefListValue> wrapper = CefListValue::Create();
-	wrapper->SetInt(0, attrData->GetIntValue());
+	// TODO: Doesn't really catch null?
+	if (attrData->IsNull() || attrData->IsUndefined() || !attrData->IsInt()) // TODO: Check everywhere for null and undefined!
+		wrapper->SetInt(0, -1);
+	else
+		wrapper->SetInt(0, attrData->GetIntValue());
+	
 	return wrapper;
 }
 
