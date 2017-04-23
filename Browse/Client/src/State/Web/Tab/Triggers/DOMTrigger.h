@@ -40,7 +40,7 @@ public:
     std::vector<Rect> GetDOMRects() const { return _spNode->GetRects(); }
 
     // Get whether DOMNode is marked as fixed
-    bool GetDOMFixed() const { return _spNode->GetFixedId() < 0; } // TODO: call real "isFixed" method so not checked for being zero
+    bool GetDOMFixed() const { return _spNode->GetFixedId() >= 0; } // TODO: call real "isFixed" method so not checked for being zero
 
 protected:
 
