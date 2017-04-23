@@ -2,7 +2,7 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// Abstract supercall for all kind of triggers.
+// Abstract superclass for all kind of triggers.
 
 #ifndef TRIGGER_H_
 #define TRIGGER_H_
@@ -36,10 +36,10 @@ public:
 protected:
 
     // Pointer to tab interface
-    TabInteractionInterface* _pTab;
+    TabInteractionInterface* _pTab = nullptr;
 
 	// Keep reference to trigger collection
-	std::vector<Trigger*>* _pTriggerCollection;
+	std::vector<Trigger*>* _pTriggerCollection = nullptr;
 };
 
 #endif // TRIGGER_H_

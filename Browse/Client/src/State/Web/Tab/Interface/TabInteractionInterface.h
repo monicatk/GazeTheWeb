@@ -12,7 +12,6 @@
 #include "src/State/Web/Tab/Interface/TabDebuggingInterface.h"
 
 // Combination of Action and Overlay interface since both have different functionalities but are used in same classes
-
 class TabInteractionInterface: public TabActionInterface, public TabOverlayInterface, public TabDebuggingInterface
 {};
 
