@@ -172,12 +172,12 @@ bool DynamicDriftCorrectionAction::Update(float tpf, TabInput tabInput)
 				float zoomCoordinateDelta = glm::length(zoomCoordinateDeltaVector);
 
 				// Current pixel gaze coordinate on page with values as sample was taken
-				glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate; // subtract movement which the user had to follow
+				glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate;
 				pageCoordinate(sample.logZoom, sample.relativeZoomCoordinate, sample.relativeCenterOffset, pixelGazeCoordinate);
 
 				// Pixel gaze coordinate on page at time where sample has been taken
 				glm::vec2 samplePixelGazeCoordinate = sample.relativeGazeCoordinate;
-				pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, samplePixelGazeCoordinate);
+				pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, samplePixelGazeCoordinate); // TODO: might be better to use here sample values? kinda confused now :D
 
 				// Delta of gaze
 				glm::vec2 gazeDeltaVector = pixelGazeCoordinate - samplePixelGazeCoordinate;
