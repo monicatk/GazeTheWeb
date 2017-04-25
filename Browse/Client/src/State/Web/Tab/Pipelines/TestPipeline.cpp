@@ -9,6 +9,7 @@
 
 TestPipeline::TestPipeline(TabInteractionInterface* pTab) : Pipeline(pTab)
 {
+	// BELOW ARE USED UNIQUE POINTERS, NOW ONE MUST USE SHARED!
 	/*
     // Add some actions
     std::unique_ptr<ZoomCoordinateAction> upZoomCoordinateAction =

@@ -334,6 +334,14 @@ bool Web::OpenURLInTab(int id, std::string URL)
     return false;
 }
 
+void Web::PushBackPointingEvaluationPipeline(PointingApproach approach)
+{
+	if (_currentTabId >= 0)
+	{
+		_tabs.at(_currentTabId)->PushBackPointingEvaluationPipeline(approach);
+	}
+}
+
 StateType Web::Update(float tpf, Input& rInput)
 {
     // Process jobs first

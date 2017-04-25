@@ -712,6 +712,9 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
 			case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
+			case GLFW_KEY_7: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::ZOOM); break; }
+			case GLFW_KEY_8: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::DRIFT_CORRECTION); break; }
+			case GLFW_KEY_9: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::DYNAMIC_DRIFT_CORRECTION); break; }
         }
     }
 }

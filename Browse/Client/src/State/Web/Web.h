@@ -59,6 +59,9 @@ public:
     // Opens URL in tab. Returns whether successful
     bool OpenURLInTab(int id, std::string URL);
 
+	// Pushs back pointing evaluation pipeline in current tab
+	void PushBackPointingEvaluationPipeline(PointingApproach approach);
+
     // #############
     // ### STATE ###
     // #############

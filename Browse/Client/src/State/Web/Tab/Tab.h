@@ -15,6 +15,7 @@
 // - PagePixel Coordinates: Pixel coordinates as rendered by CEF inclusive scrolling
 // All coordinate system have their origin at the upper left corner!
 // TODO: y-axis always from top to down?
+// TODO: define coordinate system for unscrolled (like defined in webpage code)
 
 #ifndef TAB_H_
 #define TAB_H_
@@ -29,6 +30,7 @@
 #include "src/Utils/glmWrapper.h"
 #include "src/Utils/Input.h"
 #include "src/Global.h"
+#include "src/State/Web/Tab/Pipelines/PointingEvaluationPipeline.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 #include <vector>
 #include <deque>
@@ -86,6 +88,9 @@ public:
     // Can go back / forward
     bool CanGoBack() const { return _canGoBack; }
     bool CanGoForward() const { return _canGoForward; }
+
+	// Pushs back pointing evaluation pipeline
+	void PushBackPointingEvaluationPipeline(PointingApproach approach);
 
     // #################################
     // ### TAB INTERACTIVE INTERFACE ###

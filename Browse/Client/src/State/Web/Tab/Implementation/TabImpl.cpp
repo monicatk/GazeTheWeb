@@ -551,6 +551,11 @@ void Tab::Reload()
 	this->AbortAndClearPipelines();
 }
 
+void Tab::PushBackPointingEvaluationPipeline(PointingApproach approach)
+{
+	PushBackPipeline(std::unique_ptr<PointingEvaluationPipeline>(new PointingEvaluationPipeline(this, approach)));
+}
+
 void Tab::SetPipelineActivity(bool active)
 {
 	if (active)

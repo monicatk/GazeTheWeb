@@ -6,12 +6,14 @@
 // - Input: none
 // - Output: vec2 coordinate in CEFPixel space
 
+// TODO: this version is from master branch, so quite outdated!
+
 #ifndef ZOOMCOORDINATEACTION_H_
 #define ZOOMCOORDINATEACTION_H_
 
 #include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 #include "src/Utils/LerpValue.h"
-#include <vector>
+#include <deque>
 
 class ZoomCoordinateAction : public Action
 {
@@ -37,31 +39,13 @@ public:
 
 protected:
 
-	// States of zooming
-	enum class State { ZOOM, DEBUG };
-
-	// Sample data
-	struct SampleData
+	// Struct which is used to record data while execution
+	struct ZoomData
 	{
-		// Constructor
-		SampleData(
-			float logZoom,
-			glm::vec2 relativeGazeCoordinate,
-			glm::vec2 relativeZoomCoordinate,
-			glm::vec2 relativeCenterOffset)
-		{
-			this->logZoom = logZoom;
-			this->relativeGazeCoordinate  = relativeGazeCoordinate;
-			this->relativeZoomCoordinate = relativeZoomCoordinate;
-			this->relativeCenterOffset = relativeCenterOffset;
-		}
-
-		// Values
-		float logZoom;
-		glm::vec2 relativeGazeCoordinate;
-		glm::vec2 relativeZoomCoordinate;
-		glm::vec2 relativeCenterOffset;
-		float lifetime = 0.5f; // intial lifetime in seconds
+		float lifetime = 0.f; // time since data was created
+		glm::vec2 pixelGazeCoordinate; // gaze on web view in pixels. Already free of zooming and center moving offset
+		glm::vec2 pixelZoomCoordinate; // coordinate of zooming in pixels
+		float logZoom; // value of log zoom at that time
 	};
 
 	// Dimming duration
@@ -73,52 +57,50 @@ protected:
 	// Deviation fading duration (how many seconds until full deviation is back to zero)
 	const float DEVIATION_FADING_DURATION = 1.0f;
 
-	// Multiplier of movement towards center (one means, that on maximum zoom the outermost corner is moved into center)
-	const float CENTER_OFFSET_MULTIPLIER = 0.f; // TODO: 0.25f;
+	// Multiplier of movement towards center
+	const float CENTER_OFFSET_MULTIPLIER = 0.5f;
 
 	// Duration to replace current coordinate with input
-	const float MOVE_DURATION = 0.5f;
+	const float MOVE_DURATION = 0.75f;
 
 	// Speed of zoom
-	const float ZOOM_SPEED = 0.25f;
+	const float ZOOM_SPEED = 0.4f;
 
-	// Maximum log zoom level of orientation phase
-	const float MAX_ORIENTATION_LOG_ZOOM = 0.75f;
+	// Maximal time which is looked back at compensation of calibration errors
+	const float LOOK_BACK_TIME = 0.5f;
 
-	// Drift correction zoom level (must be lower than MAX_LOG_ZOOM)
-	const float MAX_DRIFT_CORRECTION_LOG_ZOOM = 0.5f;
+	// Maximal angle between gaze drift and zoom coordinate drift in degree
+	const float DRIFT_MAX_ANGLE_DEGREE = 10.f;
 
-    // Coordinate of center of zooming in relative page coordinates (not WebView, page!)
-    glm::vec2 _relativeZoomCoordinate; // aka zoom coordinate
-
-	// Offset to center of WebView in relative space
-	glm::vec2 _relativeCenterOffset = glm::vec2(0, 0);
+    // Coordinate which is updated and later output. In relative page space
+    glm::vec2 _relativeZoomCoordinate;
 
     // Log zooming amount (used for rendering)
 	// Calculated as 1.f - log(_linZoom), so becoming smaller at higher zoom levels
-    float _logZoom = 1.f; // [1..0]
+    float _logZoom = 1.f;
 
-    // Linear zooming amount (used for calculations)
+    // Linear zooming amout (used for calculations)
 	// Increasing while zooming
-    float _linZoom = 1.f; // [1..]
+    float _linZoom = 1.f;
+
+    // Offset to center of webview
+    glm::vec2 _coordinateCenterOffset = glm::vec2(0, 0);
 
     // Bool to indicate first update
     bool _firstUpdate = true;
 
-	// Deviation of coordinate
+	// Deviation of coordinate (not of gaze!; relative coordiantes, no pixels!)
+	// Not really in relative coordinates, since aspect ratio corrected...
 	float _deviation = 0.f; // [0..1]
 
 	// Dimming
 	float _dimming = 0.f;
 
+	// Queue for recording data which is used as click to compensate calibration errors
+	std::deque<ZoomData> _zoomDataQueue;
+
 	// Do dimming
 	bool _doDimming = true;
-
-	// Sample data
-	std::vector<SampleData> _sampleData;
-
-	// State of action
-	State _state = State::ZOOM;
 };
 
 #endif // ZOOMCOORDINATEACTION_H_
