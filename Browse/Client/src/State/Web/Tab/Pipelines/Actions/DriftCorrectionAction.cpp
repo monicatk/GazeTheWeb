@@ -179,7 +179,7 @@ bool DriftCorrectionAction::Update(float tpf, TabInput tabInput)
 
 				// Sample pixel gaze coordinate on page
 				glm::vec2 samplePixelGazeCoordinate = _sampleData.relativeGazeCoordinate;
-				pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, samplePixelGazeCoordinate);
+				pageCoordinate(_logZoom, _sampleData.relativeZoomCoordinate, _sampleData.relativeCenterOffset, samplePixelGazeCoordinate);
 
 				// Calculate drift corrected fixation coordinate
 				glm::vec2 drift = pixelGazeCoordinate - samplePixelGazeCoordinate;
