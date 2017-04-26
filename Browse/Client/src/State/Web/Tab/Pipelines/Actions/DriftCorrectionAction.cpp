@@ -181,10 +181,13 @@ bool DriftCorrectionAction::Update(float tpf, TabInput tabInput)
 				glm::vec2 samplePixelGazeCoordinate = _sampleData.relativeGazeCoordinate;
 				pageCoordinate(_logZoom, _sampleData.relativeZoomCoordinate, _sampleData.relativeCenterOffset, samplePixelGazeCoordinate); // sampleData zoom coordinate and current should be the same
 
+				// Page coordinat of relative zoom coordinate
+				glm::vec2 samplePixelZoomCoordinate = _sampleData.relativeZoomCoordinate * glm::vec2(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY());
+
 				// Calculate drift corrected fixation coordinate
 				glm::vec2 drift = pixelGazeCoordinate - samplePixelGazeCoordinate;
 				float radius = glm::length(drift) / ((1.f/_logZoom) - (1.f/_sampleData.logZoom));
-				glm::vec2 fixation = (glm::normalize(drift) * radius) + samplePixelGazeCoordinate;
+				glm::vec2 fixation = (glm::normalize(drift) * radius) + samplePixelZoomCoordinate;
 				SetOutputValue("coordinate", fixation);
 
 				// Return success

@@ -41,10 +41,6 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 		pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, rCoordinate);
 	};
 
-	// Pixels in web view
-	int webViewWidth = _pTab->GetWebViewWidth();
-	int webViewHeight = _pTab->GetWebViewHeight();
-
 	// Current gaze
 	glm::vec2 relativeGazeCoordinate = glm::vec2(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY); // relative WebView space
 
@@ -83,6 +79,14 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 			// Since only for first frame, do not do it again
 			_firstUpdate = false;
 		}
+
+		// Calculated center offset. This moves the WebView content towards the center for better gaze precision
+		glm::vec2 clampedRelativeZoom = glm::clamp(_relativeZoomCoordinate, glm::vec2(0.f), glm::vec2(1.f)); // clamp within page for determining relative center offset
+		float zoomWeight = ((1.f - _logZoom) / (1.f - MAX_LOG_ZOOM)); // projects zoom level to [0..1]
+		_relativeCenterOffset =
+			CENTER_OFFSET_MULTIPLIER
+			* zoomWeight // weight with zoom (starting at zero) to have more centered version at higher zoom level
+			* (clampedRelativeZoom - 0.5f); // vector from WebView center to current zoom coordinate
 	}
 
 	// Update linear zoom
@@ -93,17 +97,6 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 
 	// Make zoom better with log function
 	_logZoom = 1.f - std::log(_linZoom); // log zooming is starting at one and getting smaller with smaller _linZoom
-
-	// Calculated center offset. This moves the WebView content towards the center for better gaze precision
-	glm::vec2 clampedRelativeZoom = glm::clamp(_relativeZoomCoordinate, glm::vec2(0.f), glm::vec2(1.f)); // clamp within page for determining relative center offset
-	float zoomWeight = ((1.f - _logZoom) / (1.f - MAX_LOG_ZOOM)); // projects zoom level to [0..1]
-	_relativeCenterOffset =
-		CENTER_OFFSET_MULTIPLIER
-		* zoomWeight // weight with zoom (starting at zero) to have more centered version at higher zoom level
-		* (clampedRelativeZoom - 0.5f); // vector from WebView center to current zoom coordinate
-
-	// Vector with web view pixel resolution
-	glm::vec2 webViewPixels(webViewWidth, webViewHeight);
 
 	// Calculate coordinate for current gaze value
 	glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate;
@@ -124,7 +117,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 		|| ((_logZoom <= 0.45f) && (_deviation < 0.01f))) // coordinate seems to be quite fixed, just do it
 	{
 		// Set coordinate in output value
-        SetOutputValue("coordinate", glm::vec2(_relativeZoomCoordinate * webViewPixels)); // into pixel space of CEF
+        SetOutputValue("coordinate", glm::vec2(_relativeZoomCoordinate * glm::vec2(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY()))); // into pixel space of CEF
 
 		// Return success
 		finished = true;

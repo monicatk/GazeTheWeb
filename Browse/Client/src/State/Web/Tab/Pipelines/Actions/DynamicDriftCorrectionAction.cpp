@@ -205,8 +205,11 @@ bool DynamicDriftCorrectionAction::Update(float tpf, TabInput tabInput)
 					float radius = gazeDelta - zoomCoordinateDelta + (zoom * zoomCoordinateDelta);
 					radius /= zoom - sampleZoom;
 
+					// Page coordinat of relative zoom coordinate
+					glm::vec2 samplePixelZoomCoordinate = sample.relativeZoomCoordinate * glm::vec2(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY());
+
 					// Actual fixation point
-					glm::vec2 fixation = (glm::normalize(zoomCoordinateDeltaVector) * radius) + samplePixelGazeCoordinate;
+					glm::vec2 fixation = (glm::normalize(zoomCoordinateDeltaVector) * radius) + samplePixelZoomCoordinate;
 					SetOutputValue("coordinate", fixation);
 
 					// finished = true; // TODO debugging
