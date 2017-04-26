@@ -82,7 +82,7 @@ bool DynamicDriftCorrectionAction::Update(float tpf, TabInput tabInput)
 				_relativeZoomCoordinate += relativeDelta * glm::min(1.f, (tpf / MOVE_DURATION));
 
 				// If at the moment a high deviation is given, try to zoom out to give user more overview
-				zoomSpeed = ZOOM_SPEED - glm::min(1.f, 2.f * _deviation); // TODO weight deviation more intelligent
+				zoomSpeed = ZOOM_SPEED - glm::min(1.f, DEVIATION_WEIGHT * _deviation); // TODO weight deviation more intelligent
 			}
 			else // first frame of execution
 			{
@@ -177,7 +177,7 @@ bool DynamicDriftCorrectionAction::Update(float tpf, TabInput tabInput)
 
 				// Pixel gaze coordinate on page at time where sample has been taken
 				glm::vec2 samplePixelGazeCoordinate = sample.relativeGazeCoordinate;
-				pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, samplePixelGazeCoordinate); // TODO: might be better to use here sample values? kinda confused now :D
+				pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, samplePixelGazeCoordinate);
 
 				// Delta of gaze
 				glm::vec2 gazeDeltaVector = pixelGazeCoordinate - samplePixelGazeCoordinate;
@@ -193,7 +193,7 @@ bool DynamicDriftCorrectionAction::Update(float tpf, TabInput tabInput)
 					SetOutputValue("coordinate", _relativeZoomCoordinate * cefPixels);
 					// finished = true; // TODO debugging
 					_state = State::DEBUG;
-					LogInfo("DEBUG: Zoom Coordinate");
+					LogInfo("Zoom coordinate used");
 				}
 				else if (deltaAngle <= 5) // angle of gazing is rather static TODO: should the delta be of some minimal size?
 				{
@@ -211,7 +211,7 @@ bool DynamicDriftCorrectionAction::Update(float tpf, TabInput tabInput)
 
 					// finished = true; // TODO debugging
 					_state = State::DEBUG;
-					LogInfo("DEBUG: Drift Correction");
+					LogInfo("Drift corrected coordinate used");
 				}
 				
 				// else continue

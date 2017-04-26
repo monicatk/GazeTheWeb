@@ -6,8 +6,6 @@
 // - Input: none
 // - Output: vec2 coordinate in CEFPixel space
 
-// TODO: this version is from master branch, so quite outdated!
-
 #ifndef ZOOMCOORDINATEACTION_H_
 #define ZOOMCOORDINATEACTION_H_
 
@@ -39,15 +37,6 @@ public:
 
 protected:
 
-	// Struct which is used to record data while execution
-	struct ZoomData
-	{
-		float lifetime = 0.f; // time since data was created
-		glm::vec2 pixelGazeCoordinate; // gaze on web view in pixels. Already free of zooming and center moving offset
-		glm::vec2 pixelZoomCoordinate; // coordinate of zooming in pixels
-		float logZoom; // value of log zoom at that time
-	};
-
 	// Dimming duration
 	const float DIMMING_DURATION = 0.5f; // seconds until it is dimmed
 
@@ -57,20 +46,20 @@ protected:
 	// Deviation fading duration (how many seconds until full deviation is back to zero)
 	const float DEVIATION_FADING_DURATION = 1.0f;
 
-	// Multiplier of movement towards center
-	const float CENTER_OFFSET_MULTIPLIER = 0.5f;
+	// Deviation weight on zoom speed
+	const float DEVIATION_WEIGHT = 3.0f;
+
+	// Multiplier of movement towards center (one means, that on maximum zoom the outermost corner is moved into center)
+	const float CENTER_OFFSET_MULTIPLIER = 0.25f;
+
+	// Maximum log zoom level
+	const float MAX_LOG_ZOOM = 0.1f;
 
 	// Duration to replace current coordinate with input
 	const float MOVE_DURATION = 0.75f;
 
 	// Speed of zoom
 	const float ZOOM_SPEED = 0.4f;
-
-	// Maximal time which is looked back at compensation of calibration errors
-	const float LOOK_BACK_TIME = 0.5f;
-
-	// Maximal angle between gaze drift and zoom coordinate drift in degree
-	const float DRIFT_MAX_ANGLE_DEGREE = 10.f;
 
     // Coordinate which is updated and later output. In relative page space
     glm::vec2 _relativeZoomCoordinate;
@@ -84,7 +73,7 @@ protected:
     float _linZoom = 1.f;
 
     // Offset to center of webview
-    glm::vec2 _coordinateCenterOffset = glm::vec2(0, 0);
+    glm::vec2 _relativeCenterOffset = glm::vec2(0, 0);
 
     // Bool to indicate first update
     bool _firstUpdate = true;
@@ -95,9 +84,6 @@ protected:
 
 	// Dimming
 	float _dimming = 0.f;
-
-	// Queue for recording data which is used as click to compensate calibration errors
-	std::deque<ZoomData> _zoomDataQueue;
 
 	// Do dimming
 	bool _doDimming = true;

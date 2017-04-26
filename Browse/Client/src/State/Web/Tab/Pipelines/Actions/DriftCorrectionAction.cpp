@@ -79,7 +79,7 @@ bool DriftCorrectionAction::Update(float tpf, TabInput tabInput)
 				_deviation = glm::min(1.f, glm::max(pixelDelta / glm::max(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY()), _deviation));
 
 				// If at the moment a high deviation is given, try to zoom out to give user more overview
-				zoomSpeed = ZOOM_SPEED - glm::min(1.f, 2.f * _deviation); // TODO weight deviation more intelligent
+				zoomSpeed = ZOOM_SPEED - glm::min(1.f, DEVIATION_WEIGHT * _deviation); // TODO weight deviation more intelligent
 			}
 			else // first frame of execution
 			{
@@ -179,7 +179,7 @@ bool DriftCorrectionAction::Update(float tpf, TabInput tabInput)
 
 				// Sample pixel gaze coordinate on page
 				glm::vec2 samplePixelGazeCoordinate = _sampleData.relativeGazeCoordinate;
-				pageCoordinate(_logZoom, _sampleData.relativeZoomCoordinate, _sampleData.relativeCenterOffset, samplePixelGazeCoordinate);
+				pageCoordinate(_logZoom, _sampleData.relativeZoomCoordinate, _sampleData.relativeCenterOffset, samplePixelGazeCoordinate); // sampleData zoom coordinate and current should be the same
 
 				// Calculate drift corrected fixation coordinate
 				glm::vec2 drift = pixelGazeCoordinate - samplePixelGazeCoordinate;

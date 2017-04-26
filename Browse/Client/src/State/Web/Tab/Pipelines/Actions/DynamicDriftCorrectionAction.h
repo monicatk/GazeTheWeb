@@ -73,6 +73,9 @@ protected:
 	// Deviation fading duration (how many seconds until full deviation is back to zero)
 	const float DEVIATION_FADING_DURATION = 1.0f;
 
+	// Deviation weight on zoom speed
+	const float DEVIATION_WEIGHT = 3.0f;
+
 	// Multiplier of movement towards center (one means, that on maximum zoom the outermost corner is moved into center)
 	const float CENTER_OFFSET_MULTIPLIER = 0.f; // TODO: 0.25f;
 
