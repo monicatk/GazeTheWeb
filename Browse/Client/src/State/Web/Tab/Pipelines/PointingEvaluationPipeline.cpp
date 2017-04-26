@@ -20,16 +20,19 @@ PointingEvaluationPipeline::PointingEvaluationPipeline(TabInteractionInterface* 
 	case PointingApproach::ZOOM:
 	{
 		spPointingAction = std::make_shared<ZoomCoordinateAction>(_pTab);
+		LogInfo("Pointing Approach: Zooming");
 		break;
 	}
 	case PointingApproach::DRIFT_CORRECTION:
 	{
 		spPointingAction = std::make_shared<DriftCorrectionAction>(_pTab);
+		LogInfo("Pointing Approach: Drift Correction");
 		break;
 	}
 	case PointingApproach::DYNAMIC_DRIFT_CORRECTION:
 	{
 		spPointingAction = std::make_shared<DynamicDriftCorrectionAction>(_pTab);
+		LogInfo("Pointing Approach: Dynamic Drift Correction");
 		break;
 	}
 	}
