@@ -143,7 +143,10 @@ void Tab::DrawDebuggingOverlay() const
 			// Render rects
 			for (const auto rRect : rDOMTextLink->GetRects())
 			{
-				renderRect(rRect, rDOMTextLink->GetFixedId());
+				renderRect(
+					rRect, 
+					(rDOMTextLink->GetFixedId() >= 0)
+				);
 			}
 		}
 
@@ -153,7 +156,10 @@ void Tab::DrawDebuggingOverlay() const
 		{
 			const auto& rDOMTextLink = rIdNodePair.second;
 			if (rDOMTextLink->GetRects().size() > 1)
-				renderRect(rDOMTextLink->GetRects()[1], rDOMTextLink->GetFixedId());
+				renderRect(
+					rDOMTextLink->GetRects()[1], 
+					(rDOMTextLink->GetFixedId() >= 0)
+				);
 		}
 
 		// ### SELECT FIELDS ###
@@ -165,7 +171,10 @@ void Tab::DrawDebuggingOverlay() const
 			// Render rects
 			for (const auto rRect : rDOMSelectField->GetRects())
 			{
-				renderRect(rRect, rDOMSelectField->GetFixedId());
+				renderRect(
+					rRect, 
+					(rDOMSelectField->GetFixedId() >= 0)
+				);
 			}
 		}
 
@@ -193,7 +202,10 @@ void Tab::DrawDebuggingOverlay() const
 		{
 			const auto& rOverflowElement = rIdNodePair.second;
 			for (const auto& rect : rOverflowElement->GetRects())
-				renderRect(rect, rOverflowElement->GetFixedId());
+				renderRect(
+					rect,
+					(rOverflowElement->GetFixedId() >= 0)
+				);
 		}
 	}
 
