@@ -128,12 +128,6 @@ int DOMTextInput::Initialize(CefRefPtr<CefProcessMessage> msg)
 		{
 			CefRefPtr<CefListValue> data = args->GetList(pivot + i);
 
-			// DEBUG
-			if (_description[i] == DOMAttribute::FixedId)
-			{
-				LogError("DOMTextInput::Initialize: Setting fixedId to ", data->GetList(0)->GetInt(0));
-			}
-
 			if (!Update(_description[i], data))
 			{
 				LogError("DOMTextInput: Failed to assign value of type ", args->GetValue(i + 1)->GetType(),
@@ -146,12 +140,6 @@ int DOMTextInput::Initialize(CefRefPtr<CefProcessMessage> msg)
 
 bool DOMTextInput::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 {
-	// DEBUG
-	if (attr == DOMAttribute::FixedId)
-	{
-		LogError("DOMTextInput::Update: Setting fixedId to ", data->GetInt(0));
-	}
-
 	switch (attr) {
 		case DOMAttribute::Text:			return IPCSetText(data);
 		case DOMAttribute::IsPassword:		return IPCSetPassword(data);

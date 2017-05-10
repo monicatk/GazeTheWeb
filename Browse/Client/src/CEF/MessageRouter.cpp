@@ -187,10 +187,6 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					return true;
 				}
 				}
-				
-				// DEBUG
-				if (ipcName == "TextInput")
-					LogDebug("MsgRouter: Added TextInput object with id=", id);
 
 				// Instruct Renderer Process to initialize empty DOM Nodes with data
 				CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("LoadDOM" + ipcName + "Data");
@@ -235,19 +231,11 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					const DOMAttribute& attr = (DOMAttribute) std::stoi(data[4]);
 					const std::string& attrData = data[5];
 
-					// DEBUG
-					if (type == 0)
-					{
-						LogDebug("MsgRouter: Updating TextInput with id=", id, ", attr=", attr);
-						if (attr == 0)
-							LogDebug("type: ", type, "-- str=", requestString);
-					}
-
 					// Perform node update
 					bool success = false;
 					if (auto node = target.lock())
 					{
-						 success = node->Update(
+						success = node->Update(
 							(DOMAttribute) attr,
 							StringToCefListValue::ExtractAttributeData((DOMAttribute) attr, attrData)
 						);
