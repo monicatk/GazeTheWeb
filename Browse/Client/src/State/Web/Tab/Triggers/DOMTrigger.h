@@ -157,7 +157,7 @@ void DOMTrigger<T>::CalculatePositionOfOverlayButton(float& rRelativePositionX, 
 	// Scrolling offset only when not fixed
 	double scrollingOffsetX = 0;
 	double scrollingOffsetY = 0;
-	if (!_spNode->GetFixedId())
+	if (!GetDOMFixed())
 	{
 		_pTab->GetScrollingOffset(scrollingOffsetX, scrollingOffsetY);
 	}
