@@ -10,6 +10,9 @@
 
 DOMTrigger::DOMTrigger(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInput> spNode) : Trigger(pTab)
 {
+	// DEBUG
+	LogDebug("DOMTrigger: Successfully created a DOMTrigger object!");
+
     // Save member
     _spNode = spNode;
 

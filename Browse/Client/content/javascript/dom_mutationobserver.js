@@ -236,7 +236,6 @@ function DOMObject(node, nodeType)
 
         // Returns float[4] for each Rect with adjusted coordinates
         this.getRects = function(){
-            this.getRectsCount++;
             // Update rects before returning them 
             // NOTE: Not that much additional overhead because it will only be called from C++ when e.g. creating a node?
             this.updateRects();

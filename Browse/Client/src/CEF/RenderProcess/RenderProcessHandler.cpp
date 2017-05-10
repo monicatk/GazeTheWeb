@@ -356,10 +356,6 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 		CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
 		if (context->Enter())
 		{
-			// DEBUG
-			if (nodeType == "LinkData")
-				IPCLogDebug(browser, "Renderer: Accessing DOMLink object... id="+std::to_string(id));
-
 			CefRefPtr<CefV8Value> objGetter = context->GetGlobal()->GetValue(js_obj_getter_name);
 
 			if (!objGetter->IsFunction())
@@ -389,10 +385,6 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			}
 
 			browser->SendProcessMessage(PID_BROWSER, reply);
-
-			// DEBUG
-			if (nodeType == "LinkData")
-				IPCLogDebug(browser, "Renderer: ... done! Accessing DOMLink object. id="+std::to_string(id));
 
 			context->Exit();
 		}

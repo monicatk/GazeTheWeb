@@ -41,9 +41,7 @@ public:
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
 	// CefProcessMessage to C++ object
-	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data, 
-		std::function<void (DOMNode*, DOMAttribute, CefRefPtr<CefListValue>)> f = nullptr
-	);
+	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data);
 
 	static void GetDescription(std::vector<const std::vector<DOMAttribute>* >* descriptions) {
 		descriptions->push_back(&_description);
@@ -114,7 +112,7 @@ private:
 	bool IPCSetPassword(CefRefPtr<CefListValue> data);
 
 	static const std::vector<DOMAttribute> _description;
-	std::string _text = NULL;
+	std::string _text = "";
 	bool _isPassword = false;
 };
 

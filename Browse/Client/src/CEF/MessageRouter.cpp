@@ -182,8 +182,15 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				case(1) : ipcName = "Link"; break;
 				case(2) : ipcName = "SelectField"; break;
 				case(3) : ipcName = "OverflowElement"; break;
-				default: LogError(browser, "MsgRouter: - ERROR: Unknown numeric DOM node type value: ", type);
+				default: {
+					LogError(browser, "MsgRouter: - ERROR: Unknown numeric DOM node type value: ", type);
+					return true;
 				}
+				}
+				
+				// DEBUG
+				if (ipcName == "TextInput")
+					LogDebug("MsgRouter: Added TextInput object with id=", id);
 
 				// Instruct Renderer Process to initialize empty DOM Nodes with data
 				CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("LoadDOM" + ipcName + "Data");
@@ -228,24 +235,32 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					const DOMAttribute& attr = (DOMAttribute) std::stoi(data[4]);
 					const std::string& attrData = data[5];
 
+					// DEBUG
+					if (type == 0)
+					{
+						LogDebug("MsgRouter: Updating TextInput with id=", id, ", attr=", attr);
+						if (attr == 0)
+							LogDebug("type: ", type, "-- str=", requestString);
+					}
+
 					// Perform node update
+					bool success = false;
 					if (auto node = target.lock())
 					{
-						// DEBUG
-						if (type == 1 && attr == DOMAttribute::Rects)
-							LogDebug("MsgRouter: DOMLink rects should be updated soon! (id=", node->GetId(), ")");
-						if (type == 1)
-								LogDebug("MsgRouter: Updating DOMLink attr: ", attr);
-
-						const auto& retVal = node->Update(
+						 success = node->Update(
 							(DOMAttribute) attr,
 							StringToCefListValue::ExtractAttributeData((DOMAttribute) attr, attrData)
 						);
-
-						// DEBUG
-						if (type == 1 && attr == DOMAttribute::Rects)
-							LogDebug("MsgRouter: .. update done! ", retVal);
-						
+					}
+					else
+					{
+						LogError("MsgRouter: Failed to access node with type: ", type, " and id: ", id, "stored in"\
+							" Tab with id: ", browser->GetIdentifier(), ")");
+					}
+					
+					if (!success)
+					{
+						LogError("MsgRouter: Update failed! Node type: ", type, ", node id: ", id, ", DOMAttribute: ", attr);
 					}
 
 				}

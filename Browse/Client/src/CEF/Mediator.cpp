@@ -229,7 +229,7 @@ void Mediator::AddDOMTextInput(CefRefPtr<CefBrowser> browser, int id)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
-		pTab->AddDOMSelectField(id);
+		pTab->AddDOMTextInput(id);
 	}
 }
 

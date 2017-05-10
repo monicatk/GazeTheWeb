@@ -43,13 +43,8 @@ int DOMNode::Initialize(CefRefPtr<CefProcessMessage> msg)
 	return _description.size() + 1;
 }
 
-bool DOMNode::Update(DOMAttribute attr, CefRefPtr<CefListValue> data, 
-						std::function<void(DOMNode*, DOMAttribute, CefRefPtr<CefListValue>)> f)
+bool DOMNode::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 {	
-	// Do debug stuff, if needed
-	if (f != nullptr)
-		f(this, attr, data);
-
 	switch (attr) {
 		case DOMAttribute::Rects:			return IPCSetRects(data);
 		case DOMAttribute::FixedId:			return IPCSetFixedId(data);
@@ -133,6 +128,12 @@ int DOMTextInput::Initialize(CefRefPtr<CefProcessMessage> msg)
 		{
 			CefRefPtr<CefListValue> data = args->GetList(pivot + i);
 
+			// DEBUG
+			if (_description[i] == DOMAttribute::FixedId)
+			{
+				LogError("DOMTextInput::Initialize: Setting fixedId to ", data->GetList(0)->GetInt(0));
+			}
+
 			if (!Update(_description[i], data))
 			{
 				LogError("DOMTextInput: Failed to assign value of type ", args->GetValue(i + 1)->GetType(),
@@ -145,6 +146,12 @@ int DOMTextInput::Initialize(CefRefPtr<CefProcessMessage> msg)
 
 bool DOMTextInput::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 {
+	// DEBUG
+	if (attr == DOMAttribute::FixedId)
+	{
+		LogError("DOMTextInput::Update: Setting fixedId to ", data->GetInt(0));
+	}
+
 	switch (attr) {
 		case DOMAttribute::Text:			return IPCSetText(data);
 		case DOMAttribute::IsPassword:		return IPCSetPassword(data);
@@ -211,18 +218,6 @@ int DOMLink::Initialize(CefRefPtr<CefProcessMessage> msg)
 
 bool DOMLink::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 {
-	LogDebug("DOMLink::Update called! attr: ", attr);
-	if (attr == DOMAttribute::Rects)
-	{
-		LogDebug("Updating DOMLink rects with output via lambda expression...");
-		const auto& f = [](DOMNode* n, DOMAttribute a, CefRefPtr<CefListValue> v) {
-			if(n->GetRects().size() > 0)
-				LogDebug("Rect update to: ", n->GetRects()[0].ToString());
-		};
-		return super::Update(attr, data, f);
-	}
-
-
 	switch (attr) {
 		case DOMAttribute::Text:	return IPCSetText(data);
 		case DOMAttribute::Url:		return IPCSetUrl(data);

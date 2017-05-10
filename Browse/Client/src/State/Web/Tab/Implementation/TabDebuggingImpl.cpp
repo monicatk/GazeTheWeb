@@ -111,6 +111,7 @@ void Tab::DrawDebuggingOverlay() const
 		// Set rendering up for DOMTrigger
 		_upDebugLineQuad->GetShader()->UpdateValue("color", DOM_TRIGGER_DEBUG_COLOR);
 
+
 		// Go over all DOMTriggers
 		for (const auto& rNodeTriggerPair : _DOMTriggers)
 		{
@@ -120,16 +121,19 @@ void Tab::DrawDebuggingOverlay() const
 			{
 				if (!rDOMTrigger->GetDOMIsPasswordField())
 				{
-					renderRect(rRect, rDOMTrigger->GetDOMFixed());
+					renderRect(rRect, (rDOMTrigger->GetDOMFixed() >= 0));
+					//LogDebug("TabDebugImpl: Is trigger fixed? ", rDOMTrigger->GetDOMFixed());
 				}
 				else
 				{
 					_upDebugLineQuad->GetShader()->UpdateValue("color", glm::vec3(0.0f, 1.f, 1.f));
 					renderRect(rRect, rDOMTrigger->GetDOMFixed());
+				
 					_upDebugLineQuad->GetShader()->UpdateValue("color", DOM_TRIGGER_DEBUG_COLOR);
 				}
 			}
 		}
+
 
 		// ### DOMTEXTLINKS ###
 
