@@ -338,7 +338,8 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 		const std::string nodeType = msgName.substr(7, msgName.size());
 		//IPCLogDebug(browser, "msg: '" + msgName + "'");
 		//IPCLogDebug(browser, "nodeType: '" + nodeType + "'");
-		const int id = msg->GetArgumentList()->GetInt(0);
+		const int id = msg->GetArgumentList()->GetInt(1);
+		// msg->args[0] == nodeType as number, but not used here!
 
 		// Fetch node type's attribute description
 		std::vector<const std::vector<DOMAttribute>* > description;
@@ -355,6 +356,10 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 		CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
 		if (context->Enter())
 		{
+			// DEBUG
+			if (nodeType == "LinkData")
+				IPCLogDebug(browser, "Renderer: Accessing DOMLink object... id="+std::to_string(id));
+
 			CefRefPtr<CefV8Value> objGetter = context->GetGlobal()->GetValue(js_obj_getter_name);
 
 			if (!objGetter->IsFunction())
@@ -384,6 +389,10 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			}
 
 			browser->SendProcessMessage(PID_BROWSER, reply);
+
+			// DEBUG
+			if (nodeType == "LinkData")
+				IPCLogDebug(browser, "Renderer: ... done! Accessing DOMLink object. id="+std::to_string(id));
 
 			context->Exit();
 		}

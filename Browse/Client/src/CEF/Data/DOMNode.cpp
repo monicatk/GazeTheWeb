@@ -43,13 +43,19 @@ int DOMNode::Initialize(CefRefPtr<CefProcessMessage> msg)
 	return _description.size() + 1;
 }
 
-bool DOMNode::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
+bool DOMNode::Update(DOMAttribute attr, CefRefPtr<CefListValue> data, 
+						std::function<void(DOMNode*, DOMAttribute, CefRefPtr<CefListValue>)> f)
 {	
+	// Do debug stuff, if needed
+	if (f != nullptr)
+		f(this, attr, data);
+
 	switch (attr) {
 		case DOMAttribute::Rects:			return IPCSetRects(data);
 		case DOMAttribute::FixedId:			return IPCSetFixedId(data);
 		case DOMAttribute::OverflowId:		return IPCSetOverflowId(data);
 	}
+
 	LogError("DOMNode: Could not find attribute ", attr, " in order to assign data");
 	return false;
 }
@@ -205,21 +211,31 @@ int DOMLink::Initialize(CefRefPtr<CefProcessMessage> msg)
 
 bool DOMLink::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 {
+	LogDebug("DOMLink::Update called! attr: ", attr);
+	if (attr == DOMAttribute::Rects)
+	{
+		LogDebug("Updating DOMLink rects with output via lambda expression...");
+		const auto& f = [](DOMNode* n, DOMAttribute a, CefRefPtr<CefListValue> v) {
+			if(n->GetRects().size() > 0)
+				LogDebug("Rect update to: ", n->GetRects()[0].ToString());
+		};
+		return super::Update(attr, data, f);
+	}
+
+
 	switch (attr) {
 		case DOMAttribute::Text:	return IPCSetText(data);
 		case DOMAttribute::Url:		return IPCSetUrl(data);
 	}
+
+
 	return super::Update(attr, data);
 }
 
 bool DOMLink::IPCSetText(CefRefPtr<CefListValue> data)
 {
 	if (data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_STRING)
-	{
-		LogDebug("data->type: ", data->GetValue(0)->GetType());
-		LogDebug("deeper type: ", data->GetList(0)->GetType(0));
 		return false;
-	}
 
 	SetText(data->GetString(0));
 	return true;

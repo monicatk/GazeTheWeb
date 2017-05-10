@@ -165,6 +165,7 @@ function DOMObject(node, nodeType)
         this.overflowParent = undefined;
         this.text = "";
         this.isPassword = false;
+        this.getRectsCount = 0;
 
     /* Methods */ 
         // Update member variable for Rects and return true if an update has occured 
@@ -235,6 +236,11 @@ function DOMObject(node, nodeType)
 
         // Returns float[4] for each Rect with adjusted coordinates
         this.getRects = function(){
+            this.getRectsCount++;
+            // Update rects before returning them 
+            // NOTE: Not that much additional overhead because it will only be called from C++ when e.g. creating a node?
+            this.updateRects();
+
             if(this.overflowParent !== null && this.overflowParent !== undefined) 
             {
                 var id = this.overflowParent.getAttribute("overflowId");

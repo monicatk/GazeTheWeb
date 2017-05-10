@@ -40,6 +40,8 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	// ### Favicon ###
 	// ###############
 
+	//LogDebug("requestString=", requestString);
+
 	if (requestString == "faviconBytesReady")
 	{
 		// Logging
@@ -226,16 +228,26 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					const DOMAttribute& attr = (DOMAttribute) std::stoi(data[4]);
 					const std::string& attrData = data[5];
 
-
-
 					// Perform node update
 					if (auto node = target.lock())
 					{
-						node->Update(
+						// DEBUG
+						if (type == 1 && attr == DOMAttribute::Rects)
+							LogDebug("MsgRouter: DOMLink rects should be updated soon! (id=", node->GetId(), ")");
+						if (type == 1)
+								LogDebug("MsgRouter: Updating DOMLink attr: ", attr);
+
+						const auto& retVal = node->Update(
 							(DOMAttribute) attr,
 							StringToCefListValue::ExtractAttributeData((DOMAttribute) attr, attrData)
 						);
+
+						// DEBUG
+						if (type == 1 && attr == DOMAttribute::Rects)
+							LogDebug("MsgRouter: .. update done! ", retVal);
+						
 					}
+
 				}
 				else
 				{
