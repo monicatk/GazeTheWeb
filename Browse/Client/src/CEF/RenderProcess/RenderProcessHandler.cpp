@@ -338,36 +338,14 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 		const std::string nodeType = msgName.substr(7, msgName.size());
 		//IPCLogDebug(browser, "msg: '" + msgName + "'");
 		//IPCLogDebug(browser, "nodeType: '" + nodeType + "'");
-		const int id = msg->GetArgumentList()->GetInt(0);
+		const int id = msg->GetArgumentList()->GetInt(1);
+		// msg->args[0] == nodeType as number, but not used here!
 
 		// Fetch node type's attribute description
 		std::vector<const std::vector<DOMAttribute>* > description;
 		std::string js_obj_getter_name;
 
 		DOM::GetJSRepresentation(nodeType, description, js_obj_getter_name); // TODO: nodeType string is currently a kind of a quick fix...
-
-		// DEBUG
-		//if (nodeType == "OverflowElementData")
-		//{
-		//	IPCLogDebug(browser, "OverflowElement desc.size()= " + std::to_string(description.size()));
-		//	for (const auto& desc : description)
-		//	{
-		//		for (const auto& attr : *desc)
-		//		{
-		//			IPCLogDebug(browser, std::to_string(attr));
-		//		}
-		//	}
-		//}
-		if (nodeType == "OverflowElementData")
-		{
-			int num_attr = 0;
-			for (const auto& d : description)
-			{
-				num_attr += d->size();
-			}
-			IPCLogDebug(browser, "#attr: " + std::to_string(num_attr));
-		}
-
 
 		if (description.size() == 0)
 		{
@@ -400,22 +378,10 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			{
 				for (const auto& attr : *desc)
 				{
-					//IPCLogDebug(browser, "Processing attr: " + std::to_string(attr) + " ... ");
-
-					if (nodeType == "OverflowElementData")
-						IPCLogDebug(browser, "attr: "+std::to_string(attr)+" #args: "+std::to_string(args->GetSize()));
-
 					CefRefPtr<CefListValue> listValue = V8ToCefListValue::ExtractAttributeData(attr, domObj, browser);
-					
-					//IPCLogDebug(browser, "... done");
 
 					args->SetList(args_count++, listValue);
 				}
-			}
-
-			//if(nodeType == "OverflowElementData")
-			{
-				IPCLogDebug(browser, nodeType+" -- msg->args->size(): " + std::to_string(args->GetSize()));
 			}
 
 			browser->SendProcessMessage(PID_BROWSER, reply);

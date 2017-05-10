@@ -109,6 +109,7 @@ void Tab::AddDOMTextInput(int id)
 {
 	std::shared_ptr<DOMTextInput> spNode = std::make_shared<DOMTextInput>(id);
 
+
 	// Add node to ID->node map
 	_TextInputMap.emplace(id, spNode);
 

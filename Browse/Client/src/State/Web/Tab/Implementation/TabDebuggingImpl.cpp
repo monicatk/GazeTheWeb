@@ -111,6 +111,8 @@ void Tab::DrawDebuggingOverlay() const
 		// Set rendering up for DOMTrigger
 		_upDebugLineQuad->GetShader()->UpdateValue("color", DOM_TRIGGER_DEBUG_COLOR);
 
+		// TODO: also implement for select fields
+
 		// Go over all TextInputTriggers
 		for (const auto& rNodeTriggerPair : _textInputTriggers)
 		{
@@ -123,15 +125,18 @@ void Tab::DrawDebuggingOverlay() const
 				if (!rDOMTrigger->GetDOMIsPasswordField()) // TODO: what is this? Different color for password fields?
 				{
 					renderRect(rRect, rDOMTrigger->GetDOMFixed());
+					//LogDebug("TabDebugImpl: Is trigger fixed? ", rDOMTrigger->GetDOMFixed());
 				}
 				else */
 				{
 					_upDebugLineQuad->GetShader()->UpdateValue("color", glm::vec3(0.0f, 1.f, 1.f));
 					renderRect(rRect, rDOMTrigger->GetDOMFixed());
+				
 					_upDebugLineQuad->GetShader()->UpdateValue("color", DOM_TRIGGER_DEBUG_COLOR);
 				}
 			}
 		}
+
 
 		// ### DOMTEXTLINKS ###
 
@@ -145,7 +150,10 @@ void Tab::DrawDebuggingOverlay() const
 			// Render rects
 			for (const auto rRect : rDOMTextLink->GetRects())
 			{
-				renderRect(rRect, rDOMTextLink->GetFixedId());
+				renderRect(
+					rRect, 
+					(rDOMTextLink->GetFixedId() >= 0)
+				);
 			}
 		}
 
@@ -155,7 +163,10 @@ void Tab::DrawDebuggingOverlay() const
 		{
 			const auto& rDOMTextLink = rIdNodePair.second;
 			if (rDOMTextLink->GetRects().size() > 1)
-				renderRect(rDOMTextLink->GetRects()[1], rDOMTextLink->GetFixedId());
+				renderRect(
+					rDOMTextLink->GetRects()[1], 
+					(rDOMTextLink->GetFixedId() >= 0)
+				);
 		}
 
 		// ### SELECT FIELDS ###
@@ -167,7 +178,10 @@ void Tab::DrawDebuggingOverlay() const
 			// Render rects
 			for (const auto rRect : rDOMSelectField->GetRects())
 			{
-				renderRect(rRect, rDOMSelectField->GetFixedId());
+				renderRect(
+					rRect, 
+					(rDOMSelectField->GetFixedId() >= 0)
+				);
 			}
 		}
 
@@ -195,7 +209,10 @@ void Tab::DrawDebuggingOverlay() const
 		{
 			const auto& rOverflowElement = rIdNodePair.second;
 			for (const auto& rect : rOverflowElement->GetRects())
-				renderRect(rect, rOverflowElement->GetFixedId());
+				renderRect(
+					rect,
+					(rOverflowElement->GetFixedId() >= 0)
+				);
 		}
 	}
 

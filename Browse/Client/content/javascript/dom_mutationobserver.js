@@ -3,6 +3,8 @@
 // Author: Daniel Mueller (muellerd@uni-koblenz.de)
 //============================================================================
 
+window.debugging = true
+
 window.domLinks = [];
 window.domTextInputs = [];
 window.domSelectFields = [];
@@ -128,8 +130,12 @@ function CutOutRect(target, overlay)
 function GetNextOverflowParent(node)
 {
     var parent = node.parentNode;
-    while(parent !== null || parent === document.documentElement)
+    while(parent !== null || parent !== undefined) // redundant? || parent === document.documentElement)
     {
+        // DEBUG
+        if(parent === null)
+            break;
+
         if(parent.nodeType === 1)
         {
             // style.overflow = {visible|hidden|scroll|auto|initial|inherit}
@@ -159,6 +165,7 @@ function DOMObject(node, nodeType)
         this.overflowParent = undefined;
         this.text = "";
         this.isPassword = false;
+        this.getRectsCount = 0;
 
     /* Methods */ 
         // Update member variable for Rects and return true if an update has occured 
@@ -183,9 +190,9 @@ function DOMObject(node, nodeType)
             // Easy to handle 'collisions' on each overlay's rendering frame, annoying in JS when scrolling
             if(this.nodeType !== 0 && !this.node.hasAttribute("childFixedId"))
             {
-                for(var i = 0; i < domFixedElements.length; i++)
+                for(var i = 0; i < window.domFixedElements.length; i++)
                 {
-                    var fixedObj = domFixedElements[i];
+                    var fixedObj = window.domFixedElements[i];
                     if(fixedObj !== null && fixedObj !== undefined)
                     {
                         updatedRectsData.map(
@@ -215,7 +222,7 @@ function DOMObject(node, nodeType)
             }
 
             // Also, update text content if input field
-            if(this.nodeType == 0)   // Only needed for text inputs
+            if(this.nodeType === 0)   // Only needed for text inputs
             {
                 this.updateText();
             }
@@ -229,6 +236,10 @@ function DOMObject(node, nodeType)
 
         // Returns float[4] for each Rect with adjusted coordinates
         this.getRects = function(){
+            // Update rects before returning them 
+            // NOTE: Not that much additional overhead because it will only be called from C++ when e.g. creating a node?
+            this.updateRects();
+
             if(this.overflowParent !== null && this.overflowParent !== undefined) 
             {
                 var id = this.overflowParent.getAttribute("overflowId");
@@ -279,7 +290,16 @@ function DOMObject(node, nodeType)
 
         // TODO: newly added - everything ok?
         this.getFixedId = function(){
-            return this.node.getAttribute("fixedId") | this.node.getAttribute("childFixedId");
+            if(this.node === null || this.node === undefined || this.node.nodeType !== 1)
+                return -1;
+
+            fixedId = this.node.getAttribute("fixedId");
+            if(fixedId !== null) return fixedId;
+
+            childFixedId = this.node.getAttribute("childFixedId");
+            if(childFixedId !== null) return childFixedId;
+
+            return -1;
         }
 
          // TODO: newly added - everything ok?
@@ -909,7 +929,10 @@ function OverflowElement(node)
             return this.node.getAttribute("fixedId") | this.node.getAttribute("childFixedId");
         }
         this.getOverflowId = function(){
-            return (this.overflowParent !== null) ? this.overflowParent.getAttribute("overflowId") : -1;
+            return -1;
+            // var val = (this.overflowParent !== null) ? this.overflowParent.getAttribute("overflowId") : -1;
+            // ConsolePrint("OverflowElement::getOverflowId: returning "+val);
+            // return (this.overflowParent !== null) ? this.overflowParent.getAttribute("overflowId") : -1;
         }
         this.getMaxScrolling = function(){
             return [this.getMaxTopScrolling(), this.getMaxLeftScrolling()];
@@ -990,7 +1013,6 @@ function OverflowElement(node)
 
         this.getRects = function(){
             // TODO: Also check if maximal scrolling limits changed if Rect width or height changed
-            ConsolePrint("OverflowElement getRects: "+this.rects);
             return this.rects;
         }
 

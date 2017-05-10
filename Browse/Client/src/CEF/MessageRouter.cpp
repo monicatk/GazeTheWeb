@@ -40,6 +40,8 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	// ### Favicon ###
 	// ###############
 
+	//LogDebug("requestString=", requestString);
+
 	if (requestString == "faviconBytesReady")
 	{
 		// Logging
@@ -180,7 +182,10 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				case(1) : ipcName = "Link"; break;
 				case(2) : ipcName = "SelectField"; break;
 				case(3) : ipcName = "OverflowElement"; break;
-				default: LogError(browser, "MsgRouter: - ERROR: Unknown numeric DOM node type value: ", type);
+				default: {
+					LogError(browser, "MsgRouter: - ERROR: Unknown numeric DOM node type value: ", type);
+					return true;
+				}
 				}
 
 				// Instruct Renderer Process to initialize empty DOM Nodes with data
@@ -227,13 +232,25 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					const std::string& attrData = data[5];
 
 					// Perform node update
+					bool success = false;
 					if (auto node = target.lock())
 					{
-						node->Update(
+						success = node->Update(
 							(DOMAttribute) attr,
 							StringToCefListValue::ExtractAttributeData((DOMAttribute) attr, attrData)
 						);
 					}
+					else
+					{
+						LogError("MsgRouter: Failed to access node with type: ", type, " and id: ", id, "stored in"\
+							" Tab with id: ", browser->GetIdentifier(), ")");
+					}
+					
+					if (!success)
+					{
+						LogError("MsgRouter: Update failed! Node type: ", type, ", node id: ", id, ", DOMAttribute: ", attr);
+					}
+
 				}
 				else
 				{

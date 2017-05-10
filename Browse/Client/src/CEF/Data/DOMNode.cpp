@@ -35,7 +35,7 @@ int DOMNode::Initialize(CefRefPtr<CefProcessMessage> msg)
 			CefRefPtr<CefListValue> data = args->GetList(i + 1);	
 			if (!Update(_description[i], data))
 			{
-				LogError("DOMNode: Failed to assign value of type ", args->GetValue(i + 1)->GetType(),
+				LogError("DOMNode: Failed to assign value of type ", data->GetType(0),
 					" to attribute ", _description[i], "!");
 			}
 		}
@@ -44,18 +44,20 @@ int DOMNode::Initialize(CefRefPtr<CefProcessMessage> msg)
 }
 
 bool DOMNode::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
-{
+{	
 	switch (attr) {
 		case DOMAttribute::Rects:			return IPCSetRects(data);
 		case DOMAttribute::FixedId:			return IPCSetFixedId(data);
 		case DOMAttribute::OverflowId:		return IPCSetOverflowId(data);
 	}
+
 	LogError("DOMNode: Could not find attribute ", attr, " in order to assign data");
 	return false;
 }
 
 bool DOMNode::IPCSetRects(CefRefPtr<CefListValue> data)
 {
+
 	if (data->GetSize() > 0  && data->GetValue(0)->GetType() != CefValueType::VTYPE_LIST)
 		return false;
 
@@ -208,17 +210,15 @@ bool DOMLink::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 		case DOMAttribute::Text:	return IPCSetText(data);
 		case DOMAttribute::Url:		return IPCSetUrl(data);
 	}
+
+
 	return super::Update(attr, data);
 }
 
 bool DOMLink::IPCSetText(CefRefPtr<CefListValue> data)
 {
 	if (data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_STRING)
-	{
-		LogDebug("data->type: ", data->GetValue(0)->GetType());
-		LogDebug("deeper type: ", data->GetList(0)->GetType(0));
 		return false;
-	}
 
 	SetText(data->GetString(0));
 	return true;
@@ -299,6 +299,7 @@ const std::vector<DOMAttribute> DOMOverflowElement::_description = {
 
 int DOMOverflowElement::Initialize(CefRefPtr<CefProcessMessage> msg)
 {
+
 	// First list element to start interpretation as this class's attributes
 	int pivot = super::Initialize(msg);
 
@@ -316,17 +317,18 @@ int DOMOverflowElement::Initialize(CefRefPtr<CefProcessMessage> msg)
 
 			if (!Update(_description[i], data))
 			{
-				LogError("OverflowElement: Failed to assign value of type ", args->GetValue(i + 1)->GetType(),
+				LogError("OverflowElement: Failed to assign value of type ", data->GetType(0),
 					" to attribute ", _description[i], "!");
 			}
 		}
 	}
+
+
 	return _description.size() + pivot;
 }
 
 bool DOMOverflowElement::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 {
-	LogDebug("DOMOverflowElement: Updating attr: ", (int)attr);
 	switch (attr) {
 	case DOMAttribute::MaxScrolling:		return IPCSetMaxScrolling(data);
 	case DOMAttribute::CurrentScrolling:	return IPCSetCurrentScrolling(data);
@@ -336,19 +338,27 @@ bool DOMOverflowElement::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 
 bool DOMOverflowElement::IPCSetMaxScrolling(CefRefPtr<CefListValue> data)
 {
-	if(data->GetSize() <= 0 || data->GetType(0) != CefValueType::VTYPE_INT || data->GetType(1) != CefValueType::VTYPE_INT)
+	if (data->GetSize() < 1)
 		return false;
 
-	SetMaxScrolling(data->GetValue(0)->GetInt(), data->GetValue(1)->GetInt());
+	CefRefPtr<CefListValue> list = data->GetList(0);
+	if (list->GetSize() < 2 || list->GetType(0) != CefValueType::VTYPE_INT || list->GetType(1) != CefValueType::VTYPE_INT)
+		return false;
+
+	SetMaxScrolling(list->GetInt(0), list->GetInt(1));
 	return true;
 }
 
 bool DOMOverflowElement::IPCSetCurrentScrolling(CefRefPtr<CefListValue> data)
 {
-	if (data->GetSize() <= 0 || data->GetType(0) != CefValueType::VTYPE_INT || data->GetType(1) != CefValueType::VTYPE_INT)
+	if (data->GetSize() < 1) 
 		return false;
 
-	SetCurrentScrolling(data->GetValue(0)->GetInt(), data->GetValue(1)->GetInt());
+	CefRefPtr<CefListValue> list = data->GetList(0);
+	if (list->GetSize() < 2 || list->GetType(0) != CefValueType::VTYPE_INT || list->GetType(1) != CefValueType::VTYPE_INT)
+		return false;
+
+	SetCurrentScrolling(list->GetInt(0), list->GetInt(1));
 	return true;
 }
 void DOM::GetJSRepresentation(

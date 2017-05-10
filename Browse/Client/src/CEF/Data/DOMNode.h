@@ -15,6 +15,7 @@
 #include <string>
 #include <memory>
 #include <include/cef_process_message.h>
+#include <functional> // for debugging purposes at the moment
 
 namespace DOM
 {
@@ -111,7 +112,7 @@ private:
 	bool IPCSetPassword(CefRefPtr<CefListValue> data);
 
 	static const std::vector<DOMAttribute> _description;
-	std::string _text = NULL;
+	std::string _text = "";
 	bool _isPassword = false;
 };
 
