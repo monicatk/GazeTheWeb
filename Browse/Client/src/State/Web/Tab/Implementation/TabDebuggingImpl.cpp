@@ -121,7 +121,7 @@ void Tab::DrawDebuggingOverlay() const
 			{
 				if (!rDOMTrigger->GetDOMIsPasswordField())
 				{
-					renderRect(rRect, (rDOMTrigger->GetDOMFixed() >= 0));
+					renderRect(rRect, rDOMTrigger->GetDOMFixed());
 					//LogDebug("TabDebugImpl: Is trigger fixed? ", rDOMTrigger->GetDOMFixed());
 				}
 				else

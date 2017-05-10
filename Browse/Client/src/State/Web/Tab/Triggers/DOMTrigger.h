@@ -38,7 +38,7 @@ public:
     std::vector<Rect> GetDOMRects() const { return _spNode->GetRects(); }
 
     // Get whether DOMNode is marked as fixed
-    bool GetDOMFixed() const { return _spNode->GetFixedId(); }
+    bool GetDOMFixed() const { return (_spNode->GetFixedId() >= 0); }
 
 	// Identify input field as password input or not
 	bool GetDOMIsPasswordField() const { return _spNode->IsPasswordField(); } // NOTE: Only DOMTextInput objects contain this method
