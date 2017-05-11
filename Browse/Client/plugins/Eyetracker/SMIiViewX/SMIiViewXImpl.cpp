@@ -5,7 +5,7 @@
 
 #include "plugins/Eyetracker/Interface/Eyetracker.h"
 #include "plugins/Eyetracker/Common/EyetrackerData.h"
-#include "plugins/Eyetracker/SMIiViewX/iViewX/include/iViewXAPI.h"
+#include "iViewXAPI.h"
 #include <algorithm>
 
 int __stdcall SampleCallbackFunction(SampleStruct sampleData)

@@ -5,7 +5,7 @@
 
 #include "plugins/Eyetracker/Interface/Eyetracker.h"
 #include "plugins/Eyetracker/Common/EyetrackerData.h"
-#include "plugins/Eyetracker/TobiiEyeX/TobiiEyeXSDK/include/eyex/EyeX.h"
+#include "eyex/EyeX.h"
 
 // Global variables
 TX_CONTEXTHANDLE Context = TX_EMPTY_HANDLE;

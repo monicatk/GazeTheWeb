@@ -5,7 +5,7 @@
 
 #include "plugins/Eyetracker/Interface/Eyetracker.h"
 #include "plugins/Eyetracker/Common/EyetrackerData.h"
-#include "plugins/Eyetracker/SMImyGaze/mygaze/include/myGazeAPI.h"
+#include "myGazeAPI.h"
 #include <algorithm>
 
 int __stdcall SampleCallbackFunction(SampleStruct sampleData)
