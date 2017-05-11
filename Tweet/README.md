@@ -19,11 +19,13 @@ To activate the console, add "-console" to the call arguments of the application
 ESC: Exit application
 
 ## Dependencies
-All necessary dependencies are provided in the _externals_ folder.
+For support of your eye tracking device, install the corresponding SDK as listed below.
+* iViewX SDK: Connection to the iViewX SDK, copyright SMI GmbH (http://www.smivision.com)
+* TobiiEyeX SDK: Connection to Tobii EyeX SDK, copyright Tobii Technology AB (http://developer.tobii.com/eyex-sdk)
+
+Dependencies below are provided in the _externals_ folder.
 * GLM: http://glm.g-truc.net/0.9.7/index.html (MIT license chosen)
 * GLFW3: http://www.glfw.org
-* iViewX: Connection to the iViewX SDK, copyright SMI GmbH (http://www.smivision.com)
-* TobiiEyeX: Connection to Tobii EyeX SDK, copyright Tobii Technology AB (http://developer.tobii.com/eyex-sdk)
 * twitCurl: https://github.com/swatkat/twitcurl
 * RapidJSON: https://github.com/miloyip/rapidjson
 * Autocomplete with Trie: https://github.com/vivekn/autocomplete

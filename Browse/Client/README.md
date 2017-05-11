@@ -57,7 +57,7 @@ A file named _log.txt_ is created at binary folder containing information about 
 ![Tab Overview](media/Screenshot-D.png)
 
 ## Dependencies
-All necessary dependencies are provided in the __externals__, __submodules__ or within the corresponding __plugins__ folder.
+Dependencies are provided in the __externals__ and __submodules__ folder.
 
 __externals__:
 * liblsl: https://github.com/sccn/labstreaminglayer
@@ -72,14 +72,19 @@ __submodules__:
 * spdlog: https://github.com/gabime/spdlog
 * text-csv: https://github.com/roman-kashitsyn/text-csv
 
+In order to build the eye tracker plugins, one must provide the pathes to the locally installed SDKs. There are following plugins in the __plugins__ folder available.
+
 __plugins__/Eyetracker/SMIiViewX:
-* iViewX: Connection to the iViewX SDK, copyright SMI GmbH (http://www.smivision.com)
+* Connection to the iViewX SDK, copyright SMI GmbH (http://www.smivision.com)
+
+__plugins__/Eyetracker/VImyGaze:
+* Connection to the myGaze SDK, copyright Visual Interaction GmbH (http://www.mygaze.com)
 
 __plugins__/Eyetracker/TobiiEyeX:
-* TobiiEyeX: Connection to Tobii EyeX SDK, copyright Tobii Technology AB (http://developer.tobii.com/eyex-sdk)
+* Connection to Tobii EyeX SDK, copyright Tobii Technology AB (http://developer.tobii.com/eyex-sdk)
 
 ## License
->Copyright 2016 Raphael Menges and Daniel Müller
+>Copyright 2017 Raphael Menges and Daniel Müller
 
 >Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
