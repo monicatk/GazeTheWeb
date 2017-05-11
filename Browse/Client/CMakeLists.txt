@@ -36,9 +36,11 @@ endif()
 set(EYETRACKER_PLUGIN_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/plugins/Eyetracker")
 
 # Plugin for SMI iViewX
-# if(EXISTS ${CLIENT_SMI_IVIEWX_SDK_PATH})
-	if(${CLIENT_BUILD_SMI_IVIEWX_PLUGIN})
+if(${CLIENT_BUILD_SMI_IVIEWX_PLUGIN})
 
+	# Check for SDK path
+	if(EXISTS ${CLIENT_SMI_IVIEWX_SDK_PATH})
+	
 		# SMI iViewX SDK
 		include_directories("${CLIENT_SMI_IVIEWX_SDK_PATH}/include")
 		set(SMI_IVIEWX_SDK_LIBRARIES "${CLIENT_SMI_IVIEWX_SDK_PATH}/iViewXAPI.lib")
@@ -57,14 +59,18 @@ set(EYETRACKER_PLUGIN_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/plugins/Eyetracker")
 
 		# Tell user about it
 		message("Plugin for SMI iViewX will be built.")
-		
+	
+	else()
+		message("SMI iViewX SDK directory not found, plugin will be *not* built.")
 	endif()
-# endif()
+endif()
 
 # Plugin for Visual Interaction myGaze
-# if(EXISTS ${CLIENT_VI_MYGAZE_SDK_PATH})
-	if(${CLIENT_BUILD_SMI_MYGAZE_PLUGIN})
+if(${CLIENT_BUILD_VI_MYGAZE_PLUGIN})
 
+	# Check for SDK path
+	if(EXISTS ${CLIENT_VI_MYGAZE_SDK_PATH})
+	
 		# Visual Interaction myGaze SDK
 		include_directories("${CLIENT_VI_MYGAZE_SDK_PATH}/include")
 		set(VI_MYGAZE_SDK_LIBRARIES "${CLIENT_VI_MYGAZE_SDK_PATH}/myGazeAPI.lib")
@@ -83,14 +89,17 @@ set(EYETRACKER_PLUGIN_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/plugins/Eyetracker")
 
 		# Tell user about it
 		message("Plugin for Visual Interaction myGaze will be built.")
-		
+	else()
+		message("Visual Interaction myGaze SDK directory not found, plugin will be *not* built.")
 	endif()
-# endif()
+endif()
 
 # Plugin for Tobii EyeX
-# if(EXISTS ${CLIENT_TOBII_EYEX_SDK_PATH})
-	if(${CLIENT_BUILD_TOBII_EYEX_PLUGIN})
+if(${CLIENT_BUILD_TOBII_EYEX_PLUGIN})
 
+	# Check for SDK path
+	if(EXISTS ${CLIENT_TOBII_EYEX_SDK_PATH})
+	
 		# Tobii EyeX SDK
 		include_directories("${CLIENT_TOBII_EYEX_SDK_PATH}/include")
 		set(TOBII_EYEX_SDK_LIBRARIES "${CLIENT_TOBII_EYEX_SDK_PATH}/lib/x86/Tobii.EyeX.Client.lib")
@@ -115,9 +124,11 @@ set(EYETRACKER_PLUGIN_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/plugins/Eyetracker")
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			"${CLIENT_TOBII_EYEX_SDK_PATH}/lib/x86/Tobii.EyeX.Client.dll"
 			$<TARGET_FILE_DIR:TobiiEyeXPlugin>)
-			
+	
+	else()
+		message("TobiiEyeX SDK directory not found, plugin will be *not* built.")
 	endif()
-# endif()
+endif()
 
 ### CONTENT ####################################################################
 
