@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <conio.h>
 #include <assert.h>
-#include "externals/TobiiEyeXSDK/include/eyex/EyeX.h"
+#include "eyex/EyeX.h"
 
 #pragma comment (lib, "Tobii.EyeX.Client.lib")
 
