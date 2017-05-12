@@ -6,6 +6,9 @@ Twitter application controlled with gaze, part of the EU-funded research project
 
 ![Logo](media/Screenshot.png)
 
+## Videos
+* [Demonstration](https://www.youtube.com/watch?v=NQQfB7nf3qw)
+
 ## Developers
 The application was designed and developed by the students who participated in the research lab:
 Svenja Neuneier, Dennis Hahn, Caterine Ospina Ocampo, Sergei Diez, Saskia Handabura, Kim Ballmes, Wojciech Kwasnik, Benjamin Stephan, Eike Idczak, Matthias Barde, Annika Wießgügel and Philipp Weber
