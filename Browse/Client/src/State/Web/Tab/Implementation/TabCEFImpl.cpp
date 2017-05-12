@@ -109,7 +109,6 @@ void Tab::AddDOMTextInput(int id)
 {
 	std::shared_ptr<DOMTextInput> spNode = std::make_shared<DOMTextInput>(id);
 
-
 	// Add node to ID->node map
 	_TextInputMap.emplace(id, spNode);
 
@@ -138,9 +137,8 @@ void Tab::AddDOMSelectField(int id)
 	// Add node to ID->node map
 	_SelectFieldMap.emplace(id, spNode);
 
-	/*
-	// Create DOMTrigger // TODO(Raphael): Add SelectField DOMTrigger class :)
-	std::unique_ptr<DOMTrigger> upDOMTrigger = std::unique_ptr<DOMTrigger>(new DOMTrigger(this, spNode));
+	// Create DOMTrigger
+	std::unique_ptr<SelectFieldTrigger> upDOMTrigger = std::unique_ptr<SelectFieldTrigger>(new SelectFieldTrigger(this, _triggers, spNode));
 
 	// Activate trigger
 	if (!_pipelineActive)
@@ -148,10 +146,8 @@ void Tab::AddDOMSelectField(int id)
 		upDOMTrigger->Activate();
 	}
 
-	
-	// Push it to vector
-	_DOMTriggers.emplace(std::weak_ptr<DOMNode>(spNode), std::move(upDOMTrigger));	// TODO: Can Trigger really be deleted if they hold a shared_ptr to the same DOMNode?
-	*/
+	// Place trigger in map
+	_selectFieldTriggers.emplace(id, std::move(upDOMTrigger));
 }
 
 void Tab::AddDOMOverflowElement(int id)
@@ -190,6 +186,7 @@ void Tab::ClearDOMNodes()
 
 	// Clear vector with triggers
 	_textInputTriggers.clear();
+	_selectFieldTriggers.clear();
 
 	// Clear ID->node maps
 	_TextLinkMap.clear();
