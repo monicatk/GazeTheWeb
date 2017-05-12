@@ -180,8 +180,9 @@ include_directories("${EYEGUI_DIRECTORY}/include")
 
 if (${USEEYETRACKER})
 
-	if (${USETOBII})
-		set(TOBII_DIRECTORY "C:/TobiiEyeXSDK-CPP/TobiiEyeXSDK")
+	if (${USETOBII}) # EyeX
+	
+		set(TOBII_DIRECTORY "C:/TobiiEyeXSDK-CPP/TobiiEyeXSDK" CACHE PATH "Path to TobiiEyeX SDK.")
 		set(TOBII_LIBRARIES_DIRECTORY "${TOBII_DIRECTORY}/lib/x86")
 		find_library(TOBII_LIBRARIES
 			NAMES Tobii.EyeX.Client
@@ -190,10 +191,15 @@ if (${USEEYETRACKER})
 
 		include_directories("${TOBII_DIRECTORY}/include")
 		add_definitions(-DUSEEYETRACKER_TOBII)
+		
+		add_custom_command(TARGET ${APPNAME} PRE_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		"${TOBII_LIBRARIES_DIRECTORY}/x86/Tobii.EyeX.Client.dll"
+		$<TARGET_FILE_DIR:${APPNAME}>)
 
 	else() # iViewX
 
-		set(IVIEW_DIRECTORY "C:/Program Files (x86)/SMI/iView X SDK")
+		set(IVIEW_DIRECTORY "C:/Program Files (x86)/SMI/iView X SDK" CACHE PATH "Path to iViewX SDK.")
 		set(IVIEW_LIBRARIES_DIRECTORY "${IVIEW_DIRECTORY}/lib")
 		find_library(IVIEW_LIBRARIES
 			NAMES iViewXAPI
@@ -223,10 +229,6 @@ if(WIN32)
 	add_custom_command(TARGET ${APPNAME} PRE_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		"${CMAKE_SOURCE_DIR}/externals/twitcurl/ssleay32.dll"
-		$<TARGET_FILE_DIR:${APPNAME}>)
-	add_custom_command(TARGET ${APPNAME} PRE_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		"${TOBII_LIBRARIES_DIRECTORY}/x86/Tobii.EyeX.Client.dll"
 		$<TARGET_FILE_DIR:${APPNAME}>)
 
 endif(WIN32)
