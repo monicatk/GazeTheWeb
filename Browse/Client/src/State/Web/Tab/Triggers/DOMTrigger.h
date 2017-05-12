@@ -129,8 +129,12 @@ bool DOMTrigger<T>::Update(float tpf, TabInput& rTabInput)
 	// Tell it floating frame
 	_pTab->SetPositionOfFloatingFrameInOverlay(_overlayFrameIndex, x, y);
 
+	// Remember about being triggered
+	bool triggered = _triggered;
+	_triggered = false;
+
 	// Return true whether triggered
-	return _triggered;
+	return triggered;
 }
 
 template <class T>
