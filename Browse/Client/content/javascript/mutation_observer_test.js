@@ -558,10 +558,19 @@ function AnalyzeNode(node)
 		if(node.tagName === "DIV" && rect.width > 0 && rect.height > 0)
 		{
 			var overflow = computedStyle.getPropertyValue("overflow");
-			if(overflow === "auto" || overflow === "scroll")
+			if(overflow === "scroll" || overflow == "auto")
 			{
 				CreateOverflowElement(node);
 			}
+			// else if (overflow === "auto")
+			// {
+			// 	// TODO: Element size might change over time! Keep node as potential overflow in mind?
+			// 	// OR add it anyway and only scroll if height and scroll height aren't the same?
+			// 	if(node.scrollHeight !== rect.height || node.scrollWidth !== rect.width)
+			// 	{
+			// 		CreateOverflowElement(node);
+			// 	}
+			// }
 			else
 			{
 				var overflowX = computedStyle.getPropertyValue("overflow-x");

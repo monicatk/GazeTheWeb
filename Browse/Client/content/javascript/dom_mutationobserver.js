@@ -920,14 +920,24 @@ function OverflowElement(node)
         this.rects = AdjustClientRects(this.node.getClientRects());
         this.fixed = false;
         this.overflowParent = GetNextOverflowParent(node);  // TODO: This should be performed by MutationObserver in order to be efficient!
-
+        this.nodeType = 3
         // this.overflowParent = undefined;
 
 
         // TODO: Quick fix! Getter should make sense later! Or do they already? :p
         this.getFixedId = function(){
-            return this.node.getAttribute("fixedId") | this.node.getAttribute("childFixedId");
+            if(this.node === null || this.node === undefined || this.node.nodeType !== 1)
+                return -1;
+
+            fixedId = this.node.getAttribute("fixedId");
+            if(fixedId !== null) return fixedId;
+
+            childFixedId = this.node.getAttribute("childFixedId");
+            if(childFixedId !== null) return childFixedId;
+
+            return -1;
         }
+
         this.getOverflowId = function(){
             return -1;
             // var val = (this.overflowParent !== null) ? this.overflowParent.getAttribute("overflowId") : -1;

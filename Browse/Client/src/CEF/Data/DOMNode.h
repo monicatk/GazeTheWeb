@@ -51,6 +51,7 @@ public:
 	std::vector<Rect> GetRects() const { return _rects; }
 	virtual int GetFixedId() const { return _fixedId; }
 	virtual int GetOverflowId() const { return _overflowId; }
+	virtual int IsFixed() const { return (_fixedId >= 0); }
 
 private:
 	void SetId(int id) { _id = id; }
