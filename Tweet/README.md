@@ -19,7 +19,7 @@ Use CMake to create a project either for Visual Studio 2015 or a Unix Makefile. 
 To activate the console, add "-console" to the call arguments of the application. Does only work on Windows.
 
 ## Shortcuts
-ESC: Exits application
+ESC: Exit application
 
 ## Dependencies
 For support of your eye tracking device, install the corresponding SDK as listed below:
