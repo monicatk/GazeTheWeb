@@ -42,7 +42,7 @@ static const unsigned int HISTORY_MAX_PAGE_COUNT = 100; // maximal length of his
 * Tab: Toggle pause
 
 ## Validation
-A file named _log.txt_ is created at binary folder containing information about current and last runs. If anything wents not as expected, one should take a look into it.
+A file named _log.txt_ is created in user folder (_~/AppData/Roaming/GazeTheWeb/Browse_ for Windows and _~/.config/GazeTheWeb/Browse_ for Linux), containing information about the current and last runs. If anything wents not as expected, one should take a look into it.
 
 ## Issues
 * eyeGUI / nanoSVG rendering of SVGs is not working correctly unter Ubuntu 16.04 in combination with Chromium Embedded Framework
@@ -72,15 +72,15 @@ __submodules__:
 * spdlog: https://github.com/gabime/spdlog
 * text-csv: https://github.com/roman-kashitsyn/text-csv
 
-In order to build the eye tracker plugins, one must provide the pathes to the locally installed SDKs. There are following plugins in the __plugins__ folder available.
+In order to build the eye tracker plugins, one must provide the pathes to the locally installed SDKs. There are following plugins available in the __plugins__ folder:
 
-__plugins__/Eyetracker/SMIiViewX:
+plugins/Eyetracker/SMIiViewX:
 * Connection to the iViewX SDK, copyright SMI GmbH (http://www.smivision.com)
 
-__plugins__/Eyetracker/VImyGaze:
+plugins/Eyetracker/VImyGaze:
 * Connection to the myGaze SDK, copyright Visual Interaction GmbH (http://www.mygaze.com)
 
-__plugins__/Eyetracker/TobiiEyeX:
+plugins/Eyetracker/TobiiEyeX:
 * Connection to Tobii EyeX SDK, copyright Tobii Technology AB (http://developer.tobii.com/eyex-sdk)
 
 ## License
