@@ -16,7 +16,7 @@ When submodules are updated, one has to execute this manual update call again.
 ## Projects
 There are multiple subprojects in this repository:
 * [**Browse**](Browse) Web browser controlled by your gaze
-* [**Tweet**](Tweet) Twitter application developed by students in research lab *(no longer in development)*
+* [**Tweet**](Tweet) Gaze-controlled Twitter application *(no longer in development)*
 
 Visit the [**wiki**](https://github.com/MAMEM/GazeTheWeb/wiki) for troubleshooting.
 
