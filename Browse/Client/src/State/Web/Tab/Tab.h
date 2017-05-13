@@ -26,6 +26,7 @@
 #include "src/State/Web/Tab/WebView.h"
 #include "src/State/Web/Tab/Pipelines/Pipeline.h"
 #include "src/State/Web/Tab/Triggers/TextInputTrigger.h"
+#include "src/State/Web/Tab/Triggers/SelectFieldTrigger.h"
 #include "src/Utils/glmWrapper.h"
 #include "src/Utils/Input.h"
 #include "src/Global.h"
@@ -463,6 +464,7 @@ private:
 
     // Maps of triggers. Remember to add clearing in "ClearDOMNodes"
 	std::map<int, std::unique_ptr<TextInputTrigger> >_textInputTriggers;
+	std::map<int, std::unique_ptr<SelectFieldTrigger> >_selectFieldTriggers;
 	
 	// Collection of all triggers
 	std::vector<Trigger*> _triggers;

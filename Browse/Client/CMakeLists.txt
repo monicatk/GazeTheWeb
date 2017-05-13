@@ -61,7 +61,7 @@ if(${CLIENT_BUILD_SMI_IVIEWX_PLUGIN})
 		message("Plugin for SMI iViewX will be built.")
 	
 	else()
-		message("SMI iViewX SDK directory not found, plugin will be *not* built.")
+		message("SMI iViewX SDK directory not found, plugin will *not* be built.")
 	endif()
 endif()
 
@@ -90,7 +90,7 @@ if(${CLIENT_BUILD_VI_MYGAZE_PLUGIN})
 		# Tell user about it
 		message("Plugin for Visual Interaction myGaze will be built.")
 	else()
-		message("Visual Interaction myGaze SDK directory not found, plugin will be *not* built.")
+		message("Visual Interaction myGaze SDK directory not found, plugin will *not* be built.")
 	endif()
 endif()
 
@@ -126,7 +126,7 @@ if(${CLIENT_BUILD_TOBII_EYEX_PLUGIN})
 			$<TARGET_FILE_DIR:TobiiEyeXPlugin>)
 	
 	else()
-		message("TobiiEyeX SDK directory not found, plugin will be *not* built.")
+		message("TobiiEyeX SDK directory not found, plugin will *not* be built.")
 	endif()
 endif()
 
