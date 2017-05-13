@@ -18,7 +18,7 @@ if(OS_WINDOWS) # Windows
 	
 	# Tobii EyeX
 	set(CLIENT_BUILD_TOBII_EYEX_PLUGIN ON CACHE BOOL "Build plugin for Tobii EyeX.")
-	set(CLIENT_TOBII_EYEX_SDK_PATH "C:/TobiiEyeXSDK-CPP/TobiiEyeXSDK" CACHE PATH "Path to TobiiEyeX SDK.")
+	set(CLIENT_TOBII_EYEX_SDK_PATH "C:/TobiiEyeXSDK-CPP/TobiiEyeXSDK" CACHE PATH "Path to Tobii EyeX SDK.")
 	
 endif()
 
@@ -126,7 +126,7 @@ if(${CLIENT_BUILD_TOBII_EYEX_PLUGIN})
 			$<TARGET_FILE_DIR:TobiiEyeXPlugin>)
 	
 	else()
-		message("TobiiEyeX SDK directory not found, plugin will *not* be built.")
+		message("Tobii EyeX SDK directory not found, plugin will *not* be built.")
 	endif()
 endif()
 
