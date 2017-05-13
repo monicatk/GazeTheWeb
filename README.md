@@ -1,6 +1,6 @@
+<img align="right" src="Browse/media/Award.jpg"/>
 # GazeTheWeb
 Software repository of the nstitute for Web Science and Technologies at University of Koblenz-Landau in context of MAMEM, for accesing the Web using eye and mind. 
-<img align="right" src="Browse/media/Award.jpg"/>
 
 ## Cloning
 This project uses Git submodules. Please check it out using:
