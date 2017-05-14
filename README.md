@@ -1,7 +1,7 @@
 <img align="right" src="Browse/media/Award.jpg"/>
 
 # GazeTheWeb
-Software repository of GazeTheWeb project, for accesing the Web using eye and mind.
+Software to access the Web using eyes and mind.
 
 ## Cloning
 This project uses Git submodules. Please check it out using:
