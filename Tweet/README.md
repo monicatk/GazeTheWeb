@@ -2,7 +2,7 @@
 
 ![Logo](media/Logo.png)
 
-Twitter application controlled with gaze, part of the EU-funded research project MAMEM. Developed as part of a research lab supervised by Dr. Chandan Kumar and Raphael Menges. Application builds on Windows with Visual Studio 2015 as 32bit project or on Linux with GCC 5.x as 64bit project.
+Twitter application controlled with gaze, part of the EU-funded research project MAMEM. Developed as part of a research lab supervised by Dr. Chandan Kumar and Raphael Menges. Application builds on Windows with Visual Studio 2015 as 32bit project or on Linux with GCC 5.x as 64bit project. *[no longer in development]*
 
 ![Logo](media/Screenshot.png)
 
