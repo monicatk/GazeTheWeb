@@ -24,7 +24,7 @@ Settings::Settings(Master* pMaster) : State(pMaster)
 		LogInfo("Settings: No settings file found or parsing error");
 		saveSettings = true;
 	}
-	ApplySettings(saveSettings);
+	ApplySettings(saveSettings); // sets settings
 
 	// Create layouts
 	_pSettingsLayout = _pMaster->AddLayout("layouts/Settings.xeyegui", EYEGUI_SETTINGS_LAYER, false);
@@ -118,6 +118,27 @@ bool Settings::SaveSettings() const
 	pGazeVisualization->SetAttribute("visible", _globalSetup.showGazeVisualization ? "true" : "false");
 	pGlobal->InsertAfterChild(pDescriptions, pGazeVisualization);
 
+	// Keyboard layout
+	tinyxml2::XMLElement* pKeyboardLayout = doc.NewElement("keyboardlayout");
+	std::string layout;
+	switch (_globalSetup.keyboardLayout)
+	{
+	case eyegui::KeyboardLayout::US_ENGLISH:
+		layout = "US_ENGLISH";
+		break;
+	case eyegui::KeyboardLayout::GERMANY_GERMAN:
+		layout = "GERMANY_GERMAN";
+		break;
+	case eyegui::KeyboardLayout::ISRAEL_HEBREW:
+		layout = "ISRAEL_HEBREW";
+		break;
+	case eyegui::KeyboardLayout::GREECE_GREEK:
+		layout = "GREECE_GREEK";
+		break;
+	}
+	pKeyboardLayout->SetAttribute("layout", layout.c_str());
+	pGlobal->InsertAfterChild(pGazeVisualization, pKeyboardLayout);
+
 	// Create environment for web setup
 	tinyxml2::XMLNode* pWeb = doc.NewElement("web");
 	pRoot->InsertAfterChild(pGlobal, pWeb);
@@ -139,6 +160,7 @@ void Settings::ApplySettings(bool save)
 	// Global
 	_pMaster->SetShowDescriptions(_globalSetup.showDescriptions);
 	_pMaster->SetGazeVisualization(_globalSetup.showGazeVisualization);
+	_pMaster->SetKeyboardLayout(_globalSetup.keyboardLayout);
 
 	// Save it
 	if (save)
@@ -177,6 +199,29 @@ bool Settings::LoadSettings()
 	if (pGazeVisualization != NULL)
 	{
 		_globalSetup.showGazeVisualization = pGazeVisualization->BoolAttribute("visible");
+	}
+
+	// Keyboard layout
+	tinyxml2::XMLElement* pKeyboardLayout = pGlobal->FirstChildElement("keyboardlayout");
+	if (pKeyboardLayout != NULL)
+	{
+		std::string attribute = pKeyboardLayout->Attribute("layout");
+		if (attribute == "GERMANY_GERMAN")
+		{
+			_globalSetup.keyboardLayout = eyegui::KeyboardLayout::GERMANY_GERMAN;
+		}
+		else if (attribute == "ISRAEL_HEBREW")
+		{
+			_globalSetup.keyboardLayout = eyegui::KeyboardLayout::ISRAEL_HEBREW;
+		}
+		else if (attribute == "GREECE_GREEK")
+		{
+			_globalSetup.keyboardLayout = eyegui::KeyboardLayout::GREECE_GREEK;
+		}
+		else // "US_ENGLISH" as fallback if string is different
+		{
+			_globalSetup.keyboardLayout = eyegui::KeyboardLayout::US_ENGLISH;
+		}
 	}
 
 	// Fetch web setup

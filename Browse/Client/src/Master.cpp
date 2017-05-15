@@ -220,7 +220,6 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	guiBuilder.width = _width;
 	guiBuilder.height = _height;
 	guiBuilder.fontFilepath = "fonts/dejavu-sans/ttf/DejaVuSans.ttf";
-	guiBuilder.characterSet = eyegui::CharacterSet::US_ENGLISH;
 	guiBuilder.localizationFilepath = "localizations/English.leyegui";
 	guiBuilder.fontTallSize = 0.07f;
 

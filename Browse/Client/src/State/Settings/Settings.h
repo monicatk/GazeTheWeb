@@ -80,9 +80,10 @@ private:
 
         bool showDescriptions = true;
         bool showGazeVisualization = false;
+		eyegui::KeyboardLayout keyboardLayout = eyegui::KeyboardLayout::US_ENGLISH;
     };
 
-	// Setupt of web settings
+	// Setup of web settings
 	class WebSetup
 	{
 	public:
