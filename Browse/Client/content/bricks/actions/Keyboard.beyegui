@@ -64,10 +64,10 @@
 				<boxbutton switch="true" icon="icons/ExtraKeys.png" id="extra_keys" desckey="action_keyboard:extra_keys"/>
 				<dropbutton icon="icons/Layout.png" id="layout" desckey="action_keyboard:layout" space="75%">
 					<stack separator="0.25%">
-						<boxbutton icon="icons/Circle.png"/>
-						<boxbutton icon="icons/Circle.png"/>
-						<boxbutton icon="icons/Circle.png"/>
-						<boxbutton icon="icons/Circle.png"/>
+						<boxbutton icon="icons/LayoutUSEnglish.png" id="layout_us_english" desckey="action_keyboard:layout_us_english"/>
+						<boxbutton icon="icons/LayoutGermanyGerman.png" id="layout_germany_german" desckey="action_keyboard:layout_germany_german"/>
+						<boxbutton icon="icons/LayoutIsraelHebrew.png" id="layout_israel_hebrew" desckey="action_keyboard:layout_israel_hebrew"/>
+						<boxbutton icon="icons/LayoutGreeceGreek.png" id="layout_greece_greek" desckey="action_keyboard:layout_greece_greek"/>
 					</stack>
 				</dropbutton>
 				<boxbutton id="space" icon="icons/Empty.png" desckey="action_keyboard:space" relativescale="300%"/>
