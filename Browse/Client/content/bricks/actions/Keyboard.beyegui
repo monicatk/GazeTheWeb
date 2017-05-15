@@ -54,14 +54,24 @@
 	</row>
 	<row size="45%">
 		<column size="100%">
-			<keyboard style="tab_overlay_noback" id="keyboard"/>
+			<keyboard style="tab_overlay_noback" id="keyboard" border="1%"/>
 		</column>
 	</row>
 	<row size="10%">
 		<column size="100%">
-			<stack orientation="horizontal" separator="0.5%">
+			<stack orientation="horizontal" separator="0.25%">
 				<boxbutton switch="true" icon="icons/Shift.png" id="shift" desckey="action_keyboard:shift"/>
+				<boxbutton switch="true" icon="icons/ExtraKeys.png" id="extra_keys" desckey="action_keyboard:extra_keys"/>
+				<dropbutton icon="icons/Layout.png" id="layout" desckey="action_keyboard:layout" space="75%">
+					<stack separator="0.25%">
+						<boxbutton icon="icons/Circle.png"/>
+						<boxbutton icon="icons/Circle.png"/>
+						<boxbutton icon="icons/Circle.png"/>
+						<boxbutton icon="icons/Circle.png"/>
+					</stack>
+				</dropbutton>
 				<boxbutton id="space" icon="icons/Empty.png" desckey="action_keyboard:space" relativescale="300%"/>
+				<boxbutton icon="icons/DeleteAllCharacters.png" id="delete_all" desckey="action_keyboard:delete_all" style="dangerous"/>
 				<boxbutton icon="icons/NewLine.png" id="new_line" desckey="action_keyboard:new_line"/>
 			</stack>
 		</column>
