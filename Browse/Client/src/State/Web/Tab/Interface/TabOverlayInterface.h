@@ -7,6 +7,7 @@
 #ifndef TABOVERLAYINTERFACE_H_
 #define TABOVERLAYINTERFACE_H_
 
+#include "submodules/eyeGUI/include/eyeGUI.h"
 #include <string>
 #include <map>
 #include <memory>
@@ -97,6 +98,12 @@ public:
 
 	// Set activity of element
 	virtual void SetElementActivity(std::string id, bool active, bool fade) = 0;
+
+	// Tell button to go up
+	virtual void ButtonUp(std::string id) = 0;
+
+	// Set global keyboard layout
+	virtual void SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout) = 0;
 
 	// Getter for values of interest
 	virtual int GetWebViewX() const = 0;

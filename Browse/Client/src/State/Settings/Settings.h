@@ -41,6 +41,9 @@ public:
 	// Set homepage URL
 	void SetHomepage(std::string URL) { _webSetup.homepage = URL; ApplySettings(true); }
 
+	// Set global keyboard layout
+	void SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout) { _globalSetup.keyboardLayout = keyboardLayout, ApplySettings(true); }
+
 private:
 
 	// Apply and maybe save settings

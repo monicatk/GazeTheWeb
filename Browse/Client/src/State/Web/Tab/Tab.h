@@ -30,7 +30,6 @@
 #include "src/Utils/glmWrapper.h"
 #include "src/Utils/Input.h"
 #include "src/Global.h"
-#include "submodules/eyeGUI/include/eyeGUI.h"
 #include <vector>
 #include <deque>
 #include <memory>
@@ -185,6 +184,12 @@ public:
 
 	// Set activity of element
 	virtual void SetElementActivity(std::string id, bool active, bool fade);
+
+	// Tell button to go up
+	virtual void ButtonUp(std::string id);
+
+	// Set global keyboard layout
+	virtual void SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout);
 
 	// Getter for values of interest
 	virtual int GetWebViewX() const;

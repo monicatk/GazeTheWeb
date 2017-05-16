@@ -204,6 +204,16 @@ void Tab::SetElementActivity(std::string id, bool active, bool fade)
 	eyegui::setElementActivity(_pOverlayLayout, id, active, fade);
 }
 
+void Tab::ButtonUp(std::string id)
+{
+	eyegui::buttonUp(_pOverlayLayout, id, false);
+}
+
+void Tab::SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout)
+{
+	_pMaster->SetKeyboardLayout(keyboardLayout);
+}
+
 int Tab::GetWebViewX() const
 {
 	return _upWebView->GetX();

@@ -100,16 +100,22 @@ public:
 				: eyegui::DescriptionVisibility::HIDDEN));
 	}
 
-	// Set keyboard layout
-	void SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout)
-	{
-		eyegui::setKeyboardLayout(_pGUI, keyboardLayout);
-	}
-
 	// ### ACCESS OF SETTINGS ###
 
-	// Set homepage URL in settings
-	void SetHomepage(std::string URL) { _upSettings->SetHomepage(URL); }
+	// Store homepage URL in settings
+	void StoreHomepage(std::string URL) { _upSettings->SetHomepage(URL); }
+
+	// ### ACCESS OF SETTINGS AND EYEGUI ###
+
+	// Set global keyboard layout (TODO: split into settings call and eyeGUI, as otherwise cicle might occur)
+	void SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout)
+	{
+		// Tell it eyeGUI
+		eyegui::setKeyboardLayout(_pGUI, keyboardLayout);
+
+		// Store it in settings
+		_upSettings->SetKeyboardLayout(keyboardLayout);
+	}
 
 private:
 
