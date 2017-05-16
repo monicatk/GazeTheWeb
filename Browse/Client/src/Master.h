@@ -85,6 +85,13 @@ public:
 	void SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyFloat type, std::string value);
 	void SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyVec4 type, std::string value);
 
+	// Set global keyboard layout
+	void SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout)
+	{
+		// Tell it eyeGUI
+		eyegui::setKeyboardLayout(_pGUI, keyboardLayout);
+	}
+
 	// ### ACCESS BY SETTINGS ###
 
 	// Set gaze visualization (of super GUI)
@@ -100,21 +107,16 @@ public:
 				: eyegui::DescriptionVisibility::HIDDEN));
 	}
 
-	// ### ACCESS OF SETTINGS ###
+	// ### STORING OF SETTINGS ###
 
 	// Store homepage URL in settings
-	void StoreHomepage(std::string URL) { _upSettings->SetHomepage(URL); }
+	void StoreHomepage(std::string URL) { _upSettings->StoreHomepage(URL); }
 
-	// ### ACCESS OF SETTINGS AND EYEGUI ###
-
-	// Set global keyboard layout (TODO: split into settings call and eyeGUI, as otherwise cicle might occur)
-	void SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout)
+	// Set global keyboard layout
+	void StoreAndSetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout)
 	{
-		// Tell it eyeGUI
-		eyegui::setKeyboardLayout(_pGUI, keyboardLayout);
-
-		// Store it in settings
-		_upSettings->SetKeyboardLayout(keyboardLayout);
+		// Store it in settings (which calls then setter above)
+		_upSettings->StoreKeyboardLayout(keyboardLayout);
 	}
 
 private:

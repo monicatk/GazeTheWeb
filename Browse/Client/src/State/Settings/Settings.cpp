@@ -160,10 +160,7 @@ void Settings::ApplySettings(bool save)
 	// Global
 	_pMaster->SetShowDescriptions(_globalSetup.showDescriptions);
 	_pMaster->SetGazeVisualization(_globalSetup.showGazeVisualization);
-	
-	// TODO: if keyboard layout can be set from options, one cannot call "SetKeyboardLayout"
-	// in master from here, as it would call this again. Think of a better way in case you want
-	// to change it both from application and settings.
+	_pMaster->SetKeyboardLayout(_globalSetup.keyboardLayout);
 
 	// Save it
 	if (save)
