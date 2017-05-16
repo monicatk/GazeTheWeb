@@ -89,6 +89,9 @@ protected:
 	std::string _overlayHebrewLayoutId;
 	std::string _overlayGreekLayoutId;
 
+	// Id of extra keys keymap
+	std::string _overlayExtraKeyId;
+
     // Bool which indicates whether input is complete
     bool _complete = false;
 

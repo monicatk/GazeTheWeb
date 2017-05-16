@@ -61,8 +61,8 @@
 		<column size="100%">
 			<stack orientation="horizontal" separator="0.25%">
 				<boxbutton switch="true" icon="icons/Shift.png" id="shift" desckey="action_keyboard:shift"/>
-				<boxbutton switch="true" icon="icons/ExtraKeys.png" id="extra_keys" desckey="action_keyboard:extra_keys"/>
-				<dropbutton icon="icons/Layout.png" id="layout" desckey="action_keyboard:layout" space="75%">
+				<boxbutton switch="true" icon="icons/ExtraKeys.png" id="extra_keys" desckey="action_keyboard:extra_keys" relativescale="75%"/>
+				<dropbutton icon="icons/Layout.png" id="layout" desckey="action_keyboard:layout" space="75%" relativescale="75%">
 					<stack separator="0.25%">
 						<boxbutton icon="icons/LayoutUSEnglish.png" id="layout_us_english" desckey="action_keyboard:layout_us_english"/>
 						<boxbutton icon="icons/LayoutGermanyGerman.png" id="layout_germany_german" desckey="action_keyboard:layout_germany_german"/>
@@ -70,9 +70,9 @@
 						<boxbutton icon="icons/LayoutGreeceGreek.png" id="layout_greece_greek" desckey="action_keyboard:layout_greece_greek"/>
 					</stack>
 				</dropbutton>
-				<boxbutton id="space" icon="icons/Empty.png" desckey="action_keyboard:space" relativescale="300%"/>
+				<boxbutton id="space" icon="icons/Empty.png" desckey="action_keyboard:space" relativescale="200%"/>
 				<boxbutton icon="icons/DeleteAllCharacters.png" id="delete_all" desckey="action_keyboard:delete_all" style="dangerous"/>
-				<boxbutton icon="icons/NewLine.png" id="new_line" desckey="action_keyboard:new_line"/>
+				<boxbutton icon="icons/NewLine.png" id="new_line" desckey="action_keyboard:new_line"  relativescale="150%"/>
 			</stack>
 		</column>
 	</row>

@@ -105,6 +105,11 @@ void Tab::SetCaseOfKeyboardLetters(std::string id, bool upper)
 	eyegui::setCaseOfKeyboard(_pOverlayLayout, id, upper ? eyegui::KeyboardCase::UPPER : eyegui::KeyboardCase::LOWER);
 }
 
+void Tab::SetKeymapOfKeyboard(std::string id, unsigned int keymap)
+{
+	eyegui::setKeymapOfKeyboard(_pOverlayLayout, id, keymap);
+}
+
 void Tab::ClassifyKey(std::string id, bool accept)
 {
 	eyegui::classifyKey(_pOverlayLayout, id, accept);

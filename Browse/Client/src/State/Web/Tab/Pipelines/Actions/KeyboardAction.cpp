@@ -37,6 +37,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 	_overlayGermanLayoutId = "text_input_action_germany_german_button";
 	_overlayHebrewLayoutId = "text_input_action_israel_hebrew_button";
 	_overlayGreekLayoutId = "text_input_action_greece_greek_button";
+	_overlayExtraKeyId = "text_input_action_extra_keys_button";
 
     // Id mapper for brick to change ids from file to the used ones
     std::map<std::string, std::string> idMapper;
@@ -60,6 +61,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 	idMapper.emplace("layout_germany_german", _overlayGermanLayoutId);
 	idMapper.emplace("layout_israel_hebrew", _overlayHebrewLayoutId);
 	idMapper.emplace("layout_greece_greek", _overlayGreekLayoutId);
+	idMapper.emplace("extra_keys", _overlayExtraKeyId);
 
     // Calculate size of overlay
     float x, y, sizeX, sizeY;
@@ -277,6 +279,9 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 
 		// Hide drop menu
 		// _pTab->ButtonUp(_overlayLayoutId);
+
+		// Go to standard mode of keyboard
+		_pTab->ButtonUp(_overlayExtraKeyId);
 	},
 	[](){}); // up callback
 
@@ -290,6 +295,9 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 
 		// Hide drop menu
 		// _pTab->ButtonUp(_overlayLayoutId);
+
+		// Go to standard mode of keyboard
+		_pTab->ButtonUp(_overlayExtraKeyId);
 	},
 	[]() {}); // up callback
 
@@ -303,6 +311,9 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 
 		// Hide drop menu
 		// _pTab->ButtonUp(_overlayLayoutId);
+
+		// Go to standard mode of keyboard
+		_pTab->ButtonUp(_overlayExtraKeyId);
 	},
 	[]() {}); // up callback
 
@@ -316,8 +327,25 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 
 		// Hide drop menu
 		// _pTab->ButtonUp(_overlayLayoutId);
+
+		// Go to standard mode of keyboard
+		_pTab->ButtonUp(_overlayExtraKeyId);
 	},
 	[]() {}); // up callback
+
+	// Extra keys
+	_pTab->RegisterButtonListenerInOverlay(
+		_overlayExtraKeyId,
+		[&]() // down callback
+	{
+		// Set keymap for extra keys
+		_pTab->SetKeymapOfKeyboard(_overlayKeyboardId, 1);
+	},
+		[&]() // up callback
+	{
+		// Set keymap for standard keys
+		_pTab->SetKeymapOfKeyboard(_overlayKeyboardId, 0);
+	});
 
 	// Create callback for lab streaming layer to send classificatoin
 	_spLabStreamCallback = std::shared_ptr<LabStreamCallback>(new LabStreamCallback(
@@ -367,6 +395,7 @@ KeyboardAction::~KeyboardAction()
 	_pTab->UnregisterButtonListenerInOverlay(_overlayGermanLayoutId);
 	_pTab->UnregisterButtonListenerInOverlay(_overlayHebrewLayoutId);
 	_pTab->UnregisterButtonListenerInOverlay(_overlayGreekLayoutId);
+	_pTab->UnregisterButtonListenerInOverlay(_overlayExtraKeyId);
 }
 
 bool KeyboardAction::Update(float tpf, TabInput tabInput)

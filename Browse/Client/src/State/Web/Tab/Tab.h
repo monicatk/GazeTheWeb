@@ -139,6 +139,9 @@ public:
     // Set case of keyboard letters
     virtual void SetCaseOfKeyboardLetters(std::string id, bool accept);
 
+	// Set keyboard 
+	virtual void SetKeymapOfKeyboard(std::string id, unsigned int keymap);
+
 	// Classify currently selected key
 	virtual void ClassifyKey(std::string id, bool accept);
 

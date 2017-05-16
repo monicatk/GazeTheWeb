@@ -53,6 +53,9 @@ public:
     // Set case of keyboard letters
     virtual void SetCaseOfKeyboardLetters(std::string id, bool upper) = 0;
 
+	// Set keyboard 
+	virtual void SetKeymapOfKeyboard(std::string id, unsigned int keymap) = 0;
+
 	// Classify currently selected key
 	virtual void ClassifyKey(std::string id, bool accept) = 0;
 
