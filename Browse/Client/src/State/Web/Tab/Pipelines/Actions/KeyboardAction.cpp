@@ -276,7 +276,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 		_pTab->SetKeyboardLayout(eyegui::KeyboardLayout::US_ENGLISH);
 
 		// Hide drop menu
-		_pTab->ButtonUp(_overlayLayoutId);
+		// _pTab->ButtonUp(_overlayLayoutId);
 	},
 	[](){}); // up callback
 
@@ -289,7 +289,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 		_pTab->SetKeyboardLayout(eyegui::KeyboardLayout::GERMANY_GERMAN);
 
 		// Hide drop menu
-		_pTab->ButtonUp(_overlayLayoutId);
+		// _pTab->ButtonUp(_overlayLayoutId);
 	},
 	[]() {}); // up callback
 
@@ -302,7 +302,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 		_pTab->SetKeyboardLayout(eyegui::KeyboardLayout::ISRAEL_HEBREW);
 
 		// Hide drop menu
-		_pTab->ButtonUp(_overlayLayoutId);
+		// _pTab->ButtonUp(_overlayLayoutId);
 	},
 	[]() {}); // up callback
 
@@ -315,7 +315,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 		_pTab->SetKeyboardLayout(eyegui::KeyboardLayout::GREECE_GREEK);
 
 		// Hide drop menu
-		_pTab->ButtonUp(_overlayLayoutId);
+		// _pTab->ButtonUp(_overlayLayoutId);
 	},
 	[]() {}); // up callback
 
