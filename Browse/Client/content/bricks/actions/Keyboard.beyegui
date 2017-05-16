@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <grid showbackground="true" consumeinput="true" style="tab_overlay">
-	<row size="35%">
+	<row size="32%">
 		<column size="100%">
 				<grid>
 					<row size="100%">
@@ -52,12 +52,12 @@
 				</grid>			
 		</column>
 	</row>
-	<row size="45%">
+	<row size="46%">
 		<column size="100%">
-			<keyboard style="tab_overlay_noback" id="keyboard" border="1%"/>
+			<keyboard style="tab_overlay_noback" id="keyboard" border="2%"/>
 		</column>
 	</row>
-	<row size="10%">
+	<row size="12%">
 		<column size="100%">
 			<stack orientation="horizontal" separator="0.25%">
 				<boxbutton switch="true" icon="icons/Shift.png" id="shift" desckey="action_keyboard:shift"/>
