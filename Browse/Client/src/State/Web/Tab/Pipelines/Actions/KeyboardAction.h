@@ -79,6 +79,9 @@ protected:
 	std::string _overlayNextLetterButtonId;
 	std::string _overlayPreviousLetterButtonId;
 
+	// Id of delete all button in overlay
+	std::string _overlayDeleteAllButtonId;
+
     // Bool which indicates whether input is complete
     bool _complete = false;
 

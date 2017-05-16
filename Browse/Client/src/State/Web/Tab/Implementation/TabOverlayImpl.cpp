@@ -168,6 +168,12 @@ void Tab::DeleteContentAtCursorInTextEdit(std::string id, int letterCount)
 	eyegui::deleteContentAtCursorInTextEdit(_pOverlayLayout, id, letterCount);
 }
 
+void Tab::DeleteContentInTextEdit(std::string id)
+{
+	// Replace by empty string
+	eyegui::setContentOfTextEdit(_pOverlayLayout, id, u"");
+}
+
 std::u16string Tab::GetActiveEntityContentInTextEdit(std::string id) const
 {
 	return eyegui::getActiveEntityContentInTextEdit(_pOverlayLayout, id);

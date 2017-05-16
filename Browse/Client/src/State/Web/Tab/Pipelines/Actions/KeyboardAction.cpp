@@ -31,6 +31,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 	_overlayPreviousWordButtonId = "text_input_action_previous_word_button";
 	_overlayNextLetterButtonId = "text_input_action_next_letter_button";
 	_overlayPreviousLetterButtonId = "text_input_action_previous_letter_button";
+	_overlayDeleteAllButtonId = "text_input_action_delete_all_button";
 
     // Id mapper for brick to change ids from file to the used ones
     std::map<std::string, std::string> idMapper;
@@ -48,6 +49,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 	idMapper.emplace("previous_word", _overlayPreviousWordButtonId);
 	idMapper.emplace("next_letter", _overlayNextLetterButtonId);
 	idMapper.emplace("previous_letter", _overlayPreviousLetterButtonId);
+	idMapper.emplace("delete_all", _overlayDeleteAllButtonId);
 
     // Calculate size of overlay
     float x, y, sizeX, sizeY;
@@ -228,6 +230,16 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 		_pTab->MoveCursorOverLettersInTextEdit(_overlayTextEditId, -1);
 	},
 	[]() {}); // up callback
+
+	// Delete all button
+	_pTab->RegisterButtonListenerInOverlay(
+		_overlayDeleteAllButtonId,
+		[&]() // down callback
+	{
+		// Delete content
+		_pTab->DeleteContentInTextEdit(_overlayTextEditId);
+	},
+		[]() {}); // up callback
 
 	// Create callback for lab streaming layer to send classificatoin
 	_spLabStreamCallback = std::shared_ptr<LabStreamCallback>(new LabStreamCallback(
