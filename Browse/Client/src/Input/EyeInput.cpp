@@ -66,10 +66,10 @@ EyeInput::EyeInput(bool useEmulation)
 			ConnectEyeTracker("SMIiViewXPlugin");
 		}
 
-		// Try to load SMI myGaze plugin
+		// Try to load Visual Interaction myGaze plugin
 		if (!_connected)
 		{
-			ConnectEyeTracker("SMImyGazePlugin");
+			ConnectEyeTracker("VImyGazePlugin");
 		}
 
 		// Try to load Tobii EyeX plugin

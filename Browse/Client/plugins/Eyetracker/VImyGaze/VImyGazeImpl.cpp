@@ -8,6 +8,8 @@
 #include "myGazeAPI.h"
 #include <algorithm>
 
+#include <iostream>
+
 int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 {
 	// Get max from both eyes (assuming, that values at failure are smaller)
@@ -26,7 +28,9 @@ bool Connect()
 	SystemInfoStruct systemInfoData;
 	int ret_connect = 0;
 
-	// Connect to iViewX
+	// Start myGaze server
+
+	// Connect to myGaze
 	ret_connect = iV_Connect();
 
 	// Set sample callback
