@@ -18,6 +18,7 @@
 #include <windows.h>
 typedef void(__cdecl *FETCH_GAZE)(int, std::vector<double>&, std::vector<double>&);
 typedef bool(__cdecl *IS_TRACKING)();
+typedef void(__cdecl *CALIBRATE)();
 #endif
 
 class EyeInput
@@ -43,6 +44,9 @@ public:
 		int windowWidth,
 		int windowHeight);
 
+	// Calibrate the eye tracking device
+	void Calibrate();
+
 private:
 
 #ifdef _WIN32
@@ -54,6 +58,9 @@ private:
 
 	// Handle to check tracking
 	IS_TRACKING _procIsTracking = NULL;
+
+	// Handle to calibration
+	CALIBRATE _procCalibrate = NULL;
 #endif
 
 	// Remember whether connection has been established

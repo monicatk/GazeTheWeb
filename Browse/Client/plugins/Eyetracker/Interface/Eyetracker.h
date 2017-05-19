@@ -25,6 +25,9 @@ extern "C" {
 	// Get k or less valid raw gaze entries. May fill vectors with nothing if nothing available
 	DLL_EXPORT void FetchGaze(int maxSampleCount, std::vector<double>& rGazeX, std::vector<double>& rGazeY);
 
+	// Perform calibration TODO: return something like an enum or so to provide user feedback
+	DLL_EXPORT void Calibrate();
+
 #ifdef __cplusplus
 }
 #endif

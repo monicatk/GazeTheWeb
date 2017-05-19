@@ -39,8 +39,11 @@ EyeInput::EyeInput(bool useEmulation)
 				// Fetch procedure to check tracking
 				_procIsTracking = (IS_TRACKING)GetProcAddress(_pluginHandle, "IsTracking");
 
+				// Fetch procedure to calibrate
+				_procCalibrate = (CALIBRATE)GetProcAddress(_pluginHandle, "Calibrate");
+
 				// Check whether procedures could be loaded
-				if (procConnect != NULL && _procFetchGaze != NULL && _procIsTracking != NULL)
+				if (procConnect != NULL && _procFetchGaze != NULL && _procIsTracking != NULL && _procCalibrate != NULL)
 				{
 					_connected = procConnect();
 					if (_connected)
@@ -49,8 +52,10 @@ EyeInput::EyeInput(bool useEmulation)
 					}
 					else
 					{
+						// Reset handles when connection to eye tracker failed
 						_procFetchGaze = NULL;
 						_procIsTracking = NULL;
+						_procCalibrate = NULL;
 					}
 				}
 			}
@@ -297,4 +302,14 @@ bool EyeInput::Update(
 
 	// Return whether gaze coordinates comes from eyetracker
 	return !gazeEmulated;
+}
+
+void EyeInput::Calibrate()
+{
+#ifdef _WIN32
+	if (_connected && _procCalibrate != NULL)
+	{
+		_procCalibrate();
+	}
+#endif
 }

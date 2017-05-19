@@ -66,3 +66,8 @@ void FetchGaze(int maxSampleCount, std::vector<double>& rGazeX, std::vector<doub
 {
 	eyetracker_global::GetKOrLessValidRawGazeEntries(maxSampleCount, rGazeX, rGazeY);
 }
+
+void Calibrate()
+{
+	// TODO
+}
