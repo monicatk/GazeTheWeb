@@ -13,7 +13,8 @@
 namespace setup
 {
 	// Window
-	static const bool FULLSCREEN = false;
+	static const bool FULLSCREEN = false; // does not work in combination with eye tracker calibration
+	static const bool MAXIMIZE_WINDOW = true; // only implemented for Windows
 	static const int INITIAL_WINDOW_WIDTH = 1280;
 	static const int INITIAL_WINDOW_HEIGHT = 720;
 

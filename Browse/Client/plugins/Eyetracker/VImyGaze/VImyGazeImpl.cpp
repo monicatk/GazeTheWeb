@@ -30,7 +30,7 @@ bool Connect()
 	int ret_connect = 0;
 
 	// Connect to myGaze server
-	ret_connect = iV_Connect();
+	ret_connect = iV_Connect(); // TODO BUG: never works, but it does for minimal sample code :(
 
 	// If server not running, try to start it
 	if (ret_connect != RET_SUCCESS)

@@ -16,6 +16,12 @@
 #include <string>
 #include <fstream>
 
+#ifdef _WIN32 // Windows
+// Native access to Windows functions is necessary to maximize window
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include "submodules/glfw/include/GLFW/glfw3native.h"
+#endif
+
 // Namespace for text-csv
 namespace csv = ::text::csv;
 
@@ -394,6 +400,30 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	LabStreamMailer::instance().RegisterCallback(_spLabStreamCallback);
 
     // ### OTHER ###
+
+	// Maximize window if required
+#ifdef _WIN32 // Windows
+	if (!setup::FULLSCREEN && setup::MAXIMIZE_WINDOW)
+	{
+		// Fetch handle to window from GLFW
+		auto Hwnd = glfwGetWin32Window(_pWindow);
+
+		/*
+		// Remove frame from window
+		LONG lStyle = GetWindowLong(Hwnd, GWL_STYLE);
+		lStyle &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
+		SetWindowLong(Hwnd, GWL_STYLE, lStyle);
+
+		// Do same for extended style
+		LONG lExStyle = GetWindowLong(Hwnd, GWL_EXSTYLE);
+		lExStyle &= ~(WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE);
+		SetWindowLong(Hwnd, GWL_EXSTYLE, lExStyle);
+		*/
+
+		// Maximize window
+		SendMessage(Hwnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
+	}
+#endif
 
     // Time
     _lastTime = glfwGetTime();
