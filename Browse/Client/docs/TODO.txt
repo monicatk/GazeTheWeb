@@ -16,8 +16,7 @@ Features:
 	- Provide Esc Emulation when Fullscreen is on
 - BUG: Text Selection does not work anymore
 - Hebrew / Greek Support
-- Integrate SMI calibration
-- Feedback function
+- Calibration when calibration is broken (how to detect?)
 
 Furthermore:
 - Word prediction improvement (and add typed words) and make extra one for URL Input
