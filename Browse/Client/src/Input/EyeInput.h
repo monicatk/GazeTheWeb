@@ -5,6 +5,7 @@
 // Abstracts input from eyetracker and mouse into general eye input. Does fallback
 // to mouse cursor input provided by GLFW when no eyetracker available. Handles
 // override of eyetracking input when mouse is moved.
+// TODO: when eye tracker is installed, connection always succeeds. So maybe make some config file setting for order or activation of single eye tracking devices
 
 #ifndef EYEINPUT_H_
 #define EYEINPUT_H_
@@ -12,6 +13,7 @@
 #include "src/Global.h"
 #include <memory>
 #include <vector>
+#include <thread>
 
 // Necessary for dynamic DLL loading in Windows
 #ifdef _WIN32
@@ -25,14 +27,14 @@ class EyeInput
 {
 public:
 
-    // Constructor
-    EyeInput(bool useEmulation = false);
+    // Constructor, starts thread to establish eye tracker connection
+    EyeInput();
 
     // Destructor
     virtual ~EyeInput();
 
     // Update. Returns whether gaze is currently used (or emulation via mouse when false)
-	// Taking information about window to enable eyetracking in windowed mode
+	// Taking information about window to enable eye tracking in windowed mode
 	bool Update(
 		float tpf,
 		double mouseX,
@@ -49,6 +51,10 @@ public:
 
 private:
 
+	// Thread that connects to eye tracking device
+	std::unique_ptr<std::thread> _upConnectionThread;
+
+	// ### Variables written by thread ###
 #ifdef _WIN32
 	// Handle for plugin
 	HINSTANCE _pluginHandle = NULL;
@@ -64,16 +70,18 @@ private:
 #endif
 
 	// Remember whether connection has been established
-	bool _connected = false;
+	bool _connected = false; // indicator whether thread was successful
+	
+	// ###################################
 
     // Mouse cursor coordinates
     double _mouseX = 0;
     double _mouseY = 0;
 
-    // Eyetracker overidden by mouse
+    // Eye tracker overidden by mouse
     bool _mouseOverride = false;
 
-    // To override the eyetracker, mouse must be moved within given timeframe a given distance
+    // To override the eye tracker, mouse must be moved within given timeframe a given distance
     int _mouseOverrideX = 0;
     int _mouseOverrideY = 0;
     float _mouseOverrideTime = EYEINPUT_MOUSE_OVERRIDE_INIT_FRAME_DURATION;

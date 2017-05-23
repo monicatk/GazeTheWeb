@@ -9,13 +9,13 @@
 #include <cmath>
 #include <functional>
 
-EyeInput::EyeInput(bool useEmulation)
+EyeInput::EyeInput()
 {
-
+	// Create thread for connection to eye tracker
+	_upConnectionThread = std::unique_ptr<std::thread>(new std::thread([this]()
+	{
 #ifdef _WIN32
 
-	if (!useEmulation)
-	{
 		// Define procedure signature for connection
 		typedef bool(__cdecl *CONNECT)();
 
@@ -25,7 +25,7 @@ EyeInput::EyeInput(bool useEmulation)
 			std::string dllName = plugin + ".dll";
 			_pluginHandle = LoadLibraryA(dllName.c_str());
 
-			// Try to connect to eyetracker
+			// Try to connect to eye tracker
 			if (_pluginHandle != NULL)
 			{
 				LogInfo("EyeInput: Loaded " + plugin + ".");
@@ -48,7 +48,7 @@ EyeInput::EyeInput(bool useEmulation)
 					_connected = procConnect();
 					if (_connected)
 					{
-						LogInfo("EyeInput: Connecting eyetracker successful.");
+						LogInfo("EyeInput: Connecting eye tracker successful.");
 					}
 					else
 					{
@@ -82,14 +82,17 @@ EyeInput::EyeInput(bool useEmulation)
 		{
 			ConnectEyeTracker("TobiiEyeXPlugin");
 		}
-	}
 
 #endif
 
-	if (!_connected)
-	{
-		LogInfo("EyeInput: No eyetracker connected. Input emulated by mouse.");
-	}
+		// If not connected to any eye tracker, provide feedback
+		if (!_connected)
+		{
+			LogInfo("EyeInput: No eye tracker connected. Input emulated by mouse.");
+		}
+
+		// End of thread
+	}));
 }
 
 EyeInput::~EyeInput()
@@ -99,13 +102,13 @@ EyeInput::~EyeInput()
 
 	if (_pluginHandle != NULL)
 	{
-		// Disconnect eyetracker if necessary
+		// Disconnect eye tracker if necessary
 		if (_connected)
 		{
 			typedef bool(__cdecl *DISCONNECT)();
 			DISCONNECT procDisconnect = (DISCONNECT)GetProcAddress(_pluginHandle, "Disconnect");
 
-			// Disconnect eyetracker when procedure available
+			// Disconnect eye tracker when procedure available
 			if (procDisconnect != NULL)
 			{
 				bool result = procDisconnect();
@@ -113,11 +116,11 @@ EyeInput::~EyeInput()
 				// Check whether disconnection has been successful
 				if (result)
 				{
-					LogInfo("EyeInput: Disconnecting eyetracker successful.");
+					LogInfo("EyeInput: Disconnecting eye tracker successful.");
 				}
 				else
 				{
-					LogInfo("EyeInput: Disconnecting eyetracker failed.");
+					LogInfo("EyeInput: Disconnecting eye tracker failed.");
 				}
 
 				// Just set connection to false
@@ -146,7 +149,7 @@ bool EyeInput::Update(
 {
 	// ### UPDATE GAZE INPUT ###
 
-	// Update gaze by eyetracker
+	// Update gaze by eye tracker
 	double filteredGazeX = 0;
 	double filteredGazeY = 0;
 
@@ -206,7 +209,7 @@ bool EyeInput::Update(
 
 	// ### MOUSE INPUT ###
 
-	// Mouse override of eyetracker
+	// Mouse override of eye tracker
 	if (_mouseOverride)
 	{
 		// Check whether override should stop
@@ -270,9 +273,9 @@ bool EyeInput::Update(
 
 	// Bool to indicate mouse usage for gaze coordinates
 	bool gazeEmulated =
-		!_connected // eyetracker not connected
-		|| _mouseOverride // eyetracker overriden by mouse
-		|| !isTracking; // eyetracker not available
+		!_connected // eye tracker not connected
+		|| _mouseOverride // eye tracker overriden by mouse
+		|| !isTracking; // eye tracker not available
 
 	// Save mouse cursor coordinate in members for calculating mouse override
 	_mouseX = mouseX;
@@ -300,7 +303,7 @@ bool EyeInput::Update(
 	rGazeX = filteredGazeX;
 	rGazeY = filteredGazeY;
 
-	// Return whether gaze coordinates comes from eyetracker
+	// Return whether gaze coordinates comes from eye tracker
 	return !gazeEmulated;
 }
 
