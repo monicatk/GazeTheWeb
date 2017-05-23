@@ -365,7 +365,24 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     _cursorFrameIndex = eyegui::addFloatingFrameWithBrick(_pCursorLayout, "bricks/Cursor.beyegui", 0, 0, 0, 0, true, false); // will be moved and sized in loop
 
     // ### INPUT ###
-    _upEyeInput = std::unique_ptr<EyeInput>(new EyeInput);
+    _upEyeInput = std::unique_ptr<EyeInput>(new EyeInput([this](EyeInput::Status status)
+	{
+		// ### DANGER !!! CALLED FROM DIFFERENT THREAD ###
+
+		// This call from a subthread should not break anything, as only strings are pushed to a member queue
+		switch (status)
+		{
+		case EyeInput::Status::CONNECTED:
+			this->PushNotification(u"Eye Tracker Connected");
+			break;
+		case EyeInput::Status::DISCONNECTED:
+			this->PushNotification(u"No Eye Tracker Connected");
+			break;
+		default:
+			// Nothing
+			break;
+		}
+	}));
 
     // ### FRAMEBUFFER ###
     _upFramebuffer = std::unique_ptr<Framebuffer>(new Framebuffer(_width, _height));

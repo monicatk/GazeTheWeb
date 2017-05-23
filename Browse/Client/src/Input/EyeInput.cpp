@@ -9,12 +9,18 @@
 #include <cmath>
 #include <functional>
 
-EyeInput::EyeInput()
+EyeInput::EyeInput(StatusCallback callback)
 {
+	// Store callback
+	_statusCallback = callback;
+
 	// Create thread for connection to eye tracker
 	_upConnectionThread = std::unique_ptr<std::thread>(new std::thread([this]()
 	{
 #ifdef _WIN32
+
+		// Trying to connect
+		_statusCallback(EyeInput::Status::TRYING_TO_CONNECT);
 
 		// Define procedure signature for connection
 		typedef bool(__cdecl *CONNECT)();
@@ -89,6 +95,11 @@ EyeInput::EyeInput()
 		if (!_connected)
 		{
 			LogInfo("EyeInput: No eye tracker connected. Input emulated by mouse.");
+			_statusCallback(EyeInput::Status::DISCONNECTED);
+		}
+		else
+		{
+			_statusCallback(EyeInput::Status::CONNECTED);
 		}
 	}));
 }
