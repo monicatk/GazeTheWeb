@@ -373,10 +373,10 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 		switch (status)
 		{
 		case EyeInput::Status::CONNECTED:
-			this->PushNotification(u"Eye Tracker Connected");
+			this->PushNotification(u"Eye Tracking Software Connected");
 			break;
 		case EyeInput::Status::DISCONNECTED:
-			this->PushNotification(u"No Eye Tracker Connected");
+			this->PushNotification(u"Eye Tracking Software Disconnected");
 			break;
 		default:
 			// Nothing

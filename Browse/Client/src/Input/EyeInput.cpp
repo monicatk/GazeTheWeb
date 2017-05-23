@@ -72,19 +72,19 @@ EyeInput::EyeInput(StatusCallback callback)
 		};
 
 		// Try to load SMI iViewX plugin
-		if (!_connected)
+		if (!_connected && setup::CONNECT_SMI_IVIEWX)
 		{
 			ConnectEyeTracker("SMIiViewXPlugin");
 		}
 
 		// Try to load Visual Interaction myGaze plugin
-		if (!_connected)
+		if (!_connected && setup::CONNECT_VI_MYGAZE)
 		{
 			ConnectEyeTracker("VImyGazePlugin");
 		}
 
 		// Try to load Tobii EyeX plugin
-		if (!_connected)
+		if (!_connected && setup::CONNECT_TOBII_EYEX)
 		{
 			ConnectEyeTracker("TobiiEyeXPlugin");
 		}

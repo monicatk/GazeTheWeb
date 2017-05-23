@@ -18,7 +18,10 @@ namespace setup
 	static const int INITIAL_WINDOW_WIDTH = 1280;
 	static const int INITIAL_WINDOW_HEIGHT = 720;
 
-	// Control
+	// Control TODO: move connect bools to config file
+	static const bool CONNECT_SMI_IVIEWX = false;
+	static const bool CONNECT_VI_MYGAZE = false;
+	static const bool CONNECT_TOBII_EYEX = true;
 	static const float DURATION_BEFORE_INPUT = 1.f; // wait one second before accepting input
 	static const bool PAUSED_AT_STARTUP = false;
 	static const float LINK_CORRECTION_MAX_PIXEL_DISTANCE = 5.f;
@@ -27,7 +30,6 @@ namespace setup
 	static const bool EYEINPUT_DISTORT_GAZE = false;
 	static const float EYEINPUT_DISTORT_GAZE_BIAS_X = 64.f; // pixels
 	static const float EYEINPUT_DISTORT_GAZE_BIAS_Y = 32.f; // pixels
-	
 
 	// Debugging
 	static const bool LOG_DEBUG_MESSAGES = false;

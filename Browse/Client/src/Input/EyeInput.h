@@ -5,7 +5,6 @@
 // Abstracts input from eyetracker and mouse into general eye input. Does fallback
 // to mouse cursor input provided by GLFW when no eyetracker available. Handles
 // override of eyetracking input when mouse is moved.
-// TODO: when eye tracker is installed, connection always succeeds. So maybe make some config file setting for order or activation of single eye tracking devices
 
 #ifndef EYEINPUT_H_
 #define EYEINPUT_H_
