@@ -16,5 +16,5 @@ static const int EYETRACKER_SAMPLE_COLLECTION_COUNT = 120;
 namespace eyetracker_global
 {
 	void PushBackRawData(double gazeX, double gazeY, bool valid);
-	void GetKOrLessValidRawGazeEntries(int k, std::vector<double>& rGazeX, std::vector<double>& rGazeY);
+	void GetKOrLessValidRawGazeEntries(int k, std::vector<std::pair<double, double> >& rGaze);
 }

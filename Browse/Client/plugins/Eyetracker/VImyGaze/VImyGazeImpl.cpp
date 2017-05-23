@@ -88,27 +88,13 @@ bool Disconnect()
 	}
 }
 
-void FetchGaze(int maxSampleCount, std::vector<double>& rGazeX, std::vector<double>& rGazeY)
+void FetchGaze(int maxSampleCount, std::vector<std::pair<double, double> >& rGaze)
 {
-	eyetracker_global::GetKOrLessValidRawGazeEntries(maxSampleCount, rGazeX, rGazeY);
+	eyetracker_global::GetKOrLessValidRawGazeEntries(maxSampleCount, rGaze);
 }
 
 void Calibrate()
 {
-	// Set up calibration
-	CalibrationStruct calibrationData;
-	calibrationData.method = 2;
-	calibrationData.speed = 0;
-	calibrationData.displayDevice = 0;
-	calibrationData.targetShape = 2;
-	calibrationData.foregroundBrightness = 10;
-	calibrationData.backgroundBrightness = 10;
-	calibrationData.autoAccept = 2;
-	calibrationData.targetSize = 20;
-	calibrationData.visualization = 1;
-	strcpy_s(calibrationData.targetFilename, 256, "");
-	iV_SetupCalibration(&calibrationData);
-
-	// Start calibration
+	// Start calibration (setup does not work of licensing reasons)
 	int ret_calibrate = iV_Calibrate();
 }

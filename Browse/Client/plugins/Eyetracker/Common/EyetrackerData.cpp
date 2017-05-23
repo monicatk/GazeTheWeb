@@ -26,11 +26,10 @@ namespace eyetracker_global
         RawGazeEntries = std::min(RawGazeEntries, EYETRACKER_SAMPLE_COLLECTION_COUNT - 1);
     }
 
-    void GetKOrLessValidRawGazeEntries(int k, std::vector<double>& rGazeX, std::vector<double>& rGazeY)
+    void GetKOrLessValidRawGazeEntries(int k, std::vector<std::pair<double, double> >& rGaze)
     {
-        // Reset output vectors
-        rGazeX.clear();
-        rGazeY.clear();
+        // Reset output vector
+		rGaze.clear();
 
         // Calculate actual k
         int clampedK = std::min(k, RawGazeEntries);
@@ -48,8 +47,7 @@ namespace eyetracker_global
             // Only add when valid
             if (EyetrackerRawGazeValidity[index])
             {
-                rGazeX.push_back(EyetrackerRawGazeX[index]);
-                rGazeY.push_back(EyetrackerRawGazeY[index]);
+                rGaze.push_back(std::make_pair(EyetrackerRawGazeX[index], EyetrackerRawGazeY[index]));
             }
         }
     }

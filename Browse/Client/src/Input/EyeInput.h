@@ -18,7 +18,7 @@
 // Necessary for dynamic DLL loading in Windows
 #ifdef _WIN32
 #include <windows.h>
-typedef void(__cdecl *FETCH_GAZE)(int, std::vector<double>&, std::vector<double>&);
+typedef void(__cdecl *FETCH_GAZE)(int, std::vector<std::pair<double, double> >&);
 typedef bool(__cdecl *IS_TRACKING)();
 typedef void(__cdecl *CALIBRATE)();
 #endif

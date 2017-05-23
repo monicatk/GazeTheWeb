@@ -90,8 +90,6 @@ EyeInput::EyeInput()
 		{
 			LogInfo("EyeInput: No eye tracker connected. Input emulated by mouse.");
 		}
-
-		// End of thread
 	}));
 }
 
@@ -100,6 +98,11 @@ EyeInput::~EyeInput()
 
 #ifdef _WIN32
 
+	// First, wait for eye tracker connection thread to join
+	LogInfo("EyeInput: Make sure that eye tracker connection thread is joined.");
+	_upConnectionThread->join();
+
+	// Check whether necessary to disconnect
 	if (_pluginHandle != NULL)
 	{
 		// Disconnect eye tracker if necessary
@@ -111,6 +114,7 @@ EyeInput::~EyeInput()
 			// Disconnect eye tracker when procedure available
 			if (procDisconnect != NULL)
 			{
+				LogInfo("EyeInput: About to disconnect eye tracker.");
 				bool result = procDisconnect();
 
 				// Check whether disconnection has been successful
@@ -161,10 +165,10 @@ bool EyeInput::Update(
 	if (_connected && _procFetchGaze != NULL && _procIsTracking != NULL)
 	{
 		// Prepare vectors to fill
-		std::vector<double> gazeXSamples, gazeYSamples;
+		std::vector<std::pair<double, double> > gazeSamples;
 
 		// Fetch k or less valid samples
-		_procFetchGaze(EYETRACKER_AVERAGE_SAMPLE_COUNT, gazeXSamples, gazeYSamples);
+		_procFetchGaze(EYETRACKER_AVERAGE_SAMPLE_COUNT, gazeSamples);
 
 		// Convert parameters to double (use same values for all samples,
 		// although they could have been collected whil windows transformation has been different)
@@ -173,32 +177,51 @@ bool EyeInput::Update(
 		double windowWidthDouble = (double)windowWidth;
 		double windowHeightDouble = (double)windowHeight;
 
-		// Average the given samples
-		if (!gazeXSamples.empty())
+		// Average the given samples as long as they do not exceed a predefined distance (aka new fixation)
+		if (!gazeSamples.empty())
 		{
-			double sum = 0;
-			for (double x : gazeXSamples)
+			double sumX = 0;
+			double sumY = 0;
+			int sampleCount = 0;
+			for (std::pair<double, double> gaze : gazeSamples)
 			{
-				// Do some clamping according to window coordinates
-				double clampedX = x - windowXDouble;
+				// Do some clamping according to window coordinates for gaze x
+				double clampedX = gaze.first - windowXDouble;
 				clampedX = clampedX > 0.0 ? clampedX : 0.0;
 				clampedX = clampedX < windowWidthDouble ? clampedX : windowWidthDouble;
-				sum += clampedX;
-			}
-			filteredGazeX = sum / gazeXSamples.size();
-		}
-		if (!gazeYSamples.empty())
-		{
-			double sum = 0;
-			for (double y : gazeYSamples)
-			{
-				// Do some clamping according to window coordinates
-				double clampedY = y - windowYDouble;
+
+				// Do some clamping according to window coordinates for gaze y
+				double clampedY = gaze.second - windowYDouble;
 				clampedY = clampedY > 0.0 ? clampedY : 0.0;
 				clampedY = clampedY < windowHeightDouble ? clampedY : windowHeightDouble;
-				sum += clampedY;
+
+				// Calculate filtered gaze
+				filteredGazeX = sumX / sampleCount;
+				filteredGazeY = sumY / sampleCount;
+
+				// Check whether new sample is withing same fixation
+				if (sampleCount > 0)
+				{
+					if (glm::distance(
+							glm::vec2(filteredGazeX, filteredGazeY),
+							glm::vec2(clampedX, clampedY))
+						> setup::EYEINPUT_GAZE_FIXATION_RADIUS)
+					{
+						break;
+					}
+				}
+
+				// Sum values
+				sumX += clampedX;
+				sumY += clampedY;
+
+				// Increase sample count
+				sampleCount++;
 			}
-			filteredGazeY = sum / gazeYSamples.size();
+
+			// Calculate (final) filtered gaze
+			filteredGazeX = sumX / sampleCount;
+			filteredGazeY = sumY / sampleCount;
 		}
 
 		// Check, whether eye tracker is tracking

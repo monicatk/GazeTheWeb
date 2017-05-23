@@ -178,9 +178,9 @@ bool Disconnect()
 	return success;
 }
 
-void FetchGaze(int maxSampleCount, std::vector<double>& rGazeX, std::vector<double>& rGazeY)
+void FetchGaze(int maxSampleCount, std::vector<std::pair<double, double> >& rGaze)
 {
-	eyetracker_global::GetKOrLessValidRawGazeEntries(maxSampleCount, rGazeX, rGazeY);
+	eyetracker_global::GetKOrLessValidRawGazeEntries(maxSampleCount, rGaze);
 }
 
 void Calibrate()
