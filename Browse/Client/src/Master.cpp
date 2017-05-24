@@ -368,6 +368,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     _upEyeInput = std::unique_ptr<EyeInput>(new EyeInput([this](EyeInput::Status status)
 	{
 		// ### DANGER !!! CALLED FROM DIFFERENT THREAD ###
+		// If more is called back from different thread, think about MasterThreadInterface to allow only calls there, which *are* threadsafe
 
 		// This call from a subthread should not break anything, as only strings are pushed to a member queue
 		switch (status)
