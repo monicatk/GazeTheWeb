@@ -28,7 +28,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
     CEF_REQUIRE_RENDERER_THREAD();
 
     const std::string& msgName = msg->GetName().ToString();
-    //IPCLogDebug(browser, "Received '" + msgName + "' IPC msg in RenderProcessHandler");
+    // IPCLogDebug(browser, "Received '" + msgName + "' IPC msg in RenderProcessHandler");
 
 	if (msgName == "SetSelectionIndex")
 	{
@@ -126,6 +126,10 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 				msg->GetArgumentList()->SetInt(1, x);
 				msg->GetArgumentList()->SetInt(2, y);
 				browser->SendProcessMessage(PID_BROWSER, msg);
+			}
+			else
+			{
+				IPCLogDebug(browser, "Renderer: Couldn't call Javascript function 'PerformTextInput'!");
 			}
 
 
@@ -442,12 +446,16 @@ void RenderProcessHandler::OnContextCreated(
 
 			// Inject Javascript code which extends the current page's context by our methods
 			// and automatically creates a MutationObserver instance
-			frame->ExecuteJavaScript(_js_dom_mutationobserver, "", 0);
-			frame->ExecuteJavaScript(_js_mutation_observer_test, "", 0);
+			for (const auto& dom_code : _js_dom_code)
+			{
+				frame->ExecuteJavaScript(dom_code.first, dom_code.second, 0);
+			}
+			frame->ExecuteJavaScript("MutationObserverInit();", "", 0);
 
-			IPCLog(browser, "LOADING FIXED ELEMENT JS FILE OVER AND OVER AGAIN");
-			_js_dom_fixed_elements = GetJSCode(DOM_FIXED_ELEMENTS);
-			frame->ExecuteJavaScript(_js_dom_fixed_elements, "", 0);
+
+			//IPCLog(browser, "LOADING FIXED ELEMENT JS FILE OVER AND OVER AGAIN");
+			//_js_dom_fixed_elements = GetJSCode(DOM_FIXED_ELEMENTS);
+			//frame->ExecuteJavaScript(_js_dom_fixed_elements, "", 0);
 
 
 
@@ -484,7 +492,7 @@ void RenderProcessHandler::OnContextReleased(CefRefPtr<CefBrowser> browser,
         globalObj->DeleteValue("favIconWidth");
 
 		// DEBUG
-		frame->ExecuteJavaScript("MutationObserverShutdown()", "", 0);
+		// frame->ExecuteJavaScript("MutationObserverShutdown()", "", 0);
     }
 }
 
