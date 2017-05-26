@@ -26,7 +26,7 @@ int DOMNode::Initialize(CefRefPtr<CefProcessMessage> msg)
 	if ((int) _description.size() > args->GetSize() - 1)
 	{
 		LogError("DOMNode: On initialization: Object description (", _description.size(), ") and message (", args->GetSize(), 
-			") size do not match!");
+			") size do not match! id: ",_id);
 	}
 	else
 	{

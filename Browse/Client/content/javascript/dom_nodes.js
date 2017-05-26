@@ -174,7 +174,6 @@ function DOMTextInput(node)
     DOMNode.call(this, node, id, 0);
 
     this.text = "";
-    this.isPasswordField = false;
 }
 DOMTextInput.prototype = Object.create(DOMNode.prototype)
 DOMTextInput.prototype.constructor = DOMTextInput;
@@ -191,6 +190,10 @@ DOMTextInput.prototype.setText = function(text){
         SendAttributeChangesToCEF("Text", this);
 }
 
+// DOMAttribute IsPassword
+DOMTextInput.prototype.getIsPassword = function(){
+    return (this.node.type === "password");
+}
 
 
 /*
@@ -258,6 +261,7 @@ function DOMSelectField(node)
 {
     window.domSelectFields.push(this);
     var id = window.domSelectFields.indexOf(this);
+
     DOMNode.call(this, node, id, 2);
 
     this.options = [];
@@ -290,10 +294,10 @@ window.domNodes[3] = window.domOverflowElements;
 
 function DOMOverflowElement(node)
 {
-    DOMNode.call(this, node, id, 2);
-
     window.domOverflowElements.push(this);
     var id = window.domOverflowElements.indexOf(this);
+
+    DOMNode.call(this, node, id, 3);
 
     this.scrollLeftMax = -1
     this.scrollTopMax = -1

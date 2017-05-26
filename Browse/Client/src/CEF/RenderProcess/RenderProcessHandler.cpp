@@ -28,7 +28,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
     CEF_REQUIRE_RENDERER_THREAD();
 
     const std::string& msgName = msg->GetName().ToString();
-    // IPCLogDebug(browser, "Received '" + msgName + "' IPC msg in RenderProcessHandler");
+    //IPCLogDebug(browser, "Received '" + msgName + "' IPC msg in RenderProcessHandler");
 
 	if (msgName == "SetSelectionIndex")
 	{
@@ -75,6 +75,13 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			CefRefPtr<CefV8Value> window = context->GetGlobal();
 
 			CefRefPtr<CefV8Value> scrollFunction = window->GetValue("ScrollOverflowElement");
+
+			if (!scrollFunction->IsFunction())
+			{
+				LogDebug(browser, "Renderer:  Could not access 'ScrollOverflowElement' function!");
+				context->Exit();
+				return true;
+			}
 
 			scrollFunction->ExecuteFunction(window, { elemId, x, y, fixedIds });
 
@@ -386,6 +393,10 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 
 					args->SetList(args_count++, listValue);
 				}
+			}
+			if (args->GetSize() <= 2)
+			{
+				LogDebug(browser, "Renderer: ERROR processing " + js_obj_getter_name + "(" + std::to_string(id) + ")!");
 			}
 
 			browser->SendProcessMessage(PID_BROWSER, reply);

@@ -134,25 +134,24 @@ DOMOverflowElement.prototype.scroll = function(gazeX, gazeY){
 
 function ScrollOverflowElement(elemId, gazeX, gazeY, fixedIds)
 {
-    var overflowObj = GetOverflowElement(elemId);
-    if(overflowObj !== null && overflowObj !== undefined)
-    {
-        // TODO: Move scrolling computation to C++ Tab::ScrollOverflowElement
-        // Add solution for scrolling if edge of overflow is covered by a fixed element and scroll at the edge of fixed element
-        if(fixedIds !== null && fixedIds.length > 0)
-        {
-            var childFixedId = overflowObj.node.getAttribute("childFixedId");
-            
-            if(childFixedId === null || 
-                (childFixedId !== null && fixedIds.indexOf(childFixedId) === -1)  // child id not contained in list
-            )
-            {
-                // Skip scrolling, because overflow is hidden by fixed element with "fixedId"
-                return;
-            }
-        }
-        overflowObj.scroll(gazeX,gazeY);
-    }
+    var overflowObj = GetDOMOverflowElement(elemId);
+	if(overflowObj === undefined)
+		return;
+	
+	// TODO: Move scrolling computation to C++ Tab::ScrollOverflowElement
+	// Add solution for scrolling if edge of overflow is covered by a fixed element and scroll at the edge of fixed element
+	if(fixedIds !== null && fixedIds !== undefined && fixedIds.length > 0)
+	{
+		var childFixedId = overflowObj.getFixedId();
+		
+		if(fixedIds.indexOf(childFixedId) === -1)  // child id not contained in list
+		{
+			ConsolePrint("Skipping scrolling!");
+			// Skip scrolling, because overflow is hidden by fixed element with "fixedId"
+			return;
+		}
+	}
+	overflowObj.scroll(gazeX,gazeY);
 }
 
 ConsolePrint("Successfully imported dom_nodes_interaction.js!");
