@@ -5,7 +5,7 @@
 
 #include "plugins/Eyetracker/Interface/Eyetracker.h"
 #include "plugins/Eyetracker/Common/EyetrackerData.h"
-#include "plugins/Eyetracker/SMIiViewX/iViewX/include/iViewXAPI.h"
+#include "iViewXAPI.h"
 #include <algorithm>
 
 int __stdcall SampleCallbackFunction(SampleStruct sampleData)
@@ -62,7 +62,12 @@ bool Disconnect()
 	return iV_Disconnect() == RET_SUCCESS;
 }
 
-void FetchGaze(int maxSampleCount, std::vector<double>& rGazeX, std::vector<double>& rGazeY)
+void FetchGaze(int maxSampleCount, std::vector<std::pair<double, double> >& rGaze)
 {
-	eyetracker_global::GetKOrLessValidRawGazeEntries(maxSampleCount, rGazeX, rGazeY);
+	eyetracker_global::GetKOrLessValidRawGazeEntries(maxSampleCount, rGaze);
+}
+
+void Calibrate()
+{
+	// TODO
 }

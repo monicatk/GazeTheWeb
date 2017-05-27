@@ -12,33 +12,38 @@
 
 namespace setup
 {
-    // Window
-    static const bool FULLSCREEN = false;
-    static const int INITIAL_WINDOW_WIDTH = 1280;
-    static const int INITIAL_WINDOW_HEIGHT = 720;
+	// Window
+	static const bool FULLSCREEN = false; // does not work in combination with eye tracker calibration
+	static const bool MAXIMIZE_WINDOW = true; // only implemented for Windows
+	static const int INITIAL_WINDOW_WIDTH = 1280;
+	static const int INITIAL_WINDOW_HEIGHT = 720;
 
-    // Control
-    static const float DURATION_BEFORE_INPUT = 1.f; // wait one second before accepting input
-    static const bool PAUSED_AT_STARTUP = false;
-    static const float LINK_CORRECTION_MAX_PIXEL_DISTANCE = 5.f;
+	// Control TODO: move connect bools to config file
+	static const bool CONNECT_SMI_IVIEWX = false;
+	static const bool CONNECT_VI_MYGAZE = false;
+	static const bool CONNECT_TOBII_EYEX = true;
+	static const float DURATION_BEFORE_INPUT = 1.f; // wait one second before accepting input
+	static const bool PAUSED_AT_STARTUP = false;
+	static const float LINK_CORRECTION_MAX_PIXEL_DISTANCE = 5.f;
 	static const int TEXT_SELECTION_MARGIN = 4; // area which is selected before / after zoom coordinate in CEFPixels
-	static const bool EYEINPUT_DISTORT_GAZE = true;
+	static const float EYEINPUT_GAZE_FIXATION_RADIUS = 32.f; // radius in which gaze sample counts as fixation and is filtered
+	static const bool EYEINPUT_DISTORT_GAZE = false;
 	static const float EYEINPUT_DISTORT_GAZE_BIAS_X = 64.f; // pixels
 	static const float EYEINPUT_DISTORT_GAZE_BIAS_Y = 32.f; // pixels
 
-    // Debugging
-    static const bool LOG_DEBUG_MESSAGES = false;
-    static const bool DRAW_DEBUG_OVERLAY = true;
+	// Debugging
+	static const bool LOG_DEBUG_MESSAGES = false;
+	static const bool DRAW_DEBUG_OVERLAY = true;
 
-    // Experiments
-    static const std::string LAB_STREAM_OUTPUT_NAME = "BrowserOutputStream";
-    static const std::string LAB_STREAM_OUTPUT_SOURCE_ID = "myuniquesourceid23443";
+	// Experiments
+	static const std::string LAB_STREAM_OUTPUT_NAME = "BrowserOutputStream";
+	static const std::string LAB_STREAM_OUTPUT_SOURCE_ID = "myuniquesourceid23443";
 	static const std::string LAB_STREAM_INPUT_NAME = "MiddlewareStream"; // may be set to same value as LAB_STREAM_OUTPUT_NAME to receive own events for debugging purposes
 	static const bool LOG_INTERACTIONS = false;
 
-    // Other
-    static const bool ENABLE_WEBGL = false; // only on Windows
-    static const bool BLUR_PERIPHERY = false;
+	// Other
+	static const bool ENABLE_WEBGL = false; // only on Windows
+	static const bool BLUR_PERIPHERY = false;
 	static const float WEB_VIEW_RESOLUTION_SCALE = 1.f;
 	static const unsigned int HISTORY_MAX_PAGE_COUNT = 100; // maximal length of history
 }

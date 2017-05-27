@@ -26,7 +26,8 @@
 #include "src/CEF/Data/DOMNode.h"
 #include "src/State/Web/Tab/WebView.h"
 #include "src/State/Web/Tab/Pipelines/Pipeline.h"
-#include "src/State/Web/Tab/Triggers/DOMTrigger.h"
+#include "src/State/Web/Tab/Triggers/TextInputTrigger.h"
+#include "src/State/Web/Tab/Triggers/SelectFieldTrigger.h"
 #include "src/Utils/glmWrapper.h"
 #include "src/Utils/Input.h"
 #include "src/Global.h"
@@ -144,6 +145,9 @@ public:
     // Set case of keyboard letters
     virtual void SetCaseOfKeyboardLetters(std::string id, bool accept);
 
+	// Set keyboard 
+	virtual void SetKeymapOfKeyboard(std::string id, unsigned int keymap);
+
 	// Classify currently selected key
 	virtual void ClassifyKey(std::string id, bool accept);
 
@@ -169,6 +173,9 @@ public:
 	// Delete content in text edit
 	virtual void DeleteContentAtCursorInTextEdit(std::string id, int letterCount);
 
+	// Delete all content in text edit
+	virtual void DeleteContentInTextEdit(std::string id);
+
 	// Get content in active entity
 	virtual std::u16string GetActiveEntityContentInTextEdit(std::string id) const;
 
@@ -186,6 +193,12 @@ public:
 
 	// Set activity of element
 	virtual void SetElementActivity(std::string id, bool active, bool fade);
+
+	// Tell button to go up
+	virtual void ButtonUp(std::string id);
+
+	// Set global keyboard layout
+	virtual void SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout);
 
 	// Getter for values of interest
 	virtual int GetWebViewX() const;
@@ -278,12 +291,21 @@ public:
     virtual std::weak_ptr<Texture> GetWebViewTexture() { return _upWebView->GetTexture(); }
 
     // Add, remove and update Tab's current DOMNodes
-    virtual void AddDOMNode(std::shared_ptr<DOMNode> spNode);
-	virtual void AddDOMNode(std::shared_ptr<DOMSelectField> spNode);
-	virtual std::weak_ptr<DOMNode> GetDOMNode(DOMNodeType type, int nodeID);
-	virtual std::weak_ptr<DOMSelectField> GetDOMSelectFieldNode(int nodeId);
-    virtual void ClearDOMNodes();
-	virtual void RemoveDOMNode(DOMNodeType type, int nodeID);
+	virtual void AddDOMTextInput(int id);
+	virtual void AddDOMLink(int id);
+	virtual void AddDOMSelectField(int id);
+	virtual void AddDOMOverflowElement(int id);
+
+	virtual std::weak_ptr<DOMTextInput> GetDOMTextInput(int id);
+	virtual std::weak_ptr<DOMLink> GetDOMLink(int id);
+	virtual std::weak_ptr<DOMSelectField> GetDOMSelectField(int id);
+	virtual std::weak_ptr<DOMOverflowElement> GetDOMOverflowElement(int id);
+
+	virtual void RemoveDOMTextInput(int id);
+	virtual void RemoveDOMLink(int id);
+	virtual void RemoveDOMSelectField(int id);
+	virtual void RemoveDOMOverflowElement(int id);
+	virtual void ClearDOMNodes();
 
     // Receive callbacks from CefMediator upon scrolling offset changes
     virtual void SetScrollingOffset(double x, double y);
@@ -309,11 +331,6 @@ public:
 	// Receive current loading status of each frame
 	virtual void SetLoadingStatus(int64 frameID, bool isMain, bool isLoading);
 	
-	// Overflow elements
-	virtual void AddOverflowElement(std::shared_ptr<OverflowElement> overflowElem);
-	virtual std::shared_ptr<OverflowElement> GetOverflowElement(int id);
-	virtual void RemoveOverflowElement(int id);
-
 	// Tell about JavaScript dialog
 	virtual void RequestJSDialog(JavaScriptDialogType type, std::string message);
 
@@ -462,19 +479,18 @@ private:
     // Current URL
     std::string _url = "";
 
-    // Vector with DOMTriggers (take DOM input node as input...)
-    std::vector<std::unique_ptr<DOMTrigger> >_DOMTriggers;
-
-	// Vector with DOMTextLinks
-	std::vector<std::shared_ptr<DOMNode> >_DOMTextLinks;
-
-	// Vector with DOMSelectFields
-	std::vector<std::shared_ptr<DOMSelectField> > _DOMSelectFields;
+    // Maps of triggers. Remember to add clearing in "ClearDOMNodes"
+	std::map<int, std::unique_ptr<TextInputTrigger> >_textInputTriggers;
+	std::map<int, std::unique_ptr<SelectFieldTrigger> >_selectFieldTriggers;
+	
+	// Collection of all triggers
+	std::vector<Trigger*> _triggers;
 
 	// Map nodeID to node itself, in order to access it when it has to be updated
-	std::map<int, std::shared_ptr<DOMNode> > _TextLinkMap;
-	std::map<int, std::shared_ptr<DOMNode> > _TextInputMap;
+	std::map<int, std::shared_ptr<DOMLink> > _TextLinkMap;
+	std::map<int, std::shared_ptr<DOMTextInput> > _TextInputMap;
 	std::map<int, std::shared_ptr<DOMSelectField> > _SelectFieldMap;
+	std::map<int, std::shared_ptr<DOMOverflowElement> > _OverflowElementMap;
 
     // Web view in which website is rendered and displayed
     std::unique_ptr<WebView> _upWebView;
@@ -580,8 +596,6 @@ private:
 
 	// Current loading icon frame
 	int _loadingIconFrame = 0;
-
-	std::vector<std::shared_ptr<OverflowElement> > _overflowElements;
 };
 
 #endif // TAB_H_

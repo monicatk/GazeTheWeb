@@ -35,7 +35,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-#include "externals/iViewX/include/iViewXAPI.h"
+#include "iViewXAPI.h"
 
 extern double eye_tracker_x, eye_tracker_y;
 

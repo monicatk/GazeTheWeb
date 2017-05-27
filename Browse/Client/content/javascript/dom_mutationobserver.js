@@ -3,10 +3,17 @@
 // Author: Daniel Mueller (muellerd@uni-koblenz.de)
 //============================================================================
 
+window.debugging = true
+
 window.domLinks = [];
 window.domTextInputs = [];
-window.overflowElements = [];
 window.domSelectFields = [];
+window.domOverflowElements = [];
+
+function GetDOMTextInput(id){ return GetDOMObject(0, id);}
+function GetDOMLink(id){ return GetDOMObject(1, id);}
+function GetDOMSelectField(id){ return GetDOMObject(2, id); }
+function GetDOMOverflowElement(id){ return GetDOMObject(3, id); }
 
 
 function SetSelectionIndex(id, index)
@@ -123,8 +130,12 @@ function CutOutRect(target, overlay)
 function GetNextOverflowParent(node)
 {
     var parent = node.parentNode;
-    while(parent !== null || parent === document.documentElement)
+    while(parent !== null || parent !== undefined) // redundant? || parent === document.documentElement)
     {
+        // DEBUG
+        if(parent === null)
+            break;
+
         if(parent.nodeType === 1)
         {
             // style.overflow = {visible|hidden|scroll|auto|initial|inherit}
@@ -154,6 +165,7 @@ function DOMObject(node, nodeType)
         this.overflowParent = undefined;
         this.text = "";
         this.isPassword = false;
+        this.getRectsCount = 0;
 
     /* Methods */ 
         // Update member variable for Rects and return true if an update has occured 
@@ -178,9 +190,9 @@ function DOMObject(node, nodeType)
             // Easy to handle 'collisions' on each overlay's rendering frame, annoying in JS when scrolling
             if(this.nodeType !== 0 && !this.node.hasAttribute("childFixedId"))
             {
-                for(var i = 0; i < domFixedElements.length; i++)
+                for(var i = 0; i < window.domFixedElements.length; i++)
                 {
-                    var fixedObj = domFixedElements[i];
+                    var fixedObj = window.domFixedElements[i];
                     if(fixedObj !== null && fixedObj !== undefined)
                     {
                         updatedRectsData.map(
@@ -210,7 +222,7 @@ function DOMObject(node, nodeType)
             }
 
             // Also, update text content if input field
-            if(this.nodeType == 0)   // Only needed for text inputs
+            if(this.nodeType === 0)   // Only needed for text inputs
             {
                 this.updateText();
             }
@@ -224,6 +236,10 @@ function DOMObject(node, nodeType)
 
         // Returns float[4] for each Rect with adjusted coordinates
         this.getRects = function(){
+            // Update rects before returning them 
+            // NOTE: Not that much additional overhead because it will only be called from C++ when e.g. creating a node?
+            this.updateRects();
+
             if(this.overflowParent !== null && this.overflowParent !== undefined) 
             {
                 var id = this.overflowParent.getAttribute("overflowId");
@@ -271,6 +287,41 @@ function DOMObject(node, nodeType)
                 this.updateRects();
             }
         };
+
+        // TODO: newly added - everything ok?
+        this.getFixedId = function(){
+            if(this.node === null || this.node === undefined || this.node.nodeType !== 1)
+                return -1;
+
+            fixedId = this.node.getAttribute("fixedId");
+            if(fixedId !== null) return fixedId;
+
+            childFixedId = this.node.getAttribute("childFixedId");
+            if(childFixedId !== null) return childFixedId;
+
+            return -1;
+        }
+
+         // TODO: newly added - everything ok?
+        this.getOverflowId = function(){
+            return -1; // TODO: Add attribute containing a pointer to overflow element, get its id, return it!
+        }
+
+        // TODO: newly added - everything ok?
+        this.getText = function(){
+            return this.text;
+        }
+
+        // TODO: newly added - everything ok?
+        this.getUrl = function(){
+            return "TODO";  // TODO!
+        }
+
+        // TODO: newly added - everything ok?
+        this.getIsPassword = function(){
+            return this.isPassword;
+        }
+        
 
         // DEPRECATED
         this.setVisibility = function(visible){
@@ -606,7 +657,7 @@ function UpdateDOMRects()
     );
 
     // ... and all OverflowElements
-    window.overflowElements.forEach(
+    window.domOverflowElements.forEach(
         function (overflowObj) {
             if(overflowObj !== null && overflowObj !== undefined)
                 overflowObj.updateRects(); 
@@ -780,6 +831,8 @@ function GetDOMObjectList(nodeType)
         case '1': { return window.domLinks; };
         case 2:
         case '2': { return window.domSelectFields; }
+        case 3:
+        case '3': { return window.domOverflowElements; }
         // NOTE: Add more cases if new nodeTypes are added
         default:
         {
@@ -869,6 +922,25 @@ function OverflowElement(node)
         this.overflowParent = GetNextOverflowParent(node);  // TODO: This should be performed by MutationObserver in order to be efficient!
 
         // this.overflowParent = undefined;
+
+
+        // TODO: Quick fix! Getter should make sense later! Or do they already? :p
+        this.getFixedId = function(){
+            return this.node.getAttribute("fixedId") | this.node.getAttribute("childFixedId");
+        }
+        this.getOverflowId = function(){
+            return -1;
+            // var val = (this.overflowParent !== null) ? this.overflowParent.getAttribute("overflowId") : -1;
+            // ConsolePrint("OverflowElement::getOverflowId: returning "+val);
+            // return (this.overflowParent !== null) ? this.overflowParent.getAttribute("overflowId") : -1;
+        }
+        this.getMaxScrolling = function(){
+            return [this.getMaxTopScrolling(), this.getMaxLeftScrolling()];
+        }
+        this.getCurrentScrolling = function(){
+            return [this.getTopScrolling(), this.getLeftScrolling()];
+        }
+
 
     /* Methods */
         this.getMaxTopScrolling = function(){
@@ -995,7 +1067,7 @@ function OverflowElement(node)
                 var id = this.node.getAttribute("overflowId");
                 this.rects = updatedRectsData;
 
-                var encodedCommand = "#ovrflow#upd#"+id+"#rect#";
+                var encodedCommand = "DOM#upd#3#"+id+"#0#";
                 
                 for (var i = 0; i < 4; i++)
                 {                 
@@ -1019,13 +1091,16 @@ function OverflowElement(node)
                 
                 // Inform CEF about changes in fixed attribute
                 var id = this.node.getAttribute("overflowId");
-                var numFixed = (fixed) ? 1 : 0;
-                var encodedCommand = "#ovrflow#upd#"+id+"#fixed#"+numFixed+"#";
+                var fixedId = this.node.getAttribute("fixedID") | this.node.getAttribute("childFixedId");
+                var encodedCommand = "DOM#upd#3#"+id+"#1#"+fixedId+"#";
                 ConsolePrint(encodedCommand);
 
                 this.updateRects();
             }
         };
+
+
+        
 
 /* ------------ CODE EXECUTED ON CONSTRUCTION OF OBJECT ---------------- */
 
@@ -1078,39 +1153,16 @@ function CreateOverflowElement(node)
     {
         var overflowObj = new OverflowElement(node);
 
-        window.overflowElements.push(overflowObj);
+        window.domOverflowElements.push(overflowObj);
 
         // Prepare informing CEF about added OverflowElement
-        var outStr = "#ovrflow#add#";
+        var outStr = "DOM#add#3#";
 
 
-        var id = window.overflowElements.length - 1;
+        var id = window.domOverflowElements.length - 1;
         node.setAttribute("overflowId", id);
 
-        var zero = (id < 10) ? "0" : "";
-        outStr += (zero + id + "#");
-        // #ovrflow#add#[0]id#
-
-
-        // Note: Ignoring multiple Rects at this point...
-        var rects = overflowObj.getRects();
-        var rect = (rects.length > 0) ? rects[0] : [0,0,0,0];
-
-
-        for(var i = 0; i < 4; i++)
-        {
-            outStr += rect[i];
-            if(i !== 3) outStr += ";";  // Note: if-statement misses in DOMObjects --> different decoding atm
-        }
-        outStr += "#";
-        // #ovrflow#add#[0]id#rect0;rect1;rect2;rect3#
-
-        outStr +=  overflowObj.getMaxLeftScrolling();
-        outStr += ";";
-        outStr += overflowObj.getMaxTopScrolling();
-        outStr += "#";
-        // #ovrflow#add#[0]id#rect0;rect1;rect2;rect3#maxLeft;maxTop#
-
+        outStr += (id + "#");
         ConsolePrint(outStr);
 
         //DEBUG
@@ -1122,11 +1174,11 @@ function CreateOverflowElement(node)
 // Called from CEF Handler
 function GetOverflowElement(id)
 {
-    if(id !== null && id !== undefined && id < window.overflowElements.length && id >= 0)
-        return window.overflowElements[id];     // This may return undefined
+    if(id !== null && id !== undefined && id < window.domOverflowElements.length && id >= 0)
+        return window.domOverflowElements[id];     // This may return undefined
     else
     {
-        // ConsolePrint("ERROR in GetOverflowElement: id="+id+", valid id should be in [0, "+(window.overflowElements.length-1)+"]!");
+        // ConsolePrint("ERROR in GetOverflowElement: id="+id+", valid id should be in [0, "+(window.domOverflowElements.length-1)+"]!");
         return null;
     }
         
@@ -1134,7 +1186,7 @@ function GetOverflowElement(id)
 
 function RemoveOverflowElement(id)
 {
-    if(id < window.overflowElements.length && id >= 0)
+    if(id < window.domOverflowElements.length && id >= 0)
     {
         /* HACK FOR REMOVAL OF GLOBAL OVERFLOW ELEMENT CAUSING SCROLL LAGG */
         domLinks.forEach(function(obj){
@@ -1142,7 +1194,7 @@ function RemoveOverflowElement(id)
             {
                 if(obj.node !== null && obj.node !== undefined)
                 {
-                    if(obj.overflowParent == window.overflowElements[id].node)
+                    if(obj.overflowParent == window.domOverflowElements[id].node)
                     {
                         obj.overflowParent = null;
                         obj.updateRects();
@@ -1155,7 +1207,7 @@ function RemoveOverflowElement(id)
             {
                 if(obj.node !== null && obj.node !== undefined)
                 {
-                    if(obj.overflowParent == window.overflowElements[id].node)
+                    if(obj.overflowParent == window.domOverflowElements[id].node)
                     {
                         obj.overflowParent = null;
                         obj.updateRects();
@@ -1165,11 +1217,11 @@ function RemoveOverflowElement(id)
         });
         /* END OF HACK */
 
-        window.overflowElements[id].node.removeAttribute("overflowId");
-        delete window.overflowElements[id]; // TODO: Keep list space empty or fill when new OE is created?
+        window.domOverflowElements[id].node.removeAttribute("overflowId");
+        delete window.domOverflowElements[id]; // TODO: Keep list space empty or fill when new OE is created?
 
         // Inform CEF about removed overflow element
-        ConsolePrint("#ovrflow#rem#"+id);
+        ConsolePrint("DOM#rem#3#"+id+"#");
 
     }
     else

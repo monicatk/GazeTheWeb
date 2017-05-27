@@ -16,6 +16,12 @@
 #include <string>
 #include <fstream>
 
+#ifdef _WIN32 // Windows
+// Native access to Windows functions is necessary to maximize window
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include "submodules/glfw/include/GLFW/glfw3native.h"
+#endif
+
 // Namespace for text-csv
 namespace csv = ::text::csv;
 
@@ -220,7 +226,6 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	guiBuilder.width = _width;
 	guiBuilder.height = _height;
 	guiBuilder.fontFilepath = "fonts/dejavu-sans/ttf/DejaVuSans.ttf";
-	guiBuilder.characterSet = eyegui::CharacterSet::US_ENGLISH;
 	guiBuilder.localizationFilepath = "localizations/English.leyegui";
 	guiBuilder.fontTallSize = 0.07f;
 
@@ -322,8 +327,8 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
     // ### HOMEPAGE ###
 	// _upWeb->AddTab("https://www.tutorialspoint.com/html/html_select_tag.htm");
-	// _upWeb->AddTab(_upSettings->GetHomepage());
-	_upWeb->AddTab(std::string(CONTENT_PATH) + "/websites/index.html");
+	// _upWeb->AddTab(std::string(CONTENT_PATH) + "/websites/index.html");
+	_upWeb->AddTab(_upSettings->GetHomepage());
 
     // ### SUPER LAYOUT ###
 
@@ -360,7 +365,25 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     _cursorFrameIndex = eyegui::addFloatingFrameWithBrick(_pCursorLayout, "bricks/Cursor.beyegui", 0, 0, 0, 0, true, false); // will be moved and sized in loop
 
     // ### INPUT ###
-    _upEyeInput = std::unique_ptr<EyeInput>(new EyeInput);
+    _upEyeInput = std::unique_ptr<EyeInput>(new EyeInput([this](EyeInput::Status status)
+	{
+		// ### DANGER !!! CALLED FROM DIFFERENT THREAD ###
+		// If more is called back from different thread, think about MasterThreadInterface to allow only calls there, which *are* threadsafe
+
+		// This call from a subthread should not break anything, as only strings are pushed to a member queue
+		switch (status)
+		{
+		case EyeInput::Status::CONNECTED:
+			this->PushNotification(u"Eye Tracking Software Connected");
+			break;
+		case EyeInput::Status::DISCONNECTED:
+			this->PushNotification(u"Eye Tracking Software Disconnected");
+			break;
+		default:
+			// Nothing
+			break;
+		}
+	}));
 
     // ### FRAMEBUFFER ###
     _upFramebuffer = std::unique_ptr<Framebuffer>(new Framebuffer(_width, _height));
@@ -395,6 +418,30 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	LabStreamMailer::instance().RegisterCallback(_spLabStreamCallback);
 
     // ### OTHER ###
+
+	// Maximize window if required
+#ifdef _WIN32 // Windows
+	if (!setup::FULLSCREEN && setup::MAXIMIZE_WINDOW)
+	{
+		// Fetch handle to window from GLFW
+		auto Hwnd = glfwGetWin32Window(_pWindow);
+
+		/*
+		// Remove frame from window
+		LONG lStyle = GetWindowLong(Hwnd, GWL_STYLE);
+		lStyle &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
+		SetWindowLong(Hwnd, GWL_STYLE, lStyle);
+
+		// Do same for extended style
+		LONG lExStyle = GetWindowLong(Hwnd, GWL_EXSTYLE);
+		lExStyle &= ~(WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE);
+		SetWindowLong(Hwnd, GWL_EXSTYLE, lExStyle);
+		*/
+
+		// Maximize window
+		SendMessage(Hwnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
+	}
+#endif
 
     // Time
     _lastTime = glfwGetTime();
@@ -711,6 +758,7 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
 			case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
+			case GLFW_KEY_C: { _upEyeInput->Calibrate(); break; }
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
 			case GLFW_KEY_7: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::ZOOM); break; }
 			case GLFW_KEY_8: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::DRIFT_CORRECTION); break; }

@@ -4,13 +4,25 @@
 //============================================================================
 
 #include "Trigger.h"
+#include <algorithm>
 
-Trigger::Trigger(TabInteractionInterface* pTab)
+Trigger::Trigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection)
 {
+	// Store pointers
     _pTab = pTab;
+	_pTriggerCollection = &rTriggerCollection;
+
+	// Register itself to trigger collection
+	_pTriggerCollection->push_back(this);
 }
 
 Trigger::~Trigger()
 {
-    // Nothing to do
+    // Unregister from trigger collection
+	_pTriggerCollection->erase(
+		std::remove(
+			_pTriggerCollection->begin(),
+			_pTriggerCollection->end(),
+			this),
+		_pTriggerCollection->end());
 }

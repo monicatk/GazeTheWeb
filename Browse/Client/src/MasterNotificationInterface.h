@@ -2,7 +2,7 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// Master interface for notifications.
+// Master interface for notifications. TODO: make notification disappear when fixation leaves it
 
 #ifndef MASTERNOTIFICATIONINTERFACE_H_
 #define MASTERNOTIFICATIONINTERFACE_H_

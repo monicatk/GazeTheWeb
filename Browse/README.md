@@ -2,7 +2,7 @@
 
 ![Logo](media/Logo.png)
 
-Gaze-controlled Web browser, part of the EU-funded research project MAMEM. There exists a rough prototype for testing purposes in [_Prototype_](Prototype) subfolder and the work in progress implementation of the full featured one in the [_Client_](Client) subfolder. Both will only compile on either Windows with Visual Studio 2015 as 32bit project or on Linux with GCC 5.x as 64bit project for the moment. In addition, your graphics card must support OpenGL 3.3 or higher (f.e. not the case for second generation Intel i-GPUs or lower, at least on Windows).
+Gaze-controlled Web browser, part of the EU-funded research project MAMEM. There exists a deprecated prototype for initial testing purposes in [_Prototype_](Prototype) subfolder and the work in progress implementation of the full featured Web browser in the [_Client_](Client) subfolder. Both will only compile on either Windows with Visual Studio 2015 as 32bit project or on Linux with GCC 5.x as 64bit project for the moment. In addition, your graphics card must support OpenGL 3.3 or higher (f.e. not the case for second generation Intel i-GPUs or lower, at least on Windows). Prototype build has been deactivated in the current version of the CMakeLists.
 
 ## Videos
 * [Demonstration](https://www.youtube.com/watch?v=x1ESgaoQR9Y)
@@ -29,9 +29,7 @@ Since the CEF3 binaries for Windows and Linux do not like each other, one has to
 5. Folder structure should look like this screenshot:
  * ![Folder structure](media/Folder.png)
 5. If prototype should be built too, one has to include its subdirectory in the main CMakeLists, line 532.
-6. Create a build folder somewhere and execute CMake to create a project, which can be compiled.
- * CLIENT_SMI_REDN_SUPPORT defines, whether Client should compile with support for SMI iViewX
- * CLIENT_TOBII_EYEX_SUPPORT defines, whether Client should compile with support for Tobii EyeX SDK
+6. Create a build folder somewhere and execute CMake to generate a project, which can be compiled.
 
 ## Notes
-This project uses the Chromium Embedded Framework. Please visit https://bitbucket.org/chromiumembedded/cef for more information about that project!
+This project uses the _Chromium Embedded Framework_. Please visit https://bitbucket.org/chromiumembedded/cef for more information about that project!

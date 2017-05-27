@@ -115,7 +115,7 @@ void Tab::InputTextData(int64 frameID, int nodeID, std::string text, bool submit
 
 std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pagePixelCoordinate, float& rDistance) const
 {
-    if(_DOMTextLinks.empty())
+    if(_TextLinkMap.empty())
     {
         // No link available
         rDistance = -1;
@@ -128,10 +128,10 @@ std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pagePixelCoordinate, 
         std::weak_ptr<const DOMNode> wpResult;
 
         // Go over links
-        for(const auto& rLink : _DOMTextLinks)
+        for(const auto& idLinkPair : _TextLinkMap)
         {
             // Go over rectangles of that link
-            for(const auto& rRect : rLink->GetRects())
+            for(const auto& rRect : idLinkPair.second->GetRects())
             {
                 // Distance
                 float dx = glm::max(glm::abs(pagePixelCoordinate.x - rRect.Center().x) - (rRect.Width() / 2.f), 0.f);
@@ -142,7 +142,7 @@ std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pagePixelCoordinate, 
                 if(distance < minDistance)
                 {
                     minDistance = distance;
-                    wpResult = rLink;
+                    wpResult = idLinkPair.second;
                 }
             }
         }

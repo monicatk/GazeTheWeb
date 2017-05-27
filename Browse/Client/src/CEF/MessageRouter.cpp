@@ -7,6 +7,7 @@
 #include "src/CEF/Mediator.h"
 #include "src/Utils/Logger.h"
 #include "src/CEF/Data/DOMNode.h"
+#include "src/CEF/Data/DOMExtraction.h"
 #include <cstdlib>
 #include <algorithm>
 
@@ -38,6 +39,8 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	// ###############
 	// ### Favicon ###
 	// ###############
+
+	//LogDebug("requestString=", requestString);
 
 	if (requestString == "faviconBytesReady")
 	{
@@ -125,112 +128,6 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		}
 	}
 
-	// ########################
-	// ### Overflow Element ###
-	// ########################
-
-	if (requestString.compare(0, 9, "#ovrflow#") == 0)
-	{
-		if (requestString.compare(9, 4, "add#") == 0) // adding overflow element
-		{
-			std::string dataStr = requestString.substr(13, requestString.length());
-			std::vector<std::string> data = SplitBySeparator(dataStr, '#');
-
-			// Extract OverflowElement ID from dataStr
-			int id = std::stoi(data[0]);
-
-			// Extract rect data from encoded String
-			std::vector<float> rectData;
-			std::vector<std::string> rectStrData = SplitBySeparator(data[1], ';');
-			std::for_each(
-				rectStrData.begin(),
-				rectStrData.end(), 
-				[&rectData](std::string str) {rectData.push_back(std::stod(str)); }
-			);
-			Rect rect = Rect(rectData);
-
-			// Extract maximum possible scrolling in x and y direction
-			std::vector<std::string> scrollMaxString = SplitBySeparator(data[2], ';');
-			if (scrollMaxString[0].compare("undefined") == 0 || scrollMaxString[1].compare("undefined") == 0)
-			{
-				LogDebug("MsgRouter: Error in OverflowElement creation: Missing max scrolling value(s)! Setting them to 0.");
-			}
-			int scrollLeftMax = (scrollMaxString[0].compare("undefined") == 0) ? 0 : std::stoi(scrollMaxString[0]);
-			int scrollTopMax = (scrollMaxString[1].compare("undefined") == 0) ? 0 : std::stoi(scrollMaxString[1]);
-
-			// Add overflow element
-			_pMediator->AddOverflowElement(browser, std::make_shared<OverflowElement>(id, rect, scrollLeftMax, scrollTopMax));
-
-			// Success!
-			callback->Success("success");
-			return true;
-		}
-		if (requestString.compare(9, 4, "rem#") == 0) // removing overflow element
-		{
-			// Remove overflow element
-			std::vector<std::string> dataStr = SplitBySeparator(requestString.substr(13), '#');
-			_pMediator->RemoveOverflowElement(browser, std::stoi(dataStr[0]));
-
-			// Success!
-			callback->Success("success");
-			return true;
-		}
-		if (requestString.compare(9, 4, "upd#") == 0) // update overflow element
-		{
-			std::vector<std::string> dataStr = SplitBySeparator(requestString.substr(13), '#');
-
-			// Assuming elementId, attribute name & data are enough information (at this time)
-			if (dataStr.size() == 3)
-			{
-				// Overflow Element ID
-				int id = std::stoi(dataStr[0]);
-
-				// Overflow Elements attribute as string, which gets updated
-				std::string attr = dataStr[1];
-
-				// dataStr[2] contains data for given attributes value changes
-
-				// Get access to given Overflow Element in Tab
-				std::weak_ptr<OverflowElement> wpElem = _pMediator->GetOverflowElement(browser, id);
-				if (const auto& elem = wpElem.lock())
-				{
-					// Update Overflow Element's rect data
-					if (attr == "rect")
-					{
-						std::vector<std::string> rectData = SplitBySeparator(dataStr[2], ';');
-						std::vector<float> rect;
-						// Convert Rect coordinates from string to float
-						std::for_each(
-							rectData.begin(),
-							rectData.end(),
-							[&rect](std::string str) {rect.push_back(std::stof(str)); }
-						);
-
-						// Use float coordinates to update Rect #0
-						elem->UpdateRect(0, std::make_shared<Rect>(rect));
-					}
-
-					// Update OverflowElement's fixation status
-					if (attr == "fixed")
-					{
-						elem->UpdateFixation(std::stoi(dataStr[2]));
-					}
-				}
-
-				// Success!
-				callback->Success("success");
-				return true;
-			}
-			else
-			{
-				// Failure!
-				LogError("MsgRouter: An error occured in decoding the update String of an OverflowElement!");
-				callback->Failure(-1, "some error occured");
-				return true;
-			}
-		}
-	}
-
 	// ################
 	// ### DOM Node ###
 	// ################
@@ -256,157 +153,111 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		if (data.size() > 3)
 		{
 			const std::string& op = data[1];
-			const int& numeric_type = std::stoi(data[2]);
+			const int& type = std::stoi(data[2]);
 			const int& id = std::stoi(data[3]);
-			
-			// Identify type as string with DOMNodeType
-			DOMNodeType type;
-			switch (numeric_type)
-			{
-				case(0) : {type = DOMNodeType::TextInput; break;  };
-				case(1) : {type = DOMNodeType::TextLink; break;  };
-				case(2) : {type = DOMNodeType::SelectField; break;  };
-				default: {
-					LogError("MsgRouter: Can't process the following incoming msg:\n", requestString, "\nCAUSE: Unknown DOMNodeType: ", numeric_type);
-					return true;
-				}
-			}
+		
+			//LogDebug(requestString, " id: ", id);
+			//if (type == 3) // DEBUG: OverflowElement
+			//	LogDebug("MsgRouter: Processing " + requestString);
 
+			// ADDING DOMNODE
 			if (op.compare("add") == 0) // adding of DOM node
 			{
-				// TODO(Daniel): Create different AddDOMNode methods in Tab for different object types
-				if (type == DOMNodeType::SelectField)
+				// Create blank node object in corresponding Tab object
+				switch (type)
 				{
-					// DEBUG
-					//LogDebug("MsgRouter: Added blank DOM SelectField node, sending IPC msg in order to fill it with data.");
-
-					// Create blank DOM node of given node type with nodeID
-					_pMediator->AddDOMNode(browser,	std::make_shared<DOMSelectField>(id));
+					case(0): {_pMediator->AddDOMTextInput(browser, id); break; }
+					case(1): {_pMediator->AddDOMLink(browser, id); break; }
+					case(2): {_pMediator->AddDOMSelectField(browser, id); break; }
+					case(3): {_pMediator->AddDOMOverflowElement(browser, id); break; }
+					default: {
+						LogError("MsgRouter: Adding DOMNode - Unknown type of DOMNode! type=", type);
+					}
 				}
-				else
-				{
-					// Create blank DOM node of given node type with nodeID
-					_pMediator->AddDOMNode(browser, std::make_shared<DOMNode>(type, id));
+
+				// TODO: This could be done in DOMExtraction
+				std::string ipcName = "";
+				switch (type) {
+				case(0) : ipcName = "TextInput"; break;
+				case(1) : ipcName = "Link"; break;
+				case(2) : ipcName = "SelectField"; break;
+				case(3) : ipcName = "OverflowElement"; break;
+				default: {
+					LogError(browser, "MsgRouter: - ERROR: Unknown numeric DOM node type value: ", type);
+					return true;
+				}
 				}
 
 				// Instruct Renderer Process to initialize empty DOM Nodes with data
-				CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("LoadDOMNodeData");
+				CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("LoadDOM" + ipcName + "Data");
 				msg->GetArgumentList()->SetInt(0, type);
 				msg->GetArgumentList()->SetInt(1, id);
 				browser->SendProcessMessage(PID_RENDERER, msg);
 			}
 
-			if (op.compare("rem") == 0) // removing of DOM node
+			// REMOVE DOMNODE
+			if (op.compare("rem") == 0)
 			{
-				_pMediator->RemoveDOMNode(browser, type, id);
+				switch (type)
+				{
+					case(0): {_pMediator->RemoveDOMTextInput(browser, id); break; }
+					case(1): {_pMediator->RemoveDOMLink(browser, id); break; }
+					case(2): {_pMediator->RemoveDOMSelectField(browser, id); break; }
+					case(3) : {_pMediator->RemoveDOMOverflowElement(browser, id); break; }
+					default: {
+						LogError("MsgRouter: Removing DOMNode - Unknown type of DOMNode! type=", type);
+					}
+				}
 			}
 
-			if (op.compare("upd") == 0) // updating of DOM node
+			// UPDATE DOMNODE
+			if (op.compare("upd") == 0)
 			{
+				std::weak_ptr<DOMNode> target;
+				switch (type)
+				{
+					case(0): {target = _pMediator->GetDOMTextInput(browser, id); break; }
+					case(1): {target = _pMediator->GetDOMLink(browser, id); break; }
+					case(2): {target = _pMediator->GetDOMSelectField(browser, id); break; }
+					case(3) : {target = _pMediator->GetDOMOverflowElement(browser, id); break; }
+					default: {
+						LogError("MsgRouter: Updating DOMNode - Unknown type of DOMNode! type=", type);
+					}
+				}
+
 				if (data.size() > 5)
 				{
-					const int& attr = std::stoi(data[4]);
+					// See DOMAttribute.h enum DOMAttribute for numeric interpretation
+					const DOMAttribute& attr = (DOMAttribute) std::stoi(data[4]);
 					const std::string& attrData = data[5];
-					
-					switch (attr)
+
+					// Perform node update
+					bool success = false;
+					if (auto node = target.lock())
 					{
-						// List of Rects were updated
-						case(0):
-						{
-							std::vector<std::string> rectDataStr = SplitBySeparator(attrData, ';');
-							std::vector<float> rectData;
-
-							// Extract each float value from string, earlier separated by ';', and convert string to numerical value
-							std::for_each(
-								rectDataStr.begin(),
-								rectDataStr.end(), 
-								[&rectData](std::string value) {rectData.push_back(std::stod(value)); }
-							);
-
-							// Read out each 4 float values und create 1 Rect with them
-							std::vector<Rect> rects;
-							for (int i = 0; i + 3 < rectData.size(); i += 4)
-							{
-								Rect rect = Rect(rectData[i], rectData[i + 1], rectData[i + 2], rectData[i + 3]);
-								rects.push_back(rect);
-							}
-
-							if (type == DOMNodeType::SelectField)
-							{
-								if (auto targetNode = _pMediator->GetDOMSelectFieldNode(browser, id).lock())
-								{
-									targetNode->SetRects(std::make_shared<std::vector<Rect>>(rects));
-								}
-							}
-							// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
-							else if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())
-							{
-								targetNode->SetRects(std::make_shared<std::vector<Rect>>(rects));
-							}
-							break;
-						};
-
-						// Node's fixation status changed
-						case(1):
-						{
-							bool boolVal = attrData.at(0) != '0';
-
-							// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
-							if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())
-							{
-								targetNode->SetFixed(boolVal);
-							}
-
-							break;
-						};
-
-						// Node's visibility has changed
-						case (2) :
-						{
-							bool boolVal = attrData.at(0) != '0';
-
-							// Get weak_ptr to target node and get shared_ptr targetNode out of weak_ptr
-							if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())
-							{
-								targetNode->SetVisibility(boolVal);
-							}
-
-							break;
-						}
-
-						// Node's text content changed
-						case (3):
-						{
-							if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())
-							{
-								targetNode->SetText(attrData);
-							}
-							break;
-						}
-
-						// Node is set as password input field
-						case(4):
-						{
-							if (auto targetNode = _pMediator->GetDOMNode(browser, type, id).lock())
-							{
-								targetNode->SetAsPasswordField();
-								LogDebug("MsgRouter: Set input field node to password field!");
-							}
-							break;
-						}
-
-						// Fallback
-						default:
-						{
-							LogDebug("MsgHandler: Received Javascript 'update' request of DOMNode attribute=", attr, ", which is not yet defined.");
-						}
+						success = node->Update(
+							(DOMAttribute) attr,
+							StringToCefListValue::ExtractAttributeData((DOMAttribute) attr, attrData)
+						);
 					}
+					else
+					{
+						LogError("MsgRouter: Failed to access node with type: ", type, " and id: ", id, "stored in"\
+							" Tab with id: ", browser->GetIdentifier(), ")");
+					}
+					
+					if (!success)
+					{
+						LogError("MsgRouter: Update failed! Node type: ", type, ", node id: ", id, ", DOMAttribute: ", attr);
+					}
+
 				}
 				else
 				{
 					LogDebug("MsgRouter: Expected more data in DOMObject update:\n", requestString, "\nAborting update.");
 				}
 			}
+
 		}
 		
 		// Success! (TODO: there may be failures which can be passed to JavaScript)

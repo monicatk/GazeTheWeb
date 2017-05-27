@@ -111,28 +111,32 @@ void Tab::DrawDebuggingOverlay() const
 		// Set rendering up for DOMTrigger
 		_upDebugLineQuad->GetShader()->UpdateValue("color", DOM_TRIGGER_DEBUG_COLOR);
 
-		// Go over all DOMTriggers
-		for (const auto& rDOMTrigger : _DOMTriggers)
+		// TODO: also implement for select fields
+
+		// Go over all TextInputTriggers
+		for (const auto& rNodeTriggerPair : _textInputTriggers)
 		{
+			const auto& rDOMTrigger = rNodeTriggerPair.second;
+
 			// Render rects
 			for (const auto rRect : rDOMTrigger->GetDOMRects())
 			{
-				if (true)//rDOMTrigger->GetDOMVisibility())
+				/*
+				if (!rDOMTrigger->GetDOMIsPasswordField()) // TODO: what is this? Different color for password fields?
 				{
-					if (!rDOMTrigger->GetDOMIsPasswordField())
-					{
-						renderRect(rRect, rDOMTrigger->GetDOMFixed());
-					}
-					else
-					{
-						_upDebugLineQuad->GetShader()->UpdateValue("color", glm::vec3(0.0f, 1.f, 1.f));
-						renderRect(rRect, rDOMTrigger->GetDOMFixed());
-						_upDebugLineQuad->GetShader()->UpdateValue("color", DOM_TRIGGER_DEBUG_COLOR);
-					}
+					renderRect(rRect, rDOMTrigger->GetDOMFixed());
+					//LogDebug("TabDebugImpl: Is trigger fixed? ", rDOMTrigger->GetDOMFixed());
 				}
-
+				else */
+				{
+					_upDebugLineQuad->GetShader()->UpdateValue("color", glm::vec3(0.0f, 1.f, 1.f));
+					renderRect(rRect, rDOMTrigger->GetDOMFixed());
+				
+					_upDebugLineQuad->GetShader()->UpdateValue("color", DOM_TRIGGER_DEBUG_COLOR);
+				}
 			}
 		}
+
 
 		// ### DOMTEXTLINKS ###
 
@@ -140,39 +144,44 @@ void Tab::DrawDebuggingOverlay() const
 		_upDebugLineQuad->GetShader()->UpdateValue("color", DOM_TEXT_LINKS_DEBUG_COLOR);
 
 		// Go over all DOMTextLinks
-		for (const auto& rDOMTextLink : _DOMTextLinks)
+		for (const auto& rIdNodePair : _TextLinkMap)
 		{
+			const auto& rDOMTextLink = rIdNodePair.second;
 			// Render rects
 			for (const auto rRect : rDOMTextLink->GetRects())
 			{
-				if (rDOMTextLink->GetVisibility())
-					renderRect(rRect, rDOMTextLink->GetFixed());
-				else
-				{
-					_upDebugLineQuad->GetShader()->UpdateValue("color", glm::vec3(1.0f, 0.f, 1.f));
-					renderRect(rRect, rDOMTextLink->GetFixed());
-					_upDebugLineQuad->GetShader()->UpdateValue("color", DOM_TEXT_LINKS_DEBUG_COLOR);
-				}
+				renderRect(
+					rRect, 
+					(rDOMTextLink->GetFixedId() >= 0)
+				);
 			}
 		}
 
 		// DEBUG - links containing line break are shown in another color
 		_upDebugLineQuad->GetShader()->UpdateValue("color", glm::vec3(1.f, 0.f, 1.f));
-		for (const auto& rDOMTextLink : _DOMTextLinks)
+		for (const auto& rIdNodePair : _TextLinkMap)
 		{
-			if (rDOMTextLink->GetRects().size() == 2 && rDOMTextLink->GetVisibility())
-				renderRect(rDOMTextLink->GetRects()[1], rDOMTextLink->GetFixed());
+			const auto& rDOMTextLink = rIdNodePair.second;
+			if (rDOMTextLink->GetRects().size() > 1)
+				renderRect(
+					rDOMTextLink->GetRects()[1], 
+					(rDOMTextLink->GetFixedId() >= 0)
+				);
 		}
 
 		// ### SELECT FIELDS ###
 		// Set rendering up for DOMSelectFields
 		_upDebugLineQuad->GetShader()->UpdateValue("color", DOM_SELECT_FIELD_DEBUG_COLOR);
-		for (const auto& rDOMSelectField : _DOMSelectFields)
+		for (const auto& rIdNodePair : _SelectFieldMap)
 		{
+			const auto& rDOMSelectField = rIdNodePair.second;
 			// Render rects
 			for (const auto rRect : rDOMSelectField->GetRects())
 			{
-				renderRect(rRect, rDOMSelectField->GetFixed());
+				renderRect(
+					rRect, 
+					(rDOMSelectField->GetFixedId() >= 0)
+				);
 			}
 		}
 
@@ -196,14 +205,14 @@ void Tab::DrawDebuggingOverlay() const
 		// ### OVERFLOW ELEMENTS ###
 		_upDebugLineQuad->GetShader()->UpdateValue("color", glm::vec3(255.f / 255.f, 127.f / 255.f, 35.f / 255.f));
 
-		for (const auto& rOverflowElement : _overflowElements)
+		for (const auto& rIdNodePair : _OverflowElementMap)
 		{
-			if (rOverflowElement) // Note: Can be NULL if aquivalent element in JS got deleted. (see Tab::RemoveOverflowElement)
-			{
-				for (const auto& rect : rOverflowElement->GetRects())
-					renderRect(rect, rOverflowElement->GetFixed());
-			}
-
+			const auto& rOverflowElement = rIdNodePair.second;
+			for (const auto& rect : rOverflowElement->GetRects())
+				renderRect(
+					rect,
+					(rOverflowElement->GetFixedId() >= 0)
+				);
 		}
 	}
 

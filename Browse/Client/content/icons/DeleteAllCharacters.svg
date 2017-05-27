@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="10cm"
+   height="10cm"
+   viewBox="0 0 354.33071 354.3307"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="DeleteAllCharacters.svg"
+   inkscape:export-filename="C:\Users\Raphael\Git\GazeTheWeb\Browse\Client\content\icons\DeleteAllCharacters.png"
+   inkscape:export-xdpi="89.916"
+   inkscape:export-ydpi="89.916">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.979899"
+     inkscape:cx="74.644873"
+     inkscape:cy="211.73206"
+     inkscape:document-units="px"
+     inkscape:current-layer="g4159"
+     showgrid="true"
+     units="cm"
+     inkscape:snap-bbox="true"
+     inkscape:bbox-paths="true"
+     inkscape:snap-page="false"
+     inkscape:bbox-nodes="true"
+     inkscape:snap-bbox-edge-midpoints="true"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:window-width="1789"
+     inkscape:window-height="770"
+     inkscape:window-x="331"
+     inkscape:window-y="408"
+     inkscape:window-maximized="0"
+     inkscape:snap-object-midpoints="true"
+     inkscape:snap-center="true"
+     inkscape:snap-to-guides="false"
+     inkscape:object-paths="false"
+     inkscape:snap-intersection-paths="false"
+     inkscape:object-nodes="true"
+     inkscape:snap-smooth-nodes="false"
+     inkscape:snap-midpoints="false"
+     inkscape:snap-grids="true"
+     showguides="false">
+    <inkscape:grid
+       type="xygrid"
+       id="grid4686" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-698.03155)">
+    <g
+       id="g4159"
+       transform="matrix(1.1608581,0,0,1.1608581,-37.48659,-146.79275)">
+      <path
+         style="opacity:1;fill:#f2f2f2;fill-opacity:1;stroke:none;stroke-width:4.38500023;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 238.70541,817.48699 c -0.53317,9.9e-4 -1.06532,0.0496 -1.58994,0.14469 l 3.14961,0 c -0.50753,-0.0889 -1.02668,-0.14301 -1.55967,-0.14301 l 0,-0.002 z m -87.63048,0.14469 -67.72839,58.08608 67.72839,65.7952 25.84295,0 -67.72839,-65.7952 67.72839,-58.08608 -25.84295,0 z m 126.39491,0.73019 c -0.53317,9.9e-4 -1.06532,0.0496 -1.58994,0.1447 l -86.04055,0 -67.72838,58.08607 67.72838,65.79353 96.6301,0 0,-0.0236 -8.99961,0 c 4.97057,0 8.99961,-4.03073 8.99961,-9.00129 l 0,-105.99985 c 0,-4.97055 -4.02904,-8.99961 -8.99961,-8.99961 z m -79.01617,19.2594 28.78057,28.78394 28.78226,-28.78394 13.00559,13.00392 -28.78393,28.78057 28.78393,28.78393 -13.00391,13.00224 -28.78058,-28.78225 -28.78393,28.78225 -13.00391,-13.00393 28.78056,-28.78224 -28.78056,-28.78057 13.00391,-13.00392 z"
+         id="rect4135"
+         inkscape:connector-curvature="0" />
+    </g>
+  </g>
+</svg>

@@ -15,7 +15,7 @@ class TextInputPipeline : public Pipeline
 public:
 
     // Constructor
-    TextInputPipeline(TabInteractionInterface* pTab, std::shared_ptr<DOMNode> spNode);
+    TextInputPipeline(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInput> spNode);
 
 };
 

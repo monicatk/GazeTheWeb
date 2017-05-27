@@ -100,8 +100,8 @@ Tab::Tab(Master* pMaster, Mediator* pCefMediator, WebTabInterface* pWeb, std::st
 
 Tab::~Tab()
 {
-	// Delete triggers before removing layout
-	_DOMTriggers.clear();
+	// Delete DOM Nodes and triggers (right now only DOMTriggers) before removing layout
+	ClearDOMNodes();
 
 	// Abort pipeline
 	AbortAndClearPipelines();
@@ -192,15 +192,11 @@ void Tab::Update(float tpf, Input& rInput)
 	// Update highlight rectangle of webview
 	// TODO: alternative: give webview shared pointer to DOM nodes
 	std::vector<Rect> rects;
-	for (const auto& rDOMNode : _DOMTextLinks)
+	for (const auto& rIdNodePair : _TextLinkMap)
 	{
-		// TODO(Daniel): Getting rid of visibility attribute
-		if(true) // if (rDOMNode->GetVisibility()) // only proceed if currently visible
+		for (const auto& rRect : rIdNodePair.second->GetRects())
 		{
-			for (const auto& rRect : rDOMNode->GetRects())
-			{
-				rects.push_back(rRect);
-			}
+			rects.push_back(rRect);
 		}
 	}
 	_upWebView->SetHighlightRects(rects);
@@ -401,10 +397,11 @@ void Tab::Update(float tpf, Input& rInput)
             _pCefMediator->EmulateMouseWheelScrolling(this, 0.0, (double)(20.f * _autoScrollingValue));
         }
 
-		// Autoscroll inside of OverflowElement if gazed upon
+		// Autoscroll inside of DOMOverflowElement if gazed upon
 		bool overflowScrolling = false;
-		for (const auto& rOverflowElement : _overflowElements)
+		for (const auto& rIdOverflowPair : _OverflowElementMap)
 		{
+			const auto& rOverflowElement = rIdOverflowPair.second;
 			if (rOverflowElement)
 			{
 				for (const auto& rRect : rOverflowElement->GetRects())
@@ -413,7 +410,7 @@ void Tab::Update(float tpf, Input& rInput)
 					int scrolledCEFPixelGazeY = CEFPixelGazeY;
 
 					// Do NOT add scrolling offset if element is fixed
-					if (!rOverflowElement->GetFixed())
+					if (!rOverflowElement->GetFixedId())
 					{
 						scrolledCEFPixelGazeX += _scrollingOffsetX;
 						scrolledCEFPixelGazeY += _scrollingOffsetY;
@@ -438,9 +435,9 @@ void Tab::Update(float tpf, Input& rInput)
 		// ### Update triggers ###
 		// #######################
 
-		for (auto& upDOMTrigger : _DOMTriggers)
+		for (auto pTrigger : _triggers)
 		{
-			upDOMTrigger->Update(tpf, tabInput);
+			pTrigger->Update(tpf, tabInput);
 		}
 	}
 }
@@ -464,9 +461,9 @@ void Tab::Draw() const
 	else
 	{
 		// Draw triggers
-		for (const auto& upDOMTrigger : _DOMTriggers)
+		for (auto pTrigger : _triggers)
 		{
-			upDOMTrigger->Draw();
+			pTrigger->Draw();
 		}
 	}
 
@@ -564,9 +561,9 @@ void Tab::SetPipelineActivity(bool active)
 		eyegui::setVisibilityOfLayout(_pPipelineAbortLayout, true, true, true);
 
 		// Deactivate all triggers
-		for (auto& upDOMTrigger : _DOMTriggers)
+		for (auto pTrigger : _triggers)
 		{
-			upDOMTrigger->Deactivate();
+			pTrigger->Deactivate();
 		}
 
 		// Deactivate scrolling overlay
@@ -578,9 +575,9 @@ void Tab::SetPipelineActivity(bool active)
 		eyegui::setVisibilityOfLayout(_pPipelineAbortLayout, false, false, true);
 
 		// Activate all triggers
-		for (auto& upDOMTrigger : _DOMTriggers)
+		for (auto pTrigger : _triggers)
 		{
-			upDOMTrigger->Activate();
+			pTrigger->Activate();
 		}
 
 		// Activate scrolling overlay
@@ -681,6 +678,7 @@ void Tab::UpdateAccentColor(float tpf)
 		RGBAToHexString(transparentBackgroundColorAccent)
 	);
 }
+
 
 void Tab::PushBackClickVisualization(double x, double y)
 {

@@ -38,8 +38,11 @@ public:
 	// Get homepage URL
 	std::string GetHomepage() const { return _webSetup.homepage; }
 
-	// Set homepage URL
-	void SetHomepage(std::string URL) { _webSetup.homepage = URL; ApplySettings(true); }
+	// Store homepage URL
+	void StoreHomepage(std::string URL) { _webSetup.homepage = URL; ApplySettings(true); }
+
+	// Store global keyboard layout
+	void StoreKeyboardLayout(eyegui::KeyboardLayout keyboardLayout) { _globalSetup.keyboardLayout = keyboardLayout, ApplySettings(true); }
 
 private:
 
@@ -80,9 +83,10 @@ private:
 
         bool showDescriptions = true;
         bool showGazeVisualization = false;
+		eyegui::KeyboardLayout keyboardLayout = eyegui::KeyboardLayout::US_ENGLISH;
     };
 
-	// Setupt of web settings
+	// Setup of web settings
 	class WebSetup
 	{
 	public:

@@ -79,6 +79,19 @@ protected:
 	std::string _overlayNextLetterButtonId;
 	std::string _overlayPreviousLetterButtonId;
 
+	// Id of delete all button in overlay
+	std::string _overlayDeleteAllButtonId;
+
+	// Ids for layout localization
+	std::string _overlayLayoutId;
+	std::string _overlayEnglishLayoutId;
+	std::string _overlayGermanLayoutId;
+	std::string _overlayHebrewLayoutId;
+	std::string _overlayGreekLayoutId;
+
+	// Id of extra keys keymap
+	std::string _overlayExtraKeyId;
+
     // Bool which indicates whether input is complete
     bool _complete = false;
 

@@ -53,19 +53,6 @@ public:
     // Exit
     void Exit();
 
-    // Set gaze visualization (of super GUI)
-    void SetGazeVisualization(bool show) { eyegui::setGazeVisualizationDrawing(_pSuperGUI, show); }
-
-    // Set show descriptions (of standard GUI)
-    void SetShowDescriptions(bool show)
-    {
-        eyegui::setDescriptionVisibility(
-            _pGUI,
-            (show ?
-                eyegui::DescriptionVisibility::ON_PENETRATION
-                : eyegui::DescriptionVisibility::HIDDEN));
-    }
-
     // Get id of dictionary
     unsigned int GetDictionary() const { return _dictonaryId; }
 
@@ -98,11 +85,39 @@ public:
 	void SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyFloat type, std::string value);
 	void SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyVec4 type, std::string value);
 
-	// ### SETTINGS ACCESS ###
+	// Set global keyboard layout
+	void SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout)
+	{
+		// Tell it eyeGUI
+		eyegui::setKeyboardLayout(_pGUI, keyboardLayout);
+	}
 
-	// Set homepage URL in settings
-	void SetHomepage(std::string URL) { _upSettings->SetHomepage(URL); }
+	// ### ACCESS BY SETTINGS ###
 
+	// Set gaze visualization (of super GUI)
+	void SetGazeVisualization(bool show) { eyegui::setGazeVisualizationDrawing(_pSuperGUI, show); }
+
+	// Set show descriptions (of standard GUI)
+	void SetShowDescriptions(bool show)
+	{
+		eyegui::setDescriptionVisibility(
+			_pGUI,
+			(show ?
+				eyegui::DescriptionVisibility::ON_PENETRATION
+				: eyegui::DescriptionVisibility::HIDDEN));
+	}
+
+	// ### STORING OF SETTINGS ###
+
+	// Store homepage URL in settings
+	void StoreHomepage(std::string URL) { _upSettings->StoreHomepage(URL); }
+
+	// Set global keyboard layout
+	void StoreAndSetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout)
+	{
+		// Store it in settings (which calls then setter above)
+		_upSettings->StoreKeyboardLayout(keyboardLayout);
+	}
 
 private:
 

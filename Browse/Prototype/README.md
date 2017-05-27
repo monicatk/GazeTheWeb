@@ -4,6 +4,9 @@ Prototype of gaze-controlled Web browser, part of the EU-funded research project
 ## Structure
 ![Structure](media/Structure.png)
 
+## TODO
+* Link application to local eye tracker SDKs
+
 ## HowTo
 Please refer to the Readme in the [parent folder](https://github.com/MAMEM/GazeTheWeb/tree/master/Browse) for details about compiling.
 
@@ -14,12 +17,11 @@ const int WINDOW_WIDTH = 1280;
 const int WINDOW_HEIGHT = 720;
 const bool FULLSCREEN = false; // Uses operation system resolution
 ```
-If the eyetracker definition is not used, the input from the connected mouse emulates gaze.
+If the eye tracker definition is not used, the input from the connected mouse emulates gaze.
 
 ## Dependencies
-All necessary dependencies are provided in the _externals_ folder.
+Necessary dependencies are provided in the _externals_ folder.
 * GLM: http://glm.g-truc.net/0.9.7/index.html (MIT license chosen)
 * GLFW3: http://www.glfw.org
-* iViewX: Connection to the iViewX SDK, copyright SMI GmbH (http://www.smivision.com/)
 * eyeGUI: https://github.com/raphaelmenges/eyeGUI
   * FreeType 2.6.1: http://www.freetype.org (FreeType license chosen)
