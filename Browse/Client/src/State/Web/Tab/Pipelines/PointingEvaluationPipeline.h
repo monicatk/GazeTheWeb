@@ -11,7 +11,7 @@
 
 enum PointingApproach
 {
-	ZOOM, DRIFT_CORRECTION, DYNAMIC_DRIFT_CORRECTION
+	MAGNIFICATION, ZOOM, DRIFT_CORRECTION, DYNAMIC_DRIFT_CORRECTION
 };
 
 class PointingEvaluationPipeline : public Pipeline

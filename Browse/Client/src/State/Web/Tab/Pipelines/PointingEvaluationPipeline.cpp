@@ -4,6 +4,7 @@
 //============================================================================
 
 #include "PointingEvaluationPipeline.h"
+#include "src/State/Web/Tab/Pipelines/Actions/MagnificationCoordinateAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/ZoomCoordinateAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/DriftCorrectionAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/DynamicDriftCorrectionAction.h"
@@ -17,10 +18,16 @@ PointingEvaluationPipeline::PointingEvaluationPipeline(TabInteractionInterface* 
 	// Decide by enumeration which approach to use
 	switch (approach)
 	{
+	case PointingApproach::MAGNIFICATION:
+	{
+		spPointingAction = std::make_shared<MagnificationCoordinateAction>(_pTab);
+		LogInfo("Pointing Approach: Magnification");
+		break;
+	}
 	case PointingApproach::ZOOM:
 	{
 		spPointingAction = std::make_shared<ZoomCoordinateAction>(_pTab);
-		LogInfo("Pointing Approach: Zooming");
+		LogInfo("Pointing Approach: Zoom");
 		break;
 	}
 	case PointingApproach::DRIFT_CORRECTION:
