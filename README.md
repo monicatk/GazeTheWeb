@@ -28,9 +28,8 @@ If you use our software as part for your own research, please be kind and cite o
   title = {GazeTheWeb: A Gaze-Controlled Web Browser},
   author = {Menges, Raphael and Kumar, Chandan and M{\"u}ller, Daniel and Sengupta, Korok},
   booktitle = {Proceedings of the 14th Web for All Conference},
-  year = {2017}
-  series = {W4A '17},
   year = {2017},
+  series = {W4A '17},
   isbn = {978-1-4503-4900-0},
   url = {http://dx.doi.org/10.1145/3058555.3058582},
   publisher = {ACM},
