@@ -21,6 +21,22 @@ Visit the [**wiki**](https://github.com/MAMEM/GazeTheWeb/wiki) for troubleshooti
 ## Public
 Winner of the TPG Accessibility Challenge Judges' Award at [Web For All 2017](http://www.w4a.info/2016/2017) in Perth, Australia. Read the corresponding paper [here](Browse/media/W4A17-p19-WeST.pdf).
 
+## Research
+If you use our software as part for your own research, please be kind and cite our publication:
+```
+@inproceedings{w4a17gazetheweb,
+  title = {GazeTheWeb: A Gaze-Controlled Web Browser},
+  author = {Menges, Raphael and Kumar, Chandan and M{\"u}ller, Daniel and Sengupta, Korok},
+  booktitle = {Proceedings of the 14th Web for All Conference},
+  year = {2017}
+  series = {W4A '17},
+  year = {2017},
+  isbn = {978-1-4503-4900-0},
+  url = {http://dx.doi.org/10.1145/3058555.3058582},
+  publisher = {ACM},
+}
+```
+
 ## Links
 * [**Project page**](http://west.uni-koblenz.de/en/research/gazetheweb) Official project page
 * [**Institute for Web Science and Technologies**](http://west.uni-koblenz.de) Website of our institute
