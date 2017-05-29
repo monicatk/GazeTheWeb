@@ -365,25 +365,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     _cursorFrameIndex = eyegui::addFloatingFrameWithBrick(_pCursorLayout, "bricks/Cursor.beyegui", 0, 0, 0, 0, true, false); // will be moved and sized in loop
 
     // ### INPUT ###
-    _upEyeInput = std::unique_ptr<EyeInput>(new EyeInput([this](EyeInput::Status status)
-	{
-		// ### DANGER !!! CALLED FROM DIFFERENT THREAD ###
-		// If more is called back from different thread, think about MasterThreadInterface to allow only calls there, which *are* threadsafe
-
-		// This call from a subthread should not break anything, as only strings are pushed to a member queue
-		switch (status)
-		{
-		case EyeInput::Status::CONNECTED:
-			this->PushNotification(u"Eye Tracking Software Connected");
-			break;
-		case EyeInput::Status::DISCONNECTED:
-			this->PushNotification(u"Eye Tracking Software Disconnected");
-			break;
-		default:
-			// Nothing
-			break;
-		}
-	}));
+	_upEyeInput = std::unique_ptr<EyeInput>(new EyeInput(this));
 
     // ### FRAMEBUFFER ###
     _upFramebuffer = std::unique_ptr<Framebuffer>(new Framebuffer(_width, _height));
@@ -482,16 +464,6 @@ void Master::Exit()
 	_pCefMediator->DoMessageLoopWork();
 }
 
-void Master::PushNotification(std::u16string content)
-{
-	_notificationStack.push(content);
-}
-
-void Master::PushNotificationByKey(std::string key)
-{
-	_notificationStack.push(eyegui::fetchLocalization(_pGUI, key));
-}
-
 eyegui::Layout* Master::AddLayout(std::string filepath, int layer, bool visible)
 {
     // Add layout
@@ -518,6 +490,38 @@ void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::StyleProp
 void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyVec4 type, std::string value)
 {
 	eyegui::setStyleTreePropertyValue(_pGUI, styleClass, type, value);
+}
+
+void Master::PushNotification(std::u16string content)
+{
+	_notificationStackMutex.lock(); // lock mutex
+	_notificationStack.push(content);
+	_notificationStackMutex.unlock(); // unlock mutex
+}
+
+void Master::PushNotificationByKey(std::string key)
+{
+	_notificationStackMutex.lock(); // lock mutex
+	_notificationStack.push(eyegui::fetchLocalization(_pGUI, key));
+	_notificationStackMutex.unlock(); // unlock mutex
+}
+
+void Master::threadsafe_EyeTrackerStatusNotification(EyeTrackerStatus status)
+{
+	// Notification stack pushes are already made thread safe, although kinda break of the structure that this is done within methods not defined in the corresponding interface :(
+	// TODO: make a threadsafe delegate class or so for better structure...
+	switch (status)
+	{
+	case EyeTrackerStatus::CONNECTED:
+		this->PushNotification(u"Eye Tracking Software Connected");
+		break;
+	case EyeTrackerStatus::DISCONNECTED:
+		this->PushNotification(u"Eye Tracking Software Disconnected");
+		break;
+	default:
+		// Nothing
+		break;
+	}
 }
 
 void Master::Loop()
@@ -552,6 +556,7 @@ void Master::Loop()
 		if (_notificationTime <= 0)
 		{
 			// Show next notification
+			_notificationStackMutex.lock(); // lock mutex
 			if (!_notificationStack.empty())
 			{
 				// Set content
@@ -573,6 +578,7 @@ void Master::Loop()
 				// Hide notification display
 				eyegui::setVisibilityOFloatingFrame(_pSuperLayout, _notificationFrameIndex, false, false, true);
 			}
+			_notificationStackMutex.unlock(); // unlock mutex
 		}
 		else
 		{

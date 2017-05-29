@@ -10,6 +10,7 @@
 #define MASTER_H_
 
 #include "src/MasterNotificationInterface.h"
+#include "src/MasterThreadsafeInterface.h"
 #include "src/Singletons/LabStreamMailer.h"
 #include "src/CEF/Mediator.h"
 #include "src/State/Web/Web.h"
@@ -27,7 +28,7 @@
 class Texture;
 struct GLFWwindow;
 
-class Master : public MasterNotificationInterface
+class Master : public MasterNotificationInterface, public MasterThreadsafeInterface
 {
 public:
 
@@ -58,12 +59,6 @@ public:
 
 	// Get user directory location
 	std::string GetUserDirectory() const { return _userDirectory; }
-
-	// Push notification to display
-	virtual void PushNotification(std::u16string content);
-
-	// Push notification to display taken from localization file
-	virtual void PushNotificationByKey(std::string key);
 
 	void RegisterJavascriptCallback(std::string prefix, std::function<void (std::string)>& callbackFunction)
 	{
@@ -118,6 +113,23 @@ public:
 		// Store it in settings (which calls then setter above)
 		_upSettings->StoreKeyboardLayout(keyboardLayout);
 	}
+
+	// #####################################
+	// ### MASTER NOTIFICATION INTERFACE ###
+	// #####################################
+
+	// Push notification to display
+	virtual void PushNotification(std::u16string content);
+
+	// Push notification to display taken from localization file
+	virtual void PushNotificationByKey(std::string key);
+
+	// ###################################
+	// ### MASTER THREADSAFE INTERFACE ###
+	// ###################################
+
+	// Notify about eye tracker status
+	virtual void threadsafe_EyeTrackerStatusNotification(EyeTrackerStatus status);
 
 private:
 
@@ -228,6 +240,9 @@ private:
 
 	// Boolean to indicate exiting the applicatoin
 	bool _exit = false;
+
+	// Mutex for notification stack
+	std::mutex _notificationStackMutex; // TODO: this seems hacky, as has to be locked/unlocked everytime notification is accesses
 };
 
 #endif // MASTER_H_

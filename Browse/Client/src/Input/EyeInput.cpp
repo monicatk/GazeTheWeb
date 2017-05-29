@@ -9,18 +9,15 @@
 #include <cmath>
 #include <functional>
 
-EyeInput::EyeInput(StatusCallback callback)
+EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 {
-	// Store callback
-	_statusCallback = callback;
-
 	// Create thread for connection to eye tracker
-	_upConnectionThread = std::unique_ptr<std::thread>(new std::thread([this]()
+	_upConnectionThread = std::unique_ptr<std::thread>(new std::thread([this, _pMasterThreadsafeInterface]()
 	{
 #ifdef _WIN32
 
 		// Trying to connect
-		_statusCallback(EyeInput::Status::TRYING_TO_CONNECT);
+		_pMasterThreadsafeInterface->threadsafe_EyeTrackerStatusNotification(EyeTrackerStatus::TRYING_TO_CONNECT);
 
 		// Define procedure signature for connection
 		typedef bool(__cdecl *CONNECT)();
@@ -95,11 +92,11 @@ EyeInput::EyeInput(StatusCallback callback)
 		if (!_connected)
 		{
 			LogInfo("EyeInput: No eye tracker connected. Input emulated by mouse.");
-			_statusCallback(EyeInput::Status::DISCONNECTED);
+			_pMasterThreadsafeInterface->threadsafe_EyeTrackerStatusNotification(EyeTrackerStatus::DISCONNECTED);
 		}
 		else
 		{
-			_statusCallback(EyeInput::Status::CONNECTED);
+			_pMasterThreadsafeInterface->threadsafe_EyeTrackerStatusNotification(EyeTrackerStatus::CONNECTED);
 		}
 	}));
 }

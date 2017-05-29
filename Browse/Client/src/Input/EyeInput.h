@@ -10,6 +10,8 @@
 #define EYEINPUT_H_
 
 #include "src/Global.h"
+#include "src/MasterThreadsafeInterface.h"
+#include "src/Input/EyeTrackerStatus.h"
 #include <memory>
 #include <vector>
 #include <thread>
@@ -26,17 +28,8 @@ class EyeInput
 {
 public:
 
-	// Enumeration about eye tracker status
-	enum class Status
-	{
-		CONNECTED, DISCONNECTED, TRYING_TO_CONNECT
-	};
-
-	// Typdef of callback function
-	typedef std::function<void(Status)> StatusCallback;
-
     // Constructor, starts thread to establish eye tracker connection. Callback called from a different thread!
-    EyeInput(StatusCallback callback);
+    EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface);
 
     // Destructor
     virtual ~EyeInput();
@@ -94,9 +87,6 @@ private:
     int _mouseOverrideY = 0;
     float _mouseOverrideTime = EYEINPUT_MOUSE_OVERRIDE_INIT_FRAME_DURATION;
     bool _mouseOverrideInitFrame = false;
-
-	// Callback about eye tracker status
-	StatusCallback _statusCallback;
 };
 
 #endif // EYEINPUT_H_
