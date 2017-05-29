@@ -49,38 +49,14 @@ protected:
 	// Deviation weight on zoom speed
 	const float DEVIATION_WEIGHT = 3.0f;
 
-	// Multiplier of movement towards center (one means, that on maximum zoom the outermost corner is moved into center)
-	const float CENTER_OFFSET_MULTIPLIER = 0.25f;
+	// Level of magnification
+	const float MAGNIFICATION = 0.5f;
 
-	// Maximum log zoom level
-	const float MAX_LOG_ZOOM = 0.1f;
+	// Magnfication center. In relative page space
+	glm::vec2 _relativeMagnificationCenter;
 
-	// Duration to replace current coordinate with input
-	const float MOVE_DURATION = 0.75f;
-
-	// Speed of zoom
-	const float ZOOM_SPEED = 0.4f;
-
-    // Coordinate which is updated and later output. In relative page space
-    glm::vec2 _relativeZoomCoordinate;
-
-    // Log zooming amount (used for rendering)
-	// Calculated as 1.f - log(_linZoom), so becoming smaller at higher zoom levels
-    float _logZoom = 1.f;
-
-    // Linear zooming amout (used for calculations)
-	// Increasing while zooming
-    float _linZoom = 1.f;
-
-    // Offset to center of webview
-    glm::vec2 _relativeCenterOffset = glm::vec2(0, 0);
-
-    // Bool to indicate first update
-    bool _firstUpdate = true;
-
-	// Deviation of coordinate (not of gaze!; relative coordiantes, no pixels!)
-	// Not really in relative coordinates, since aspect ratio corrected...
-	float _deviation = 0.f; // [0..1]
+	// Variable to indicate whether magnified or not
+	bool _magnified = false;
 
 	// Dimming
 	float _dimming = 0.f;

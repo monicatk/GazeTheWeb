@@ -24,67 +24,48 @@ bool MagnificationCoordinateAction::Update(float tpf, TabInput tabInput)
 
 	// Function transforms coordinate from relative WebView coordinates to CEFPixel coordinates on page
 	const std::function<void(const float&, const glm::vec2&, const glm::vec2&, glm::vec2&)> pageCoordinate
-		= [&](const float& rLogZoom, const glm::vec2& rRelativeZoomCoordinate, const glm::vec2& rRelativeCenterOffset, glm::vec2& rCoordinate)
+		= [&](const float& rZoom, const glm::vec2& rRelativeMagnificationCoordinate, const glm::vec2& rRelativeCenterOffset, glm::vec2& rCoordinate)
 	{
 		// Analogous to shader in WebView
 		rCoordinate += rRelativeCenterOffset; // add center offset
-		rCoordinate -= rRelativeZoomCoordinate; // move zoom coordinate to origin
-		rCoordinate *= rLogZoom; // apply zoom
-		rCoordinate += rRelativeZoomCoordinate; // move back
+		rCoordinate -= rRelativeMagnificationCoordinate; // move magnification coordinate to origin
+		rCoordinate *= rZoom; // apply zoom
+		rCoordinate += rRelativeMagnificationCoordinate; // move back
 		rCoordinate *= glm::vec2(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY()); // bring into pixel space of CEF
-	};
-
-	// Function calling above function with current values
-	const std::function<void(glm::vec2&)> currentPageCoordinate
-		= [&](glm::vec2& rCoordinate)
-	{
-		pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, rCoordinate);
 	};
 
 	// Current gaze
 	glm::vec2 relativeGazeCoordinate = glm::vec2(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY); // relative WebView space
 
-	// Only allow zoom in when gaze upon web view
-	if (!tabInput.gazeUsed && tabInput.insideWebView) // TODO: gazeUsed really good idea here? Maybe later null pointer?
-	{
-		
-	}
-
-	// Update linear zoom
-	_linZoom += tpf * zoomSpeed; // frame rate depended, because zoomSpeed is depending on deviation which is depending on tpf
-
-	// Clamp linear zoom (one is standard, everything higher is zoomed)
-	_linZoom = glm::max(_linZoom, 1.f);
-
-	// Make zoom better with log function
-	_logZoom = 1.f - std::log(_linZoom); // log zooming is starting at one and getting smaller with smaller _linZoom
-
-	// Calculate coordinate for current gaze value
-	glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate;
-	currentPageCoordinate(pixelGazeCoordinate);
+	// Values of interest
+	glm::vec2 relativeCenterOffset = _magnified ? _relativeMagnificationCenter - glm::vec2(0.5f, 0.5f) : glm::vec2(0);
+	float zoom = _magnified ? MAGNIFICATION : 1.f;
+	glm::vec2 relativeMagnificationCenter = _relativeMagnificationCenter;
 
 	// Decide whether zooming is finished
 	bool finished = false;
 	if (!tabInput.gazeUsed && tabInput.instantInteraction) // user demands on instant interaction
 	{
-		// Set coordinate in output value. Use current gaze position
-		
+		// Check for magnification
+		if (_magnified) // already magnified, so finish this action
+		{
+			// Set output
+			glm::vec2 coordinate = relativeGazeCoordinate;
+			pageCoordinate(zoom, relativeMagnificationCenter, relativeCenterOffset, coordinate); // transform gaze relative to WebView to page coordinates
+			SetOutputValue("coordinate", coordinate); // into pixel space of CEF
+			
+			// Finish this action
+			finished = true;
+		}
+		else // not yet magnified, do it now
+		{
+			// Set magnification center
+			_relativeMagnificationCenter = relativeGazeCoordinate;
 
-		// Return success
-		finished = true;
+			// Remember magnification
+			_magnified = true;
+		}
 	}
-	else if ( // zooming is high enough for coordinate to be accurate
-		_logZoom <= MAX_LOG_ZOOM // just zoomed so far into that coordinate is just used
-		|| ((_logZoom <= 0.45f) && (_deviation < 0.01f))) // coordinate seems to be quite fixed, just do it
-	{
-		// Set coordinate in output value
-        SetOutputValue("coordinate", glm::vec2(_relativeZoomCoordinate * glm::vec2(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY()))); // into pixel space of CEF
-
-		// Return success
-		finished = true;
-	}
-
-	SetOutputValue("coordinate", pixelGazeCoordinate);
 
 	// Decrement dimming
 	_dimming += tpf;
@@ -92,9 +73,9 @@ bool MagnificationCoordinateAction::Update(float tpf, TabInput tabInput)
 
 	// Tell web view about zoom
 	WebViewParameters webViewParameters;
-	webViewParameters.centerOffset = _relativeCenterOffset;
-	webViewParameters.zoom = _logZoom;
-	webViewParameters.zoomPosition = _relativeZoomCoordinate;
+	webViewParameters.centerOffset = relativeCenterOffset;
+	webViewParameters.zoom = zoom;
+	webViewParameters.zoomPosition = relativeMagnificationCenter;
 	if (_doDimming) { webViewParameters.dim = DIMMING_VALUE * (_dimming / DIMMING_DURATION); }
 	_pTab->SetWebViewParameters(webViewParameters);
 
