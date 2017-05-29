@@ -5,50 +5,28 @@
 
 #include "EyetrackerData.h"
 #include <algorithm>
+#include <mutex>
 
 namespace eyetracker_global
 {
-    // Global variables for raw gaze data are defined here. Will exist within this translation unit
-    double EyetrackerRawGazeX[EYETRACKER_SAMPLE_COLLECTION_COUNT];
-    double EyetrackerRawGazeY[EYETRACKER_SAMPLE_COLLECTION_COUNT];
-    bool EyetrackerRawGazeValidity[EYETRACKER_SAMPLE_COLLECTION_COUNT];
-    int EyetrackerRawGazeIndex = 0;
-    int RawGazeEntries = 0; // count of filled raw data fields in array (converges to EYETRACKER_SAMPLE_COLLECTION_COUNT - 1)
+    // Variables
+	std::vector<SampleData> sampleDataVector;
+	std::mutex sampleDataMutex;
 
-    void PushBackRawData(double gazeX, double gazeY, bool valid)
+    void PushBackSample(SampleData sample)
     {
-        EyetrackerRawGazeIndex++;
-        EyetrackerRawGazeIndex = EyetrackerRawGazeIndex >= EYETRACKER_SAMPLE_COLLECTION_COUNT ? 0 : EyetrackerRawGazeIndex;
-        EyetrackerRawGazeX[EyetrackerRawGazeIndex] = gazeX;
-        EyetrackerRawGazeY[EyetrackerRawGazeIndex] = gazeY;
-        EyetrackerRawGazeValidity[EyetrackerRawGazeIndex] = valid;
-        RawGazeEntries++;
-        RawGazeEntries = std::min(RawGazeEntries, EYETRACKER_SAMPLE_COLLECTION_COUNT - 1);
+		std::lock_guard<std::mutex> guard(sampleDataMutex); // locks mutex before pushing samples
+		sampleDataVector.push_back(sample); // pushes sample
+
+		// mutex is unlocked by destruction of guard
     }
 
-    void GetKOrLessValidRawGazeEntries(int k, std::vector<std::pair<double, double> >& rGaze)
+	void FetchSamples(std::vector<SampleData>& rSamples)
     {
-        // Reset output vector
-		rGaze.clear();
+		std::lock_guard<std::mutex> guard(sampleDataMutex); // locks mutex before working on samples
+		rSamples = std::move(sampleDataVector); // move data to output
+		sampleDataVector.clear(); // should not be necessary
 
-        // Calculate actual k
-        int clampedK = std::min(k, RawGazeEntries);
-
-        // Go over last k entries and collect valid ones
-        for (int i = 0; i < clampedK; i++)
-        {
-            int index = EyetrackerRawGazeIndex - i;
-            if (index < 0)
-            {
-                // If index less than zero, start at end again
-                index += EYETRACKER_SAMPLE_COLLECTION_COUNT;
-            }
-
-            // Only add when valid
-            if (EyetrackerRawGazeValidity[index])
-            {
-                rGaze.push_back(std::make_pair(EyetrackerRawGazeX[index], EyetrackerRawGazeY[index]));
-            }
-        }
+		// mutex is unlocked by destruction of guard
     }
 }

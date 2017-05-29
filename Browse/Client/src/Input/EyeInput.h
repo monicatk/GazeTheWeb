@@ -12,6 +12,7 @@
 #include "src/Global.h"
 #include "src/MasterThreadsafeInterface.h"
 #include "src/Input/EyeTrackerStatus.h"
+#include "plugins/Eyetracker/Interface/EyetrackerSampleData.h"
 #include <memory>
 #include <vector>
 #include <thread>
@@ -19,7 +20,7 @@
 // Necessary for dynamic DLL loading in Windows
 #ifdef _WIN32
 #include <windows.h>
-typedef void(__cdecl *FETCH_GAZE)(int, std::vector<std::pair<double, double> >&);
+typedef void(__cdecl *FETCH_SAMPLES)(std::vector<SampleData>&);
 typedef bool(__cdecl *IS_TRACKING)();
 typedef void(__cdecl *CALIBRATE)();
 #endif
@@ -60,8 +61,8 @@ private:
 	// Handle for plugin
 	HINSTANCE _pluginHandle = NULL;
 
-	// Handle to fetch gaze
-	FETCH_GAZE _procFetchGaze = NULL;
+	// Handle to fetch gaze samples
+	FETCH_SAMPLES _procFetchGazeSamples = NULL;
 
 	// Handle to check tracking
 	IS_TRACKING _procIsTracking = NULL;

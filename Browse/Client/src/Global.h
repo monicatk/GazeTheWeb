@@ -33,7 +33,6 @@ static const float MASTER_PAUSE_ALPHA = 0.35f;
 static const float EYEINPUT_MOUSE_OVERRIDE_INIT_FRAME_DURATION = 0.25f; // duration between mouse movement is expected. Triggered by initial movement
 static const float EYEINPUT_MOUSE_OVERRIDE_INIT_DISTANCE = 100.f; // pixels on screen (not best but works)
 static const float EYEINPUT_MOUSE_OVERRIDE_STOP_DURATION = 3.f; // duration until override is stopped when no mouse movement done
-static const int EYETRACKER_AVERAGE_SAMPLE_COUNT = 15;
 static const std::string LOG_FILE_NAME = "log";
 static const std::string INTERACTION_FILE_NAME = "interaction";
 static const int LOG_FILE_MAX_SIZE = 1024 * 1024;

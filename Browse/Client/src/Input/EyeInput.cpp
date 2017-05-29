@@ -37,7 +37,7 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 				CONNECT procConnect = (CONNECT)GetProcAddress(_pluginHandle, "Connect");
 
 				// Fetch procedure for fetching gaze data
-				_procFetchGaze = (FETCH_GAZE)GetProcAddress(_pluginHandle, "FetchGaze");
+				_procFetchGazeSamples = (FETCH_SAMPLES)GetProcAddress(_pluginHandle, "FetchSamples");
 
 				// Fetch procedure to check tracking
 				_procIsTracking = (IS_TRACKING)GetProcAddress(_pluginHandle, "IsTracking");
@@ -46,7 +46,7 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 				_procCalibrate = (CALIBRATE)GetProcAddress(_pluginHandle, "Calibrate");
 
 				// Check whether procedures could be loaded
-				if (procConnect != NULL && _procFetchGaze != NULL && _procIsTracking != NULL && _procCalibrate != NULL)
+				if (procConnect != NULL && _procFetchGazeSamples != NULL && _procIsTracking != NULL && _procCalibrate != NULL)
 				{
 					_connected = procConnect();
 					if (_connected)
@@ -56,7 +56,7 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 					else
 					{
 						// Reset handles when connection to eye tracker failed
-						_procFetchGaze = NULL;
+						_procFetchGazeSamples = NULL;
 						_procIsTracking = NULL;
 						_procCalibrate = NULL;
 					}
@@ -170,13 +170,13 @@ bool EyeInput::Update(
 
 #ifdef _WIN32
 
-	if (_connected && _procFetchGaze != NULL && _procIsTracking != NULL)
+	if (_connected && _procFetchGazeSamples != NULL && _procIsTracking != NULL)
 	{
 		// Prepare vectors to fill
-		std::vector<std::pair<double, double> > gazeSamples;
+		std::vector<SampleData> samples;
 
 		// Fetch k or less valid samples
-		_procFetchGaze(EYETRACKER_AVERAGE_SAMPLE_COUNT, gazeSamples);
+		_procFetchGazeSamples(samples);
 
 		// Convert parameters to double (use same values for all samples,
 		// although they could have been collected whil windows transformation has been different)
@@ -186,20 +186,23 @@ bool EyeInput::Update(
 		double windowHeightDouble = (double)windowHeight;
 
 		// Average the given samples as long as they do not exceed a predefined distance (aka new fixation)
-		if (!gazeSamples.empty())
+		if (!samples.empty())
 		{
+			// TODO: put filtering into extra class and define how to cope with fixations
 			double sumX = 0;
 			double sumY = 0;
 			int sampleCount = 0;
-			for (std::pair<double, double> gaze : gazeSamples)
+
+			// Go over available samples
+			for (const auto& sample : samples)
 			{
 				// Do some clamping according to window coordinates for gaze x
-				double clampedX = gaze.first - windowXDouble;
+				double clampedX = sample.x - windowXDouble;
 				clampedX = clampedX > 0.0 ? clampedX : 0.0;
 				clampedX = clampedX < windowWidthDouble ? clampedX : windowWidthDouble;
 
 				// Do some clamping according to window coordinates for gaze y
-				double clampedY = gaze.second - windowYDouble;
+				double clampedY = sample.y - windowYDouble;
 				clampedY = clampedY > 0.0 ? clampedY : 0.0;
 				clampedY = clampedY < windowHeightDouble ? clampedY : windowHeightDouble;
 
