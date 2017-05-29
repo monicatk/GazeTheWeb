@@ -56,7 +56,9 @@ private:
 	// Thread that connects to eye tracking device
 	std::unique_ptr<std::thread> _upConnectionThread;
 
+	// ###################################
 	// ### Variables written by thread ###
+	// ###################################
 #ifdef _WIN32
 	// Handle for plugin
 	HINSTANCE _pluginHandle = NULL;

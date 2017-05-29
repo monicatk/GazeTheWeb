@@ -48,8 +48,8 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 				// Check whether procedures could be loaded
 				if (procConnect != NULL && _procFetchGazeSamples != NULL && _procIsTracking != NULL && _procCalibrate != NULL)
 				{
-					_connected = procConnect();
-					if (_connected)
+					bool connected = procConnect();
+					if (connected)
 					{
 						LogInfo("EyeInput: Connecting eye tracker successful.");
 					}
@@ -59,6 +59,10 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 						_procFetchGazeSamples = NULL;
 						_procIsTracking = NULL;
 						_procCalibrate = NULL;
+
+						// Set member about connected to true
+						_connected = true; // only write access to _connected
+						return; // direct return from thread
 					}
 				}
 			}
