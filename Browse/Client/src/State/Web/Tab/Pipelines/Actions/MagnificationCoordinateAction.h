@@ -43,12 +43,6 @@ protected:
 	// Dimming value
 	const float DIMMING_VALUE = 0.3f;
 
-	// Deviation fading duration (how many seconds until full deviation is back to zero)
-	const float DEVIATION_FADING_DURATION = 1.0f;
-
-	// Deviation weight on zoom speed
-	const float DEVIATION_WEIGHT = 3.0f;
-
 	// Level of magnification
 	const float MAGNIFICATION = 0.5f;
 

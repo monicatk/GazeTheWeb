@@ -19,9 +19,6 @@ MagnificationCoordinateAction::MagnificationCoordinateAction(TabInteractionInter
 
 bool MagnificationCoordinateAction::Update(float tpf, TabInput tabInput)
 {
-	// Speed of zooming
-	float zoomSpeed = 0.f;
-
 	// Function transforms coordinate from relative WebView coordinates to CEFPixel coordinates on page
 	const std::function<void(const float&, const glm::vec2&, const glm::vec2&, glm::vec2&)> pageCoordinate
 		= [&](const float& rZoom, const glm::vec2& rRelativeMagnificationCoordinate, const glm::vec2& rRelativeCenterOffset, glm::vec2& rCoordinate)
