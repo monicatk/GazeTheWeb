@@ -7,7 +7,7 @@
 #ifndef TRIGGER_H_
 #define TRIGGER_H_
 
-#include "src/Utils/TabInput.h"
+#include "src/Input/TabInput.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 #include <vector>
 

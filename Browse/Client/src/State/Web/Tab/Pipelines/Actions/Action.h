@@ -8,7 +8,7 @@
 #ifndef ACTION_H_
 #define ACTION_H_
 
-#include "src/Utils/TabInput.h"
+#include "src/Input/TabInput.h"
 #include "src/State/Web/Tab/Pipelines/Actions/ActionDataMap.h"
 
 // Forward declaration

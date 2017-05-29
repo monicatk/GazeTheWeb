@@ -8,7 +8,7 @@
 #ifndef TABINPUT_H_
 #define TABINPUT_H_
 
-#include "src/Utils/Input.h"
+#include "src/Input/Input.h"
 
 class TabInput : public Input
 {

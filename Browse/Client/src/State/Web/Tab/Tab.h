@@ -29,7 +29,7 @@
 #include "src/State/Web/Tab/Triggers/TextInputTrigger.h"
 #include "src/State/Web/Tab/Triggers/SelectFieldTrigger.h"
 #include "src/Utils/glmWrapper.h"
-#include "src/Utils/Input.h"
+#include "src/Input/Input.h"
 #include "src/Global.h"
 #include "src/State/Web/Tab/Pipelines/PointingEvaluationPipeline.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"

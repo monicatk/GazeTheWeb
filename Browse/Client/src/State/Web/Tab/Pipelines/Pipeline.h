@@ -13,7 +13,7 @@
 
 #include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 #include "src/State/Web/Tab/Pipelines/Actions/ActionConnector.h"
-#include "src/Utils/TabInput.h"
+#include "src/Input/TabInput.h"
 #include <memory>
 #include <vector>
 

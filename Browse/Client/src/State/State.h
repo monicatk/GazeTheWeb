@@ -9,7 +9,7 @@
 #define STATE_H_
 
 #include "submodules/eyeGUI/include/eyeGUI.h"
-#include "src/Utils/Input.h"
+#include "src/Input/Input.h"
 
 // Forward declaration
 class Master;
