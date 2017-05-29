@@ -61,7 +61,7 @@ private:
 	// ###################################
 #ifdef _WIN32
 	// Handle for plugin
-	HINSTANCE _pluginHandle = NULL;
+	HINSTANCE _pluginHandle = NULL; // can be not null but still disconnected
 
 	// Handle to fetch gaze samples
 	FETCH_SAMPLES _procFetchGazeSamples = NULL;
@@ -74,7 +74,7 @@ private:
 #endif
 
 	// Remember whether connection has been established
-	bool _connected = false; // indicator whether thread was successful
+	bool _connected = false; // indicator whether thread was successfully finished
 	
 	// ###################################
 
