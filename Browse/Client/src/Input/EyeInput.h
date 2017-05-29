@@ -12,6 +12,7 @@
 #include "src/Global.h"
 #include "src/MasterThreadsafeInterface.h"
 #include "src/Input/EyeTrackerStatus.h"
+#include "src/Input/Filters/SimpleFilter.h"
 #include "plugins/Eyetracker/Interface/EyetrackerSampleData.h"
 #include <memory>
 #include <vector>
@@ -43,6 +44,7 @@ public:
 		double mouseY,
 		double& rGazeX,
 		double& rGazeY,
+		bool& rSaccade,
 		int windowX,
 		int windowY,
 		int windowWidth,
@@ -90,6 +92,9 @@ private:
     int _mouseOverrideY = 0;
     float _mouseOverrideTime = EYEINPUT_MOUSE_OVERRIDE_INIT_FRAME_DURATION;
     bool _mouseOverrideInitFrame = false;
+
+	// Filter of gaze data
+	SimpleFilter _filter;
 };
 
 #endif // EYEINPUT_H_

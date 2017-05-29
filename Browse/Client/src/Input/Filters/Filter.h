@@ -8,12 +8,17 @@
 #define FILTER_H_
 
 #include "plugins/Eyetracker/Interface/EyetrackerSampleData.h"
+#include <vector>
 
 class Filter
 {
 public:
 
-	// TODO: think about inteface...
+	// Update. Takes samples in window pixel coordinates
+	virtual void Update(std::vector<SampleData> samples,
+		double& rGazeX,
+		double& rGazeY,
+		bool& rSaccade) = 0;
 
 
 };

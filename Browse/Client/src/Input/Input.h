@@ -11,18 +11,20 @@ class Input
 {
 public:
 
-    Input(int gazeX, int gazeY, bool gazeUsed, bool instantInteraction)
+    Input(int gazeX, int gazeY, bool gazeUsed, bool instantInteraction, bool saccade)
     {
         this->gazeX = gazeX;
         this->gazeY = gazeY;
         this->gazeUsed = gazeUsed;
 		this->instantInteraction = instantInteraction;
+		this->saccade = saccade;
     }
 
     int gazeX;
     int gazeY;
     bool gazeUsed;
 	bool instantInteraction;
+	bool saccade; // indicator whether current gaze is classified as part of a saccade
 };
 
 #endif // INPUT_H_

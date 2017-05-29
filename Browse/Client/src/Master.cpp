@@ -596,16 +596,18 @@ void Master::Loop()
 		int windowY = 0;
 		glfwGetWindowPos(_pWindow, &windowX, &windowY);
 		double gazeX, gazeY; // result of EyeInput update
+		bool saccade; // provided by filtering algorithm
 		bool gazeUsed = _upEyeInput->Update(
 			tpf,
 			currentMouseX,
 			currentMouseY,
 			gazeX,
 			gazeY,
+			saccade,
 			windowX,
 			windowY,
 			_width,
-			_height);
+			_height); // returns whether gaze was used (or emulated by mouse)
 
         // Update cursor with original mouse input
         eyegui::setVisibilityOfLayout(_pCursorLayout, !gazeUsed, false, true);
@@ -660,7 +662,12 @@ void Master::Loop()
         _pCefMediator->DoMessageLoopWork();
 
         // Create input struct for own framework
-        Input input(usedEyeGUIInput.gazeX, usedEyeGUIInput.gazeY, usedEyeGUIInput.gazeUsed, usedEyeGUIInput.instantInteraction);
+        Input input(
+			usedEyeGUIInput.gazeX,
+			usedEyeGUIInput.gazeY,
+			usedEyeGUIInput.gazeUsed,
+			usedEyeGUIInput.instantInteraction,
+			saccade);
 
         // Bind framebuffer
         _upFramebuffer->Bind();

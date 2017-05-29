@@ -52,6 +52,10 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 					if (connected)
 					{
 						LogInfo("EyeInput: Connecting eye tracker successful.");
+
+						// Set member about connected to true
+						_connected = true; // only write access to _connected
+						return; // direct return from thread
 					}
 					else
 					{
@@ -59,10 +63,6 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 						_procFetchGazeSamples = NULL;
 						_procIsTracking = NULL;
 						_procCalibrate = NULL;
-
-						// Set member about connected to true
-						_connected = true; // only write access to _connected
-						return; // direct return from thread
 					}
 				}
 			}
@@ -158,6 +158,7 @@ bool EyeInput::Update(
 	double mouseY,
 	double& rGazeX,
 	double& rGazeY,
+	bool& rSaccade,
 	int windowX,
 	int windowY,
 	int windowWidth,
@@ -168,6 +169,7 @@ bool EyeInput::Update(
 	// Update gaze by eye tracker
 	double filteredGazeX = 0;
 	double filteredGazeY = 0;
+	bool saccade = false;
 
 	// Bool whether eye tracker is tracking
 	bool isTracking = false;
@@ -183,61 +185,27 @@ bool EyeInput::Update(
 		_procFetchGazeSamples(samples);
 
 		// Convert parameters to double (use same values for all samples,
-		// although they could have been collected whil windows transformation has been different)
 		double windowXDouble = (double)windowX;
 		double windowYDouble = (double)windowY;
 		double windowWidthDouble = (double)windowWidth;
 		double windowHeightDouble = (double)windowHeight;
 
-		// Average the given samples as long as they do not exceed a predefined distance (aka new fixation)
-		if (!samples.empty())
+		// Go over available samples and bring into window space
+		for (auto& sample : samples)
 		{
-			// TODO: put filtering into extra class and define how to cope with fixations
-			double sumX = 0;
-			double sumY = 0;
-			int sampleCount = 0;
+			// Do some clamping according to window coordinates for gaze x
+			sample.x = sample.x - windowXDouble;
+			sample.x = sample.x > 0.0 ? sample.x : 0.0;
+			sample.x = sample.x < windowWidthDouble ? sample.x : windowWidthDouble;
 
-			// Go over available samples
-			for (const auto& sample : samples)
-			{
-				// Do some clamping according to window coordinates for gaze x
-				double clampedX = sample.x - windowXDouble;
-				clampedX = clampedX > 0.0 ? clampedX : 0.0;
-				clampedX = clampedX < windowWidthDouble ? clampedX : windowWidthDouble;
-
-				// Do some clamping according to window coordinates for gaze y
-				double clampedY = sample.y - windowYDouble;
-				clampedY = clampedY > 0.0 ? clampedY : 0.0;
-				clampedY = clampedY < windowHeightDouble ? clampedY : windowHeightDouble;
-
-				// Calculate filtered gaze
-				filteredGazeX = sumX / sampleCount;
-				filteredGazeY = sumY / sampleCount;
-
-				// Check whether new sample is withing same fixation
-				if (sampleCount > 0)
-				{
-					if (glm::distance(
-							glm::vec2(filteredGazeX, filteredGazeY),
-							glm::vec2(clampedX, clampedY))
-						> setup::EYEINPUT_GAZE_FIXATION_RADIUS)
-					{
-						break;
-					}
-				}
-
-				// Sum values
-				sumX += clampedX;
-				sumY += clampedY;
-
-				// Increase sample count
-				sampleCount++;
-			}
-
-			// Calculate (final) filtered gaze
-			filteredGazeX = sumX / sampleCount;
-			filteredGazeY = sumY / sampleCount;
+			// Do some clamping according to window coordinates for gaze y
+			sample.y = sample.y - windowYDouble;
+			sample.y = sample.y > 0.0 ? sample.y : 0.0;
+			sample.y = sample.y < windowHeightDouble ? sample.y : windowHeightDouble;
 		}
+
+		// Update filter algorithm and provide local variables as reference
+		_filter.Update(samples, filteredGazeX, filteredGazeY, saccade);
 
 		// Check, whether eye tracker is tracking
 		isTracking = _procIsTracking();
@@ -340,6 +308,7 @@ bool EyeInput::Update(
 	// Fill return values
 	rGazeX = filteredGazeX;
 	rGazeY = filteredGazeY;
+	rSaccade = saccade;
 
 	// Return whether gaze coordinates comes from eye tracker
 	return !gazeEmulated;

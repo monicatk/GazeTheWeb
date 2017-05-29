@@ -14,14 +14,11 @@ class TabInput : public Input
 {
 public:
     TabInput(
-        int gazeX,
-        int gazeY,
-        bool gazeUsed,
-		bool instantInteraction,
+        const Input& rInput,
         int webViewPixelGazeX,
         int webViewPixelGazeY,
         float webViewRelativeGazeX,
-        float webViewRelativeGazeY) : Input(gazeX, gazeY, gazeUsed, instantInteraction)
+        float webViewRelativeGazeY) : Input(rInput.gazeX, rInput.gazeY, rInput.gazeUsed, rInput.instantInteraction, rInput.saccade)
     {
         this->webViewPixelGazeX = webViewPixelGazeX;
         this->webViewPixelGazeY = webViewPixelGazeY;

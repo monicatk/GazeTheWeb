@@ -178,10 +178,7 @@ void Tab::Update(float tpf, Input& rInput)
 	float webViewGazeRelativeX = ((float)webViewPixelGazeX) / (float)(_upWebView->GetWidth());
 	float webViewGazeRelativeY = ((float)webViewPixelGazeY) / (float)(_upWebView->GetHeight());
 	TabInput tabInput(
-		rInput.gazeX,
-		rInput.gazeY,
-		rInput.gazeUsed,
-		rInput.instantInteraction,
+		rInput,
 		webViewPixelGazeX,
 		webViewPixelGazeY,
 		webViewGazeRelativeX,
