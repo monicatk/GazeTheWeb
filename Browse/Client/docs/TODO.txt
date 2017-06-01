@@ -17,7 +17,6 @@ Features:
 - BUG: Text Selection does not work anymore
 - Hebrew / Greek Support
 - Calibration when calibration is broken (how to detect?)
-- EyeX connection in Debug Mode
 
 Furthermore:
 - Word prediction improvement (and add typed words) and make extra one for URL Input
