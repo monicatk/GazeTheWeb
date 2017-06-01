@@ -49,7 +49,7 @@ void SimpleFilter::Update(SampleQueue upSamples,
 			filteredGazeX = sumX / filterCount;
 			filteredGazeY = sumY / filterCount;
 
-			// Check distance of new sample to current fixation
+			// Check distance of new sample to current filtered gaze
 			if (glm::distance(
 				glm::vec2(filteredGazeX, filteredGazeY),
 				glm::vec2(rGaze.x, rGaze.y))
