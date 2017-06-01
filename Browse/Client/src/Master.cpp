@@ -494,34 +494,20 @@ void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::StyleProp
 
 void Master::PushNotification(std::u16string content)
 {
-	_notificationStackMutex.lock(); // lock mutex
 	_notificationStack.push(content);
-	_notificationStackMutex.unlock(); // unlock mutex
 }
 
 void Master::PushNotificationByKey(std::string key)
 {
-	_notificationStackMutex.lock(); // lock mutex
 	_notificationStack.push(eyegui::fetchLocalization(_pGUI, key));
-	_notificationStackMutex.unlock(); // unlock mutex
 }
 
-void Master::threadsafe_EyeTrackerStatusNotification(EyeTrackerStatus status)
+void Master::threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status)
 {
-	// Notification stack pushes are already made thread safe, although kinda break of the structure that this is done within methods not defined in the corresponding interface :(
-	// TODO: make a threadsafe delegate class or so for better structure...
-	switch (status)
-	{
-	case EyeTrackerStatus::CONNECTED:
-		this->PushNotification(u"Eye Tracking Software Connected");
-		break;
-	case EyeTrackerStatus::DISCONNECTED:
-		this->PushNotification(u"Eye Tracking Software Disconnected");
-		break;
-	default:
-		// Nothing
-		break;
-	}
+	// TODO: make job pushing a method of its own
+	_threadJobsMutex.lock();
+	_threadJobs.push_back(std::make_shared<PushEyetrackerStatusThreadJob>(this, status));
+	_threadJobsMutex.unlock();
 }
 
 void Master::Loop()
@@ -546,6 +532,15 @@ void Master::Loop()
 			_timeUntilInput -= tpf;
 		}
 
+		// Execute thread jobs
+		_threadJobsMutex.lock(); // lock jobs
+		for (auto& rJob : _threadJobs)
+		{
+			rJob->Execute();
+		}
+		_threadJobs.clear();
+		_threadJobsMutex.unlock(); // unlock jobs
+
 		// Update lab streaming layer mailer to get incoming messages
 		LabStreamMailer::instance().Update();
 
@@ -556,7 +551,6 @@ void Master::Loop()
 		if (_notificationTime <= 0)
 		{
 			// Show next notification
-			_notificationStackMutex.lock(); // lock mutex
 			if (!_notificationStack.empty())
 			{
 				// Set content
@@ -578,7 +572,6 @@ void Master::Loop()
 				// Hide notification display
 				eyegui::setVisibilityOFloatingFrame(_pSuperLayout, _notificationFrameIndex, false, false, true);
 			}
-			_notificationStackMutex.unlock(); // unlock mutex
 		}
 		else
 		{
@@ -844,4 +837,28 @@ void Master::MasterButtonListener::up(eyegui::Layout* pLayout, std::string id)
         _pMaster->_paused = false;
         eyegui::setDescriptionVisibility(_pMaster->_pGUI, eyegui::DescriptionVisibility::ON_PENETRATION); // TODO look up in Settings for set value
     }
+}
+
+Master::ThreadJob::~ThreadJob()
+{
+	// For the sake of C++
+}
+
+void Master::PushEyetrackerStatusThreadJob::Execute()
+{
+	switch (_status)
+	{
+	case EyeTrackerStatus::TRYING_TO_CONNECT:
+		_pMaster->PushNotificationByKey("notification:eye_tracker_status:trying_to_connect");
+		break;
+	case EyeTrackerStatus::CONNECTED:
+		_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected");
+		break;
+	case EyeTrackerStatus::DISCONNECTED:
+		_pMaster->PushNotificationByKey("notification:eye_tracker_status:disconnected");
+		break;
+	default:
+		// Nothing
+		break;
+	}
 }

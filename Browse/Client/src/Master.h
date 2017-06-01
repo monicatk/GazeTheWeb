@@ -129,7 +129,7 @@ public:
 	// ###################################
 
 	// Notify about eye tracker status
-	virtual void threadsafe_EyeTrackerStatusNotification(EyeTrackerStatus status);
+	virtual void threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status);
 
 private:
 
@@ -153,6 +153,47 @@ private:
 
     // Instance of listener
     std::shared_ptr<MasterButtonListener> _spMasterButtonListener;
+
+	// ThreadJob class (class to store a job assigned by a thread)
+	class ThreadJob
+	{
+	public:
+
+		// Constructor
+		ThreadJob(Master* pMaster) : _pMaster(pMaster) {}
+
+		// Destructor
+		virtual ~ThreadJob() = 0;
+
+		// Execute
+		virtual void Execute() = 0;
+	
+	protected:
+
+		// Members
+		Master* _pMaster;
+	};
+	class PushEyetrackerStatusThreadJob : public ThreadJob
+	{
+	public:
+
+		// Constructor
+		PushEyetrackerStatusThreadJob(Master* pMaster, EyeTrackerStatus status) : ThreadJob(pMaster), _status(status) {};
+
+		// Destructor
+		~PushEyetrackerStatusThreadJob() {}
+
+		// Execute
+		virtual void Execute();
+
+	private:
+
+		// Members
+		EyeTrackerStatus _status;
+	};
+
+	// List jobs as friends with benefits
+	friend class PushEyetrackerStatusThreadJob;
 
     // Loop of master
     void Loop();
@@ -241,8 +282,11 @@ private:
 	// Boolean to indicate exiting the applicatoin
 	bool _exit = false;
 
-	// Mutex for notification stack
-	std::mutex _notificationStackMutex; // TODO: this seems hacky, as has to be locked/unlocked everytime notification is accesses
+	// Buffer for jobs assigned by threads
+	std::vector<std::shared_ptr<ThreadJob> > _threadJobs;
+
+	// Mutex to guarantees that threadJobs are not manipulated while read by master
+	std::mutex _threadJobsMutex;
 };
 
 #endif // MASTER_H_

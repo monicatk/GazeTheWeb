@@ -17,7 +17,7 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 #ifdef _WIN32
 
 		// Trying to connect
-		_pMasterThreadsafeInterface->threadsafe_EyeTrackerStatusNotification(EyeTrackerStatus::TRYING_TO_CONNECT);
+		_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::TRYING_TO_CONNECT);
 
 		// Define procedure signature for connection
 		typedef bool(__cdecl *CONNECT)();
@@ -96,11 +96,11 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 		if (!_connected)
 		{
 			LogInfo("EyeInput: No eye tracker connected. Input emulated by mouse.");
-			_pMasterThreadsafeInterface->threadsafe_EyeTrackerStatusNotification(EyeTrackerStatus::DISCONNECTED);
+			_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::DISCONNECTED);
 		}
 		else
 		{
-			_pMasterThreadsafeInterface->threadsafe_EyeTrackerStatusNotification(EyeTrackerStatus::CONNECTED);
+			_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::CONNECTED);
 		}
 	}));
 }

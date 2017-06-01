@@ -3,6 +3,7 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Master interface for accessing functionality from other threads.
+// Internally, ThreadJobs are pushed back to be processed in loop.
 
 #ifndef MASTERTHREADSAFEINTERFACE_H_
 #define MASTERTHREADSAFEINTERFACE_H_
@@ -13,10 +14,8 @@ class MasterThreadsafeInterface
 {
 public:
 
-	// TODO: make better job queue, this is the best solution for thread safeness!
-
 	// Notify about eye tracker status
-	virtual void threadsafe_EyeTrackerStatusNotification(EyeTrackerStatus status) = 0;
+	virtual void threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status) = 0;
 };
 
 #endif // MASTERTHREADSAFEINTERFACE_H_
