@@ -119,10 +119,10 @@ public:
 	// #####################################
 
 	// Push notification to display
-	virtual void PushNotification(std::u16string content);
+	virtual void PushNotification(std::u16string content, Type type, bool overridable);
 
 	// Push notification to display taken from localization file
-	virtual void PushNotificationByKey(std::string key);
+	virtual void PushNotificationByKey(std::string key, Type type, bool overridable);
 
 	// ###################################
 	// ### MASTER THREADSAFE INTERFACE ###
@@ -273,11 +273,11 @@ private:
 	// Stack with content for notifications
 	std::queue<std::u16string> _notificationStack;
 
-	// LabStreamMailer callback to print incoming messages to log
-	std::shared_ptr<LabStreamCallback> _spLabStreamCallback;
-
 	// Time of notification displaying
 	float _notificationTime;
+
+	// LabStreamMailer callback to print incoming messages to log
+	std::shared_ptr<LabStreamCallback> _spLabStreamCallback;
 
 	// Boolean to indicate exiting the applicatoin
 	bool _exit = false;

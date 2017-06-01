@@ -492,12 +492,12 @@ void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::StyleProp
 	eyegui::setStyleTreePropertyValue(_pGUI, styleClass, type, value);
 }
 
-void Master::PushNotification(std::u16string content)
+void Master::PushNotification(std::u16string content, Type type, bool overridable)
 {
 	_notificationStack.push(content);
 }
 
-void Master::PushNotificationByKey(std::string key)
+void Master::PushNotificationByKey(std::string key, Type type, bool overridable)
 {
 	_notificationStack.push(eyegui::fetchLocalization(_pGUI, key));
 }
@@ -849,13 +849,13 @@ void Master::PushEyetrackerStatusThreadJob::Execute()
 	switch (_status)
 	{
 	case EyeTrackerStatus::TRYING_TO_CONNECT:
-		_pMaster->PushNotificationByKey("notification:eye_tracker_status:trying_to_connect");
+		_pMaster->PushNotificationByKey("notification:eye_tracker_status:trying_to_connect", MasterNotificationInterface::Type::NEUTRAL, true);
 		break;
 	case EyeTrackerStatus::CONNECTED:
-		_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected");
+		_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected", MasterNotificationInterface::Type::SUCCESS, false);
 		break;
 	case EyeTrackerStatus::DISCONNECTED:
-		_pMaster->PushNotificationByKey("notification:eye_tracker_status:disconnected");
+		_pMaster->PushNotificationByKey("notification:eye_tracker_status:disconnected", MasterNotificationInterface::Type::WARNING, false);
 		break;
 	default:
 		// Nothing

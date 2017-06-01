@@ -13,11 +13,14 @@ class MasterNotificationInterface
 {
 public:
 
+	// Enum about notification types
+	enum class Type { NEUTRAL, SUCCESS, WARNING };
+
 	// Push notification to display
-	virtual void PushNotification(std::u16string content) = 0;
+	virtual void PushNotification(std::u16string content, Type type, bool overridable) = 0;
 
 	// Push notification to display taken from localization file
-	virtual void PushNotificationByKey(std::string key) = 0;
+	virtual void PushNotificationByKey(std::string key, Type type, bool overridable) = 0;
 };
 
 #endif // MASTERNOTIFICATIONINTERFACE_H_

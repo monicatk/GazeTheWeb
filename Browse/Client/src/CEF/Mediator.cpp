@@ -634,7 +634,7 @@ void Mediator::SetClipboardText(std::string text)
 	_clipboard = text;
 
 	// Notify user about the new content of the clipboard
-	_pMaster->PushNotificationByKey("notification:copied_to_clipboard");
+	_pMaster->PushNotificationByKey("notification:copied_to_clipboard", MasterNotificationInterface::Type::NEUTRAL, false);
 }
 
 std::string Mediator::GetClipboardText() const

@@ -899,11 +899,11 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				// Display notification
 				if (success)
 				{
-					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_success");
+					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_success", MasterNotificationInterface::Type::SUCCESS, false);
 				}
 				else
 				{
-					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_existing");
+					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_existing", MasterNotificationInterface::Type::NEUTRAL, false);
 				}
 			}
 
