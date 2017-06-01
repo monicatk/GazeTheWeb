@@ -6,7 +6,7 @@
 #include "SelectFieldTrigger.h"
 #include "src/Singletons/LabStreamMailer.h"
 
-SelectFieldTrigger::SelectFieldTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection, std::shared_ptr<DOMSelectField> spNode) : DOMTrigger<DOMSelectField>(pTab, rTriggerCollection, spNode, "bricks/triggers/SelectField.beyegui")
+SelectFieldTrigger::SelectFieldTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection, std::shared_ptr<DOMSelectField> spNode) : DOMTrigger<DOMSelectField>(pTab, rTriggerCollection, spNode, "bricks/triggers/SelectField.beyegui", "select_field")
 {
 	// Nothing to do here
 }
