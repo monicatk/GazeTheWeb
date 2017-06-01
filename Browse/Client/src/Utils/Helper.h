@@ -8,8 +8,8 @@
 #define HELPER_H_
 
 #include "src/Utils/glmWrapper.h"
-#include <vector>
 #include <string>
+#include <vector>
 
 // Convert color [0..1] to hexadecimal string
 std::string RGBAToHexString(glm::vec4 color);

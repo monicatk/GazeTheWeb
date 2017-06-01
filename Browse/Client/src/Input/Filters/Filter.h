@@ -14,7 +14,7 @@ class Filter
 public:
 
 	// Update. Takes samples in window pixel coordinates
-	virtual void Update(SampleVector upSamples,
+	virtual void Update(SampleQueue upSamples,
 		double& rGazeX,
 		double& rGazeY,
 		bool& rSaccade) = 0;

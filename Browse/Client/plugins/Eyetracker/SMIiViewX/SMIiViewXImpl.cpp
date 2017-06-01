@@ -72,7 +72,7 @@ bool Disconnect()
 	return iV_Disconnect() == RET_SUCCESS;
 }
 
-void FetchSamples(SampleVector& rupSamples)
+void FetchSamples(SampleQueue& rupSamples)
 {
 	eyetracker_global::FetchSamples(rupSamples);
 }

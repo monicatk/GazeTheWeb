@@ -98,7 +98,7 @@ bool Disconnect()
 	}
 }
 
-void FetchSamples(SampleVector& rupSamples)
+void FetchSamples(SampleQueue& rupSamples)
 {
 	eyetracker_global::FetchSamples(rupSamples);
 }

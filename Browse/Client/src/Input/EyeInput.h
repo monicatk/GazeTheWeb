@@ -21,7 +21,7 @@
 // Necessary for dynamic DLL loading in Windows
 #ifdef _WIN32
 #include <windows.h>
-typedef void(__cdecl *FETCH_SAMPLES)(SampleVector&);
+typedef void(__cdecl *FETCH_SAMPLES)(SampleQueue&);
 typedef bool(__cdecl *IS_TRACKING)();
 typedef void(__cdecl *CALIBRATE)();
 #endif

@@ -8,7 +8,7 @@
 
 #include <chrono>
 #include <memory>
-#include <vector>
+#include <deque>
 
 // Struct of sample data
 struct SampleData
@@ -24,7 +24,7 @@ struct SampleData
 	std::chrono::milliseconds timestamp;
 };
 
-// Typedef for unique pointer of sample vector
-typedef std::unique_ptr<std::vector<SampleData> > SampleVector;
+// Typedef for unique pointer of sample queue
+typedef std::unique_ptr<std::deque<SampleData> > SampleQueue;
 
 #endif EYETRACKERSAMPLEDATA_H_

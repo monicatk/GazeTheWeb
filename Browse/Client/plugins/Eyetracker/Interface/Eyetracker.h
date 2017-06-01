@@ -23,7 +23,7 @@ extern "C" {
 	DLL_EXPORT bool Disconnect();
 
 	// Fetches gaze samples and clears buffer
-	DLL_EXPORT void FetchSamples(SampleVector& rupSamples);
+	DLL_EXPORT void FetchSamples(SampleQueue& rupSamples);
 
 	// Perform calibration TODO: return something like an enum or so to provide user feedback
 	DLL_EXPORT void Calibrate();

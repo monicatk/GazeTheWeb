@@ -13,8 +13,11 @@ class SimpleFilter
 {
 public:
 
+	// Constructor
+	SimpleFilter();
+
 	// Update. Takes samples in window pixel coordinates
-	virtual void Update(SampleVector upSamples,
+	virtual void Update(SampleQueue upSamples,
 		double& rGazeX,
 		double& rGazeY,
 		bool& rSaccade);
@@ -24,6 +27,7 @@ private:
 	// Testing
 	double _gazeX = 0;
 	double _gazeY = 0;
+	SampleQueue _upSamples;
 };
 
 #endif SIMPLEFILTER_H_

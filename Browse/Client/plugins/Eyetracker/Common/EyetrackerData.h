@@ -11,5 +11,5 @@
 namespace eyetracker_global
 {
 	void PushBackSample(SampleData sample);
-	void FetchSamples(SampleVector& rupSamples);
+	void FetchSamples(SampleQueue& rupSamples);
 }

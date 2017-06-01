@@ -178,11 +178,11 @@ bool EyeInput::Update(
 
 	if (_connected && _procFetchGazeSamples != NULL && _procIsTracking != NULL)
 	{
-		// Prepare vector to fill
-		SampleVector upSamples;
+		// Prepare queue to fill
+		SampleQueue upSamples;
 
 		// Fetch k or less valid samples
-		_procFetchGazeSamples(upSamples);
+		_procFetchGazeSamples(upSamples); // unique pointered vector is filled by fetch procedure
 
 		// Convert parameters to double (use same values for all samples,
 		double windowXDouble = (double)windowX;
