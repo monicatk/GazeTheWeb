@@ -13,6 +13,8 @@ class MasterThreadsafeInterface
 {
 public:
 
+	// TODO: make better job queue, this is the best solution for thread safeness!
+
 	// Notify about eye tracker status
 	virtual void threadsafe_EyeTrackerStatusNotification(EyeTrackerStatus status) = 0;
 };
