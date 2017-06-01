@@ -154,6 +154,18 @@ private:
     // Instance of listener
     std::shared_ptr<MasterButtonListener> _spMasterButtonListener;
 
+	// Notification struct
+	struct Notification
+	{
+		// Constructor
+		Notification(std::u16string message, MasterNotificationInterface::Type type, bool overridable) : message(message), type(type), overridable(overridable) {}
+
+		// Fields
+		std::u16string message;
+		MasterNotificationInterface::Type type;
+		bool overridable;
+	};
+
 	// ThreadJob class (class to store a job assigned by a thread)
 	class ThreadJob
 	{
@@ -270,11 +282,14 @@ private:
 	// Frame index of notification message
 	unsigned int _notificationFrameIndex = 0;
 
-	// Stack with content for notifications
-	std::queue<std::u16string> _notificationStack;
+	// Queue with upcoming notifications
+	std::queue<Notification> _notificationStack;
 
 	// Time of notification displaying
 	float _notificationTime;
+
+	// Whether current notification is overridable or not
+	bool _notificationOverridable = false;
 
 	// LabStreamMailer callback to print incoming messages to log
 	std::shared_ptr<LabStreamCallback> _spLabStreamCallback;

@@ -57,5 +57,8 @@ static const float NOTIFICATION_DISPLAY_DURATION = 5.f;
 static const float CLICK_VISUALIZATION_DURATION = 0.75f;
 static const float CLICK_VISUALIZATION_RELATIVE_SIZE = 0.4f;
 static const std::string SEARCH_PREFIX = "duckduckgo.com?q="; // TODO: move to some kind of config or let the user choose
+static const glm::vec4 NOTIFICATION_NEUTRAL_COLOR = glm::vec4(0.2f, 0.2f, 0.2f, 0.75f);
+static const glm::vec4 NOTIFICATION_SUCCESS_COLOR = glm::vec4(0.15f, 1.0f, 0.0f, 0.75f);
+static const glm::vec4 NOTIFICATION_WARNING_COLOR = glm::vec4(1.0f, 0.15f, 0.0f, 0.75f);
 
 #endif // GLOBAL_H_

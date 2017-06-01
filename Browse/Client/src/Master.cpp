@@ -494,12 +494,12 @@ void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::StyleProp
 
 void Master::PushNotification(std::u16string content, Type type, bool overridable)
 {
-	_notificationStack.push(content);
+	_notificationStack.push(Notification(content, type, overridable));
 }
 
 void Master::PushNotificationByKey(std::string key, Type type, bool overridable)
 {
-	_notificationStack.push(eyegui::fetchLocalization(_pGUI, key));
+	_notificationStack.push(Notification(eyegui::fetchLocalization(_pGUI, key), type, overridable));
 }
 
 void Master::threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status)
@@ -548,18 +548,41 @@ void Master::Loop()
 		_pCefMediator->Poll(tpf);
 
 		// Notification handling
-		if (_notificationTime <= 0)
+		if (_notificationTime <= 0 || _notificationOverridable)
 		{
 			// Show next notification
 			if (!_notificationStack.empty())
 			{
+				// Fetch notification
+				auto notification = _notificationStack.front();
+				_notificationStack.pop();
+
 				// Set content
-				auto content = _notificationStack.front();
 				eyegui::setContentOfTextBlock(
 					_pSuperLayout,
 					"notification",
-					content);
-				_notificationStack.pop();
+					notification.message);
+
+				// Decide color of notification
+				glm::vec4 color;
+				switch (notification.type)
+				{
+				case(Type::NEUTRAL):
+					color = NOTIFICATION_NEUTRAL_COLOR;
+					break;
+				case(Type::SUCCESS):
+					color = NOTIFICATION_SUCCESS_COLOR;
+					break;
+				case(Type::WARNING):
+					color = NOTIFICATION_WARNING_COLOR;
+					break;
+				}
+				
+				// Set color in state (TODO: would be better to set / add / remove old style of element so color can be defined in stylesheet)
+				eyegui::setStyleTreePropertyValue(_pSuperGUI, "notification", eyegui::StylePropertyVec4::BackgroundColor, RGBAToHexString(color));
+
+				// Remember whether this notification is overridable
+				_notificationOverridable = notification.overridable;
 
 				// Make floating frame visible
 				eyegui::setVisibilityOFloatingFrame(_pSuperLayout, _notificationFrameIndex, true, false, true);
@@ -567,7 +590,7 @@ void Master::Loop()
 				// Reset time
 				_notificationTime = NOTIFICATION_DISPLAY_DURATION;
 			}
-			else
+			else if(_notificationTime <= 0) // hide notification, if empty and time is over
 			{
 				// Hide notification display
 				eyegui::setVisibilityOFloatingFrame(_pSuperLayout, _notificationFrameIndex, false, false, true);
