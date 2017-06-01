@@ -11,5 +11,5 @@
 namespace eyetracker_global
 {
 	void PushBackSample(SampleData sample);
-	void FetchSamples(std::vector<SampleData>& rSamples); // clears vector, so fetch should be only called by single consumer
+	void FetchSamples(SampleVector& rupSamples);
 }

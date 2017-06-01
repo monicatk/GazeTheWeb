@@ -7,7 +7,6 @@
 #define DLL_EXPORT __declspec(dllexport) // only on Windows
 
 #include "plugins/Eyetracker/Interface/EyetrackerSampleData.h"
-#include <vector>
 
 // Export C interface (resolved overloading etc)
 #ifdef __cplusplus
@@ -24,7 +23,7 @@ extern "C" {
 	DLL_EXPORT bool Disconnect();
 
 	// Fetches gaze samples and clears buffer
-	DLL_EXPORT void FetchSamples(std::vector<SampleData>& rSamples);
+	DLL_EXPORT void FetchSamples(SampleVector& rupSamples);
 
 	// Perform calibration TODO: return something like an enum or so to provide user feedback
 	DLL_EXPORT void Calibrate();

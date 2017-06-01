@@ -98,9 +98,9 @@ bool Disconnect()
 	}
 }
 
-void FetchSamples(std::vector<SampleData>& rSamples)
+void FetchSamples(SampleVector& rupSamples)
 {
-	eyetracker_global::FetchSamples(rSamples);
+	eyetracker_global::FetchSamples(rupSamples);
 }
 
 void Calibrate()

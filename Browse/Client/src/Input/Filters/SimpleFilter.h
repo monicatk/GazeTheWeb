@@ -14,7 +14,7 @@ class SimpleFilter
 public:
 
 	// Update. Takes samples in window pixel coordinates
-	virtual void Update(std::vector<SampleData> samples,
+	virtual void Update(SampleVector upSamples,
 		double& rGazeX,
 		double& rGazeY,
 		bool& rSaccade);

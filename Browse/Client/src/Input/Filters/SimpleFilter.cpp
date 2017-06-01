@@ -5,16 +5,16 @@
 
 #include "SimpleFilter.h"
 
-void SimpleFilter::Update(std::vector<SampleData> samples,
+void SimpleFilter::Update(SampleVector upSamples,
 	double& rGazeX,
 	double& rGazeY,
 	bool& rSaccade)
 {
 	// TODO: Implement fancy filtering
-	if (!samples.empty())
+	if (!upSamples->empty())
 	{
-		_gazeX = samples.back().x;
-		_gazeY = samples.back().y;
+		_gazeX = upSamples->back().x;
+		_gazeY = upSamples->back().y;
 	}
 	rGazeX = _gazeX;
 	rGazeY = _gazeY;

@@ -7,6 +7,8 @@
 #define EYETRACKERSAMPLEDATA_H_
 
 #include <chrono>
+#include <memory>
+#include <vector>
 
 // Struct of sample data
 struct SampleData
@@ -21,5 +23,8 @@ struct SampleData
 	bool valid;
 	std::chrono::milliseconds timestamp;
 };
+
+// Typedef for unique pointer of sample vector
+typedef std::unique_ptr<std::vector<SampleData> > SampleVector;
 
 #endif EYETRACKERSAMPLEDATA_H_

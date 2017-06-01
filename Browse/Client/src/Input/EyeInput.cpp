@@ -178,11 +178,11 @@ bool EyeInput::Update(
 
 	if (_connected && _procFetchGazeSamples != NULL && _procIsTracking != NULL)
 	{
-		// Prepare vectors to fill
-		std::vector<SampleData> samples;
+		// Prepare vector to fill
+		SampleVector upSamples;
 
 		// Fetch k or less valid samples
-		_procFetchGazeSamples(samples);
+		_procFetchGazeSamples(upSamples);
 
 		// Convert parameters to double (use same values for all samples,
 		double windowXDouble = (double)windowX;
@@ -191,7 +191,7 @@ bool EyeInput::Update(
 		double windowHeightDouble = (double)windowHeight;
 
 		// Go over available samples and bring into window space
-		for (auto& sample : samples)
+		for (auto& sample : *upSamples)
 		{
 			// Do some clamping according to window coordinates for gaze x
 			sample.x = sample.x - windowXDouble;
@@ -205,7 +205,7 @@ bool EyeInput::Update(
 		}
 
 		// Update filter algorithm and provide local variables as reference
-		_filter.Update(samples, filteredGazeX, filteredGazeY, saccade);
+		_filter.Update(std::move(upSamples), filteredGazeX, filteredGazeY, saccade);
 
 		// Check, whether eye tracker is tracking
 		isTracking = _procIsTracking();
