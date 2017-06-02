@@ -127,7 +127,7 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
     {
 		//LogDebug("Handler: Started loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), "), browserID = ", browser->GetIdentifier());
 
-		frame->ExecuteJavaScript("StartPageLoadingTimer();", "", 0);
+		//frame->ExecuteJavaScript("StartPageLoadingTimer();", "", 0);
 
         // Set Tab's URL when page is loading
         _pMediator->SetURL(browser);
@@ -153,7 +153,7 @@ void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame
     if (frame->IsMain())
     {
 		//LogDebug("Handler: End of loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), ").");
-		frame->ExecuteJavaScript("StopPageLoadingTimer();", "", 0);
+		//frame->ExecuteJavaScript("StopPageLoadingTimer();", "", 0);
 
         // Set zoom level according to Tab's settings
         SetZoomLevel(browser, false);
@@ -433,7 +433,8 @@ void Handler::ResizeBrowsers()
 		// It might be better to perform that Rect Update not simultaneously on every browser.
 		// Instead save it and execute it when you switch to the target tab
 
-		bit->get()->GetMainFrame()->ExecuteJavaScript("UpdateDOMRects();", "", 0);
+		bit->get()->GetMainFrame()->ExecuteJavaScript("console.log('Browser resized, updating DOM Rects!');" \
+			"UpdateDOMRects();", "", 0);
 
         // EXPERIMENTAL
         //GetFixedElements(bit->get());
@@ -530,7 +531,8 @@ void Handler::SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged
     if (double zoomLevel = _pMediator->GetZoomLevel(browser))
     {
         LogDebug("Handler: Setting zoom level = ", zoomLevel, " (browserID = ", browser->GetIdentifier(), ").");
-		const std::string setZoomLevel = "if(document.body !== null && document.body !== undefined) document.body.style.zoom=" + std::to_string(zoomLevel) + ";this.blur(); UpdateDOMRects();";
+		const std::string setZoomLevel = "if(document.body !== null && document.body !== undefined) document.body.style.zoom="\
+			+ std::to_string(zoomLevel) + ";this.blur(); "; // TODO(Refactoring): console.log('Setting zoom level, updating DOMRects!'); UpdateDOMRects(); ";
         browser->GetMainFrame()->ExecuteJavaScript(setZoomLevel, "", 0); 
 
         if (definitelyChanged)

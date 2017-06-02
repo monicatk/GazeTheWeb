@@ -76,6 +76,13 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 
 			CefRefPtr<CefV8Value> scrollFunction = window->GetValue("ScrollOverflowElement");
 
+			if (!scrollFunction->IsFunction())
+			{
+				LogDebug(browser, "Renderer:  Could not access 'ScrollOverflowElement' function!");
+				context->Exit();
+				return true;
+			}
+
 			scrollFunction->ExecuteFunction(window, { elemId, x, y, fixedIds });
 
 			context->Exit();
@@ -126,6 +133,10 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 				msg->GetArgumentList()->SetInt(1, x);
 				msg->GetArgumentList()->SetInt(2, y);
 				browser->SendProcessMessage(PID_BROWSER, msg);
+			}
+			else
+			{
+				IPCLogDebug(browser, "Renderer: Couldn't call Javascript function 'PerformTextInput'!");
 			}
 
 
@@ -383,6 +394,10 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 					args->SetList(args_count++, listValue);
 				}
 			}
+			if (args->GetSize() <= 2)
+			{
+				LogDebug(browser, "Renderer: ERROR processing " + js_obj_getter_name + "(" + std::to_string(id) + ")!");
+			}
 
 			browser->SendProcessMessage(PID_BROWSER, reply);
 
@@ -442,12 +457,37 @@ void RenderProcessHandler::OnContextCreated(
 
 			// Inject Javascript code which extends the current page's context by our methods
 			// and automatically creates a MutationObserver instance
-			frame->ExecuteJavaScript(_js_dom_mutationobserver, "", 0);
-			frame->ExecuteJavaScript(_js_mutation_observer_test, "", 0);
+			for (const auto& dom_code : _js_dom_code)
+			{
+				frame->ExecuteJavaScript(dom_code.first, dom_code.second, 0);
+			}
+			const auto& add_attribute = context->GetGlobal()->GetValue("AddDOMAttribute");
+			if (add_attribute->IsFunction())
+			{
+				bool valid = true;
+				int attrId = 0;
+				while (valid)
+				{
+					const std::string& attrStr = DOMAttrToString((DOMAttribute) attrId);
+					valid = (attrStr.size() >= 3);	// There won't exist any attribute name with less than 4 characters
+					if (valid)
+						add_attribute->ExecuteFunction(
+							context->GetGlobal(),
+							{ CefV8Value::CreateString(attrStr), CefV8Value::CreateInt(attrId) }
+					);
+					attrId++;
+				}
+			}
+			else
+			{
+				IPCLog(browser, "Renderer: ERROR: Could not find JS function 'AddDOMAttribute'!");
+			}
+			frame->ExecuteJavaScript("MutationObserverInit();", "", 0);
 
-			IPCLog(browser, "LOADING FIXED ELEMENT JS FILE OVER AND OVER AGAIN");
-			_js_dom_fixed_elements = GetJSCode(DOM_FIXED_ELEMENTS);
-			frame->ExecuteJavaScript(_js_dom_fixed_elements, "", 0);
+
+			//IPCLog(browser, "LOADING FIXED ELEMENT JS FILE OVER AND OVER AGAIN");
+			//_js_dom_fixed_elements = GetJSCode(DOM_FIXED_ELEMENTS);
+			//frame->ExecuteJavaScript(_js_dom_fixed_elements, "", 0);
 
 
 
@@ -484,7 +524,7 @@ void RenderProcessHandler::OnContextReleased(CefRefPtr<CefBrowser> browser,
         globalObj->DeleteValue("favIconWidth");
 
 		// DEBUG
-		frame->ExecuteJavaScript("MutationObserverShutdown()", "", 0);
+		// frame->ExecuteJavaScript("MutationObserverShutdown()", "", 0);
     }
 }
 

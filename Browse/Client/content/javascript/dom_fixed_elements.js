@@ -3,8 +3,7 @@
 // Author: Daniel Mueller (muellerd@uni-koblenz.de)
 //============================================================================
 
-ConsolePrint("Importing JS code for FixedElements...");
-
+ConsolePrint("Starting to import dom_fixed_elements.js ...");
 
 
 // new version of window.fixed_elements
@@ -13,12 +12,36 @@ window.domFixedElements = [];
 /** Constructor */
 function FixedElement(node)
 {
+    /* Code executed on constructor call ... */
+    // Add FixedElement Object to list and determine its id
+    if(window.domFixedElements.indexOf(node) !== -1)
+    {
+        window.domFixedElements.push(this);
+        this.id = window.domFixedElements.indexOf(node);
+    }
+    else
+    {
+        console.log("Node already marked as fixed element! Aborting object creation!");
+        return;
+    }
+
+
     /* Attributes */
     this.node = node;
     this.rects = [];
     this.id = -1;
 
+
+    /**
+     * REFACTORING TODOs
+     *  - Automatically add FixedElement to list of fixed elements after it's creation
+     *  - On creation: Check if node already belongs to an fixed element object? OR Use CreateFixedElement function
+     */
+
     /* Methods */
+    // Refactoring: Added for DOMNode objects
+    this.getId = () => { return this.id; }
+
     this.getRects = function()
     {
         return this.rects;
@@ -129,6 +152,7 @@ function FixedElement(node)
             // Inform CEF that fixed element has been updated
             // var debug = (window.domFixedElements[this.id] === undefined) ? "undefined" : "ok";
             ConsolePrint("#fixElem#add#"+this.id+"#");
+            console.log("FixedElement "+this.id+" updated.");
             //   ConsolePrint("-----> #fixElem#add#"+this.id); // DEBUG
 
 
@@ -142,11 +166,7 @@ function FixedElement(node)
         
     }
 
-    /* Code executed on constructor call ... */
-    // Add FixedElement Object to list and determine its id
-    window.domFixedElements.push(this);
-    this.id = window.domFixedElements.length - 1;
-    
+  
 
     this.node.setAttribute("fixedId", this.id);
     
@@ -195,15 +215,11 @@ function GetFixedElementById(id)
     {
         return window.domFixedElements[id];
     }
-    else
-    {
-        console.log("Couldn't find FixedElement with id="+id);
-    }
+    return undefined;
 }
 
 function AddFixedElement(node)
 {
-    // return false; // DEBUG
 
     if(node.nodeType === 1)
     {
@@ -275,6 +291,7 @@ function RemoveFixedElement(node)
 // Inform CEF about the current fixation status of a already known nodes
 function SetFixationStatus(node, status)
 {
+    // TODO: Refactoring! & move to helpers
 	var type = node.getAttribute('nodeType');
 	var nodeId = node.getAttribute('nodeID');
 
@@ -336,6 +353,4 @@ function IsRectContained(rect, container)
 
     return false;
 }
-
-
-ConsolePrint("Successfully finished importing JS code for FixedElements!");
+ConsolePrint("Successfully imported dom_fixed_elements.js!");

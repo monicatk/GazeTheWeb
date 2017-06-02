@@ -99,15 +99,6 @@ namespace V8ToCefListValue
 		if (data->IsUndefined() || data->IsNull())
 			return CefRefPtr<CefListValue>();
 
-		//// DEBUG:
-		//_Log("V8TOCefListValue: Calling AttrConversion for attr: " + std::to_string(attr) +"...", browser);
-
-		//auto return_value = AttrConversion.at(attr)(data);
-
-		//_Log("V8ToCefListValue: ... done!", browser);
-
-		//return return_value;
-
 		// Convert returned V8Value to CefListValue
 		return AttrConversion.at(attr)(data);
 	}

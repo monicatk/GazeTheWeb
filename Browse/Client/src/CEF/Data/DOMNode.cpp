@@ -26,7 +26,7 @@ int DOMNode::Initialize(CefRefPtr<CefProcessMessage> msg)
 	if ((int) _description.size() > args->GetSize() - 1)
 	{
 		LogError("DOMNode: On initialization: Object description (", _description.size(), ") and message (", args->GetSize(), 
-			") size do not match!");
+			") size do not match! id: ",_id);
 	}
 	else
 	{
@@ -36,7 +36,7 @@ int DOMNode::Initialize(CefRefPtr<CefProcessMessage> msg)
 			if (!Update(_description[i], data))
 			{
 				LogError("DOMNode: Failed to assign value of type ", data->GetType(0),
-					" to attribute ", _description[i], "!");
+					" to attribute ", DOMAttrToString(_description[i]), "!");
 			}
 		}
 	}
@@ -131,7 +131,7 @@ int DOMTextInput::Initialize(CefRefPtr<CefProcessMessage> msg)
 			if (!Update(_description[i], data))
 			{
 				LogError("DOMTextInput: Failed to assign value of type ", args->GetValue(i + 1)->GetType(),
-					" to attribute ", _description[i], "!");
+					" to attribute ", DOMAttrToString(_description[i]), "!");
 			}
 		}
 	}
@@ -197,7 +197,7 @@ int DOMLink::Initialize(CefRefPtr<CefProcessMessage> msg)
 			if (!Update(_description[i], data))
 			{
 				LogError("DOMLink: Failed to assign value of type ", data->GetValue(0)->GetType(), // TODO: Could this crash the renderer process if data is a CefListValue?
-					" to attribute ", _description[i], "!");
+					" to attribute ", DOMAttrToString(_description[i]), "!");
 			}
 		}
 	}
@@ -210,7 +210,6 @@ bool DOMLink::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 		case DOMAttribute::Text:	return IPCSetText(data);
 		case DOMAttribute::Url:		return IPCSetUrl(data);
 	}
-
 
 	return super::Update(attr, data);
 }
@@ -264,7 +263,7 @@ int DOMSelectField::Initialize(CefRefPtr<CefProcessMessage> msg)
 			if (!Update(_description[i], data))
 			{
 				LogError("DOMSelectField: Failed to assign value of type ", args->GetValue(i + 1)->GetType(),
-					" to attribute ", _description[i], "!");
+					" to attribute ", DOMAttrToString(_description[i]), "!");
 			}
 		}
 	}
@@ -281,8 +280,26 @@ bool DOMSelectField::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 
 bool DOMSelectField::IPCSetOptions(CefRefPtr<CefListValue> data)
 {
-	// TODO:
-	return false;
+	if (data->GetSize() < 1)
+	{
+		LogDebug("DOMSelectField: Size of option list is less than 1. Aborting.");
+		return false;
+	}
+
+	std::vector<std::string> options;
+	CefRefPtr<CefListValue> list = data->GetList(0);
+	for (int i = 0; i < list->GetSize(); i++)
+	{
+		if (list->GetType(i) != CefValueType::VTYPE_STRING)
+		{
+			LogDebug("DOMSelectField: Invalid data type for option! Aborting.");
+			return false;
+		}
+		options.push_back(list->GetString(i));
+	}
+
+	SetOptions(options);
+	return true;
 }
 
 
@@ -318,7 +335,7 @@ int DOMOverflowElement::Initialize(CefRefPtr<CefProcessMessage> msg)
 			if (!Update(_description[i], data))
 			{
 				LogError("OverflowElement: Failed to assign value of type ", data->GetType(0),
-					" to attribute ", _description[i], "!");
+					" to attribute ", DOMAttrToString(_description[i]), "!");
 			}
 		}
 	}

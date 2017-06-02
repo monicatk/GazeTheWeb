@@ -15,15 +15,19 @@ const std::string src = CONTENT_PATH "/javascript/";
 // List of all available JS code file paths and how to access them with JSCode enum
 const std::map<JSFile, std::string> findJSFile =
 {
-    std::make_pair<JSFile, std::string>(REMOVE_CSS_SCROLLBAR, src + "remove_css_scrollbar.js"),
-    std::make_pair<JSFile, std::string>(DOM_UPDATE_SIZES, src + "dom_update_sizes.js"),
-    std::make_pair<JSFile, std::string>(DOM_FILL_ARRAYS, src + "dom_fill_arrays.js"),
-    std::make_pair<JSFile, std::string>(FAVICON_GET_URL_AND_RESOLUTION, src + "favicon_get_url_and_resolution.js"),
-    std::make_pair<JSFile, std::string>(FAVICON_CREATE_IMG, src + "favicon_create_img.js"),
-    std::make_pair<JSFile, std::string>(FAVICON_COPY_IMG_BYTES_TO_V8ARRAY, src + "favicon_copy_img_bytes_to_v8array.js"),
-    std::make_pair<JSFile, std::string>(MUTATION_OBSERVER_TEST, src + "mutation_observer_test.js"),
+	// Favicon
+	std::make_pair<JSFile, std::string>(FAVICON_GET_URL_AND_RESOLUTION, src + "favicon/favicon_get_url_and_resolution.js"),
+	std::make_pair<JSFile, std::string>(FAVICON_CREATE_IMG, src + "favicon/favicon_create_img.js"),
+	std::make_pair<JSFile, std::string>(FAVICON_COPY_IMG_BYTES_TO_V8ARRAY, src + "favicon/favicon_copy_img_bytes_to_v8array.js"),
+	// MutationObserver & DOMNodes
+    std::make_pair<JSFile, std::string>(HELPERS, src + "helpers.js"),
+    std::make_pair<JSFile, std::string>(DOM_NODES, src + "dom_nodes.js"),
+    std::make_pair<JSFile, std::string>(DOM_NODES_INTERACTION, src + "dom_nodes_interaction.js"),
 	std::make_pair<JSFile, std::string>(DOM_MUTATIONOBSERVER, src + "dom_mutationobserver.js"),
-	std::make_pair<JSFile, std::string>(DOM_FIXED_ELEMENTS, src + "dom_fixed_elements.js")
+	std::make_pair<JSFile, std::string>(DOM_FIXED_ELEMENTS, src + "dom_fixed_elements.js"),
+	std::make_pair<JSFile, std::string>(DOM_ATTRIBUTES, src + "dom_attributes.js"),
+	// Various
+	std::make_pair<JSFile, std::string>(REMOVE_CSS_SCROLLBAR, src + "old/remove_css_scrollbar.js")
 };
 
 std::string GetJSCode(JSFile file)

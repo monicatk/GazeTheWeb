@@ -35,6 +35,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	CefRefPtr<Callback> callback)
 {
 	const std::string requestString = request.ToString();
+	// LogDebug("MsgRouter: ", requestString);
 
 	// ###############
 	// ### Favicon ###
@@ -153,6 +154,13 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		if (data.size() > 3)
 		{
 			const std::string& op = data[1];
+			const std::string& typeStr = data[2];
+			const std::string& idStr = data[3];
+			if (typeStr == "undefined" || typeStr == "null" || idStr == "undefined" || idStr == "null")
+			{
+				LogError("MsgRouter: Can not fetch node with type: ", typeStr, " and id: ", idStr, ". Aborting.");
+				return true;
+			}
 			const int& type = std::stoi(data[2]);
 			const int& id = std::stoi(data[3]);
 		
@@ -183,7 +191,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				case(2) : ipcName = "SelectField"; break;
 				case(3) : ipcName = "OverflowElement"; break;
 				default: {
-					LogError(browser, "MsgRouter: - ERROR: Unknown numeric DOM node type value: ", type);
+					LogError("MsgRouter: - ERROR: Unknown numeric DOM node type value: ", type);
 					return true;
 				}
 				}
@@ -242,13 +250,15 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					}
 					else
 					{
-						LogError("MsgRouter: Failed to access node with type: ", type, " and id: ", id, "stored in"\
+						LogError("MsgRouter: Failed to access node with type: ", type, " and id: ", id, " stored in"\
 							" Tab with id: ", browser->GetIdentifier(), ")");
+						return true;
 					}
 					
 					if (!success)
 					{
-						LogError("MsgRouter: Update failed! Node type: ", type, ", node id: ", id, ", DOMAttribute: ", attr);
+						LogError("MsgRouter: Update failed! Node type: ", type, ", node id: ", id, 
+							", DOMAttribute: ", DOMAttrToString(attr));
 					}
 
 				}
