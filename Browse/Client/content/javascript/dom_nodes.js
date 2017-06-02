@@ -10,15 +10,6 @@
  */
 ConsolePrint("Starting to import dom_nodes.js ...");
 
-function SendAttributeChangesToCEF(attrStr, domObj)
-{
-    // TODO: attrStr -> int map
-    // TODO: attrStr -> getter function map
-    // TODO: getter data to encoded string
-
-    //ConsolePrint("DOM#"+domObj.getType()+"#"+domObj.getId()+"#")
-}
-
 /*
    ___  ____  __  ____  __        __      
   / _ \/ __ \/  |/  / |/ /__  ___/ /__ ___
@@ -49,17 +40,21 @@ function DOMNode(node, id, type)
     this.rects = []
     // MutationObserver will handle setting up the following references, if necessary
     this.fixObj = undefined;
-    this.fixedId = -1;
     this.overflow = undefined;
-    this.overflowId = -1;
+    // DEBUG
+    this.overflowHistory = []
 
     if(typeof(node.getAttribute) === "function")
     {
         // Initial setup of fixObj, if already set in node
         this.setFixObj(  GetFixedElementById( node.getAttribute("fixedId") )  );
         if(this.fixObj === null)
-            this.setFixObj(  GetFIxedElementById( node.getAttribute("childFixedId") )  );
-        // TODO: Initial setup of overflow, if already set in node
+            this.setFixObj(  GetFixedElementById( node.getAttribute("childFixedId") )  );
+
+        // Initial setup of overflow, if already set in node
+        var overflowId = node.getAttribute("overflowid");
+        if(overflowId !== null)
+            this.setOverflow(GetDOMOverflowElement(overflowId));
     }
 
     // Inform C++ about added DOMNode
@@ -78,6 +73,7 @@ DOMNode.prototype.getType = function(){
 // DOMAttribute Rects
 DOMNode.prototype.getRects = function(){
     this.updateRects();
+
     // TODO: Set each DOMNode's overflow attribute to undefined, if corresponding Overflow gets deleted/removed
     // IDEA: Sign up each DOMNode in OverflowElements list if assigned to overflow attribute?
     if(this.overflow !== undefined)
@@ -87,6 +83,11 @@ DOMNode.prototype.getRects = function(){
     // FUTURE TODO: Cut with overlying fixed areas, if any
     return this.rects;
 }
+DOMNode.prototype.getUnalteredRects = function(){
+    this.updateRects();
+    return this.rects;
+}
+
 DOMNode.prototype.updateRects = function(){
     if(typeof(this.node.getClientRects) !== "function")
     {
@@ -97,7 +98,7 @@ DOMNode.prototype.updateRects = function(){
     if(!EqualClientRectsData(this.rects, adjustedRects))
     {
         this.rects = adjustedRects
-        SendAttributeChangesToCEF(0, this);
+        SendAttributeChangesToCEF("Rects", this);
         return true; // Rects changed and were updated
     }
     return false; // No update needed, no changes
@@ -105,7 +106,9 @@ DOMNode.prototype.updateRects = function(){
 
 // DOMAttribute FixedId
 DOMNode.prototype.getFixedId = function(){
-    return this.fixedId;
+    if(this.fixObj === undefined)
+        return -1;
+    return this.fixObj.getId();
 }
 
 DOMNode.prototype.setFixObj = function(fixObj){
@@ -113,7 +116,6 @@ DOMNode.prototype.setFixObj = function(fixObj){
     if(fixObj === undefined)
     {
         this.fixObj = undefined;
-        this.fixId = -1;
         SendAttributeChangesToCEF("FixedId", this);
         return true;
     }
@@ -122,10 +124,6 @@ DOMNode.prototype.setFixObj = function(fixObj){
     {
         this.fixObj = fixObj;
         var fixId = fixObj.getId();
-        if(fixId >= 0)
-            this.fixedId = fixId;
-        else
-            this.fixedId = -1;
         SendAttributeChangesToCEF("FixedId", this);
         return true;
     }
@@ -141,9 +139,30 @@ DOMNode.prototype.getOverflowId = function(){
     return this.overflow.getId();
 }
 DOMNode.prototype.setOverflow = function(obj){
-    this.overflow = obj;
+    if(this.overflow !== obj)
+    {
+        this.overflow = obj;
+        this.overflowHistory.push(obj);
+        SendAttributeChangesToCEF("OverflowId", this);
+        // Automatically trigger rect update
+        this.updateRects();
+    }
+}
+DOMNode.prototype.setOverflowViaId = function(id){
+    // Reset overflow
+    if(id === null || id === -1)
+    {
+        this.setOverflow(undefined);
+    }
+    // Invalid input
+    if(id === undefined || id < 0)
+        return;
+    // Fetch overflow object and set attribute with it
+    var obj = GetDOMOverflowElement(id);
+    this.setOverflow(obj);
 }
 
+// TODO: What was this good for? oO
 DOMNode.prototype.setDOMAttribute = function(str){
     switch(str){
         case "fixed":
@@ -311,7 +330,7 @@ function DOMOverflowElement(node)
         if(e.target.scrollLeft !== e.target.last_scroll_x || e.target.scrollTop !== e.target.last_scroll_y)
         {
             ForEveryChild(e.target, function(child){
-                var obj = GetDOMObject(child);
+                var obj = GetCorrespondingDOMObject(child);
                 if(obj !== undefined)
                 {
                     obj.updateRects();
@@ -320,8 +339,17 @@ function DOMOverflowElement(node)
             e.target.last_scroll_x = e.target.scrollLeft;
             e.target.last_scroll_y = e.target.scrollTop;
         }
-    }
+    };
 
+
+    // Set first generation of childs overflowId, MutationObserver will handle the rest
+    for(var i = 0, n = node.childNodes.length; i < n; i++)
+    {
+        var child = node.childNodes[i];
+        if(child === undefined || typeof(child.setAttribute) !== "function")
+            continue;
+        child.setAttribute("overflowId", id);
+    }
 
 }
 DOMOverflowElement.prototype = Object.create(DOMNode.prototype);
@@ -359,7 +387,7 @@ DOMOverflowElement.prototype.cutRectsWith = function(domObj){
     }
 
     var oeRects = this.getRects();
-    var objRects = domObj.getRects();
+    var objRects = domObj.getUnalteredRects();
 
     return objRects.map(
         (objRect) => {

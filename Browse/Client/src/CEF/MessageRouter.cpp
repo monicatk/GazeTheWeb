@@ -250,13 +250,15 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					}
 					else
 					{
-						LogError("MsgRouter: Failed to access node with type: ", type, " and id: ", id, "stored in"\
+						LogError("MsgRouter: Failed to access node with type: ", type, " and id: ", id, " stored in"\
 							" Tab with id: ", browser->GetIdentifier(), ")");
+						return true;
 					}
 					
 					if (!success)
 					{
-						LogError("MsgRouter: Update failed! Node type: ", type, ", node id: ", id, ", DOMAttribute: ", attr);
+						LogError("MsgRouter: Update failed! Node type: ", type, ", node id: ", id, 
+							", DOMAttribute: ", DOMAttrToString(attr));
 					}
 
 				}

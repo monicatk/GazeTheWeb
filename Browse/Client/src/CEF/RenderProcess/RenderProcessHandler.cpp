@@ -461,6 +461,27 @@ void RenderProcessHandler::OnContextCreated(
 			{
 				frame->ExecuteJavaScript(dom_code.first, dom_code.second, 0);
 			}
+			const auto& add_attribute = context->GetGlobal()->GetValue("AddDOMAttribute");
+			if (add_attribute->IsFunction())
+			{
+				bool valid = true;
+				int attrId = 0;
+				while (valid)
+				{
+					const std::string& attrStr = DOMAttrToString((DOMAttribute) attrId);
+					valid = (attrStr.size() >= 3);	// There won't exist any attribute name with less than 4 characters
+					if (valid)
+						add_attribute->ExecuteFunction(
+							context->GetGlobal(),
+							{ CefV8Value::CreateString(attrStr), CefV8Value::CreateInt(attrId) }
+					);
+					attrId++;
+				}
+			}
+			else
+			{
+				IPCLog(browser, "Renderer: ERROR: Could not find JS function 'AddDOMAttribute'!");
+			}
 			frame->ExecuteJavaScript("MutationObserverInit();", "", 0);
 
 

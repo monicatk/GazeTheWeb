@@ -150,8 +150,8 @@ function GetDOMObject(node)
 
     if(nodeObjId === null || nodeObjType === null || nodeObjId < 0 || nodeObjType < 0)
     {
-        // console.log("Error: Couldn't fetch corresponding DOMObject. Insufficient information stored in node!");
-        // console.log("Required integer attributes: nodeObjId="+nodeObjId+", nodeObjType="+nodeObjType);
+        console.log("Error: Couldn't fetch corresponding DOMObject. Insufficient information stored in node!");
+        console.log("Required integer attributes: nodeObjId="+nodeObjId+", nodeObjType="+nodeObjType);
         return undefined;
     }
 
@@ -223,10 +223,10 @@ function UpdateNodesRect(node)
 
 
 // DEPRECATED - only as quick fix at the moment, remove function calls later
-function CreateDOMLink(node){ new DOMLink(node); }
-function CreateDOMTextInput(node) { new DOMTextInput(node); }
-function CreateDOMSelectField(node) { new DOMSelectField(node); }
-function CreateOverflowElement(node) { new DOMOverflowElement(node); }
+function CreateDOMLink(node){ if(GetCorrespondingDOMObject(node) === undefined) return new DOMLink(node); }
+function CreateDOMTextInput(node) { if(GetCorrespondingDOMObject(node) === undefined) return new DOMTextInput(node); }
+function CreateDOMSelectField(node) { if(GetCorrespondingDOMObject(node) === undefined) return new DOMSelectField(node); }
+function CreateOverflowElement(node) { if(GetCorrespondingDOMObject(node) === undefined) return new DOMOverflowElement(node); }
 
 function GetDOMObject(type, id)
 {
@@ -243,18 +243,38 @@ function GetDOMLink(id){ return GetDOMObject(1, id);}
 function GetDOMSelectField(id){ return GetDOMObject(2, id); }
 function GetDOMOverflowElement(id){ return GetDOMObject(3, id); }
 
-function GetDOMNode(node)
+function GetCorrespondingDOMObject(node)
 {
     if(typeof(node.getAttribute) !== "function")
         return undefined;
     
-    var type = node.getAttribute("nodeObjId");
+    var type = node.getAttribute("nodeObjType");
     var id = node.getAttribute("nodeObjId");
 
     if(type === null || id === null)
         return undefined;
 
     return GetDOMObject(type, id);
+}
+
+/**
+ * Usage example: Determine what parts of a node's rect are visible when inside an overflowing element
+ */
+function CutRectOnRectWindow(innerRect, outerRect)
+{
+    if(!(innerRect.length > 0) || !(outerRect.length > 0))
+        return [0,0,0,0];
+
+    var t = Math.max(innerRect[0], outerRect[0]);
+    var l = Math.max(innerRect[1], outerRect[1]);
+    var b = Math.min(innerRect[2], outerRect[2]);
+    var r = Math.min(innerRect[3], outerRect[3]);
+    
+    // return size zero rect if edges flipped sides
+    if(t >= b || l >= r) 
+        return [0,0,0,0]
+
+    return [t, l, b, r]
 }
 
 

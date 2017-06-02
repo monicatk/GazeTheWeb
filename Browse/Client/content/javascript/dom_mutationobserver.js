@@ -238,7 +238,7 @@ document.addEventListener('transitionend', function(event){
 	else
 	{
 		// Update rects of given root node
-		var obj = GetDOMNode(root);
+		var obj = GetCorrespondingDOMObject(root);
 		if(obj !== undefined)
 		{
 			obj.updateRects();
@@ -288,17 +288,10 @@ Document.prototype.createElement = function(tag)
 	return elem ;
 }
 
-var origImportNode = Document.prototype.importNode;
-Document.prototype.importNode = function(importedNode, deep){
-	ConsolePrint("Document.importNode called!");
-	return origImportNode.apply(this, arguments);
-}
-
 
 /* Modify appendChild in order to get notifications when this function is called */
 var originalAppendChild = Element.prototype.appendChild;
 Element.prototype.appendChild = function(child){
-
 	// appendChild extension: Check if root is already part of DOM tree
     if(this.nodeType == 1 || this.nodeType > 8)
     {
@@ -306,10 +299,7 @@ Element.prototype.appendChild = function(child){
 
 		// Stop going up the tree when parentNode is documentElement or doesn't exist (null or undefined)
 		while(subtreeRoot !== document.documentElement && subtreeRoot.parentNode && subtreeRoot.parentNode !== undefined)
-		{
 			subtreeRoot = subtreeRoot.parentNode;
-		}
-
 
 		// Register subtree roots, whose children have to be checked outside of MutationObserver
         if(subtreeRoot !== document.documentElement) 
@@ -322,11 +312,9 @@ Element.prototype.appendChild = function(child){
 				for(var i = 0, n = subtreeRoot.childNodes.length; i < n; i++)
 				{
 					window.appendedSubtreeRoots.add(subtreeRoot.childNodes[i]);
-
-					ForEveryChild(subtreeRoot.childNodes[i], function(childNode){
+					// ForEveryChild(subtreeRoot.childNodes[i], function(childNode){
 						// if(childNode.style) childNode.style.backgroundColor = '#0000ff';
-					});
-					
+					// });	
 				}
 			}
 			else 
@@ -340,10 +328,7 @@ Element.prototype.appendChild = function(child){
 						window.appendedSubtreeRoots.delete(childNode);
 					}
 				);
-
-
-			}
-		
+			} // else
 		}
 
     }  
@@ -387,11 +372,10 @@ function AnalyzeNode(node)
 {
 	if( (node.nodeType == 1 || node.nodeType > 8) && (node.hasAttribute && !node.hasAttribute("nodeType")) && (node !== window)) // 1 == ELEMENT_NODE
 	{
+
 		// If node is possible DocFrag subtree root node, remove it from set and analyze its subtree too
 		if(window.appendedSubtreeRoots.delete(node))
-		{
 			ForEveryChild(node, AnalyzeNode);
-		}
 
 		var computedStyle = window.getComputedStyle(node, null);
 
@@ -588,8 +572,8 @@ function MutationObserverInit()
 								// Node was set to unfix, fixedId attribute existed before
 								if(fixId === null || fixId === -1)
 								 	DeleteFixedElement(node);
-								else
-									new FixedElement(node);
+								// else
+								// 	new FixedElement(node);	// Nodes who already are labeled with a fixedId will already have an DOM object
 							}
 							// If current child-fixed nodes subtree was unfixed, unfix its direct children too
 							// This will cascade until leaf nodes are met
@@ -612,16 +596,59 @@ function MutationObserverInit()
 								}
 								else
 								{
-									node.childNodes.forEach((child) => {
+									node.childNodes.forEach((child) => {	// TODO: This self-created forEach might not work as expected
 										// Extend node by given attribute
 										if(typeof(child.getAttribute) === "function")
 												child.removeAttribute("childFixedId");
 										// Update fixObj in DOMObject
-										SetFixationStatus(node, undefined);
+										SetFixationStatus(child, undefined);
 									});
 								}
 							}
-							// TODO: Refactoring: Do the same for OverflowElements
+
+
+
+
+							// Set childrens' overflowIds when node gets tagged as part of overflow subtree 
+							if(attr == "overflowid")
+							{
+								var id = node.getAttribute("overflowid");
+								var domObj = GetCorrespondingDOMObject(node);
+								var skip_subtree = false;
+								if(domObj !== undefined)
+								{
+								// id of null or -1 will reset overflow object in domObj
+									domObj.setOverflowViaId(id);
+
+									if(domObj.Class === "DOMOverflowElement")
+										skip_subtree = true;
+								}
+								// TODO: This node should automatically get an overflowId (on Overflow test site), but it doesn't --> DocFrag!
+								// if(node.className === "scroll-wrapper scrollbar-inner")
+								// 	console.log("overflowId changed to: "+id);
+
+								if(!skip_subtree)
+								{
+									for(var i = 0, n = node.childNodes.length; i < n; i++)
+									{			
+										var child = node.childNodes[i];	
+
+										if(child === undefined || typeof(child.setAttribute) !== "function")
+										{			
+											// console.log(i+"/"+n+": Skipped.");
+											continue;
+										}
+										// console.log(i+"/"+n+": "+child.className);
+
+										if(id !== null)
+											child.setAttribute("overflowId", id);
+										else
+											child.removeAttribute("overflowid");	// TODO: Search for hierachically higher overflows!
+									}
+								}
+							}
+
+
 							
 
 		  					if(attr == 'style' ||  (document.readyState != 'loading' && attr == 'class') )
@@ -712,6 +739,10 @@ function MutationObserverInit()
 								// Remove knowledge about every possible root due to a DocFrag in whole subtree
 								ForEveryChild(node, function(child){ window.appendedSubtreeRoots.delete(child); });
 							}
+
+							// DEBUG
+							if(node.className === "scroll-wrapper scrollbar-inner")
+								console.log("Target node added to dom tree!");
 							
 							
 							// Set children (and their subtree) to fixed, if parent is also fixed
@@ -726,6 +757,14 @@ function MutationObserverInit()
 									node.setAttribute("childfixedid", id);
 									SetFixationStatus(node, true);
 								}
+							}
+
+							// If parent is contained in overflow element, then child will also be
+							if(parent !== undefined && typeof(parent.getAttribute) === "function" && typeof(node.setAttribute) === "function")
+							{
+								var overflowId = parent.getAttribute("overflowid");
+								if(overflowId !== null)
+									node.setAttribute("overflowid", overflowId);
 							}
 
 			  				AnalyzeNode(node);
