@@ -122,9 +122,7 @@ public:
     void EmulateLeftMouseButtonClick(CefRefPtr<CefBrowser> browser, double x, double y);
     void EmulateMouseWheelScrolling(CefRefPtr<CefBrowser> browser, double deltaX, double deltaY);
 
-    // Inject text input to given DOM node (via Javascript)
-    bool InputTextData(CefRefPtr<CefBrowser> browser, int64 frameID, int nodeID, std::string text, bool submit = false);
-
+    
     void ResetMainFramesScrolling(CefRefPtr<CefBrowser> browser);
 
     // Bool value indicates need to reload DOM node data, true when called from outside of Tab due to changes
@@ -142,8 +140,17 @@ public:
 	void OnTitleChange(CefRefPtr<CefBrowser> browser,
 		const CefString& title) OVERRIDE;
 
+	/* ### DOM node interaction ### */	
+	// TODO: Move to DOMNodeInteraction.h
+	// Idea: Execute interaction function in node object. In interaction function: Define name of JS function to execute,
+	// forward JS function name and interaction parameters to Handler, execute JS function in RenderProcessHandler
+
 	// Execute scrolling request from Tab in determined Overflow Element with elemId
 	void ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, int x, int y, std::vector<int> fixedId = {});
+	// Inject text input to given DOM node (via Javascript)
+	bool InputTextData(CefRefPtr<CefBrowser> browser, int64 frameID, int nodeID, std::string text, bool submit = false);
+	void SetSelectionIndex(CefRefPtr<CefBrowser> browser, int nodeId, int idx) const;
+
 
 	void RegisterJavascriptCallback(std::string prefix, std::function<void(std::string)> callbackFunction)
 	{

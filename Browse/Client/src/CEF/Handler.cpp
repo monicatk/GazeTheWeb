@@ -226,40 +226,38 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 {
     const std::string& msgName = msg->GetName().ToString();
 
-	if (msgName == "SubmitInput")
+	if (msgName == "EmulateEnterKey")
 	{
-		LogDebug("Handler: Emulating a centered click and 'Enter' being pressed, in order to submit input.");
+		// Emulate left mouse click where 'Enter' should be pressed
+		double x = msg->GetArgumentList()->GetDouble(0);
+		double y = msg->GetArgumentList()->GetDouble(1);
 
-		// Emulate left mouse click on input fields center
-		bool submit = msg->GetArgumentList()->GetBool(0);
-		double x = msg->GetArgumentList()->GetDouble(1);
-		double y = msg->GetArgumentList()->GetDouble(2);
+		LogDebug("Handler: Emulating a click (",x,",",y,") and 'Enter' being pressed.");
+
 		EmulateLeftMouseButtonClick(browser, x, y);
 
-		if (submit) 
-		{
-			// Emulate pressing 'Enter' down, pressed and up
-			CefKeyEvent event;
-			event.is_system_key = false;
-			event.modifiers = 0;
+		// Emulate pressing 'Enter' down, pressed and up
+		CefKeyEvent event;
+		event.is_system_key = false;
+		event.modifiers = 0;
 
-			// Enter key. Everywhere
-			event.windows_key_code = 13;
-			event.native_key_code = 13;
-			event.character = event.unmodified_character = 13;
+		// Enter key. Everywhere
+		event.windows_key_code = 13;
+		event.native_key_code = 13;
+		event.character = event.unmodified_character = 13;
 
-			// Down
-			event.type = KEYEVENT_RAWKEYDOWN;
-			browser->GetHost()->SendKeyEvent(event);
+		// Down
+		event.type = KEYEVENT_RAWKEYDOWN;
+		browser->GetHost()->SendKeyEvent(event);
 
-			// Character
-			event.type = KEYEVENT_CHAR;
-			browser->GetHost()->SendKeyEvent(event);
+		// Character
+		event.type = KEYEVENT_CHAR;
+		browser->GetHost()->SendKeyEvent(event);
 
-			// Up
-			event.type = KEYEVENT_KEYUP;
-			browser->GetHost()->SendKeyEvent(event);
-		}
+		// Up
+		event.type = KEYEVENT_KEYUP;
+		browser->GetHost()->SendKeyEvent(event);
+
 
 	}
 
@@ -480,13 +478,13 @@ void Handler::EmulateMouseWheelScrolling(CefRefPtr<CefBrowser> browser, double d
 
 bool Handler::InputTextData(CefRefPtr<CefBrowser> browser, int64 frameID, int nodeID, std::string text, bool submit)
 {
-    //CEF_REQUIRE_UI_THREAD();
-
-	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("ExecuteTextInput");
+	// TODO: Move to DOMNodeInteraction.h
+	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("ExecuteJavascriptFunction");
 	const auto& args = msg->GetArgumentList();
-	args->SetInt(0, nodeID);
-	args->SetString(1, text);
-	args->SetBool(2, submit);
+	args->SetString(0, "PerformTextInput");
+	args->SetInt(1, nodeID);
+	args->SetString(2, text);
+	args->SetBool(3, submit);
 
 	browser->SendProcessMessage(PID_RENDERER, msg);
 
@@ -675,17 +673,19 @@ bool Handler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
 
 void Handler::ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, int x, int y, std::vector<int> fixedIds)
 {
-	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("ScrollOverflowElement");
+	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("ExecuteJavascriptFunction");
 	const auto& args = msg->GetArgumentList();
-	args->SetInt(0, elemId);
-	args->SetInt(1, x);
-	args->SetInt(2, y);
 
-	int count = 3;
+	args->SetString(0, "ScrollOverflowElement");
+	args->SetInt(1, elemId);
+	args->SetInt(2, x);
+	args->SetInt(3, y);
+
+	CefRefPtr<CefListValue> ids = CefListValue::Create();
 	for (const auto& id : fixedIds)
-	{
-		args->SetInt(count++, id);
-	}
+		ids->SetInt(ids->GetSize(), id);
+
+	args->SetList(4, ids);
 
 	browser->SendProcessMessage(PID_RENDERER, msg);
 }
@@ -701,4 +701,13 @@ void Handler::SendToJSLoggingMediator(std::string message)
 		browser->SendProcessMessage(PID_RENDERER, msg);
 	}
 	
+}
+
+void Handler::SetSelectionIndex(CefRefPtr<CefBrowser> browser, int nodeId, int idx) const
+{
+	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("SetSelectionIndex");
+	CefRefPtr<CefListValue> args = msg->GetArgumentList();
+	args->SetInt(0, nodeId);
+	args->SetInt(1, idx);
+	browser->SendProcessMessage(PID_RENDERER, msg);
 }

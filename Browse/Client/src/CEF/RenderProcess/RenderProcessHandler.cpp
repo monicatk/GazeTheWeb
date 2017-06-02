@@ -20,6 +20,29 @@ RenderProcessHandler::RenderProcessHandler()
 	_msgRouter = CefMessageRouterRendererSide::Create(config);
 }
 
+CefRefPtr<CefV8Value> RenderProcessHandler::CefValueToCefV8Value(CefRefPtr<CefValue> val)
+{
+	switch (val->GetType()) {
+	case VTYPE_BOOL:		return CefV8Value::CreateBool(val->GetBool());
+	case VTYPE_INT:			return CefV8Value::CreateInt(val->GetInt());
+	case VTYPE_DOUBLE:		return CefV8Value::CreateDouble(val->GetDouble());
+	case VTYPE_STRING:		return CefV8Value::CreateString(val->GetString());
+	case VTYPE_LIST:
+	{
+		const auto& size = val->GetList()->GetSize();
+		CefRefPtr<CefListValue> list = val->GetList();
+		CefRefPtr<CefV8Value> v8list = CefV8Value::CreateArray(size);
+		for (int i = 0; i < size; i++)
+		{
+			v8list->SetValue(i, CefValueToCefV8Value(list->GetValue(i)));
+		}
+		return v8list;
+	}
+	default:				return CefV8Value::CreateUndefined();
+	}
+}
+
+
 bool RenderProcessHandler::OnProcessMessageReceived(
     CefRefPtr<CefBrowser> browser,
     CefProcessId sourceProcess,
@@ -29,6 +52,71 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 
     const std::string& msgName = msg->GetName().ToString();
     //IPCLogDebug(browser, "Received '" + msgName + "' IPC msg in RenderProcessHandler");
+
+	if (msgName == "ExecuteJavascriptFunction")
+	{
+		const auto& args = msg->GetArgumentList();
+		const std::string& function_name = args->GetString(0);
+
+
+		CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
+
+		if (context->Enter())
+		{
+			CefRefPtr<CefV8Value> js_function = context->GetGlobal()->GetValue(function_name);
+			if (!js_function->IsFunction())
+			{
+				IPCLog(browser, "Renderer: Couldn't find JS function named '" + function_name + "' in current V8 context!"\
+					" Aborting ExecuteJavascriptFunction routine!");
+				context->Exit();
+				return true;
+			}
+
+			// Transform parameters into CefV8Values
+			CefV8ValueList params = {};
+			for (int i = 1; i < args->GetSize(); i++)
+				params.push_back(CefValueToCefV8Value(args->GetValue(i)));
+
+			// Execute Javascript function
+			CefRefPtr<CefV8Value> ret_val = js_function->ExecuteFunction(context->GetGlobal(), params);
+
+			if (ret_val->IsObject())
+			{
+				std::vector<CefString> keys;
+				ret_val->GetKeys(keys);
+
+				const auto& iter = std::find(keys.begin(), keys.end(), CefString("command"));
+				// Handle error case
+				if (iter == keys.end())
+				{
+					IPCLog(browser, "Renderer: Invalid JS execution respond received! Aborting.");
+					context->Exit();
+					return true;
+				}
+
+				const std::string& command = ret_val->GetValue("command")->GetStringValue();
+				// TODO: If command is known command!
+				msg = CefProcessMessage::Create(command);
+				const auto& args = msg->GetArgumentList();
+				// TODO: This could be move to DOMNodeInteraction.h
+				if (command == "EmulateEnterKey")
+				{
+					args->SetDouble(0, ret_val->GetValue("x")->GetDoubleValue());
+					args->SetDouble(1, ret_val->GetValue("y")->GetDoubleValue());
+					browser->SendProcessMessage(PID_BROWSER, msg);
+					
+				}
+
+			}
+
+			context->Exit();
+			return true;
+		}
+		else
+		{
+			IPCLog(browser, "Renderer: Failed to enter V8 context in order to execute JS function '" + function_name + "'!");
+		}
+	}
 
 	if (msgName == "SetSelectionIndex")
 	{

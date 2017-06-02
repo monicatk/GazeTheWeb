@@ -222,11 +222,28 @@ function UpdateNodesRect(node)
 
 
 
-// DEPRECATED - only as quick fix at the moment, remove function calls later
-function CreateDOMLink(node){ if(GetCorrespondingDOMObject(node) === undefined) return new DOMLink(node); }
-function CreateDOMTextInput(node) { if(GetCorrespondingDOMObject(node) === undefined) return new DOMTextInput(node); }
-function CreateDOMSelectField(node) { if(GetCorrespondingDOMObject(node) === undefined) return new DOMSelectField(node); }
-function CreateOverflowElement(node) { if(GetCorrespondingDOMObject(node) === undefined) return new DOMOverflowElement(node); }
+function CreateDOMTextInput(node) { CreateDOMObject(node, 0); }
+function CreateDOMLink(node){ CreateDOMObject(node, 1); }
+function CreateDOMSelectField(node) { CreateDOMObject(node, 2); }
+function CreateOverflowElement(node) { CreateDOMObject(node, 3); }
+
+function CreateDOMObject(node, type)
+{
+    var obj = GetCorrespondingDOMObject(node);
+    if(obj !== undefined && obj.getType() === type)
+        return undefined;
+
+    switch(type){
+        case 0: return new DOMTextInput(node);
+        case 1: return new DOMLink(node);
+        case 2: return new DOMSelectField(node);
+        case 3: return new DOMOverflowElement(node);
+        default: {
+            console.log("Warning: Unknown DOM node type: "+type);
+            return undefined;
+        }
+    }
+}
 
 function GetDOMObject(type, id)
 {

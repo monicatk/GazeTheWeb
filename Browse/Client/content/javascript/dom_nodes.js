@@ -41,8 +41,6 @@ function DOMNode(node, id, type)
     // MutationObserver will handle setting up the following references, if necessary
     this.fixObj = undefined;
     this.overflow = undefined;
-    // DEBUG
-    this.overflowHistory = []
 
     if(typeof(node.getAttribute) === "function")
     {
@@ -142,7 +140,6 @@ DOMNode.prototype.setOverflow = function(obj){
     if(this.overflow !== obj)
     {
         this.overflow = obj;
-        this.overflowHistory.push(obj);
         SendAttributeChangesToCEF("OverflowId", this);
         // Automatically trigger rect update
         this.updateRects();
@@ -282,9 +279,6 @@ function DOMSelectField(node)
     var id = window.domSelectFields.indexOf(this);
 
     DOMNode.call(this, node, id, 2);
-
-    this.options = [];
-    this.selectionIdx = -1;
 }
 DOMSelectField.prototype = Object.create(DOMNode.prototype);
 DOMSelectField.prototype.constructor = DOMSelectField;
@@ -292,12 +286,22 @@ DOMSelectField.prototype.Class = "DOMSelectField";  // Override base class ident
 
 // DOMAttribute Options
 DOMSelectField.prototype.getOptions = function(){
-    return this.options;
+    var options = [];
+    for(var i = 0, n = this.node.childNodes.length; i < n; i++)
+    {
+        var child = this.node.childNodes[i];
+        if(child === undefined || child.tagName !== "OPTION")
+            continue;
+        options.push(child.value);
+    }
+    return options;
 }
-DOMSelectField.prototype.setOptions = function(options){
-    this.options = options;
+DOMSelectField.prototype.setSelectionIdx = function(idx){
+    this.node.selectedIndex = idx;
 }
-
+DOMSelectField.prototype.getSelectionIdx = function(){
+    return this.node.selectedIndex;
+}
 
 
 /*

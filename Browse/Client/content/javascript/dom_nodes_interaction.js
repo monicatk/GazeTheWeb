@@ -2,9 +2,6 @@ ConsolePrint("Starting to import dom_nodes_interaction.js ...");
 
 
 
-DOMSelectField.prototype.setSelectionIdx = function(idx){
-	this.node.selectedIndex = idx;
-}
 
 function SetSelectionIndex(id, idx)
 {
@@ -18,7 +15,7 @@ function SetSelectionIndex(id, idx)
 	obj.setSelectionIdx(index);
 }
 
-DOMTextInput.prototype.setTextInput = function(text){
+DOMTextInput.prototype.setTextInput = function(text, submit){
 	// TODO: To be refactored!
 	if(this.node.tagName == "TEXTAREA")
 	{
@@ -51,21 +48,32 @@ DOMTextInput.prototype.setTextInput = function(text){
 	
 	this.setText(text);
 
+	if(!submit)
+		return {'command': "Success"};
+
 	// Used for Enter-Button emulation, when submitting text
 	if(this.rects.length > 0)
 	{
 		var rect = this.getRects()[0];
-		var xy = {  'x': rect[1] + (rect[3]-rect[1])/2, 
-					'y': rect[0] + (rect[2]-rect[0])/2};
-		ConsolePrint("Returning rect's center: "+xy.x+", "+xy.y);
-		return xy;
+		var response = {  
+					'command' : "EmulateEnterKey",
+					'x': rect[1] + (rect[3]-rect[1])/2, 
+					'y': rect[0] + (rect[2]-rect[0])/2
+		};
+		ConsolePrint("Returning rect's center: "+response.x+", "+response.y);
+		return response;
 	}
 	else
-		return null;
+		return {
+			'command' : "Error",
+			'msg'	: "Input's rect w: 0, h: 0, can't perfom Enter emulation!"
+		}
+		;
 	}
 
-function PerformTextInput(id, text)
+function PerformTextInput(id, text, submit)
 {
+	console.log("PerfomTextInput: "+[id, text, submit]);
     var domObj = GetDOMTextInput(id);
     if(domObj === undefined)
 	{
@@ -73,7 +81,7 @@ function PerformTextInput(id, text)
 		return false;
 	}
     
-	return domObj.setTextInput(text);
+	return domObj.setTextInput(text, submit);
 }
 
 
