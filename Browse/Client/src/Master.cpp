@@ -326,9 +326,9 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     _upWeb->Activate();
 
     // ### HOMEPAGE ###
-	// _upWeb->AddTab("https://www.tutorialspoint.com/html/html_select_tag.htm");
+	_upWeb->AddTab("https://www.tutorialspoint.com/html/html_select_tag.htm");
 	// _upWeb->AddTab(std::string(CONTENT_PATH) + "/websites/index.html");
-	_upWeb->AddTab(_upSettings->GetHomepage());
+	// _upWeb->AddTab(_upSettings->GetHomepage());
 
     // ### SUPER LAYOUT ###
 

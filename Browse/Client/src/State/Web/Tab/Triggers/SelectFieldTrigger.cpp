@@ -4,6 +4,7 @@
 //============================================================================
 
 #include "SelectFieldTrigger.h"
+#include "src/State/Web/Tab/Pipelines/SelectFieldPipeline.h"
 #include "src/Singletons/LabStreamMailer.h"
 
 SelectFieldTrigger::SelectFieldTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection, std::shared_ptr<DOMSelectField> spNode) : DOMTrigger<DOMSelectField>(pTab, rTriggerCollection, spNode, "bricks/triggers/SelectField.beyegui", "select_field")
@@ -26,7 +27,12 @@ bool SelectFieldTrigger::Update(float tpf, TabInput& rTabInput)
 	{
 		LabStreamMailer::instance().Send("Select field hit");
 
-		// TODO: start correct pipeline
+		_pTab->PushBackPipeline(
+			std::move(
+				std::unique_ptr<SelectFieldPipeline>(
+					new SelectFieldPipeline(
+						_pTab,
+						_spNode))));
 	}
 
 	// Return whether triggered
