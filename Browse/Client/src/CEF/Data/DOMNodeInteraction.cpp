@@ -17,17 +17,29 @@ bool DOMJavascriptCommunication::SendProcessMessageToRenderer(CefRefPtr<CefProce
 	return false;
 }
 
-
-void DOMTextInputInteraction::InputText(std::string text, bool submit)
+CefRefPtr<CefProcessMessage> DOMJavascriptCommunication::SetupExecuteFunctionMessage(std::string func_name, 
+	CefRefPtr<CefListValue> param)
 {
 	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("ExecuteJavascriptFunction");
 	const auto& args = msg->GetArgumentList();
-	//CefRefPtr<CefListValue> 
-	args->SetString(0, "PerformTextInput");
-	args->SetInt(1, GetId());
-	args->SetString(2, text);
-	args->SetBool(3, submit);
+	CefRefPtr<CefListValue> header = CefListValue::Create();
+	header->SetString(0, func_name);
+	header->SetInt(1, GetType());
+	header->SetInt(2, GetId());
 
+	args->SetList(0, header);
+	args->SetList(1, param);
+	return msg;
+}
+
+
+void DOMTextInputInteraction::InputText(std::string text, bool submit)
+{
+	CefRefPtr<CefListValue> param = CefListValue::Create();
+	param->SetString(0, text);
+	param->SetBool(1, submit);
+
+	CefRefPtr<CefProcessMessage> msg = SetupExecuteFunctionMessage("setTextInput", param);
 	SendProcessMessageToRenderer(msg);
 }
 
@@ -52,10 +64,9 @@ void DOMOverflowElementInteraction::Scroll(int x, int y, std::vector<int> fixedI
 
 void DOMSelectFieldInteraction::SetSelectionIndex(int idx)
 {
-	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("SetSelectionIndex");
-	CefRefPtr<CefListValue> args = msg->GetArgumentList();
-	args->SetInt(0, GetId());
-	args->SetInt(1, idx);
+	CefRefPtr<CefListValue> param = CefListValue::Create();
+	param->SetInt(0, idx);
+	CefRefPtr<CefProcessMessage> msg = SetupExecuteFunctionMessage("setSelectionIdx", param);
 	SendProcessMessageToRenderer(msg);
 }
 

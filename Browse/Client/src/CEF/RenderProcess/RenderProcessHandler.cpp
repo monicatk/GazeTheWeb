@@ -56,28 +56,33 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 	if (msgName == "ExecuteJavascriptFunction")
 	{
 		const auto& args = msg->GetArgumentList();
-		const std::string& function_name = args->GetString(0);
 
 		CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
 
 		if (context->Enter())
 		{
-			CefRefPtr<CefV8Value> js_function = context->GetGlobal()->GetValue(function_name);
+			CefRefPtr<CefV8Value> js_function = context->GetGlobal()->GetValue("CefExecute");
 			if (!js_function->IsFunction())
 			{
-				IPCLog(browser, "Renderer: Couldn't find JS function named '" + function_name + "' in current V8 context!"\
+				IPCLog(browser, "Renderer: Couldn't find JS function 'CefExecute' in current V8 context!"\
 					" Aborting ExecuteJavascriptFunction routine!");
 				context->Exit();
 				return true;
 			}
 
-			// Transform parameters into CefV8Values
-			CefV8ValueList params = {};
-			for (int i = 1; i < args->GetSize(); i++)
-				params.push_back(CefValueToCefV8Value(args->GetValue(i)));
+			// Transform header into CefV8Values
+			const auto& headerVals = args->GetList(0);
+			CefRefPtr<CefV8Value> header = CefV8Value::CreateArray(headerVals->GetSize());
+			for (int i = 0; i < headerVals->GetSize(); i++)
+				header->SetValue(i, CefValueToCefV8Value(headerVals->GetValue(i)));
+			// Transform param into CefV8Values
+			const auto& paramVals = args->GetList(1);
+			CefRefPtr<CefV8Value> param = CefV8Value::CreateArray(paramVals->GetSize());
+			for (int i = 0; i < paramVals->GetSize(); i++)
+				param->SetValue(i, CefValueToCefV8Value(paramVals->GetValue(i)));
 
 			// Execute Javascript function
-			CefRefPtr<CefV8Value> ret_val = js_function->ExecuteFunction(context->GetGlobal(), params);
+			CefRefPtr<CefV8Value> ret_val = js_function->ExecuteFunction(context->GetGlobal(), { header, param });
 
 			/* ### TODO ### Move to DOMNodeInteractionResponse.h */
 			if (ret_val->IsObject())
@@ -114,7 +119,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 		}
 		else
 		{
-			IPCLog(browser, "Renderer: Failed to enter V8 context in order to execute JS function '" + function_name + "'!");
+			IPCLog(browser, "Renderer: Failed to enter V8 context in order to execute JS function 'CefExecute'#'!");
 		}
 	}
 

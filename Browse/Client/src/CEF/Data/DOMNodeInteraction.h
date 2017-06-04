@@ -28,6 +28,10 @@ public:
 
 	bool SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg);
 
+	// Helper
+	CefRefPtr<CefProcessMessage> SetupExecuteFunctionMessage(std::string func_name,
+		CefRefPtr<CefListValue> param);
+
 	Tab* _pTab;
 
 };

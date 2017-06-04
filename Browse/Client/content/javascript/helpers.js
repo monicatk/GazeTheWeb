@@ -294,6 +294,25 @@ function CutRectOnRectWindow(innerRect, outerRect)
     return [t, l, b, r]
 }
 
+function CefExecute(header, param)
+{
+    console.log(header);
+    console.log(param);
+    var f = header[0], type = header[1], id = header[2];
+    var a = param[0], b = param[1], c = param[2], d = param[3];
+
+    ConsolePrint("Executing CefExecute -- "+f+", "+type+", "+id);
+
+    // Determine object, which holds function to execute
+    var obj = (id === undefined || type === undefined) ? window : GetDOMObject(type, id);
+
+    if(obj === undefined || obj[f] === undefined)
+        return false; 
+
+    // Execute function with obj as context and parameters given
+    // Return value may be e.g. a DOMNodeInteractionResponse
+    return obj[f](a, b, c, d);
+}
 
 
 

@@ -71,6 +71,7 @@ DOMTextInput.prototype.setTextInput = function(text, submit){
 		;
 	}
 
+// DEPRECATED
 function PerformTextInput(id, text, submit)
 {
 	console.log("PerfomTextInput: "+[id, text, submit]);
@@ -140,6 +141,7 @@ DOMOverflowElement.prototype.scroll = function(gazeX, gazeY){
 	
 }
 
+// DEPRECATED
 function ScrollOverflowElement(elemId, gazeX, gazeY, fixedIds)
 {
     var overflowObj = GetDOMOverflowElement(elemId);
