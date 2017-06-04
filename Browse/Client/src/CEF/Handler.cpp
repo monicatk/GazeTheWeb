@@ -703,11 +703,3 @@ void Handler::SendToJSLoggingMediator(std::string message)
 	
 }
 
-void Handler::SetSelectionIndex(CefRefPtr<CefBrowser> browser, int nodeId, int idx) const
-{
-	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("SetSelectionIndex");
-	CefRefPtr<CefListValue> args = msg->GetArgumentList();
-	args->SetInt(0, nodeId);
-	args->SetInt(1, idx);
-	browser->SendProcessMessage(PID_RENDERER, msg);
-}

@@ -134,11 +134,6 @@ public:
 	std::weak_ptr<DOMSelectField> GetDOMSelectField(CefRefPtr<CefBrowser> browser, int id);
 	std::weak_ptr<DOMOverflowElement> GetDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id);
 
-
-	/* Interaction with DOM nodes */
-
-
-	void SetSelectionIndex(TabCEFInterface* tab, int nodeId, int index);	// NOTE: One could set the index by instead sending an option text
 	// DOM node objects can directly send interaction messages to Renderer
 	bool SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg, TabCEFInterface* pTab);
 

@@ -292,19 +292,6 @@ void Mediator::RemoveDOMSelectField(CefRefPtr<CefBrowser> browser, int id)
 	}
 }
 
-// TODO: Generic CallJSFunction msg with JS function as argument name and the rest as arguments?
-void Mediator::SetSelectionIndex(TabCEFInterface * tab, int nodeId, int index)
-{
-	if (const auto& browser = GetBrowser(tab))
-	{
-                auto msg = CefProcessMessage::Create("SetSelectionIndex");
-                auto args = msg->GetArgumentList();
-		args->SetInt(0, nodeId);
-		args->SetInt(1, index);
-		browser->SendProcessMessage(PID_RENDERER, msg);
-	}
-}
-
 bool Mediator::SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg, TabCEFInterface* pTab)
 {
 	if (auto browser = GetBrowser(pTab))
