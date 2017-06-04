@@ -274,15 +274,18 @@ public:
     virtual std::weak_ptr<Texture> GetWebViewTexture() { return _upWebView->GetTexture(); }
 
     // Add, remove and update Tab's current DOMNodes
-	virtual void AddDOMTextInput(int id);
-	virtual void AddDOMLink(int id);
-	virtual void AddDOMSelectField(int id);
-	virtual void AddDOMOverflowElement(int id);
+	virtual void AddDOMTextInput(CefRefPtr<CefBrowser> browser, int id);
+	virtual void AddDOMLink(CefRefPtr<CefBrowser> browser, int id);
+	virtual void AddDOMSelectField(CefRefPtr<CefBrowser> browser, int id);
+	virtual void AddDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id);
 
 	virtual std::weak_ptr<DOMTextInput> GetDOMTextInput(int id);
 	virtual std::weak_ptr<DOMLink> GetDOMLink(int id);
 	virtual std::weak_ptr<DOMSelectField> GetDOMSelectField(int id);
 	virtual std::weak_ptr<DOMOverflowElement> GetDOMOverflowElement(int id);
+
+	// Enable direct communication between DOM node instances and Renderer
+	virtual bool SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg);
 
 	virtual void RemoveDOMTextInput(int id);
 	virtual void RemoveDOMLink(int id);

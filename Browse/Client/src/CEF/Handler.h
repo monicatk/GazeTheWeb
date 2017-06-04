@@ -148,7 +148,7 @@ public:
 	// Execute scrolling request from Tab in determined Overflow Element with elemId
 	void ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, int x, int y, std::vector<int> fixedId = {});
 	// Inject text input to given DOM node (via Javascript)
-	bool InputTextData(CefRefPtr<CefBrowser> browser, int64 frameID, int nodeID, std::string text, bool submit = false);
+	//bool InputTextData(CefRefPtr<CefBrowser> browser, int64 frameID, int nodeID, std::string text, bool submit = false);
 	void SetSelectionIndex(CefRefPtr<CefBrowser> browser, int nodeId, int idx) const;
 
 

@@ -11,6 +11,7 @@
 #include "src/State/Web/Tab/Pipelines/JSDialogPipeline.h"
 #include "src/Singletons/LabStreamMailer.h"
 #include <algorithm>
+#include "src/CEF/Mediator.h"
 
 void Tab::GetWebRenderResolution(int& rWidth, int& rHeight) const
 {
@@ -105,9 +106,9 @@ void Tab::ResetFaviconBytes()
     _faviconLoaded = false;
 }
 
-void Tab::AddDOMTextInput(int id)
+void Tab::AddDOMTextInput(CefRefPtr<CefBrowser> browser, int id)
 {
-	std::shared_ptr<DOMTextInput> spNode = std::make_shared<DOMTextInput>(id);
+	std::shared_ptr<DOMTextInput> spNode = std::make_shared<DOMTextInput>(this, id);
 
 	// Add node to ID->node map
 	_TextInputMap.emplace(id, spNode);
@@ -125,14 +126,14 @@ void Tab::AddDOMTextInput(int id)
 	_textInputTriggers.emplace(id, std::move(upDOMTrigger));
 }
 
-void Tab::AddDOMLink(int id)
+void Tab::AddDOMLink(CefRefPtr<CefBrowser> browser, int id)
 {
-	_TextLinkMap.emplace(id, std::make_shared<DOMLink>(id));
+	_TextLinkMap.emplace(id, std::make_shared<DOMLink>(this, id));
 }
 
-void Tab::AddDOMSelectField(int id)
+void Tab::AddDOMSelectField(CefRefPtr<CefBrowser> browser, int id)
 {
-	std::shared_ptr<DOMSelectField> spNode = std::make_shared<DOMSelectField>(id);
+	std::shared_ptr<DOMSelectField> spNode = std::make_shared<DOMSelectField>(this, id);
 
 	// Add node to ID->node map
 	_SelectFieldMap.emplace(id, spNode);
@@ -150,9 +151,9 @@ void Tab::AddDOMSelectField(int id)
 	_selectFieldTriggers.emplace(id, std::move(upDOMTrigger));
 }
 
-void Tab::AddDOMOverflowElement(int id)
+void Tab::AddDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id)
 {
-	_OverflowElementMap.emplace(id, std::make_shared<DOMOverflowElement>(id));
+	_OverflowElementMap.emplace(id, std::make_shared<DOMOverflowElement>(this, id));
 }
 
 
@@ -334,9 +335,15 @@ void Tab::SetLoadingStatus(int64 frameID, bool isMain, bool isLoading)
 	}
 }
 
+bool Tab::SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg)
+{
+	LogDebug("Tab: Forwarding process message!");
+	return _pCefMediator->SendProcessMessageToRenderer(msg, this);
+}
 
 
 void Tab::RequestJSDialog(JavaScriptDialogType type, std::string message)
 {
 	this->PushBackPipeline(std::unique_ptr<Pipeline>(new JSDialogPipeline(this, type, message)));
 }
+

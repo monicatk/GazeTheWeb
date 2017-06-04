@@ -13,6 +13,7 @@
 #include "src/CEF/Data/Rect.h"
 #include "src/Utils/glmWrapper.h"
 #include "src/CEF/JavaScriptDialogType.h"
+#include "include/cef_browser.h"
 
 // Forward declaration
 class Texture;
@@ -48,10 +49,10 @@ public:
     virtual std::weak_ptr<Texture> GetWebViewTexture() = 0;
 
 	// Add, remove and update Tab's current DOMNodes
-    virtual void AddDOMTextInput(int id) = 0;
-	virtual void AddDOMLink(int id) = 0;
-	virtual void AddDOMSelectField(int id) = 0;
-	virtual void AddDOMOverflowElement(int id) = 0;
+    virtual void AddDOMTextInput(CefRefPtr<CefBrowser> browser, int id) = 0;
+	virtual void AddDOMLink(CefRefPtr<CefBrowser> browser, int id) = 0;
+	virtual void AddDOMSelectField(CefRefPtr<CefBrowser> browser, int id) = 0;
+	virtual void AddDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id) = 0;
 
 	virtual std::weak_ptr<DOMTextInput> GetDOMTextInput(int id) = 0;
 	virtual std::weak_ptr<DOMLink> GetDOMLink(int id) = 0;
@@ -63,6 +64,9 @@ public:
 	virtual void RemoveDOMSelectField(int id) = 0;
 	virtual void RemoveDOMOverflowElement(int id) = 0;
 	virtual void ClearDOMNodes() = 0;
+
+	// Enable direct communication between DOM node instances and Renderer
+	virtual bool SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg) = 0;
 
     // Receive callbacks from CefMediator upon scrolling offset changes
     virtual void SetScrollingOffset(double x, double y) = 0;

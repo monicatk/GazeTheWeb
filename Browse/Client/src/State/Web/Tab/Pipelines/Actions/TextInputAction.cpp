@@ -37,7 +37,8 @@ bool TextInputAction::Update(float tpf, TabInput tabInput)
 	std::string text8;
 	eyegui_helper::convertUTF16ToUTF8(text, text8);
 
-    // Just pipe values to CEF mediator through Tab interface
+    // FORMERLY: Just pipe values to CEF mediator through Tab interface
+	// NOW: Call InputText method on DOMNode object
     _pTab->InputTextData(frameId, nodeId, text8, submit != 0);
 
     // Action is done

@@ -137,10 +137,10 @@ public:
 
 	/* Interaction with DOM nodes */
 
-	// TODO: Call Javascript function instead of injecting more JS code
-	bool InputTextData(TabCEFInterface* tab, int64 frameID, int nodeID, std::string text, bool submit = false);
-	void SetSelectionIndex(TabCEFInterface* tab, int nodeId, int index);	// NOTE: One could set the index by instead sending an option text
 
+	void SetSelectionIndex(TabCEFInterface* tab, int nodeId, int index);	// NOTE: One could set the index by instead sending an option text
+	// DOM node objects can directly send interaction messages to Renderer
+	bool SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg, TabCEFInterface* pTab);
 
 	// Activate rendering in given Tab and deactivate it for all other Tabs
 	void SetActiveTab(TabCEFInterface* pTab);	// TODO Raphael: Call this method when Tab is changed via GUI

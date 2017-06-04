@@ -110,7 +110,16 @@ void Tab::InputTextData(int64 frameID, int nodeID, std::string text, bool submit
 	{
 		LabStreamMailer::instance().Send("Inputting Text: " + text);
 	}
-	_pCefMediator->InputTextData(this, frameID, nodeID, text, submit);
+	
+	// Execute node interaction
+	if (auto node = GetDOMTextInput(nodeID).lock())
+	{
+		node->InputText(text, submit);
+	}
+	else
+	{
+		LogError("Tab: Could not execute PerformTextInput DOM node interaction!");
+	}
 }
 
 std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pagePixelCoordinate, float& rDistance) const

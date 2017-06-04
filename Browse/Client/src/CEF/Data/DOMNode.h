@@ -8,6 +8,7 @@
 #ifndef DOMNODE_H_
 #define DOMNODE_H_
 
+#include "src/CEF/Data/DOMNodeInteraction.h"
 #include "src/CEF/Data/Rect.h"
 #include "src/Utils/glmWrapper.h"
 #include "src/CEF/Data/DOMAttribute.h"
@@ -32,11 +33,12 @@ namespace DOM
  / // / /_/ / /|_/ /    / _ \/ _  / -_|_-<
 /____/\____/_/  /_/_/|_/\___/\_,_/\__/___/
 */
-class DOMNode
+class DOMNode : public virtual DOMJavascriptCommunication
 {
 public:
 	// Empty construction
-	DOMNode(int id) : _id(id) {};
+	DOMNode(Tab* pTab, int id) : 
+		_id(id), DOMJavascriptCommunication(pTab) {};
 
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
@@ -47,7 +49,8 @@ public:
 		descriptions->push_back(&_description);
 	}
 	
-	int GetId() const { return _id; }
+	int GetId() { return _id; }
+
 	std::vector<Rect> GetRects() const { return _rects; }
 	virtual int GetFixedId() const { return _fixedId; }
 	virtual int GetOverflowId() const { return _overflowId; }
@@ -80,11 +83,16 @@ private:
                                             /_/ 
 */
 
-class DOMTextInput : public DOMNode
+class DOMTextInput : 
+	public DOMNode,
+	public virtual DOMTextInputInteraction
 {
 public:
 	// Empty construction
-	DOMTextInput(int id) : DOMNode(id) {};
+	DOMTextInput(Tab* pTab, int id) : 
+		DOMNode(pTab, id), 
+		DOMTextInputInteraction(pTab), 
+		DOMJavascriptCommunication(pTab){};
 
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
@@ -100,6 +108,9 @@ public:
 		return "GetDOMTextInput";
 	}
 
+	// DOMTextInputInteraction method
+	virtual int GetType() { return 0; };
+	
 	std::string GetText() const { return _text; }
 	bool IsPasswordField() const { return _isPassword; }
 
@@ -129,7 +140,9 @@ class DOMLink : public DOMNode
 {
 public:
 	// Empty construction
-	DOMLink(int id) : DOMNode(id) {};
+	DOMLink(Tab* pTab, int id) :
+		DOMNode(pTab, id),
+		DOMJavascriptCommunication(pTab) {};
 
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
@@ -145,6 +158,8 @@ public:
 	static const std::string GetJSObjectGetter() {
 		return "GetDOMLink";
 	}
+
+	virtual int GetType() { return 1; };
 
 	std::string GetText() const { return _text; }
 	std::string GetUrl() const { return _url; }
@@ -173,11 +188,16 @@ private:
 /___/___/____/___/\___/ /_/   /_/ /___/___/____/____/___/
 */
 
-class DOMSelectField : public DOMNode
+class DOMSelectField : 
+	public DOMNode,
+	public virtual DOMSelectFieldInteraction
 {
 public:
 	// Empty construction
-	DOMSelectField(int id) : DOMNode(id) {};
+	DOMSelectField(Tab* pTab, int id) :
+		DOMNode(pTab, id), 
+		DOMSelectFieldInteraction(pTab),
+		DOMJavascriptCommunication(pTab) {};
 
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
@@ -193,6 +213,7 @@ public:
 	static const std::string GetJSObjectGetter() {
 		return "GetDOMSelectField";
 	}
+	virtual int GetType() { return 2; };
 
 	std::vector<std::string> GetOptions() const { return _options; }
 
@@ -215,11 +236,16 @@ private:
 \____/|___/\__/_/ /_//_/\___/__,__/___/_/\__/_/_/_/\__/_//_/\__/___/
 */
 
-class DOMOverflowElement : public DOMNode
+class DOMOverflowElement : 
+	public DOMNode,
+	public virtual DOMOverflowElementInteraction
 {
 public:
 	// Empty construction
-	DOMOverflowElement(int id) : DOMNode(id) {};
+	DOMOverflowElement(Tab* pTab, int id) :
+		DOMNode(pTab, id),
+		DOMOverflowElementInteraction(pTab),
+		DOMJavascriptCommunication(pTab) {};
 
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
@@ -235,6 +261,8 @@ public:
 	static const std::string GetJSObjectGetter() {
 		return "GetDOMOverflowElement";
 	}
+
+	virtual int GetType() { return 3; };
 
 	std::pair<int, int> GetMaxScrolling() const { return std::make_pair(_scrollLeftMax, _scrollTopMax); }
 	std::pair<int, int> GetCurrentScrolling() const { return std::make_pair(_scrollLeft, _scrollTop); }

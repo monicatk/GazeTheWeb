@@ -58,7 +58,6 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 		const auto& args = msg->GetArgumentList();
 		const std::string& function_name = args->GetString(0);
 
-
 		CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
 
 		if (context->Enter())
@@ -80,6 +79,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			// Execute Javascript function
 			CefRefPtr<CefV8Value> ret_val = js_function->ExecuteFunction(context->GetGlobal(), params);
 
+			/* ### TODO ### Move to DOMNodeInteractionResponse.h */
 			if (ret_val->IsObject())
 			{
 				std::vector<CefString> keys;
@@ -141,96 +141,6 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 
 	}
 
-
-	if (msgName == "ScrollOverflowElement")
-	{
-		const auto& args = msg->GetArgumentList();
-
-		CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
-
-		if (context->Enter())
-		{
-			CefRefPtr<CefV8Value> elemId = CefV8Value::CreateInt(args->GetInt(0));
-			CefRefPtr<CefV8Value> x = CefV8Value::CreateInt(args->GetInt(1));
-			CefRefPtr<CefV8Value> y = CefV8Value::CreateInt(args->GetInt(2));
-			CefRefPtr<CefV8Value> fixedIds = CefV8Value::CreateArray(args->GetSize() - 3);
-
-			for (int i = 3; i < args->GetSize(); i++)
-			{
-				fixedIds->SetValue(i - 3, CefV8Value::CreateInt(args->GetInt(i)));
-			}
-
-			CefRefPtr<CefV8Value> window = context->GetGlobal();
-
-			CefRefPtr<CefV8Value> scrollFunction = window->GetValue("ScrollOverflowElement");
-
-			if (!scrollFunction->IsFunction())
-			{
-				LogDebug(browser, "Renderer:  Could not access 'ScrollOverflowElement' function!");
-				context->Exit();
-				return true;
-			}
-
-			scrollFunction->ExecuteFunction(window, { elemId, x, y, fixedIds });
-
-			context->Exit();
-			
-		}
-		return true;
-	}
-
-	if (msgName == "ExecuteTextInput")
-	{
-		// DEBUG
-		IPCLogDebug(browser, "Received 'ExecuteTextInput' request.");
-
-		CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
-
-		if (context->Enter())
-		{
-			const auto& args = msg->GetArgumentList();
-			const auto& inputId = CefV8Value::CreateInt(args->GetInt(0));
-			const auto& text = CefV8Value::CreateString(args->GetString(1));
-			const auto& submit = CefV8Value::CreateBool(args->GetBool(2));
-
-
-			CefRefPtr<CefV8Value> window = context->GetGlobal();
-			CefRefPtr<CefV8Value> input_function = window->GetValue("PerformTextInput");
-			if (input_function->IsFunction())
-			{
-				CefRefPtr<CefV8Value> return_value = // TODO: Is Null at the moment?
-					input_function->ExecuteFunction(
-						input_function,				// function to be called
-						{ inputId, text, submit}	// input for called function
-					);
-				// TODO: 'submit' not used anymore in use in Javascript!
-
-				msg = CefProcessMessage::Create("SubmitInput");
-				msg->GetArgumentList()->SetBool(0, submit->GetBoolValue());
-				double x = 0, y = 0;
-				if (!return_value->IsNull() && !return_value->IsUndefined() && !return_value->IsBool())
-				{
-					x = return_value->GetValue("x")->GetDoubleValue();
-					y = return_value->GetValue("y")->GetDoubleValue();
-					IPCLogDebug(browser, "Found center coordinates for click emulation: " + std::to_string(x) + ", " + std::to_string(y));
-				}
-				else
-				{
-					IPCLogDebug(browser, "Return value was null! Couldn't find rect's center...");
-				}
-				msg->GetArgumentList()->SetInt(1, x);
-				msg->GetArgumentList()->SetInt(2, y);
-				browser->SendProcessMessage(PID_BROWSER, msg);
-			}
-			else
-			{
-				IPCLogDebug(browser, "Renderer: Couldn't call Javascript function 'PerformTextInput'!");
-			}
-
-
-			context->Exit();
-		}
-	}
 
 	if (msgName == "SendToLoggingMediator")
 	{
