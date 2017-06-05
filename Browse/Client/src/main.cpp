@@ -11,7 +11,7 @@
 #include "main_linux.h"
 #endif
 
-#include "src/Master.h"
+#include "src/Master/Master.h"
 #include "src/Utils/Logger.h"
 
 // Execute function to have Master object on stack which might be faster than on heap

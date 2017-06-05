@@ -10,7 +10,7 @@
 #define EYEINPUT_H_
 
 #include "src/Global.h"
-#include "src/MasterThreadsafeInterface.h"
+#include "src/Master/MasterThreadsafeInterface.h"
 #include "src/Input/EyeTrackerStatus.h"
 #include "src/Input/Filters/SimpleFilter.h"
 #include "src/Input/Input.h"

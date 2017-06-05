@@ -9,8 +9,8 @@
 #ifndef MASTER_H_
 #define MASTER_H_
 
-#include "src/MasterNotificationInterface.h"
-#include "src/MasterThreadsafeInterface.h"
+#include "src/Master/MasterNotificationInterface.h"
+#include "src/Master/MasterThreadsafeInterface.h"
 #include "src/Singletons/LabStreamMailer.h"
 #include "src/CEF/Mediator.h"
 #include "src/State/Web/Web.h"

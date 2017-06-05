@@ -5,7 +5,7 @@
 //============================================================================
 
 #include "src/State/Web/Tab/Tab.h"
-#include "src/Master.h"
+#include "src/Master/Master.h"
 #include "src/Utils/Logger.h"
 
 int Tab::AddFloatingFrameToOverlay(

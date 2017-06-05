@@ -5,6 +5,6 @@
 //============================================================================
 
 #include "src/State/Web/Tab/Tab.h"
-#include "src/Master.h"
+#include "src/Master/Master.h"
 
 // Nothing extra here

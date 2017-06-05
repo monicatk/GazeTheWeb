@@ -4,7 +4,7 @@
 //============================================================================
 
 #include "Settings.h"
-#include "src/Master.h"
+#include "src/Master/Master.h"
 #include "src/Global.h"
 #include "src/Utils/Logger.h"
 #include "submodules/eyeGUI/externals/TinyXML2/tinyxml2.h"

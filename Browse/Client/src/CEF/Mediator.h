@@ -7,7 +7,7 @@
 #ifndef CEF_MEDIATOR_H_
 #define CEF_MEDIATOR_H_
 
-#include "src/MasterNotificationInterface.h"
+#include "src/Master/MasterNotificationInterface.h"
 #include "include/cef_browser.h"
 #include "src/CEF/Handler.h"
 #include "src/CEF/DevToolsHandler.h"

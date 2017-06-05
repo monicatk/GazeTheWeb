@@ -5,7 +5,7 @@
 
 #include "History.h"
 #include "src/Global.h"
-#include "src/Master.h"
+#include "src//Master/Master.h"
 #include "src/Utils/Helper.h"
 
 

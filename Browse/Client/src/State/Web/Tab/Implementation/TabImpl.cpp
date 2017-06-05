@@ -5,7 +5,7 @@
 //============================================================================
 
 #include "src/State/Web/Tab/Tab.h"
-#include "src/Master.h"
+#include "src/Master/Master.h"
 #include "src/Setup.h"
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
