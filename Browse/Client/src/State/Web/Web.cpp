@@ -342,7 +342,7 @@ void Web::PushBackPointingEvaluationPipeline(PointingApproach approach)
 	}
 }
 
-StateType Web::Update(float tpf, Input& rInput)
+StateType Web::Update(float tpf, const std::shared_ptr<const Input> spInput)
 {
     // Process jobs first
     while(!_jobs.empty())
@@ -433,7 +433,7 @@ StateType Web::Update(float tpf, Input& rInput)
         eyegui::setElementActivity(_pWebLayout, "forward", _tabs.at(_currentTabId)->CanGoForward(), true);
 
 		
-		_tabs.at(_currentTabId)->Update(tpf, rInput);
+		_tabs.at(_currentTabId)->Update(tpf, spInput);
     }
 
     // Decide what to do next

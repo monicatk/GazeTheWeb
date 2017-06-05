@@ -13,7 +13,7 @@ LeftMouseButtonClickAction::LeftMouseButtonClickAction(TabInteractionInterface* 
 	AddIntInputSlot("visualize", 1);
 }
 
-bool LeftMouseButtonClickAction::Update(float tpf, TabInput tabInput)
+bool LeftMouseButtonClickAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
     // Get coordinate from input slot
     glm::vec2 coordinate;

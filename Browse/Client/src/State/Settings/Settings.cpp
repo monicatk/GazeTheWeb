@@ -56,7 +56,7 @@ Settings::~Settings()
 	// Delete layouts?
 }
 
-StateType Settings::Update(float tpf, Input& rInput)
+StateType Settings::Update(float tpf, const std::shared_ptr<const Input> spInput)
 {
     if (_goToWeb)
 	{

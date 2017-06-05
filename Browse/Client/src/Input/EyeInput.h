@@ -13,6 +13,7 @@
 #include "src/MasterThreadsafeInterface.h"
 #include "src/Input/EyeTrackerStatus.h"
 #include "src/Input/Filters/SimpleFilter.h"
+#include "src/Input/Input.h"
 #include "plugins/Eyetracker/Interface/EyetrackerSampleData.h"
 #include <memory>
 #include <vector>
@@ -36,15 +37,11 @@ public:
     // Destructor
     virtual ~EyeInput();
 
-    // Update. Returns whether gaze is currently used (or emulation via mouse when false)
-	// Taking information about window to enable eye tracking in windowed mode
-	bool Update(
+    // Update method fills Input struct and returns it
+	std::shared_ptr<Input> Update(
 		float tpf,
 		double mouseX,
 		double mouseY,
-		double& rGazeX,
-		double& rGazeY,
-		bool& rSaccade,
 		int windowX,
 		int windowY,
 		int windowWidth,

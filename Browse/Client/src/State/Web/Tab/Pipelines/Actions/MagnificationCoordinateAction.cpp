@@ -17,7 +17,7 @@ MagnificationCoordinateAction::MagnificationCoordinateAction(TabInteractionInter
     AddVec2OutputSlot("coordinate");
 }
 
-bool MagnificationCoordinateAction::Update(float tpf, TabInput tabInput)
+bool MagnificationCoordinateAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
 	// Function transforms coordinate from relative WebView coordinates to CEFPixel coordinates on page
 	const std::function<void(const float&, const glm::vec2&, const glm::vec2&, glm::vec2&)> pageCoordinate
@@ -32,7 +32,7 @@ bool MagnificationCoordinateAction::Update(float tpf, TabInput tabInput)
 	};
 
 	// Current gaze
-	glm::vec2 relativeGazeCoordinate = glm::vec2(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY); // relative WebView space
+	glm::vec2 relativeGazeCoordinate = glm::vec2(spInput->webViewRelativeGazeX, spInput->webViewRelativeGazeY); // relative WebView space
 
 	// Values of interest
 	glm::vec2 relativeCenterOffset = _magnified ? _relativeMagnificationCenter - glm::vec2(0.5f, 0.5f) : glm::vec2(0);
@@ -41,7 +41,7 @@ bool MagnificationCoordinateAction::Update(float tpf, TabInput tabInput)
 
 	// Decide whether zooming is finished
 	bool finished = false;
-	if (!tabInput.gazeUsed && tabInput.instantInteraction) // user demands on instant interaction
+	if (!spInput->gazeUponGUI && spInput->instantInteraction) // user demands on instant interaction
 	{
 		// Check for magnification
 		if (_magnified) // already magnified, so finish this action

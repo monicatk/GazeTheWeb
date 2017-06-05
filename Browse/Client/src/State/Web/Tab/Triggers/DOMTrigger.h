@@ -25,7 +25,7 @@ public:
     virtual ~DOMTrigger() = 0;
 
     // Update
-    virtual bool Update(float tpf, TabInput& rTabInput);
+    virtual bool Update(float tpf, const std::shared_ptr<const TabInput> spInput);
 
     // Draw
     virtual void Draw() const;
@@ -110,7 +110,7 @@ DOMTrigger<T>::~DOMTrigger()
 }
 
 template <class T>
-bool DOMTrigger<T>::Update(float tpf, TabInput& rTabInput)
+bool DOMTrigger<T>::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
 	// Decide visibility (TODO: no visibility variable in DOMNode anymore?)
 	bool visible =

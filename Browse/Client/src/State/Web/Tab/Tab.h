@@ -60,7 +60,7 @@ public:
     virtual ~Tab();
 
     // Update
-    void Update(float tpf, Input& rInput);
+    void Update(float tpf, const std::shared_ptr<const Input> spInput);
 
     // Draw
     void Draw() const;

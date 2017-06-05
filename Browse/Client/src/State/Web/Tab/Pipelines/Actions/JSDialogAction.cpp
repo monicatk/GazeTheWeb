@@ -72,7 +72,7 @@ JSDialogAction::~JSDialogAction()
 	_pTab->UnregisterButtonListenerInOverlay(_overlayCancelButtonId);
 }
 
-bool JSDialogAction::Update(float tpf, TabInput tabInput)
+bool JSDialogAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
     return _done;
 }

@@ -152,13 +152,10 @@ EyeInput::~EyeInput()
 
 }
 
-bool EyeInput::Update(
+std::shared_ptr<Input> EyeInput::Update(
 	float tpf,
 	double mouseX,
 	double mouseY,
-	double& rGazeX,
-	double& rGazeY,
-	bool& rSaccade,
 	int windowX,
 	int windowY,
 	int windowWidth,
@@ -305,13 +302,17 @@ bool EyeInput::Update(
 
 	// ### OUTPUT ###
 
-	// Fill return values
-	rGazeX = filteredGazeX;
-	rGazeY = filteredGazeY;
-	rSaccade = saccade;
+	// Create input structure to return
+	std::shared_ptr<Input> spInput = std::make_shared<Input>(
+		filteredGazeX, // gazeX,
+		filteredGazeY, // gazeY,
+		gazeEmulated, // gazeEmulated,
+		false, // gazeUponGUI,
+		false, // instantInteraction,
+		saccade); // saccade
 
 	// Return whether gaze coordinates comes from eye tracker
-	return !gazeEmulated;
+	return spInput;
 }
 
 void EyeInput::Calibrate()

@@ -114,7 +114,7 @@ Tab::~Tab()
     _pMaster->RemoveLayout(_pDebugLayout);
 }
 
-void Tab::Update(float tpf, Input& rInput)
+void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 {
 	// #######################
 	// ### UPDATE WEB VIEW ###
@@ -173,18 +173,19 @@ void Tab::Update(float tpf, Input& rInput)
 	// ########################
 
 	// Create tab input structure (like standard input but in addition with input coordinates in web view space)
-	int webViewPixelGazeX = rInput.gazeX - _upWebView->GetX();
-	int webViewPixelGazeY = rInput.gazeY - _upWebView->GetY();
-	float webViewGazeRelativeX = ((float)webViewPixelGazeX) / (float)(_upWebView->GetWidth());
-	float webViewGazeRelativeY = ((float)webViewPixelGazeY) / (float)(_upWebView->GetHeight());
-	TabInput tabInput(
-		rInput,
+	int webViewPixelGazeX = spInput->gazeX - _upWebView->GetX();
+	int webViewPixelGazeY = spInput->gazeY - _upWebView->GetY();
+	float webViewRelativeGazeX = ((float)webViewPixelGazeX) / (float)(_upWebView->GetWidth());
+	float webViewRelativeGazeY = ((float)webViewPixelGazeY) / (float)(_upWebView->GetHeight());
+	const std::shared_ptr<TabInput> spTabInput = std::make_shared<TabInput>(
+		spInput,
 		webViewPixelGazeX,
 		webViewPixelGazeY,
-		webViewGazeRelativeX,
-		webViewGazeRelativeY);
-	double CEFPixelGazeX = tabInput.webViewPixelGazeX;
-	double CEFPixelGazeY = tabInput.webViewPixelGazeY;
+		webViewRelativeGazeX,
+		webViewRelativeGazeY);
+
+	LogInfo(spTabInput->webViewRelativeGazeX, ", ", spTabInput->webViewRelativeGazeY);
+	LogInfo(spTabInput->webViewPixelGazeX, ", ", spTabInput->webViewPixelGazeY);
 
 	// Update highlight rectangle of webview
 	// TODO: alternative: give webview shared pointer to DOM nodes
@@ -231,7 +232,7 @@ void Tab::Update(float tpf, Input& rInput)
 	// ###########################
 
 	// Push back current gaze for debugging purposes
-	_gazeDebuggingQueue.push_front(glm::vec2(rInput.gazeX, rInput.gazeY));
+	_gazeDebuggingQueue.push_front(glm::vec2(spInput->gazeX, spInput->gazeY));
 
 	// Limit length of queue
 	int toPop = (int)_gazeDebuggingQueue.size() - TAB_DEBUGGING_GAZE_COUNT;
@@ -263,7 +264,7 @@ void Tab::Update(float tpf, Input& rInput)
 		eyegui::setInputUsageOfLayout(_pPipelineAbortLayout, true);
 
 		// Update current pipeline (if there is one)
-		if (_pipelines.front()->Update(tpf, tabInput))
+		if (_pipelines.front()->Update(tpf, spTabInput))
 		{
 			// Remove front element from pipelines
 			_pipelines.front()->Deactivate();
@@ -288,7 +289,7 @@ void Tab::Update(float tpf, Input& rInput)
         // Gaze mouse
         if(_gazeMouse && !(_pMaster->IsPaused()))
         {
-            EmulateMouseCursor(tabInput.webViewPixelGazeX, tabInput.webViewPixelGazeY);
+            EmulateMouseCursor(spTabInput->webViewPixelGazeX, spTabInput->webViewPixelGazeY);
         }
 
 		// Ask for page resolution
@@ -343,6 +344,8 @@ void Tab::Update(float tpf, Input& rInput)
 		eyegui::setElementActivity(_pPanelLayout, "scroll_to_top", showScrollUp, true);
 
 		// Check, that gaze is not upon a fixed element
+		double CEFPixelGazeX = spTabInput->webViewPixelGazeX;
+		double CEFPixelGazeY = spTabInput->webViewPixelGazeY;
 		ConvertToCEFPixel(CEFPixelGazeX, CEFPixelGazeY);
 		bool gazeUponFixed = false;
 		for (const auto& rElements : _fixedElements)
@@ -360,10 +363,10 @@ void Tab::Update(float tpf, Input& rInput)
 		}
 
 		// Automatic scrolling. Check whether gaze is available inside webview
-		if (_autoScrolling && !tabInput.gazeUsed && tabInput.insideWebView && !gazeUponFixed)
+		if (_autoScrolling && !spTabInput->gazeUponGUI && spTabInput->insideWebView && !gazeUponFixed)
 		{
 			// Only vertical scrolling supported, yet (TODO: parameters)
-			float yOffset = -tabInput.webViewGazeRelativeY + 0.5f;
+			float yOffset = -spTabInput->webViewRelativeGazeY + 0.5f;
 			yOffset *= 2; // [-1..1]
 			bool negative = yOffset < 0;
 			yOffset = yOffset * yOffset; // [0..1]
@@ -434,7 +437,7 @@ void Tab::Update(float tpf, Input& rInput)
 
 		for (auto pTrigger : _triggers)
 		{
-			pTrigger->Update(tpf, tabInput);
+			pTrigger->Update(tpf, spTabInput);
 		}
 	}
 }

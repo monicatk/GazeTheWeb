@@ -17,7 +17,7 @@ ZoomCoordinateAction::ZoomCoordinateAction(TabInteractionInterface* pTab, bool d
     AddVec2OutputSlot("coordinate");
 }
 
-bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
+bool ZoomCoordinateAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
 	// Speed of zooming
 	float zoomSpeed = 0.f;
@@ -42,10 +42,10 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 	};
 
 	// Current gaze
-	glm::vec2 relativeGazeCoordinate = glm::vec2(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY); // relative WebView space
+	glm::vec2 relativeGazeCoordinate = glm::vec2(spInput->webViewRelativeGazeX, spInput->webViewRelativeGazeY); // relative WebView space
 
 	// Only allow zoom in when gaze upon web view
-	if (!tabInput.gazeUsed && tabInput.insideWebView) // TODO: gazeUsed really good idea here? Maybe later null pointer?
+	if (!spInput->gazeUponGUI && spInput->insideWebView) // TODO: gazeUsed really good idea here? Maybe later null pointer?
 	{
 		// Update deviation value (fade away deviation)
 		_deviation = glm::max(0.f, _deviation - (tpf / DEVIATION_FADING_DURATION));
@@ -104,7 +104,7 @@ bool ZoomCoordinateAction::Update(float tpf, TabInput tabInput)
 
 	// Decide whether zooming is finished
 	bool finished = false;
-	if (!tabInput.gazeUsed && tabInput.instantInteraction) // user demands on instant interaction
+	if (!spInput->gazeUponGUI && spInput->instantInteraction) // user demands on instant interaction
 	{
 		// Set coordinate in output value. Use current gaze position
 		SetOutputValue("coordinate", pixelGazeCoordinate);

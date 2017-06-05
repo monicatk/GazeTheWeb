@@ -13,7 +13,7 @@
 
 #include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 #include "src/State/Web/Tab/Pipelines/Actions/ActionConnector.h"
-#include "src/Input/TabInput.h"
+#include "src/Input/Input.h"
 #include <memory>
 #include <vector>
 
@@ -31,7 +31,7 @@ public:
     virtual ~Pipeline() = 0;
 
     // Update retuns whether finished with execution
-    bool Update(float tpf, TabInput tabInput);
+    bool Update(float tpf, const std::shared_ptr<const TabInput> spInput);
 
     // Draw
     void Draw() const;

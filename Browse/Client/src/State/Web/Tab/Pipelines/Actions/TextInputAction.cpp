@@ -21,7 +21,7 @@ TextInputAction::~TextInputAction()
     // Nothing to do
 }
 
-bool TextInputAction::Update(float tpf, TabInput tabInput)
+bool TextInputAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
     // Fetch input values
     int64 frameId = 0;

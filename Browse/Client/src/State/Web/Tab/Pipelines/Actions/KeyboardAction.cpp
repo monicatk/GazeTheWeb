@@ -398,7 +398,7 @@ KeyboardAction::~KeyboardAction()
 	_pTab->UnregisterButtonListenerInOverlay(_overlayExtraKeyId);
 }
 
-bool KeyboardAction::Update(float tpf, TabInput tabInput)
+bool KeyboardAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
 	// ######################################################
 	// ### TODO CERTH #######################################

@@ -23,7 +23,7 @@ public:
     virtual ~ReplyJSDialogAction();
 
     // Update retuns whether finished with execution
-    virtual bool Update(float tpf, TabInput tabInput);
+    virtual bool Update(float tpf, const std::shared_ptr<const TabInput> spInput);
 
     // Draw
     virtual void Draw() const;

@@ -11,7 +11,7 @@ TestAction::TestAction(TabInteractionInterface *pTab) : Action(pTab)
     _dim.setValue(0);
 }
 
-bool TestAction::Update(float tpf, TabInput tabInput)
+bool TestAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
     bool done = _dim.update(0.25f * tpf) >= 1;
     WebViewParameters webViewParameters;

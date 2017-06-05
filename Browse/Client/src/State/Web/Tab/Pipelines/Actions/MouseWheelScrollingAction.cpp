@@ -12,7 +12,7 @@ MouseWheelScrollingAction::MouseWheelScrollingAction(TabInteractionInterface* pT
     AddVec2InputSlot("scrolling");
 }
 
-bool MouseWheelScrollingAction::Update(float tpf, TabInput tabInput)
+bool MouseWheelScrollingAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
     // Get coordinate from input slot
     glm::vec2 scrolling;

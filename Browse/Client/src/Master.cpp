@@ -364,7 +364,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     eyegui::setInputUsageOfLayout(_pCursorLayout, false);
     _cursorFrameIndex = eyegui::addFloatingFrameWithBrick(_pCursorLayout, "bricks/Cursor.beyegui", 0, 0, 0, 0, true, false); // will be moved and sized in loop
 
-    // ### INPUT ###
+    // ### EYE INPUT ###
 	_upEyeInput = std::unique_ptr<EyeInput>(new EyeInput(this));
 
     // ### FRAMEBUFFER ###
@@ -611,22 +611,17 @@ void Master::Loop()
 		int windowX = 0;
 		int windowY = 0;
 		glfwGetWindowPos(_pWindow, &windowX, &windowY);
-		double gazeX, gazeY; // result of EyeInput update
-		bool saccade; // provided by filtering algorithm
-		bool gazeUsed = _upEyeInput->Update(
+		auto spInput = _upEyeInput->Update(
 			tpf,
 			currentMouseX,
 			currentMouseY,
-			gazeX,
-			gazeY,
-			saccade,
 			windowX,
 			windowY,
 			_width,
 			_height); // returns whether gaze was used (or emulated by mouse)
 
         // Update cursor with original mouse input
-        eyegui::setVisibilityOfLayout(_pCursorLayout, !gazeUsed, false, true);
+        eyegui::setVisibilityOfLayout(_pCursorLayout, spInput->gazeEmulated, false, true);
         float halfRelativeMouseCursorSize = MOUSE_CURSOR_RELATIVE_SIZE / 2.f;
         eyegui::setPositionOfFloatingFrame(
             _pCursorLayout,
@@ -647,43 +642,39 @@ void Master::Loop()
 			eyegui::StylePropertyVec4::BackgroundColor,
             RGBAToHexString(glm::vec4(0, 0, 0, MASTER_PAUSE_ALPHA * _pausedDimming.getValue())));
 
-        // Input struct for eyeGUI
-        eyegui::Input eyeGUIInput;
+		// Check for focus and time until input
+		int focused = glfwGetWindowAttrib(_pWindow, GLFW_FOCUSED);
+		if ((focused <= 0) // window not focused
+			|| (_timeUntilInput > 0)) // do not use input, yet
+		{
+			// TODO: Do it more effeciently (like calling it with NULL instead of reference)
+			spInput->gazeUponGUI = true; // means: gaze already consumed, so nothing reacts anymore
+		}
 
-        // Fill input structure
-        eyeGUIInput.instantInteraction = (_leftMouseButtonPressed && !gazeUsed) || (_enterKeyPressed && gazeUsed);
-        eyeGUIInput.gazeX = (int)gazeX;
-        eyeGUIInput.gazeY = (int)gazeY;
+        // Fill input structure for eyeGUI
+		eyegui::Input eyeGUIInput;
+        eyeGUIInput.instantInteraction =
+			(_leftMouseButtonPressed && spInput->gazeEmulated) // in case of gaze emulation
+			|| (_enterKeyPressed && !spInput->gazeEmulated); // other
+        eyeGUIInput.gazeX = (int)spInput->gazeX;
+        eyeGUIInput.gazeY = (int)spInput->gazeY;
 
-        // Check for focus and time until input
-        int focused = glfwGetWindowAttrib(_pWindow, GLFW_FOCUSED);
-        if((focused <= 0) // window not focused
-            || (_timeUntilInput > 0)) // do not use input, yet
-        {
-            // TODO: Do it more effeciently (like calling it with NULL instead of reference)
-            eyeGUIInput.gazeUsed = true;
-        }
-
-        // Update eyeGUI
-        eyegui::Input usedEyeGUIInput = eyegui::updateGUI(_pSuperGUI, tpf, eyeGUIInput);
+        // Update super GUI, including pause button
+		eyeGUIInput = eyegui::updateGUI(_pSuperGUI, tpf, eyeGUIInput);
 
         if(_paused)
         {
             // Do not pipe input to standard GUI if paused
-            usedEyeGUIInput.gazeUsed = true; // TODO: null pointer would be nicer
+			eyeGUIInput.gazeUsed = true; // TODO: null pointer would be nicer
         }
-        usedEyeGUIInput = eyegui::updateGUI(_pGUI, tpf, usedEyeGUIInput);
+		eyeGUIInput = eyegui::updateGUI(_pGUI, tpf, eyeGUIInput);
 
         // Do message loop of CEF
         _pCefMediator->DoMessageLoopWork();
 
-        // Create input struct for own framework
-        Input input(
-			usedEyeGUIInput.gazeX,
-			usedEyeGUIInput.gazeY,
-			usedEyeGUIInput.gazeUsed,
-			usedEyeGUIInput.instantInteraction,
-			saccade);
+        // Update our input structure
+		spInput->gazeUponGUI = eyeGUIInput.gazeUsed;
+		spInput->instantInteraction = eyeGUIInput.instantInteraction;
 
         // Bind framebuffer
         _upFramebuffer->Bind();
@@ -694,16 +685,16 @@ void Master::Loop()
 		// Disable depth test for drawing
 		glDisable(GL_DEPTH_TEST);
 
-        // Update current state (one should use here pointer instead of switch case)
+        // Update current state and draw it (one should use here pointer instead of switch case)
         StateType nextState = StateType::WEB;
         switch (_currentState)
         {
         case StateType::WEB:
-            nextState = _upWeb->Update(tpf, input);
+            nextState = _upWeb->Update(tpf, spInput);
             _upWeb->Draw();
             break;
         case StateType::SETTINGS:
-            nextState = _upSettings->Update(tpf, input);
+            nextState = _upSettings->Update(tpf, spInput);
             _upSettings->Draw();
             break;
         }
@@ -760,7 +751,7 @@ void Master::Loop()
         // Fill uniforms when necessary
         if(setup::BLUR_PERIPHERY)
         {
-            _upScreenFillingQuad->GetShader()->UpdateValue("focusPixelPosition", glm::vec2(usedEyeGUIInput.gazeX, _height - usedEyeGUIInput.gazeY)); // OpenGL coordinate system
+            _upScreenFillingQuad->GetShader()->UpdateValue("focusPixelPosition", glm::vec2(spInput->gazeX, _height - spInput->gazeY)); // OpenGL coordinate system
             _upScreenFillingQuad->GetShader()->UpdateValue("focusPixelRadius", (float)glm::min(_width, _height) * BLUR_FOCUS_RELATIVE_RADIUS);
             _upScreenFillingQuad->GetShader()->UpdateValue("peripheryMultiplier", BLUR_PERIPHERY_MULTIPLIER);
         }

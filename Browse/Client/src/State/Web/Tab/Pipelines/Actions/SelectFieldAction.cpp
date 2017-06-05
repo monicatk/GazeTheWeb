@@ -17,7 +17,7 @@ SelectFieldAction::~SelectFieldAction()
     // Nothing to do
 }
 
-bool SelectFieldAction::Update(float tpf, TabInput tabInput)
+bool SelectFieldAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
     // TODO
 

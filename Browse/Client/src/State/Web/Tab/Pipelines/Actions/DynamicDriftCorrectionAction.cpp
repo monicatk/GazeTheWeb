@@ -19,7 +19,7 @@ DynamicDriftCorrectionAction::DynamicDriftCorrectionAction(TabInteractionInterfa
     AddVec2OutputSlot("coordinate");
 }
 
-bool DynamicDriftCorrectionAction::Update(float tpf, TabInput tabInput)
+bool DynamicDriftCorrectionAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
 	// ### PREPARATION ###
 
@@ -49,12 +49,12 @@ bool DynamicDriftCorrectionAction::Update(float tpf, TabInput tabInput)
 	};
 
 	// Current gaze
-	glm::vec2 relativeGazeCoordinate = glm::vec2(tabInput.webViewGazeRelativeX, tabInput.webViewGazeRelativeY); // relative WebView space
+	glm::vec2 relativeGazeCoordinate = glm::vec2(spInput->webViewRelativeGazeX, spInput->webViewRelativeGazeY); // relative WebView space
 
 	// ### UPDATE ZOOM SPEED, ZOOM CENTER AND CENTER OFFSET ###
 
 	// Only allow zoom in when gaze upon WebView and not yet used
-	if (tabInput.insideWebView && !tabInput.gazeUsed) // TODO: gazeUsed really good idea here? Maybe later null pointer?
+	if (spInput->insideWebView && !spInput->gazeUponGUI) // TODO: gazeUsed really good idea here? Maybe later null pointer?
 	{
 		switch (_state)
 		{
@@ -127,7 +127,7 @@ bool DynamicDriftCorrectionAction::Update(float tpf, TabInput tabInput)
 	bool finished = false;
 
 	// Instant interaction handling
-	if (tabInput.insideWebView && !tabInput.gazeUsed && tabInput.instantInteraction) // user demands on instant interaction
+	if (spInput->insideWebView && !spInput->gazeUponGUI && spInput->instantInteraction) // user demands on instant interaction
 	{
 		// Calculate pixel gaze coordiante on page
 		glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate;

@@ -17,10 +17,10 @@ TextInputTrigger::~TextInputTrigger()
 	// Nothing to do here
 }
 
-bool TextInputTrigger::Update(float tpf, TabInput& rTabInput)
+bool TextInputTrigger::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
 	// Call super method
-	bool triggered = DOMTrigger::Update(tpf, rTabInput);
+	bool triggered = DOMTrigger::Update(tpf, spInput);
 
 	// When triggered, push back pipeline to input text
 	if (triggered)
