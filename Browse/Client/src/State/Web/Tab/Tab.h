@@ -117,6 +117,12 @@ public:
         float relativeSizeX,
         float relativeSizeY,
         std::map<std::string, std::string> idMapper);
+	virtual int AddFloatingFrameToOverlay(
+		std::string brickFilepath,
+		float relativePositionX,
+		float relativePositionY,
+		float relativeSizeX,
+		float relativeSizeY);
 
     // Move floating frame in overlay
     virtual void SetPositionOfFloatingFrameInOverlay(
@@ -199,6 +205,15 @@ public:
 
 	// Set global keyboard layout
 	virtual void SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout);
+
+	// Set space of flow
+	virtual void SetSpaceOfFlow(std::string id, float space);
+
+	// Add brick to stack
+	virtual void AddBrickToStack(
+		std::string id,
+		std::string brickFilepath,
+		std::map<std::string, std::string> idMapper);
 
 	// Getter for values of interest
 	virtual int GetWebViewX() const;

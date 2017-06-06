@@ -36,6 +36,17 @@ public:
 
     // Abort
     virtual void Abort();
+
+private:
+
+	// Store count of options to delete ids later on
+	int _optionCount = 0;
+
+	// Index of floating frame in Tab's overlay
+	int _overlayFrameIndex = -1;
+
+	// Bool whether finished
+	bool _finished = false;
 };
 
 #endif // SELECTFIELDOPTIONSACTION_H_

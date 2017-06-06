@@ -50,6 +50,7 @@ static const std::string SETTINGS_FILE = "settings.xml";
 static const int URL_INPUT_BOOKMARKS_ROWS_ON_SCREEN = 6;
 static const int HISTORY_ROWS_ON_SCREEN = 6;
 static const int HISTORY_DISPLAY_COUNT = 20;
+static const int SELECT_FIELD_OPTIONS_ON_SCREEN = 6;
 static const float NOTIFICATION_WIDTH = 0.75f;
 static const float NOTIFICATION_Y = 0.0075f;
 static const float NOTIFICATION_HEIGHT = 0.06f;

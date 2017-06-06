@@ -28,6 +28,24 @@ int Tab::AddFloatingFrameToOverlay(
 		false);
 }
 
+int Tab::AddFloatingFrameToOverlay(
+	std::string brickFilepath,
+	float relativePositionX,
+	float relativePositionY,
+	float relativeSizeX,
+	float relativeSizeY)
+{
+	return eyegui::addFloatingFrameWithBrick(
+		_pOverlayLayout,
+		brickFilepath,
+		relativePositionX,
+		relativePositionY,
+		relativeSizeX,
+		relativeSizeY,
+		false,
+		false);
+}
+
 void Tab::SetPositionOfFloatingFrameInOverlay(
 	int index,
 	float relativePositionX,
@@ -217,6 +235,19 @@ void Tab::ButtonUp(std::string id)
 void Tab::SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout)
 {
 	_pMaster->SetKeyboardLayout(keyboardLayout);
+}
+
+void Tab::SetSpaceOfFlow(std::string id, float space)
+{
+	eyegui::setSpaceOfFlow(_pOverlayLayout, id, space);
+}
+
+void Tab::AddBrickToStack(
+	std::string id,
+	std::string brickFilepath,
+	std::map<std::string, std::string> idMapper)
+{
+	eyegui::addBrickToStack(_pOverlayLayout, id, brickFilepath, idMapper);
 }
 
 int Tab::GetWebViewX() const
