@@ -241,9 +241,6 @@ public:
 	// Get text out of global clipboard in mediator
 	virtual std::string GetClipboardText() const;
 
-	// Set text in text input field
-	virtual void InputTextData(int64 frameID, int nodeID, std::string text, bool submit);
-
     // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available. Distance in page pixels
     virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pagePixelCoordinate, float& rDistance) const;
 

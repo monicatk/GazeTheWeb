@@ -13,7 +13,13 @@ class Input
 {
 public:
 
-    Input(int gazeX, int gazeY, bool gazeEmulated, bool gazeUponGUI, bool instantInteraction, bool saccade) : 
+    Input(
+		int gazeX,
+		int gazeY,
+		bool gazeEmulated,
+		bool gazeUponGUI,
+		bool instantInteraction,
+		bool saccade) : 
 	gazeX(gazeX),
 	gazeY(gazeY),
 	gazeEmulated(gazeEmulated),
@@ -45,7 +51,8 @@ public:
 		webViewPixelGazeY(webViewPixelGazeY),
 		webViewRelativeGazeX(webViewRelativeGazeX),
 		webViewRelativeGazeY(webViewRelativeGazeY),
-		insideWebView(webViewRelativeGazeX < 1.f
+		insideWebView(
+			webViewRelativeGazeX < 1.f
 			&& webViewRelativeGazeX >= 0
 			&& webViewRelativeGazeY < 1.f
 			&& webViewRelativeGazeY >= 0),

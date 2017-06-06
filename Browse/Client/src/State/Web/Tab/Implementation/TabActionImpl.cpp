@@ -100,28 +100,6 @@ std::string Tab::GetClipboardText() const
 	return _pCefMediator->GetClipboardText();
 }
 
-void Tab::InputTextData(int64 frameID, int nodeID, std::string text, bool submit)
-{
-	if (submit)
-	{
-		LabStreamMailer::instance().Send("Submitting Text: " + text);
-	}
-	else
-	{
-		LabStreamMailer::instance().Send("Inputting Text: " + text);
-	}
-	
-	// Execute node interaction
-	if (auto node = GetDOMTextInput(nodeID).lock())
-	{
-		node->InputText(text, submit);
-	}
-	else
-	{
-		LogError("Tab: Could not execute PerformTextInput DOM node interaction!");
-	}
-}
-
 std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pagePixelCoordinate, float& rDistance) const
 {
     if(_TextLinkMap.empty())

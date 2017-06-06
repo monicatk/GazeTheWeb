@@ -3,8 +3,6 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Action to input text into a text input field on a webpage.
-// - Input: int64 frameId
-// - Input: int nodeId
 // - Input: std::u16string text
 // - Input: int submit (0 if not, else submit)
 // - Output: none
@@ -13,13 +11,14 @@
 #define TEXTINPUTACTION_H_
 
 #include "src/State/Web/Tab/Pipelines/Actions/Action.h"
+#include "src/CEF/Data/DOMNodeInteraction.h"
 
 class TextInputAction : public Action
 {
 public:
 
     // Constructor
-    TextInputAction(TabInteractionInterface* pTab);
+    TextInputAction(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInputInteraction> spInteractionNode);
 
     // Destructor
     virtual ~TextInputAction();
@@ -38,6 +37,12 @@ public:
 
     // Abort
     virtual void Abort();
+
+private:
+
+	// Members
+	std::shared_ptr<DOMTextInputInteraction> _spInteractionNode;
+
 };
 
 #endif // TEXTINPUTACTION_H_

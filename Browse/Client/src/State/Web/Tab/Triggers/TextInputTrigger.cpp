@@ -32,6 +32,7 @@ bool TextInputTrigger::Update(float tpf, const std::shared_ptr<const TabInput> s
 				std::unique_ptr<TextInputPipeline>(
 					new TextInputPipeline(
 						_pTab,
+						_spNode,
 						_spNode))));
 	}
 
