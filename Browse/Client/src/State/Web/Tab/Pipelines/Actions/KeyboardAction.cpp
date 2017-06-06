@@ -16,6 +16,8 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
     AddString16OutputSlot("text");
     AddIntOutputSlot("submit");
 
+	// TODO: forget about ids and move all of this into activation
+
     // Create id, which is unique in overlay
     _overlayKeyboardId = "text_input_action_keyboard";
     _overlayCompleteButtonId = "text_input_action_complete_button";
