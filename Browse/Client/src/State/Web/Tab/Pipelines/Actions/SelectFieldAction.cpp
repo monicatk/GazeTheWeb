@@ -7,9 +7,12 @@
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 
-SelectFieldAction::SelectFieldAction(TabInteractionInterface *pTab) : Action(pTab)
+SelectFieldAction::SelectFieldAction(TabInteractionInterface *pTab, std::shared_ptr<DOMSelectFieldInteraction> spInteractionNode) :
+	Action(pTab),
+	_spInteractionNode(spInteractionNode)
 {
-    // TODO
+	// Add in- and output data slots
+	AddIntInputSlot("option");
 }
 
 SelectFieldAction::~SelectFieldAction()
@@ -19,7 +22,10 @@ SelectFieldAction::~SelectFieldAction()
 
 bool SelectFieldAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
-    // TODO
+    // Set option
+	int option = 0;
+	GetInputValue("option", option);
+	_spInteractionNode->SetSelectionIndex(option);
 
 	// Action is done
 	return true;

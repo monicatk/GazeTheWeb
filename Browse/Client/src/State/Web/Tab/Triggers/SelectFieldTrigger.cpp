@@ -32,6 +32,7 @@ bool SelectFieldTrigger::Update(float tpf, const std::shared_ptr<const TabInput>
 				std::unique_ptr<SelectFieldPipeline>(
 					new SelectFieldPipeline(
 						_pTab,
+						_spNode,
 						_spNode))));
 	}
 

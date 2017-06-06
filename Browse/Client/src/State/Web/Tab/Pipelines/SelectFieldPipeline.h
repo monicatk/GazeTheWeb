@@ -9,13 +9,17 @@
 
 #include "Pipeline.h"
 #include "src/CEF/Data/DOMNode.h"
+#include "src/CEF/Data/DOMNodeInteraction.h"
 
 class SelectFieldPipeline : public Pipeline
 {
 public:
 
     // Constructor
-	SelectFieldPipeline(TabInteractionInterface* pTab, std::shared_ptr<DOMSelectField> spNode);
+	SelectFieldPipeline(
+		TabInteractionInterface* pTab,
+		std::shared_ptr<const DOMSelectField> spNode,
+		std::shared_ptr<DOMSelectFieldInteraction> spInteractionNode);
 
 };
 

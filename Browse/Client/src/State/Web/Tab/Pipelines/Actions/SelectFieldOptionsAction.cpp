@@ -7,9 +7,13 @@
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 
-SelectFieldOptionsAction::SelectFieldOptionsAction(TabInteractionInterface *pTab) : Action(pTab)
+SelectFieldOptionsAction::SelectFieldOptionsAction(TabInteractionInterface *pTab, std::shared_ptr<const DOMSelectField> spNode) : Action(pTab)
 {
-    // TODO
+	auto options = spNode->GetOptions();
+	for (auto& option : options)
+	{
+		LogInfo(option);
+	}
 }
 
 SelectFieldOptionsAction::~SelectFieldOptionsAction()

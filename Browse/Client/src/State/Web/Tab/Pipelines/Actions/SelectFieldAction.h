@@ -3,20 +3,21 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Action to choose option of select field on a webpage.
-// - Input: none
+// - Input: int option
 // - Output: none
 
 #ifndef SELECTFIELDACTION_H_
 #define SELECTFIELDACTION_H_
 
 #include "src/State/Web/Tab/Pipelines/Actions/Action.h"
+#include "src/CEF/Data/DOMNodeInteraction.h"
 
 class SelectFieldAction : public Action
 {
 public:
 
     // Constructor
-	SelectFieldAction(TabInteractionInterface* pTab);
+	SelectFieldAction(TabInteractionInterface* pTab, std::shared_ptr<DOMSelectFieldInteraction> spInteractionNode);
 
     // Destructor
     virtual ~SelectFieldAction();
@@ -35,6 +36,11 @@ public:
 
     // Abort
     virtual void Abort();
+
+private:
+
+	// Members
+	std::shared_ptr<DOMSelectFieldInteraction> _spInteractionNode;
 };
 
 #endif // SELECTFIELDACTION_H_

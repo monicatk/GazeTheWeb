@@ -10,13 +10,14 @@
 #define SELECTFIELDOPTIONSACTION_H_
 
 #include "src/State/Web/Tab/Pipelines/Actions/Action.h"
+#include "src/CEF/Data/DOMNode.h"
 
 class SelectFieldOptionsAction : public Action
 {
 public:
 
     // Constructor
-	SelectFieldOptionsAction(TabInteractionInterface* pTab);
+	SelectFieldOptionsAction(TabInteractionInterface* pTab, std::shared_ptr<const DOMSelectField> spNode);
 
     // Destructor
     virtual ~SelectFieldOptionsAction();
