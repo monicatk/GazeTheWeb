@@ -671,25 +671,6 @@ bool Handler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
 	return true;
 }
 
-void Handler::ScrollOverflowElement(CefRefPtr<CefBrowser> browser, int elemId, int x, int y, std::vector<int> fixedIds)
-{
-	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("ExecuteJavascriptFunction");
-	const auto& args = msg->GetArgumentList();
-
-	args->SetString(0, "ScrollOverflowElement");
-	args->SetInt(1, elemId);
-	args->SetInt(2, x);
-	args->SetInt(3, y);
-
-	CefRefPtr<CefListValue> ids = CefListValue::Create();
-	for (const auto& id : fixedIds)
-		ids->SetInt(ids->GetSize(), id);
-
-	args->SetList(4, ids);
-
-	browser->SendProcessMessage(PID_RENDERER, msg);
-}
-
 void Handler::SendToJSLoggingMediator(std::string message)
 {
 	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("SendToLoggingMediator");

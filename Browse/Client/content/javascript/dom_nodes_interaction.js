@@ -86,7 +86,11 @@ function PerformTextInput(id, text, submit)
 }
 
 
-DOMOverflowElement.prototype.scroll = function(gazeX, gazeY){
+DOMOverflowElement.prototype.scroll = function(gazeX, gazeY, fixedIds){
+	// TODO: Refactore this method?
+	if(fixedIds.length > 0 && fixedIds.indexOf(this.getFixedId()) === -1)
+		return;
+
 	// Do not use cut-off rect and keep scrolling velocity untouched if partially hidden
 	var rects = AdjustClientRects(this.node.getClientRects());
 	//  var rect = this.getRects()[0];

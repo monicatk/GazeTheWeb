@@ -296,10 +296,7 @@ bool Mediator::SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg, Ta
 {
 	if (auto browser = GetBrowser(pTab))
 	{
-		bool success = browser->SendProcessMessage(PID_RENDERER, msg);
-		if (success)
-			LogInfo("Mediator: Successfully send process message from DOM node object to Renderer!");
-		return success;
+		return browser->SendProcessMessage(PID_RENDERER, msg);
 	}
 	return false;
 }
@@ -366,14 +363,6 @@ bool Mediator::SetLoadingStatus(CefRefPtr<CefBrowser> browser, int64 frameID, bo
 		return false;
 	}
 	
-}
-
-void Mediator::ScrollOverflowElement(TabCEFInterface * pTab, int elemId, int x, int y, std::vector<int> fixedIds)
-{
-	if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
-	{
-		_handler->ScrollOverflowElement(browser, elemId, x, y, fixedIds);
-	}
 }
 
 std::weak_ptr<DOMOverflowElement> Mediator::GetDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id)
