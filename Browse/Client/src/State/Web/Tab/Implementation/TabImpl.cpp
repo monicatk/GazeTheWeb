@@ -184,9 +184,6 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		webViewRelativeGazeX,
 		webViewRelativeGazeY);
 
-	LogInfo(spTabInput->webViewRelativeGazeX, ", ", spTabInput->webViewRelativeGazeY);
-	LogInfo(spTabInput->webViewPixelGazeX, ", ", spTabInput->webViewPixelGazeY);
-
 	// Update highlight rectangle of webview
 	// TODO: alternative: give webview shared pointer to DOM nodes
 	std::vector<Rect> rects;
