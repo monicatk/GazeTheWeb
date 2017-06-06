@@ -229,7 +229,7 @@ void Mediator::AddDOMTextInput(CefRefPtr<CefBrowser> browser, int id)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
-		pTab->AddDOMTextInput(id);
+		pTab->AddDOMTextInput(browser, id);
 	}
 }
 
@@ -237,7 +237,7 @@ void Mediator::AddDOMLink(CefRefPtr<CefBrowser> browser, int id)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
-		pTab->AddDOMLink(id);
+		pTab->AddDOMLink(browser, id);
 	}
 }
 
@@ -245,7 +245,7 @@ void Mediator::AddDOMSelectField(CefRefPtr<CefBrowser> browser, int id)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
-		pTab->AddDOMSelectField(id);
+		pTab->AddDOMSelectField(browser, id);
 	}
 }
 
@@ -253,7 +253,7 @@ void Mediator::AddDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
-		pTab->AddDOMOverflowElement(id);
+		pTab->AddDOMOverflowElement(browser, id);
 	}
 }
 
@@ -292,28 +292,16 @@ void Mediator::RemoveDOMSelectField(CefRefPtr<CefBrowser> browser, int id)
 	}
 }
 
-bool Mediator::InputTextData(TabCEFInterface* tab, int64 frameID, int nodeID, std::string text, bool submit)
+bool Mediator::SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg, TabCEFInterface* pTab)
 {
-    if (CefRefPtr<CefBrowser> browser = GetBrowser(tab))
-    {
-        LogDebug("Mediator: Input text '", text, "' in frame id = ", frameID, " (nodeID = ", nodeID, ").");
-        return _handler->InputTextData(browser, frameID, nodeID, text, submit);
-    }
-    return false;
-}
-
-
-// TODO: Generic CallJSFunction msg with JS function as argument name and the rest as arguments?
-void Mediator::SetSelectionIndex(TabCEFInterface * tab, int nodeId, int index)
-{
-	if (const auto& browser = GetBrowser(tab))
+	if (auto browser = GetBrowser(pTab))
 	{
-                auto msg = CefProcessMessage::Create("SetSelectionIndex");
-                auto args = msg->GetArgumentList();
-		args->SetInt(0, nodeId);
-		args->SetInt(1, index);
-		browser->SendProcessMessage(PID_RENDERER, msg);
+		bool success = browser->SendProcessMessage(PID_RENDERER, msg);
+		if (success)
+			LogInfo("Mediator: Successfully send process message from DOM node object to Renderer!");
+		return success;
 	}
+	return false;
 }
 
 std::weak_ptr<DOMTextInput> Mediator::GetDOMTextInput(CefRefPtr<CefBrowser> browser, int id)

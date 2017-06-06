@@ -43,6 +43,9 @@ public:
         CefRefPtr<CefFrame> frame,
         CefRefPtr<CefV8Context> context) OVERRIDE;
 
+	// Helper for automatic transformation between IPC messages and V8 values
+	CefRefPtr<CefV8Value> RenderProcessHandler::CefValueToCefV8Value(CefRefPtr<CefValue> val);
+
 private:
 
     // Send logs to main process

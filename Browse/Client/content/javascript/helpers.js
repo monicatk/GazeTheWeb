@@ -222,11 +222,28 @@ function UpdateNodesRect(node)
 
 
 
-// DEPRECATED - only as quick fix at the moment, remove function calls later
-function CreateDOMLink(node){ if(GetCorrespondingDOMObject(node) === undefined) return new DOMLink(node); }
-function CreateDOMTextInput(node) { if(GetCorrespondingDOMObject(node) === undefined) return new DOMTextInput(node); }
-function CreateDOMSelectField(node) { if(GetCorrespondingDOMObject(node) === undefined) return new DOMSelectField(node); }
-function CreateOverflowElement(node) { if(GetCorrespondingDOMObject(node) === undefined) return new DOMOverflowElement(node); }
+function CreateDOMTextInput(node) { CreateDOMObject(node, 0); }
+function CreateDOMLink(node){ CreateDOMObject(node, 1); }
+function CreateDOMSelectField(node) { CreateDOMObject(node, 2); }
+function CreateOverflowElement(node) { CreateDOMObject(node, 3); }
+
+function CreateDOMObject(node, type)
+{
+    var obj = GetCorrespondingDOMObject(node);
+    if(obj !== undefined && obj.getType() === type)
+        return undefined;
+
+    switch(type){
+        case 0: return new DOMTextInput(node);
+        case 1: return new DOMLink(node);
+        case 2: return new DOMSelectField(node);
+        case 3: return new DOMOverflowElement(node);
+        default: {
+            console.log("Warning: Unknown DOM node type: "+type);
+            return undefined;
+        }
+    }
+}
 
 function GetDOMObject(type, id)
 {
@@ -277,6 +294,25 @@ function CutRectOnRectWindow(innerRect, outerRect)
     return [t, l, b, r]
 }
 
+function CefExecute(header, param)
+{
+    console.log(header);
+    console.log(param);
+    var f = header[0], type = header[1], id = header[2];
+    var a = param[0], b = param[1], c = param[2], d = param[3];
+
+    ConsolePrint("Executing CefExecute -- "+f+", "+type+", "+id);
+
+    // Determine object, which holds function to execute
+    var obj = (id === undefined || type === undefined) ? window : GetDOMObject(type, id);
+
+    if(obj === undefined || obj[f] === undefined)
+        return false; 
+
+    // Execute function with obj as context and parameters given
+    // Return value may be e.g. a DOMNodeInteractionResponse
+    return obj[f](a, b, c, d);
+}
 
 
 

@@ -876,6 +876,30 @@ function StopPageLoadingTimer()
 		(100*mutation_observer_working_time/page_load_duration)+"% of page load.");
 }
 
+function CreateCustomMutationObserver(node, attrFunc, childFunc)
+{
+	var observer = new MutationObserver(
+		function(mutations) {
+		  	mutations.forEach(
+		  		function(mutation){
+					if(mutation.type === 'attributes')
+						attrFunc(mutation);
+					if(mutation.type == 'childList')
+						childFunc(mutation);
+
+				  }
+			);
+		}
+	);
+	var config = {
+		attributes: true, childList: true, characterData: true, 
+		subtree: true, characterDataOldValue: true, attributeOldValue: true
+	};
+	observer.observe(node, config);
+	return observer;
+}
+
+
 ConsolePrint("Successfully imported dom_mutationobserver.js!");
 
 
