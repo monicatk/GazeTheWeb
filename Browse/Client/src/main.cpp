@@ -50,11 +50,12 @@ int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<MainCefA
 
 #endif
 
-	// Set path for CEF data, both cache and user data
+	// Set path for CEF data: cache, user data and debug.log
 	CefString(&settings.cache_path).FromASCII(std::string(userDirectory + "cache").c_str());
 	CefString(&settings.user_data_path).FromASCII(std::string(userDirectory + "user_data").c_str());
-
-	// Set output path of log file
+	CefString(&settings.log_file).FromASCII(std::string(userDirectory + "debug.log").c_str());
+	
+	// Set output path of custom log file
 	LogPath = userDirectory;
 
 	// Say hello
