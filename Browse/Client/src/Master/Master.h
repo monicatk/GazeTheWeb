@@ -9,7 +9,8 @@
 #ifndef MASTER_H_
 #define MASTER_H_
 
-#include "src/MasterNotificationInterface.h"
+#include "src/Master/MasterNotificationInterface.h"
+#include "src/Master/MasterThreadsafeInterface.h"
 #include "src/Singletons/LabStreamMailer.h"
 #include "src/CEF/Mediator.h"
 #include "src/State/Web/Web.h"
@@ -27,7 +28,7 @@
 class Texture;
 struct GLFWwindow;
 
-class Master : public MasterNotificationInterface
+class Master : public MasterNotificationInterface, public MasterThreadsafeInterface
 {
 public:
 
@@ -53,30 +54,11 @@ public:
     // Exit
     void Exit();
 
-    // Set gaze visualization (of super GUI)
-    void SetGazeVisualization(bool show) { eyegui::setGazeVisualizationDrawing(_pSuperGUI, show); }
-
-    // Set show descriptions (of standard GUI)
-    void SetShowDescriptions(bool show)
-    {
-        eyegui::setDescriptionVisibility(
-            _pGUI,
-            (show ?
-                eyegui::DescriptionVisibility::ON_PENETRATION
-                : eyegui::DescriptionVisibility::HIDDEN));
-    }
-
     // Get id of dictionary
     unsigned int GetDictionary() const { return _dictonaryId; }
 
 	// Get user directory location
 	std::string GetUserDirectory() const { return _userDirectory; }
-
-	// Push notification to display
-	virtual void PushNotification(std::u16string content);
-
-	// Push notification to display taken from localization file
-	virtual void PushNotificationByKey(std::string key);
 
 	void RegisterJavascriptCallback(std::string prefix, std::function<void (std::string)>& callbackFunction)
 	{
@@ -98,11 +80,56 @@ public:
 	void SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyFloat type, std::string value);
 	void SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyVec4 type, std::string value);
 
-	// ### SETTINGS ACCESS ###
+	// Set global keyboard layout
+	void SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout)
+	{
+		// Tell it eyeGUI
+		eyegui::setKeyboardLayout(_pGUI, keyboardLayout);
+	}
 
-	// Set homepage URL in settings
-	void SetHomepage(std::string URL) { _upSettings->SetHomepage(URL); }
+	// ### ACCESS BY SETTINGS ###
 
+	// Set gaze visualization (of super GUI)
+	void SetGazeVisualization(bool show) { eyegui::setGazeVisualizationDrawing(_pSuperGUI, show); }
+
+	// Set show descriptions (of standard GUI)
+	void SetShowDescriptions(bool show)
+	{
+		eyegui::setDescriptionVisibility(
+			_pGUI,
+			(show ?
+				eyegui::DescriptionVisibility::ON_PENETRATION
+				: eyegui::DescriptionVisibility::HIDDEN));
+	}
+
+	// ### STORING OF SETTINGS ###
+
+	// Store homepage URL in settings
+	void StoreHomepage(std::string URL) { _upSettings->StoreHomepage(URL); }
+
+	// Set global keyboard layout
+	void StoreAndSetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout)
+	{
+		// Store it in settings (which calls then setter above)
+		_upSettings->StoreKeyboardLayout(keyboardLayout);
+	}
+
+	// #####################################
+	// ### MASTER NOTIFICATION INTERFACE ###
+	// #####################################
+
+	// Push notification to display
+	virtual void PushNotification(std::u16string content, Type type, bool overridable);
+
+	// Push notification to display taken from localization file
+	virtual void PushNotificationByKey(std::string key, Type type, bool overridable);
+
+	// ###################################
+	// ### MASTER THREADSAFE INTERFACE ###
+	// ###################################
+
+	// Notify about eye tracker status
+	virtual void threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status);
 
 private:
 
@@ -126,6 +153,59 @@ private:
 
     // Instance of listener
     std::shared_ptr<MasterButtonListener> _spMasterButtonListener;
+
+	// Notification struct
+	struct Notification
+	{
+		// Constructor
+		Notification(std::u16string message, MasterNotificationInterface::Type type, bool overridable) : message(message), type(type), overridable(overridable) {}
+
+		// Fields
+		std::u16string message;
+		MasterNotificationInterface::Type type;
+		bool overridable;
+	};
+
+	// ThreadJob class (class to store a job assigned by a thread)
+	class ThreadJob
+	{
+	public:
+
+		// Constructor
+		ThreadJob(Master* pMaster) : _pMaster(pMaster) {}
+
+		// Destructor
+		virtual ~ThreadJob() = 0;
+
+		// Execute
+		virtual void Execute() = 0;
+	
+	protected:
+
+		// Members
+		Master* _pMaster;
+	};
+	class PushEyetrackerStatusThreadJob : public ThreadJob
+	{
+	public:
+
+		// Constructor
+		PushEyetrackerStatusThreadJob(Master* pMaster, EyeTrackerStatus status) : ThreadJob(pMaster), _status(status) {};
+
+		// Destructor
+		~PushEyetrackerStatusThreadJob() {}
+
+		// Execute
+		virtual void Execute();
+
+	private:
+
+		// Members
+		EyeTrackerStatus _status;
+	};
+
+	// List jobs as friends with benefits
+	friend class PushEyetrackerStatusThreadJob;
 
     // Loop of master
     void Loop();
@@ -202,17 +282,26 @@ private:
 	// Frame index of notification message
 	unsigned int _notificationFrameIndex = 0;
 
-	// Stack with content for notifications
-	std::queue<std::u16string> _notificationStack;
-
-	// LabStreamMailer callback to print incoming messages to log
-	std::shared_ptr<LabStreamCallback> _spLabStreamCallback;
+	// Queue with upcoming notifications
+	std::queue<Notification> _notificationStack;
 
 	// Time of notification displaying
 	float _notificationTime;
 
+	// Whether current notification is overridable or not
+	bool _notificationOverridable = false;
+
+	// LabStreamMailer callback to print incoming messages to log
+	std::shared_ptr<LabStreamCallback> _spLabStreamCallback;
+
 	// Boolean to indicate exiting the applicatoin
 	bool _exit = false;
+
+	// Buffer for jobs assigned by threads
+	std::vector<std::shared_ptr<ThreadJob> > _threadJobs;
+
+	// Mutex to guarantees that threadJobs are not manipulated while read by master
+	std::mutex _threadJobsMutex;
 };
 
 #endif // MASTER_H_

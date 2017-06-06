@@ -7,6 +7,7 @@
 #ifndef TABOVERLAYINTERFACE_H_
 #define TABOVERLAYINTERFACE_H_
 
+#include "submodules/eyeGUI/include/eyeGUI.h"
 #include <string>
 #include <map>
 #include <memory>
@@ -24,6 +25,12 @@ public:
         float relativeSizeX,
         float relativeSizeY,
         std::map<std::string, std::string> idMapper) = 0;
+	virtual int AddFloatingFrameToOverlay(
+		std::string brickFilepath,
+		float relativePositionX,
+		float relativePositionY,
+		float relativeSizeX,
+		float relativeSizeY) = 0;
 
     // Move floating frame in overlay
     virtual void SetPositionOfFloatingFrameInOverlay(
@@ -52,6 +59,9 @@ public:
     // Set case of keyboard letters
     virtual void SetCaseOfKeyboardLetters(std::string id, bool upper) = 0;
 
+	// Set keyboard 
+	virtual void SetKeymapOfKeyboard(std::string id, unsigned int keymap) = 0;
+
 	// Classify currently selected key
 	virtual void ClassifyKey(std::string id, bool accept) = 0;
 
@@ -77,6 +87,9 @@ public:
 	// Delete content in text edit
 	virtual void DeleteContentAtCursorInTextEdit(std::string id, int letterCount) = 0;
 
+	// Delete all content in text edit
+	virtual void DeleteContentInTextEdit(std::string id) = 0;
+
 	// Get content in active entity
 	virtual std::u16string GetActiveEntityContentInTextEdit(std::string id) const = 0;
 
@@ -94,6 +107,21 @@ public:
 
 	// Set activity of element
 	virtual void SetElementActivity(std::string id, bool active, bool fade) = 0;
+
+	// Tell button to go up
+	virtual void ButtonUp(std::string id) = 0;
+
+	// Set global keyboard layout
+	virtual void SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout) = 0;
+
+	// Set space of flow
+	virtual void SetSpaceOfFlow(std::string id, float space) = 0;
+
+	// Add brick to stack
+	virtual void AddBrickToStack(
+		std::string id,
+		std::string brickFilepath,
+		std::map<std::string, std::string> idMapper) = 0;
 
 	// Getter for values of interest
 	virtual int GetWebViewX() const = 0;

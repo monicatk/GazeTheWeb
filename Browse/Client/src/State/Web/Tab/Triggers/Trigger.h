@@ -7,7 +7,7 @@
 #ifndef TRIGGER_H_
 #define TRIGGER_H_
 
-#include "src/Utils/TabInput.h"
+#include "src/Input/Input.h"
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 #include <vector>
 
@@ -22,7 +22,7 @@ public:
     virtual ~Trigger() = 0;
 
     // Update, returns true if triggered
-    virtual bool Update(float tpf, TabInput& rTabInput) = 0;
+    virtual bool Update(float tpf, const std::shared_ptr<const TabInput> spInput) = 0;
 
     // Draw
     virtual void Draw() const = 0;

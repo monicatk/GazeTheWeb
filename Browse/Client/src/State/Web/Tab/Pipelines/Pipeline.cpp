@@ -27,12 +27,12 @@ Pipeline::~Pipeline()
     _pTab->Reset();
 }
 
-bool Pipeline::Update(float tpf, TabInput tabInput)
+bool Pipeline::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
     if(!_actions.empty())
     {
         // Update current action
-        bool finished = _actions[_currentActionIndex]->Update(tpf, tabInput);
+        bool finished = _actions[_currentActionIndex]->Update(tpf, spInput);
 
         // Check current action for finishing of execution
         if(finished)

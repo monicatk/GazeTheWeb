@@ -59,12 +59,15 @@ public:
     // Opens URL in tab. Returns whether successful
     bool OpenURLInTab(int id, std::string URL);
 
+	// Pushs back pointing evaluation pipeline in current tab
+	void PushBackPointingEvaluationPipeline(PointingApproach approach);
+
     // #############
     // ### STATE ###
     // #############
 
     // Update. Returns which state should be active in next time step
-    virtual StateType Update(float tpf, Input& rInput);
+    virtual StateType Update(float tpf, const std::shared_ptr<const Input> spInput);
 
     // Draw
     virtual void Draw() const;

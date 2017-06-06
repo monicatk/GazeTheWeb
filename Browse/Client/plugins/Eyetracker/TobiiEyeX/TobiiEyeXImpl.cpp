@@ -52,8 +52,20 @@ void OnGazeDataEvent(TX_HANDLE hGazeDataBehavior)
 	TX_GAZEPOINTDATAEVENTPARAMS eventParams;
 	if (txGetGazePointDataEventParams(hGazeDataBehavior, &eventParams) == TX_RESULT_OK)
 	{
-		// Push back to array
-		eyetracker_global::PushBackRawData(eventParams.X, eventParams.Y, true);
+		// Push back to vector
+		using namespace std::chrono;
+		eyetracker_global::PushBackSample(
+			SampleData(
+				eventParams.X, // x
+				eventParams.Y, // y
+				true, // valid (TODO: check this. X or Y not -1 when invalid?)
+				duration_cast<milliseconds>(
+					system_clock::now().time_since_epoch() // timestamp
+					)
+			)
+		);
+
+		// When gaze samples are received, tracking seems to work...
 		Tracking = true; // kinda hack: initially, no onEngineStateChanged is triggered. So initial state is unkown and even txGetState does not work. This workaround sets Tracking at first gaze sample to true
 	}
 }
@@ -178,7 +190,12 @@ bool Disconnect()
 	return success;
 }
 
-void FetchGaze(int maxSampleCount, std::vector<double>& rGazeX, std::vector<double>& rGazeY)
+void FetchSamples(SampleQueue& rupSamples)
 {
-	eyetracker_global::GetKOrLessValidRawGazeEntries(maxSampleCount, rGazeX, rGazeY);
+	eyetracker_global::FetchSamples(rupSamples);
+}
+
+void Calibrate()
+{
+	// Not available
 }

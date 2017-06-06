@@ -15,6 +15,7 @@
 // - PagePixel Coordinates: Pixel coordinates as rendered by CEF inclusive scrolling
 // All coordinate system have their origin at the upper left corner!
 // TODO: y-axis always from top to down?
+// TODO: define coordinate system for unscrolled (like defined in webpage code)
 
 #ifndef TAB_H_
 #define TAB_H_
@@ -28,8 +29,9 @@
 #include "src/State/Web/Tab/Triggers/TextInputTrigger.h"
 #include "src/State/Web/Tab/Triggers/SelectFieldTrigger.h"
 #include "src/Utils/glmWrapper.h"
-#include "src/Utils/Input.h"
+#include "src/Input/Input.h"
 #include "src/Global.h"
+#include "src/State/Web/Tab/Pipelines/PointingEvaluationPipeline.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 #include <vector>
 #include <deque>
@@ -58,7 +60,7 @@ public:
     virtual ~Tab();
 
     // Update
-    void Update(float tpf, Input& rInput);
+    void Update(float tpf, const std::shared_ptr<const Input> spInput);
 
     // Draw
     void Draw() const;
@@ -88,6 +90,9 @@ public:
     bool CanGoBack() const { return _canGoBack; }
     bool CanGoForward() const { return _canGoForward; }
 
+	// Pushs back pointing evaluation pipeline
+	void PushBackPointingEvaluationPipeline(PointingApproach approach);
+
     // #################################
     // ### TAB INTERACTIVE INTERFACE ###
     // #################################
@@ -112,6 +117,12 @@ public:
         float relativeSizeX,
         float relativeSizeY,
         std::map<std::string, std::string> idMapper);
+	virtual int AddFloatingFrameToOverlay(
+		std::string brickFilepath,
+		float relativePositionX,
+		float relativePositionY,
+		float relativeSizeX,
+		float relativeSizeY);
 
     // Move floating frame in overlay
     virtual void SetPositionOfFloatingFrameInOverlay(
@@ -140,6 +151,9 @@ public:
     // Set case of keyboard letters
     virtual void SetCaseOfKeyboardLetters(std::string id, bool accept);
 
+	// Set keyboard 
+	virtual void SetKeymapOfKeyboard(std::string id, unsigned int keymap);
+
 	// Classify currently selected key
 	virtual void ClassifyKey(std::string id, bool accept);
 
@@ -165,6 +179,9 @@ public:
 	// Delete content in text edit
 	virtual void DeleteContentAtCursorInTextEdit(std::string id, int letterCount);
 
+	// Delete all content in text edit
+	virtual void DeleteContentInTextEdit(std::string id);
+
 	// Get content in active entity
 	virtual std::u16string GetActiveEntityContentInTextEdit(std::string id) const;
 
@@ -182,6 +199,21 @@ public:
 
 	// Set activity of element
 	virtual void SetElementActivity(std::string id, bool active, bool fade);
+
+	// Tell button to go up
+	virtual void ButtonUp(std::string id);
+
+	// Set global keyboard layout
+	virtual void SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout);
+
+	// Set space of flow
+	virtual void SetSpaceOfFlow(std::string id, float space);
+
+	// Add brick to stack
+	virtual void AddBrickToStack(
+		std::string id,
+		std::string brickFilepath,
+		std::map<std::string, std::string> idMapper);
 
 	// Getter for values of interest
 	virtual int GetWebViewX() const;
@@ -223,9 +255,6 @@ public:
 
 	// Get text out of global clipboard in mediator
 	virtual std::string GetClipboardText() const;
-
-	// Set text in text input field
-	virtual void InputTextData(int64 frameID, int nodeID, std::string text, bool submit);
 
     // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available. Distance in page pixels
     virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pagePixelCoordinate, float& rDistance) const;
@@ -579,8 +608,6 @@ private:
 
 	// Current loading icon frame
 	int _loadingIconFrame = 0;
-
-
 };
 
 #endif // TAB_H_

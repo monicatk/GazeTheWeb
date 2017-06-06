@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <grid showbackground="true" consumeinput="true" style="tab_overlay">
-	<row size="35%">
+	<row size="32%">
 		<column size="100%">
 				<grid>
 					<row size="100%">
@@ -52,17 +52,27 @@
 				</grid>			
 		</column>
 	</row>
-	<row size="45%">
+	<row size="46%">
 		<column size="100%">
-			<keyboard style="tab_overlay_noback" id="keyboard"/>
+			<keyboard style="tab_overlay_noback" id="keyboard" border="2%"/>
 		</column>
 	</row>
-	<row size="10%">
+	<row size="12%">
 		<column size="100%">
-			<stack orientation="horizontal" separator="0.5%">
+			<stack orientation="horizontal" separator="0.25%">
 				<boxbutton switch="true" icon="icons/Shift.png" id="shift" desckey="action_keyboard:shift"/>
-				<boxbutton id="space" icon="icons/Empty.png" desckey="action_keyboard:space" relativescale="300%"/>
-				<boxbutton icon="icons/NewLine.png" id="new_line" desckey="action_keyboard:new_line"/>
+				<boxbutton switch="true" icon="icons/ExtraKeys.png" id="extra_keys" desckey="action_keyboard:extra_keys" relativescale="75%"/>
+				<dropbutton icon="icons/Layout.png" id="layout" desckey="action_keyboard:layout" space="75%" relativescale="75%">
+					<stack separator="0.25%">
+						<boxbutton icon="icons/LayoutUSEnglish.png" id="layout_us_english" desckey="action_keyboard:layout_us_english"/>
+						<boxbutton icon="icons/LayoutGermanyGerman.png" id="layout_germany_german" desckey="action_keyboard:layout_germany_german"/>
+						<boxbutton icon="icons/LayoutIsraelHebrew.png" id="layout_israel_hebrew" desckey="action_keyboard:layout_israel_hebrew"/>
+						<boxbutton icon="icons/LayoutGreeceGreek.png" id="layout_greece_greek" desckey="action_keyboard:layout_greece_greek"/>
+					</stack>
+				</dropbutton>
+				<boxbutton id="space" icon="icons/Empty.png" desckey="action_keyboard:space" relativescale="200%"/>
+				<boxbutton icon="icons/DeleteAllCharacters.png" id="delete_all" desckey="action_keyboard:delete_all" style="dangerous"/>
+				<boxbutton icon="icons/NewLine.png" id="new_line" desckey="action_keyboard:new_line"  relativescale="150%"/>
 			</stack>
 		</column>
 	</row>

@@ -9,13 +9,17 @@
 
 #include "Pipeline.h"
 #include "src/CEF/Data/DOMNode.h"
+#include "src/CEF/Data/DOMNodeInteraction.h"
 
 class TextInputPipeline : public Pipeline
 {
 public:
 
     // Constructor
-    TextInputPipeline(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInput> spNode);
+	TextInputPipeline(
+		TabInteractionInterface* pTab,
+		std::shared_ptr<const DOMTextInput> spNode,
+		std::shared_ptr<DOMTextInputInteraction> spInteractionNode);
 
 };
 

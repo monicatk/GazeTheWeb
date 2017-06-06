@@ -5,7 +5,7 @@
 //============================================================================
 
 #include "src/State/Web/Tab/Tab.h"
-#include "src/Master.h"
+#include "src/Master/Master.h"
 #include "src/Utils/Logger.h"
 
 int Tab::AddFloatingFrameToOverlay(
@@ -24,6 +24,24 @@ int Tab::AddFloatingFrameToOverlay(
 		relativeSizeX,
 		relativeSizeY,
 		idMapper,
+		false,
+		false);
+}
+
+int Tab::AddFloatingFrameToOverlay(
+	std::string brickFilepath,
+	float relativePositionX,
+	float relativePositionY,
+	float relativeSizeX,
+	float relativeSizeY)
+{
+	return eyegui::addFloatingFrameWithBrick(
+		_pOverlayLayout,
+		brickFilepath,
+		relativePositionX,
+		relativePositionY,
+		relativeSizeX,
+		relativeSizeY,
 		false,
 		false);
 }
@@ -105,6 +123,11 @@ void Tab::SetCaseOfKeyboardLetters(std::string id, bool upper)
 	eyegui::setCaseOfKeyboard(_pOverlayLayout, id, upper ? eyegui::KeyboardCase::UPPER : eyegui::KeyboardCase::LOWER);
 }
 
+void Tab::SetKeymapOfKeyboard(std::string id, unsigned int keymap)
+{
+	eyegui::setKeymapOfKeyboard(_pOverlayLayout, id, keymap);
+}
+
 void Tab::ClassifyKey(std::string id, bool accept)
 {
 	eyegui::classifyKey(_pOverlayLayout, id, accept);
@@ -168,6 +191,12 @@ void Tab::DeleteContentAtCursorInTextEdit(std::string id, int letterCount)
 	eyegui::deleteContentAtCursorInTextEdit(_pOverlayLayout, id, letterCount);
 }
 
+void Tab::DeleteContentInTextEdit(std::string id)
+{
+	// Replace by empty string
+	eyegui::setContentOfTextEdit(_pOverlayLayout, id, u"");
+}
+
 std::u16string Tab::GetActiveEntityContentInTextEdit(std::string id) const
 {
 	return eyegui::getActiveEntityContentInTextEdit(_pOverlayLayout, id);
@@ -196,6 +225,29 @@ void Tab::MoveCursorOverWordsInTextEdit(std::string id, int wordCount)
 void Tab::SetElementActivity(std::string id, bool active, bool fade)
 {
 	eyegui::setElementActivity(_pOverlayLayout, id, active, fade);
+}
+
+void Tab::ButtonUp(std::string id)
+{
+	eyegui::buttonUp(_pOverlayLayout, id, false);
+}
+
+void Tab::SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout)
+{
+	_pMaster->SetKeyboardLayout(keyboardLayout);
+}
+
+void Tab::SetSpaceOfFlow(std::string id, float space)
+{
+	eyegui::setSpaceOfFlow(_pOverlayLayout, id, space);
+}
+
+void Tab::AddBrickToStack(
+	std::string id,
+	std::string brickFilepath,
+	std::map<std::string, std::string> idMapper)
+{
+	eyegui::addBrickToStack(_pOverlayLayout, id, brickFilepath, idMapper);
 }
 
 int Tab::GetWebViewX() const

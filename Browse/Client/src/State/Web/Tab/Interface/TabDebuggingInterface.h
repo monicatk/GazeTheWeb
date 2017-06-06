@@ -2,7 +2,8 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// Tab interface for debugging interfaces
+// Tab interface for debugging overlays. Does not control, whether any global
+// variable is set for showing / hiding debugging overlay.
 
 #ifndef TABDEBUGGINGINTERFACE_H_
 #define TABDEBUGGINGINTERFACE_H_

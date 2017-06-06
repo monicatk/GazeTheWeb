@@ -7,7 +7,7 @@
 #include "src/State/Web/Tab/Pipelines/TextInputPipeline.h"
 #include "src/Singletons/LabStreamMailer.h"
 
-TextInputTrigger::TextInputTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection, std::shared_ptr<DOMTextInput> spNode) : DOMTrigger<DOMTextInput>(pTab, rTriggerCollection, spNode, "bricks/triggers/TextInput.beyegui")
+TextInputTrigger::TextInputTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection, std::shared_ptr<DOMTextInput> spNode) : DOMTrigger<DOMTextInput>(pTab, rTriggerCollection, spNode, "bricks/triggers/TextInput.beyegui", "text_input")
 {
 	// Nothing to do here
 }
@@ -17,10 +17,10 @@ TextInputTrigger::~TextInputTrigger()
 	// Nothing to do here
 }
 
-bool TextInputTrigger::Update(float tpf, TabInput& rTabInput)
+bool TextInputTrigger::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
 	// Call super method
-	bool triggered = DOMTrigger::Update(tpf, rTabInput);
+	bool triggered = DOMTrigger::Update(tpf, spInput);
 
 	// When triggered, push back pipeline to input text
 	if (triggered)
@@ -32,6 +32,7 @@ bool TextInputTrigger::Update(float tpf, TabInput& rTabInput)
 				std::unique_ptr<TextInputPipeline>(
 					new TextInputPipeline(
 						_pTab,
+						_spNode,
 						_spNode))));
 	}
 

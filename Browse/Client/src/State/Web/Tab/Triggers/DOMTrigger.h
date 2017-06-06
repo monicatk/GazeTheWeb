@@ -19,13 +19,13 @@ class DOMTrigger : public Trigger
 public:
 
     // Constructor
-	DOMTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection, std::shared_ptr<T> spNode, std::string brickPath);
+	DOMTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection, std::shared_ptr<T> spNode, std::string brickPath, std::string idExtension);
 
     // Destructor
     virtual ~DOMTrigger() = 0;
 
     // Update
-    virtual bool Update(float tpf, TabInput& rTabInput);
+    virtual bool Update(float tpf, const std::shared_ptr<const TabInput> spInput);
 
     // Draw
     virtual void Draw() const;
@@ -73,13 +73,13 @@ private:
 // ######################
 
 template <class T>
-DOMTrigger<T>::DOMTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection, std::shared_ptr<T> spNode, std::string brickPath) : Trigger(pTab, rTriggerCollection)
+DOMTrigger<T>::DOMTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection, std::shared_ptr<T> spNode, std::string brickPath, std::string idExtension) : Trigger(pTab, rTriggerCollection)
 {
 	// Save member
 	_spNode = spNode;
 
 	// Create id, which is unique in overlay
-	_overlayButtonId = "dom_trigger_" + std::to_string(_spNode->GetId());
+	_overlayButtonId = "dom_trigger_" + idExtension + "_" + std::to_string(_spNode->GetId());
 
 	// Id mapper for brick
 	std::map<std::string, std::string> idMapper;
@@ -110,7 +110,7 @@ DOMTrigger<T>::~DOMTrigger()
 }
 
 template <class T>
-bool DOMTrigger<T>::Update(float tpf, TabInput& rTabInput)
+bool DOMTrigger<T>::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
 	// Decide visibility (TODO: no visibility variable in DOMNode anymore?)
 	bool visible =

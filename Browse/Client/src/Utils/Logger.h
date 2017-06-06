@@ -2,7 +2,7 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// Abstraction of logger.
+// Abstraction of logger. Can be called from threads, too.
 
 #ifndef LOGGER_H_
 #define LOGGER_H_

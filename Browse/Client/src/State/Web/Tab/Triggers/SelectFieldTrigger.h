@@ -20,7 +20,7 @@ public:
 	virtual ~SelectFieldTrigger();
 
 	// Update
-	virtual bool Update(float tpf, TabInput& rTabInput);
+	virtual bool Update(float tpf, const std::shared_ptr<const TabInput> spInput);
 };
 
 #endif // SELECTFIELDTRIGGER_H_

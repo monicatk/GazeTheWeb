@@ -16,7 +16,7 @@ LinkNavigationAction::LinkNavigationAction(TabInteractionInterface* pTab) : Acti
 	AddIntInputSlot("visualize", 1);
 }
 
-bool LinkNavigationAction::Update(float tpf, TabInput tabInput)
+bool LinkNavigationAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
     // Get coordinate from input slot (WebViewPixel space)
     glm::vec2 coordinate;

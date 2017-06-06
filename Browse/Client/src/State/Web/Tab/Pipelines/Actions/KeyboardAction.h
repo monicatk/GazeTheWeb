@@ -24,7 +24,7 @@ public:
     virtual ~KeyboardAction();
 
     // Update retuns whether finished with execution
-    virtual bool Update(float tpf, TabInput tabInput);
+    virtual bool Update(float tpf, const std::shared_ptr<const TabInput> spInput);
 
     // Draw
     virtual void Draw() const;
@@ -78,6 +78,19 @@ protected:
 	std::string _overlayPreviousWordButtonId;
 	std::string _overlayNextLetterButtonId;
 	std::string _overlayPreviousLetterButtonId;
+
+	// Id of delete all button in overlay
+	std::string _overlayDeleteAllButtonId;
+
+	// Ids for layout localization
+	std::string _overlayLayoutId;
+	std::string _overlayEnglishLayoutId;
+	std::string _overlayGermanLayoutId;
+	std::string _overlayHebrewLayoutId;
+	std::string _overlayGreekLayoutId;
+
+	// Id of extra keys keymap
+	std::string _overlayExtraKeyId;
 
     // Bool which indicates whether input is complete
     bool _complete = false;

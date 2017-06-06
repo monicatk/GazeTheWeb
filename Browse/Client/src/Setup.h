@@ -13,15 +13,20 @@
 namespace setup
 {
 	// Window
-	static const bool FULLSCREEN = false;
+	static const bool FULLSCREEN = false; // does not work in combination with eye tracker calibration
+	static const bool MAXIMIZE_WINDOW = true; // only implemented for Windows
 	static const int INITIAL_WINDOW_WIDTH = 1280;
 	static const int INITIAL_WINDOW_HEIGHT = 720;
 
-	// Control
+	// Control TODO: move connect bools to config file
+	static const bool CONNECT_SMI_IVIEWX = false;
+	static const bool CONNECT_VI_MYGAZE = false;
+	static const bool CONNECT_TOBII_EYEX = true;
 	static const float DURATION_BEFORE_INPUT = 1.f; // wait one second before accepting input
 	static const bool PAUSED_AT_STARTUP = false;
 	static const float LINK_CORRECTION_MAX_PIXEL_DISTANCE = 5.f;
 	static const int TEXT_SELECTION_MARGIN = 4; // area which is selected before / after zoom coordinate in CEFPixels
+	static const int FILTER_GAZE_FIXATION_PIXEL_RADIUS = 20;
 	static const bool EYEINPUT_DISTORT_GAZE = false;
 	static const float EYEINPUT_DISTORT_GAZE_BIAS_X = 64.f; // pixels
 	static const float EYEINPUT_DISTORT_GAZE_BIAS_Y = 32.f; // pixels

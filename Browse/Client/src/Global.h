@@ -33,7 +33,6 @@ static const float MASTER_PAUSE_ALPHA = 0.35f;
 static const float EYEINPUT_MOUSE_OVERRIDE_INIT_FRAME_DURATION = 0.25f; // duration between mouse movement is expected. Triggered by initial movement
 static const float EYEINPUT_MOUSE_OVERRIDE_INIT_DISTANCE = 100.f; // pixels on screen (not best but works)
 static const float EYEINPUT_MOUSE_OVERRIDE_STOP_DURATION = 3.f; // duration until override is stopped when no mouse movement done
-static const int EYETRACKER_AVERAGE_SAMPLE_COUNT = 15;
 static const std::string LOG_FILE_NAME = "log";
 static const std::string INTERACTION_FILE_NAME = "interaction";
 static const int LOG_FILE_MAX_SIZE = 1024 * 1024;
@@ -51,6 +50,7 @@ static const std::string SETTINGS_FILE = "settings.xml";
 static const int URL_INPUT_BOOKMARKS_ROWS_ON_SCREEN = 6;
 static const int HISTORY_ROWS_ON_SCREEN = 6;
 static const int HISTORY_DISPLAY_COUNT = 20;
+static const int SELECT_FIELD_OPTIONS_ON_SCREEN = 6;
 static const float NOTIFICATION_WIDTH = 0.75f;
 static const float NOTIFICATION_Y = 0.0075f;
 static const float NOTIFICATION_HEIGHT = 0.06f;
@@ -58,5 +58,8 @@ static const float NOTIFICATION_DISPLAY_DURATION = 5.f;
 static const float CLICK_VISUALIZATION_DURATION = 0.75f;
 static const float CLICK_VISUALIZATION_RELATIVE_SIZE = 0.4f;
 static const std::string SEARCH_PREFIX = "duckduckgo.com?q="; // TODO: move to some kind of config or let the user choose
+static const glm::vec4 NOTIFICATION_NEUTRAL_COLOR = glm::vec4(0.2f, 0.2f, 0.2f, 0.75f);
+static const glm::vec4 NOTIFICATION_SUCCESS_COLOR = glm::vec4(0.15f, 1.0f, 0.0f, 0.75f);
+static const glm::vec4 NOTIFICATION_WARNING_COLOR = glm::vec4(1.0f, 0.15f, 0.0f, 0.75f);
 
 #endif // GLOBAL_H_

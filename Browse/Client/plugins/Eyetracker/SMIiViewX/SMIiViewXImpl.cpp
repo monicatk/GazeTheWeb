@@ -14,8 +14,18 @@ int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 	double gazeX = std::max(sampleData.leftEye.gazeX, sampleData.rightEye.gazeX);
 	double gazeY = std::max(sampleData.leftEye.gazeY, sampleData.rightEye.gazeY);
 
-	// Push back to array
-	eyetracker_global::PushBackRawData(gazeX, gazeY, gazeX != 0 && gazeY != 0);
+	// Push back to vector
+	using namespace std::chrono;
+	eyetracker_global::PushBackSample(
+		SampleData(
+			gazeX, // x
+			gazeY, // y
+			gazeX != 0 && gazeY != 0, // valid
+			duration_cast<milliseconds>(
+				system_clock::now().time_since_epoch() // timestamp
+				)
+		)
+	);
 
 	return 1;
 }
@@ -62,7 +72,12 @@ bool Disconnect()
 	return iV_Disconnect() == RET_SUCCESS;
 }
 
-void FetchGaze(int maxSampleCount, std::vector<double>& rGazeX, std::vector<double>& rGazeY)
+void FetchSamples(SampleQueue& rupSamples)
 {
-	eyetracker_global::GetKOrLessValidRawGazeEntries(maxSampleCount, rGazeX, rGazeY);
+	eyetracker_global::FetchSamples(rupSamples);
+}
+
+void Calibrate()
+{
+	// TODO
 }

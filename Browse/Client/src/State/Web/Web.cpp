@@ -5,7 +5,7 @@
 
 #include "Web.h"
 #include "src/State/Web/Tab/Tab.h"
-#include "src/Master.h"
+#include "src/Master/Master.h"
 #include "src/Global.h"
 #include "src/Utils/Helper.h"
 #include "src/Utils/Texture.h"
@@ -334,7 +334,15 @@ bool Web::OpenURLInTab(int id, std::string URL)
     return false;
 }
 
-StateType Web::Update(float tpf, Input& rInput)
+void Web::PushBackPointingEvaluationPipeline(PointingApproach approach)
+{
+	if (_currentTabId >= 0)
+	{
+		_tabs.at(_currentTabId)->PushBackPointingEvaluationPipeline(approach);
+	}
+}
+
+StateType Web::Update(float tpf, const std::shared_ptr<const Input> spInput)
 {
     // Process jobs first
     while(!_jobs.empty())
@@ -425,7 +433,7 @@ StateType Web::Update(float tpf, Input& rInput)
         eyegui::setElementActivity(_pWebLayout, "forward", _tabs.at(_currentTabId)->CanGoForward(), true);
 
 		
-		_tabs.at(_currentTabId)->Update(tpf, rInput);
+		_tabs.at(_currentTabId)->Update(tpf, spInput);
     }
 
     // Decide what to do next
@@ -891,11 +899,11 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				// Display notification
 				if (success)
 				{
-					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_success");
+					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_success", MasterNotificationInterface::Type::SUCCESS, false);
 				}
 				else
 				{
-					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_existing");
+					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_existing", MasterNotificationInterface::Type::NEUTRAL, false);
 				}
 			}
 

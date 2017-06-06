@@ -8,7 +8,7 @@
 #ifndef ACTION_H_
 #define ACTION_H_
 
-#include "src/Utils/TabInput.h"
+#include "src/Input/Input.h"
 #include "src/State/Web/Tab/Pipelines/Actions/ActionDataMap.h"
 
 // Forward declaration
@@ -25,7 +25,7 @@ public:
     virtual ~Action() = 0;
 
     // Update retuns whether finished with execution
-    virtual bool Update(float tpf, TabInput tabInput) = 0;
+    virtual bool Update(float tpf, const std::shared_ptr<const TabInput> spInput) = 0;
 
     // Draw
     virtual void Draw() const = 0;

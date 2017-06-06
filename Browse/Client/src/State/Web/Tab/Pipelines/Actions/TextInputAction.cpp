@@ -7,11 +7,11 @@
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 
-TextInputAction::TextInputAction(TabInteractionInterface *pTab) : Action(pTab)
+TextInputAction::TextInputAction(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInputInteraction> spInteractionNode) :
+	Action(pTab),
+	_spInteractionNode(spInteractionNode)
 {
     // Add in- and output data slots
-    AddInt64InputSlot("frameId");
-    AddIntInputSlot("nodeId");
     AddString16InputSlot("text");
     AddIntInputSlot("submit");
 }
@@ -21,15 +21,11 @@ TextInputAction::~TextInputAction()
     // Nothing to do
 }
 
-bool TextInputAction::Update(float tpf, TabInput tabInput)
+bool TextInputAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
     // Fetch input values
-    int64 frameId = 0;
-    int nodeId = 0;
     std::u16string text;
     int submit = 0;
-    GetInputValue("frameId", frameId);
-    GetInputValue("nodeId", nodeId);
     GetInputValue("text", text);
     GetInputValue("submit", submit);
 
@@ -37,9 +33,8 @@ bool TextInputAction::Update(float tpf, TabInput tabInput)
 	std::string text8;
 	eyegui_helper::convertUTF16ToUTF8(text, text8);
 
-    // FORMERLY: Just pipe values to CEF mediator through Tab interface
-	// NOW: Call InputText method on DOMNode object
-    _pTab->InputTextData(frameId, nodeId, text8, submit != 0);
+	// Input text
+	_spInteractionNode->InputText(text8, submit);
 
     // Action is done
     return true;

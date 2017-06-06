@@ -16,6 +16,12 @@
 #include <string>
 #include <fstream>
 
+#ifdef _WIN32 // Windows
+// Native access to Windows functions is necessary to maximize window
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include "submodules/glfw/include/GLFW/glfw3native.h"
+#endif
+
 // Namespace for text-csv
 namespace csv = ::text::csv;
 
@@ -220,7 +226,6 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	guiBuilder.width = _width;
 	guiBuilder.height = _height;
 	guiBuilder.fontFilepath = "fonts/dejavu-sans/ttf/DejaVuSans.ttf";
-	guiBuilder.characterSet = eyegui::CharacterSet::US_ENGLISH;
 	guiBuilder.localizationFilepath = "localizations/English.leyegui";
 	guiBuilder.fontTallSize = 0.07f;
 
@@ -321,9 +326,9 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     _upWeb->Activate();
 
     // ### HOMEPAGE ###
-	// _upWeb->AddTab("https://www.tutorialspoint.com/html/html_select_tag.htm");
+	_upWeb->AddTab("https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select");
 	// _upWeb->AddTab(std::string(CONTENT_PATH) + "/websites/index.html");
-	_upWeb->AddTab(_upSettings->GetHomepage());
+	// _upWeb->AddTab(_upSettings->GetHomepage());
 
     // ### SUPER LAYOUT ###
 
@@ -359,8 +364,8 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     eyegui::setInputUsageOfLayout(_pCursorLayout, false);
     _cursorFrameIndex = eyegui::addFloatingFrameWithBrick(_pCursorLayout, "bricks/Cursor.beyegui", 0, 0, 0, 0, true, false); // will be moved and sized in loop
 
-    // ### INPUT ###
-    _upEyeInput = std::unique_ptr<EyeInput>(new EyeInput);
+    // ### EYE INPUT ###
+	_upEyeInput = std::unique_ptr<EyeInput>(new EyeInput(this));
 
     // ### FRAMEBUFFER ###
     _upFramebuffer = std::unique_ptr<Framebuffer>(new Framebuffer(_width, _height));
@@ -395,6 +400,30 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	LabStreamMailer::instance().RegisterCallback(_spLabStreamCallback);
 
     // ### OTHER ###
+
+	// Maximize window if required
+#ifdef _WIN32 // Windows
+	if (!setup::FULLSCREEN && setup::MAXIMIZE_WINDOW)
+	{
+		// Fetch handle to window from GLFW
+		auto Hwnd = glfwGetWin32Window(_pWindow);
+
+		/*
+		// Remove frame from window
+		LONG lStyle = GetWindowLong(Hwnd, GWL_STYLE);
+		lStyle &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
+		SetWindowLong(Hwnd, GWL_STYLE, lStyle);
+
+		// Do same for extended style
+		LONG lExStyle = GetWindowLong(Hwnd, GWL_EXSTYLE);
+		lExStyle &= ~(WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE);
+		SetWindowLong(Hwnd, GWL_EXSTYLE, lExStyle);
+		*/
+
+		// Maximize window
+		SendMessage(Hwnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
+	}
+#endif
 
     // Time
     _lastTime = glfwGetTime();
@@ -435,16 +464,6 @@ void Master::Exit()
 	_pCefMediator->DoMessageLoopWork();
 }
 
-void Master::PushNotification(std::u16string content)
-{
-	_notificationStack.push(content);
-}
-
-void Master::PushNotificationByKey(std::string key)
-{
-	_notificationStack.push(eyegui::fetchLocalization(_pGUI, key));
-}
-
 eyegui::Layout* Master::AddLayout(std::string filepath, int layer, bool visible)
 {
     // Add layout
@@ -473,6 +492,24 @@ void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::StyleProp
 	eyegui::setStyleTreePropertyValue(_pGUI, styleClass, type, value);
 }
 
+void Master::PushNotification(std::u16string content, Type type, bool overridable)
+{
+	_notificationStack.push(Notification(content, type, overridable));
+}
+
+void Master::PushNotificationByKey(std::string key, Type type, bool overridable)
+{
+	_notificationStack.push(Notification(eyegui::fetchLocalization(_pGUI, key), type, overridable));
+}
+
+void Master::threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status)
+{
+	// TODO: make job pushing a method of its own
+	_threadJobsMutex.lock();
+	_threadJobs.push_back(std::make_shared<PushEyetrackerStatusThreadJob>(this, status));
+	_threadJobsMutex.unlock();
+}
+
 void Master::Loop()
 {
 	while (!_exit)
@@ -495,6 +532,15 @@ void Master::Loop()
 			_timeUntilInput -= tpf;
 		}
 
+		// Execute thread jobs
+		_threadJobsMutex.lock(); // lock jobs
+		for (auto& rJob : _threadJobs)
+		{
+			rJob->Execute();
+		}
+		_threadJobs.clear();
+		_threadJobsMutex.unlock(); // unlock jobs
+
 		// Update lab streaming layer mailer to get incoming messages
 		LabStreamMailer::instance().Update();
 
@@ -502,18 +548,41 @@ void Master::Loop()
 		_pCefMediator->Poll(tpf);
 
 		// Notification handling
-		if (_notificationTime <= 0)
+		if (_notificationTime <= 0 || _notificationOverridable)
 		{
 			// Show next notification
 			if (!_notificationStack.empty())
 			{
+				// Fetch notification
+				auto notification = _notificationStack.front();
+				_notificationStack.pop();
+
 				// Set content
-				auto content = _notificationStack.front();
 				eyegui::setContentOfTextBlock(
 					_pSuperLayout,
 					"notification",
-					content);
-				_notificationStack.pop();
+					notification.message);
+
+				// Decide color of notification
+				glm::vec4 color;
+				switch (notification.type)
+				{
+				case(Type::NEUTRAL):
+					color = NOTIFICATION_NEUTRAL_COLOR;
+					break;
+				case(Type::SUCCESS):
+					color = NOTIFICATION_SUCCESS_COLOR;
+					break;
+				case(Type::WARNING):
+					color = NOTIFICATION_WARNING_COLOR;
+					break;
+				}
+				
+				// Set color in state (TODO: would be better to set / add / remove old style of element so color can be defined in stylesheet)
+				eyegui::setStyleTreePropertyValue(_pSuperGUI, "notification", eyegui::StylePropertyVec4::BackgroundColor, RGBAToHexString(color));
+
+				// Remember whether this notification is overridable
+				_notificationOverridable = notification.overridable;
 
 				// Make floating frame visible
 				eyegui::setVisibilityOFloatingFrame(_pSuperLayout, _notificationFrameIndex, true, false, true);
@@ -521,7 +590,7 @@ void Master::Loop()
 				// Reset time
 				_notificationTime = NOTIFICATION_DISPLAY_DURATION;
 			}
-			else
+			else if(_notificationTime <= 0) // hide notification, if empty and time is over
 			{
 				// Hide notification display
 				eyegui::setVisibilityOFloatingFrame(_pSuperLayout, _notificationFrameIndex, false, false, true);
@@ -542,20 +611,17 @@ void Master::Loop()
 		int windowX = 0;
 		int windowY = 0;
 		glfwGetWindowPos(_pWindow, &windowX, &windowY);
-		double gazeX, gazeY; // result of EyeInput update
-		bool gazeUsed = _upEyeInput->Update(
+		auto spInput = _upEyeInput->Update(
 			tpf,
 			currentMouseX,
 			currentMouseY,
-			gazeX,
-			gazeY,
 			windowX,
 			windowY,
 			_width,
-			_height);
+			_height); // returns whether gaze was used (or emulated by mouse)
 
         // Update cursor with original mouse input
-        eyegui::setVisibilityOfLayout(_pCursorLayout, !gazeUsed, false, true);
+        eyegui::setVisibilityOfLayout(_pCursorLayout, spInput->gazeEmulated, false, true);
         float halfRelativeMouseCursorSize = MOUSE_CURSOR_RELATIVE_SIZE / 2.f;
         eyegui::setPositionOfFloatingFrame(
             _pCursorLayout,
@@ -576,38 +642,39 @@ void Master::Loop()
 			eyegui::StylePropertyVec4::BackgroundColor,
             RGBAToHexString(glm::vec4(0, 0, 0, MASTER_PAUSE_ALPHA * _pausedDimming.getValue())));
 
-        // Input struct for eyeGUI
-        eyegui::Input eyeGUIInput;
+		// Check for focus and time until input
+		int focused = glfwGetWindowAttrib(_pWindow, GLFW_FOCUSED);
+		if ((focused <= 0) // window not focused
+			|| (_timeUntilInput > 0)) // do not use input, yet
+		{
+			// TODO: Do it more effeciently (like calling it with NULL instead of reference)
+			spInput->gazeUponGUI = true; // means: gaze already consumed, so nothing reacts anymore
+		}
 
-        // Fill input structure
-        eyeGUIInput.instantInteraction = (_leftMouseButtonPressed && !gazeUsed) || (_enterKeyPressed && gazeUsed);
-        eyeGUIInput.gazeX = (int)gazeX;
-        eyeGUIInput.gazeY = (int)gazeY;
+        // Fill input structure for eyeGUI
+		eyegui::Input eyeGUIInput;
+        eyeGUIInput.instantInteraction =
+			(_leftMouseButtonPressed && spInput->gazeEmulated) // in case of gaze emulation
+			|| (_enterKeyPressed && !spInput->gazeEmulated); // other
+        eyeGUIInput.gazeX = (int)spInput->gazeX;
+        eyeGUIInput.gazeY = (int)spInput->gazeY;
 
-        // Check for focus and time until input
-        int focused = glfwGetWindowAttrib(_pWindow, GLFW_FOCUSED);
-        if((focused <= 0) // window not focused
-            || (_timeUntilInput > 0)) // do not use input, yet
-        {
-            // TODO: Do it more effeciently (like calling it with NULL instead of reference)
-            eyeGUIInput.gazeUsed = true;
-        }
-
-        // Update eyeGUI
-        eyegui::Input usedEyeGUIInput = eyegui::updateGUI(_pSuperGUI, tpf, eyeGUIInput);
+        // Update super GUI, including pause button
+		eyeGUIInput = eyegui::updateGUI(_pSuperGUI, tpf, eyeGUIInput);
 
         if(_paused)
         {
             // Do not pipe input to standard GUI if paused
-            usedEyeGUIInput.gazeUsed = true; // TODO: null pointer would be nicer
+			eyeGUIInput.gazeUsed = true; // TODO: null pointer would be nicer
         }
-        usedEyeGUIInput = eyegui::updateGUI(_pGUI, tpf, usedEyeGUIInput);
+		eyeGUIInput = eyegui::updateGUI(_pGUI, tpf, eyeGUIInput);
 
         // Do message loop of CEF
         _pCefMediator->DoMessageLoopWork();
 
-        // Create input struct for own framework
-        Input input(usedEyeGUIInput.gazeX, usedEyeGUIInput.gazeY, usedEyeGUIInput.gazeUsed, usedEyeGUIInput.instantInteraction);
+        // Update our input structure
+		spInput->gazeUponGUI = eyeGUIInput.gazeUsed;
+		spInput->instantInteraction = eyeGUIInput.instantInteraction;
 
         // Bind framebuffer
         _upFramebuffer->Bind();
@@ -618,16 +685,16 @@ void Master::Loop()
 		// Disable depth test for drawing
 		glDisable(GL_DEPTH_TEST);
 
-        // Update current state (one should use here pointer instead of switch case)
+        // Update current state and draw it (one should use here pointer instead of switch case)
         StateType nextState = StateType::WEB;
         switch (_currentState)
         {
         case StateType::WEB:
-            nextState = _upWeb->Update(tpf, input);
+            nextState = _upWeb->Update(tpf, spInput);
             _upWeb->Draw();
             break;
         case StateType::SETTINGS:
-            nextState = _upSettings->Update(tpf, input);
+            nextState = _upSettings->Update(tpf, spInput);
             _upSettings->Draw();
             break;
         }
@@ -684,7 +751,7 @@ void Master::Loop()
         // Fill uniforms when necessary
         if(setup::BLUR_PERIPHERY)
         {
-            _upScreenFillingQuad->GetShader()->UpdateValue("focusPixelPosition", glm::vec2(usedEyeGUIInput.gazeX, _height - usedEyeGUIInput.gazeY)); // OpenGL coordinate system
+            _upScreenFillingQuad->GetShader()->UpdateValue("focusPixelPosition", glm::vec2(spInput->gazeX, _height - spInput->gazeY)); // OpenGL coordinate system
             _upScreenFillingQuad->GetShader()->UpdateValue("focusPixelRadius", (float)glm::min(_width, _height) * BLUR_FOCUS_RELATIVE_RADIUS);
             _upScreenFillingQuad->GetShader()->UpdateValue("peripheryMultiplier", BLUR_PERIPHERY_MULTIPLIER);
         }
@@ -711,7 +778,12 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
 			case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
+			case GLFW_KEY_C: { _upEyeInput->Calibrate(); break; }
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
+			case GLFW_KEY_6: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::MAGNIFICATION); break; }
+			case GLFW_KEY_7: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::ZOOM); break; }
+			case GLFW_KEY_8: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::DRIFT_CORRECTION); break; }
+			case GLFW_KEY_9: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::DYNAMIC_DRIFT_CORRECTION); break; }
         }
     }
 }
@@ -779,4 +851,28 @@ void Master::MasterButtonListener::up(eyegui::Layout* pLayout, std::string id)
         _pMaster->_paused = false;
         eyegui::setDescriptionVisibility(_pMaster->_pGUI, eyegui::DescriptionVisibility::ON_PENETRATION); // TODO look up in Settings for set value
     }
+}
+
+Master::ThreadJob::~ThreadJob()
+{
+	// For the sake of C++
+}
+
+void Master::PushEyetrackerStatusThreadJob::Execute()
+{
+	switch (_status)
+	{
+	case EyeTrackerStatus::TRYING_TO_CONNECT:
+		_pMaster->PushNotificationByKey("notification:eye_tracker_status:trying_to_connect", MasterNotificationInterface::Type::NEUTRAL, true);
+		break;
+	case EyeTrackerStatus::CONNECTED:
+		_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected", MasterNotificationInterface::Type::SUCCESS, false);
+		break;
+	case EyeTrackerStatus::DISCONNECTED:
+		_pMaster->PushNotificationByKey("notification:eye_tracker_status:disconnected", MasterNotificationInterface::Type::WARNING, false);
+		break;
+	default:
+		// Nothing
+		break;
+	}
 }
