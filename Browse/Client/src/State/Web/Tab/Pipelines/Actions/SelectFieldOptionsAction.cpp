@@ -9,6 +9,9 @@
 
 SelectFieldOptionsAction::SelectFieldOptionsAction(TabInteractionInterface *pTab, std::shared_ptr<const DOMSelectField> spNode) : Action(pTab)
 {
+	// Add in- and output data slots
+	AddIntOutputSlot("option");
+
 	auto options = spNode->GetOptions();
 	for (auto& option : options)
 	{
@@ -24,6 +27,7 @@ SelectFieldOptionsAction::~SelectFieldOptionsAction()
 bool SelectFieldOptionsAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
     // TODO
+	SetOutputValue("option", 1);
 
     // Action is done
     return true;

@@ -4,7 +4,7 @@
 //============================================================================
 // Action to present user options of a select field on a webpage
 // - Input: none
-// - Output: none
+// - Output: int option
 
 #ifndef SELECTFIELDOPTIONSACTION_H_
 #define SELECTFIELDOPTIONSACTION_H_
