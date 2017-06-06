@@ -1,7 +1,6 @@
 Features:
 - Drop Down menu support
 	@Raphael: Prevent click emulation on selectfields (otherwise a fullscreen popup, showing the options, will appear in some cases)
-	- Only GUI missing
 - Auto Fill / Password Manager
 	- Keyboard has to feature this mode
 - New DOM node types (inclusive abstract superclass)
