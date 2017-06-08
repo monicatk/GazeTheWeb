@@ -110,8 +110,6 @@ public:
 
 	bool SetLoadingStatus(CefRefPtr<CefBrowser> browser, int64 frameID, bool isMain, bool isLoading);
 
-	// Execute scrolling request from Tab in determined Overflow Element with elemId
-	void ScrollOverflowElement(TabCEFInterface* pTab, int elemId, int x, int y, std::vector<int> fixedIds = {});
 
 	/* DOM relevant methods */
 

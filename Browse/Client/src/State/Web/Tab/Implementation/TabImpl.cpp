@@ -416,7 +416,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 					// Check if current gaze is inside of overflow element, if so execute scrolling method in corresponding Javascript object
 					if (rRect.IsInside(scrolledCEFPixelGazeX, scrolledCEFPixelGazeY))
 					{
-						ScrollOverflowElement(rOverflowElement->GetId(), CEFPixelGazeX, CEFPixelGazeY);
+						rOverflowElement->Scroll(CEFPixelGazeX, CEFPixelGazeY);
 						break;
 					}
 				}

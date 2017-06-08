@@ -94,7 +94,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 				// Handle error case
 				if (iter == keys.end())
 				{
-					IPCLog(browser, "Renderer: Invalid JS execution respond received! Aborting.");
+					//IPCLog(browser, "Renderer: Invalid JS execution respond received! Aborting.");
 					context->Exit();
 					return true;
 				}

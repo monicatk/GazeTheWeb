@@ -45,19 +45,15 @@ void DOMTextInputInteraction::InputText(std::string text, bool submit)
 
 void DOMOverflowElementInteraction::Scroll(int x, int y, std::vector<int> fixedIds)
 {
-	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("ExecuteJavascriptFunction");
-	const auto& args = msg->GetArgumentList();
-
-	args->SetString(0, "ScrollOverflowElement");
-	args->SetInt(1, GetId());
-	args->SetInt(2, x);
-	args->SetInt(3, y);
-
+	CefRefPtr<CefListValue> param = CefListValue::Create();
+	param->SetInt(0, x);
+	param->SetInt(1, y);
 	CefRefPtr<CefListValue> ids = CefListValue::Create();
 	for (const auto& id : fixedIds)
 		ids->SetInt(ids->GetSize(), id);
+	param->SetList(2, ids);
 
-	args->SetList(4, ids);
+	CefRefPtr<CefProcessMessage> msg = SetupExecuteFunctionMessage("scroll", param);
 
 	SendProcessMessageToRenderer(msg);
 }

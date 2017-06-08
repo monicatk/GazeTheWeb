@@ -259,9 +259,6 @@ public:
     // Get distance to next link and weak pointer to it. Returns empty weak pointer if no link available. Distance in page pixels
     virtual std::weak_ptr<const DOMNode> GetNearestLink(glm::vec2 pagePixelCoordinate, float& rDistance) const;
 
-	// Execute scrolling in determined Overflow Element with elemId, x and y are delta values for each dimension
-	virtual void ScrollOverflowElement(int elemId, int x, int y);
-
 	// Convert WebViewPixel coordinate to CEFPixel coordinate
 	void ConvertToCEFPixel(double& rWebViewPixelX, double& rWebViewPixelY) const;
 

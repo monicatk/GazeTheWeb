@@ -337,7 +337,6 @@ void Tab::SetLoadingStatus(int64 frameID, bool isMain, bool isLoading)
 
 bool Tab::SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg)
 {
-	LogDebug("Tab: Forwarding process message!");
 	return _pCefMediator->SendProcessMessageToRenderer(msg, this);
 }
 

@@ -102,64 +102,44 @@ std::string Tab::GetClipboardText() const
 
 std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pagePixelCoordinate, float& rDistance) const
 {
-    if(_TextLinkMap.empty())
-    {
-        // No link available
-        rDistance = -1;
-        return std::weak_ptr<DOMNode>();
-    }
-    else
-    {
-        // Get link with minimal distance
-        float minDistance = std::numeric_limits<float>::max();
-        std::weak_ptr<const DOMNode> wpResult;
-
-        // Go over links
-        for(const auto& idLinkPair : _TextLinkMap)
-        {
-            // Go over rectangles of that link
-            for(const auto& rRect : idLinkPair.second->GetRects())
-            {
-                // Distance
-                float dx = glm::max(glm::abs(pagePixelCoordinate.x - rRect.Center().x) - (rRect.Width() / 2.f), 0.f);
-                float dy = glm::max(glm::abs(pagePixelCoordinate.y - rRect.Center().y) - (rRect.Height() / 2.f), 0.f);
-                float distance = glm::sqrt((dx * dx) + (dy * dy));
-
-                // Check whether distance is smaller
-                if(distance < minDistance)
-                {
-                    minDistance = distance;
-                    wpResult = idLinkPair.second;
-                }
-            }
-        }
-
-        // Return result
-        rDistance = minDistance;
-        return wpResult;
-    }
-}
-
-void Tab::ScrollOverflowElement(int elemId, int x, int y)
-{
-	std::vector<int> inside_fixed_element;
-	for (int i = 0; i < _fixedElements.size(); i++)
+	if (_TextLinkMap.empty())
 	{
-		for (int j = 0; j < _fixedElements[i].size(); j++)
+		// No link available
+		rDistance = -1;
+		return std::weak_ptr<DOMNode>();
+	}
+	else
+	{
+		// Get link with minimal distance
+		float minDistance = std::numeric_limits<float>::max();
+		std::weak_ptr<const DOMNode> wpResult;
+
+		// Go over links
+		for (const auto& idLinkPair : _TextLinkMap)
 		{
-			if (_fixedElements[i][j].IsInside(x, y))
+			// Go over rectangles of that link
+			for (const auto& rRect : idLinkPair.second->GetRects())
 			{
-				inside_fixed_element.push_back(i);
-				break;
+				// Distance
+				float dx = glm::max(glm::abs(pagePixelCoordinate.x - rRect.Center().x) - (rRect.Width() / 2.f), 0.f);
+				float dy = glm::max(glm::abs(pagePixelCoordinate.y - rRect.Center().y) - (rRect.Height() / 2.f), 0.f);
+				float distance = glm::sqrt((dx * dx) + (dy * dy));
+
+				// Check whether distance is smaller
+				if (distance < minDistance)
+				{
+					minDistance = distance;
+					wpResult = idLinkPair.second;
+				}
 			}
 		}
+
+		// Return result
+		rDistance = minDistance;
+		return wpResult;
 	}
-	//for (const auto& i : inside_fixed_element)
-	//{
-	//	LogDebug("DEBUG: Scrolling is performed in fixed element=", i);
-	//}
-	_pCefMediator->ScrollOverflowElement(this, elemId, x, y, inside_fixed_element);
 }
+
 
 void Tab::ConvertToCEFPixel(double& rWebViewPixelX, double& rWebViewPixelY) const
 {
