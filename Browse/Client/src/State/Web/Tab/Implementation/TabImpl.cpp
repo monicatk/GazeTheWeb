@@ -183,6 +183,9 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		webViewPixelGazeY,
 		webViewRelativeGazeX,
 		webViewRelativeGazeY);
+	double CEFPixelGazeX = spTabInput->webViewPixelGazeX;
+	double CEFPixelGazeY = spTabInput->webViewPixelGazeY;
+	ConvertToCEFPixel(CEFPixelGazeX, CEFPixelGazeY);
 
 	// Update highlight rectangle of webview
 	// TODO: alternative: give webview shared pointer to DOM nodes
@@ -243,9 +246,9 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
         _pDebugLayout,
         "web_view_coordinate",
         "Fixed:\n"
-        + std::to_string(webViewPixelGazeX) + ", " + std::to_string(webViewPixelGazeY) + "\n"
+        + std::to_string(CEFPixelGazeX) + ", " + std::to_string(CEFPixelGazeY) + "\n"
         + "Scrolled:\n"
-        + std::to_string((int)(webViewPixelGazeX + _scrollingOffsetX)) + ", " + std::to_string((int)(webViewPixelGazeY + _scrollingOffsetY)));
+        + std::to_string((int)(CEFPixelGazeX + _scrollingOffsetX)) + ", " + std::to_string((int)(CEFPixelGazeY + _scrollingOffsetY)));
 
 	// #######################################
     // ### UPDATE PIPELINE OR STANDARD GUI ###
@@ -341,9 +344,6 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		eyegui::setElementActivity(_pPanelLayout, "scroll_to_top", showScrollUp, true);
 
 		// Check, that gaze is not upon a fixed element
-		double CEFPixelGazeX = spTabInput->webViewPixelGazeX;
-		double CEFPixelGazeY = spTabInput->webViewPixelGazeY;
-		ConvertToCEFPixel(CEFPixelGazeX, CEFPixelGazeY);
 		bool gazeUponFixed = false;
 		for (const auto& rElements : _fixedElements)
 		{
@@ -367,7 +367,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 			yOffset *= 2; // [-1..1]
 			bool negative = yOffset < 0;
 			yOffset = yOffset * yOffset; // [0..1]
-										 // yOffset = (glm::max(0.f, yOffset - 0.05f) / 0.95f); // In the center of view no movement
+			// yOffset = (glm::max(0.f, yOffset - 0.05f) / 0.95f); // In the center of view no movement
 			yOffset = negative ? -yOffset : yOffset; // [-1..1]
 
 			// Update the auto scrolling value (TODO: not frame rate independend)
@@ -395,19 +395,18 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
         }
 
 		// Autoscroll inside of DOMOverflowElement if gazed upon
-		bool overflowScrolling = false;
-		for (const auto& rIdOverflowPair : _OverflowElementMap)
+		for (auto& rIdOverflowPair : _OverflowElementMap)
 		{
-			const auto& rOverflowElement = rIdOverflowPair.second;
-			if (rOverflowElement)
+			auto& rspOverflowElement = rIdOverflowPair.second;
+			if (rspOverflowElement)
 			{
-				for (const auto& rRect : rOverflowElement->GetRects())
+				for (const auto& rRect : rspOverflowElement->GetRects())
 				{
 					int scrolledCEFPixelGazeX = CEFPixelGazeX;
 					int scrolledCEFPixelGazeY = CEFPixelGazeY;
 
-					// Do NOT add scrolling offset if element is fixed
-					if (!rOverflowElement->GetFixedId())
+					// Do add scrolling offset if element is not fixed
+					if (!rspOverflowElement->GetFixedId())
 					{
 						scrolledCEFPixelGazeX += _scrollingOffsetX;
 						scrolledCEFPixelGazeY += _scrollingOffsetY;
@@ -416,17 +415,12 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 					// Check if current gaze is inside of overflow element, if so execute scrolling method in corresponding Javascript object
 					if (rRect.IsInside(scrolledCEFPixelGazeX, scrolledCEFPixelGazeY))
 					{
-						rOverflowElement->Scroll(CEFPixelGazeX, CEFPixelGazeY);
+						rspOverflowElement->Scroll(CEFPixelGazeX, CEFPixelGazeY);
 						break;
 					}
 				}
-				if (overflowScrolling)
-				{
-					break;
-				}
 			}
 		}
-		//LogDebug(tabInput.webViewGazeX, "\t",tabInput.webViewGazeY);
 
 		// #######################
 		// ### Update triggers ###
