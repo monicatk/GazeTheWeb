@@ -113,8 +113,10 @@ void Handler::OnLoadError(
     frame->LoadString(ss.str(), failedUrl);
 }
 
-void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame)
+void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, TransitionType transition_type)
 {
+	// TODO CEF UPDATE: what is transition_type
+
 	// Set loading status of each in Tab to loading in order to display loading icon and status
 	_pMediator->SetLoadingStatus(browser, frame->GetIdentifier(), frame->IsMain(), true);
 
@@ -360,7 +362,6 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 bool Handler::OnJSDialog(
 	CefRefPtr<CefBrowser> browser,
 	const CefString& origin_url,
-	const CefString& accept_lang,
 	JSDialogType dialog_type,
 	const CefString& message_text,
 	const CefString& default_prompt_text,
@@ -683,4 +684,3 @@ void Handler::SendToJSLoggingMediator(std::string message)
 	}
 	
 }
-

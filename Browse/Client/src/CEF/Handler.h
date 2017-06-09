@@ -63,7 +63,7 @@ public:
 		bool* no_javascript_access) OVERRIDE;
 
     // Loading state callbacks
-    virtual void OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame) OVERRIDE;
+    virtual void OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, TransitionType transition_type) OVERRIDE;
     virtual void OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode) OVERRIDE;
     virtual void OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
         bool isLoading,
@@ -89,7 +89,6 @@ public:
 	virtual bool OnJSDialog(
 		CefRefPtr<CefBrowser> browser,
 		const CefString& origin_url,
-		const CefString& accept_lang,
 		JSDialogType dialog_type,
 		const CefString& message_text,
 		const CefString& default_prompt_text,

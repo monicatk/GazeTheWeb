@@ -16,7 +16,9 @@ Gaze-controlled Web browser, part of the EU-funded research project MAMEM. There
 Since the CEF3 binaries for Windows and Linux do not like each other, one has to copy them manually into the cloned project. Just follow these easy steps:
 
 1. Clone this repository.
-2. Download either Windows 32bit or Linux 64bit CEF 3.x binaries of branch 2454 [**here**](https://cefbuilds.com/#branch_2454).
+2. Download either Windows 32bit or Linux 64bit CEF 3.x binaries in standard distribution from [here](http://opensource.spotify.com/cefbuilds/index.html)
+ * Windows Version: CEF 3.3071.1634.g9cc59c8 / Chromium 59.0.3071.82
+ * Linux Version: CEF 3.3071.1636.g2718da5 / Chromium 59.0.3071.82
 3. Extract the downloaded files and copy following content into the locally cloned repository:
  * include
  * libcef_dll
@@ -25,7 +27,7 @@ Since the CEF3 binaries for Windows and Linux do not like each other, one has to
  * Resources
  * README.txt
  * LICENSE.txt
- * **DO NOT** overwrite the provided CMakeLists.txt, otherwise the Prototype and Client is not found.
+ * **DO NOT** overwrite the provided CMakeLists.txt and the content of cmake folder.
 5. Folder structure should look like this screenshot:
  * ![Folder structure](media/Folder.png)
 5. If prototype should be built too, one has to include its subdirectory in the main CMakeLists, line 532.

@@ -11,6 +11,7 @@
 
 #include "src/Utils/Helper.h"
 #include "include/wrapper/cef_message_router.h"
+#include "include/cef_base.h"
 #include <functional>
 
 class Mediator; // Forward declaration
@@ -65,7 +66,7 @@ private:
 };
 
 // Router that owns multiple handlers for messages
-class MessageRouter : public CefBase
+class MessageRouter : public CefBaseRefCounted
 {
 public:
 

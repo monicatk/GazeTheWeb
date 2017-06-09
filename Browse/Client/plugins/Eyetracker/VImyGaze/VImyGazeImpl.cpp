@@ -8,6 +8,9 @@
 #include "myGazeAPI.h"
 #include <algorithm>
 
+// Because Windows
+#undef max
+
 // Global variables
 static bool serverOwner = false;
 

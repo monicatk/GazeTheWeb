@@ -8,6 +8,9 @@
 #include "iViewXAPI.h"
 #include <algorithm>
 
+// Because Windows
+#undef max
+
 int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 {
 	// Get max from both eyes (assuming, that values at failure are smaller)

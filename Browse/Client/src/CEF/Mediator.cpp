@@ -31,7 +31,7 @@ void Mediator::RegisterTab(TabCEFInterface* pTab)
         - windowless_frame_rate: default 30 fps, maximum 60
     */
     CefWindowInfo window_info;				// CefBrowser relevant information
-    window_info.SetAsWindowless(0, false);	// Window handle set to zero (may cause visual errors)
+    window_info.SetAsWindowless(0);			// Window handle set to zero (may cause visual errors)
     CefBrowserSettings browser_settings;	// Browser settings
 
     // Enable WebGL part 1 (other is in App.cpp)

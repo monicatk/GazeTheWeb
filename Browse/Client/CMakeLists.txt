@@ -31,6 +31,12 @@ if(OS_LINUX) # Linux
 	add_definitions(-Doff_t=__off_t)
 endif()
 
+if(OS_WINDOWS) # Windows
+	# Do not use MSVC RUNTIME_LIBRARY_DLL TODO: in GLFW it is already a compiler flag. Maybe there is a better way than this force?
+	set(CMAKE_C_FLAGS_DEBUG "/MTd" CACHE STRING "compiler flag" FORCE)
+	set(CMAKE_C_FLAGS_RELEASE "/MT" CACHE STRING "compiler flag" FORCE)
+endif()
+
 ### EYETRACKER PLUGINS #########################################################
 
 set(EYETRACKER_PLUGIN_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/plugins/Eyetracker")
@@ -190,7 +196,7 @@ set(GLFW_INSTALL OFF CACHE INTERNAL "GLFW install.")
 set(GLFW_DOCUMENT_INTERNALS OFF CACHE INTERNAL "GLFW document internals.")
 set(GLFW_USE_EGL OFF CACHE INTERNAL "GLFW use EGL.")
 set(GLFW_USE_HYBRID_HPG OFF CACHE INTERNAL "GLFW use hybrid HPG.")
-set(USE_MSVC_RUNTIME_LIBRARY_DLL ON CACHE INTERNAL "MSCV runtime library dll.")
+set(USE_MSVC_RUNTIME_LIBRARY_DLL OFF CACHE INTERNAL "MSCV runtime library dll.")
 set(GLFW_VULKAN_STATIC OFF CACHE INTERNAL "Use the Vulkan loader statically linked into application.")
 set(LIB_SUFFIX "" CACHE INTERNAL "Suffix of lib.")
 set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "GLFW build shared libs.")
@@ -257,6 +263,7 @@ if(OS_WINDOWS) # Windows
 
 	# Creation of executeable
 	add_executable(${CEF_TARGET} WIN32 ${ALL_CODE} ${RESOURCE_FILE})
+	SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_TARGET})
 
 	# TODO: put resources in extra source group
 
@@ -281,7 +288,7 @@ if(OS_WINDOWS) # Windows
 	endif()
 
 	# Add the custom manifest files to the executable
-	ADD_WINDOWS_MANIFEST("${CMAKE_CURRENT_SOURCE_DIR}" "${CEF_TARGET}")
+	ADD_WINDOWS_MANIFEST("${CMAKE_CURRENT_SOURCE_DIR}" "${CEF_TARGET}" "exe")
 
 	# Copy binary and resource files to the target output directory
 	COPY_FILES("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "${CEF_TARGET_OUT_DIR}")
@@ -300,6 +307,7 @@ elseif(OS_LINUX) # Linux
 
 	# Creation of executeable
 	add_executable(${CEF_TARGET} ${ALL_CODE})
+	SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_TARGET})
 
 	# Add dependencies
 	add_dependencies(${CEF_TARGET} libcef_dll_wrapper)

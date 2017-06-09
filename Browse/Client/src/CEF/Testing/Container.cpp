@@ -41,7 +41,8 @@ void V8_Container::AddContainerArray(CefRefPtr<CefV8Context> context, std::strin
 
 CefRefPtr<CefV8Value> V8_Container::CreateContainerV8Object()
 {
-    CefRefPtr<CefV8Value> containerObj = CefV8Value::CreateObject(NULL);
+	// TODO CEF UPDATE: what is second parameter?
+    CefRefPtr<CefV8Value> containerObj = CefV8Value::CreateObject(NULL, NULL);
 
     for (int i = 0; i < (int)_scheme.size(); i++)
     {
