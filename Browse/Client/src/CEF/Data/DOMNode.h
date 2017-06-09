@@ -12,10 +12,10 @@
 #include "src/CEF/Data/Rect.h"
 #include "src/Utils/glmWrapper.h"
 #include "src/CEF/Data/DOMAttribute.h"
+#include "include/cef_process_message.h"
 #include <vector>
 #include <string>
 #include <memory>
-#include <include/cef_process_message.h>
 #include <functional> // for debugging purposes at the moment
 
 namespace DOM
@@ -36,12 +36,14 @@ namespace DOM
 class DOMNode : public virtual DOMJavascriptCommunication
 {
 public:
+
 	// Empty construction
 	DOMNode(Tab* pTab, int id) : 
 		_id(id), DOMJavascriptCommunication(pTab) {};
 
-	// Define initialization through ICP message in each DOMNode subclass
+	// Define initialization through IPC message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
+
 	// CefProcessMessage to C++ object
 	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data);
 
@@ -69,11 +71,9 @@ private:
 	static const std::vector<DOMAttribute> _description;
 	int _id;
 	std::vector<Rect> _rects = {};
-	int _fixedId = -1;				// first FixedElement's ID, which is hierarchically above this node, if any
-	int _overflowId = -1;				// first DOMOverflowElement's ID, which is hierarchically above this node, if any
-
+	int _fixedId = -1;		// first FixedElement's ID, which is hierarchically above this node, if any
+	int _overflowId = -1;	// first DOMOverflowElement's ID, which is hierarchically above this node, if any
 };
-
 
 /*
    ___  ____  __  _________        __  ____               __    
@@ -128,7 +128,6 @@ private:
 	bool _isPassword = false;
 };
 
-
 /*
    ___  ____  __  _____   _      __      
   / _ \/ __ \/  |/  / /  (_)__  / /__ ___
@@ -179,13 +178,13 @@ private:
 
 };
 
-
-
 /*
-   __________   _______________  ______________   ___  ____
-  / __/ __/ /  / __/ ___/_  __/ / __/  _/ __/ /  / _ \/ __/
- _\ \/ _// /__/ _// /__  / /   / _/_/ // _// /__/ // /\ \  
-/___/___/____/___/\___/ /_/   /_/ /___/___/____/____/___/
+    ____  ____  __  ________      __          __  _______      __    __
+   / __ \/ __ \/  |/  / ___/___  / /__  _____/ /_/ ____(_)__  / /___/ /____
+  / / / / / / / /|_/ /\__ \/ _ \/ / _ \/ ___/ __/ /_  / / _ \/ / __  / ___/
+ / /_/ / /_/ / /  / /___/ /  __/ /  __/ /__/ /_/ __/ / /  __/ / /_/ (__  )
+/_____/\____/_/  /_//____/\___/_/\___/\___/\__/_/   /_/\___/_/\__,_/____/
+
 */
 
 class DOMSelectField : 
@@ -230,10 +229,11 @@ private:
 
 
 /*
-  ____               _____           ______                   __    
- / __ \_  _____ ____/ _/ /__ _    __/ __/ /__ __ _  ___ ___  / /____
-/ /_/ / |/ / -_) __/ _/ / _ \ |/|/ / _// / -_)  ' \/ -_) _ \/ __(_-<
-\____/|___/\__/_/ /_//_/\___/__,__/___/_/\__/_/_/_/\__/_//_/\__/___/
+    ____  ____  __  _______                  ______              ________                          __
+   / __ \/ __ \/  |/  / __ \_   _____  _____/ __/ /___ _      __/ ____/ /__  ____ ___  ___  ____  / /______
+  / / / / / / / /|_/ / / / / | / / _ \/ ___/ /_/ / __ \ | /| / / __/ / / _ \/ __ `__ \/ _ \/ __ \/ __/ ___/
+ / /_/ / /_/ / /  / / /_/ /| |/ /  __/ /  / __/ / /_/ / |/ |/ / /___/ /  __/ / / / / /  __/ / / / /_(__  )
+/_____/\____/_/  /_/\____/ |___/\___/_/  /_/ /_/\____/|__/|__/_____/_/\___/_/ /_/ /_/\___/_/ /_/\__/____/
 */
 
 class DOMOverflowElement : 
@@ -285,6 +285,3 @@ private:
 };
 
 #endif  // DOMNODE_H_
-
-
-
