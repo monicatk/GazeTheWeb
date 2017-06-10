@@ -8,20 +8,23 @@ ConsolePrint("Starting to import dom_fixed_elements.js ...");
 
 // new version of window.fixed_elements
 window.domFixedElements = [];
+debugFixedNodes = []; // DEBUG
 
 /** Constructor */
 function FixedElement(node)
 {
     /* Code executed on constructor call ... */
     // Add FixedElement Object to list and determine its id
-    if(window.domFixedElements.indexOf(node) !== -1)
+    if(GetFixedElementByNode(node) === undefined)
     {
         window.domFixedElements.push(this);
-        this.id = window.domFixedElements.indexOf(node);
+        this.id = window.domFixedElements.indexOf(this);
+        // console.log("Creating FixedElement with id="+this.id);
     }
     else
     {
         console.log("Node already marked as fixed element! Aborting object creation!");
+        debugFixedNodes.push(node); // DEBUG
         return;
     }
 
@@ -29,7 +32,7 @@ function FixedElement(node)
     /* Attributes */
     this.node = node;
     this.rects = [];
-    this.id = -1;
+
 
 
     /**
@@ -152,7 +155,7 @@ function FixedElement(node)
             // Inform CEF that fixed element has been updated
             // var debug = (window.domFixedElements[this.id] === undefined) ? "undefined" : "ok";
             ConsolePrint("#fixElem#add#"+this.id+"#");
-            console.log("FixedElement "+this.id+" updated.");
+            // console.log("FixedElement "+this.id+" updated.");
             //   ConsolePrint("-----> #fixElem#add#"+this.id); // DEBUG
 
 
