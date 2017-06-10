@@ -515,16 +515,16 @@ void RenderProcessHandler::OnContextReleased(CefRefPtr<CefBrowser> browser,
 		IPCLogDebug(browser, "### Context released for main frame. ###");
 
         // Release all created V8 values, when context is released
-        CefRefPtr<CefV8Value> globalObj = context->GetGlobal();
+        //CefRefPtr<CefV8Value> globalObj = context->GetGlobal();
 
-        globalObj->DeleteValue("_pageWidth");
-        globalObj->DeleteValue("_pageHeight");
+        //globalObj->DeleteValue("_pageWidth");
+        //globalObj->DeleteValue("_pageHeight");
 
-        globalObj->DeleteValue("sizeTextLinks");
-        globalObj->DeleteValue("sizeTextInputs");
+        //globalObj->DeleteValue("sizeTextLinks");
+        //globalObj->DeleteValue("sizeTextInputs");
 
-        globalObj->DeleteValue("favIconHeight");
-        globalObj->DeleteValue("favIconWidth");
+        //globalObj->DeleteValue("favIconHeight");
+        //globalObj->DeleteValue("favIconWidth");
 
 		// DEBUG
 		// frame->ExecuteJavaScript("MutationObserverShutdown()", "", 0);
