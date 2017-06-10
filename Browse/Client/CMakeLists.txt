@@ -32,9 +32,8 @@ if(OS_LINUX) # Linux
 endif()
 
 if(OS_WINDOWS) # Windows
-	# Do not use MSVC RUNTIME_LIBRARY_DLL TODO: in GLFW it is already a compiler flag. Maybe there is a better way than this force?
-	set(CMAKE_C_FLAGS_DEBUG "/MTd" CACHE STRING "compiler flag" FORCE)
-	set(CMAKE_C_FLAGS_RELEASE "/MT" CACHE STRING "compiler flag" FORCE)
+	# Do not use MSVC RUNTIME_LIBRARY_DLL but static one
+	add_definitions(/MT) # TODO: use MTd for Debug, like glfw is doing it
 endif()
 
 ### EYETRACKER PLUGINS #########################################################
