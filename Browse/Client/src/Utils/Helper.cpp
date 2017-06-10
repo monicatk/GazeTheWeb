@@ -171,7 +171,7 @@ std::vector<std::string> SplitBySeparator(std::string str, char separator)
 	std::vector<char> buffer;
 
 	// Go over string
-	for (int i = 0; i < str.length(); i++)
+	for (int i = 0; i < (int)str.length(); i++)
 	{
 		// Read single character
 		const char read = str.at(i);

@@ -32,8 +32,7 @@ if(OS_LINUX) # Linux
 endif()
 
 if(OS_WINDOWS) # Windows
-	# Do not use MSVC RUNTIME_LIBRARY_DLL but static one
-	add_definitions(/MT) # TODO: use MTd for Debug, like glfw is doing it
+	add_definitions(/MT) # Do not use MSVC RUNTIME_LIBRARY_DLL but static one. And no MTd, as CEF only uses MT
 endif()
 
 ### EYETRACKER PLUGINS #########################################################
@@ -283,7 +282,8 @@ if(OS_WINDOWS) # Windows
 	if(USE_SANDBOX)
 		# Logical target used to link the cef_sandbox library
 		ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
-		target_link_libraries(${CEF_TARGET} cef_sandbox_lib ${CEF_SANDBOX_STANDARD_LIBS})
+		SET_TARGET_PROPERTIES(${CEF_TARGET} PROPERTIES LINK_FLAGS -LTCG) # CEF compilation output tell one to do so
+		target_link_libraries(${CEF_TARGET} cef_sandbox_lib ${CEF_SANDBOX_STANDARD_LIBS} )
 	endif()
 
 	# Add the custom manifest files to the executable
