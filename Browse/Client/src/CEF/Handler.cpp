@@ -475,21 +475,7 @@ void Handler::EmulateMouseWheelScrolling(CefRefPtr<CefBrowser> browser, double d
     //DLOG(INFO) << "Emulating mouse wheel, browserID=" << browser->GetIdentifier();
     browser->GetHost()->SendMouseWheelEvent(event, deltaX, deltaY);
 }
-//
-//bool Handler::InputTextData(CefRefPtr<CefBrowser> browser, int64 frameID, int nodeID, std::string text, bool submit)
-//{
-//	// TODO: Move to DOMNodeInteraction.h
-//	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("ExecuteJavascriptFunction");
-//	const auto& args = msg->GetArgumentList();
-//	args->SetString(0, "PerformTextInput");
-//	args->SetInt(1, nodeID);
-//	args->SetString(2, text);
-//	args->SetBool(3, submit);
-//
-//	browser->SendProcessMessage(PID_RENDERER, msg);
-//
-//	return true;
-//}
+
 void Handler::Reload(CefRefPtr<CefBrowser> browser)
 {
     LogDebug("Handler: Reloading browser (id = ", browser->GetIdentifier(), ") on page ", browser->GetMainFrame()->GetURL().ToString());
