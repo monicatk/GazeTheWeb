@@ -796,7 +796,7 @@ function MutationObserverInit()
 								var overflowId = node.getAttribute("overflowId");
 								if(overflowId !== null)
 								{
-									RemoveOverflowElement(overflowId);
+									RemoveDOMOverflowElement(overflowId);
 								}
 
 			  				}
