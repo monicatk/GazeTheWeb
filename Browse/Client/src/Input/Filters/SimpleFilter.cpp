@@ -7,29 +7,29 @@
 #include "src/Utils/Helper.h"
 #include "src/Setup.h"
 
-SimpleFilter::SimpleFilter() : _upSamples(SampleQueue(new std::deque<SampleData>))
+SimpleFilter::SimpleFilter() : _spSamples(SampleQueue(new std::deque<SampleData>))
 {
 	// Nothing to do
 }
 
-void SimpleFilter::Update(SampleQueue upSamples,
+void SimpleFilter::Update(SampleQueue spSamples,
 	double& rGazeX,
 	double& rGazeY,
 	bool& rSaccade)
 {
 	// Move samples over to member
-	_upSamples->insert(_upSamples->end(),
-		std::make_move_iterator(upSamples->begin()),
-		std::make_move_iterator(upSamples->end()));
+	_spSamples->insert(_spSamples->end(),
+		std::make_move_iterator(spSamples->begin()),
+		std::make_move_iterator(spSamples->end()));
 
 	// Delete beginning of queue to match maximum allowed queue length
-	int size = (int)_upSamples->size(); // sample queue size
+	int size = (int)_spSamples->size(); // sample queue size
 	int overlap = size - 100; // TODO: non hardcoded length
 	for (int i = 0; i < overlap; i++)
 	{
-		_upSamples->pop_front();
+		_spSamples->pop_front();
 	}
-	size = (int)_upSamples->size(); // update sample queue size
+	size = (int)_spSamples->size(); // update sample queue size
 
 	// Go over samples and filter
 	double filteredGazeX = 0;
@@ -40,7 +40,7 @@ void SimpleFilter::Update(SampleQueue upSamples,
 	for(int i = size - 1; i >= 0; i--) // newest to oldest means reverse order in queue
 	{
 		// Get sample
-		const auto& rGaze = _upSamples->at(i);
+		const auto& rGaze = _spSamples->at(i);
 
 		// Check whether new sample is withing same fixation
 		if (filterCount > 0)

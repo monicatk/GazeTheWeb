@@ -193,9 +193,9 @@ bool Disconnect()
 	return success;
 }
 
-void FetchSamples(SampleQueue& rupSamples)
+void FetchSamples(SampleQueue& rspSamples)
 {
-	eyetracker_global::FetchSamples(rupSamples);
+	eyetracker_global::FetchSamples(rspSamples);
 }
 
 void Calibrate()

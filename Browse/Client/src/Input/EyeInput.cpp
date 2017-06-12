@@ -175,11 +175,12 @@ std::shared_ptr<Input> EyeInput::Update(
 
 	if (_connected && _procFetchGazeSamples != NULL && _procIsTracking != NULL)
 	{
+		
 		// Prepare queue to fill
-		SampleQueue upSamples;
+		SampleQueue spSamples = SampleQueue(new std::deque<SampleData>);
 
 		// Fetch k or less valid samples
-		_procFetchGazeSamples(upSamples); // unique pointered vector is filled by fetch procedure
+		_procFetchGazeSamples(spSamples); // shared pointered vector is filled by fetch procedure
 
 		// Convert parameters to double (use same values for all samples,
 		double windowXDouble = (double)windowX;

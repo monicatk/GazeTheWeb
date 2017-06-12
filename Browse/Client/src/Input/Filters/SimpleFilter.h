@@ -17,7 +17,7 @@ public:
 	SimpleFilter();
 
 	// Update. Takes samples in window pixel coordinates
-	virtual void Update(SampleQueue upSamples,
+	virtual void Update(SampleQueue spSamples,
 		double& rGazeX,
 		double& rGazeY,
 		bool& rSaccade);
@@ -27,7 +27,7 @@ private:
 	// Testing
 	double _gazeX = 0;
 	double _gazeY = 0;
-	SampleQueue _upSamples;
+	SampleQueue _spSamples;
 };
 
 #endif SIMPLEFILTER_H_

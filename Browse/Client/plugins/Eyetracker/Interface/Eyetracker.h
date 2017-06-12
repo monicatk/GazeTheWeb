@@ -30,7 +30,7 @@ extern "C" {
 	DLL_API bool Disconnect();
 
 	// Fetches gaze samples and clears buffer
-	DLL_API void FetchSamples(SampleQueue& rupSamples);
+	DLL_API void FetchSamples(SampleQueue& rspSamples);
 
 	// Perform calibration TODO: return something like an enum or so to provide user feedback
 	DLL_API void Calibrate();

@@ -25,6 +25,6 @@ struct SampleData
 };
 
 // Typedef for unique pointer of sample queue
-typedef std::unique_ptr<std::deque<SampleData> > SampleQueue;
+typedef std::shared_ptr<std::deque<const SampleData> > SampleQueue;
 
 #endif EYETRACKERSAMPLEDATA_H_

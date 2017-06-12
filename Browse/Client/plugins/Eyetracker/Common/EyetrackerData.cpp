@@ -9,21 +9,21 @@
 namespace eyetracker_global
 {
     // Variables
-	auto upSampleDataQueue = SampleQueue(new std::deque<SampleData>);
+	auto spSampleDataQueue = SampleQueue(new std::deque<SampleData>);
 	std::mutex sampleDataMutex;
 
     void PushBackSample(SampleData sample)
     {
 		sampleDataMutex.lock(); // lock
-		upSampleDataQueue->push_back(sample); // pushes sample
+		spSampleDataQueue->push_back(sample); // pushes sample
 		sampleDataMutex.unlock(); // unlock
     }
 
-	void FetchSamples(SampleQueue& rupSamples)
+	void FetchSamples(SampleQueue& rspSamples)
     {
 		sampleDataMutex.lock(); // lock
-		rupSamples = std::move(upSampleDataQueue); // move data to output
-		upSampleDataQueue = SampleQueue(new std::deque<SampleData>); // intialize empty queue for new data
+		rspSamples = spSampleDataQueue; // move data to output
+		spSampleDataQueue = SampleQueue(new std::deque<SampleData>); // intialize empty queue for new data
 		sampleDataMutex.unlock(); // unlock
     }
 }
