@@ -3,8 +3,8 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
-#ifndef EYETRACKERSAMPLEDATA_H_
-#define EYETRACKERSAMPLEDATA_H_
+#ifndef EYETRACKERSAMPLE_H_
+#define EYETRACKERSAMPLE_H_
 
 #include <chrono>
 #include <memory>
@@ -25,6 +25,6 @@ struct SampleData
 };
 
 // Typedef for unique pointer of sample queue
-typedef std::shared_ptr<std::deque<const SampleData> > SampleQueue;
+typedef std::shared_ptr<std::deque<SampleData> > SampleQueue;
 
-#endif EYETRACKERSAMPLEDATA_H_
+#endif EYETRACKERSAMPLE_H_
