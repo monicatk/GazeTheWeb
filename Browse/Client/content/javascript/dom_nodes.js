@@ -292,7 +292,7 @@ DOMSelectField.prototype.getOptions = function(){
         var child = this.node.childNodes[i];
         if(child === undefined || child.tagName !== "OPTION")
             continue;
-        options.push(child.value);
+        options.push(child.text); // Use text instead of value, text is visibile for user, value isn't
     }
     return options;
 }

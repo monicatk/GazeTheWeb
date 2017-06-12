@@ -102,42 +102,42 @@ std::string Tab::GetClipboardText() const
 
 std::weak_ptr<const DOMNode> Tab::GetNearestLink(glm::vec2 pagePixelCoordinate, float& rDistance) const
 {
-	if (_TextLinkMap.empty())
-	{
-		// No link available
-		rDistance = -1;
-		return std::weak_ptr<DOMNode>();
-	}
-	else
-	{
-		// Get link with minimal distance
-		float minDistance = std::numeric_limits<float>::max();
-		std::weak_ptr<const DOMNode> wpResult;
+    if(_TextLinkMap.empty())
+    {
+        // No link available
+        rDistance = -1;
+        return std::weak_ptr<DOMNode>();
+    }
+    else
+    {
+        // Get link with minimal distance
+        float minDistance = std::numeric_limits<float>::max();
+        std::weak_ptr<const DOMNode> wpResult;
 
-		// Go over links
-		for (const auto& idLinkPair : _TextLinkMap)
-		{
-			// Go over rectangles of that link
-			for (const auto& rRect : idLinkPair.second->GetRects())
-			{
-				// Distance
-				float dx = glm::max(glm::abs(pagePixelCoordinate.x - rRect.Center().x) - (rRect.Width() / 2.f), 0.f);
-				float dy = glm::max(glm::abs(pagePixelCoordinate.y - rRect.Center().y) - (rRect.Height() / 2.f), 0.f);
-				float distance = glm::sqrt((dx * dx) + (dy * dy));
+        // Go over links
+        for(const auto& idLinkPair : _TextLinkMap)
+        {
+            // Go over rectangles of that link
+            for(const auto& rRect : idLinkPair.second->GetRects())
+            {
+                // Distance
+                float dx = glm::max(glm::abs(pagePixelCoordinate.x - rRect.Center().x) - (rRect.Width() / 2.f), 0.f);
+                float dy = glm::max(glm::abs(pagePixelCoordinate.y - rRect.Center().y) - (rRect.Height() / 2.f), 0.f);
+                float distance = glm::sqrt((dx * dx) + (dy * dy));
 
-				// Check whether distance is smaller
-				if (distance < minDistance)
-				{
-					minDistance = distance;
-					wpResult = idLinkPair.second;
-				}
-			}
-		}
+                // Check whether distance is smaller
+                if(distance < minDistance)
+                {
+                    minDistance = distance;
+                    wpResult = idLinkPair.second;
+                }
+            }
+        }
 
-		// Return result
-		rDistance = minDistance;
-		return wpResult;
-	}
+        // Return result
+        rDistance = minDistance;
+        return wpResult;
+    }
 }
 
 
