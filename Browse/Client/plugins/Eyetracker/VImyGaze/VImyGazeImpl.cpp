@@ -3,13 +3,13 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
+// This is an implementation
+#define DLL_IMPLEMENTATION
+
 #include "plugins/Eyetracker/Interface/Eyetracker.h"
 #include "plugins/Eyetracker/Common/EyetrackerData.h"
 #include "myGazeAPI.h"
 #include <algorithm>
-
-// Because Windows
-#undef max
 
 // Global variables
 static bool serverOwner = false;

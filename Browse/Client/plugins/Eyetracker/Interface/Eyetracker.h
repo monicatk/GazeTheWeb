@@ -3,8 +3,15 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
-#include <windows.h>
-#define DLL_EXPORT __declspec(dllexport) // only on Windows
+#ifndef EYETRACKER_H_
+#define EYETRACKER_H_
+
+// Decide about api style by define
+#ifdef DLL_IMPLEMENTATION  
+#define DLL_API __declspec(dllexport)   
+#else  
+#define DLL_API __declspec(dllimport)   
+#endif  
 
 #include "plugins/Eyetracker/Interface/EyetrackerSampleData.h"
 
@@ -14,20 +21,22 @@ extern "C" {
 #endif
 
 	// Connect eyetracker, returns whether succesfull
-	DLL_EXPORT bool Connect();
+	DLL_API bool Connect();
 
 	// Check whether eyetracker is working (regardless of user presence)
-	DLL_EXPORT bool IsTracking();
+	DLL_API bool IsTracking();
 
 	// Disconnect eyetracker, returns whether succesfull
-	DLL_EXPORT bool Disconnect();
+	DLL_API bool Disconnect();
 
 	// Fetches gaze samples and clears buffer
-	DLL_EXPORT void FetchSamples(SampleQueue& rupSamples);
+	DLL_API void FetchSamples(SampleQueue& rupSamples);
 
 	// Perform calibration TODO: return something like an enum or so to provide user feedback
-	DLL_EXPORT void Calibrate();
+	DLL_API void Calibrate();
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif // EYETRACKER_H_
