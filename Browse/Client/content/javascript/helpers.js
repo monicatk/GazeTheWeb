@@ -225,7 +225,7 @@ function UpdateNodesRect(node)
 function CreateDOMTextInput(node) { CreateDOMObject(node, 0); }
 function CreateDOMLink(node){ CreateDOMObject(node, 1); }
 function CreateDOMSelectField(node) { CreateDOMObject(node, 2); }
-function CreateOverflowElement(node) { CreateDOMObject(node, 3); }
+function CreateDOMOverflowElement(node) { CreateDOMObject(node, 3); }
 
 function CreateDOMObject(node, type)
 {
@@ -273,6 +273,16 @@ function GetCorrespondingDOMObject(node)
 
     return GetDOMObject(type, id);
 }
+
+function RemoveDOMObject(type, id)
+{
+    console.log("RemoveDOMObject called with parameters type="+type+" and id="+id+"! Doesn't do anything at the moment. TODO!");
+}
+function RemoveDOMTextInput(id){ return RemoveDOMObject(0, id); }
+function RemoveDOMLink(id){ return RemoveDOMObject(1, id); }
+function RemoveDOMSelectField(id){ return RemoveDOMObject(2, id); }
+function RemoveDOMOverflowElement(id){ return RemoveDOMObject(3, id); }
+
 
 /**
  * Usage example: Determine what parts of a node's rect are visible when inside an overflowing element

@@ -431,8 +431,7 @@ void RenderProcessHandler::OnContextCreated(
 
     if (frame->IsMain())
     {
-		// TODO (Daniel): Really necessary?
-		// Tell browser thread that context was created to discard all previous registered DOM nodes
+		// Clear previous DOM nodes in current Tab
 		CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("OnContextCreated");
 		browser->SendProcessMessage(PID_BROWSER, msg);
 
@@ -448,8 +447,6 @@ void RenderProcessHandler::OnContextCreated(
             // Add attributes with their pre-set values to JS object |window|
             globalObj->SetValue("_pageWidth", CefV8Value::CreateDouble(-1), V8_PROPERTY_ATTRIBUTE_NONE);
             globalObj->SetValue("_pageHeight", CefV8Value::CreateDouble(-1), V8_PROPERTY_ATTRIBUTE_NONE);
-            globalObj->SetValue("sizeTextLinks", CefV8Value::CreateInt(0), V8_PROPERTY_ATTRIBUTE_NONE);
-            globalObj->SetValue("sizeTextInputs", CefV8Value::CreateInt(0), V8_PROPERTY_ATTRIBUTE_NONE);
 
             // Create JS variables for width and height of favicon image
             globalObj->SetValue("favIconHeight", CefV8Value::CreateInt(-1), V8_PROPERTY_ATTRIBUTE_NONE);
@@ -464,6 +461,8 @@ void RenderProcessHandler::OnContextCreated(
 			{
 				frame->ExecuteJavaScript(dom_code.first, dom_code.second, 0);
 			}
+
+
 			const auto& add_attribute = context->GetGlobal()->GetValue("AddDOMAttribute");
 			if (add_attribute->IsFunction())
 			{
@@ -485,6 +484,7 @@ void RenderProcessHandler::OnContextCreated(
 			{
 				IPCLog(browser, "Renderer: ERROR: Could not find JS function 'AddDOMAttribute'!");
 			}
+
 			frame->ExecuteJavaScript("MutationObserverInit();", "", 0);
 
 
