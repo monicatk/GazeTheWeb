@@ -33,6 +33,7 @@ endif()
 
 if(OS_WINDOWS) # Windows
 	add_definitions(/MT) # Do not use MSVC RUNTIME_LIBRARY_DLL but static one. And no MTd, as CEF only uses MT
+	add_definitions(-D_HAS_EXCEPTIONS=0) # CEF settings disable exceptions. Tell it  VS, so no warnings are generated.
 endif()
 
 ### EYETRACKER PLUGINS #########################################################
