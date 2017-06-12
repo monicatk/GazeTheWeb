@@ -59,7 +59,7 @@ void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upDa
 			{
 				float delta = max - glm::min(r, glm::min(g, b));
 				saturation = delta / max;
-				saturation *= a;
+				// saturation *= a; // Are values already premultiplied?
 			}
 
 			// Is it maximum?
