@@ -225,7 +225,7 @@ function UpdateNodesRect(node)
 function CreateDOMTextInput(node) { CreateDOMObject(node, 0); }
 function CreateDOMLink(node){ CreateDOMObject(node, 1); }
 function CreateDOMSelectField(node) { CreateDOMObject(node, 2); }
-function CreateOverflowElement(node) { CreateDOMObject(node, 3); }
+function CreateDOMOverflowElement(node) { CreateDOMObject(node, 3); }
 
 function CreateDOMObject(node, type)
 {

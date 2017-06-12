@@ -464,12 +464,12 @@ function AnalyzeNode(node)
 		var rect = node.getBoundingClientRect();
 
 		// Detect scrollable elements inside of webpage
-		if(node.tagName === "DIV" && rect.width > 0 && rect.height > 0)
+		if((node.tagName === "DIV" || node.tagName === "P") && rect.width > 0 && rect.height > 0)
 		{
 			var overflow = computedStyle.getPropertyValue("overflow");
 			if(overflow === "scroll" || overflow == "auto")
 			{
-				CreateOverflowElement(node);
+				CreateDOMOverflowElement(node);
 			}
 			// else if (overflow === "auto")
 			// {
