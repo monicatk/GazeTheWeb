@@ -8,7 +8,7 @@
 #ifndef EYETRACKERDATA_H_
 #define EYETRACKERDATA_H_
 
-#include "plugins/Eyetracker/Interface/EyetrackerSampleData.h"
+#include "plugins/Eyetracker/Interface/EyetrackerSample.h"
 #include <vector>
 
 namespace eyetracker_global

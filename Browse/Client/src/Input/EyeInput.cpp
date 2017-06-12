@@ -189,7 +189,7 @@ std::shared_ptr<Input> EyeInput::Update(
 		double windowHeightDouble = (double)windowHeight;
 
 		// Go over available samples and bring into window space
-		for (auto& sample : *upSamples)
+		for (auto& sample : *spSamples)
 		{
 			// Do some clamping according to window coordinates for gaze x
 			sample.x = sample.x - windowXDouble;
@@ -203,7 +203,7 @@ std::shared_ptr<Input> EyeInput::Update(
 		}
 
 		// Update filter algorithm and provide local variables as reference
-		_filter.Update(std::move(upSamples), filteredGazeX, filteredGazeY, saccade);
+		_filter.Update(spSamples, filteredGazeX, filteredGazeY, saccade);
 
 		// Check, whether eye tracker is tracking
 		isTracking = _procIsTracking();

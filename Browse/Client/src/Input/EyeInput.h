@@ -14,7 +14,7 @@
 #include "src/Input/EyeTrackerStatus.h"
 #include "src/Input/Filters/SimpleFilter.h"
 #include "src/Input/Input.h"
-#include "plugins/Eyetracker/Interface/EyetrackerSampleData.h"
+#include "plugins/Eyetracker/Interface/EyetrackerSample.h"
 #include <memory>
 #include <vector>
 #include <thread>

@@ -20,7 +20,7 @@ namespace setup
 
 	// Control TODO: move connect bools to config file
 	static const bool CONNECT_SMI_IVIEWX = false;
-	static const bool CONNECT_VI_MYGAZE = false;
+	static const bool CONNECT_VI_MYGAZE = true;
 	static const bool CONNECT_TOBII_EYEX = true;
 	static const float DURATION_BEFORE_INPUT = 1.f; // wait one second before accepting input
 	static const bool PAUSED_AT_STARTUP = false;

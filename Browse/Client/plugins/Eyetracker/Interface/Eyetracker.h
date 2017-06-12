@@ -13,7 +13,7 @@
 #define DLL_API __declspec(dllimport)   
 #endif  
 
-#include "plugins/Eyetracker/Interface/EyetrackerSampleData.h"
+#include "plugins/Eyetracker/Interface/EyetrackerSample.h"
 
 // Export C interface (resolved overloading etc)
 #ifdef __cplusplus

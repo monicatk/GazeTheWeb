@@ -7,7 +7,7 @@
 #ifndef FILTER_H_
 #define FILTER_H_
 
-#include "plugins/Eyetracker/Interface/EyetrackerSampleData.h"
+#include "plugins/Eyetracker/Interface/EyetrackerSample.h"
 
 class Filter
 {
