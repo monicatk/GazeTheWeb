@@ -172,21 +172,15 @@ function FixedElement(node)
   
 
     this.node.setAttribute("fixedId", this.id);
+
+    var scoped_id = this.id;
+    ForEveryChild(this.node, (child) => {
+        if(typeof(child.setAttribute) !== "function")
+            return;
+        
+        child.setAttribute("childFixedId", scoped_id);
+    });
     
-    //// INFO: MutationObserver now automatically sets all attributes for children!
-    // // Note corresponding fixed element ID in an attribute
-    // var scope_id = this.id;
-    // ForEveryChild(this.node, function(child)
-    // { 
-    //     if(child.nodeType === 1) 
-    //     {
-    //         child.setAttribute("childFixedId", scope_id);
-
-    //         // If child corresponds to DOMObject or OverflowElement, inform about its fixation
-    //         SetFixationStatus(child, true);
-    //     }
-    // });
-
     // Update fixed Rects and inform CEF if changes happened
     this.updateRects();
 }
@@ -294,32 +288,8 @@ function RemoveFixedElement(node)
 // Inform CEF about the current fixation status of a already known nodes
 function SetFixationStatus(node, status)
 {
-    // TODO: Refactoring! & move to helpers
-	var type = node.getAttribute('nodeType');
-	var nodeId = node.getAttribute('nodeID');
-
-	// Node might be linked to DOMObject
-	if(type !== null && nodeId !== null)
-	{
-
-		var domObj = GetDOMObject(type, nodeId);
-		if(domObj !== null && domObj !== undefined)
-		{
-			domObj.setFixed(status);
-		}
-	}
-
-
-	// Node might be linked to OverflowElement object
-	var overflowId = node.getAttribute("overflowId");
-	if(overflowId !== null)
-	{
-		var overflowObj = GetOverflowElement(overflowId);
-		if(overflowObj !== null)
-		{
-			overflowObj.setFixed(status);
-		}
-	}
+    console.log("SetFixationStatus: DO NOT USE THIS FUNCTION ANYMORE!");
+    return; 
 }
 
 

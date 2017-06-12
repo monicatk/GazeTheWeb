@@ -249,7 +249,7 @@ document.addEventListener('transitionend', function(event){
 				var fixedElem = GetFixedElement(child);
 				if(fixedElem === undefined)
 				{
-					var obj = GetDOMObject(child);
+					var obj = GetCorrespondingDOMObject(child);
 					if (obj !== undefined)
 					{
 						obj.updateRects();
@@ -581,29 +581,18 @@ function MutationObserverInit()
 							{
 								var id = node.getAttribute(attr);
 
-								if(id !== null) // Attribute exists aka was previously set
-								{
-									// Set childFixedId for each child of altered node
-									var fixObj = GetFixedElementById(id);
+								// Set childFixedId for each child of altered node
+								var fixObj = GetFixedElementById(id);
 
-									node.childNodes.forEach((child) => {
-										// Extend node by given attribute
-										if(typeof(child.setAttribute) === "function")
-											child.setAttribute("childFixedId", id);
+								node.childNodes.forEach((child) => {
+									// Extend node by given attribute
+									if(typeof(child.setAttribute) === "function")
+										child.setAttribute("childFixedId", id);
 										// Update fixObj in DOMObject
-										SetFixationStatus(node, fixObj);
-									});
-								}
-								else
-								{
-									node.childNodes.forEach((child) => {	// TODO: This self-created forEach might not work as expected
-										// Extend node by given attribute
-										if(typeof(child.getAttribute) === "function")
-												child.removeAttribute("childFixedId");
-										// Update fixObj in DOMObject
-										SetFixationStatus(child, undefined);
-									});
-								}
+										var domObj = GetCorrespondingDOMObject(child);
+										if(domObj !== undefined)
+											domObj.setFixObj(fixObj);	// fixObj may be undefined
+								});
 							}
 
 
@@ -690,7 +679,7 @@ function MutationObserverInit()
 									}
 
 									// Fetch node and update its subtree too
-									var domObj = GetDOMObject(node);
+									var domObj = GetCorrespondingDOMObject(node);
 									if(domObj !== undefined)
 									{
 										var changed = domObj.updateRects();
@@ -755,7 +744,9 @@ function MutationObserverInit()
 								if(id !== null && id !== undefined)
 								{
 									node.setAttribute("childfixedid", id);
-									SetFixationStatus(node, true);
+									var domObj = GetCorrespondingDOMObject(node);
+									if(domObj !== undefined)
+										domObj.setFixObj(GetFixedElementById(id));
 								}
 							}
 
