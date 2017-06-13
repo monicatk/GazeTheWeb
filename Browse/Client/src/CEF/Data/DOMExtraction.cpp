@@ -5,9 +5,7 @@
 //============================================================================
 
 #include "DOMExtraction.h"
-#include <src/Utils/Helper.h>
-
-
+#include "src/Utils/Helper.h"
 
 const CefRefPtr<CefListValue> V8ToCefListValue::NestedListOfDoubles(CefRefPtr<CefV8Value> v8rects)
 {
@@ -103,13 +101,48 @@ const CefRefPtr<CefListValue> V8ToCefListValue::String(CefRefPtr<CefV8Value> att
 	return wrapper;
 }
 
+const void V8ToCefListValue::_Log(std::string txt, CefRefPtr<CefBrowser> browser)
+{
+	if (browser != nullptr)
+	{
+		CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("IPCLog");
+		msg->GetArgumentList()->SetBool(0, true);
+		msg->GetArgumentList()->SetString(1, txt);
+		browser->SendProcessMessage(PID_BROWSER, msg);
+	}
+}
 
+const CefRefPtr<CefListValue> V8ToCefListValue::ExtractAttributeData(DOMAttribute attr, CefRefPtr<CefV8Value> obj, CefRefPtr<CefBrowser> browser)
+{
+	if (obj->IsNull() || obj->IsUndefined())
+		return CefRefPtr<CefListValue>();
 
+	// Early exit
+	if (AttrGetter.find(attr) == AttrGetter.end() || AttrConversion.find(attr) == AttrConversion.end())
+	{
+		_Log("V8ToCefListValue conversion: Insufficient information defined for DOMAttribute " + std::to_string((int)attr) + "! Abort.", browser);
+		return CefRefPtr<CefListValue>();
+	}
 
+	// Return getter function,
+	CefRefPtr<CefV8Value> getter = obj->GetValue(AttrGetter.at(attr));
 
+	// Check if getter function is valid
+	if (getter->IsUndefined() || getter->IsNull() || !getter->IsFunction())
+	{
+		_Log("V8ToCefListValue conversion: Could not access getter function for DOMAttribute " + std::to_string((int)attr) + " in Javascript object.", browser);
+		return CefRefPtr<CefListValue>();
+	}
 
+	// Execute getter function
+	CefRefPtr<CefV8Value> data = getter->ExecuteFunction(obj, {});
 
+	if (data->IsUndefined() || data->IsNull())
+		return CefRefPtr<CefListValue>();
 
+	// Convert returned V8Value to CefListValue
+	return AttrConversion.at(attr)(data);
+}
 
 const CefRefPtr<CefListValue> StringToCefListValue::NestedListOfDoubles(std::string attrData)
 {
@@ -126,7 +159,7 @@ const CefRefPtr<CefListValue> StringToCefListValue::NestedListOfDoubles(std::str
 	);
 
 	// Read out each 4 float values und create 1 Rect with them
-	for (int i = 0; i + 3 < rectData.size(); i += 4)
+	for (int i = 0; i + 3 < (int)rectData.size(); i += 4)
 	{
 		CefRefPtr<CefListValue> rect = CefListValue::Create();
 		for (int j = 0; j < 4; j++)
@@ -148,7 +181,7 @@ const CefRefPtr<CefListValue> StringToCefListValue::ListOfStrings(std::string at
 	CefRefPtr<CefListValue> extracted_data = CefListValue::Create();
 
 	std::vector<std::string> options = SplitBySeparator(attrData, ';');
-	for (int i = 0; i < options.size(); i++)
+	for (int i = 0; i < (int)options.size(); i++)
 	{
 		extracted_data->SetString(i, options[i]);
 	}
@@ -162,7 +195,7 @@ const CefRefPtr<CefListValue> StringToCefListValue::ListOfIntegers(std::string a
 	CefRefPtr<CefListValue> extracted_data = CefListValue::Create();
 
 	std::vector<std::string> options = SplitBySeparator(attrData, ';');
-	for (int i = 0; i < options.size(); i++)
+	for (int i = 0; i < (int)options.size(); i++)
 	{
 		extracted_data->SetInt(i, std::stoi(options[i]));
 	}
@@ -173,7 +206,7 @@ const CefRefPtr<CefListValue> StringToCefListValue::ListOfIntegers(std::string a
 const CefRefPtr<CefListValue> StringToCefListValue::Boolean(std::string attrData)
 {
 	CefRefPtr<CefListValue> wrapper = CefListValue::Create();
-	wrapper->SetBool(0, std::stoi(attrData));
+	wrapper->SetBool(0, std::stoi(attrData) != 0);
 	return wrapper;
 }
 
@@ -189,4 +222,16 @@ const CefRefPtr<CefListValue> StringToCefListValue::String(std::string attrData)
 	CefRefPtr<CefListValue> wrapper = CefListValue::Create();
 	wrapper->SetString(0, attrData);
 	return wrapper;
+}
+
+const CefRefPtr<CefListValue> StringToCefListValue::ExtractAttributeData(DOMAttribute attr, std::string attrData)
+{
+	// Early exit
+	if (AttrConversion.find(attr) == AttrConversion.end())
+	{
+		LogError("StringToCefListValue conversion: Insufficient information defined for DOMAttribute ", (int)attr, "! Abort.");
+		return CefRefPtr<CefListValue>();
+	}
+
+	return AttrConversion.at(attr)(attrData);
 }

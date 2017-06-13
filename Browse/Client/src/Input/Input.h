@@ -41,21 +41,12 @@ class TabInput
 public:
 	TabInput(
 		const std::shared_ptr<const Input> spInput,
-		int webViewPixelGazeX,
-		int webViewPixelGazeY,
-		float webViewRelativeGazeX,
-		float webViewRelativeGazeY) :
-
-		// TabInput fields
-		webViewPixelGazeX(webViewPixelGazeX),
-		webViewPixelGazeY(webViewPixelGazeY),
-		webViewRelativeGazeX(webViewRelativeGazeX),
-		webViewRelativeGazeY(webViewRelativeGazeY),
-		insideWebView(
-			webViewRelativeGazeX < 1.f
-			&& webViewRelativeGazeX >= 0
-			&& webViewRelativeGazeY < 1.f
-			&& webViewRelativeGazeY >= 0),
+		int webViewX,
+		int webViewY,
+		int webViewWidth,
+		int webViewHeight,
+		int webViewResolutionX,
+		int webViewResolutionY) :
 
 		// Fields from input
 		gazeX(spInput->gazeX),
@@ -63,13 +54,29 @@ public:
 		gazeEmulated(spInput->gazeEmulated),
 		gazeUponGUI(spInput->gazeUponGUI),
 		instantInteraction(spInput->instantInteraction),
-		saccade(spInput->saccade) {}
+		saccade(spInput->saccade),
+
+		// TabInput fields
+		webViewPixelGazeX(spInput->gazeX - webViewX),
+		webViewPixelGazeY(spInput->gazeY - webViewY),
+		webViewRelativeGazeX((float)webViewPixelGazeX / (float)webViewWidth),
+		webViewRelativeGazeY((float)webViewPixelGazeY / (float)webViewHeight),
+		CEFPixelGazeX(webViewRelativeGazeX * (float)webViewResolutionX),
+		CEFPixelGazeY(webViewRelativeGazeY * (float)webViewResolutionY),
+		insideWebView(
+			webViewRelativeGazeX < 1.f
+			&& webViewRelativeGazeX >= 0
+			&& webViewRelativeGazeY < 1.f
+			&& webViewRelativeGazeY >= 0)
+		{}
 
 	// Fields
 	int webViewPixelGazeX;
 	int webViewPixelGazeY;
 	float webViewRelativeGazeX;
 	float webViewRelativeGazeY;
+	float CEFPixelGazeX;
+	float CEFPixelGazeY;
 	bool insideWebView;
 
 	// Fields from input as reference

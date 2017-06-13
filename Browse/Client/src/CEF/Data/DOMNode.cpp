@@ -64,11 +64,11 @@ bool DOMNode::IPCSetRects(CefRefPtr<CefListValue> data)
 	const auto rectList = data->GetList(0);
 	std::vector<Rect> rects;
 	//LogDebug("IPCSetRects: #Rects: ", rectList->GetSize());
-	for (int i = 0; i < rectList->GetSize(); i++)
+	for (int i = 0; i < (int)rectList->GetSize(); i++)
 	{
 		const auto rectData = rectList->GetList(i);
 		std::vector<float> rect;
-		for (int j = 0; rectData && j < rectData->GetSize(); j++)
+		for (int j = 0; rectData && j < (int)rectData->GetSize(); j++)
 		{
 			rect.push_back(rectData->GetValue(j)->GetDouble());
 		}
@@ -289,7 +289,7 @@ bool DOMSelectField::IPCSetOptions(CefRefPtr<CefListValue> data)
 
 	std::vector<std::string> options;
 	CefRefPtr<CefListValue> list = data->GetList(0);
-	for (int i = 0; i < list->GetSize(); i++)
+	for (int i = 0; i < (int)list->GetSize(); i++)
 	{
 		if (list->GetType(i) != CefValueType::VTYPE_STRING)
 		{
@@ -302,7 +302,6 @@ bool DOMSelectField::IPCSetOptions(CefRefPtr<CefListValue> data)
 	SetOptions(options);
 	return true;
 }
-
 
 /*
     ____  ____  __  _______                  ______              ________                          __

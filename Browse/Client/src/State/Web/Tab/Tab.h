@@ -310,9 +310,6 @@ public:
 	virtual std::weak_ptr<DOMSelectField> GetDOMSelectField(int id);
 	virtual std::weak_ptr<DOMOverflowElement> GetDOMOverflowElement(int id);
 
-	// Enable direct communication between DOM node instances and Renderer
-	virtual bool SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg);
-
 	virtual void RemoveDOMTextInput(int id);
 	virtual void RemoveDOMLink(int id);
 	virtual void RemoveDOMSelectField(int id);

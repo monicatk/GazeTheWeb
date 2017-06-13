@@ -10,14 +10,11 @@
 
 bool DOMJavascriptCommunication::SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg)
 {
-	if (_pTab)
-	{
-		return _pTab->SendProcessMessageToRenderer(msg);
-	}
-	return false;
+	return _sendRenderMessage(msg);
 }
 
-CefRefPtr<CefProcessMessage> DOMJavascriptCommunication::SetupExecuteFunctionMessage(std::string func_name, 
+CefRefPtr<CefProcessMessage> DOMJavascriptCommunication::SetupExecuteFunctionMessage(
+	std::string func_name, 
 	CefRefPtr<CefListValue> param)
 {
 	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("ExecuteJavascriptFunction");

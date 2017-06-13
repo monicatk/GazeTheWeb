@@ -59,20 +59,16 @@ public:
 	// Methods
 	float Width() const { return right - left; }
 	float Height() const { return bottom - top; }
-
 	glm::vec2 Center() const { return glm::vec2(left + (Width() / 2.f), top + (Height() / 2.f)); }
-
 	bool IsZero() const { return (Width() <= 0 || Height() <= 0); }
-
+	bool IsInside(float x, float y) const
+	{
+		return y <= bottom && y >= top && x >= left && x <= right;
+	}
 	std::string ToString() const
 	{
 		return "(" + std::to_string(top) + ", " + std::to_string(left) + ", "
 			+ std::to_string(bottom) + ", " + std::to_string(right) + ")";
-	}
-
-	bool IsInside(float x, float y) const
-	{
-		return y <= bottom && y >= top && x >= left && x <= right;
 	}
 };
 

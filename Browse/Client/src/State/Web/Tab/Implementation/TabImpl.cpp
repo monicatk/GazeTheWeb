@@ -173,19 +173,14 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 	// ########################
 
 	// Create tab input structure (like standard input but in addition with input coordinates in web view space)
-	int webViewPixelGazeX = spInput->gazeX - _upWebView->GetX();
-	int webViewPixelGazeY = spInput->gazeY - _upWebView->GetY();
-	float webViewRelativeGazeX = ((float)webViewPixelGazeX) / (float)(_upWebView->GetWidth());
-	float webViewRelativeGazeY = ((float)webViewPixelGazeY) / (float)(_upWebView->GetHeight());
 	const std::shared_ptr<TabInput> spTabInput = std::make_shared<TabInput>(
 		spInput,
-		webViewPixelGazeX,
-		webViewPixelGazeY,
-		webViewRelativeGazeX,
-		webViewRelativeGazeY);
-	double CEFPixelGazeX = spTabInput->webViewPixelGazeX;
-	double CEFPixelGazeY = spTabInput->webViewPixelGazeY;
-	ConvertToCEFPixel(CEFPixelGazeX, CEFPixelGazeY);
+		_upWebView->GetX(),
+		_upWebView->GetY(),
+		_upWebView->GetWidth(),
+		_upWebView->GetHeight(),
+		_upWebView->GetResolutionX(),
+		_upWebView->GetResolutionY());
 
 	// Update highlight rectangle of webview
 	// TODO: alternative: give webview shared pointer to DOM nodes
@@ -246,9 +241,9 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
         _pDebugLayout,
         "web_view_coordinate",
         "Fixed:\n"
-        + std::to_string(CEFPixelGazeX) + ", " + std::to_string(CEFPixelGazeY) + "\n"
+        + std::to_string(spTabInput->CEFPixelGazeX) + ", " + std::to_string(spTabInput->CEFPixelGazeY) + "\n"
         + "Scrolled:\n"
-        + std::to_string((int)(CEFPixelGazeX + _scrollingOffsetX)) + ", " + std::to_string((int)(CEFPixelGazeY + _scrollingOffsetY)));
+        + std::to_string((int)(spTabInput->CEFPixelGazeX + _scrollingOffsetX)) + ", " + std::to_string((int)(spTabInput->CEFPixelGazeY + _scrollingOffsetY)));
 
 	// #######################################
     // ### UPDATE PIPELINE OR STANDARD GUI ###
@@ -350,7 +345,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 			for (const auto& rElement : rElements)
 			{
 				// Simple box test
-				if(rElement.IsInside(CEFPixelGazeX, CEFPixelGazeY))
+				if(rElement.IsInside(spTabInput->CEFPixelGazeX, spTabInput->CEFPixelGazeY))
 				{
 					gazeUponFixed = true;
 					break;
@@ -402,8 +397,8 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 			{
 				for (const auto& rRect : rspOverflowElement->GetRects())
 				{
-					int scrolledCEFPixelGazeX = CEFPixelGazeX;
-					int scrolledCEFPixelGazeY = CEFPixelGazeY;
+					int scrolledCEFPixelGazeX = spTabInput->CEFPixelGazeX;
+					int scrolledCEFPixelGazeY = spTabInput->CEFPixelGazeY;
 
 					// Do add scrolling offset if element is not fixed
 					if (!rspOverflowElement->GetFixedId())
@@ -415,7 +410,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 					// Check if current gaze is inside of overflow element, if so execute scrolling method in corresponding Javascript object
 					if (rRect.IsInside(scrolledCEFPixelGazeX, scrolledCEFPixelGazeY))
 					{
-						rspOverflowElement->Scroll(CEFPixelGazeX, CEFPixelGazeY);
+						rspOverflowElement->Scroll(spTabInput->CEFPixelGazeX, spTabInput->CEFPixelGazeY);
 						break;
 					}
 				}
