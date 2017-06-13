@@ -41,8 +41,6 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	// ### Favicon ###
 	// ###############
 
-	//LogDebug("requestString=", requestString);
-
 	if (requestString == "faviconBytesReady")
 	{
 		// Logging

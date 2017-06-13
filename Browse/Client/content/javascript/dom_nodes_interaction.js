@@ -2,19 +2,6 @@ ConsolePrint("Starting to import dom_nodes_interaction.js ...");
 
 
 
-
-function SetSelectionIndex(id, idx)
-{
-	var obj = GetDOMSelectField(id);
-	if(obj === undefined)
-	{
-		ConsolePrint("ERROR: Function call of 'SetSelectionIndex' failed.")
-		return;
-	}
-
-	obj.setSelectionIdx(index);
-}
-
 DOMTextInput.prototype.setTextInput = function(text, submit){
 	// TODO: To be refactored!
 	if(this.node.tagName == "TEXTAREA")
@@ -71,20 +58,6 @@ DOMTextInput.prototype.setTextInput = function(text, submit){
 		;
 	}
 
-// DEPRECATED
-function PerformTextInput(id, text, submit)
-{
-	console.log("PerfomTextInput: "+[id, text, submit]);
-    var domObj = GetDOMTextInput(id);
-    if(domObj === undefined)
-	{
-		ConsolePrint("ERROR: Couldn't input text to DOMTextInput with id "+id+".");
-		return false;
-	}
-    
-	return domObj.setTextInput(text, submit);
-}
-
 
 DOMOverflowElement.prototype.scroll = function(gazeX, gazeY, fixedIds){
 	// TODO: Refactore this method?
@@ -104,6 +77,8 @@ DOMOverflowElement.prototype.scroll = function(gazeX, gazeY, fixedIds){
 		var centerX = rect[1] + Math.round(rect.width / 2);
 		var centerY =  rect[0] + Math.round(rect.height / 2);
 
+		// TODO: Substract scrollbar areas from overflow rect! So, you don't have to look at e.g. the horizontal scrollbar
+		// in order to scroll vertically
 		var distLeft = gazeX - rect[1];   // negative values imply gaze outside of element
 		var distRight = rect[3] - gazeX;
 		var distTop = gazeY - rect[0];
@@ -143,29 +118,6 @@ DOMOverflowElement.prototype.scroll = function(gazeX, gazeY, fixedIds){
 		return [this.node.scrollLeft, this.node.scrollTop];
 	}
 	
-}
-
-// DEPRECATED
-function ScrollOverflowElement(elemId, gazeX, gazeY, fixedIds)
-{
-    var overflowObj = GetDOMOverflowElement(elemId);
-	if(overflowObj === undefined)
-		return;
-	
-	// TODO: Move scrolling computation to C++ Tab::ScrollOverflowElement
-	// Add solution for scrolling if edge of overflow is covered by a fixed element and scroll at the edge of fixed element
-	if(fixedIds !== null && fixedIds !== undefined && fixedIds.length > 0)
-	{
-		var childFixedId = overflowObj.getFixedId();
-		
-		if(fixedIds.indexOf(childFixedId) === -1)  // child id not contained in list
-		{
-			ConsolePrint("Skipping scrolling!");
-			// Skip scrolling, because overflow is hidden by fixed element with "fixedId"
-			return;
-		}
-	}
-	overflowObj.scroll(gazeX,gazeY);
 }
 
 ConsolePrint("Successfully imported dom_nodes_interaction.js!");
