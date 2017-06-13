@@ -10,15 +10,15 @@
 std::string DOMAttrToString(DOMAttribute attr)
 {
 	switch (attr) {
-	case Rects: return "Rects"; break;
-	case FixedId: return "FixedId"; break;
-	case OverflowId: return "OverflowId"; break;
-	case Text: return "Text"; break;
-	case IsPassword: return "IsPassword"; break;
-	case Url: return "Url"; break;
-	case Options: return "Options"; break;
-	case MaxScrolling: return "MaxScrolling"; break;
-	case CurrentScrolling: return "CurrentScrolling"; break;
-	default: return std::to_string(attr);
+	case Rects:				return "Rects"; break;
+	case FixedId:			return "FixedId"; break;
+	case OverflowId:		return "OverflowId"; break;
+	case Text:				return "Text"; break;
+	case IsPassword:		return "IsPassword"; break;
+	case Url:				return "Url"; break;
+	case Options:			return "Options"; break;
+	case MaxScrolling:		return "MaxScrolling"; break;
+	case CurrentScrolling:	return "CurrentScrolling"; break;
+	default:				return std::to_string(attr);
 	}
 }

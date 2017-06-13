@@ -303,7 +303,6 @@ bool DOMSelectField::IPCSetOptions(CefRefPtr<CefListValue> data)
 	return true;
 }
 
-
 /*
     ____  ____  __  _______                  ______              ________                          __
    / __ \/ __ \/  |/  / __ \_   _____  _____/ __/ /___ _      __/ ____/ /__  ____ ___  ___  ____  / /______

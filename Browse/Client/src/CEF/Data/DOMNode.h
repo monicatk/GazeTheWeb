@@ -36,7 +36,8 @@ namespace DOM
  / // / /_/ / /|_/ /    / _ \/ _  / -_|_-<
 /____/\____/_/  /_/_/|_/\___/\_,_/\__/___/
 */
-class DOMNode : public virtual DOMBaseInterface, public virtual DOMJavascriptCommunication
+class DOMNode :
+	public virtual DOMJavascriptCommunication
 {
 public:
 
@@ -47,21 +48,26 @@ public:
 	// Define initialization through IPC message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
 
-	// CefProcessMessage to C++ object
+	// CefProcessMessage to C++ object. So update indicated by JavaScript
 	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data);
 
+	// Contains all
 	static void GetDescription(std::vector<const std::vector<DOMAttribute>* >* descriptions) {
 		descriptions->push_back(&_description);
 	}
 	
-	virtual int GetId() { return _id; }
+	// Getter from DOMBaseInterface
+	virtual int GetId() override { return _id; }
 
+	// Custom final getter
 	std::vector<Rect> GetRects() const { return _rects; }
-	virtual int GetFixedId() const { return _fixedId; }
-	virtual int GetOverflowId() const { return _overflowId; }
-	virtual int IsFixed() const { return (_fixedId >= 0); }
+	int GetFixedId() const { return _fixedId; }
+	int GetOverflowId() const { return _overflowId; }
+	int IsFixed() const { return (_fixedId >= 0); }
 
 private:
+
+	// Setter
 	void SetId(int id) { _id = id; }
 	void SetRects(std::vector<Rect> rects) { _rects = rects; }
 	void SetFixedId(int fixedId) { _fixedId = fixedId; }
@@ -71,6 +77,7 @@ private:
 	bool IPCSetFixedId(CefRefPtr<CefListValue> data);
 	bool IPCSetOverflowId(CefRefPtr<CefListValue> data);
 
+	// Members
 	static const std::vector<DOMAttribute> _description;
 	int _id;
 	std::vector<Rect> _rects = {};
@@ -91,6 +98,7 @@ class DOMTextInput :
 	public virtual DOMTextInputInteraction
 {
 public:
+
 	// Empty construction
 	DOMTextInput(Tab* pTab, int id) : 
 		DOMNode(pTab, id), 
@@ -98,34 +106,42 @@ public:
 		DOMJavascriptCommunication(pTab){};
 
 	// Define initialization through ICP message in each DOMNode subclass
-	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
-	// CefProcessMessage to C++ object
-	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data);
+	virtual int Initialize(CefRefPtr<CefProcessMessage> msg) override;
 
+	// CefProcessMessage to C++ object
+	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data) override;
+
+	// Build description
 	static void GetDescription(std::vector<const std::vector<DOMAttribute>* >* descriptions) {
 		super::GetDescription(descriptions);
 		descriptions->push_back(&_description);
 	}
 
-	static const std::string GetJSObjectGetter() {
+	// TODO: why no abstract declaration in DOMNode?
+	static const std::string GetJSObjectGetter()
+	{
 		return "GetDOMTextInput";
 	}
 
-	// DOMTextInputInteraction method
-	virtual int GetType() { return 0; };
+	// TODO: somehow set enum per subclass and return this in DOMNode?
+	virtual int GetType() override { return 0; };
 	
+	// Custom getter
 	std::string GetText() const { return _text; }
 	bool IsPasswordField() const { return _isPassword; }
 
 private:
+
 	typedef DOMNode super;
 
+	// Setter
 	void SetText(std::string text) { _text = text; }
 	void SetPassword(bool isPwd) { _isPassword = isPwd; }
 
 	bool IPCSetText(CefRefPtr<CefListValue> data);
 	bool IPCSetPassword(CefRefPtr<CefListValue> data);
 
+	// Members
 	static const std::vector<DOMAttribute> _description;
 	std::string _text = "";
 	bool _isPassword = false;
@@ -138,47 +154,56 @@ private:
 /____/\____/_/  /_/____/_/_//_/_/\_\/___/
 */
 
-class DOMLink : public DOMNode
+class DOMLink :
+	public virtual DOMNode
 {
 public:
+
 	// Empty construction
 	DOMLink(Tab* pTab, int id) :
 		DOMNode(pTab, id),
 		DOMJavascriptCommunication(pTab) {};
 
 	// Define initialization through ICP message in each DOMNode subclass
-	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
+	virtual int Initialize(CefRefPtr<CefProcessMessage> msg) override;
+
 	// CefProcessMessage to C++ object
-	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data);
+	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data) override;
 
-
+	// Build description
 	static void GetDescription(std::vector<const std::vector<DOMAttribute>* >* descriptions) {
 		super::GetDescription(descriptions);
 		descriptions->push_back(&_description);
 	}
 
-	static const std::string GetJSObjectGetter() {
+	// TODO: why no abstract declaration in DOMNode?
+	static const std::string GetJSObjectGetter()
+	{
 		return "GetDOMLink";
 	}
 
-	virtual int GetType() { return 1; };
+	// TODO: somehow set enum per subclass and return this in DOMNode?
+	virtual int GetType() override { return 1; };
 
+	// Custom getter
 	std::string GetText() const { return _text; }
 	std::string GetUrl() const { return _url; }
 
 private:
+
 	typedef DOMNode super;
 
+	// Setter
 	void SetText(std::string text) { _text = text; }
 	void SetUrl(std::string url) { _url = url; }
 
 	bool IPCSetText(CefRefPtr<CefListValue> data);
 	bool IPCSetUrl(CefRefPtr<CefListValue> data);
 
+	// Members
 	static const std::vector<DOMAttribute> _description;
 	std::string _text = "";
 	std::string _url = "";
-
 };
 
 /*
@@ -191,10 +216,11 @@ private:
 */
 
 class DOMSelectField : 
-	public DOMNode,
+	public virtual DOMNode,
 	public virtual DOMSelectFieldInteraction
 {
 public:
+
 	// Empty construction
 	DOMSelectField(Tab* pTab, int id) :
 		DOMNode(pTab, id), 
@@ -202,34 +228,42 @@ public:
 		DOMJavascriptCommunication(pTab) {};
 
 	// Define initialization through ICP message in each DOMNode subclass
-	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
+	virtual int Initialize(CefRefPtr<CefProcessMessage> msg) override;
+
 	// CefProcessMessage to C++ object
-	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data);
+	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data) override;
 
-
+	// Build description
 	static void GetDescription(std::vector<const std::vector<DOMAttribute>* >* descriptions) {
 		super::GetDescription(descriptions);
 		descriptions->push_back(&_description);
 	}
 
-	static const std::string GetJSObjectGetter() {
+	// TODO: why no abstract declaration in DOMNode?
+	static const std::string GetJSObjectGetter()
+	{
 		return "GetDOMSelectField";
 	}
-	virtual int GetType() { return 2; };
 
+	// TODO: somehow set enum per subclass and return this in DOMNode?
+	virtual int GetType() override { return 2; };
+
+	// Custom getter
 	std::vector<std::string> GetOptions() const { return _options; }
 
 private:
+
 	typedef DOMNode super;
 
+	// Setter
 	void SetOptions(std::vector<std::string> options) { _options = options; }
 
 	bool IPCSetOptions(CefRefPtr<CefListValue> data);
 
+	// Members
 	static const std::vector<DOMAttribute> _description;
-	std::vector<std::string> _options = {};		// Entries might be NULL, if weirdly indexed on JS side (but chances are really low)
+	std::vector<std::string> _options = {}; // Entries might be NULL, if weirdly indexed on JS side (but chances are really low)
 };
-
 
 /*
     ____  ____  __  _______                  ______              ________                          __
@@ -240,10 +274,11 @@ private:
 */
 
 class DOMOverflowElement : 
-	public DOMNode,
+	public virtual DOMNode,
 	public virtual DOMOverflowElementInteraction
 {
 public:
+
 	// Empty construction
 	DOMOverflowElement(Tab* pTab, int id) :
 		DOMNode(pTab, id),
@@ -251,35 +286,42 @@ public:
 		DOMJavascriptCommunication(pTab) {};
 
 	// Define initialization through ICP message in each DOMNode subclass
-	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
+	virtual int Initialize(CefRefPtr<CefProcessMessage> msg) override;
+
 	// CefProcessMessage to C++ object
-	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data);
+	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data) override;
 
-
+	// Build description
 	static void GetDescription(std::vector<const std::vector<DOMAttribute>* >* descriptions) {
 		super::GetDescription(descriptions);
 		descriptions->push_back(&_description);
 	}
 
-	static const std::string GetJSObjectGetter() {
+	// TODO: why no abstract declaration in DOMNode?
+	static const std::string GetJSObjectGetter()
+	{
 		return "GetDOMOverflowElement";
 	}
 
-	virtual int GetType() { return 3; };
+	// TODO: somehow set enum per subclass and return this in DOMNode?
+	virtual int GetType() override { return 3; };
 
+	// Custom getter
 	std::pair<int, int> GetMaxScrolling() const { return std::make_pair(_scrollLeftMax, _scrollTopMax); }
 	std::pair<int, int> GetCurrentScrolling() const { return std::make_pair(_scrollLeft, _scrollTop); }
 
 private:
+
 	typedef DOMNode super;
 
+	// Setter
 	void SetMaxScrolling(int top, int left) { _scrollTopMax = top; _scrollLeftMax = left; }
 	void SetCurrentScrolling(int top, int left) { _scrollTop = top; _scrollLeft = left; }
 	
 	bool IPCSetMaxScrolling(CefRefPtr<CefListValue> data);
 	bool IPCSetCurrentScrolling(CefRefPtr<CefListValue> data);
 
-
+	// Members
 	static const std::vector<DOMAttribute> _description;
 	int _scrollLeftMax = 0;		// maximum values for scrolling directions
 	int _scrollTopMax = 0; 

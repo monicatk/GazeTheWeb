@@ -17,7 +17,8 @@ bool DOMJavascriptCommunication::SendProcessMessageToRenderer(CefRefPtr<CefProce
 	return false;
 }
 
-CefRefPtr<CefProcessMessage> DOMJavascriptCommunication::SetupExecuteFunctionMessage(std::string func_name, 
+CefRefPtr<CefProcessMessage> DOMJavascriptCommunication::SetupExecuteFunctionMessage(
+	std::string func_name, 
 	CefRefPtr<CefListValue> param)
 {
 	CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("ExecuteJavascriptFunction");

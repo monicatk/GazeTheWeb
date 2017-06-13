@@ -5,9 +5,7 @@
 //============================================================================
 
 #include "DOMExtraction.h"
-#include <src/Utils/Helper.h>
-
-
+#include "src/Utils/Helper.h"
 
 const CefRefPtr<CefListValue> V8ToCefListValue::NestedListOfDoubles(CefRefPtr<CefV8Value> v8rects)
 {

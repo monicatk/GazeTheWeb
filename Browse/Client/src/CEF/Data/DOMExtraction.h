@@ -3,6 +3,7 @@
 // Author: Daniel Mueller (muellerd@uni-koblenz.de)
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
+// Conversion of incoming values. ONLY USED IN RENDER PROCESS.
 
 #ifndef DOMEXTRACTION_H_
 #define DOMEXTRACTION_H_
@@ -15,7 +16,6 @@
 #include <functional>
 #include <algorithm>
 
-/** Do only use if V8 context was entered before! */
 namespace V8ToCefListValue
 {
 	// Nested lists
@@ -30,6 +30,7 @@ namespace V8ToCefListValue
 	const CefRefPtr<CefListValue> Integer(CefRefPtr<CefV8Value> attrData);
 	const CefRefPtr<CefListValue> String(CefRefPtr<CefV8Value> attrData);
 
+	// Mapping from attribute to JavaScript function name
 	const std::map<const DOMAttribute, const std::string> AttrGetter = {
 		{ DOMAttribute::Rects,				"getRects" },
 		{ DOMAttribute::FixedId,			"getFixedId" },
@@ -43,6 +44,7 @@ namespace V8ToCefListValue
 
 	};
 
+	// Mapping from attribute to datatype
 	const std::map < const DOMAttribute, const std::function<CefRefPtr<CefListValue>(CefRefPtr<CefV8Value>)> > AttrConversion = {
 		{ DOMAttribute::Rects,				&NestedListOfDoubles },
 		{ DOMAttribute::FixedId,			&Integer },
@@ -59,6 +61,7 @@ namespace V8ToCefListValue
 	// NOTE: Debug output wouldn't reach the user's console, because this code is run in the Renderer process
 	const void _Log(std::string txt, CefRefPtr<CefBrowser> browser = nullptr);
 
+	// Extract attribute data
 	const CefRefPtr<CefListValue> ExtractAttributeData(DOMAttribute attr, CefRefPtr<CefV8Value> obj, CefRefPtr<CefBrowser> browser = nullptr);
 }
 
@@ -77,6 +80,7 @@ namespace StringToCefListValue
 	const CefRefPtr<CefListValue> Integer(std::string attrData);
 	const CefRefPtr<CefListValue> String(std::string attrData);
 
+	// Mapping from attribute to datatype
 	const std::map<const DOMAttribute, const std::function<CefRefPtr<CefListValue>(std::string)> > AttrConversion =
 	{
 		{DOMAttribute::Rects,				&NestedListOfDoubles},
@@ -90,7 +94,7 @@ namespace StringToCefListValue
 		{DOMAttribute::CurrentScrolling,	&ListOfIntegers}	
 	};
 
-
+	// Extract attribute data
 	const CefRefPtr<CefListValue> ExtractAttributeData(DOMAttribute attr, std::string attrData);
 }
 
