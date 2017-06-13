@@ -8,6 +8,9 @@
 #ifndef DOMNODE_H_
 #define DOMNODE_H_
 
+#pragma warning(push) // warning about dominance inheritage
+#pragma warning(disable : 4250)
+
 #include "src/CEF/Data/DOMNodeInteraction.h"
 #include "src/CEF/Data/Rect.h"
 #include "src/Utils/glmWrapper.h"
@@ -33,13 +36,13 @@ namespace DOM
  / // / /_/ / /|_/ /    / _ \/ _  / -_|_-<
 /____/\____/_/  /_/_/|_/\___/\_,_/\__/___/
 */
-class DOMNode : public virtual DOMJavascriptCommunication
+class DOMNode : public virtual DOMBaseInterface, public virtual DOMJavascriptCommunication
 {
 public:
 
 	// Empty construction
 	DOMNode(Tab* pTab, int id) : 
-		_id(id), DOMJavascriptCommunication(pTab) {};
+		_id(id) {};
 
 	// Define initialization through IPC message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
@@ -51,7 +54,7 @@ public:
 		descriptions->push_back(&_description);
 	}
 	
-	int GetId() { return _id; }
+	virtual int GetId() { return _id; }
 
 	std::vector<Rect> GetRects() const { return _rects; }
 	virtual int GetFixedId() const { return _fixedId; }
@@ -84,7 +87,7 @@ private:
 */
 
 class DOMTextInput : 
-	public DOMNode,
+	public virtual DOMNode,
 	public virtual DOMTextInputInteraction
 {
 public:
@@ -283,5 +286,7 @@ private:
 	int _scrollLeft = 0;		// current position in interval [0, max value]
 	int _scrollTop = 0; 
 };
+
+#pragma warning(pop) // warning about dominance inheritage
 
 #endif  // DOMNODE_H_

@@ -225,7 +225,6 @@ void Texture::drawRectangle(int width, int height, int x, int y)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, _handle);
 
-	unsigned char black = 'A';
 	std::vector<glm::vec4> img;
 	const int pixels = (width > height) ? width : height;
 

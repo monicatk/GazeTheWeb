@@ -50,7 +50,7 @@ void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upDa
 			float r = upData->at(i);
 			float g = upData->at(i + 1);
 			float b = upData->at(i + 2);
-			float a = upData->at(i + 3);
+			// float a = upData->at(i + 3); // not used
 
 			// Calculate saturation like in HSV color space
 			float max = glm::max(r, glm::max(g, b));

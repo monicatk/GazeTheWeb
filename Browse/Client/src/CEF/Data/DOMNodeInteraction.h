@@ -12,19 +12,24 @@
 
 class Tab;	// Forward declaration
 
-/*
- * Guarantee, that DOMNode provides any informationen needed in order to contact
- * its corresponding Javascript DOM node object
-*/
-class DOMJavascriptCommunication 
+class DOMBaseInterface
 {
 public:
-	DOMJavascriptCommunication(Tab* pTab) :
-		_pTab(pTab) {};
 
 	// Required in order to being able to access corresponding JS DOM object
 	virtual int GetId() = 0;
 	virtual int GetType() = 0;
+};
+
+/*
+ * Guarantee, that DOMNode provides any informationen needed in order to contact
+ * its corresponding Javascript DOM node object
+*/
+class DOMJavascriptCommunication  : public virtual DOMBaseInterface
+{
+public:
+	DOMJavascriptCommunication(Tab* pTab) :
+		_pTab(pTab) {};
 
 	bool SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg);
 
@@ -39,8 +44,7 @@ public:
 class DOMTextInputInteraction : public virtual DOMJavascriptCommunication
 {
 public:
-	DOMTextInputInteraction(Tab* pTab) :
-		DOMJavascriptCommunication(pTab) {};
+	DOMTextInputInteraction(Tab* pTab) {};
 
 	// Send IPC message to JS in order to execute text input function
 	void InputText(std::string text, bool submit);
@@ -49,8 +53,7 @@ public:
 class DOMOverflowElementInteraction : public virtual DOMJavascriptCommunication
 {
 public:
-	DOMOverflowElementInteraction(Tab* pTab) :
-		DOMJavascriptCommunication(pTab) {};
+	DOMOverflowElementInteraction(Tab* pTab) {};
 
 	// Send IPC message to JS in order to execute scrolling function
 	void Scroll(int x, int y, std::vector<int> fixedIds = {});
@@ -59,8 +62,7 @@ public:
 class DOMSelectFieldInteraction : public virtual DOMJavascriptCommunication
 {
 public:
-	DOMSelectFieldInteraction(Tab* pTab) :
-		DOMJavascriptCommunication(pTab) {};
+	DOMSelectFieldInteraction(Tab* pTab) {};
 
 	// Send IPC message to JS in order to execute JS function
 	void SetSelectionIndex(int idx);

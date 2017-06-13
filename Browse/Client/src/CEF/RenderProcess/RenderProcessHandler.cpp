@@ -32,7 +32,7 @@ CefRefPtr<CefV8Value> RenderProcessHandler::CefValueToCefV8Value(CefRefPtr<CefVa
 		const auto& size = val->GetList()->GetSize();
 		CefRefPtr<CefListValue> list = val->GetList();
 		CefRefPtr<CefV8Value> v8list = CefV8Value::CreateArray(size);
-		for (int i = 0; i < size; i++)
+		for (int i = 0; i < (int)size; i++)
 		{
 			v8list->SetValue(i, CefValueToCefV8Value(list->GetValue(i)));
 		}
@@ -73,12 +73,12 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			// Transform header into CefV8Values
 			const auto& headerVals = args->GetList(0);
 			CefRefPtr<CefV8Value> header = CefV8Value::CreateArray(headerVals->GetSize());
-			for (int i = 0; i < headerVals->GetSize(); i++)
+			for (int i = 0; i < (int)headerVals->GetSize(); i++)
 				header->SetValue(i, CefValueToCefV8Value(headerVals->GetValue(i)));
 			// Transform param into CefV8Values
 			const auto& paramVals = args->GetList(1);
 			CefRefPtr<CefV8Value> param = CefV8Value::CreateArray(paramVals->GetSize());
-			for (int i = 0; i < paramVals->GetSize(); i++)
+			for (int i = 0; i < (int)paramVals->GetSize(); i++)
 				param->SetValue(i, CefValueToCefV8Value(paramVals->GetValue(i)));
 
 			// Execute Javascript function
@@ -102,12 +102,12 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 				const std::string& command = ret_val->GetValue("command")->GetStringValue();
 				// TODO: If command is known command!
 				msg = CefProcessMessage::Create(command);
-				const auto& args = msg->GetArgumentList();
+				const auto& innerArgs = msg->GetArgumentList();
 				// TODO: This could be move to DOMNodeInteraction.h
 				if (command == "EmulateEnterKey")
 				{
-					args->SetDouble(0, ret_val->GetValue("x")->GetDoubleValue());
-					args->SetDouble(1, ret_val->GetValue("y")->GetDoubleValue());
+					innerArgs->SetDouble(0, ret_val->GetValue("x")->GetDoubleValue());
+					innerArgs->SetDouble(1, ret_val->GetValue("y")->GetDoubleValue());
 					browser->SendProcessMessage(PID_BROWSER, msg);
 					
 				}
