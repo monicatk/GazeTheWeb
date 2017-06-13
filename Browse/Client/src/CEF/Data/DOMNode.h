@@ -19,7 +19,7 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <functional> // for debugging purposes at the moment
+#include "src/Utils/Logger.h" // DEBUGGING
 
 namespace DOM
 {

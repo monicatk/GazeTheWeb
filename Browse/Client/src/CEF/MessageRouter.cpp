@@ -35,7 +35,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	CefRefPtr<Callback> callback)
 {
 	const std::string requestString = request.ToString();
-	// LogDebug("MsgRouter: ", requestString);
+	//LogDebug("MsgRouter: ", requestString);
 
 	// ###############
 	// ### Favicon ###

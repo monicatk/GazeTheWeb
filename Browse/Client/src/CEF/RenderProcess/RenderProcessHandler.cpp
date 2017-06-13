@@ -404,6 +404,18 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 
 			browser->SendProcessMessage(PID_BROWSER, reply);
 
+			// Set node ready for attribute updates
+			CefRefPtr<CefV8Value> setReadyFunc = domObj->GetValue("setCppReady");
+			if (setReadyFunc->IsFunction())
+			{
+				setReadyFunc->ExecuteFunction(domObj, {});
+			}
+			else
+			{
+				IPCLog(browser, "Renderer: Failed to set node ready in Javascript! Attribute updates won't be received for"\
+					"node of type: " + nodeType + "and id: ", id);
+			}
+
 			context->Exit();
 		}
 

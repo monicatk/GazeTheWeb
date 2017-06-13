@@ -3,11 +3,6 @@
 // Author: Daniel Mueller (muellerd@uni-koblenz.de)
 //============================================================================
 
-/**
- * GetNextOverflowParent -- Verallgemeinerte Aufwärtstraversierung?
- * GetDOMObject(node) -check if node.nodeType valid, than read attributes nodeObjId and nodeObjType
- * SendAttributeChangesToCEF(DOMAttribute, domObj); instead of InformCEF
- */
 
 // Helper function for console output
 function ConsolePrint(msg)
@@ -139,33 +134,6 @@ function ForEveryChild(parentNode, applyFunction, abortFunction)
 	}
 }
 
-// Returns corresponding DOMNode object, if it exists. Returns undefined if not
-function GetDOMObject(node)
-{
-    if(node === undefined || typeof(node.getAttribute) !== "function" || typeof(node.setAttribute) !== "function")
-        return undefined;
-
-    var nodeObjId = node.getAttribute("nodeObjId");
-    var nodeObjType = node.getAttribute("nodeObjType");
-
-    if(nodeObjId === null || nodeObjType === null || nodeObjId < 0 || nodeObjType < 0)
-    {
-        console.log("Error: Couldn't fetch corresponding DOMObject. Insufficient information stored in node!");
-        console.log("Required integer attributes: nodeObjId="+nodeObjId+", nodeObjType="+nodeObjType);
-        return undefined;
-    }
-
-    var objList = domNodes[nodeObjType];
-    if (objList === undefined)
-    {
-        console.log("Error: Unknown DOMObjectType with numerical interpretation "+nodeObjType+" when accessing nodeObjId="+nodeObjId);
-        return undefined;
-    }
-
-    var obj = domNodes[nodeObjType][nodeObjId];
-    return obj;
-}
-
 function GetFixedElement(node)
 {
     if(typeof(node.getAttribute) !== "function" || typeof(node.setAttribute) !== "function")
@@ -215,7 +183,7 @@ function UpdateDOMRects()
 
 function UpdateNodesRect(node)
 {
-    var domObj = GetDOMObject(node);
+    var domObj = GetCorrespondingDOMObject(node);
     if(domObj !== undefined)
         domObj.updateRects();
 }
@@ -247,6 +215,9 @@ function CreateDOMObject(node, type)
 
 function GetDOMObject(type, id)
 {
+    if(id === undefined && typeof(type.getAttribute) === "function")
+        console.log("You should use GetCorrespondingDOMObject, when you only use single nodes! ;)");
+
     if(type < 0 || id < 0)
         return undefined;
     if(window.domNodes[type] === undefined)
