@@ -163,11 +163,6 @@ std::shared_ptr<Input> EyeInput::Update(
 {
 	// ### UPDATE GAZE INPUT ###
 
-	// Update gaze by eye tracker
-	double filteredGazeX = 0;
-	double filteredGazeY = 0;
-	bool saccade = false;
-
 	// Bool whether eye tracker is tracking
 	bool isTracking = false;
 
@@ -203,7 +198,7 @@ std::shared_ptr<Input> EyeInput::Update(
 		}
 
 		// Update filter algorithm and provide local variables as reference
-		_filter.Update(spSamples, filteredGazeX, filteredGazeY, saccade);
+		_filter.Update(spSamples);
 
 		// Check, whether eye tracker is tracking
 		isTracking = _procIsTracking();
@@ -285,6 +280,10 @@ std::shared_ptr<Input> EyeInput::Update(
 	_mouseX = mouseX;
 	_mouseY = mouseY;
 
+	// Get data from filter
+	double filteredGazeX = _filter.GetFilteredGazeX();
+	double filteredGazeY = _filter.GetFilteredGazeY();
+
 	// Use mouse when gaze is emulated
 	if (gazeEmulated)
 	{
@@ -307,10 +306,15 @@ std::shared_ptr<Input> EyeInput::Update(
 	std::shared_ptr<Input> spInput = std::make_shared<Input>(
 		filteredGazeX, // gazeX,
 		filteredGazeY, // gazeY,
+		_filter.GetRawGazeX(), // rawGazeX
+		_filter.GetRawGazeY(), // rawGazeY
 		gazeEmulated, // gazeEmulated,
 		false, // gazeUponGUI,
 		false, // instantInteraction,
-		saccade); // saccade
+		_filter.IsSaccade()); // saccade
+
+	// TODO TESTING
+	LogInfo(_filter.GetAge());
 
 	// Return whether gaze coordinates comes from eye tracker
 	return spInput;

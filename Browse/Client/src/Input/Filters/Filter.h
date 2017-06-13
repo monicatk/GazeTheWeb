@@ -14,12 +14,25 @@ class Filter
 public:
 
 	// Update. Takes samples in window pixel coordinates
-	virtual void Update(SampleQueue upSamples,
-		double& rGazeX,
-		double& rGazeY,
-		bool& rSaccade) = 0;
+	virtual void Update(SampleQueue spSamples);
 
+	// Various abstract getters
+	virtual double GetFilteredGazeX() const = 0;
+	virtual double GetFilteredGazeY() const = 0;
+	virtual double GetRawGazeX() const = 0;
+	virtual double GetRawGazeY() const = 0;
+	virtual bool IsSaccade() const = 0;
 
+	// Getter for age of last used sample
+	float GetAge() const;
+
+private:
+
+	// Timestamp of last sample
+	std::chrono::milliseconds _timestamp;
+
+	// Bool whether timestamp was set at least once
+	bool _timestampSetOnce = false;
 };
 
 #endif FILTER_H_

@@ -61,7 +61,6 @@ void OnGazeDataEvent(TX_HANDLE hGazeDataBehavior)
 			SampleData(
 				eventParams.X, // x
 				eventParams.Y, // y
-				true, // valid (TODO: check this. X or Y not -1 when invalid?)
 				duration_cast<milliseconds>(
 					system_clock::now().time_since_epoch() // timestamp
 					)
