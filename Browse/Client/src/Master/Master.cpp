@@ -620,6 +620,13 @@ void Master::Loop()
 			_width,
 			_height); // returns whether gaze was used (or emulated by mouse)
 
+		// If last gaze sample age is too high, perform recalibration
+		if (!spInput->gazeEmulated && spInput->gazeAge > 2.f)
+		{
+			_upEyeInput->Calibrate();
+			continue; // skip this loop execution (do not do this between framebuffer bindings)
+		}
+
         // Update cursor with original mouse input
         eyegui::setVisibilityOfLayout(_pCursorLayout, spInput->gazeEmulated, false, true);
         float halfRelativeMouseCursorSize = MOUSE_CURSOR_RELATIVE_SIZE / 2.f;

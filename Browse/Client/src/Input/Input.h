@@ -18,6 +18,7 @@ public:
 		float gazeY,
 		float rawGazeX,
 		float rawGazeY,
+		float gazeAge,
 		bool gazeEmulated,
 		bool gazeUponGUI,
 		bool instantInteraction,
@@ -26,6 +27,7 @@ public:
 	gazeY(gazeY),
 	rawGazeX(rawGazeX),
 	rawGazeY(rawGazeY),
+	gazeAge(gazeAge),
 	gazeEmulated(gazeEmulated),
 	gazeUponGUI(gazeUponGUI),
 	instantInteraction(instantInteraction),
@@ -36,6 +38,7 @@ public:
 	float gazeY;
 	float rawGazeX;
 	float rawGazeY;
+	float gazeAge;
 	bool gazeEmulated;
     bool gazeUponGUI;
 	bool instantInteraction;
@@ -59,6 +62,7 @@ public:
 		gazeY(spInput->gazeY),
 		rawGazeX(spInput->rawGazeX),
 		rawGazeY(spInput->rawGazeY),
+		gazeAge(spInput->gazeAge),
 		gazeEmulated(spInput->gazeEmulated),
 		gazeUponGUI(spInput->gazeUponGUI),
 		instantInteraction(spInput->instantInteraction),
@@ -92,6 +96,7 @@ public:
 	const float& gazeY;
 	const float& rawGazeX;
 	const float& rawGazeY;
+	const float& gazeAge;
 	const bool& gazeEmulated;
 	const bool& gazeUponGUI;
 	const bool& instantInteraction;

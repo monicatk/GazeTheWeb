@@ -308,6 +308,7 @@ std::shared_ptr<Input> EyeInput::Update(
 		filteredGazeY, // gazeY,
 		_filter.GetRawGazeX(), // rawGazeX
 		_filter.GetRawGazeY(), // rawGazeY
+		_filter.GetAge(), // gazeAge
 		gazeEmulated, // gazeEmulated,
 		false, // gazeUponGUI,
 		false, // instantInteraction,
