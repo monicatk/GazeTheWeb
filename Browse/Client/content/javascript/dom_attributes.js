@@ -31,16 +31,13 @@ function GetAttributeCode(attrStr)
 
 function SendAttributeChangesToCEF(attrStr, domObj)
 {
-    // DEBUG
-    // console.log("SendAttributeChangesToCEF called!");
-
-    // console.log("typeof(domObj.getType): "+typeof(domObj.getType));
     if (typeof(domObj.getType) !== "function")
         return "Invalid 'getType' function!";
+
+    if(typeof(domObj.isCppReady) !== "function" || !domObj.isCppReady())
+        return "Node not yet ready on C++ side!";
     
-    // console.log("Fetching attrCode for attrStr: "+attrStr);
     var attrCode = GetAttributeCode(attrStr);
-    // console.log("attrCode: "+attrCode);
     if(attrCode === undefined)
         return "Invalid attrCode: "+attrCode;
 

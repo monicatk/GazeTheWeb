@@ -270,6 +270,8 @@ function RemoveFixedElement(node)
         }
 
         node.removeAttribute("fixedId");
+
+        // TODO: Set childrens fixedIds to this node's parent fixed id, if any
         
         // Just in case
         UpdateDOMRects();

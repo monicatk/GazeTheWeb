@@ -55,10 +55,18 @@ function DOMNode(node, id, type)
             this.setOverflow(GetDOMOverflowElement(overflowId));
     }
 
+    this.cppReady = false; // TODO: Queuing calls, when node isn't ready yet?
+
     // Inform C++ about added DOMNode
     ConsolePrint("DOM#add#"+type+"#"+id+"#");
 }
 DOMNode.prototype.Class = "DOMNode";
+DOMNode.prototype.setCppReady = function(){
+    this.cppReady = true;
+}
+DOMNode.prototype.isCppReady = function(){
+    return this.cppReady;
+}
 
 // Set up methods, which will be inherited
 DOMNode.prototype.getId = function(){
@@ -110,24 +118,16 @@ DOMNode.prototype.getFixedId = function(){
 }
 
 DOMNode.prototype.setFixObj = function(fixObj){
-    // Reset of fixObj
-    if(fixObj === undefined)
-    {
-        this.fixObj = undefined;
-        SendAttributeChangesToCEF("FixedId", this);
-        return true;
-    }
-    // Update of fixObj
-    if(typeof(fixObj.getId) === "function")
+    // Only accept undefined or a valid fixed element
+    if(fixObj !== undefined && typeof(fixObj.getId) !== "function")
+        return false;
+
+    if(this.fixObj !== fixObj)
     {
         this.fixObj = fixObj;
-        var fixId = fixObj.getId();
         SendAttributeChangesToCEF("FixedId", this);
-        return true;
     }
-    // else: Invalid object, do nothing.
-    console.log("Error: DOMNode.setFixObj: Invalid object given! ("+this.Class+" id: "+this.getId()+")");
-    return false;
+    return true;
 }
 
 // DOMAttribute OverflowId
