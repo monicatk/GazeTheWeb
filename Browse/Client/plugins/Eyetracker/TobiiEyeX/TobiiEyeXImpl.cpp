@@ -104,7 +104,7 @@ void TX_CALLCONVENTION OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connect
 	{
 	case TX_CONNECTIONSTATE_CONNECTED:
 		{
-			txCommitSnapshotAsync(GlobalInteractorSnapshot, OnSnapshotCommitted, NULL) == TX_RESULT_OK;
+			txCommitSnapshotAsync(GlobalInteractorSnapshot, OnSnapshotCommitted, NULL);
 		}
 		break;
 

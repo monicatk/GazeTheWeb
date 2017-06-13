@@ -65,9 +65,6 @@ public:
 	virtual void RemoveDOMOverflowElement(int id) = 0;
 	virtual void ClearDOMNodes() = 0;
 
-	// Enable direct communication between DOM node instances and Renderer
-	virtual bool SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg) = 0;
-
     // Receive callbacks from CefMediator upon scrolling offset changes
     virtual void SetScrollingOffset(double x, double y) = 0;
 

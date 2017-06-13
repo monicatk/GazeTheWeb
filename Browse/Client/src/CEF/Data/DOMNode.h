@@ -37,12 +37,12 @@ namespace DOM
 /____/\____/_/  /_/_/|_/\___/\_,_/\__/___/
 */
 class DOMNode :
-	public virtual DOMJavascriptCommunication
+	public virtual DOMBaseInterface
 {
 public:
 
 	// Empty construction
-	DOMNode(Tab* pTab, int id) : 
+	DOMNode(int id) :
 		_id(id) {};
 
 	// Define initialization through IPC message in each DOMNode subclass
@@ -100,10 +100,10 @@ class DOMTextInput :
 public:
 
 	// Empty construction
-	DOMTextInput(Tab* pTab, int id) : 
-		DOMNode(pTab, id), 
-		DOMTextInputInteraction(pTab), 
-		DOMJavascriptCommunication(pTab){};
+	DOMTextInput(int id, SendRenderMessage sendRenderMessage) :
+		DOMNode(id),
+		DOMTextInputInteraction(), 
+		DOMJavascriptCommunication(sendRenderMessage){};
 
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg) override;
@@ -156,13 +156,13 @@ private:
 
 class DOMLink :
 	public virtual DOMNode
+
 {
 public:
 
 	// Empty construction
-	DOMLink(Tab* pTab, int id) :
-		DOMNode(pTab, id),
-		DOMJavascriptCommunication(pTab) {};
+	DOMLink(int id, SendRenderMessage sendRenderMessage) :
+		DOMNode(id) {};
 
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg) override;
@@ -222,10 +222,10 @@ class DOMSelectField :
 public:
 
 	// Empty construction
-	DOMSelectField(Tab* pTab, int id) :
-		DOMNode(pTab, id), 
-		DOMSelectFieldInteraction(pTab),
-		DOMJavascriptCommunication(pTab) {};
+	DOMSelectField(int id, SendRenderMessage sendRenderMessage) :
+		DOMNode(id), 
+		DOMSelectFieldInteraction(),
+		DOMJavascriptCommunication(sendRenderMessage) {};
 
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg) override;
@@ -280,10 +280,10 @@ class DOMOverflowElement :
 public:
 
 	// Empty construction
-	DOMOverflowElement(Tab* pTab, int id) :
-		DOMNode(pTab, id),
-		DOMOverflowElementInteraction(pTab),
-		DOMJavascriptCommunication(pTab) {};
+	DOMOverflowElement(int id, SendRenderMessage sendRenderMessage) :
+		DOMNode(id),
+		DOMOverflowElementInteraction(),
+		DOMJavascriptCommunication(sendRenderMessage) {};
 
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg) override;

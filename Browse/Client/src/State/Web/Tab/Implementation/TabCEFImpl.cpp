@@ -13,6 +13,8 @@
 #include <algorithm>
 #include "src/CEF/Mediator.h"
 
+#define SendRenderMessage [this](CefRefPtr<CefProcessMessage> msg) { return _pCefMediator->SendProcessMessageToRenderer(msg, this); }
+
 void Tab::GetWebRenderResolution(int& rWidth, int& rHeight) const
 {
 	// One cannot ask the web view for its size, because its size is not updated before the update call
@@ -108,7 +110,9 @@ void Tab::ResetFaviconBytes()
 
 void Tab::AddDOMTextInput(CefRefPtr<CefBrowser> browser, int id)
 {
-	std::shared_ptr<DOMTextInput> spNode = std::make_shared<DOMTextInput>(this, id);
+	std::shared_ptr<DOMTextInput> spNode = std::make_shared<DOMTextInput>(
+		id,
+		SendRenderMessage);
 
 	// Add node to ID->node map
 	_TextInputMap.emplace(id, spNode);
@@ -128,12 +132,16 @@ void Tab::AddDOMTextInput(CefRefPtr<CefBrowser> browser, int id)
 
 void Tab::AddDOMLink(CefRefPtr<CefBrowser> browser, int id)
 {
-	_TextLinkMap.emplace(id, std::make_shared<DOMLink>(this, id));
+	_TextLinkMap.emplace(id, std::make_shared<DOMLink>(
+		id,
+		SendRenderMessage));
 }
 
 void Tab::AddDOMSelectField(CefRefPtr<CefBrowser> browser, int id)
 {
-	std::shared_ptr<DOMSelectField> spNode = std::make_shared<DOMSelectField>(this, id);
+	std::shared_ptr<DOMSelectField> spNode = std::make_shared<DOMSelectField>(
+		id,
+		SendRenderMessage);
 
 	// Add node to ID->node map
 	_SelectFieldMap.emplace(id, spNode);
@@ -153,7 +161,9 @@ void Tab::AddDOMSelectField(CefRefPtr<CefBrowser> browser, int id)
 
 void Tab::AddDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id)
 {
-	_OverflowElementMap.emplace(id, std::make_shared<DOMOverflowElement>(this, id));
+	_OverflowElementMap.emplace(id, std::make_shared<DOMOverflowElement>(
+		id,
+		SendRenderMessage));
 }
 
 
@@ -222,7 +232,6 @@ void Tab::RemoveDOMOverflowElement(int id)
 {
 	if (_OverflowElementMap.find(id) != _OverflowElementMap.end()) { _OverflowElementMap.erase(id); }
 }
-
 
 void Tab::SetScrollingOffset(double x, double y)
 {
@@ -333,11 +342,6 @@ void Tab::SetLoadingStatus(int64 frameID, bool isMain, bool isLoading)
 			_pWeb->PushAddPageToHistoryJob(this, page);
         }
 	}
-}
-
-bool Tab::SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg)
-{
-	return _pCefMediator->SendProcessMessageToRenderer(msg, this);
 }
 
 

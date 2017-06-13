@@ -13,6 +13,8 @@
 
 class Tab;	// Forward declaration
 
+typedef std::function<bool(CefRefPtr<CefProcessMessage>)> SendRenderMessage;
+
 class DOMBaseInterface
 {
 public:
@@ -31,8 +33,8 @@ class DOMJavascriptCommunication  : public virtual DOMBaseInterface
 public:
 
 	// Constructor
-	DOMJavascriptCommunication(Tab* pTab) :
-		_pTab(pTab) {};
+	DOMJavascriptCommunication(SendRenderMessage sendRenderMessage) :
+		_sendRenderMessage(sendRenderMessage) {};
 
 	// Sending message to renderer
 	bool SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg);
@@ -43,7 +45,7 @@ public:
 		CefRefPtr<CefListValue> param);
 
 	// Member
-	Tab* _pTab; // TODO some interface or so would be better.
+	SendRenderMessage _sendRenderMessage;
 
 };
 
@@ -53,7 +55,7 @@ class DOMTextInputInteraction : public virtual DOMJavascriptCommunication
 public:
 
 	// Constructor
-	DOMTextInputInteraction(Tab* pTab) {};
+	DOMTextInputInteraction() {};
 
 	// Send IPC message to JS in order to execute text input function
 	void InputText(std::string text, bool submit);
@@ -65,7 +67,7 @@ class DOMOverflowElementInteraction : public virtual DOMJavascriptCommunication
 public:
 
 	// Constructor
-	DOMOverflowElementInteraction(Tab* pTab) {};
+	DOMOverflowElementInteraction() {};
 
 	// TODO taking gaze, should take scrolling offset
 	// Send IPC message to JS in order to execute scrolling function
@@ -78,7 +80,7 @@ class DOMSelectFieldInteraction : public virtual DOMJavascriptCommunication
 public:
 
 	// Constructor
-	DOMSelectFieldInteraction(Tab* pTab) {};
+	DOMSelectFieldInteraction() {};
 
 	// Send IPC message to JS in order to execute JS function
 	void SetSelectionIndex(int idx);
