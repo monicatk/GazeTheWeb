@@ -32,8 +32,8 @@ extern "C" {
 	// Fetches gaze samples and clears buffer
 	DLL_API void FetchSamples(SampleQueue& rspSamples);
 
-	// Perform calibration TODO: return something like an enum or so to provide user feedback
-	DLL_API void Calibrate();
+	// Perform calibration, returns whether succesfull
+	DLL_API bool Calibrate();
 
 #ifdef __cplusplus
 }

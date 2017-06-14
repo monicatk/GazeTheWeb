@@ -24,7 +24,7 @@
 #include <windows.h>
 typedef void(__cdecl *FETCH_SAMPLES)(SampleQueue&);
 typedef bool(__cdecl *IS_TRACKING)();
-typedef void(__cdecl *CALIBRATE)();
+typedef bool(__cdecl *CALIBRATE)();
 #endif
 
 class EyeInput
@@ -47,8 +47,8 @@ public:
 		int windowWidth,
 		int windowHeight);
 
-	// Calibrate the eye tracking device
-	void Calibrate();
+	// Calibrate the eye tracking device, returns whether succesfull
+	bool Calibrate();
 
 private:
 

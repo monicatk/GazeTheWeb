@@ -108,8 +108,8 @@ void FetchSamples(SampleQueue& rspSamples)
 	eyetracker_global::FetchSamples(rspSamples);
 }
 
-void Calibrate()
+bool Calibrate()
 {
 	// Start calibration (setup does not work of licensing reasons)
-	int ret_calibrate = iV_Calibrate();
+	return iV_Calibrate() == RET_SUCCESS;
 }

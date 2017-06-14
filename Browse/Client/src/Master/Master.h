@@ -258,6 +258,9 @@ private:
     // Layout for pause button etc.
     eyegui::Layout* _pSuperLayout;
 
+	// Layout to trigger calibration etc.
+	eyegui::Layout* _pSuperCalibrationLayout;
+
     // Emtpy layout to handle cursor floating frame that may not take input
     eyegui::Layout* _pCursorLayout;
 

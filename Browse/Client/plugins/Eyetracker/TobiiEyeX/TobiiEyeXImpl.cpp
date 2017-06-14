@@ -197,7 +197,8 @@ void FetchSamples(SampleQueue& rspSamples)
 	eyetracker_global::FetchSamples(rspSamples);
 }
 
-void Calibrate()
+bool Calibrate()
 {
-	// Not available
+	// Not supported
+	return false;
 }

@@ -79,3 +79,7 @@ notification:copied_to_clipboard=Copied To Clipboard
 notification:eye_tracker_status:trying_to_connect=Connecting Eye Tracker...
 notification:eye_tracker_status:connected=Eye Tracking Driver Connected
 notification:eye_tracker_status:disconnected=Eye Tracking Driver Disconnected
+notification:calibration_success=Calibration Successful
+notification:calibration_failure=Calibration Failed
+super_calibration:continue=Continue
+super_calibration:recalibration=Recalibrate

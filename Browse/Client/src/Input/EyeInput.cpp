@@ -315,18 +315,20 @@ std::shared_ptr<Input> EyeInput::Update(
 		_filter.IsSaccade()); // saccade
 
 	// TODO TESTING
-	LogInfo(_filter.GetAge());
+	// LogInfo(_filter.GetAge());
 
 	// Return whether gaze coordinates comes from eye tracker
 	return spInput;
 }
 
-void EyeInput::Calibrate()
+bool EyeInput::Calibrate()
 {
+	bool success = false;
 #ifdef _WIN32
 	if (_connected && _procCalibrate != NULL)
 	{
-		_procCalibrate();
+		success = _procCalibrate();
 	}
 #endif
+	return success;
 }

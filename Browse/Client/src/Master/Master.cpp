@@ -332,12 +332,17 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
     // ### SUPER LAYOUT ###
 
-    // Load layout (deleted at eyeGUI termination)
+    // Load layouts (deleted at eyeGUI termination)
     _pSuperLayout = eyegui::addLayout(_pSuperGUI, "layouts/Super.xeyegui", EYEGUI_SUPER_LAYER, true);
+	_pSuperCalibrationLayout = eyegui::addLayout(_pSuperGUI, "layouts/SuperCalibration.xeyegui", EYEGUI_SUPER_LAYER, false); // adding on top of super layout but still beneath cursor
 
     // Button listener for pause
     _spMasterButtonListener = std::shared_ptr<MasterButtonListener>(new MasterButtonListener(this));
     eyegui::registerButtonListener(_pSuperLayout, "pause", _spMasterButtonListener);
+
+	// Button listener for super calibration (reusing the master button listener)
+	eyegui::registerButtonListener(_pSuperCalibrationLayout, "continue", _spMasterButtonListener);
+	eyegui::registerButtonListener(_pSuperCalibrationLayout, "recalibration", _spMasterButtonListener);
 
     // Initialization
     if(setup::PAUSED_AT_STARTUP)
@@ -360,7 +365,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// ### CURSOR LAYOUT ###
 
     // Add floating frame on empty layout for cursor
-    _pCursorLayout = eyegui::addLayout(_pSuperGUI, "layouts/Empty.xeyegui", EYEGUI_CURSOR_LAYER, true);
+    _pCursorLayout = eyegui::addLayout(_pSuperGUI, "layouts/Empty.xeyegui", EYEGUI_CURSOR_LAYER, true); // placed over super layer
     eyegui::setInputUsageOfLayout(_pCursorLayout, false);
     _cursorFrameIndex = eyegui::addFloatingFrameWithBrick(_pCursorLayout, "bricks/Cursor.beyegui", 0, 0, 0, 0, true, false); // will be moved and sized in loop
 
@@ -785,7 +790,7 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
 			case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
-			case GLFW_KEY_C: { _upEyeInput->Calibrate(); break; }
+			case GLFW_KEY_C: { eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true); break; }
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
 			case GLFW_KEY_6: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::MAGNIFICATION); break; }
 			case GLFW_KEY_7: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::ZOOM); break; }
@@ -849,6 +854,30 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
         _pMaster->_paused = true;
         eyegui::setDescriptionVisibility(_pMaster->_pGUI, eyegui::DescriptionVisibility::VISIBLE);
     }
+	else if (pLayout == _pMaster->_pSuperCalibrationLayout)
+	{
+		if(id == "continue")
+		{
+			// Hide layout
+			eyegui::setVisibilityOfLayout(_pMaster->_pSuperCalibrationLayout, false, false, true);
+		}
+		else if (id == "recalibration")
+		{
+			// Perform calibration
+			bool success = _pMaster->_upEyeInput->Calibrate();
+			if (success)
+			{
+				_pMaster->PushNotificationByKey("notification:calibration_success", MasterNotificationInterface::Type::SUCCESS, false);
+			}
+			else
+			{
+				_pMaster->PushNotificationByKey("notification:calibration_failure", MasterNotificationInterface::Type::WARNING, false);
+			}
+
+			// Hide layout after calibration
+			eyegui::setVisibilityOfLayout(_pMaster->_pSuperCalibrationLayout, false, false, true);
+		}
+	}
 }
 
 void Master::MasterButtonListener::up(eyegui::Layout* pLayout, std::string id)
