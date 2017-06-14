@@ -65,8 +65,7 @@ DOMOverflowElement.prototype.scroll = function(gazeX, gazeY, fixedIds){
 		return;
 
 	// Do not use cut-off rect and keep scrolling velocity untouched if partially hidden
-	var rects = AdjustClientRects(this.node.getClientRects());
-	//  var rect = this.getRects()[0];
+	var rects = this.getAdjustedClientRects();
 
 	// Update scrolling position according to current gaze coordinates
 	// Idea: Only scroll if gaze is somewhere near the overflow elements edges

@@ -73,41 +73,32 @@ function FixedElement(node)
             
             
             // Check if child is already contained in one of the DOMRects
-            ForEveryChild(this.node,
-                function(child)
-                {
+            ForEveryChild(
+                this.node, 
+                // Main function
+                (child) =>{
                     if(child.nodeType === 1 && 
                         window.getComputedStyle(child, null).getPropertyValue("opacity") !== "0" &&
                         window.getComputedStyle(child, null).getPropertyValue("visibility") !== "hidden")
                     {
-                        var rects = child.getClientRects();
-                       
-                        for(var i = 0, n = rects.length; i < n; i++)
-                        {
-                            var rect = rects[i];
+                        child.getClientRects().forEach((rect) => {
                             var contained = false;
 
                             // Iterate over all current bounding rects
-                            domRectList.forEach(
-                                function(container)
-                                {
+                            domRectList.forEach((container) => {
                                     if(!contained) // Stop checking if rect is contained, when already contained in another rect
-                                    {
                                         contained = IsRectContained(rect, container);
-                                    }
                                 }
-                            ); // domRectList.forEach
+                            );
 
                             // Another rect must be added if current rect isn't contained in any 
                             if(!contained)
-                            {
                                 domRectList.push(rects[i]);
-                            }
 
-                        } // for rects.length
+                        }); // rects.forEach
                     } // if nodeType === 1
                 },
-                // Abort function
+                // Abort function, executed after main function
                 (node) => { 
                     if (node.nodeType === 1)
                     {
@@ -116,18 +107,15 @@ function FixedElement(node)
                             return true;
                         // ... or overflow element, which would cover children anyway outside of rect
                         var css_overflow = window.getComputedStyle(node, null).getPropertyValue("overflow");
-                         return (node.hasAttribute("overflowId") 
-                         || ( css_overflow !== null && css_overflow !== "visible")
-                         ); 
+                        return (node.hasAttribute("overflowId") || ( css_overflow !== null && css_overflow !== "visible"))
                     } 
-                    else return true;
+                    else 
+                        return true;
                 }
             ); // ForEveryChild
 
             // Convert DOMRects to [t,l,b,r] float lists and adjust coordinates if zoomed
-            domRectList.forEach(
-                function(domRect)
-                { 
+            domRectList.forEach((domRect) => { 
                     updatedRectsData.push(AdjustRectToZoom(domRect));
                 }
             );
@@ -155,9 +143,6 @@ function FixedElement(node)
             // Inform CEF that fixed element has been updated
             // var debug = (window.domFixedElements[this.id] === undefined) ? "undefined" : "ok";
             ConsolePrint("#fixElem#add#"+this.id+"#");
-            // console.log("FixedElement "+this.id+" updated.");
-            //   ConsolePrint("-----> #fixElem#add#"+this.id); // DEBUG
-
 
             // Give feedback if other rects might have to get updated too
             return true;
@@ -255,7 +240,8 @@ function AddFixedElement(node)
 
 function RemoveFixedElement(node)
 {
-    if((fixedObj = GetFixedElementByNode(node)) !== null && fixedObj !== undefined)
+    var fixedObj = GetFixedElementByNode(node);
+    if(fixedObj !== undefined)
     {
         // Needed for output at the end
         var id = fixedObj.id;
@@ -272,6 +258,21 @@ function RemoveFixedElement(node)
         node.removeAttribute("fixedId");
 
         // TODO: Set childrens fixedIds to this node's parent fixed id, if any
+        var childFixedId = node.getAttribute("childFixedId");
+        if(childFixedId)
+        {
+            node.childNodes.forEach((child) => {
+                if(typeof(child.setAttribute) === "function")
+                    child.setAttribute("childFixedId", childFixedId);
+            });
+        }
+        else
+        {
+            node.childNodes.forEach((child) => {
+                if(typeof(child.removeAttribute) === "function")
+                    child.removeAttribute("childFixedId");
+            });
+        }
         
         // Just in case
         UpdateDOMRects();
@@ -283,15 +284,6 @@ function RemoveFixedElement(node)
         // ConsolePrint("fixedObj === undefined")
         // ConsolePrint("node.fixedId="+node.getAttribute("fixedId"));
     }
-}
-
-
-
-// Inform CEF about the current fixation status of a already known nodes
-function SetFixationStatus(node, status)
-{
-    console.log("SetFixationStatus: DO NOT USE THIS FUNCTION ANYMORE!");
-    return; 
 }
 
 

@@ -64,14 +64,17 @@ private:
 	const std::string _js_dom_fixed_elements	= GetJSCode(DOM_FIXED_ELEMENTS);
 	const std::string _js_helpers				= GetJSCode(HELPERS);
 	const std::string _js_dom_attributes		= GetJSCode(DOM_ATTRIBUTES);
+	const std::string _js_dom_nodes_helpers		= GetJSCode(DOM_NODES_HELPERS);
 
 	std::vector<std::pair<std::string, std::string>> _js_dom_code = {
 		std::make_pair(_js_helpers, "helpers.js"),
 		std::make_pair(_js_dom_nodes, "dom_nodes.js"),
+		std::make_pair(_js_dom_nodes_helpers, "dom_nodes_helper.js"),
 		std::make_pair(_js_dom_nodes_interaction, "dom_nodes_interaction.js"),
 		std::make_pair(_js_dom_fixed_elements, "dom_fixed_elements.js"),
 		std::make_pair(_js_dom_mutationobserver, "dom_mutationobserver.js"),
 		std::make_pair(_js_dom_attributes, "dom_attributes.js")
+
 	};
 
     // Include CEF'S default reference counting implementation

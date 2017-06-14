@@ -26,6 +26,7 @@ const std::map<JSFile, std::string> findJSFile =
 	std::make_pair<JSFile, std::string>(DOM_MUTATIONOBSERVER, src + "dom_mutationobserver.js"),
 	std::make_pair<JSFile, std::string>(DOM_FIXED_ELEMENTS, src + "dom_fixed_elements.js"),
 	std::make_pair<JSFile, std::string>(DOM_ATTRIBUTES, src + "dom_attributes.js"),
+	std::make_pair<JSFile, std::string>(DOM_NODES_HELPERS, src + "dom_nodes_helpers.js"),
 	// Various
 	std::make_pair<JSFile, std::string>(REMOVE_CSS_SCROLLBAR, src + "old/remove_css_scrollbar.js")
 };

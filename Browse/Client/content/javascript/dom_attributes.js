@@ -62,9 +62,11 @@ var simpleReturn = (data) => { return data; };
 var listReturn = (data) => { return data.reduce( (i,j) => {return i+";"+j; })};
 
 window.attrStrToEncodingFunc.set("Rects", (data) => {
+    if(data.length === 0)
+        return [0,0,0,0];
     // Add ';' between every element in each list, afterwards add ';' between each list
     // FUTURE TODO: Use another kind of delimiter in between list elements as between lists
-        return data.map( (l) => { return l.reduce((n,m) => {return n+";"+m; }) }).reduce( (i,j) => {return i+";"+j; });
+    return data.map( (l) => { return l.reduce((n,m) => {return n+";"+m; }) }).reduce( (i,j) => {return i+";"+j; });
     }
 );
 window.attrStrToEncodingFunc.set("FixedId", simpleReturn);
@@ -93,7 +95,7 @@ function FetchAndEncodeAttribute(domObj, attrStr)
     }
 
     // Call attribute getter
-    var data = domObj["get"+attrStr]();
+    var data = domObj["get"+attrStr](false); // param update=false
 
     // Enode and return data
     return encodeFunc(data);
