@@ -332,3 +332,8 @@ bool EyeInput::Calibrate()
 #endif
 	return success;
 }
+
+bool EyeInput::SamplesReceived() const
+{
+	return _filter.IsTimestampSetOnce();
+}

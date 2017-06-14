@@ -625,11 +625,15 @@ void Master::Loop()
 			_width,
 			_height); // returns whether gaze was used (or emulated by mouse)
 
+		// TODO: when user keeps eye closed, this is executed for every frame
 		// If last gaze sample age is too high, perform recalibration
-		if (!spInput->gazeEmulated && spInput->gazeAge > 2.f)
+		if (
+			!spInput->gazeEmulated // only think about calibration if gaze is not emulated
+			&& spInput->gazeAge > setup::DURATION_BEFORE_SUPER_CALIBRATION // also only when for given time no samples received
+			&& _upEyeInput->SamplesReceived()) // and it should not performed when there were no samples so far
 		{
-			_upEyeInput->Calibrate();
-			continue; // skip this loop execution (do not do this between framebuffer bindings)
+			// Display layout to recalibrate
+			eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true);
 		}
 
         // Update cursor with original mouse input

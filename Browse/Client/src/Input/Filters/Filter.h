@@ -26,12 +26,15 @@ public:
 	// Getter for age of last used sample
 	float GetAge() const;
 
+	// Getter which returns whether timestamp was actively set at least once (aka at least one sample received)
+	bool IsTimestampSetOnce() const;
+
 private:
 
 	// Timestamp of last sample
 	std::chrono::milliseconds _timestamp;
 
-	// Bool whether timestamp was set at least once
+	// Bool whether timestamp was set at least once (aka at least one sample received)
 	bool _timestampSetOnce = false;
 };
 

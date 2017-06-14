@@ -33,3 +33,8 @@ float Filter::GetAge() const
 	}
 }
 
+bool Filter::IsTimestampSetOnce() const
+{
+	return _timestampSetOnce;
+}
+

@@ -50,6 +50,9 @@ public:
 	// Calibrate the eye tracking device, returns whether succesfull
 	bool Calibrate();
 
+	// Delegation of filter. Indicated whether age of input does say something...
+	bool SamplesReceived() const;
+
 private:
 
 	// Thread that connects to eye tracking device
