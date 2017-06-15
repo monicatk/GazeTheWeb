@@ -16,11 +16,14 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 	{
 #ifdef _WIN32
 
-		// Trying to connect
-		_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::TRYING_TO_CONNECT);
-
 		// Define procedure signature for connection
 		typedef bool(__cdecl *CONNECT)();
+
+		// Variable about device
+		EyeTrackerDevice device = EyeTrackerDevice::NONE;
+
+		// Trying to connect
+		_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::TRYING_TO_CONNECT, EyeTrackerDevice::NONE); // just give general indication about trying to connect
 
 		// Function to connect to eye tracker via plugin
 		std::function<void(std::string)> ConnectEyeTracker = [&](std::string plugin)
@@ -75,18 +78,21 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 		// Try to load SMI iViewX plugin
 		if (!_connected && setup::CONNECT_SMI_IVIEWX)
 		{
+			device = EyeTrackerDevice::SMI_REDN;
 			ConnectEyeTracker("SMIiViewXPlugin");
 		}
 
 		// Try to load Visual Interaction myGaze plugin
 		if (!_connected && setup::CONNECT_VI_MYGAZE)
 		{
+			device = EyeTrackerDevice::VI_MYGAZE;
 			ConnectEyeTracker("VImyGazePlugin");
 		}
 
 		// Try to load Tobii EyeX plugin
 		if (!_connected && setup::CONNECT_TOBII_EYEX)
 		{
+			device = EyeTrackerDevice::TOBII_EYEX;
 			ConnectEyeTracker("TobiiEyeXPlugin");
 		}
 
@@ -96,11 +102,11 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 		if (!_connected)
 		{
 			LogInfo("EyeInput: No eye tracker connected. Input emulated by mouse.");
-			_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::DISCONNECTED);
+			_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::DISCONNECTED, EyeTrackerDevice::NONE);
 		}
 		else
 		{
-			_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::CONNECTED);
+			_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::CONNECTED, device);
 		}
 	}));
 }

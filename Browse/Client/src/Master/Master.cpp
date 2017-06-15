@@ -507,11 +507,11 @@ void Master::PushNotificationByKey(std::string key, Type type, bool overridable)
 	_notificationStack.push(Notification(eyegui::fetchLocalization(_pGUI, key), type, overridable));
 }
 
-void Master::threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status)
+void Master::threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status, EyeTrackerDevice device)
 {
 	// TODO: make job pushing a method of its own
 	_threadJobsMutex.lock();
-	_threadJobs.push_back(std::make_shared<PushEyetrackerStatusThreadJob>(this, status));
+	_threadJobs.push_back(std::make_shared<PushEyetrackerStatusThreadJob>(this, status, device));
 	_threadJobsMutex.unlock();
 }
 
@@ -784,6 +784,8 @@ void Master::Loop()
     }
 }
 
+#include <iostream>
+
 void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
 {
     if (action == GLFW_PRESS)
@@ -794,7 +796,7 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
 			case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
-			case GLFW_KEY_C: { eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true); break; }
+			case GLFW_KEY_C: { eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true); std::cout << '\a';  break; }
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
 			case GLFW_KEY_6: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::MAGNIFICATION); break; }
 			case GLFW_KEY_7: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::ZOOM); break; }
@@ -906,7 +908,22 @@ void Master::PushEyetrackerStatusThreadJob::Execute()
 		_pMaster->PushNotificationByKey("notification:eye_tracker_status:trying_to_connect", MasterNotificationInterface::Type::NEUTRAL, true);
 		break;
 	case EyeTrackerStatus::CONNECTED:
-		_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected", MasterNotificationInterface::Type::SUCCESS, false);
+		switch (_device)
+		{
+		case EyeTrackerDevice::SMI_REDN:
+			_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected_smi_redn", MasterNotificationInterface::Type::SUCCESS, false);
+			break;
+		case EyeTrackerDevice::VI_MYGAZE:
+			_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected_vi_mygaze", MasterNotificationInterface::Type::SUCCESS, false);
+			break;
+		case EyeTrackerDevice::TOBII_EYEX:
+			_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected_tobii_eyex", MasterNotificationInterface::Type::SUCCESS, false);
+			break;
+		default:
+			_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected", MasterNotificationInterface::Type::SUCCESS, false);
+			break;
+		}
+		
 		break;
 	case EyeTrackerStatus::DISCONNECTED:
 		_pMaster->PushNotificationByKey("notification:eye_tracker_status:disconnected", MasterNotificationInterface::Type::WARNING, false);

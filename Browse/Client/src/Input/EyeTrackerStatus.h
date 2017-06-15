@@ -12,4 +12,10 @@ enum class EyeTrackerStatus
 	CONNECTED, DISCONNECTED, TRYING_TO_CONNECT
 };
 
+// Enumeration about available eye trackers
+enum class EyeTrackerDevice
+{
+	SMI_REDN, VI_MYGAZE, TOBII_EYEX, NONE
+};
+
 #endif EYETRACKERSTATUS_H_

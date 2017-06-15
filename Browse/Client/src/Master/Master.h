@@ -129,7 +129,7 @@ public:
 	// ###################################
 
 	// Notify about eye tracker status
-	virtual void threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status);
+	virtual void threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status, EyeTrackerDevice device);
 
 private:
 
@@ -190,7 +190,7 @@ private:
 	public:
 
 		// Constructor
-		PushEyetrackerStatusThreadJob(Master* pMaster, EyeTrackerStatus status) : ThreadJob(pMaster), _status(status) {};
+		PushEyetrackerStatusThreadJob(Master* pMaster, EyeTrackerStatus status, EyeTrackerDevice device) : ThreadJob(pMaster), _status(status), _device(device) {};
 
 		// Destructor
 		~PushEyetrackerStatusThreadJob() {}
@@ -202,6 +202,7 @@ private:
 
 		// Members
 		EyeTrackerStatus _status;
+		EyeTrackerDevice _device;
 	};
 
 	// List jobs as friends with benefits
