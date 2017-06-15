@@ -2,6 +2,8 @@
 
 set(CEF_TARGET Client)
 
+message(STATUS "*** CLIENT ***")
+
 ### PARAMETERS #################################################################
 
 set(CLIENT_DEPLOYMENT OFF CACHE BOOL "Setup for Deployment.")
@@ -64,10 +66,10 @@ if(${CLIENT_BUILD_SMI_IVIEWX_PLUGIN})
 		target_link_libraries(SMIiViewXPlugin ${SMI_IVIEWX_SDK_LIBRARIES})
 
 		# Tell user about it
-		message("Plugin for SMI iViewX will be built.")
+		message(STATUS "Plugin for SMI iViewX will be built.")
 	
 	else()
-		message("SMI iViewX SDK directory not found, plugin will *not* be built.")
+		message(WARNING "SMI iViewX SDK directory not found, plugin will *not* be built.")
 	endif()
 endif()
 
@@ -95,9 +97,9 @@ if(${CLIENT_BUILD_VI_MYGAZE_PLUGIN})
 		target_link_libraries(VImyGazePlugin ${VI_MYGAZE_SDK_LIBRARIES})
 
 		# Tell user about it
-		message("Plugin for Visual Interaction myGaze will be built.")
+		message(STATUS "Plugin for Visual Interaction myGaze will be built.")
 	else()
-		message("Visual Interaction myGaze SDK directory not found, plugin will *not* be built.")
+		message(WARNING "Visual Interaction myGaze SDK directory not found, plugin will *not* be built.")
 	endif()
 endif()
 
@@ -125,7 +127,7 @@ if(${CLIENT_BUILD_TOBII_EYEX_PLUGIN})
 		target_link_libraries(TobiiEyeXPlugin ${TOBII_EYEX_SDK_LIBRARIES})
 		
 		# Tell user about it
-		message("Plugin for Tobii EyeX will be built.")
+		message(STATUS "Plugin for Tobii EyeX will be built.")
 		
 		# Copy Tobii EyeX library to output folder
 		add_custom_command(TARGET TobiiEyeXPlugin POST_BUILD
@@ -134,7 +136,7 @@ if(${CLIENT_BUILD_TOBII_EYEX_PLUGIN})
 			$<TARGET_FILE_DIR:TobiiEyeXPlugin>)
 	
 	else()
-		message("Tobii EyeX SDK directory not found, plugin will *not* be built.")
+		message(WARNING "Tobii EyeX SDK directory not found, plugin will *not* be built.")
 	endif()
 endif()
 
