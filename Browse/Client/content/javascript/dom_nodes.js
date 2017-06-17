@@ -43,18 +43,15 @@ function DOMNode(node, id, type)
     this.fixObj = undefined;
     this.overflow = undefined;
 
-    if(typeof(node.getAttribute) === "function")
-    {
-        // Initial setup of fixObj, if already set in node
-        this.setFixObj(  GetFixedElementById( node.getAttribute("fixedId") )  );
-        if(this.fixObj === null)
-            this.setFixObj(  GetFixedElementById( node.getAttribute("childFixedId") )  );
+    // Initial setup of fixObj, if already set in node
+    this.setFixObj(  GetFixedElementById( node.getAttribute("fixedId") )  );
+    if(this.fixObj === undefined)
+        this.setFixObj(  GetFixedElementById( node.getAttribute("childFixedId") )  );
 
-        // Initial setup of overflow, if already set in node
-        var overflowId = node.getAttribute("overflowid");
-        if(overflowId !== null)
-            this.setOverflow(GetDOMOverflowElement(overflowId));
-    }
+    // Initial setup of overflow, if already set in node
+    var overflowId = node.getAttribute("overflowid");
+    if(overflowId !== null)
+        this.setOverflow(GetDOMOverflowElement(overflowId));
 
     this.cppReady = false; // TODO: Queuing calls, when node isn't ready yet?
 

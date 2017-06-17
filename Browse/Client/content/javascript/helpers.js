@@ -17,8 +17,7 @@ if(ClientRectList.prototype.map === undefined)
     ConsolePrint("JS: Extending JS ClientRectList by own map function.");
     ClientRectList.prototype.map = function(f){
         var output = [];
-        var n = this.length;
-        for(var i = 0; i < n; i++)
+        for(var i = 0, n = this.length; i < n; i++)
         {
             output.push( f(this[i]) ); 
         }
@@ -78,11 +77,16 @@ function EqualClientRectsData(r1, r2)
         return false;
     
     // Check if width and height of each Rect are identical
-    var n = r1.length;
-	for(var i = 0; i < n; i++)
+	for(var i = 0, n = r1.length; i < n; i++)
+    {
+        if((r1[i] === undefined && r2[i] !== undefined) || (r1[i] !== undefined && r2[i] === undefined))
+            return false;
+        if(r1[i] === undefined)
+            continue;
 		for(var j = 0; j < 4; j++)
             if(r1[i][j] !== r2[i][j])
                 return false;   // Stop iterating asap
+    }
 	return true;
 
 }
@@ -112,35 +116,31 @@ function ForEveryChild(parentNode, applyFunction, abortFunction)
 	}
 }
 
-function GetFixedElement(node)
+function GetFixedElementByNode(node)
 {
     if(typeof(node.getAttribute) !== "function" || typeof(node.setAttribute) !== "function")
         return undefined;
 
     var fixedId = node.getAttribute("fixedId");
-    if(fixedId === null || fixedId < 0)
-        return undefined;
-
-    return window.domFixedElements[fixedId];
+    return GetFixedElementById(fixedId);
 }
 
 function GetFixedElementById(id)
 {
     if(id !== null && id >= 0 && id < window.domFixedElements.length)
-    {
         return window.domFixedElements[id];
-    }
-    else
-    {
-        console.log("Couldn't find FixedElement with id="+id);
-        return undefined;
-    }
+    return undefined;
 }
 
-function DeleteFixedElement(node)
+function DeleteFixedElement(fixId)
 {
-    // TODO
-    console.log("TODO DeleteFixedElement");
+    var fixObj = domFixedElements[fixId];
+    if(fixObj === undefined)
+        return;
+    
+    delete fixObj;
+    ConsolePrint("#fixElem#rem#"+fixId+"#");
+    console.log("Removed fixed element with id: "+fixId);
 }
 
 

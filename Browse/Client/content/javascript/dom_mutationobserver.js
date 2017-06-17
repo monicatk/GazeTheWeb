@@ -86,7 +86,7 @@ document.addEventListener('transitionend', function(event){
 	// Tree, whose children have to be check for rect updates
 	var root = event.target;
 
-	var fixedElem = GetFixedElement(root);
+	var fixedElem = GetFixedElementByNode(root);
 	if(fixedElem !== undefined)
 	{
 		// If root is fixed element, subtree will be updated by simply calling updateRects
@@ -103,7 +103,7 @@ document.addEventListener('transitionend', function(event){
 		// Update rects of whole subtree beneath root node
 		ForEveryChild(root, 
 			(child) => {
-				var fixedElem = GetFixedElement(child);
+				var fixedElem = GetFixedElementByNode(child);
 				if(fixedElem === undefined)
 				{
 					var obj = GetCorrespondingDOMObject(child);
@@ -120,7 +120,7 @@ document.addEventListener('transitionend', function(event){
 			(child) => {
 				// Abort rect update of childs subtree, if child is fixed element
 				// With child as fixed element, rect updates for subtree will be triggered anyway
-				return (GetFixedElement(child) !== undefined);
+				return (GetFixedElementByNode(child) !== undefined);
 			}
 		); // ForEveryChild end
 	}
@@ -334,7 +334,7 @@ function AnalyzeNode(node)
 			// 	// OR add it anyway and only scroll if height and scroll height aren't the same?
 			// 	if(node.scrollHeight !== rect.height || node.scrollWidth !== rect.width)
 			// 	{
-			// 		CreateOverflowElement(node);
+			// 		CreateDOMOverflowElement(node);
 			// 	}
 			// }
 			else
@@ -343,7 +343,7 @@ function AnalyzeNode(node)
 				var overflowY = computedStyle.getPropertyValue("overflow-y");
 				if(overflowX === "auto" || overflowX === "scroll" || overflowY === "auto" || overflowY === "scroll")
 				{
-					CreateOverflowElement(node);
+					CreateDOMOverflowElement(node);
 				}
 			}
 		}
@@ -418,22 +418,9 @@ function MutationObserverInit()
 		  				{
 		  					attr = mutation.attributeName;
 
-							// ##################################################
-							// FIXED ELEMENT HANDLING
-							// ##################################################
-
-							// Detect creation/removal of a fixed element
-							if(attr === "fixedid")
-							{
-								var fixId = node.getAttribute("fixedid");
-								// Node was set to unfix, fixedId attribute existed before
-								if(fixId === null || fixId === -1)
-								 	DeleteFixedElement(node);
-								// else
-								// 	new FixedElement(node);	// Nodes who already are labeled with a fixedId will already have an DOM object
-							}
-							// If current child-fixed nodes subtree was unfixed, unfix its direct children too
-							// This will cascade until leaf nodes are met
+							// ### FIXED HIERARCHY HANDLING ###
+							// 1.) Cascading copy of current childFixedId for whole subtree
+							// 2.) Update of fixObj in each DOM object in this subtree
 							if(attr === "childfixedid")
 							{
 								var id = node.getAttribute(attr);
@@ -455,7 +442,7 @@ function MutationObserverInit()
 
 
 
-
+							// ### OVERFLOW HIERARCHY HANDLING ###
 							// Set childrens' overflowIds when node gets tagged as part of overflow subtree 
 							if(attr == "overflowid")
 							{
@@ -497,7 +484,7 @@ function MutationObserverInit()
 
 
 							
-
+							// ### CREATION AND REMOVAL OF FIXED ELEMENTS ###
 		  					if(attr == 'style' ||  (document.readyState != 'loading' && attr == 'class') )
 		  					{
 								if(window.getComputedStyle(node, null).getPropertyValue('position') === 'fixed')
@@ -513,39 +500,39 @@ function MutationObserverInit()
 								}
 							}
 
-
-							// Changes in attribute 'class' may indicate that a fixed element's union of bounding rects needs to be updated
+						
 							if(attr == 'class')
 							{
-								// Trigger fixed parent update, if it exists
+								// Update (if it exists) DOM object's rects if node's class changed
+								var domObj = GetCorrespondingDOMObject(node);
+								if(domObj !== undefined)
+									domObj.updateRects();
+
+								// ### FIXED ELEMENT BOUNDING BOX UPDATES ###
+								// Changes in attribute 'class' may indicate that a fixed element's union of bounding rects needs to be updated
+								// Trigger fixed parent update, if it exists. All of its children will be updated
 								var childFixedId = node.getAttribute("childFixedId");
 								if(childFixedId !== null && childFixedId !== null)
 								{
 									var fixObj = GetFixedElementById(childFixedId);
 									if(fixObj !== undefined)
-										fixObj.updateRects();
-								}
-								// Trigger node's rect update and for it's subtree
-								else
-								{
-									// If node is fixed, subtree will be updated too
-									var fixObj = GetFixedElement(node);
-									if(fixObj !== undefined)
 									{
 										fixObj.updateRects();
 										return;
 									}
+								}
 
-									// Fetch node and update its subtree too
-									var domObj = GetCorrespondingDOMObject(node);
-									if(domObj !== undefined)
-									{
-										var changed = domObj.updateRects();
-										if(changed)
-											ForEveryChild(node, (child) => { UpdateNodesRect(child); });
+								// Else, if node is fixed, subtree will be updated too
+								var fixObj = GetFixedElementByNode(node);
+								if(fixObj !== undefined)
+								{
+									fixObj.updateRects();
+									return;
+								}
 
-									}
-								} 
+								// Update subtree if class changes
+								ForEveryChild(node, (child) => { UpdateNodesRect(child); });
+							
 							}
 
 							if(attr == "style")
