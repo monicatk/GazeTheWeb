@@ -661,10 +661,11 @@ void Master::Loop()
 			eyegui::StylePropertyVec4::BackgroundColor,
             RGBAToHexString(glm::vec4(0, 0, 0, MASTER_PAUSE_ALPHA * _pausedDimming.getValue())));
 
-		// Check for focus and time until input
+		// Check whether input is desired
 		int focused = glfwGetWindowAttrib(_pWindow, GLFW_FOCUSED);
 		if ((focused <= 0) // window not focused
-			|| (_timeUntilInput > 0)) // do not use input, yet
+			|| (_timeUntilInput > 0) // do not use input, yet
+			|| (!spInput->gazeEmulated && spInput->gazeAge > setup::MAX_AGE_OF_USED_GAZE)) // do not use gaze that is too old
 		{
 			// TODO: Do it more effeciently (like calling it with NULL instead of reference)
 			spInput->gazeUponGUI = true; // means: gaze already consumed, so nothing reacts anymore
@@ -680,20 +681,21 @@ void Master::Loop()
 		eyeGUIInput.gazeUsed = spInput->gazeUponGUI;
 
 		// TODO TESTING
+		/*
 		if (eyeGUIInput.instantInteraction)
 		{
 			eyegui::playSound(_pGUI, "sounds/test.ogg");
 		}
+		*/
 
         // Update super GUI, including pause button
-		eyeGUIInput = eyegui::updateGUI(_pSuperGUI, tpf, eyeGUIInput);
-
+		eyeGUIInput = eyegui::updateGUI(_pSuperGUI, tpf, eyeGUIInput); // update super GUI with pause button
         if(_paused)
         {
             // Do not pipe input to standard GUI if paused
 			eyeGUIInput.gazeUsed = true; // TODO: null pointer would be nicer
         }
-		eyeGUIInput = eyegui::updateGUI(_pGUI, tpf, eyeGUIInput);
+		eyeGUIInput = eyegui::updateGUI(_pGUI, tpf, eyeGUIInput); // update GUI
 
         // Do message loop of CEF
         _pCefMediator->DoMessageLoopWork();
