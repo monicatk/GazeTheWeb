@@ -677,6 +677,13 @@ void Master::Loop()
 			|| (_enterKeyPressed && !spInput->gazeEmulated); // other
         eyeGUIInput.gazeX = (int)spInput->gazeX;
         eyeGUIInput.gazeY = (int)spInput->gazeY;
+		eyeGUIInput.gazeUsed = spInput->gazeUponGUI;
+
+		// TODO TESTING
+		if (eyeGUIInput.instantInteraction)
+		{
+			eyegui::playSound(_pGUI, "sounds/test.ogg");
+		}
 
         // Update super GUI, including pause button
 		eyeGUIInput = eyegui::updateGUI(_pSuperGUI, tpf, eyeGUIInput);
