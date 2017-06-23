@@ -280,7 +280,7 @@ function AnalyzeNode(node)
 				CreateDOMLink(node);
 			}
 		}
-		// textareas or DIVs, whole are treated as text fields
+		// textareas or DIVs, who are treated as text fields
 		if(node.tagName == 'TEXTAREA' || (node.tagName == 'DIV' && node.getAttribute('role') == 'textbox'))
 		{
 			CreateDOMTextInput(node);

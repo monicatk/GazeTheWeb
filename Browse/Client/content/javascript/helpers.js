@@ -209,12 +209,15 @@ function GetDOMLink(id){ return GetDOMObject(1, id);}
 function GetDOMSelectField(id){ return GetDOMObject(2, id); }
 function GetDOMOverflowElement(id){ return GetDOMObject(3, id); }
 
-function GetCorrespondingDOMObject(node)
+function GetCorrespondingDOMObject(node, expected_type)
 {
     if(typeof(node.getAttribute) !== "function")
         return undefined;
     
     var type = node.getAttribute("nodeObjType");
+    if(expected_type !== undefined && type !== expected_type)
+        return undefined;
+
     var id = node.getAttribute("nodeObjId");
 
     if(type === null || id === null)
@@ -222,6 +225,7 @@ function GetCorrespondingDOMObject(node)
 
     return GetDOMObject(type, id);
 }
+function GetCorrespondingDOMOverflow(node){ return GetCorrespondingDOMObject(node, 3); }
 
 function RemoveDOMObject(type, id)
 {

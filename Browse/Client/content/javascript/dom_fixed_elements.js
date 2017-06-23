@@ -74,10 +74,11 @@ function FixedElement(node)
         ForEveryChild(
             this.node, 
             // Main function
-            (child) =>{
+            (child) => {
                 var domObj = GetCorrespondingDOMObject(child);
                 if(domObj !== undefined)
                     domObj.updateRects();
+                
 
                 if(child.nodeType === 1 && 
                     window.getComputedStyle(child, null).getPropertyValue("opacity") !== "0" &&
@@ -111,8 +112,13 @@ function FixedElement(node)
                     if(window.getComputedStyle(node, null).getPropertyValue("opacity") === 0)
                         return true;
                     // ... or overflow element, which would cover children anyway outside of rect
-                    var css_overflow = window.getComputedStyle(node, null).getPropertyValue("overflow");
-                    return (node.hasAttribute("overflowId") || ( css_overflow !== null && css_overflow !== "visible"))
+                    var overflowObj = GetCorrespondingDOMOverflow(node);
+                    if(overflowObj !== undefined)
+                    {
+                        overflow.updateRects(); // Update all children too
+                        return true;
+                    }
+                    return false;
                 } 
                 else 
                     return true;
