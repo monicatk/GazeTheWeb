@@ -237,19 +237,11 @@ function AnalyzeNode(node)
 		var computedStyle = window.getComputedStyle(node, null);
 
 		// Identify fixed elements on appending them to DOM tree
-		if(
-			// computedStyle.getPropertyValue('display') !==  "none" && // NOTE: if display == 'none' -> rect is zero
-			(
-				computedStyle.getPropertyValue('position') == 'fixed'
-				//  ||	node.tagName == "DIV" && node.getAttribute("role") == "dialog"	// role == dialog isn't sufficient
-			)
-		) 
+		if(computedStyle.getPropertyValue('position') == 'fixed') 
 		{
 			// Returns true if new FixedElement was added; false if already linked to FixedElement Object
 			if(AddFixedElement(node))
-			{
 				UpdateDOMRects();
-			}
 		}
 
 

@@ -164,6 +164,10 @@ function UpdateNodesRect(node)
     var domObj = GetCorrespondingDOMObject(node);
     if(domObj !== undefined)
         domObj.updateRects();
+
+    var fixObj = GetFixedElementByNode(node);
+    if(fixObj !== undefined)
+        fixObj.updateRects();
 }
 
 

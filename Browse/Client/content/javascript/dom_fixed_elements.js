@@ -49,6 +49,13 @@ function FixedElement(node)
 
     this.updateRects = function()
     {
+        // Delete fixed element object, if position isn't fixed anymore
+        if(window.getComputedStyle(this.node, null).getPropertyValue("position") !== "fixed")
+        {
+            RemoveFixedElement(this.node);
+            return true;
+        }
+
         var updatedRectsData = [];
 
         // NOTE: Fix for GMail. There exist DIVs without any children, whose rects cover the whole page and they are fixed
@@ -175,7 +182,7 @@ function AddFixedElement(node)
         var id = node.getAttribute("fixedId")
         var fixedObj = GetFixedElementById(id);
         // Trigger rect updates of whole subtree, just in case
-        if(fixedObj !== undefined && fixedObj !== null)
+        if(fixedObj !== undefined)
             fixedObj.updateRects();
 
         return false;
