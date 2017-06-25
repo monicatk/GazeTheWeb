@@ -73,19 +73,22 @@ DOMOverflowElement.prototype.scroll = function(gazeX, gazeY, fixedIds){
 	{
 		var rect = rects[0];
 
-		var centerX = rect[1] + Math.round(rect.width / 2);
-		var centerY =  rect[0] + Math.round(rect.height / 2);
+		var width = this.node.clientWidth; // without scrollbar
+		var height = this.node.clientHeight;
+
+		// var centerX = rect[1] + Math.round(width / 2);
+		// var centerY =  rect[0] + Math.round(height / 2);
 
 		// TODO: Substract scrollbar areas from overflow rect! So, you don't have to look at e.g. the horizontal scrollbar
 		// in order to scroll vertically
 		var distLeft = gazeX - rect[1];   // negative values imply gaze outside of element
-		var distRight = rect[3] - gazeX;
+		var distRight = rect[1] + width - gazeX;
 		var distTop = gazeY - rect[0];
-		var distBottom = rect[2] - gazeY;
+		var distBottom = rect[0] + height - gazeY;
 
 		// Treshold for actual scrolling taking place, maximum distance to border where scrolling takes place
-		var tresholdX = 1 / 2.5 * ((rect[3]-rect[1]) / 2);
-		var tresholdY = 1 / 2.5 * ((rect[2]-rect[0]) / 2);
+		var tresholdX = 1 / 2.5 * (width / 2);
+		var tresholdY = 1 / 2.5 * (height / 2);
 
 		var maxScrollingPerFrame = 10;
 		// Actual scrolling, added afterwards
