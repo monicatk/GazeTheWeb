@@ -116,9 +116,9 @@ DOMOverflowElement.prototype.scroll = function(gazeX, gazeY, fixedIds){
 		this.node.scrollLeft += scrollX;
 		this.node.scrollTop += scrollY;
 
-		// Return current scrolling position as feedback
-		return [this.node.scrollLeft, this.node.scrollTop];
+		return [scrollX, scrollY];
 	}
+	return [0,0];
 	
 }
 

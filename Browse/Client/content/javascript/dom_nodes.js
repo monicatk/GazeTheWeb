@@ -28,12 +28,11 @@ function DOMNode(node, id, type)
         console.log("Error: Given node does not suffice DOMNode object criteria! id="+id+", type="+type);
         return;
     }
-    else
-    {
-        // Store information in node attributes
-        node.setAttribute("nodeObjId", id);
-        node.setAttribute("nodeObjType", type);
-    }
+
+    // Store information in node attributes
+    node.setAttribute("nodeObjId", id);
+    node.setAttribute("nodeObjType", type);
+
     this.node = node;
     this.id = id;
     this.type = type;
@@ -186,6 +185,12 @@ window.domNodes[0] = window.domTextInputs;
 
 function DOMTextInput(node)
 {
+    if(typeof(node.getAttribute) === "function" && node.getAttribute("aria-hidden") === "true")
+    {
+        console.log("Skipping creation of new DOMTextInput due to aria-hidden set to 'true'.");
+        return;
+    }
+
     window.domTextInputs.push(this);
     var id = window.domTextInputs.indexOf(this);
     DOMNode.call(this, node, id, 0);
