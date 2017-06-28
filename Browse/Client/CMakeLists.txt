@@ -4,6 +4,8 @@ set(CEF_TARGET Client)
 
 message(STATUS "*** CLIENT ***")
 
+set(VERSION "0.7")
+
 ### PARAMETERS #################################################################
 
 set(CLIENT_DEPLOYMENT OFF CACHE BOOL "Setup for Deployment.")
@@ -364,10 +366,18 @@ endif(MSVC)
 
 ### DEPLOYMENT #################################################################
 
-# Copy content to output folder
 if(CLIENT_DEPLOYMENT)
-add_custom_command(TARGET ${CEF_TARGET} PRE_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_directory
-	${CLIENT_CONTENT_PATH}
-	$<TARGET_FILE_DIR:${CEF_TARGET}>/content)
+
+	# Create text file with version information
+	configure_file(VERSION.in ${CMAKE_BINARY_DIR}/VERSION) # first, create it in build folder
+	add_custom_command(TARGET ${CEF_TARGET} PRE_BUILD #then, copy it to specific binary folder (direct creation there does not work)
+		COMMAND ${CMAKE_COMMAND} -E copy
+		${CMAKE_BINARY_DIR}/VERSION
+		$<TARGET_FILE_DIR:${CEF_TARGET}>/VERSION)
+
+	# Copy content to output folder
+	add_custom_command(TARGET ${CEF_TARGET} PRE_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+		${CLIENT_CONTENT_PATH}
+		$<TARGET_FILE_DIR:${CEF_TARGET}>/content)
 endif(CLIENT_DEPLOYMENT)
