@@ -1,3 +1,17 @@
+// Copyright 2017 Raphael Menges
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -13,8 +27,8 @@
 const std::string serverURL = "https://userpages.uni-koblenz.de/~raphaelmenges/gtw-update";
 const std::string tmpZipName = "gtw_new_version.zip";
 const std::string tmpUnzipDirName = "gtw_new_version";
-const std::string gtwPath = "C:/Users/Raphael/Desktop/gtw"; // path to GazeTheWeb-Browse folder
-const long long exitSleepMS = 1000;
+const std::string gtwPath = "C:/Users/Raphael/Desktop/gtw"; // path to GazeTheWeb-Browse folder TODO: replace later with relative path like "../Browse"
+const long long exitSleepMS = 2000;
 
 // Variables
 CURL *curl; // CURL handle
@@ -70,16 +84,18 @@ int main()
 
 	// Read version file
 	std::string versionString = "";
-	std::ifstream ifs(gtwPath + "VERSION");
+	std::ifstream ifs(gtwPath + "/VERSION");
 	if (ifs.is_open())
 	{
 		versionString = std::string((std::istreambuf_iterator<char>(ifs)),
 			(std::istreambuf_iterator<char>()));
+		versionString.erase(std::remove(versionString.begin(), versionString.end(), '\n'), versionString.end()); // remove new line at end of version string
 	}
 	if (versionString.empty())
 	{
 		return Return("Local version could no be determined. Exiting...");
 	}
+	ifs.close(); // otherwise could not be deleted later
 	std::cout << "Local version: " << versionString << std::endl;
 	
 	// Initialize CURL
@@ -89,7 +105,7 @@ int main()
 	if (curl)
 	{
 		// Setup CURL
-		curl_easy_setopt(curl, CURLOPT_URL, std::string(serverURL + "/gtw-check.cgi?version=0.6").c_str()); // set address of request
+		curl_easy_setopt(curl, CURLOPT_URL, std::string(serverURL + "/gtw-check.cgi?version=" + versionString).c_str()); // set address of request
 		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // follow potential redirection
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteURL); // use write callback
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer); // set pointer to write data into
@@ -181,6 +197,7 @@ int main()
 	if (!status)
 	{
 		std::experimental::filesystem::remove(tmpZipPath.c_str());
+		std::cout << std::endl;
 		return Return("Temporary zip file could not be read. Exiting...");
 	}
 
@@ -199,6 +216,7 @@ int main()
 		{
 			mz_zip_reader_end(&zip_archive);
 			std::experimental::filesystem::remove(tmpZipPath.c_str());
+			std::cout << std::endl;
 			return Return("Temporary zip file could not be read. Exiting...");
 		}
 		bool isDirectory = mz_zip_reader_is_file_a_directory(&zip_archive, i);
@@ -209,7 +227,7 @@ int main()
 		{
 			if (!std::experimental::filesystem::exists(path)) // check whether already exists
 			{
-				std::experimental::filesystem::create_directory(path); // create the directory if not
+				std::experimental::filesystem::create_directory(path); // create the directory if not existing
 			}
 		}
 		else // file
@@ -230,13 +248,22 @@ int main()
 	std::cout << "Removing temporary zip file..." << std::endl;
 	std::experimental::filesystem::remove(tmpZipPath.c_str());
 
-	// ### REMOVE OLD VERSION ###
+	// ### REPLACE OLD VERSION ###
 
-	// ### COPY NEW VERSION ###
+	// Remove complete folder recursively
+	std::cout << "Removing old version..." << std::endl;
+	std::experimental::filesystem::remove_all(gtwPath.c_str());
+
+	// Create new empty folder
+	std::cout << "Install new version..." << std::endl;
+	std::experimental::filesystem::create_directory(gtwPath.c_str());
+
+	// Move new version to given path
+	std::experimental::filesystem::rename(tmpUnzipPath.c_str(), gtwPath.c_str());
 
 	// Remove unzipped
-	std::cout << "Removing temporary unzipped files..." << std::endl;
-	std::experimental::filesystem::remove_all(tmpUnzipPath.c_str());
+	// std::cout << "Removing temporary unzipped files..." << std::endl;
+	// std::experimental::filesystem::remove_all(tmpUnzipPath.c_str());
 
 	// ### RETURN ###
 
