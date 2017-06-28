@@ -6,6 +6,8 @@ message(STATUS "*** CLIENT ***")
 
 set(VERSION "0.7")
 
+string(TIMESTAMP DATE %d/%m/%Y)
+
 ### PARAMETERS #################################################################
 
 set(CLIENT_DEPLOYMENT OFF CACHE BOOL "Setup for Deployment.")
@@ -374,6 +376,13 @@ if(CLIENT_DEPLOYMENT)
 		COMMAND ${CMAKE_COMMAND} -E copy
 		${CMAKE_BINARY_DIR}/VERSION
 		$<TARGET_FILE_DIR:${CEF_TARGET}>/VERSION)
+		
+	# Generate end-user readme
+	configure_file(README.in ${CMAKE_BINARY_DIR}/README.txt) # first, create it in build folder
+	add_custom_command(TARGET ${CEF_TARGET} PRE_BUILD #then, copy it to specific binary folder (direct creation there does not work)
+		COMMAND ${CMAKE_COMMAND} -E copy
+		${CMAKE_BINARY_DIR}/README.txt
+		$<TARGET_FILE_DIR:${CEF_TARGET}>/README.txt)
 
 	# Copy content to output folder
 	add_custom_command(TARGET ${CEF_TARGET} PRE_BUILD
