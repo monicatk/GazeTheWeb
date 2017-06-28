@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <fstream>
 #include <chrono>
 #include <thread>
 #include <filesystem>
@@ -12,7 +13,8 @@
 const std::string serverURL = "https://userpages.uni-koblenz.de/~raphaelmenges/gtw-update";
 const std::string tmpZipName = "gtw_new_version.zip";
 const std::string tmpUnzipDirName = "gtw_new_version";
-const long long exitSleepMS = 50000;
+const std::string gtwPath = "C:/Users/Raphael/Desktop/gtw"; // path to GazeTheWeb-Browse folder
+const long long exitSleepMS = 1000;
 
 // Variables
 CURL *curl; // CURL handle
@@ -66,7 +68,19 @@ int main()
 
 	// ### CHECK VERSION ###
 
-	// TODO: check version of local gazetheweb
+	// Read version file
+	std::string versionString = "";
+	std::ifstream ifs(gtwPath + "VERSION");
+	if (ifs.is_open())
+	{
+		versionString = std::string((std::istreambuf_iterator<char>(ifs)),
+			(std::istreambuf_iterator<char>()));
+	}
+	if (versionString.empty())
+	{
+		return Return("Local version could no be determined. Exiting...");
+	}
+	std::cout << "Local version: " << versionString << std::endl;
 	
 	// Initialize CURL
 	curl = curl_easy_init();
