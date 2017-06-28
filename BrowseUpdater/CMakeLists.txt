@@ -29,11 +29,6 @@ file(GLOB_RECURSE HEADERS
 	"${CMAKE_SOURCE_DIR}/src/*.h"
 )
 
-# Collect all code
-set(ALL_CODE
-	${SOURCES}
-	${HEADERS})
-
 ### EXTERNALS ##################################################################
 
 # Set path to submodules
@@ -41,13 +36,27 @@ set(EXTERNALS_DIR "${CMAKE_SOURCE_DIR}/externals")
 
 # Curl
 add_definitions(-DCURL_STATICLIB)
-set(CURL_DIRECTORY "${EXTERNALS_DIR}/curl")
-set(CURL_LIBRARIES "${CURL_DIRECTORY}/lib/static-release-x86/libcurl_a.lib")
+set(CURL_DIR "${EXTERNALS_DIR}/curl")
+set(CURL_LIBRARIES "${CURL_DIR}/lib/static-release-x86/libcurl_a.lib")
 	
 ### SUBMODULES #################################################################
 
 # Set path to submodules
 set(SUBMODULES_DIR "${CMAKE_SOURCE_DIR}/submodules")
+
+# miniz
+set(MINIZ_DIR "${SUBMODULES_DIR}/miniz")
+set(MINIZ_SOURCES
+"${MINIZ_DIR}/miniz.c"
+"${MINIZ_DIR}/miniz_zip.c"
+"${MINIZ_DIR}/miniz_tinfl.c"
+"${MINIZ_DIR}/miniz_tdef.c")
+
+# Collect all code
+set(ALL_CODE
+	${SOURCES}
+	${HEADERS}
+	${MINIZ_SOURCES})
 
 ### FILTERING ##################################################################
 

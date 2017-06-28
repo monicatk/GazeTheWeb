@@ -3,18 +3,21 @@
 #include <sstream>
 #include <chrono>
 #include <thread>
+#include <filesystem>
 #include "externals/curl/include/curl/curl.h"
+#include "submodules/miniz/miniz.h"
+#include "submodules/miniz/miniz_zip.h"
 
 // Constants
 const std::string serverURL = "https://userpages.uni-koblenz.de/~raphaelmenges/gtw-update";
-const char tmpZipPath[FILENAME_MAX] = "C:/Users/Raphael/Desktop/gtw_new_version.zip";
-const long long exitSleepMS = 5000;
+const std::string tmpZipName = "gtw_new_version.zip";
+const std::string tmpUnzipDirName = "gtw_new_version";
+const long long exitSleepMS = 50000;
 
 // Variables
 CURL *curl; // CURL handle
 std::string readBuffer; // buffer
 std::string downloadLink = "";
-
 
 // Callback for CURL to retrieve zip name
 size_t WriteURL(void *contents, size_t size, size_t nmemb, void *userp)
@@ -47,6 +50,19 @@ int main()
 	std::cout << "####################################" << std::endl;
 	std::cout << "By Raphael Menges" << std::endl;
 	std::cout << std::endl;
+
+	// ### CHECK FOR TEMP FOLDER ###
+	const std::string tmpPath = std::experimental::filesystem::temp_directory_path().string();
+	if (!tmpPath.empty())
+	{
+		std::cout << "Temporary files will be stored in: " << tmpPath << std::endl;
+	}
+	else
+	{
+		return Return("Temporary folder not available. Exiting...");
+	}
+	const std::string tmpZipPath = tmpPath + tmpZipName;
+	const std::string tmpUnzipPath = tmpPath + tmpUnzipDirName;
 
 	// ### CHECK VERSION ###
 
@@ -99,7 +115,7 @@ int main()
 	}
 	else
 	{
-		std::cout << "Downloading new version: " << downloadLink << "..." << std::endl;
+		std::cout << "Downloading new version: " << downloadLink;
 	}
 
 	// ### DOWNLOAD NEW VERSION INTO TMP ###
@@ -107,7 +123,7 @@ int main()
 	if (curl)
 	{
 		FILE *fp;
-		fp = fopen(tmpZipPath, "wb");
+		fp = fopen(tmpZipPath.c_str(), "wb");
 		if (fp != NULL) // Only continue if file is opened
 		{
 			// 
@@ -140,15 +156,73 @@ int main()
 
 	// ### UNPACK NEW VERSION INTO TMP ##
 
-	// Unpack zip
+	std::cout << "Unzipping new version";
+
+	// Try to open archive
+	mz_zip_archive zip_archive;
+	memset(&zip_archive, 0, sizeof(zip_archive));
+	auto status = mz_zip_reader_init_file(&zip_archive, tmpZipPath.c_str(), 0);
+
+	// Check for success
+	if (!status)
+	{
+		std::experimental::filesystem::remove(tmpZipPath.c_str());
+		return Return("Temporary zip file could not be read. Exiting...");
+	}
+
+	// Create folder to place content
+	if (!std::experimental::filesystem::exists(tmpUnzipPath)) // check whether already exists
+	{
+		std::experimental::filesystem::create_directory(tmpUnzipPath);
+	}
+
+	// Get and print information about each file in the archive
+	for (int i = 0; i < (int)mz_zip_reader_get_num_files(&zip_archive); ++i)
+	{
+		// Read file stat
+		mz_zip_archive_file_stat file_stat;
+		if (!mz_zip_reader_file_stat(&zip_archive, i, &file_stat))
+		{
+			mz_zip_reader_end(&zip_archive);
+			std::experimental::filesystem::remove(tmpZipPath.c_str());
+			return Return("Temporary zip file could not be read. Exiting...");
+		}
+		bool isDirectory = mz_zip_reader_is_file_a_directory(&zip_archive, i);
+
+		// Store file or create folder
+		std::string path = tmpUnzipPath + "/" + file_stat.m_filename;
+		if (isDirectory) // directory
+		{
+			if (!std::experimental::filesystem::exists(path)) // check whether already exists
+			{
+				std::experimental::filesystem::create_directory(path); // create the directory if not
+			}
+		}
+		else // file
+		{
+			mz_zip_reader_extract_to_file(&zip_archive, i, path.c_str(), 0); // unzip it
+		}
+
+		// Show progress
+		std::cout << ".";
+	}
+
+	// Close the archive, freeing any resources it was using
+	mz_zip_reader_end(&zip_archive);
+
+	std::cout << "...unzipping done." << std::endl;
 
 	// Remove zip
-	// std::cout << "Removing tmp zip file..." << std::endl;
-	// std::remove(tmpZipPath);
+	std::cout << "Removing temporary zip file..." << std::endl;
+	std::experimental::filesystem::remove(tmpZipPath.c_str());
 
 	// ### REMOVE OLD VERSION ###
 
 	// ### COPY NEW VERSION ###
+
+	// Remove unzipped
+	std::cout << "Removing temporary unzipped files..." << std::endl;
+	std::experimental::filesystem::remove_all(tmpUnzipPath.c_str());
 
 	// ### RETURN ###
 

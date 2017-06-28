@@ -14,3 +14,6 @@
 [submodule "Browse/Client/submodules/text-csv"]
 	path = Browse/Client/submodules/text-csv
 	url = https://github.com/roman-kashitsyn/text-csv
+[submodule "BrowseUpdater/submodules/miniz"]
+	path = BrowseUpdater/submodules/miniz
+	url = https://github.com/richgel999/miniz
