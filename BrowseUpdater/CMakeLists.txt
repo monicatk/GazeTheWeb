@@ -15,6 +15,8 @@ if(NOT MSVC)
 	set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -std=c++11)
 endif(NOT MSVC)
 
+### SOURCES ####################################################################
+
 # Add include path to directory
 include_directories(${CMAKE_SOURCE_DIR})
 
@@ -31,6 +33,23 @@ file(GLOB_RECURSE HEADERS
 set(ALL_CODE
 	${SOURCES}
 	${HEADERS})
+
+### EXTERNALS ##################################################################
+
+# Set path to submodules
+set(EXTERNALS_DIR "${CMAKE_SOURCE_DIR}/externals")
+
+# Curl
+add_definitions(-DCURL_STATICLIB)
+set(CURL_DIRECTORY "${EXTERNALS_DIR}/curl")
+set(CURL_LIBRARIES "${CURL_DIRECTORY}/lib/static-release-x86/libcurl_a.lib")
+	
+### SUBMODULES #################################################################
+
+# Set path to submodules
+set(SUBMODULES_DIR "${CMAKE_SOURCE_DIR}/submodules")
+
+### FILTERING ##################################################################
 
 # Filtering for Visual Studio
 if(MSVC)
@@ -52,10 +71,10 @@ if(MSVC)
 
 endif(MSVC)
 
-# add_definitions(-DCURL_STATICLIB)
+### CREATION AND LINKING #######################################################
 
 # Creation of executeable
 add_executable(${APPNAME} ${ALL_CODE})
 
 # Linking
-# target_link_libraries(${APPNAME} curl)
+target_link_libraries(${APPNAME} ${CURL_LIBRARIES})
