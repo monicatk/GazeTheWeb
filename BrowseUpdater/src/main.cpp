@@ -30,20 +30,15 @@ const std::string tmpUnzipDirName = "gtw_new_version";
 const std::string gtwPath = "C:/Users/Raphael/Desktop/gtw"; // path to GazeTheWeb-Browse folder TODO: replace later with relative path like "../Browse"
 const long long exitSleepMS = 2000;
 
-// Variables
-CURL *curl; // CURL handle
-std::string readBuffer; // buffer
-std::string downloadLink = "";
-
 // Callback for CURL to retrieve zip name
-size_t WriteURL(void *contents, size_t size, size_t nmemb, void *userp)
+size_t CURLWriteString(void *contents, size_t size, size_t nmemb, void *userp)
 {
 	((std::string*)userp)->append((char*)contents, size * nmemb);
 	return size * nmemb;
 }
 
 // Callback for CURL to retrieve zip file
-size_t WriteData(void *ptr, size_t size, size_t nmemb, FILE *stream) {
+size_t CURLWriteFile(void *ptr, size_t size, size_t nmemb, FILE *stream) {
 	size_t written = fwrite(ptr, size, nmemb, stream);
 	std::cout << ".";
 	return written;
@@ -80,7 +75,7 @@ int main()
 	const std::string tmpZipPath = tmpPath + tmpZipName;
 	const std::string tmpUnzipPath = tmpPath + tmpUnzipDirName;
 
-	// ### CHECK VERSION ###
+	// ### CHECK LOCAL VERSION ###
 
 	// Read version file
 	std::string versionString = "";
@@ -90,14 +85,21 @@ int main()
 		versionString = std::string((std::istreambuf_iterator<char>(ifs)),
 			(std::istreambuf_iterator<char>()));
 		versionString.erase(std::remove(versionString.begin(), versionString.end(), '\n'), versionString.end()); // remove new line at end of version string
+		ifs.close(); // otherwise could not be deleted later
 	}
 	if (versionString.empty())
 	{
 		return Return("Local version could no be determined. Exiting...");
 	}
-	ifs.close(); // otherwise could not be deleted later
 	std::cout << "Local version: " << versionString << std::endl;
+
+	// ### RETRIEVE DOWNLOAD URL ###
 	
+	// Variables
+	CURL *curl; // CURL handle
+	std::string readBuffer; // buffer
+	std::string downloadLink = "";
+
 	// Initialize CURL
 	curl = curl_easy_init();
 
@@ -107,7 +109,7 @@ int main()
 		// Setup CURL
 		curl_easy_setopt(curl, CURLOPT_URL, std::string(serverURL + "/gtw-check.cgi?version=" + versionString).c_str()); // set address of request
 		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // follow potential redirection
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteURL); // use write callback
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CURLWriteString); // use write callback
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer); // set pointer to write data into
 
 		// Perform the request
@@ -137,6 +139,10 @@ int main()
 		// Clean up CURL
 		curl_easy_cleanup(curl);
 	}
+	else
+	{
+		return Return("CURL could not be instantiated. Exiting...");
+	}
 
 	// Only continue if download link it not empty
 	if (downloadLink.empty())
@@ -158,24 +164,23 @@ int main()
 		{
 			// 
 			curl_easy_setopt(curl, CURLOPT_URL, downloadLink.c_str());
-			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteData);
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CURLWriteFile);
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
 			CURLcode res = curl_easy_perform(curl);
-
-			// Check for errors
-			if (res != CURLE_OK)
-			{
-				curl_easy_cleanup(curl);
-				return Return("curl_easy_perform() failed: " + std::string(curl_easy_strerror(res)) + " Exiting...");
-			}
 
 			// Cleanup CURL and close file
 			curl_easy_cleanup(curl);
 			fclose(fp);
+
+			// Check for errors
+			if (res != CURLE_OK)
+			{
+				return Return("curl_easy_perform() failed: " + std::string(curl_easy_strerror(res)) + " Exiting...");
+			}
 		}
 		else
 		{
-			return Return("Target path for tmp download could be opened. Exiting...");
+			return Return("Target path for zip download could be opened. Exiting...");
 		}
 		std::cout << "...download done." << std::endl;
 	}
@@ -201,13 +206,15 @@ int main()
 		return Return("Temporary zip file could not be read. Exiting...");
 	}
 
-	// Create folder to place content
-	if (!std::experimental::filesystem::exists(tmpUnzipPath)) // check whether already exists
+	// Create folder to place unzipped content
+	if (std::experimental::filesystem::exists(tmpUnzipPath)) // check whether already exists
 	{
-		std::experimental::filesystem::create_directory(tmpUnzipPath);
+		std::experimental::filesystem::remove_all(tmpUnzipPath); // remove when already existing
+		
 	}
+	std::experimental::filesystem::create_directory(tmpUnzipPath);
 
-	// Get and print information about each file in the archive
+	// Go over content of zip file
 	for (int i = 0; i < (int)mz_zip_reader_get_num_files(&zip_archive); ++i)
 	{
 		// Read file stat
@@ -216,6 +223,7 @@ int main()
 		{
 			mz_zip_reader_end(&zip_archive);
 			std::experimental::filesystem::remove(tmpZipPath.c_str());
+			std::experimental::filesystem::remove(tmpUnzipPath.c_str());
 			std::cout << std::endl;
 			return Return("Temporary zip file could not be read. Exiting...");
 		}
@@ -258,12 +266,8 @@ int main()
 	std::cout << "Install new version..." << std::endl;
 	std::experimental::filesystem::create_directory(gtwPath.c_str());
 
-	// Move new version to given path
+	// Move new version to given path (move, not copy)
 	std::experimental::filesystem::rename(tmpUnzipPath.c_str(), gtwPath.c_str());
-
-	// Remove unzipped
-	// std::cout << "Removing temporary unzipped files..." << std::endl;
-	// std::experimental::filesystem::remove_all(tmpUnzipPath.c_str());
 
 	// ### RETURN ###
 
