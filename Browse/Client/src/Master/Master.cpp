@@ -625,10 +625,10 @@ void Master::Loop()
 			_width,
 			_height); // returns whether gaze was used (or emulated by mouse)
 
-		// TODO: when user keeps eye closed, this is executed for every frame
 		// If last gaze sample age is too high, perform recalibration
 		if (
-			!spInput->gazeEmulated // only think about calibration if gaze is not emulated
+			!eyegui::isLayoutVisible(_pSuperCalibrationLayout) // only proceed when layout is not already visible
+			&& !spInput->gazeEmulated // only think about calibration if gaze is not emulated
 			&& spInput->gazeAge > setup::DURATION_BEFORE_SUPER_CALIBRATION // also only when for given time no samples received
 			&& _upEyeInput->SamplesReceived()) // and it should not performed when there were no samples so far
 		{
@@ -636,7 +636,7 @@ void Master::Loop()
 			eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true);
 
 			// Notify user via sound
-			eyegui::playSound(_pGUI, "sounds/test.ogg");
+			eyegui::playSound(_pGUI, "sounds/Boop.ogg");
 		}
 
         // Update cursor with original mouse input
@@ -679,14 +679,6 @@ void Master::Loop()
         eyeGUIInput.gazeX = (int)spInput->gazeX;
         eyeGUIInput.gazeY = (int)spInput->gazeY;
 		eyeGUIInput.gazeUsed = spInput->gazeUponGUI;
-
-		// TODO TESTING
-		/*
-		if (eyeGUIInput.instantInteraction)
-		{
-			eyegui::playSound(_pGUI, "sounds/test.ogg");
-		}
-		*/
 
         // Update super GUI, including pause button
 		eyeGUIInput = eyegui::updateGUI(_pSuperGUI, tpf, eyeGUIInput); // update super GUI with pause button
