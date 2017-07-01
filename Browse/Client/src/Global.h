@@ -61,5 +61,6 @@ static const std::string SEARCH_PREFIX = "duckduckgo.com?q="; // TODO: move to s
 static const glm::vec4 NOTIFICATION_NEUTRAL_COLOR = glm::vec4(0.2f, 0.2f, 0.2f, 0.75f);
 static const glm::vec4 NOTIFICATION_SUCCESS_COLOR = glm::vec4(0.15f, 1.0f, 0.0f, 0.75f);
 static const glm::vec4 NOTIFICATION_WARNING_COLOR = glm::vec4(1.0f, 0.15f, 0.0f, 0.75f);
+static const float FILTER_MAXIMUM_SAMPLE_AGE = 1000; // seconds
 
 #endif // GLOBAL_H_

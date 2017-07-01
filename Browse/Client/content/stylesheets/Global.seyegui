@@ -21,6 +21,11 @@ default_noback : default
 	BackgroundColor = 0x00000000
 }
 
+slow_animation
+{
+	AnimationDuration = 0.4
+}
+
 panel : default
 {
 	BackgroundColor = 0x1e2021FF
@@ -93,6 +98,18 @@ pause : default
 pause_background
 {
 	BackgroundColor = 0x00000000
+}
+
+super_calibration_background
+{
+	BackgroundColor = 0x000000DD
+}
+
+recalibration
+{
+	Color = 0xD64400FF
+	ButtonThresholdIncreaseDuration = 3
+	ButtonThresholdDecreaseDuration = 5
 }
 
 invisible_but_icon : default

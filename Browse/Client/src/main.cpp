@@ -61,6 +61,7 @@ int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<MainCefA
 	// Say hello
 	LogInfo("####################################################");
 	LogInfo("Welcome to GazeTheWeb - Browse!");
+	LogInfo("Version: ", std::to_string(CLIENT_VERSION));
 	LogInfo("Personal files are saved in: ", userDirectory);
 
 	// Turn on offscreen rendering.

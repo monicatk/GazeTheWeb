@@ -12,11 +12,11 @@ SimpleFilter::SimpleFilter() : _spSamples(SampleQueue(new std::deque<SampleData>
 	// Nothing to do
 }
 
-void SimpleFilter::Update(SampleQueue spSamples,
-	double& rGazeX,
-	double& rGazeY,
-	bool& rSaccade)
+void SimpleFilter::Update(SampleQueue spSamples)
 {
+	// Super call
+	Filter::Update(spSamples);
+
 	// Move samples over to member
 	_spSamples->insert(_spSamples->end(),
 		std::make_move_iterator(spSamples->begin()),
@@ -79,8 +79,45 @@ void SimpleFilter::Update(SampleQueue spSamples,
 		_gazeY = filteredGazeY;
 	}
 
-	// Fill reference
-	rGazeX = _gazeX;
-	rGazeY = _gazeY;
-	rSaccade = filterCount > 1;
+	// Remember about saccade
+	_saccade = filterCount > 1;
+}
+
+double SimpleFilter::GetFilteredGazeX() const
+{
+	return _gazeX;
+}
+
+double SimpleFilter::GetFilteredGazeY() const
+{
+	return _gazeY;
+}
+
+double SimpleFilter::GetRawGazeX() const
+{
+	if (!_spSamples->empty())
+	{
+		return _spSamples->back().x;
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+double SimpleFilter::GetRawGazeY() const
+{
+	if (!_spSamples->empty())
+	{
+		return _spSamples->back().y;
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+bool SimpleFilter::IsSaccade() const
+{
+	return _saccade;
 }

@@ -1,0 +1,56 @@
+### Binary release of GazeTheWeb - Browse ###
+Date: ${DATE}
+Version: ${VERSION}
+Build setup: All eyetracker plugins, windowed, no WebGL
+
+Please go to our GitHub repository at https://github.com/MAMEM/GazeTheWeb/tree/master/Browse for more information about the project!
+
+## Requirements
+Windows 7, 8, 8.1 or 10
+Graphics card with OpenGL 3.3 or higher support
+
+## Installation
+1. Install Microsoft Visual C++ 2015 Redistributable for x86 applications
+	Get it here: https://www.microsoft.com/en-us/download/details.aspx?id=51682
+2. Install eyetracker software (instructions should be included)
+3. Unzip content of this zip (if not already done)
+
+## Usage
+1. Connect eyetracker
+2. Start eyetracker server application
+3. Calibrate eyetracker
+4. Start GazeTheWeb.exe which was included in this zip 
+
+## Shortcuts
+ESC: Exit application
+Tab: Toggle pause
+
+## License
+Copyright 2017 Raphael Menges and Daniel Müller
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+## Software used in this project
+CEF3: https://bitbucket.org/chromiumembedded/cef
+	Binary release of branch 2454 Windows 32bit included from here: https://cefbuilds.com/#branch_2454
+GLM: http://glm.g-truc.net/0.9.7/index.html (MIT license chosen)
+GLFW3: http://www.glfw.org
+iViewX: Connection to the iViewX SDK, copyright SMI GmbH (http://www.smivision.com)
+TobiiEyeX: Connection to Tobii EyeX SDK, copyright Tobii Technology AB (http://developer.tobii.com/eyex-sdk)
+eyeGUI: https://github.com/raphaelmenges/eyeGUI
+	FreeType 2.6.1: http://www.freetype.org (FreeType license chosen)
+spdlog: https://github.com/gabime/spdlog
+liblsl: https://github.com/sccn/labstreaminglayer
+	Boost: https://github.com/boostorg/boost
+text-csv: https://github.com/roman-kashitsyn/text-csv
+TinyXML2 (used one from eyeGUI library): https://github.com/leethomason/tinyxml2

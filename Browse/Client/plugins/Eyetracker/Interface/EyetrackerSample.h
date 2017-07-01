@@ -14,13 +14,12 @@
 struct SampleData
 {
 	// Constructor
-	SampleData(double x, double y, bool valid, std::chrono::milliseconds timestamp) : x(x), y(y), valid(valid), timestamp(timestamp)
+	SampleData(double x, double y, std::chrono::milliseconds timestamp) : x(x), y(y), timestamp(timestamp)
 	{};
 
 	// Fields
 	double x;
 	double y;
-	bool valid;
 	std::chrono::milliseconds timestamp;
 };
 

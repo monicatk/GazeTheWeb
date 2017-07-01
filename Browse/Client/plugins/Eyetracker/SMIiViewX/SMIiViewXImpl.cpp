@@ -11,8 +11,8 @@
 #include "iViewXAPI.h"
 #include <algorithm>
 
-// Because Windows
-#undef max
+// Global variables
+static bool serverOwner = false;
 
 int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 {
@@ -21,17 +21,19 @@ int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 	double gazeY = std::max(sampleData.leftEye.gazeY, sampleData.rightEye.gazeY);
 
 	// Push back to vector
-	using namespace std::chrono;
-	eyetracker_global::PushBackSample(
-		SampleData(
-			gazeX, // x
-			gazeY, // y
-			gazeX != 0 && gazeY != 0, // valid
-			duration_cast<milliseconds>(
-				system_clock::now().time_since_epoch() // timestamp
-				)
-		)
-	);
+	if (gazeX != 0 && gazeY != 0) // push only valid samples
+	{
+		using namespace std::chrono;
+		eyetracker_global::PushBackSample(
+			SampleData(
+				gazeX, // x
+				gazeY, // y
+				duration_cast<milliseconds>(
+					system_clock::now().time_since_epoch() // timestamp
+					)
+			)
+		);
+	}
 
 	return 1;
 }
@@ -42,14 +44,30 @@ bool Connect()
 	SystemInfoStruct systemInfoData;
 	int ret_connect = 0;
 
-	// Connect to iViewX
-	ret_connect = iV_Connect("127.0.0.1", 4444, "127.0.0.1", 5555);
+	// Connect to iViewX server
+	ret_connect = iV_ConnectLocal(); // TODO BUG: never works, but it does for minimal sample code :(
+
+	// If server not running, try to start it
+	if (ret_connect != RET_SUCCESS)
+	{
+		// Start iViewX server
+		iV_Start(iViewX);
+
+		// Retry to connect to iViewX server
+		ret_connect = iV_ConnectLocal();
+
+		// Remember to shut down server
+		if (ret_connect == RET_SUCCESS)
+		{
+			serverOwner = true;
+		}
+	}
 
 	// Set sample callback
 	if (ret_connect == RET_SUCCESS)
 	{
-		iV_GetSystemInfo(&systemInfoData);
 		/*
+		iV_GetSystemInfo(&systemInfoData);
 		LogInfo("iViewX ETSystem: ", systemInfoData.iV_ETDevice);
 		LogInfo("iViewX iV_Version: ", systemInfoData.iV_MajorVersion, ".", systemInfoData.iV_MinorVersion, ".", systemInfoData.iV_Buildnumber);
 		LogInfo("iViewX API_Version: ", systemInfoData.API_MajorVersion, ".", systemInfoData.API_MinorVersion, ".", systemInfoData.API_Buildnumber);
@@ -75,7 +93,14 @@ bool Disconnect()
 	iV_SetSampleCallback(NULL);
 
 	// Disconnect
-	return iV_Disconnect() == RET_SUCCESS;
+	if (serverOwner) // also shutdown server
+	{
+		return iV_Quit() == RET_SUCCESS;
+	}
+	else
+	{
+		return iV_Disconnect() == RET_SUCCESS;
+	}
 }
 
 void FetchSamples(SampleQueue& rspSamples)
@@ -83,7 +108,8 @@ void FetchSamples(SampleQueue& rspSamples)
 	eyetracker_global::FetchSamples(rspSamples);
 }
 
-void Calibrate()
+bool Calibrate()
 {
-	// TODO
+	// Start calibration
+	return iV_Calibrate() == RET_SUCCESS;
 }

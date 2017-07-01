@@ -332,12 +332,17 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
     // ### SUPER LAYOUT ###
 
-    // Load layout (deleted at eyeGUI termination)
+    // Load layouts (deleted at eyeGUI termination)
     _pSuperLayout = eyegui::addLayout(_pSuperGUI, "layouts/Super.xeyegui", EYEGUI_SUPER_LAYER, true);
+	_pSuperCalibrationLayout = eyegui::addLayout(_pSuperGUI, "layouts/SuperCalibration.xeyegui", EYEGUI_SUPER_LAYER, false); // adding on top of super layout but still beneath cursor
 
     // Button listener for pause
     _spMasterButtonListener = std::shared_ptr<MasterButtonListener>(new MasterButtonListener(this));
     eyegui::registerButtonListener(_pSuperLayout, "pause", _spMasterButtonListener);
+
+	// Button listener for super calibration (reusing the master button listener)
+	eyegui::registerButtonListener(_pSuperCalibrationLayout, "continue", _spMasterButtonListener);
+	eyegui::registerButtonListener(_pSuperCalibrationLayout, "recalibration", _spMasterButtonListener);
 
     // Initialization
     if(setup::PAUSED_AT_STARTUP)
@@ -360,7 +365,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// ### CURSOR LAYOUT ###
 
     // Add floating frame on empty layout for cursor
-    _pCursorLayout = eyegui::addLayout(_pSuperGUI, "layouts/Empty.xeyegui", EYEGUI_CURSOR_LAYER, true);
+    _pCursorLayout = eyegui::addLayout(_pSuperGUI, "layouts/Empty.xeyegui", EYEGUI_CURSOR_LAYER, true); // placed over super layer
     eyegui::setInputUsageOfLayout(_pCursorLayout, false);
     _cursorFrameIndex = eyegui::addFloatingFrameWithBrick(_pCursorLayout, "bricks/Cursor.beyegui", 0, 0, 0, 0, true, false); // will be moved and sized in loop
 
@@ -502,11 +507,11 @@ void Master::PushNotificationByKey(std::string key, Type type, bool overridable)
 	_notificationStack.push(Notification(eyegui::fetchLocalization(_pGUI, key), type, overridable));
 }
 
-void Master::threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status)
+void Master::threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status, EyeTrackerDevice device)
 {
 	// TODO: make job pushing a method of its own
 	_threadJobsMutex.lock();
-	_threadJobs.push_back(std::make_shared<PushEyetrackerStatusThreadJob>(this, status));
+	_threadJobs.push_back(std::make_shared<PushEyetrackerStatusThreadJob>(this, status, device));
 	_threadJobsMutex.unlock();
 }
 
@@ -620,6 +625,20 @@ void Master::Loop()
 			_width,
 			_height); // returns whether gaze was used (or emulated by mouse)
 
+		// If last gaze sample age is too high, perform recalibration
+		if (
+			!eyegui::isLayoutVisible(_pSuperCalibrationLayout) // only proceed when layout is not already visible
+			&& !spInput->gazeEmulated // only think about calibration if gaze is not emulated
+			&& spInput->gazeAge > setup::DURATION_BEFORE_SUPER_CALIBRATION // also only when for given time no samples received
+			&& _upEyeInput->SamplesReceived()) // and it should not performed when there were no samples so far
+		{
+			// Display layout to recalibrate
+			eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true);
+
+			// Notify user via sound
+			eyegui::playSound(_pGUI, "sounds/Boop.ogg");
+		}
+
         // Update cursor with original mouse input
         eyegui::setVisibilityOfLayout(_pCursorLayout, spInput->gazeEmulated, false, true);
         float halfRelativeMouseCursorSize = MOUSE_CURSOR_RELATIVE_SIZE / 2.f;
@@ -642,10 +661,11 @@ void Master::Loop()
 			eyegui::StylePropertyVec4::BackgroundColor,
             RGBAToHexString(glm::vec4(0, 0, 0, MASTER_PAUSE_ALPHA * _pausedDimming.getValue())));
 
-		// Check for focus and time until input
+		// Check whether input is desired
 		int focused = glfwGetWindowAttrib(_pWindow, GLFW_FOCUSED);
 		if ((focused <= 0) // window not focused
-			|| (_timeUntilInput > 0)) // do not use input, yet
+			|| (_timeUntilInput > 0) // do not use input, yet
+			|| (!spInput->gazeEmulated && spInput->gazeAge > setup::MAX_AGE_OF_USED_GAZE)) // do not use gaze that is too old
 		{
 			// TODO: Do it more effeciently (like calling it with NULL instead of reference)
 			spInput->gazeUponGUI = true; // means: gaze already consumed, so nothing reacts anymore
@@ -658,16 +678,16 @@ void Master::Loop()
 			|| (_enterKeyPressed && !spInput->gazeEmulated); // other
         eyeGUIInput.gazeX = (int)spInput->gazeX;
         eyeGUIInput.gazeY = (int)spInput->gazeY;
+		eyeGUIInput.gazeUsed = spInput->gazeUponGUI;
 
         // Update super GUI, including pause button
-		eyeGUIInput = eyegui::updateGUI(_pSuperGUI, tpf, eyeGUIInput);
-
+		eyeGUIInput = eyegui::updateGUI(_pSuperGUI, tpf, eyeGUIInput); // update super GUI with pause button
         if(_paused)
         {
             // Do not pipe input to standard GUI if paused
 			eyeGUIInput.gazeUsed = true; // TODO: null pointer would be nicer
         }
-		eyeGUIInput = eyegui::updateGUI(_pGUI, tpf, eyeGUIInput);
+		eyeGUIInput = eyegui::updateGUI(_pGUI, tpf, eyeGUIInput); // update GUI
 
         // Do message loop of CEF
         _pCefMediator->DoMessageLoopWork();
@@ -768,6 +788,8 @@ void Master::Loop()
     }
 }
 
+#include <iostream>
+
 void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
 {
     if (action == GLFW_PRESS)
@@ -778,7 +800,7 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
 			case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
-			case GLFW_KEY_C: { _upEyeInput->Calibrate(); break; }
+			case GLFW_KEY_C: { eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true); eyegui::playSound(_pGUI, "sounds/test.ogg");  break; }
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
 			case GLFW_KEY_6: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::MAGNIFICATION); break; }
 			case GLFW_KEY_7: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::ZOOM); break; }
@@ -842,6 +864,30 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
         _pMaster->_paused = true;
         eyegui::setDescriptionVisibility(_pMaster->_pGUI, eyegui::DescriptionVisibility::VISIBLE);
     }
+	else if (pLayout == _pMaster->_pSuperCalibrationLayout)
+	{
+		if(id == "continue")
+		{
+			// Hide layout
+			eyegui::setVisibilityOfLayout(_pMaster->_pSuperCalibrationLayout, false, false, true);
+		}
+		else if (id == "recalibration")
+		{
+			// Perform calibration
+			bool success = _pMaster->_upEyeInput->Calibrate();
+			if (success)
+			{
+				_pMaster->PushNotificationByKey("notification:calibration_success", MasterNotificationInterface::Type::SUCCESS, false);
+			}
+			else
+			{
+				_pMaster->PushNotificationByKey("notification:calibration_failure", MasterNotificationInterface::Type::WARNING, false);
+			}
+
+			// Hide layout after calibration
+			eyegui::setVisibilityOfLayout(_pMaster->_pSuperCalibrationLayout, false, false, true);
+		}
+	}
 }
 
 void Master::MasterButtonListener::up(eyegui::Layout* pLayout, std::string id)
@@ -866,7 +912,22 @@ void Master::PushEyetrackerStatusThreadJob::Execute()
 		_pMaster->PushNotificationByKey("notification:eye_tracker_status:trying_to_connect", MasterNotificationInterface::Type::NEUTRAL, true);
 		break;
 	case EyeTrackerStatus::CONNECTED:
-		_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected", MasterNotificationInterface::Type::SUCCESS, false);
+		switch (_device)
+		{
+		case EyeTrackerDevice::SMI_REDN:
+			_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected_smi_redn", MasterNotificationInterface::Type::SUCCESS, false);
+			break;
+		case EyeTrackerDevice::VI_MYGAZE:
+			_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected_vi_mygaze", MasterNotificationInterface::Type::SUCCESS, false);
+			break;
+		case EyeTrackerDevice::TOBII_EYEX:
+			_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected_tobii_eyex", MasterNotificationInterface::Type::SUCCESS, false);
+			break;
+		default:
+			_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected", MasterNotificationInterface::Type::SUCCESS, false);
+			break;
+		}
+		
 		break;
 	case EyeTrackerStatus::DISCONNECTED:
 		_pMaster->PushNotificationByKey("notification:eye_tracker_status:disconnected", MasterNotificationInterface::Type::WARNING, false);

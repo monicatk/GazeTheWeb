@@ -14,22 +14,31 @@ class Input
 public:
 
     Input(
-		int gazeX,
-		int gazeY,
+		float gazeX,
+		float gazeY,
+		float rawGazeX,
+		float rawGazeY,
+		float gazeAge,
 		bool gazeEmulated,
 		bool gazeUponGUI,
 		bool instantInteraction,
 		bool saccade) : 
 	gazeX(gazeX),
 	gazeY(gazeY),
+	rawGazeX(rawGazeX),
+	rawGazeY(rawGazeY),
+	gazeAge(gazeAge),
 	gazeEmulated(gazeEmulated),
 	gazeUponGUI(gazeUponGUI),
 	instantInteraction(instantInteraction),
 	saccade(saccade) {}
 
 	// Fields
-    double gazeX;
-	double gazeY;
+    float gazeX;
+	float gazeY;
+	float rawGazeX;
+	float rawGazeY;
+	float gazeAge;
 	bool gazeEmulated;
     bool gazeUponGUI;
 	bool instantInteraction;
@@ -51,16 +60,19 @@ public:
 		// Fields from input
 		gazeX(spInput->gazeX),
 		gazeY(spInput->gazeY),
+		rawGazeX(spInput->rawGazeX),
+		rawGazeY(spInput->rawGazeY),
+		gazeAge(spInput->gazeAge),
 		gazeEmulated(spInput->gazeEmulated),
 		gazeUponGUI(spInput->gazeUponGUI),
 		instantInteraction(spInput->instantInteraction),
 		saccade(spInput->saccade),
 
 		// TabInput fields
-		webViewPixelGazeX(spInput->gazeX - webViewX),
-		webViewPixelGazeY(spInput->gazeY - webViewY),
-		webViewRelativeGazeX((float)webViewPixelGazeX / (float)webViewWidth),
-		webViewRelativeGazeY((float)webViewPixelGazeY / (float)webViewHeight),
+		webViewPixelGazeX(spInput->gazeX - (float)webViewX),
+		webViewPixelGazeY(spInput->gazeY - (float)webViewY),
+		webViewRelativeGazeX(webViewPixelGazeX / (float)webViewWidth),
+		webViewRelativeGazeY(webViewPixelGazeY / (float)webViewHeight),
 		CEFPixelGazeX(webViewRelativeGazeX * (float)webViewResolutionX),
 		CEFPixelGazeY(webViewRelativeGazeY * (float)webViewResolutionY),
 		insideWebView(
@@ -71,8 +83,8 @@ public:
 		{}
 
 	// Fields
-	int webViewPixelGazeX;
-	int webViewPixelGazeY;
+	float webViewPixelGazeX;
+	float webViewPixelGazeY;
 	float webViewRelativeGazeX;
 	float webViewRelativeGazeY;
 	float CEFPixelGazeX;
@@ -80,8 +92,11 @@ public:
 	bool insideWebView;
 
 	// Fields from input as reference
-	const double& gazeX;
-	const double& gazeY;
+	const float& gazeX;
+	const float& gazeY;
+	const float& rawGazeX;
+	const float& rawGazeY;
+	const float& gazeAge;
 	const bool& gazeEmulated;
 	const bool& gazeUponGUI;
 	const bool& instantInteraction;

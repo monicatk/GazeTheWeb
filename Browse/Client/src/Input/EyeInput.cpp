@@ -16,11 +16,14 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 	{
 #ifdef _WIN32
 
-		// Trying to connect
-		_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::TRYING_TO_CONNECT);
-
 		// Define procedure signature for connection
 		typedef bool(__cdecl *CONNECT)();
+
+		// Variable about device
+		EyeTrackerDevice device = EyeTrackerDevice::NONE;
+
+		// Trying to connect
+		_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::TRYING_TO_CONNECT, EyeTrackerDevice::NONE); // just give general indication about trying to connect
 
 		// Function to connect to eye tracker via plugin
 		std::function<void(std::string)> ConnectEyeTracker = [&](std::string plugin)
@@ -75,18 +78,21 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 		// Try to load SMI iViewX plugin
 		if (!_connected && setup::CONNECT_SMI_IVIEWX)
 		{
+			device = EyeTrackerDevice::SMI_REDN;
 			ConnectEyeTracker("SMIiViewXPlugin");
 		}
 
 		// Try to load Visual Interaction myGaze plugin
 		if (!_connected && setup::CONNECT_VI_MYGAZE)
 		{
+			device = EyeTrackerDevice::VI_MYGAZE;
 			ConnectEyeTracker("VImyGazePlugin");
 		}
 
 		// Try to load Tobii EyeX plugin
 		if (!_connected && setup::CONNECT_TOBII_EYEX)
 		{
+			device = EyeTrackerDevice::TOBII_EYEX;
 			ConnectEyeTracker("TobiiEyeXPlugin");
 		}
 
@@ -96,11 +102,11 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 		if (!_connected)
 		{
 			LogInfo("EyeInput: No eye tracker connected. Input emulated by mouse.");
-			_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::DISCONNECTED);
+			_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::DISCONNECTED, EyeTrackerDevice::NONE);
 		}
 		else
 		{
-			_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::CONNECTED);
+			_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::CONNECTED, device);
 		}
 	}));
 }
@@ -163,11 +169,6 @@ std::shared_ptr<Input> EyeInput::Update(
 {
 	// ### UPDATE GAZE INPUT ###
 
-	// Update gaze by eye tracker
-	double filteredGazeX = 0;
-	double filteredGazeY = 0;
-	bool saccade = false;
-
 	// Bool whether eye tracker is tracking
 	bool isTracking = false;
 
@@ -203,7 +204,7 @@ std::shared_ptr<Input> EyeInput::Update(
 		}
 
 		// Update filter algorithm and provide local variables as reference
-		_filter.Update(spSamples, filteredGazeX, filteredGazeY, saccade);
+		_filter.Update(spSamples);
 
 		// Check, whether eye tracker is tracking
 		isTracking = _procIsTracking();
@@ -285,6 +286,10 @@ std::shared_ptr<Input> EyeInput::Update(
 	_mouseX = mouseX;
 	_mouseY = mouseY;
 
+	// Get data from filter
+	double filteredGazeX = _filter.GetFilteredGazeX();
+	double filteredGazeY = _filter.GetFilteredGazeY();
+
 	// Use mouse when gaze is emulated
 	if (gazeEmulated)
 	{
@@ -307,21 +312,34 @@ std::shared_ptr<Input> EyeInput::Update(
 	std::shared_ptr<Input> spInput = std::make_shared<Input>(
 		filteredGazeX, // gazeX,
 		filteredGazeY, // gazeY,
+		_filter.GetRawGazeX(), // rawGazeX
+		_filter.GetRawGazeY(), // rawGazeY
+		_filter.GetAge(), // gazeAge
 		gazeEmulated, // gazeEmulated,
 		false, // gazeUponGUI,
 		false, // instantInteraction,
-		saccade); // saccade
+		_filter.IsSaccade()); // saccade
+
+	// TODO TESTING
+	// LogInfo(_filter.GetAge());
 
 	// Return whether gaze coordinates comes from eye tracker
 	return spInput;
 }
 
-void EyeInput::Calibrate()
+bool EyeInput::Calibrate()
 {
+	bool success = false;
 #ifdef _WIN32
 	if (_connected && _procCalibrate != NULL)
 	{
-		_procCalibrate();
+		success = _procCalibrate();
 	}
 #endif
+	return success;
+}
+
+bool EyeInput::SamplesReceived() const
+{
+	return _filter.IsTimestampSetOnce();
 }

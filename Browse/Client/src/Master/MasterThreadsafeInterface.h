@@ -15,7 +15,7 @@ class MasterThreadsafeInterface
 public:
 
 	// Notify about eye tracker status
-	virtual void threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status) = 0;
+	virtual void threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status, EyeTrackerDevice device) = 0;
 };
 
 #endif // MASTERTHREADSAFEINTERFACE_H_

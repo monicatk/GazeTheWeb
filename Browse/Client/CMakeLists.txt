@@ -2,6 +2,13 @@
 
 set(CEF_TARGET Client)
 
+message(STATUS "*** CLIENT ***")
+
+set(VERSION "0.7")
+add_definitions(-DCLIENT_VERSION=${VERSION})
+
+string(TIMESTAMP DATE %d/%m/%Y)
+
 ### PARAMETERS #################################################################
 
 set(CLIENT_DEPLOYMENT OFF CACHE BOOL "Setup for Deployment.")
@@ -64,10 +71,10 @@ if(${CLIENT_BUILD_SMI_IVIEWX_PLUGIN})
 		target_link_libraries(SMIiViewXPlugin ${SMI_IVIEWX_SDK_LIBRARIES})
 
 		# Tell user about it
-		message("Plugin for SMI iViewX will be built.")
+		message(STATUS "Plugin for SMI iViewX will be built.")
 	
 	else()
-		message("SMI iViewX SDK directory not found, plugin will *not* be built.")
+		message(WARNING "SMI iViewX SDK directory not found, plugin will *not* be built.")
 	endif()
 endif()
 
@@ -95,9 +102,9 @@ if(${CLIENT_BUILD_VI_MYGAZE_PLUGIN})
 		target_link_libraries(VImyGazePlugin ${VI_MYGAZE_SDK_LIBRARIES})
 
 		# Tell user about it
-		message("Plugin for Visual Interaction myGaze will be built.")
+		message(STATUS "Plugin for Visual Interaction myGaze will be built.")
 	else()
-		message("Visual Interaction myGaze SDK directory not found, plugin will *not* be built.")
+		message(WARNING "Visual Interaction myGaze SDK directory not found, plugin will *not* be built.")
 	endif()
 endif()
 
@@ -125,7 +132,7 @@ if(${CLIENT_BUILD_TOBII_EYEX_PLUGIN})
 		target_link_libraries(TobiiEyeXPlugin ${TOBII_EYEX_SDK_LIBRARIES})
 		
 		# Tell user about it
-		message("Plugin for Tobii EyeX will be built.")
+		message(STATUS "Plugin for Tobii EyeX will be built.")
 		
 		# Copy Tobii EyeX library to output folder
 		add_custom_command(TARGET TobiiEyeXPlugin POST_BUILD
@@ -134,7 +141,7 @@ if(${CLIENT_BUILD_TOBII_EYEX_PLUGIN})
 			$<TARGET_FILE_DIR:TobiiEyeXPlugin>)
 	
 	else()
-		message("Tobii EyeX SDK directory not found, plugin will *not* be built.")
+		message(WARNING "Tobii EyeX SDK directory not found, plugin will *not* be built.")
 	endif()
 endif()
 
@@ -362,10 +369,25 @@ endif(MSVC)
 
 ### DEPLOYMENT #################################################################
 
-# Copy content to output folder
 if(CLIENT_DEPLOYMENT)
-add_custom_command(TARGET ${CEF_TARGET} PRE_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_directory
-	${CLIENT_CONTENT_PATH}
-	$<TARGET_FILE_DIR:${CEF_TARGET}>/content)
+
+	# Create text file with version information
+	configure_file(VERSION.in ${CMAKE_BINARY_DIR}/VERSION) # first, create it in build folder
+	add_custom_command(TARGET ${CEF_TARGET} PRE_BUILD #then, copy it to specific binary folder (direct creation there does not work)
+		COMMAND ${CMAKE_COMMAND} -E copy
+		${CMAKE_BINARY_DIR}/VERSION
+		$<TARGET_FILE_DIR:${CEF_TARGET}>/VERSION)
+		
+	# Generate end-user readme
+	configure_file(README.in ${CMAKE_BINARY_DIR}/README.txt) # first, create it in build folder
+	add_custom_command(TARGET ${CEF_TARGET} PRE_BUILD #then, copy it to specific binary folder (direct creation there does not work)
+		COMMAND ${CMAKE_COMMAND} -E copy
+		${CMAKE_BINARY_DIR}/README.txt
+		$<TARGET_FILE_DIR:${CEF_TARGET}>/README.txt)
+
+	# Copy content to output folder
+	add_custom_command(TARGET ${CEF_TARGET} PRE_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+		${CLIENT_CONTENT_PATH}
+		$<TARGET_FILE_DIR:${CEF_TARGET}>/content)
 endif(CLIENT_DEPLOYMENT)
