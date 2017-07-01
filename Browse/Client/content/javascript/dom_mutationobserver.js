@@ -6,69 +6,15 @@ ConsolePrint("Starting to import dom_mutationobserver.js ...");
 
 window.appendedSubtreeRoots = new Set();
 
-// TODO: Deprecated?
-function CompareArrays(array1, array2)
-{
-	var n = array1.length;
-
-	if(n != array2.length)
-		return false;
-
-	for(var i = 0; i < n; i++)
-	{
-		if(array1[i] != array2[i])
-			return false;
-	}
-
-	return true;
-}
-
-// TESTING PURPOSE
-document.onclick = function(){
-	// ConsolePrint("### document.onclick() triggered! Calling UpdateDOMRects! ###");
-	// UpdateDOMRects();
-	
-}
-// TESTING TWITTER, no updates through clicking right now
-// document.addEventListener("click", function(e){
-// 	ConsolePrint("JS Debug: Realized that click event was fired! Target is listed in DevTools Console.");
-// 	console.log("Clicked target: "+e.target);
-// 	UpdateDOMRects();
-// });
-
 // Trigger DOM data update on changing document loading status
 document.onreadystatechange = function()
 {
-	// ConsolePrint("### DOCUMENT STATECHANGE! ###");
-
-	// if(document.readyState == 'loading')
-	// {
-	// 	// ConsolePrint('### document.readyState == loading ###'); // Never triggered
-	// }
-
-	if(document.readyState == 'interactive')
+	if(document.readyState == 'interactive' || document.readyState == 'complete')
 	{
 		// GMail fix
 		ForEveryChild(document.documentElement, AnalyzeNode);
 
 		UpdateDOMRects();
-
-		// GMail
-		// ForEveryChild(document.documentElement, AnalyzeNode);
-	}
-
-	if(document.readyState == 'complete')
-	{
-		// GMail fix
-		ForEveryChild(document.documentElement, AnalyzeNode);
-
-		UpdateDOMRects();
-
-		//ConsolePrint('<----- Page fully loaded. -------|');
-
-		// GMail
-		// ForEveryChild(document.documentElement, AnalyzeNode);
-		
 	}
 }
 
@@ -131,20 +77,6 @@ document.addEventListener('transitionend', function(event){
 
 var docFrags = [];
 
-var origCreateElement = Document.prototype.createElement;
-Document.prototype.createElement = function(tag)
-{
-	if(arguments[0] === "iframe" || arguments[0] === "IFRAME") 
-	{
-		// ConsolePrint("<iframe> created.");
-	}
-	// ConsolePrint("Creating element with tagName="+tag);
-
-	var elem = origCreateElement.apply(this, arguments);
-	// if(arguments[0] === "iframe") elem.style.backgroundColor = "#0000ff";
-	return elem ;
-}
-
 
 /* Modify appendChild in order to get notifications when this function is called */
 var originalAppendChild = Element.prototype.appendChild;
@@ -167,12 +99,7 @@ Element.prototype.appendChild = function(child){
 			{
 				// Mark all 1st generation child nodes of DocumentFragments as subtree roots
 				for(var i = 0, n = subtreeRoot.childNodes.length; i < n; i++)
-				{
 					window.appendedSubtreeRoots.add(subtreeRoot.childNodes[i]);
-					// ForEveryChild(subtreeRoot.childNodes[i], function(childNode){
-						// if(childNode.style) childNode.style.backgroundColor = '#0000ff';
-					// });	
-				}
 			}
 			else 
 			{	
@@ -180,14 +107,9 @@ Element.prototype.appendChild = function(child){
 				window.appendedSubtreeRoots.add(subtreeRoot);	
 
 				// Remove children of this subtree root from subtree root set --> prevent double-checking of branches
-				ForEveryChild(subtreeRoot, function(childNode){
-						// if(childNode.nodeType == 1 && childNode.style) childNode.style.backgroundColor = '#ffff00';
-						window.appendedSubtreeRoots.delete(childNode);
-					}
-				);
-			} // else
+				ForEveryChild(subtreeRoot, (child) => {window.appendedSubtreeRoots.delete(child); });
+			} 
 		}
-
     }  
 
 	// DocumentFragment as parent: children disappear when fragment is appended to DOM tree
