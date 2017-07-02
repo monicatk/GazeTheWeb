@@ -38,7 +38,7 @@ bool TextSelectionAction::Update(float tpf, const std::shared_ptr<const TabInput
 	else
 	{
 		// Keep emulating mouse cursor
-		_pTab->EmulateMouseCursor(zoomCoordinate.x, zoomCoordinate.y, false, setup::TEXT_SELECTION_MARGIN);
+		_pTab->EmulateMouseCursor(zoomCoordinate.x, zoomCoordinate.y, true, setup::TEXT_SELECTION_MARGIN);
 	}
 
     return done;
