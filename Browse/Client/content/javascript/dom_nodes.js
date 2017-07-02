@@ -26,13 +26,13 @@ function DOMNode(node, id, type)
     if(typeof(node.setAttribute) !== "function")
     {
         console.log("Error: Given node does not suffice DOMNode object criteria! id="+id+", type="+type);
+        return;
     }
-    else
-    {
-        // Store information in node attributes
-        node.setAttribute("nodeObjId", id);
-        node.setAttribute("nodeObjType", type);
-    }
+
+    // Store information in node attributes
+    node.setAttribute("nodeObjId", id);
+    node.setAttribute("nodeObjType", type);
+
     this.node = node;
     this.id = id;
     this.type = type;
@@ -42,18 +42,15 @@ function DOMNode(node, id, type)
     this.fixObj = undefined;
     this.overflow = undefined;
 
-    if(typeof(node.getAttribute) === "function")
-    {
-        // Initial setup of fixObj, if already set in node
-        this.setFixObj(  GetFixedElementById( node.getAttribute("fixedId") )  );
-        if(this.fixObj === null)
-            this.setFixObj(  GetFixedElementById( node.getAttribute("childFixedId") )  );
+    // Initial setup of fixObj, if already set in node
+    this.setFixObj(  GetFixedElementById( node.getAttribute("fixedId") )  );
+    if(this.fixObj === undefined)
+        this.setFixObj(  GetFixedElementById( node.getAttribute("childFixedId") )  );
 
-        // Initial setup of overflow, if already set in node
-        var overflowId = node.getAttribute("overflowid");
-        if(overflowId !== null)
-            this.setOverflow(GetDOMOverflowElement(overflowId));
-    }
+    // Initial setup of overflow, if already set in node
+    var overflowId = node.getAttribute("overflowid");
+    if(overflowId !== null)
+        this.setOverflow(GetDOMOverflowElement(overflowId));
 
     this.cppReady = false; // TODO: Queuing calls, when node isn't ready yet?
 
@@ -61,12 +58,6 @@ function DOMNode(node, id, type)
     ConsolePrint("DOM#add#"+type+"#"+id+"#");
 }
 DOMNode.prototype.Class = "DOMNode";
-DOMNode.prototype.setCppReady = function(){
-    this.cppReady = true;
-}
-DOMNode.prototype.isCppReady = function(){
-    return this.cppReady;
-}
 
 // Set up methods, which will be inherited
 DOMNode.prototype.getId = function(){
@@ -77,8 +68,10 @@ DOMNode.prototype.getType = function(){
 }
 
 // DOMAttribute Rects
-DOMNode.prototype.getRects = function(){
-    this.updateRects();
+DOMNode.prototype.getRects = function(update=true){
+    // Prevent SendAttributeChangesToCEF (called in updateRects) from calling updateRects again
+    if(update)
+        this.updateRects();
 
     // TODO: Set each DOMNode's overflow attribute to undefined, if corresponding Overflow gets deleted/removed
     // IDEA: Sign up each DOMNode in OverflowElements list if assigned to overflow attribute?
@@ -89,8 +82,9 @@ DOMNode.prototype.getRects = function(){
     // FUTURE TODO: Cut with overlying fixed areas, if any
     return this.rects;
 }
-DOMNode.prototype.getUnalteredRects = function(){
-    this.updateRects();
+DOMNode.prototype.getUnalteredRects = function(update=true){
+    if(update)
+        this.updateRects();
     return this.rects;
 }
 
@@ -100,10 +94,15 @@ DOMNode.prototype.updateRects = function(){
         console.log("Error: Could not update rects because of missing 'getClientRects' function in node!");
         return;
     }
-    var adjustedRects = AdjustClientRects(this.node.getClientRects());
+
+    var adjustedRects = this.getAdjustedClientRects();
+    
     if(!EqualClientRectsData(this.rects, adjustedRects))
     {
-        this.rects = adjustedRects
+        this.rects = adjustedRects;
+        if(debug)
+            console.log("Rects changed! adjustedRects: "+adjustedRects+", updated this.rects: "+this.rects);
+
         SendAttributeChangesToCEF("Rects", this);
         return true; // Rects changed and were updated
     }
@@ -126,6 +125,7 @@ DOMNode.prototype.setFixObj = function(fixObj){
     {
         this.fixObj = fixObj;
         SendAttributeChangesToCEF("FixedId", this);
+        this.updateRects();
     }
     return true;
 }
@@ -185,6 +185,12 @@ window.domNodes[0] = window.domTextInputs;
 
 function DOMTextInput(node)
 {
+    if(typeof(node.getAttribute) === "function" && node.getAttribute("aria-hidden") === "true")
+    {
+        console.log("Skipping creation of new DOMTextInput due to aria-hidden set to 'true'.");
+        return;
+    }
+
     window.domTextInputs.push(this);
     var id = window.domTextInputs.indexOf(this);
     DOMNode.call(this, node, id, 0);
@@ -383,7 +389,7 @@ DOMOverflowElement.prototype.setCurrentScrolling = function(left, top){
 //     // IDEA: Only trigger updateRects for every child on width/height changes?
 // }
 
-DOMOverflowElement.prototype.cutRectsWith = function(domObj){
+DOMOverflowElement.prototype.cutRectsWith = function(domObj, skip_update=true){
     if(typeof(domObj.getRects) !== "function")
     {
         console.log("Error: Attempted to cut object rects on DOMOverflowElement without a 'getRects' function inside object!");
@@ -391,7 +397,19 @@ DOMOverflowElement.prototype.cutRectsWith = function(domObj){
     }
 
     var oeRects = this.getRects();
-    var objRects = domObj.getUnalteredRects();
+    var update_rects = !skip_update;
+    var objRects = domObj.getUnalteredRects(update_rects);
+
+    // If domObj is fixed, substract current scrolling offsets from overflow rects
+    if(domObj.getFixedId() !== -1)
+    {
+        oeRects.forEach((r) => {
+            r[0] -= window.scrollY; // top
+            r[1] -= window.scrollX; // left
+            r[2] -= window.scrollY; // bottom
+            r[3] -= window.scrollX; // right
+        });
+    }
 
     return objRects.map(
         (objRect) => {

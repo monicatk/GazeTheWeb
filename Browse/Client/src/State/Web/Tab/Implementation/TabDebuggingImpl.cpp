@@ -152,7 +152,7 @@ void Tab::DrawDebuggingOverlay() const
 			{
 				renderRect(
 					rRect, 
-					(rDOMTextLink->GetFixedId() >= 0)
+					(rDOMTextLink->IsFixed())
 				);
 			}
 		}
@@ -165,7 +165,7 @@ void Tab::DrawDebuggingOverlay() const
 			if (rDOMTextLink->GetRects().size() > 1)
 				renderRect(
 					rDOMTextLink->GetRects()[1], 
-					(rDOMTextLink->GetFixedId() >= 0)
+					(rDOMTextLink->IsFixed())
 				);
 		}
 
@@ -180,7 +180,7 @@ void Tab::DrawDebuggingOverlay() const
 			{
 				renderRect(
 					rRect, 
-					(rDOMSelectField->GetFixedId() >= 0)
+					(rDOMSelectField->IsFixed())
 				);
 			}
 		}
@@ -211,7 +211,7 @@ void Tab::DrawDebuggingOverlay() const
 			for (const auto& rect : rOverflowElement->GetRects())
 				renderRect(
 					rect,
-					(rOverflowElement->GetFixedId() >= 0)
+					(rOverflowElement->IsFixed())
 				);
 		}
 	}
