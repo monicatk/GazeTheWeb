@@ -93,9 +93,6 @@ Tab::Tab(Master* pMaster, Mediator* pCefMediator, WebTabInterface* pWeb, std::st
 
 	// Prepare debugging overlay
 	InitDebuggingOverlay();
-
-	// TOOD: Bug, text selection does not work anymore
-	eyegui::setElementActivity(_pPanelLayout, "selection", false, false);
 }
 
 Tab::~Tab()
