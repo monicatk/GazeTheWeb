@@ -87,21 +87,21 @@ DOMNode.prototype.getUnalteredRects = function(update=true){
         this.updateRects();
     return this.rects;
 }
-
-DOMNode.prototype.updateRects = function(){
+/**
+ * param: altNode - Use alternative node for retrieval of client rects (e.g. DOMLinks refering to images: use image node for rects)
+ */
+DOMNode.prototype.updateRects = function(altNode){
     if(typeof(this.node.getClientRects) !== "function")
     {
         console.log("Error: Could not update rects because of missing 'getClientRects' function in node!");
-        return;
+        return "Error!";
     }
 
-    var adjustedRects = this.getAdjustedClientRects();
+    var adjustedRects = this.getAdjustedClientRects(altNode);
     
     if(!EqualClientRectsData(this.rects, adjustedRects))
     {
         this.rects = adjustedRects;
-        if(debug)
-            console.log("Rects changed! adjustedRects: "+adjustedRects+", updated this.rects: "+this.rects);
 
         SendAttributeChangesToCEF("Rects", this);
         return true; // Rects changed and were updated
@@ -238,11 +238,21 @@ function DOMLink(node)
     this.text = "";
     this.url = "";
 
+    // Search image which might be displayed instead of link text
+    var imgs = node.getElementsByTagName("IMG");
+    if(imgs.length > 0)
+        this.imgNode = imgs[0];
 
 }
 DOMLink.prototype = Object.create(DOMNode.prototype)
 DOMLink.prototype.constructor = DOMLink;
 DOMLink.prototype.Class = "DOMLink";  // Override base class identifier for this derivated class
+
+// Use underlying image node instead of link node for rect data
+DOMLink.prototype.origUpdateRects = DOMNode.prototype.updateRects;
+DOMLink.prototype.updateRects = function(){
+    this.origUpdateRects(this.imgNode);
+}
 
 // DOMAttribute Text
 DOMLink.prototype.getText = function(){
@@ -264,7 +274,6 @@ DOMLink.prototype.setUrl = function(url){
     this.url = url;
     if(informCEF)
         SendAttributeChangesToCEF("Url", this);
-
 }
 
 

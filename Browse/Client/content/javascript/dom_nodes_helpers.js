@@ -12,8 +12,8 @@ DOMNode.prototype.setCppReady = function(){
 DOMNode.prototype.isCppReady = function(){
     return this.cppReady;
 }
-DOMNode.prototype.getAdjustedClientRects = function(){
-    var rects = this.node.getClientRects();
+DOMNode.prototype.getAdjustedClientRects = function(altNode){
+    var rects = (altNode === undefined) ? this.node.getClientRects() : altNode.getClientRects();
     if (this.getFixedId() === -1)
     {
         return rects.map(
