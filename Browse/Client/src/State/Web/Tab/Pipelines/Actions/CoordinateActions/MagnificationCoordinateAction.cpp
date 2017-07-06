@@ -49,7 +49,8 @@ bool MagnificationCoordinateAction::Update(float tpf, const std::shared_ptr<cons
 		}
 		else
 		{
-			_fixationTime += tpf;
+			// _fixationTime += tpf;
+			_fixationTime = FIXATION_DURATION;
 		}
 	}
 
