@@ -46,6 +46,12 @@ protected:
 	// Level of magnification
 	const float MAGNIFICATION = 0.5f;
 
+	// Fixation duration taken as "real" fixation to trigger something
+	const float FIXATION_DURATION = 0.5f;
+
+	// Fixation time
+	float _fixationTime = FIXATION_DURATION;
+
 	// Magnfication center. In relative page space
 	glm::vec2 _relativeMagnificationCenter;
 

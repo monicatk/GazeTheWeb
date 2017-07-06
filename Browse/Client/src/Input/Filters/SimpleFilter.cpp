@@ -80,7 +80,7 @@ void SimpleFilter::Update(SampleQueue spSamples)
 	}
 
 	// Remember about saccade
-	_saccade = filterCount > 1;
+	_saccade = filterCount <= 1;
 }
 
 double SimpleFilter::GetFilteredGazeX() const
