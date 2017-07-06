@@ -93,6 +93,9 @@ public:
 	// Pushs back pointing evaluation pipeline
 	void PushBackPointingEvaluationPipeline(PointingApproach approach);
 
+	// Get last time per frame
+	float GetLastTimePerFrame() const { return _lastTimePerFrame; }
+
     // #################################
     // ### TAB INTERACTIVE INTERFACE ###
     // #################################
@@ -605,6 +608,9 @@ private:
 
 	// Current loading icon frame
 	int _loadingIconFrame = 0;
+
+	// Last time per frame
+	float _lastTimePerFrame = 1.f; // initialize with something that is not zero, as may be used for divisions
 };
 
 #endif // TAB_H_

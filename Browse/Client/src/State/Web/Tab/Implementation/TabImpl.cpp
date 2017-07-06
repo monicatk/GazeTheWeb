@@ -113,6 +113,9 @@ Tab::~Tab()
 
 void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 {
+	// Store tpf
+	_lastTimePerFrame = tpf;
+
 	// #######################
 	// ### UPDATE WEB VIEW ###
 	// #######################
@@ -362,7 +365,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 			// yOffset = (glm::max(0.f, yOffset - 0.05f) / 0.95f); // In the center of view no movement
 			yOffset = negative ? -yOffset : yOffset; // [-1..1]
 
-			// Update the auto scrolling value (TODO: not frame rate independend)
+			// Update the auto scrolling value (TODO: not really frame rate independend)
 			_autoScrollingValue += tpf * (yOffset - _autoScrollingValue);
 		}
 		else if (_autoScrollingValue != 0)
