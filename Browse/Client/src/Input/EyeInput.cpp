@@ -96,8 +96,6 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 			ConnectEyeTracker("TobiiEyeXPlugin");
 		}
 
-#endif
-
 		// If not connected to any eye tracker, provide feedback
 		if (!_connected)
 		{
@@ -108,6 +106,7 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 		{
 			_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::CONNECTED, device);
 		}
+#endif // _WIN32
 	}));
 }
 
@@ -154,7 +153,7 @@ EyeInput::~EyeInput()
 		FreeLibrary(_pluginHandle);
 	}
 
-#endif
+#endif // _WIN32
 
 }
 
@@ -210,7 +209,7 @@ std::shared_ptr<Input> EyeInput::Update(
 		isTracking = _procIsTracking();
 	}
 
-#endif
+#endif // _WIN32
 
 	// ### MOUSE INPUT ###
 
@@ -335,7 +334,7 @@ bool EyeInput::Calibrate()
 	{
 		success = _procCalibrate();
 	}
-#endif
+#endif // _WIN32
 	return success;
 }
 

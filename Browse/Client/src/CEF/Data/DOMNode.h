@@ -43,7 +43,7 @@ public:
 
 	// Empty construction
 	DOMNode(int id) :
-		_id(id) {};
+        _id(id) {}
 
 	// Define initialization through IPC message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg);
@@ -101,9 +101,9 @@ public:
 
 	// Empty construction
 	DOMTextInput(int id, SendRenderMessage sendRenderMessage) :
-		DOMNode(id),
-		DOMTextInputInteraction(), 
-		DOMJavascriptCommunication(sendRenderMessage){};
+        DOMNode(id),
+        DOMJavascriptCommunication(sendRenderMessage),
+        DOMTextInputInteraction() {}
 
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg) override;
@@ -124,7 +124,7 @@ public:
 	}
 
 	// TODO: somehow set enum per subclass and return this in DOMNode?
-	virtual int GetType() override { return 0; };
+    virtual int GetType() override { return 0; }
 	
 	// Custom getter
 	std::string GetText() const { return _text; }
@@ -183,7 +183,7 @@ public:
 	}
 
 	// TODO: somehow set enum per subclass and return this in DOMNode?
-	virtual int GetType() override { return 1; };
+    virtual int GetType() override { return 1; }
 
 	// Custom getter
 	std::string GetText() const { return _text; }
@@ -224,8 +224,8 @@ public:
 	// Empty construction
 	DOMSelectField(int id, SendRenderMessage sendRenderMessage) :
 		DOMNode(id), 
-		DOMSelectFieldInteraction(),
-		DOMJavascriptCommunication(sendRenderMessage) {};
+        DOMJavascriptCommunication(sendRenderMessage),
+        DOMSelectFieldInteraction() {}
 
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg) override;
@@ -246,7 +246,7 @@ public:
 	}
 
 	// TODO: somehow set enum per subclass and return this in DOMNode?
-	virtual int GetType() override { return 2; };
+    virtual int GetType() override { return 2; }
 
 	// Custom getter
 	std::vector<std::string> GetOptions() const { return _options; }
@@ -282,8 +282,8 @@ public:
 	// Empty construction
 	DOMOverflowElement(int id, SendRenderMessage sendRenderMessage) :
 		DOMNode(id),
-		DOMOverflowElementInteraction(),
-		DOMJavascriptCommunication(sendRenderMessage) {};
+        DOMJavascriptCommunication(sendRenderMessage),
+        DOMOverflowElementInteraction() {}
 
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg) override;
@@ -304,7 +304,7 @@ public:
 	}
 
 	// TODO: somehow set enum per subclass and return this in DOMNode?
-	virtual int GetType() override { return 3; };
+    virtual int GetType() override { return 3; }
 
 	// Custom getter
 	std::pair<int, int> GetMaxScrolling() const { return std::make_pair(_scrollLeftMax, _scrollTopMax); }

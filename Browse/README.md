@@ -10,6 +10,7 @@ On a clean Ubuntu 17.04 installation, following packages are required:
 * *build-essential* (GCC to compile the code)
 * *xorg-dev* (libraries to create windows under X11 desktops)
 * *libgl1-mesa-dev* (OpenGL development libraries)
+* *libgconf2-4* (CEF needs to be linked against this)
 
 ## Videos
 * [Demonstration](https://www.youtube.com/watch?v=x1ESgaoQR9Y)
