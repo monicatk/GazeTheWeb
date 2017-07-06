@@ -93,9 +93,6 @@ Tab::Tab(Master* pMaster, Mediator* pCefMediator, WebTabInterface* pWeb, std::st
 
 	// Prepare debugging overlay
 	InitDebuggingOverlay();
-
-	// TOOD: Bug, text selection does not work anymore
-	eyegui::setElementActivity(_pPanelLayout, "selection", false, false);
 }
 
 Tab::~Tab()
@@ -400,8 +397,8 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 					int scrolledCEFPixelGazeX = spTabInput->CEFPixelGazeX;
 					int scrolledCEFPixelGazeY = spTabInput->CEFPixelGazeY;
 
-					// Do add scrolling offset if element is not fixed
-					if (!rspOverflowElement->GetFixedId())
+					// Add scrolling offset if element is not fixed
+					if (!(rspOverflowElement->IsFixed()))
 					{
 						scrolledCEFPixelGazeX += _scrollingOffsetX;
 						scrolledCEFPixelGazeY += _scrollingOffsetY;
@@ -410,7 +407,8 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 					// Check if current gaze is inside of overflow element, if so execute scrolling method in corresponding Javascript object
 					if (rRect.IsInside(scrolledCEFPixelGazeX, scrolledCEFPixelGazeY))
 					{
-						rspOverflowElement->Scroll(spTabInput->CEFPixelGazeX, spTabInput->CEFPixelGazeY);
+						rspOverflowElement->Scroll(scrolledCEFPixelGazeX, scrolledCEFPixelGazeY);
+						//rspOverflowElement->Scroll(spTabInput->CEFPixelGazeX, spTabInput->CEFPixelGazeY);
 						break;
 					}
 				}

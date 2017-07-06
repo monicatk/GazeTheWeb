@@ -17,8 +17,7 @@ if(ClientRectList.prototype.map === undefined)
     ConsolePrint("JS: Extending JS ClientRectList by own map function.");
     ClientRectList.prototype.map = function(f){
         var output = [];
-        var n = this.length;
-        for(var i = 0; i < n; i++)
+        for(var i = 0, n = this.length; i < n; i++)
         {
             output.push( f(this[i]) ); 
         }
@@ -38,29 +37,7 @@ if(NodeList.prototype.forEach === undefined)
         }
     }
 }
-/**
- * Adjusts given DOMRects to window properties in order to get screen coordinates
- * 
- * args:    rects : [DOMRect]
- * return:  [[float]] - top, left, bottom, right coordinates of each DOMRect in rects
- */
-function AdjustClientRects(rects)
-{
-    if(rects === undefined || rects === null || rects.length === 0)
-        return [[0,0,0,0]];
 
-    // if(typeof(rects.map) !== "function")
-    // {
-    //     console.log(rects);
-    //     return [[0,0,0,0]];
-    // }
-
-    return rects.map(
-        (rect) => {
-            return AdjustRectCoordinatesToWindow(rect);
-        }
-    );
-}
 
 /**
 	Adjust bounding client rectangle coordinates to window, using scrolling offset and zoom factor.
@@ -100,11 +77,16 @@ function EqualClientRectsData(r1, r2)
         return false;
     
     // Check if width and height of each Rect are identical
-    var n = r1.length;
-	for(var i = 0; i < n; i++)
+	for(var i = 0, n = r1.length; i < n; i++)
+    {
+        if((r1[i] === undefined && r2[i] !== undefined) || (r1[i] !== undefined && r2[i] === undefined))
+            return false;
+        if(r1[i] === undefined)
+            continue;
 		for(var j = 0; j < 4; j++)
             if(r1[i][j] !== r2[i][j])
                 return false;   // Stop iterating asap
+    }
 	return true;
 
 }
@@ -134,35 +116,31 @@ function ForEveryChild(parentNode, applyFunction, abortFunction)
 	}
 }
 
-function GetFixedElement(node)
+function GetFixedElementByNode(node)
 {
     if(typeof(node.getAttribute) !== "function" || typeof(node.setAttribute) !== "function")
         return undefined;
 
     var fixedId = node.getAttribute("fixedId");
-    if(fixedId === null || fixedId < 0)
-        return undefined;
-
-    return window.domFixedElements[fixedId];
+    return GetFixedElementById(fixedId);
 }
 
 function GetFixedElementById(id)
 {
     if(id !== null && id >= 0 && id < window.domFixedElements.length)
-    {
         return window.domFixedElements[id];
-    }
-    else
-    {
-        console.log("Couldn't find FixedElement with id="+id);
-        return undefined;
-    }
+    return undefined;
 }
 
-function DeleteFixedElement(node)
+function DeleteFixedElement(fixId)
 {
-    // TODO
-    console.log("TODO DeleteFixedElement");
+    var fixObj = domFixedElements[fixId];
+    if(fixObj === undefined)
+        return;
+    
+    delete fixObj;
+    ConsolePrint("#fixElem#rem#"+fixId+"#");
+    console.log("Removed fixed element with id: "+fixId);
 }
 
 
@@ -186,6 +164,10 @@ function UpdateNodesRect(node)
     var domObj = GetCorrespondingDOMObject(node);
     if(domObj !== undefined)
         domObj.updateRects();
+
+    var fixObj = GetFixedElementByNode(node);
+    if(fixObj !== undefined)
+        fixObj.updateRects();
 }
 
 
@@ -231,12 +213,15 @@ function GetDOMLink(id){ return GetDOMObject(1, id);}
 function GetDOMSelectField(id){ return GetDOMObject(2, id); }
 function GetDOMOverflowElement(id){ return GetDOMObject(3, id); }
 
-function GetCorrespondingDOMObject(node)
+function GetCorrespondingDOMObject(node, expected_type)
 {
     if(typeof(node.getAttribute) !== "function")
         return undefined;
     
     var type = node.getAttribute("nodeObjType");
+    if(expected_type !== undefined && type !== expected_type)
+        return undefined;
+
     var id = node.getAttribute("nodeObjId");
 
     if(type === null || id === null)
@@ -244,6 +229,7 @@ function GetCorrespondingDOMObject(node)
 
     return GetDOMObject(type, id);
 }
+function GetCorrespondingDOMOverflow(node){ return GetCorrespondingDOMObject(node, 3); }
 
 function RemoveDOMObject(type, id)
 {
@@ -289,6 +275,118 @@ function CefExecute(header, param)
     // Execute function with obj as context and parameters given
     // Return value may be e.g. a DOMNodeInteractionResponse
     return obj[f](a, b, c, d);
+}
+
+
+
+function DrawRect(rect, color)
+{
+	//Position parameters used for drawing the rectangle
+	var x = rect[1];
+	var y = rect[0];
+	var width = rect[3] - rect[1];
+	var height = rect[2] - rect[0];
+
+	var canvas = document.createElement('canvas'); //Create a canvas element
+	//Set canvas width/height
+	canvas.style.width='100%';
+	canvas.style.height='100%';
+	//Set canvas drawing area width/height
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+	//Position canvas
+	canvas.style.position='absolute';
+	canvas.style.left=0;
+	canvas.style.top=0;
+	canvas.style.zIndex=100000;
+	canvas.style.pointerEvents='none'; //Make sure you can click 'through' the canvas
+	document.body.appendChild(canvas); //Append canvas to body element
+	var context = canvas.getContext('2d');
+	//Draw rectangle
+	context.rect(x, y, width, height);
+	context.fillStyle = color;
+	context.fill();
+}
+
+function DrawObject(obj)
+{
+	var colors = ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#FFFFFF"];
+	for(var i = 0; i < obj.rects.length; i++)
+	{
+		DrawRect(obj.rects[i], colors[i % 6]);
+	}
+}
+
+
+function SendLSLMessage(msg) {
+    window.cefQuery({ request: ("lsl:" + msg), persistent: false, onSuccess: (response) => { }, onFailure: (error_code, error_message) => { } });
+}
+
+function LoggingMediator()
+{
+	/* This function is indirectly called via this.log */
+    this.logFunction = null;
+
+	/* Register your own log function with this function */
+    this.registerFunction = function(f)
+    {
+        this.logFunction = f;
+    }
+
+    /* Unregister the log function with this function */
+    this.unregisterFunction = function() {
+        this.logFunction = null;
+    }
+
+	/* This function is called by CEF's renderer process */
+    this.log = function(logText)
+    {
+        try
+        {
+            if(this.logFunction !== null)
+                this.logFunction(logText);
+        }
+        catch(e)
+        {
+            console.log("LoggingMediator: Something went wrong while redirecting logging data.");
+            console.log(e);
+        }
+    }
+
+    /* Code, executed on object construction */
+    ConsolePrint("LoggingMediator instance was successfully created!");
+
+}
+
+window.loggingMediator = new LoggingMediator();
+
+
+
+function GetTextSelection()
+{
+	// Pipe message to C++ MsgRouter
+	ConsolePrint("#select#"+document.getSelection().toString()+"#");
+}
+
+// parent & child are 1D arrays of length 4
+function ComputeBoundingRect(parent, child)
+{
+	// top, left, bottom, right
+
+	var bbs = [];
+	for(var i = 0, n=child.length/4; i < n; i++)
+	{
+		var _child = [child[i], child[i+1], child[i+2], child[i+3]];
+
+		// // no intersection possible
+		// if(parent[3] <= _child[0] || parent[3] <= _child[1])
+		// 	bbs.push(_child);
+
+		if(_child[2] - _child[0] > 0 && _child[3] - _child[1])
+			bbs.push(_child);
+	}
+
+	return bbs;
 }
 
 

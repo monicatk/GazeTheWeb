@@ -289,27 +289,6 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 		_pMediator->ClearDOMNodes(browser);
 		return true;
 	}
-	if (msgName == "SendDOMNodeData")
-	{
-		//_pMediator->HandleDOMNodeIPCMsg(browser, msg);
-		LogDebug("Handler: Received old IPC msg 'SendDOMNodeData'!");
-		return true;
-	}
-
-	if (msgName.substr(0, 9) == "CreateDOM")
-	{
-		/*_pMediator->FillDOMNodeWithData(browser, msg);*/
-		LogBug("Handler: Received deprecated 'CreateDOM' msg!");
-		return true;
-	}
-
-	if (msgName == "InitializeDOMSelectField")
-	{
-		//_pMediator->InitializeDOMNode(browser, msg);
-		LogBug("Handler: Received deprecated '", msgName, "' msg!");
-		return true;
-	}
-
 
 	// NEW DOMNODE STRUCTURE, TODO: Might be (partially) moved to DOMExtraction?
 	if (msgName.substr(0, 12) == "ExtractedDOM")
