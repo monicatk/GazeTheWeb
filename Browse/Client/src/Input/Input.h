@@ -71,10 +71,16 @@ public:
 		// TabInput fields
 		webViewPixelGazeX(spInput->gazeX - (float)webViewX),
 		webViewPixelGazeY(spInput->gazeY - (float)webViewY),
+		webViewPixelRawGazeX(spInput->rawGazeX - (float)webViewX),
+		webViewPixelRawGazeY(spInput->rawGazeY - (float)webViewY),
 		webViewRelativeGazeX(webViewPixelGazeX / (float)webViewWidth),
 		webViewRelativeGazeY(webViewPixelGazeY / (float)webViewHeight),
+		webViewRelativeRawGazeX(webViewPixelRawGazeX / (float)webViewWidth),
+		webViewRelativeRawGazeY(webViewPixelRawGazeY / (float)webViewHeight),
 		CEFPixelGazeX(webViewRelativeGazeX * (float)webViewResolutionX),
 		CEFPixelGazeY(webViewRelativeGazeY * (float)webViewResolutionY),
+		CEFPixelRawGazeX(webViewRelativeRawGazeX * (float)webViewResolutionX),
+		CEFPixelRawGazeY(webViewRelativeRawGazeY * (float)webViewResolutionY),
 		insideWebView(
 			webViewRelativeGazeX < 1.f
 			&& webViewRelativeGazeX >= 0
@@ -85,10 +91,16 @@ public:
 	// Fields
 	float webViewPixelGazeX;
 	float webViewPixelGazeY;
+	float webViewPixelRawGazeX;
+	float webViewPixelRawGazeY;
 	float webViewRelativeGazeX;
 	float webViewRelativeGazeY;
+	float webViewRelativeRawGazeX;
+	float webViewRelativeRawGazeY;
 	float CEFPixelGazeX;
 	float CEFPixelGazeY;
+	float CEFPixelRawGazeX;
+	float CEFPixelRawGazeY;
 	bool insideWebView;
 
 	// Fields from input as reference
