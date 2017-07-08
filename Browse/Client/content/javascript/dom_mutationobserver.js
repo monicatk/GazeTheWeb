@@ -399,7 +399,7 @@ function MutationObserverInit()
 
 							
 							// ### CREATION AND REMOVAL OF FIXED ELEMENTS ###
-		  					if(attr == 'style' ||  (document.readyState != 'loading' && attr == 'class') )
+		  					if(attr == 'style') // ||  (document.readyState != 'loading' && attr == 'class') )
 		  					{
 								if(window.getComputedStyle(node, null).getPropertyValue('position') === 'fixed')
 								{
@@ -412,6 +412,17 @@ function MutationObserverInit()
 									// Checks if node corresponds to fixedObj and removes it, when true
 									RemoveFixedElement(node);
 								}
+
+								var curr_display_none = (node.style.display === "none");
+								var old_display_none = (mutation.oldValue !== null && typeof(mutation.oldValue.contains)  === "function") ? 
+									mutation.oldValue.contains("display: none") : false;
+									
+								if((curr_display_none && !old_display_none) || (!curr_display_none && old_display_none))
+								{
+									console.log("style.display changed: curr="+curr_display_none+", old="+old_display_none);
+									ForEveryChild(node, (c) => { UpdateNodesRect(c); })
+								}
+
 							}
 
 						
