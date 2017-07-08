@@ -96,6 +96,19 @@ DOMNode.prototype.updateRects = function(altNode){
         console.log("Error: Could not update rects because of missing 'getClientRects' function in node!");
         return "Error!";
     }
+    if(window.getComputedStyle(this.node, null).getPropertyValue("opacity") === 0)
+        return this.setRectsToZero();
+
+    if(this.node.hidden_by !== undefined && this.node.hidden_by.size > 0)
+    {
+        for(var hiding_parent of this.node.hidden_by.keys())
+        {
+            var hiding_reason = this.node.hidden_by.get(hiding_parent);
+            if (hiding_reason === "opacity" && 
+                window.getComputedStyle(hiding_parent, null).getPropertyValue(hiding_reason) === "0")
+                    return this.setRectsToZero();
+        }
+    }
 
     var adjustedRects = this.getAdjustedClientRects(altNode);
     

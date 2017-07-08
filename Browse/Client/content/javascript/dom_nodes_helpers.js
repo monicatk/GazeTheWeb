@@ -25,5 +25,19 @@ DOMNode.prototype.getAdjustedClientRects = function(altNode){
     return rects.map((r) => {return [r.top, r.left, r.bottom, r.right];});
 }
 
+/**
+ * Sets rects to zero, checks if changes happened, and if so, informs CEF.
+ */
+DOMNode.prototype.setRectsToZero = function(){
+    var prev_rects = this.rects;
+    this.rects = [[0,0,0,0]]
+    if(!EqualClientRectsData(this.rects, prev_rects))
+    {
+        SendAttributeChangesToCEF("Rects", this);
+        return true;
+    }
+    return false;
+}
+
 
 ConsolePrint("Successfully imported dom_nodes_helpers.js!");
