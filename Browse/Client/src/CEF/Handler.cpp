@@ -154,8 +154,15 @@ void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame
 
     if (frame->IsMain())
     {
-		//LogDebug("Handler: End of loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), ").");
-		//frame->ExecuteJavaScript("StopPageLoadingTimer();", "", 0);
+		// Calculate page loading time via Javascript
+		frame->ExecuteJavaScript(
+			"window.page_load_time_ = window.performance.now() - starting_time_;\
+			 var rect_update_time = time_spent_rects_updating + 0.0;\
+			 ConsolePrint('### Page load took '+Math.round(window.page_load_time_ / 1000)+'s / '\
+				+Math.round((window.page_load_time_)*1000)/1000+'ms. ###');\
+			 ConsolePrint('### Rect updates: '+Math.round(rect_update_time / 1000)+'s / '\
+				+Math.round(rect_update_time * 1000)/1000+'ms -- '+100*Math.round(rect_update_time/window.page_load_time_\
+				*1000)/1000 +'% of page load time.');", "", 0);
 
         // Set zoom level according to Tab's settings
         SetZoomLevel(browser, false);

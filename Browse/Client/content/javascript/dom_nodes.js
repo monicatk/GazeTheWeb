@@ -91,13 +91,18 @@ DOMNode.prototype.getUnalteredRects = function(update=true){
  * param: altNode - Use alternative node for retrieval of client rects (e.g. DOMLinks refering to images: use image node for rects)
  */
 DOMNode.prototype.updateRects = function(altNode){
+    var t0 = performance.now();
     if(typeof(this.node.getClientRects) !== "function")
     {
         console.log("Error: Could not update rects because of missing 'getClientRects' function in node!");
+        UpdateRectUpdateTimer(t0);
         return "Error!";
     }
     if(window.getComputedStyle(this.node, null).getPropertyValue("opacity") === 0)
+    {
+        UpdateRectUpdateTimer(t0);  
         return this.setRectsToZero();
+    }
 
     if(this.node.hidden_by !== undefined && this.node.hidden_by.size > 0)
     {
@@ -106,7 +111,10 @@ DOMNode.prototype.updateRects = function(altNode){
             var hiding_reason = this.node.hidden_by.get(hiding_parent);
             if (hiding_reason === "opacity" && 
                 window.getComputedStyle(hiding_parent, null).getPropertyValue(hiding_reason) === "0")
+                {
+                    UpdateRectUpdateTimer(t0);
                     return this.setRectsToZero();
+                }
         }
     }
 
@@ -117,8 +125,10 @@ DOMNode.prototype.updateRects = function(altNode){
         this.rects = adjustedRects;
 
         SendAttributeChangesToCEF("Rects", this);
+        UpdateRectUpdateTimer(t0);
         return true; // Rects changed and were updated
     }
+    UpdateRectUpdateTimer(t0);
     return false; // No update needed, no changes
 }
 

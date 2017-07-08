@@ -443,6 +443,8 @@ void RenderProcessHandler::OnContextCreated(
 
     if (frame->IsMain())
     {
+		frame->ExecuteJavaScript("window.starting_time_ = window.performance.now();", "", 0);
+
 		// Clear previous DOM nodes in current Tab
 		CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("OnContextCreated");
 		browser->SendProcessMessage(PID_BROWSER, msg);

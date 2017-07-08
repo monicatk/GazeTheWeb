@@ -389,6 +389,11 @@ function ComputeBoundingRect(parent, child)
 	return bbs;
 }
 
+var time_spent_rects_updating = 0.0;
+function UpdateRectUpdateTimer(t0)
+{
+    time_spent_rects_updating += (performance.now() - t0);
+}
 
 
 ConsolePrint("Successfully imported helpers.js!");
