@@ -350,6 +350,9 @@ function DOMOverflowElement(node)
 
     DOMNode.call(this, node, id, 3);
 
+    // Disable scrolling for divs which shouldn't be scrolled
+    this.hidden_overflow = window.getComputedStyle(node, null).getPropertyValue("overflow") === "hidden";
+
     this.scrollLeftMax = -1
     this.scrollTopMax = -1
     this.scrollLeft = -1

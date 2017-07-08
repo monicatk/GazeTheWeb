@@ -258,7 +258,8 @@ function AnalyzeNode(node)
 		if((node.tagName === "DIV" || node.tagName === "P") && rect.width > 0 && rect.height > 0)
 		{
 			var overflow = computedStyle.getPropertyValue("overflow");
-			if(overflow === "scroll" || overflow == "auto")
+			var valid_overflow = ["scroll", "auto", "hidden"];
+			if(valid_overflow.indexOf(overflow) !== -1)
 			{
 				CreateDOMOverflowElement(node);
 			}
