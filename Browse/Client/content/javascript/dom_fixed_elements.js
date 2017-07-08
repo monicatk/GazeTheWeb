@@ -51,8 +51,9 @@ FixedElement.prototype.getRects = function(){
 }
 
 FixedElement.prototype.updateRects = function(){
+    var cs = window.getComputedStyle(this.node, null);
     // Delete fixed element object, if position isn't fixed anymore
-    if(window.getComputedStyle(this.node, null).getPropertyValue("position") !== "fixed")
+    if(cs.getPropertyValue("position") !== "fixed" || cs.getPropertyValue("display") == "none")
     {
         RemoveFixedElement(this.node);
         return true;
@@ -117,16 +118,14 @@ FixedElement.prototype.updateRects = function(){
         (node) => { 
             if (node.nodeType === 1)
             {
+                var cs = window.getComputedStyle(node, null);
                 // Skip children if invisible
-                if(window.getComputedStyle(node, null).getPropertyValue("opacity") === 0)
+                if(cs.getPropertyValue("opacity") === 0)
                     return true;
                 // ... or overflow element, which would cover children anyway outside of rect
-                var overflowObj = GetCorrespondingDOMOverflow(node);
-                if(overflowObj !== undefined)
-                {
-                    overflow.updateRects(); // Update all children too
+                var hiding = ["hidden", "scroll", "auto"]
+                if(hiding.indexOf(cs.getPropertyValue("overflow")) !== -1)
                     return true;
-                }
                 return false;
             } 
             else 
