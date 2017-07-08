@@ -87,18 +87,19 @@ if(OS_LINUX)
     -Wno-missing-field-initializers # Don't warn about missing field initializers
     -Wno-unused-parameter           # Don't warn about unused parameters
     )
-	# Edit by Raphael Menges: Removed -Werror
+  # Edit by Raphael Menges: Removed -Werror
   list(APPEND CEF_C_COMPILER_FLAGS
     -std=c99                        # Use the C99 language standard
     )
   list(APPEND CEF_CXX_COMPILER_FLAGS
-    -fno-exceptions                 # Disable exceptions
+    # -fno-exceptions                 # Disable exceptions
     -fno-rtti                       # Disable real-time type information
     -fno-threadsafe-statics         # Don't generate thread-safe statics
     -fvisibility-inlines-hidden     # Give hidden visibility to inlined class member functions
     -std=gnu++11                    # Use the C++11 language standard including GNU extensions
     -Wsign-compare                  # Warn about mixed signed/unsigned type comparisons
     )
+  # Edit by Raphael Menges: Removed -fno-exceptions
   list(APPEND CEF_COMPILER_FLAGS_DEBUG
     -O0                             # Disable optimizations
     -g                              # Generate debug information

@@ -34,7 +34,7 @@ public:
 
 	// Constructor
 	DOMJavascriptCommunication(SendRenderMessage sendRenderMessage) :
-		_sendRenderMessage(sendRenderMessage) {};
+        _sendRenderMessage(sendRenderMessage) {}
 
 	// Sending message to renderer
 	bool SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg);
@@ -47,6 +47,18 @@ public:
 	// Member
 	SendRenderMessage _sendRenderMessage;
 
+private:
+
+    // Default constructor only for friends. Problem: Virtual classes have to call some
+    // constructor, although never instantiated on their own. Finally utilized classes like
+    // DOMTextInput are calling the "good" constructor with parameter. So below is never really used.
+    DOMJavascriptCommunication();
+
+    // This are the friends who have to access the default constructor
+    friend class DOMTextInputInteraction;
+    friend class DOMOverflowElementInteraction;
+    friend class DOMSelectFieldInteraction;
+
 };
 
 // Interaction with text input
@@ -55,7 +67,7 @@ class DOMTextInputInteraction : public virtual DOMJavascriptCommunication
 public:
 
 	// Constructor
-	DOMTextInputInteraction() {};
+    DOMTextInputInteraction() {}
 
 	// Send IPC message to JS in order to execute text input function
 	void InputText(std::string text, bool submit);
@@ -67,7 +79,7 @@ class DOMOverflowElementInteraction : public virtual DOMJavascriptCommunication
 public:
 
 	// Constructor
-	DOMOverflowElementInteraction() {};
+    DOMOverflowElementInteraction() {}
 
 	// TODO taking gaze, should take scrolling offset
 	// Send IPC message to JS in order to execute scrolling function
@@ -80,7 +92,7 @@ class DOMSelectFieldInteraction : public virtual DOMJavascriptCommunication
 public:
 
 	// Constructor
-	DOMSelectFieldInteraction() {};
+    DOMSelectFieldInteraction() {}
 
 	// Send IPC message to JS in order to execute JS function
 	void SetSelectionIndex(int idx);

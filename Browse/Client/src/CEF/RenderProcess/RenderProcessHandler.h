@@ -44,13 +44,13 @@ public:
         CefRefPtr<CefV8Context> context) OVERRIDE;
 
 	// Helper for automatic transformation between IPC messages and V8 values
-	CefRefPtr<CefV8Value> RenderProcessHandler::CefValueToCefV8Value(CefRefPtr<CefValue> val);
+    CefRefPtr<CefV8Value> CefValueToCefV8Value(CefRefPtr<CefValue> val);
 
 private:
 
     // Send logs to main process
     void IPCLog(CefRefPtr<CefBrowser> browser, std::string text, bool debugLog = false);
-	void IPCLogDebug(CefRefPtr<CefBrowser> browser, std::string text) { IPCLog(browser, text, true); };
+    void IPCLogDebug(CefRefPtr<CefBrowser> browser, std::string text) { IPCLog(browser, text, true); }
 
     // Message router instance
 	CefRefPtr<CefMessageRouterRendererSide> _msgRouter;
