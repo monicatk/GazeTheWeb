@@ -16,7 +16,8 @@ set(CLIENT_DEPLOYMENT OFF CACHE BOOL "Setup for Deployment.")
 if(OS_WINDOWS) # Windows
 
 	# OpenGaze
-	set(CLIENT_BUILD_OPEN_GAZE_PLUGIN ON CACHE BOOL "Build plugin for OpenGaze API.")
+	# TODO: GazePoint client uses MFC which results in a linker error, as MFC has to be linked before CRT but no idea how to
+	# set(CLIENT_BUILD_OPEN_GAZE_PLUGIN ON CACHE BOOL "Build plugin for OpenGaze API.")
 
 	# SMI iViewX
 	set(CLIENT_BUILD_SMI_IVIEWX_PLUGIN ON CACHE BOOL "Build plugin for SMI iViewX.")
