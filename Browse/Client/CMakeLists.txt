@@ -61,7 +61,8 @@ if(${CLIENT_BUILD_OPEN_GAZE_PLUGIN})
 		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
 		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
 		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
-		${EYETRACKER_PLUGIN_DIRECTORY}/OpenGaze/OpenGazeImpl.cpp)
+		${EYETRACKER_PLUGIN_DIRECTORY}/OpenGaze/OpenGazeImpl.cpp
+		${EYETRACKER_PLUGIN_DIRECTORY}/OpenGaze/include/GPClient.cpp)
 
 	# Tell user about it
 	message(STATUS "Plugin for OpenGaze API will be built.")
