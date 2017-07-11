@@ -60,6 +60,9 @@ DOMTextInput.prototype.setTextInput = function(text, submit){
 
 
 DOMOverflowElement.prototype.scroll = function(gazeX, gazeY, fixedIds){
+	if(this.hidden_overflow)
+		return [0,0];
+
 	// TODO: Refactore this method?
 	if(fixedIds.length > 0 && fixedIds.indexOf(this.getFixedId()) === -1)
 		return;

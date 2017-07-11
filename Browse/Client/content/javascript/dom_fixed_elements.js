@@ -5,154 +5,28 @@
 
 ConsolePrint("Starting to import dom_fixed_elements.js ...");
 
-
-// new version of window.fixed_elements
 window.domFixedElements = [];
-debugFixedNodes = []; // DEBUG
+/**
+ * REFACTORING TODOs
+ *  - Automatically add FixedElement to list of fixed elements after it's creation
+ *  - On creation: Check if node already belongs to an fixed element object? OR Use CreateFixedElement function
+ */
 
-/** Constructor */
+
 function FixedElement(node)
 {
     /* Code executed on constructor call ... */
     // Add FixedElement Object to list and determine its id
-    if(GetFixedElementByNode(node) === undefined)
-    {
-        window.domFixedElements.push(this);
-        this.id = window.domFixedElements.indexOf(this);
-        // console.log("Creating FixedElement with id="+this.id);
-    }
-    else
-    {
-        console.log("Node already marked as fixed element! Aborting object creation!");
-        debugFixedNodes.push(node); // DEBUG
-        return;
-    }
+    if(GetFixedElementByNode(node) !== undefined || typeof(node.setAttribute) !== "function")
+        return false;
 
+    window.domFixedElements.push(this);
+    this.id = window.domFixedElements.indexOf(this);
 
     /* Attributes */
     this.node = node;
     this.rects = [];
-
-
-
-    /**
-     * REFACTORING TODOs
-     *  - Automatically add FixedElement to list of fixed elements after it's creation
-     *  - On creation: Check if node already belongs to an fixed element object? OR Use CreateFixedElement function
-     */
-
-    /* Methods */
-    // Refactoring: Added for DOMNode objects
-    this.getId = () => { return this.id; }
-
-    this.getRects = () => { return this.rects; }
-
-    this.updateRects = function()
-    {
-        // Delete fixed element object, if position isn't fixed anymore
-        if(window.getComputedStyle(this.node, null).getPropertyValue("position") !== "fixed")
-        {
-            RemoveFixedElement(this.node);
-            return true;
-        }
-
-        var updatedRectsData = [];
-
-        // NOTE: Fix for GMail. There exist DIVs without any children, whose rects cover the whole page and they are fixed
-        // although this does not seem to influence anything
-        if((this.node.tagName === "DIV" && this.node.children.length === 0)
-            || ( window.getComputedStyle(this.node, null).getPropertyValue("display") === "none")) // 9gag inactivity overlay
-        {
-            var previous_rects = this.rects;
-            this.rects = [[0,0,0,0]];
-            return !EqualClientRectsData(this.rects, previous_rects);
-        }
-
-        // Compute fitting bounding box for fixed node and all its children
-        // Starting with ClientRects of this parent node
-        var domRectList = [];
-        for(var i = 0, rects = this.node.getClientRects(); i < rects.length; i ++)
-        {
-            domRectList.push(rects[i]);
-        }
-        
-        
-        // Check if child is already contained in one of the DOMRects
-        ForEveryChild(
-            this.node, 
-            // Main function
-            (child) => {
-                var domObj = GetCorrespondingDOMObject(child);
-                if(domObj !== undefined)
-                    domObj.updateRects();
-                
-
-                if(child.nodeType === 1 && 
-                    window.getComputedStyle(child, null).getPropertyValue("opacity") !== "0" &&
-                    window.getComputedStyle(child, null).getPropertyValue("visibility") !== "hidden")
-                {
-                    var cr = child.getClientRects();
-                    for(var i = 0, n = cr.length; i < n; i++)
-                    {
-                        var rect = cr[i];
-                        var contained = false;
-
-                        // Iterate over all current bounding rects
-                        domRectList.forEach((container) => {
-                                if(!contained) // Stop checking if rect is contained, when already contained in another rect
-                                    contained = IsRectContained(rect, container);
-                            }
-                        );
-
-                        // Another rect must be added if current rect isn't contained in any 
-                        if(!contained)
-                            domRectList.push(rect);
-
-                    } // rects.forEach
-                } // if nodeType === 1
-            },
-            // Abort function, executed after main function
-            (node) => { 
-                if (node.nodeType === 1)
-                {
-                    // Skip children if invisible
-                    if(window.getComputedStyle(node, null).getPropertyValue("opacity") === 0)
-                        return true;
-                    // ... or overflow element, which would cover children anyway outside of rect
-                    var overflowObj = GetCorrespondingDOMOverflow(node);
-                    if(overflowObj !== undefined)
-                    {
-                        overflow.updateRects(); // Update all children too
-                        return true;
-                    }
-                    return false;
-                } 
-                else 
-                    return true;
-            }
-        ); // ForEveryChild
-
-        // Convert DOMRects to [t,l,b,r] float lists and adjust coordinates if zoomed
-        domRectList.forEach((domRect) => { 
-                updatedRectsData.push(AdjustRectToZoom(domRect));
-            }
-        );
-             
-        // Check if Rect data changed, if yes, inform CEF about changes
-        var changed = !EqualClientRectsData(this.rects, updatedRectsData);
-
-        // Save updated rect data in FixedElement objects attribute
-        this.rects = updatedRectsData;
-
-        if(changed)
-            // Inform CEF that fixed element has been updated
-            ConsolePrint("#fixElem#add#"+this.id+"#");
-
-        return changed;
-    }
-
-  
-
+    
     this.node.setAttribute("fixedId", this.id);
 
     // Set childFixedId for 1st generation of child nodes, rest will be done by MutationObserver
@@ -166,6 +40,116 @@ function FixedElement(node)
     
     // Compute fixed subtree's rects and inform CEF
     this.updateRects();
+}
+
+FixedElement.prototype.getId = function(){
+    return this.id;
+}
+
+FixedElement.prototype.getRects = function(){
+    return this.rects;
+}
+
+FixedElement.prototype.updateRects = function(){
+    var cs = window.getComputedStyle(this.node, null);
+    // Delete fixed element object, if position isn't fixed anymore
+    if(cs.getPropertyValue("position") !== "fixed" || cs.getPropertyValue("display") == "none")
+    {
+        RemoveFixedElement(this.node);
+        return true;
+    }
+
+    var updatedRectsData = [];
+
+    // NOTE: Fix for GMail. There exist DIVs without any children, whose rects cover the whole page and they are fixed
+    // although this does not seem to influence anything
+    if((this.node.tagName === "DIV" && this.node.children.length === 0)
+        || ( window.getComputedStyle(this.node, null).getPropertyValue("display") === "none")) // 9gag inactivity overlay
+    {
+        var previous_rects = this.rects;
+        this.rects = [[0,0,0,0]];
+        return !EqualClientRectsData(this.rects, previous_rects);
+    }
+
+    // Compute fitting bounding box for fixed node and all its children
+    // Starting with ClientRects of this parent node
+    var domRectList = [];
+    for(var i = 0, rects = this.node.getClientRects(); i < rects.length; i ++)
+    {
+        domRectList.push(rects[i]);
+    }
+    
+    
+    // Check if child is already contained in one of the DOMRects
+    ForEveryChild(
+        this.node, 
+        // Main function
+        (child) => {
+            var domObj = GetCorrespondingDOMObject(child);
+            if(domObj !== undefined)
+                domObj.updateRects();
+            
+
+            if(child.nodeType === 1 && 
+                window.getComputedStyle(child, null).getPropertyValue("opacity") !== "0" &&
+                window.getComputedStyle(child, null).getPropertyValue("visibility") !== "hidden")
+            {
+                var cr = child.getClientRects();
+                for(var i = 0, n = cr.length; i < n; i++)
+                {
+                    var rect = cr[i];
+                    var contained = false;
+
+                    // Iterate over all current bounding rects
+                    domRectList.forEach((container) => {
+                            if(!contained) // Stop checking if rect is contained, when already contained in another rect
+                                contained = IsRectContained(rect, container);
+                        }
+                    );
+
+                    // Another rect must be added if current rect isn't contained in any 
+                    if(!contained)
+                        domRectList.push(rect);
+
+                } // rects.forEach
+            } // if nodeType === 1
+        },
+        // Abort function, executed after main function
+        (node) => { 
+            if (node.nodeType === 1)
+            {
+                var cs = window.getComputedStyle(node, null);
+                // Skip children if invisible
+                if(cs.getPropertyValue("opacity") === 0)
+                    return true;
+                // ... or overflow element, which would cover children anyway outside of rect
+                var hiding = ["hidden", "scroll", "auto"]
+                if(hiding.indexOf(cs.getPropertyValue("overflow")) !== -1)
+                    return true;
+                return false;
+            } 
+            else 
+                return true;
+        }
+    ); // ForEveryChild
+
+    // Convert DOMRects to [t,l,b,r] float lists and adjust coordinates if zoomed
+    domRectList.forEach((domRect) => { 
+            updatedRectsData.push(AdjustRectToZoom(domRect));
+        }
+    );
+            
+    // Check if Rect data changed, if yes, inform CEF about changes
+    var changed = !EqualClientRectsData(this.rects, updatedRectsData);
+
+    // Save updated rect data in FixedElement objects attribute
+    this.rects = updatedRectsData;
+
+    if(changed)
+        // Inform CEF that fixed element has been updated
+        ConsolePrint("#fixElem#add#"+this.id+"#");
+
+    return changed;
 }
 
 // TODO: Get rid of this function and only use object constructor?

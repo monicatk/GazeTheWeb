@@ -10,16 +10,23 @@
 #include <memory>
 #include <deque>
 
+// Coordinate systems for sample data coordinates
+enum class SampleDataCoordinateSystem
+{
+	SCREEN_PIXELS, SCREEN_RELATIVE
+};
+
 // Struct of sample data
 struct SampleData
 {
 	// Constructor
-	SampleData(double x, double y, std::chrono::milliseconds timestamp) : x(x), y(y), timestamp(timestamp)
+	SampleData(double x, double y, SampleDataCoordinateSystem system, std::chrono::milliseconds timestamp) : x(x), y(y), timestamp(timestamp)
 	{};
 
 	// Fields
 	double x;
 	double y;
+	SampleDataCoordinateSystem system;
 	std::chrono::milliseconds timestamp;
 };
 

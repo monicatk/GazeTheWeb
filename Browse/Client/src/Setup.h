@@ -19,6 +19,7 @@ namespace setup
 	static const int INITIAL_WINDOW_HEIGHT = 720;
 
 	// Control TODO: move connect bools to config file
+	static const bool CONNECT_OPEN_GAZE = false;
 	static const bool CONNECT_SMI_IVIEWX = false;
 	static const bool CONNECT_VI_MYGAZE = false;
 	static const bool CONNECT_TOBII_EYEX = true;
@@ -34,8 +35,8 @@ namespace setup
 	static const float EYEINPUT_DISTORT_GAZE_BIAS_Y = 32.f; // pixels
 
 	// Debugging
-	static const bool LOG_DEBUG_MESSAGES = false;
-	static const bool DRAW_DEBUG_OVERLAY = false;
+	static const bool LOG_DEBUG_MESSAGES = true;
+	static const bool DRAW_DEBUG_OVERLAY = true;
 
 	// Experiments
 	static const std::string LAB_STREAM_OUTPUT_NAME = "BrowserOutputStream";

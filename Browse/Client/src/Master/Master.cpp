@@ -914,6 +914,9 @@ void Master::PushEyetrackerStatusThreadJob::Execute()
 	case EyeTrackerStatus::CONNECTED:
 		switch (_device)
 		{
+		case EyeTrackerDevice::OPEN_GAZE:
+			_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected_open_gaze", MasterNotificationInterface::Type::SUCCESS, false);
+			break;
 		case EyeTrackerDevice::SMI_REDN:
 			_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected_smi_redn", MasterNotificationInterface::Type::SUCCESS, false);
 			break;

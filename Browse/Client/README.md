@@ -72,7 +72,12 @@ __submodules__:
 * spdlog: https://github.com/gabime/spdlog
 * text-csv: https://github.com/roman-kashitsyn/text-csv
 
+__plugins__:
+
 In order to build the eye tracker plugins, one must provide the pathes to the locally installed SDKs. There are following plugins available in the __plugins__ folder:
+
+plugins/Eyetracker/OpenGaze:
+* Connection to the OpenGaze API designed by GazePoint (https://www.gazept.com). No SDK necessary but a Visual Studio installation including MFC.
 
 plugins/Eyetracker/SMIiViewX:
 * Connection to the iViewX SDK, copyright SMI GmbH (http://www.smivision.com)
