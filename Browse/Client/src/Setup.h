@@ -35,8 +35,8 @@ namespace setup
 	static const float EYEINPUT_DISTORT_GAZE_BIAS_Y = 32.f; // pixels
 
 	// Debugging
-	static const bool LOG_DEBUG_MESSAGES = false;
-	static const bool DRAW_DEBUG_OVERLAY = false;
+	static const bool LOG_DEBUG_MESSAGES = true;
+	static const bool DRAW_DEBUG_OVERLAY = true;
 
 	// Experiments
 	static const std::string LAB_STREAM_OUTPUT_NAME = "BrowserOutputStream";

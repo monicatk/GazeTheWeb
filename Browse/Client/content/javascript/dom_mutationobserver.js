@@ -6,69 +6,15 @@ ConsolePrint("Starting to import dom_mutationobserver.js ...");
 
 window.appendedSubtreeRoots = new Set();
 
-// TODO: Deprecated?
-function CompareArrays(array1, array2)
-{
-	var n = array1.length;
-
-	if(n != array2.length)
-		return false;
-
-	for(var i = 0; i < n; i++)
-	{
-		if(array1[i] != array2[i])
-			return false;
-	}
-
-	return true;
-}
-
-// TESTING PURPOSE
-document.onclick = function(){
-	// ConsolePrint("### document.onclick() triggered! Calling UpdateDOMRects! ###");
-	// UpdateDOMRects();
-	
-}
-// TESTING TWITTER, no updates through clicking right now
-// document.addEventListener("click", function(e){
-// 	ConsolePrint("JS Debug: Realized that click event was fired! Target is listed in DevTools Console.");
-// 	console.log("Clicked target: "+e.target);
-// 	UpdateDOMRects();
-// });
-
 // Trigger DOM data update on changing document loading status
 document.onreadystatechange = function()
 {
-	// ConsolePrint("### DOCUMENT STATECHANGE! ###");
-
-	// if(document.readyState == 'loading')
-	// {
-	// 	// ConsolePrint('### document.readyState == loading ###'); // Never triggered
-	// }
-
-	if(document.readyState == 'interactive')
+	if(document.readyState == 'interactive' || document.readyState == 'complete')
 	{
 		// GMail fix
 		ForEveryChild(document.documentElement, AnalyzeNode);
 
 		UpdateDOMRects();
-
-		// GMail
-		// ForEveryChild(document.documentElement, AnalyzeNode);
-	}
-
-	if(document.readyState == 'complete')
-	{
-		// GMail fix
-		ForEveryChild(document.documentElement, AnalyzeNode);
-
-		UpdateDOMRects();
-
-		//ConsolePrint('<----- Page fully loaded. -------|');
-
-		// GMail
-		// ForEveryChild(document.documentElement, AnalyzeNode);
-		
 	}
 }
 
@@ -80,70 +26,76 @@ window.onresize = function()
 	ConsolePrint("Javascript detected window resize, update of fixed element Rects.");
 }
 
-// Refactored!
+
+// DEBUG
+window.te = []
+
 // Update rects if CSS transition took place (TODO: Needed if parent's rects didn't change?)
 document.addEventListener('transitionend', function(event){
 	// Tree, whose children have to be check for rect updates
 	var root = event.target;
 
+	// TODO: Hiding reason should be shared with children, altough
 	var fixedElem = GetFixedElementByNode(root);
 	if(fixedElem !== undefined)
 	{
 		// If root is fixed element, subtree will be updated by simply calling updateRects
 		fixedElem.updateRects();
+		return;
 	}
-	else
-	{
-		// Update rects of given root node
-		var obj = GetCorrespondingDOMObject(root);
-		if(obj !== undefined)
-		{
-			obj.updateRects();
-		}
-		// Update rects of whole subtree beneath root node
-		ForEveryChild(root, 
-			(child) => {
-				var fixedElem = GetFixedElementByNode(child);
-				if(fixedElem === undefined)
+
+	// DOMObjects might not be visible if any parent has opacity == 0, so store information about
+	// possible hidding parents as node attributes, check these in DOMNode.updateRects
+	var hiding_reason = undefined;
+	var cs = window.getComputedStyle(root, null);
+	if(cs.getPropertyValue("opacity") === "0")
+		hiding_reason = "opacity";
+
+	// Update rects of given root node
+	var obj = GetCorrespondingDOMObject(root);
+	if(obj !== undefined)
+		obj.updateRects();
+
+	// Update rects of whole subtree beneath root node
+	ForEveryChild(root, 
+		(child) => {
+			if(typeof(child.getAttribute) !== "function")
+				return;
+
+			if(hiding_reason !== undefined && child.hidden_by === undefined)
+				child.hidden_by = new Map();
+
+			if(hiding_reason === undefined && child.hidden_by !== undefined && child.hidden_by.has(root))
+				child.hidden_by.delete(root);
+
+			if(hiding_reason !== undefined)
+				child.hidden_by.set(root, hiding_reason);
+
+
+			var fixedElem = GetFixedElementByNode(child);
+			if(fixedElem === undefined)
+			{
+				var obj = GetCorrespondingDOMObject(child);
+				if (obj !== undefined)
 				{
-					var obj = GetCorrespondingDOMObject(child);
-					if (obj !== undefined)
-					{
-						obj.updateRects();
-					}
+					obj.updateRects();
 				}
-				else
-				{
-					fixedElem.updateRects();
-				}
-			},
-			(child) => {
-				// Abort rect update of childs subtree, if child is fixed element
-				// With child as fixed element, rect updates for subtree will be triggered anyway
-				return (GetFixedElementByNode(child) !== undefined);
 			}
-		); // ForEveryChild end
-	}
+			else
+				fixedElem.updateRects();
+		},
+		(child) => {
+			// Abort rect update of childs subtree, if child is fixed element
+			// With child as fixed element, rect updates for subtree will be triggered anyway
+			return (GetFixedElementByNode(child) !== undefined);
+		}
+	); // ForEveryChild end
 
 }, false);
 
 
 
 var docFrags = [];
-
-var origCreateElement = Document.prototype.createElement;
-Document.prototype.createElement = function(tag)
-{
-	if(arguments[0] === "iframe" || arguments[0] === "IFRAME") 
-	{
-		// ConsolePrint("<iframe> created.");
-	}
-	// ConsolePrint("Creating element with tagName="+tag);
-
-	var elem = origCreateElement.apply(this, arguments);
-	// if(arguments[0] === "iframe") elem.style.backgroundColor = "#0000ff";
-	return elem ;
-}
 
 
 /* Modify appendChild in order to get notifications when this function is called */
@@ -167,12 +119,7 @@ Element.prototype.appendChild = function(child){
 			{
 				// Mark all 1st generation child nodes of DocumentFragments as subtree roots
 				for(var i = 0, n = subtreeRoot.childNodes.length; i < n; i++)
-				{
 					window.appendedSubtreeRoots.add(subtreeRoot.childNodes[i]);
-					// ForEveryChild(subtreeRoot.childNodes[i], function(childNode){
-						// if(childNode.style) childNode.style.backgroundColor = '#0000ff';
-					// });	
-				}
 			}
 			else 
 			{	
@@ -180,14 +127,9 @@ Element.prototype.appendChild = function(child){
 				window.appendedSubtreeRoots.add(subtreeRoot);	
 
 				// Remove children of this subtree root from subtree root set --> prevent double-checking of branches
-				ForEveryChild(subtreeRoot, function(childNode){
-						// if(childNode.nodeType == 1 && childNode.style) childNode.style.backgroundColor = '#ffff00';
-						window.appendedSubtreeRoots.delete(childNode);
-					}
-				);
-			} // else
+				ForEveryChild(subtreeRoot, (child) => {window.appendedSubtreeRoots.delete(child); });
+			} 
 		}
-
     }  
 
 	// DocumentFragment as parent: children disappear when fragment is appended to DOM tree
@@ -316,7 +258,8 @@ function AnalyzeNode(node)
 		if((node.tagName === "DIV" || node.tagName === "P") && rect.width > 0 && rect.height > 0)
 		{
 			var overflow = computedStyle.getPropertyValue("overflow");
-			if(overflow === "scroll" || overflow == "auto")
+			var valid_overflow = ["scroll", "auto", "hidden"];
+			if(valid_overflow.indexOf(overflow) !== -1)
 			{
 				CreateDOMOverflowElement(node);
 			}
@@ -477,7 +420,7 @@ function MutationObserverInit()
 
 							
 							// ### CREATION AND REMOVAL OF FIXED ELEMENTS ###
-		  					if(attr == 'style' ||  (document.readyState != 'loading' && attr == 'class') )
+		  					if(attr == 'style') // ||  (document.readyState != 'loading' && attr == 'class') )
 		  					{
 								if(window.getComputedStyle(node, null).getPropertyValue('position') === 'fixed')
 								{
@@ -490,6 +433,17 @@ function MutationObserverInit()
 									// Checks if node corresponds to fixedObj and removes it, when true
 									RemoveFixedElement(node);
 								}
+
+								var curr_display_none = (node.style.display === "none");
+								var old_display_none = (mutation.oldValue !== null && typeof(mutation.oldValue.contains)  === "function") ? 
+									mutation.oldValue.contains("display: none") : false;
+									
+								if((curr_display_none && !old_display_none) || (!curr_display_none && old_display_none))
+								{
+									console.log("style.display changed: curr="+curr_display_none+", old="+old_display_none);
+									ForEveryChild(node, (c) => { UpdateNodesRect(c); })
+								}
+
 							}
 
 						
