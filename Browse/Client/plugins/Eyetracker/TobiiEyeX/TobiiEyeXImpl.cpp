@@ -61,6 +61,7 @@ void OnGazeDataEvent(TX_HANDLE hGazeDataBehavior)
 			SampleData(
 				eventParams.X, // x
 				eventParams.Y, // y
+				SampleDataCoordinateSystem::SCREEN_PIXELS,
 				duration_cast<milliseconds>(
 					system_clock::now().time_since_epoch() // timestamp
 					)

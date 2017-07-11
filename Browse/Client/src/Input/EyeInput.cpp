@@ -75,6 +75,13 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
 			}
 		};
 
+		// Try to load OpenGaze API plugin
+		if (!_connected && setup::CONNECT_OPEN_GAZE)
+		{
+			device = EyeTrackerDevice::OPEN_GAZE;
+			ConnectEyeTracker("OpenGazePlugin");
+		}
+
 		// Try to load SMI iViewX plugin
 		if (!_connected && setup::CONNECT_SMI_IVIEWX)
 		{
@@ -179,8 +186,24 @@ std::shared_ptr<Input> EyeInput::Update(
 		// Prepare queue to fill
 		SampleQueue spSamples = SampleQueue(new std::deque<SampleData>);
 
-		// Fetch k or less valid samples
+		// Fetch samples
 		_procFetchGazeSamples(spSamples); // shared pointered vector is filled by fetch procedure
+
+		/*
+		// Expecting in screen pixel space
+		for (auto& sample : *spSamples)
+		{
+			switch (sample.system)
+			{
+			case SampleDataCoordinateSystem::SCREEN_PIXELS:
+				// everything ok
+				break;
+			case SampleDataCoordinateSystem::SCREEN_RELATIVE:
+				// TODO: this is hacky for multiple monitors... on which is the eye trackers / window displayed?
+				break;
+			}
+		}
+		*/
 
 		// Convert parameters to double (use same values for all samples,
 		double windowXDouble = (double)windowX;

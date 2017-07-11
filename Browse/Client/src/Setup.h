@@ -19,6 +19,7 @@ namespace setup
 	static const int INITIAL_WINDOW_HEIGHT = 720;
 
 	// Control TODO: move connect bools to config file
+	static const bool CONNECT_OPEN_GAZE = true;
 	static const bool CONNECT_SMI_IVIEWX = true;
 	static const bool CONNECT_VI_MYGAZE = true;
 	static const bool CONNECT_TOBII_EYEX = true;

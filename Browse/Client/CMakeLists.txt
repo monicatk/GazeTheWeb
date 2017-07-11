@@ -15,6 +15,9 @@ set(CLIENT_DEPLOYMENT OFF CACHE BOOL "Setup for Deployment.")
 
 if(OS_WINDOWS) # Windows
 
+	# OpenGaze
+	set(CLIENT_BUILD_OPEN_GAZE_PLUGIN ON CACHE BOOL "Build plugin for OpenGaze API.")
+
 	# SMI iViewX
 	set(CLIENT_BUILD_SMI_IVIEWX_PLUGIN ON CACHE BOOL "Build plugin for SMI iViewX.")
 	set(CLIENT_SMI_IVIEWX_SDK_PATH "C:/Program Files (x86)/SMI/iView X SDK" CACHE PATH "Path to SMI iViewX SDK.")
@@ -46,6 +49,24 @@ endif()
 ### EYETRACKER PLUGINS #########################################################
 
 set(EYETRACKER_PLUGIN_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/plugins/Eyetracker")
+
+# Plugin for OpenGaze API
+if(${CLIENT_BUILD_OPEN_GAZE_PLUGIN})
+
+	# Plugin project
+	add_library(
+		OpenGazePlugin
+		MODULE
+		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
+		${EYETRACKER_PLUGIN_DIRECTORY}/OpenGaze/OpenGazeImpl.cpp)
+
+	# Tell user about it
+	message(STATUS "Plugin for OpenGaze API will be built.")
+	
+endif()
 
 # Plugin for SMI iViewX
 if(${CLIENT_BUILD_SMI_IVIEWX_PLUGIN})
