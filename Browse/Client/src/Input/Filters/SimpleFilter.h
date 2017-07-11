@@ -13,10 +13,7 @@ class SimpleFilter : public Filter
 {
 public:
 
-	// Constructor
-	SimpleFilter();
-
-	// Update. Takes samples in window pixel coordinates
+	// Update. Takes samples in window pixel coordinates. Samples are moved out provided variable
 	virtual void Update(SampleQueue spSamples) override;
 
 	// Various getters
@@ -24,15 +21,14 @@ public:
 	virtual double GetFilteredGazeY() const override;
 	virtual double GetRawGazeX() const override;
 	virtual double GetRawGazeY() const override;
-	virtual bool IsSaccade() const override;
+	virtual float GetFixationDuration() const override;
 
 private:
 
 	// Testing
 	double _gazeX = -1; // filtered
 	double _gazeY = -1; // filtered
-	bool _saccade = false;
-	SampleQueue _spSamples;
+	float _fixationDuration = 0;
 };
 
 #endif SIMPLEFILTER_H_

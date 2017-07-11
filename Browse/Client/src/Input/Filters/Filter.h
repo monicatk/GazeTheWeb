@@ -13,7 +13,13 @@ class Filter
 {
 public:
 
-	// Update. Takes samples in window pixel coordinates
+	// Constructor
+	Filter();
+
+	// Destructor
+	virtual ~Filter() = 0;
+
+	// Update. Takes samples in window pixel coordinates. Samples are moved out provided variable
 	virtual void Update(SampleQueue spSamples);
 
 	// Various abstract getters
@@ -21,13 +27,18 @@ public:
 	virtual double GetFilteredGazeY() const = 0;
 	virtual double GetRawGazeX() const = 0;
 	virtual double GetRawGazeY() const = 0;
-	virtual bool IsSaccade() const = 0;
+	virtual float GetFixationDuration() const = 0;
 
 	// Getter for age of last used sample
 	float GetAge() const;
 
 	// Getter which returns whether timestamp was actively set at least once (aka at least one sample received)
 	bool IsTimestampSetOnce() const;
+
+protected:
+
+	// Members
+	SampleQueue _spSamples;
 
 private:
 

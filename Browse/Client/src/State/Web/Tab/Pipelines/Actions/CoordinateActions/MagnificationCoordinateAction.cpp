@@ -40,34 +40,30 @@ bool MagnificationCoordinateAction::Update(float tpf, const std::shared_ptr<cons
 	float zoom = _magnified ? MAGNIFICATION : 1.f;
 	glm::vec2 relativeMagnificationCenter = _relativeMagnificationCenter;
 
-	// Update fixation check TODO: replace this with access to fixation stack or so
-	if (!spInput->gazeUponGUI && !spInput->gazeEmulated)
+	// If magnified, decrease secondFixationWaitTime
+	if (_magnified && secondFixationWaitTime > 0)
 	{
-		if (!spInput->saccade)
-		{
-			_fixationTime -= tpf;
-		}
-		else
-		{
-			// _fixationTime += tpf;
-			_fixationTime = FIXATION_DURATION;
-		}
+		secondFixationWaitTime -= tpf;
+		glm::max(secondFixationWaitTime, 0.f);
 	}
 
 	// Decide whether zooming is finished
 	bool finished = false;
-	if (!spInput->gazeUponGUI && (spInput->instantInteraction || _fixationTime < 0.f)) // user demands on instant interaction or fixates on the screen
+	if (!spInput->gazeUponGUI && (spInput->instantInteraction || spInput->fixationDuration >= FIXATION_DURATION)) // user demands on instant interaction or fixates on the screen
 	{
 		// Check for magnification
 		if (_magnified) // already magnified, so finish this action
 		{
-			// Set output
-			glm::vec2 coordinate = relativeGazeCoordinate;
-			pageCoordinate(zoom, relativeMagnificationCenter, relativeCenterOffset, coordinate); // transform gaze relative to WebView to page coordinates
-			SetOutputValue("coordinate", coordinate); // into pixel space of CEF
-			
-			// Finish this action
-			finished = true;
+			if (secondFixationWaitTime <= 0) // only proceed if wait time is over. This should avoid instant selection after magnification, as fixation will probably continue for some milliseconds
+			{
+				// Set output
+				glm::vec2 coordinate = relativeGazeCoordinate;
+				pageCoordinate(zoom, relativeMagnificationCenter, relativeCenterOffset, coordinate); // transform gaze relative to WebView to page coordinates
+				SetOutputValue("coordinate", coordinate); // into pixel space of CEF
+
+				// Finish this action
+				finished = true;
+			}
 		}
 		else // not yet magnified, do it now
 		{
@@ -77,9 +73,6 @@ bool MagnificationCoordinateAction::Update(float tpf, const std::shared_ptr<cons
 			// Remember magnification
 			_magnified = true;
 		}
-
-		// Reset fixation time
-		_fixationTime = FIXATION_DURATION;
 	}
 
 	// Decrement dimming

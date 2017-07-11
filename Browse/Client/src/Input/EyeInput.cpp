@@ -340,10 +340,7 @@ std::shared_ptr<Input> EyeInput::Update(
 		gazeEmulated, // gazeEmulated,
 		false, // gazeUponGUI,
 		false, // instantInteraction,
-		_filter.IsSaccade()); // saccade
-
-	// TODO TESTING
-	// LogInfo(_filter.GetAge());
+		_filter.GetFixationDuration()); // fixationDuration
 
 	// Return whether gaze coordinates comes from eye tracker
 	return spInput;

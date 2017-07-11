@@ -7,42 +7,25 @@
 #include "src/Utils/Helper.h"
 #include "src/Setup.h"
 
-SimpleFilter::SimpleFilter() : _spSamples(SampleQueue(new std::deque<SampleData>))
-{
-	// Nothing to do
-}
-
 void SimpleFilter::Update(SampleQueue spSamples)
 {
-	// Super call
+	// Super call which moves samples to member
 	Filter::Update(spSamples);
 
-	// Move samples over to member
-	_spSamples->insert(_spSamples->end(),
-		std::make_move_iterator(spSamples->begin()),
-		std::make_move_iterator(spSamples->end()));
-
-	// Delete beginning of queue to match maximum allowed queue length
-	int size = (int)_spSamples->size(); // sample queue size
-	int overlap = size - 100; // TODO: non hardcoded length
-	for (int i = 0; i < overlap; i++)
-	{
-		_spSamples->pop_front();
-	}
-	size = (int)_spSamples->size(); // update sample queue size
-
-	// Go over samples and filter
+	// Go over samples and smooth
 	double filteredGazeX = 0;
 	double filteredGazeY = 0;
 	double sumX = 0;
 	double sumY = 0;
 	int filterCount = 0;
+	int oldestUsedIndex = -1;
+	int size = (int)_spSamples->size();
 	for(int i = size - 1; i >= 0; i--) // newest to oldest means reverse order in queue
 	{
 		// Get sample
 		const auto& rGaze = _spSamples->at(i);
 
-		// Check whether new sample is withing same fixation
+		// Check whether sample is within same fixation
 		if (filterCount > 0)
 		{
 			// Calculate filtered gaze
@@ -55,7 +38,7 @@ void SimpleFilter::Update(SampleQueue spSamples)
 				glm::vec2(rGaze.x, rGaze.y))
 						> setup::FILTER_GAZE_FIXATION_PIXEL_RADIUS)
 			{
-				break;
+				break; // distance too big, break smoothing
 			}
 		}
 
@@ -65,6 +48,9 @@ void SimpleFilter::Update(SampleQueue spSamples)
 
 		// Increase count of filtered count
 		filterCount++;
+
+		// Update index of oldest sample point considered as belonging to this fixation
+		oldestUsedIndex = i;
 	}
 
 	// Update member if samples where filtered
@@ -79,8 +65,13 @@ void SimpleFilter::Update(SampleQueue spSamples)
 		_gazeY = filteredGazeY;
 	}
 
-	// Remember about saccade
-	_saccade = filterCount <= 1;
+	// Update fixation duration
+	float fixationDuration = 0;
+	if (oldestUsedIndex >= 0)
+	{
+		fixationDuration = (float)((double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch() - _spSamples->at(oldestUsedIndex).timestamp).count() / 1000.0);
+	}
+	_fixationDuration = fixationDuration;
 }
 
 double SimpleFilter::GetFilteredGazeX() const
@@ -117,7 +108,7 @@ double SimpleFilter::GetRawGazeY() const
 	}
 }
 
-bool SimpleFilter::IsSaccade() const
+float SimpleFilter::GetFixationDuration() const
 {
-	return _saccade;
+	return _fixationDuration;
 }

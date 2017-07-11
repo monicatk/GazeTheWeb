@@ -33,6 +33,7 @@ namespace setup
 	static const bool EYEINPUT_DISTORT_GAZE = false;
 	static const float EYEINPUT_DISTORT_GAZE_BIAS_X = 64.f; // pixels
 	static const float EYEINPUT_DISTORT_GAZE_BIAS_Y = 32.f; // pixels
+	static const int FILTER_MEMORY_SIZE = 1000; // how many samples are kept in memory of the filters
 
 	// Debugging
 	static const bool LOG_DEBUG_MESSAGES = true;

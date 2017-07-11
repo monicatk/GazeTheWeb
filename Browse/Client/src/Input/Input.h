@@ -22,7 +22,7 @@ public:
 		bool gazeEmulated,
 		bool gazeUponGUI,
 		bool instantInteraction,
-		bool saccade) : 
+		float fixationDuration) :
 	gazeX(gazeX),
 	gazeY(gazeY),
 	rawGazeX(rawGazeX),
@@ -31,7 +31,7 @@ public:
 	gazeEmulated(gazeEmulated),
 	gazeUponGUI(gazeUponGUI),
 	instantInteraction(instantInteraction),
-	saccade(saccade) {}
+	fixationDuration(fixationDuration) {}
 
 	// Fields
     float gazeX;
@@ -42,7 +42,7 @@ public:
 	bool gazeEmulated;
     bool gazeUponGUI;
 	bool instantInteraction;
-	bool saccade; // indicator whether current gaze is classified as part of a saccade
+	float fixationDuration; // duration of current fixation (zero if currently saccade happening)
 };
 
 class TabInput
@@ -66,7 +66,7 @@ public:
 		gazeEmulated(spInput->gazeEmulated),
 		gazeUponGUI(spInput->gazeUponGUI),
 		instantInteraction(spInput->instantInteraction),
-		saccade(spInput->saccade),
+		fixationDuration(spInput->fixationDuration),
 
 		// TabInput fields
 		webViewPixelGazeX(spInput->gazeX - (float)webViewX),
@@ -112,7 +112,7 @@ public:
 	const bool& gazeEmulated;
 	const bool& gazeUponGUI;
 	const bool& instantInteraction;
-	const bool& saccade;
+	const float& fixationDuration;
 };
 
 #endif // INPUT_H_
