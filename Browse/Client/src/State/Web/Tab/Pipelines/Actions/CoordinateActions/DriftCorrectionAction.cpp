@@ -45,17 +45,17 @@ bool DriftCorrectionAction::Update(float tpf, const std::shared_ptr<const TabInp
 		pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, rCoordinate);
 	};
 
-	// Current gaze
-	glm::vec2 relativeGazeCoordinate = glm::vec2(spInput->webViewRelativeGazeX, spInput->webViewRelativeGazeY); // relative WebView space
+	// Current raw! gaze (filtered here manually)
+	glm::vec2 relativeGazeCoordinate = glm::vec2(spInput->webViewRelativeRawGazeX, spInput->webViewRelativeRawGazeY); // relative WebView space
 
 	// ### UPDATE ZOOM SPEED, ZOOM CENTER AND CENTER OFFSET ###
 
 	// Only allow zoom in when gaze upon WebView and not yet used
-	if (spInput->insideWebView && !spInput->gazeUponGUI) // TODO: gazeUsed really good idea here? Maybe later null pointer?
+	if (spInput->insideWebView && !spInput->gazeUponGUI)
 	{
 		switch (_state)
 		{
-		case State::ORIENTATE:
+		case State::ORIENTATE: // orientation phase
 		{
 			// Update deviation value (fade away deviation)
 			_deviation = glm::max(0.f, _deviation - (tpf / DEVIATION_FADING_DURATION));
@@ -71,7 +71,7 @@ bool DriftCorrectionAction::Update(float tpf, const std::shared_ptr<const TabInp
 
 				// Move zoom coordinate towards new coordinate
 				glm::vec2 relativeDelta =
-					(relativeGazeCoordinate + _relativeCenterOffset) // Visually, the zoom coordinate is moved by relative center offset. So adapt input to this
+					(relativeGazeCoordinate + _relativeCenterOffset) // visually, the zoom coordinate is moved by relative center offset. So adapt input to this
 					- _relativeZoomCoordinate;
 				_relativeZoomCoordinate += relativeDelta * glm::min(1.f, (tpf / MOVE_DURATION));
 
@@ -101,10 +101,10 @@ bool DriftCorrectionAction::Update(float tpf, const std::shared_ptr<const TabInp
 			// Get out of case
 			break;
 		}
-		case State::ZOOM:
+		case State::ZOOM: // zoom phase
 			zoomSpeed = 0.25f;
 			break;
-		default:
+		default: // in fact: debug phase
 			zoomSpeed = 0.f;
 			break;
 		}
@@ -173,26 +173,29 @@ bool DriftCorrectionAction::Update(float tpf, const std::shared_ptr<const TabInp
 			{
 				// TODO check whether drift is significant or can be ignored (for very good calibration)
 
+				// Use filtered gaze here, not raw one (TODO: fixation based filtering might be a bad idea, as here something moving is fixated and not a static position)
+				glm::vec2 relativeFilteredGazeCoordinate = glm::vec2(spInput->webViewRelativeGazeX, spInput->webViewRelativeGazeY); // relative WebView space
+
 				// Current pixel gaze coordinate on page with values as sample was taken
-				glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate;
-				pageCoordinate(_sampleData.logZoom, _sampleData.relativeZoomCoordinate, _sampleData.relativeCenterOffset, pixelGazeCoordinate);
+				glm::vec2 pixelFilteredGazeCoordinate = relativeFilteredGazeCoordinate;
+				pageCoordinate(_sampleData.logZoom, _sampleData.relativeZoomCoordinate, _sampleData.relativeCenterOffset, pixelFilteredGazeCoordinate);
 
 				// Sample pixel gaze coordinate on page
 				glm::vec2 samplePixelGazeCoordinate = _sampleData.relativeGazeCoordinate;
 				pageCoordinate(_logZoom, _sampleData.relativeZoomCoordinate, _sampleData.relativeCenterOffset, samplePixelGazeCoordinate); // sampleData zoom coordinate and current should be the same
 
-				// Page coordinat of relative zoom coordinate
+				// Page coordinate of relative zoom coordinate
 				glm::vec2 samplePixelZoomCoordinate = _sampleData.relativeZoomCoordinate * glm::vec2(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY());
 
 				// Calculate drift corrected fixation coordinate
-				glm::vec2 drift = pixelGazeCoordinate - samplePixelGazeCoordinate;
+				glm::vec2 drift = pixelFilteredGazeCoordinate - samplePixelGazeCoordinate;
 				float radius = glm::length(drift) / ((1.f/_logZoom) - (1.f/_sampleData.logZoom));
 				glm::vec2 fixation = (glm::normalize(drift) * radius) + samplePixelZoomCoordinate;
 				SetOutputValue("coordinate", fixation);
 
 				// Return success
-				// finished = true; // TODO debugging
-				_state = State::DEBUG;
+				finished = true;
+				// _state = State::DEBUG; // TODO debugging
 			}
 			break;
 		}

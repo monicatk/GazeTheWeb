@@ -21,6 +21,9 @@ DynamicDriftCorrectionAction::DynamicDriftCorrectionAction(TabInteractionInterfa
 
 bool DynamicDriftCorrectionAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
+	// TODO
+	// - incoporate raw gaze data
+
 	// ### PREPARATION ###
 
 	// Speed of zooming

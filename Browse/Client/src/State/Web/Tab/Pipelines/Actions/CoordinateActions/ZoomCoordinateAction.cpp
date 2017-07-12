@@ -59,11 +59,14 @@ bool ZoomCoordinateAction::Update(float tpf, const std::shared_ptr<const TabInpu
 			glm::vec2 pixelZoomCoordinate = _relativeZoomCoordinate * glm::vec2(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY());
 			float pixelDelta = glm::distance(pixelGazeCoordinate, pixelZoomCoordinate);
 
-			// Move zoom coordinate towards new coordinate
+			// Move zoom coordinate towards new coordinate (in relative WebView coordinates)
+			/*
 			glm::vec2 relativeDelta =
-				(relativeGazeCoordinate + _relativeCenterOffset) // Visually, the zoom coordinate is moved by relative center offset. So adapt input to this
-				- _relativeZoomCoordinate;
+				(relativeGazeCoordinate + _relativeCenterOffset) // visually, the zoom coordinate is moved by relative center offset. So adapt input to this
+				- _relativeZoomCoordinate; // in relative page coordinates
 			_relativeZoomCoordinate += relativeDelta * glm::min(1.f, (tpf / MOVE_DURATION));
+			*/
+			_relativeZoomCoordinate -= (pixelDelta / glm::vec2(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY())) * glm::min(1.f, (tpf / MOVE_DURATION));
 
 			// Set length of delta to deviation if bigger than current deviation
 			_deviation = glm::min(1.f, glm::max(pixelDelta / glm::max(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY()), _deviation));
