@@ -9,8 +9,8 @@
 
 #include <iostream>
 
-WeightedAverageFilter::WeightedAverageFilter(bool outlierDetection, FilterKernel kernel, unsigned int windowSize) :
-	Filter(outlierDetection), _kernel(kernel), _windowSize(windowSize)
+WeightedAverageFilter::WeightedAverageFilter(FilterKernel kernel, unsigned int windowSize, bool outlierRemoval) :
+	_kernel(kernel), _windowSize(windowSize), _outlierRemoval(outlierRemoval)
 {
 	// Calculate sigma for gaussian filter
 	float sigma = glm::sqrt(-glm::pow(_windowSize - 2.f, 2.f) / (2.f * glm::log(0.05f))); // determine sigma, so that no weight is below 0.05
@@ -24,30 +24,72 @@ void WeightedAverageFilter::Update(SampleQueue spSamples)
 	// Super call which moves samples to member
 	Filter::Update(spSamples);
 
-	// Go over samples and smooth
+	// Prepare variables
 	double sumX = 0;
 	double sumY = 0;
 	double weightSum = 0;
-	int oldestUsedIndex = -1; // used for determining fixation duration
+	
+	// Indexing
 	const int size = (int)_spSamples->size();
-	const int minIndex = glm::max(0, size - (int)_windowSize);
+	int endIndex = glm::max(0, size - (int)_windowSize);
+	int startIndex = size - 1;
+
+	// Indices updated by loop
 	int weightIndex = 0; // weight index inputted into weight calculation
-	for(int i = size - 1; i >= minIndex; i--) // newest to oldest means reverse order in queue
+	int oldestUsedIndex = -1; // used for determining fixation duration
+
+	// Adjust indices for outlier removal (latest sample may not be used)
+	if (_outlierRemoval)
 	{
-		// Get sample
+		// Queue is iterated from back (where the latest samples are) to the front. So move one entry towards front
+		--startIndex; // is -1 for queue with one sample, so single sample is not filtered and nothing happens
+		endIndex = glm::max(0, endIndex - 1); // end index must be floored to zero
+	}
+
+	// Go over samples and smooth
+	for(int i = startIndex; i >= endIndex; --i) // latest to oldest means reverse order in queue
+	{
+		// Get current sample
 		const auto& rGaze = _spSamples->at(i);
 
 		// Saccade detection
-		if (oldestUsedIndex >= 0) // at least on loop execution was performed
+		if (i < size - 1) // only proceed when there is a previous sample to check against
 		{
-			// Check distance of current sample and previous one
-			const auto& prevGaze = _spSamples->at(i + 1);
+			// Check distance of current sample and previously filtered one
+			const auto& prevGaze = _spSamples->at(i + 1); // in terms of time, prevGaze is newer than gaze
 			if (glm::distance(
 				glm::vec2(prevGaze.x, prevGaze.y),
 				glm::vec2(rGaze.x, rGaze.y))
-						> setup::FILTER_GAZE_FIXATION_PIXEL_RADIUS)
+				> setup::FILTER_GAZE_FIXATION_PIXEL_RADIUS)
 			{
-				break;
+				if (_outlierRemoval) // check whether to ignore this as outlier or really breaking
+				{
+					int nextIndex = i - 1; // index of next sample to filter (which is older than current)
+					if (nextIndex >= 0)
+					{
+						const auto& nextGaze = _spSamples->at(nextIndex);
+						if (glm::distance(
+							glm::vec2(prevGaze.x, prevGaze.y),
+							glm::vec2(nextGaze.x, nextGaze.y))
+							> setup::FILTER_GAZE_FIXATION_PIXEL_RADIUS)
+						{
+							break; // previous and next sample do not belong to the same fixation, so this sample is start of new fixation
+						}
+						else
+						{
+							continue; // previous and next sample do belong to the same fixation, skip this outlier
+						}
+					}
+					else
+					{
+						break; // no next index available, so cannot deterime whether this is an outlier
+					}
+					
+				}
+				else // no outlier removal performed
+				{
+					break; // just break as this sample is too far away from previous
+				}
 			}
 		}
 
@@ -58,10 +100,10 @@ void WeightedAverageFilter::Update(SampleQueue spSamples)
 		sumX += rGaze.x * weight;
 		sumY += rGaze.y * weight;
 
-		// Sum weight
+		// Sum weight for later normalization
 		weightSum += weight;
 
-		// Update index of oldest sample point considered as belonging to this fixation
+		// Update index of oldest sample point considered as belonging to current fixation
 		oldestUsedIndex = i;
 
 		// Update weight index
@@ -76,7 +118,7 @@ void WeightedAverageFilter::Update(SampleQueue spSamples)
 		_gazeX = sumX / weightSum;
 		_gazeY = sumY / weightSum;
 
-		// Calculate fixation duration
+		// Calculate fixation duration (duration from now to receiving of oldest sample contributing to fixation)
 		fixationDuration = (float)((double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch() - _spSamples->at(oldestUsedIndex).timestamp).count() / 1000.0);
 	}
 	_fixationDuration = fixationDuration; // update fixation duration
@@ -126,7 +168,7 @@ double WeightedAverageFilter::CalculateWeight(unsigned int i) const
 	switch (_kernel)
 	{
 	case FilterKernel::LINEAR:
-		return 1;
+		return 1.0;
 		break;
 	case FilterKernel::TRIANGULAR:
 		return (int)_windowSize - (int)i;
@@ -135,5 +177,5 @@ double WeightedAverageFilter::CalculateWeight(unsigned int i) const
 		return glm::exp(-glm::pow(i, 2.f) / _gaussianDenominator);
 		break;
 	}
-	return 1;
+	return 1.0;
 }

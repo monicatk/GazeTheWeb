@@ -16,9 +16,9 @@ public:
 
 	// Constructor
 	WeightedAverageFilter(
-		bool outlierDetection, // whether outlier detection is used, delays input by one sample
 		FilterKernel kernel, // type of weights used
-		unsigned int windowSize); // count of samples used for filtering
+		unsigned int windowSize, // count of samples used for filtering
+		bool outlierRemoval); // whether outlier detection is used, delays input by one sample
 
 	// Update. Takes samples in window pixel coordinates. Samples are moved out provided variable
 	virtual void Update(SampleQueue spSamples) override;
@@ -43,6 +43,7 @@ private:
 	FilterKernel _kernel;
 	unsigned int _windowSize;
 	float _gaussianDenominator = 0.f;
+	bool _outlierRemoval;
 };
 
 #endif WEIGHTEDAVERAGEFILTER_H_

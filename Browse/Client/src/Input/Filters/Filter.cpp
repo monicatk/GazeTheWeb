@@ -9,8 +9,8 @@
 #include "src/Setup.h"
 #include <algorithm>
 
-Filter::Filter(bool outlierDetection) :
-	_outlierDetection(outlierDetection), _spSamples(SampleQueue(new std::deque<SampleData>))
+Filter::Filter() :
+	_spSamples(SampleQueue(new std::deque<SampleData>))
 {
 	// Nothing to do
 }
@@ -24,8 +24,6 @@ void Filter::Update(SampleQueue spSamples)
 {
 	if (!spSamples->empty())
 	{
-		// TODO: implement outlier detection
-
 		// Update timestamp
 		if (!spSamples->empty())
 		{

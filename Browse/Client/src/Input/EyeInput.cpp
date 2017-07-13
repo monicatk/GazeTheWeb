@@ -11,7 +11,11 @@
 #include <functional>
 
 EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface) :
-	_upFilter(std::unique_ptr<Filter>(new WeightedAverageFilter(setup::FILTER_USE_OUTLIER_DETECTION, setup::FILTER_KERNEL, setup::FILTER_WINDOW_SIZE)))
+	_upFilter(std::unique_ptr<Filter>(
+		new WeightedAverageFilter(
+			setup::FILTER_KERNEL,
+			setup::FILTER_WINDOW_SIZE,
+			setup::FILTER_USE_OUTLIER_REMOVAL)))
 {
 	// Create thread for connection to eye tracker
 	_upConnectionThread = std::unique_ptr<std::thread>(new std::thread([this, _pMasterThreadsafeInterface]()

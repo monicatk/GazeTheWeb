@@ -37,7 +37,7 @@ namespace setup
 	static const int FILTER_MEMORY_SIZE = 1000; // how many samples are kept in memory of the filters
 	static const FilterKernel FILTER_KERNEL = FilterKernel::GAUSSIAN;
 	static const int FILTER_WINDOW_SIZE = 60;
-	static const bool FILTER_USE_OUTLIER_DETECTION = true;
+	static const bool FILTER_USE_OUTLIER_REMOVAL = true;
 
 	// Debugging
 	static const bool LOG_DEBUG_MESSAGES = true;
