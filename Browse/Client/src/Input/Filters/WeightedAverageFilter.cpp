@@ -13,7 +13,7 @@ WeightedAverageFilter::WeightedAverageFilter(FilterKernel kernel, unsigned int w
 	_kernel(kernel), _windowSize(windowSize), _outlierRemoval(outlierRemoval)
 {
 	// Calculate sigma for gaussian filter
-	float sigma = glm::sqrt(-glm::pow(_windowSize - 2.f, 2.f) / (2.f * glm::log(0.05f))); // determine sigma, so that no weight is below 0.05
+	float sigma = glm::sqrt(-glm::pow(_windowSize - 1.f, 2.f) / (2.f * glm::log(0.05f))); // determine sigma, so that no weight is below 0.05
 
 	// Store denominator of exponential function
 	_gaussianDenominator = (2.f * glm::pow(sigma, 2.f));
