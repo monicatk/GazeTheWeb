@@ -46,11 +46,11 @@ protected:
 	// Level of magnification
 	const float MAGNIFICATION = 0.5f;
 
-	// Fixation duration taken as "real" fixation to trigger something
+	// Fixation duration taken as "perceived" fixation to trigger something
 	const float FIXATION_DURATION = 0.5f;
 
-	// Time to wait before checking for fixation after magnification
-	float secondFixationWaitTime = FIXATION_DURATION; // start checking for fixation after this is over (to avoid instant selection of coordinate after magnification)
+	// Time to wait before checking for fixation after activation and magnification
+	float fixationWaitTime = FIXATION_DURATION; // to avoid instant selection of coordinate after actiation and magnification
 
 	// Magnfication center. In relative page space
 	glm::vec2 _relativeMagnificationCenter;

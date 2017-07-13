@@ -41,29 +41,26 @@ bool MagnificationCoordinateAction::Update(float tpf, const std::shared_ptr<cons
 	glm::vec2 relativeMagnificationCenter = _relativeMagnificationCenter;
 
 	// If magnified, decrease secondFixationWaitTime
-	if (_magnified && secondFixationWaitTime > 0)
+	if (fixationWaitTime > 0)
 	{
-		secondFixationWaitTime -= tpf;
-		glm::max(secondFixationWaitTime, 0.f);
+		fixationWaitTime -= tpf;
+		glm::max(fixationWaitTime, 0.f);
 	}
 
 	// Decide whether zooming is finished
 	bool finished = false;
-	if (!spInput->gazeUponGUI && (spInput->instantInteraction || spInput->fixationDuration >= FIXATION_DURATION)) // user demands on instant interaction or fixates on the screen
+	if (fixationWaitTime <= 0 && !spInput->gazeUponGUI && (spInput->instantInteraction || spInput->fixationDuration >= FIXATION_DURATION)) // user demands on instant interaction or fixates on the screen
 	{
 		// Check for magnification
 		if (_magnified) // already magnified, so finish this action
 		{
-			if (secondFixationWaitTime <= 0) // only proceed if wait time is over. This should avoid instant selection after magnification, as fixation will probably continue for some milliseconds
-			{
-				// Set output
-				glm::vec2 coordinate = relativeGazeCoordinate;
-				pageCoordinate(zoom, relativeMagnificationCenter, relativeCenterOffset, coordinate); // transform gaze relative to WebView to page coordinates
-				SetOutputValue("coordinate", coordinate); // into pixel space of CEF
+			// Set output
+			glm::vec2 coordinate = relativeGazeCoordinate;
+			pageCoordinate(zoom, relativeMagnificationCenter, relativeCenterOffset, coordinate); // transform gaze relative to WebView to page coordinates
+			SetOutputValue("coordinate", coordinate); // into pixel space of CEF
 
-				// Finish this action
-				finished = true;
-			}
+			// Finish this action
+			finished = true;
 		}
 		else // not yet magnified, do it now
 		{
@@ -72,6 +69,9 @@ bool MagnificationCoordinateAction::Update(float tpf, const std::shared_ptr<cons
 
 			// Remember magnification
 			_magnified = true;
+
+			// Reset fixation wait time so no instant interaction after magnification can happen
+			fixationWaitTime = FIXATION_DURATION;
 		}
 	}
 
