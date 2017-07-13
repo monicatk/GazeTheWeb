@@ -6,10 +6,12 @@
 #include "EyeInput.h"
 #include "src/Utils/Logger.h"
 #include "src/Setup.h"
+#include "src/Input/Filters/WeightedAverageFilter.h"
 #include <cmath>
 #include <functional>
 
-EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface)
+EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface) :
+	_upFilter(std::unique_ptr<Filter>(new WeightedAverageFilter(setup::FILTER_USE_OUTLIER_DETECTION, setup::FILTER_KERNEL, setup::FILTER_WINDOW_SIZE)))
 {
 	// Create thread for connection to eye tracker
 	_upConnectionThread = std::unique_ptr<std::thread>(new std::thread([this, _pMasterThreadsafeInterface]()
@@ -226,7 +228,7 @@ std::shared_ptr<Input> EyeInput::Update(
 		}
 
 		// Update filter algorithm and provide local variables as reference
-		_filter.Update(spSamples);
+		_upFilter->Update(spSamples);
 
 		// Check, whether eye tracker is tracking
 		isTracking = _procIsTracking();
@@ -309,8 +311,8 @@ std::shared_ptr<Input> EyeInput::Update(
 	_mouseY = mouseY;
 
 	// Get data from filter
-	double filteredGazeX = _filter.GetFilteredGazeX();
-	double filteredGazeY = _filter.GetFilteredGazeY();
+	double filteredGazeX = _upFilter->GetFilteredGazeX();
+	double filteredGazeY = _upFilter->GetFilteredGazeY();
 
 	// Use mouse when gaze is emulated
 	if (gazeEmulated)
@@ -334,13 +336,13 @@ std::shared_ptr<Input> EyeInput::Update(
 	std::shared_ptr<Input> spInput = std::make_shared<Input>(
 		filteredGazeX, // gazeX,
 		filteredGazeY, // gazeY,
-		_filter.GetRawGazeX(), // rawGazeX
-		_filter.GetRawGazeY(), // rawGazeY
-		_filter.GetAge(), // gazeAge
+		_upFilter->GetRawGazeX(), // rawGazeX
+		_upFilter->GetRawGazeY(), // rawGazeY
+		_upFilter->GetAge(), // gazeAge
 		gazeEmulated, // gazeEmulated,
 		false, // gazeUponGUI,
 		false, // instantInteraction,
-		_filter.GetFixationDuration()); // fixationDuration
+		_upFilter->GetFixationDuration()); // fixationDuration
 
 	// Return whether gaze coordinates comes from eye tracker
 	return spInput;
@@ -360,5 +362,5 @@ bool EyeInput::Calibrate()
 
 bool EyeInput::SamplesReceived() const
 {
-	return _filter.IsTimestampSetOnce();
+	return _upFilter->IsTimestampSetOnce();
 }

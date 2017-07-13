@@ -9,7 +9,8 @@
 #include "src/Setup.h"
 #include <algorithm>
 
-Filter::Filter() : _spSamples(SampleQueue(new std::deque<SampleData>))
+Filter::Filter(bool outlierDetection) :
+	_outlierDetection(outlierDetection), _spSamples(SampleQueue(new std::deque<SampleData>))
 {
 	// Nothing to do
 }
@@ -21,24 +22,29 @@ Filter::~Filter()
 
 void Filter::Update(SampleQueue spSamples)
 {
-	// Update timestamp
 	if (!spSamples->empty())
 	{
-		_timestamp = spSamples->back().timestamp; // should be newest sample
-		_timestampSetOnce = true;
-	}
+		// TODO: implement outlier detection
 
-	// Move samples over to member
-	_spSamples->insert(_spSamples->end(),
-		std::make_move_iterator(spSamples->begin()),
-		std::make_move_iterator(spSamples->end()));
+		// Update timestamp
+		if (!spSamples->empty())
+		{
+			_timestamp = spSamples->back().timestamp; // should be newest sample
+			_timestampSetOnce = true;
+		}
 
-	// Delete beginning of queue to match maximum allowed queue length
-	int size = (int)_spSamples->size(); // sample queue size
-	int overlap = size - setup::FILTER_MEMORY_SIZE;
-	for (int i = 0; i < overlap; i++)
-	{
-		_spSamples->pop_front();
+		// Move samples over to member
+		_spSamples->insert(_spSamples->end(),
+			std::make_move_iterator(spSamples->begin()),
+			std::make_move_iterator(spSamples->end()));
+
+		// Delete front of queue to match maximum allowed queue length (delete oldest samples)
+		int size = (int)_spSamples->size(); // sample queue size
+		int overlap = size - setup::FILTER_MEMORY_SIZE;
+		for (int i = 0; i < overlap; i++)
+		{
+			_spSamples->pop_front();
+		}
 	}
 }
 
@@ -60,4 +66,3 @@ bool Filter::IsTimestampSetOnce() const
 {
 	return _timestampSetOnce;
 }
-

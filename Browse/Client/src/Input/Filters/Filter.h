@@ -14,7 +14,7 @@ class Filter
 public:
 
 	// Constructor
-	Filter();
+	Filter(bool outlierDetection); // outlier detection discards single sample disturb a fixation
 
 	// Destructor
 	virtual ~Filter() = 0;
@@ -37,10 +37,16 @@ public:
 
 protected:
 
-	// Members
+	// Samples to filter
 	SampleQueue _spSamples;
 
 private:
+
+	// Indicator about outlier detection
+	bool _outlierDetection;
+
+	// Latest gaze sample is stored here and added with the next update, when outlier correction is performed
+	std::unique_ptr<SampleData> _upCandidate = nullptr;
 
 	// Timestamp of last sample
 	std::chrono::milliseconds _timestamp;
