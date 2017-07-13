@@ -40,16 +40,16 @@ bool MagnificationCoordinateAction::Update(float tpf, const std::shared_ptr<cons
 	float zoom = _magnified ? MAGNIFICATION : 1.f;
 	glm::vec2 relativeMagnificationCenter = _relativeMagnificationCenter;
 
-	// If magnified, decrease secondFixationWaitTime
+	// Decrease fixationWaitTime
 	if (fixationWaitTime > 0)
 	{
 		fixationWaitTime -= tpf;
 		glm::max(fixationWaitTime, 0.f);
 	}
 
-	// Decide whether zooming is finished
+	// Decide whether to magnify or to finish
 	bool finished = false;
-	if (fixationWaitTime <= 0 && !spInput->gazeUponGUI && (spInput->instantInteraction || spInput->fixationDuration >= FIXATION_DURATION)) // user demands on instant interaction or fixates on the screen
+	if (!spInput->gazeUponGUI && (spInput->instantInteraction || (fixationWaitTime <= 0 && spInput->fixationDuration >= FIXATION_DURATION))) // user demands on instant interaction or fixates on the screen
 	{
 		// Check for magnification
 		if (_magnified) // already magnified, so finish this action
@@ -70,7 +70,7 @@ bool MagnificationCoordinateAction::Update(float tpf, const std::shared_ptr<cons
 			// Remember magnification
 			_magnified = true;
 
-			// Reset fixation wait time so no instant interaction after magnification can happen
+			// Reset fixation wait time so no accidential instant interaction after magnification can happen
 			fixationWaitTime = FIXATION_DURATION;
 		}
 	}
