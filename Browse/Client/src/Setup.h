@@ -8,6 +8,7 @@
 #ifndef SETUP_H_
 #define SETUP_H_
 
+#include "src/Input/Filters/FilterKernel.h"
 #include <string>
 
 namespace setup
@@ -19,10 +20,10 @@ namespace setup
 	static const int INITIAL_WINDOW_HEIGHT = 720;
 
 	// Control TODO: move connect bools to config file
-	static const bool CONNECT_OPEN_GAZE = true;
+	static const bool CONNECT_OPEN_GAZE = false;
 	static const bool CONNECT_SMI_IVIEWX = false;
 	static const bool CONNECT_VI_MYGAZE = false;
-	static const bool CONNECT_TOBII_EYEX = false;
+	static const bool CONNECT_TOBII_EYEX = true;
 	static const float DURATION_BEFORE_INPUT = 1.f; // wait one second before accepting input
 	static const float MAX_AGE_OF_USED_GAZE = 1.f; // only accept gaze as input that is not older than one second
 	static const float DURATION_BEFORE_SUPER_CALIBRATION = 3.f; // duration until recalibration is offered after receiving no gaze samples
@@ -33,6 +34,10 @@ namespace setup
 	static const bool EYEINPUT_DISTORT_GAZE = false;
 	static const float EYEINPUT_DISTORT_GAZE_BIAS_X = 64.f; // pixels
 	static const float EYEINPUT_DISTORT_GAZE_BIAS_Y = 32.f; // pixels
+	static const int FILTER_MEMORY_SIZE = 1000; // how many samples are kept in memory of the filters
+	static const FilterKernel FILTER_KERNEL = FilterKernel::GAUSSIAN;
+	static const int FILTER_WINDOW_SIZE = 60;
+	static const bool FILTER_USE_OUTLIER_REMOVAL = true;
 
 	// Debugging
 	static const bool LOG_DEBUG_MESSAGES = true;

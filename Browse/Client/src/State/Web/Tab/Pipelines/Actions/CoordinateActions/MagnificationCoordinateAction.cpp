@@ -7,6 +7,7 @@
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 #include "submodules/glm/glm/gtx/vector_angle.hpp"
 #include <algorithm>
+#include <iostream>
 
 MagnificationCoordinateAction::MagnificationCoordinateAction(TabInteractionInterface* pTab, bool doDimming) : Action(pTab)
 {
@@ -39,9 +40,16 @@ bool MagnificationCoordinateAction::Update(float tpf, const std::shared_ptr<cons
 	float zoom = _magnified ? MAGNIFICATION : 1.f;
 	glm::vec2 relativeMagnificationCenter = _relativeMagnificationCenter;
 
-	// Decide whether zooming is finished
+	// Decrease fixationWaitTime
+	if (fixationWaitTime > 0)
+	{
+		fixationWaitTime -= tpf;
+		glm::max(fixationWaitTime, 0.f);
+	}
+
+	// Decide whether to magnify or to finish
 	bool finished = false;
-	if (!spInput->gazeUponGUI && spInput->instantInteraction) // user demands on instant interaction
+	if (!spInput->gazeUponGUI && (spInput->instantInteraction || (fixationWaitTime <= 0 && spInput->fixationDuration >= FIXATION_DURATION))) // user demands on instant interaction or fixates on the screen
 	{
 		// Check for magnification
 		if (_magnified) // already magnified, so finish this action
@@ -50,7 +58,7 @@ bool MagnificationCoordinateAction::Update(float tpf, const std::shared_ptr<cons
 			glm::vec2 coordinate = relativeGazeCoordinate;
 			pageCoordinate(zoom, relativeMagnificationCenter, relativeCenterOffset, coordinate); // transform gaze relative to WebView to page coordinates
 			SetOutputValue("coordinate", coordinate); // into pixel space of CEF
-			
+
 			// Finish this action
 			finished = true;
 		}
@@ -61,6 +69,9 @@ bool MagnificationCoordinateAction::Update(float tpf, const std::shared_ptr<cons
 
 			// Remember magnification
 			_magnified = true;
+
+			// Reset fixation wait time so no accidential instant interaction after magnification can happen
+			fixationWaitTime = FIXATION_DURATION;
 		}
 	}
 

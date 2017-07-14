@@ -12,7 +12,7 @@
 #include "src/Global.h"
 #include "src/Master/MasterThreadsafeInterface.h"
 #include "src/Input/EyeTrackerStatus.h"
-#include "src/Input/Filters/SimpleFilter.h"
+#include "src/Input/Filters/Filter.h"
 #include "src/Input/Input.h"
 #include "plugins/Eyetracker/Interface/EyetrackerSample.h"
 #include <memory>
@@ -94,7 +94,7 @@ private:
     bool _mouseOverrideInitFrame = false;
 
 	// Filter of gaze data
-	SimpleFilter _filter;
+	std::unique_ptr<Filter> _upFilter;
 };
 
 #endif // EYEINPUT_H_

@@ -41,11 +41,11 @@ bool ZoomCoordinateAction::Update(float tpf, const std::shared_ptr<const TabInpu
 		pageCoordinate(_logZoom, _relativeZoomCoordinate, _relativeCenterOffset, rCoordinate);
 	};
 
-	// Current gaze
-	glm::vec2 relativeGazeCoordinate = glm::vec2(spInput->webViewRelativeGazeX, spInput->webViewRelativeGazeY); // relative WebView space
+	// Current raw! gaze (filtered here through zoom coordinate calculation)
+	glm::vec2 relativeGazeCoordinate = glm::vec2(spInput->webViewRelativeRawGazeX, spInput->webViewRelativeRawGazeY); // relative WebView space
 
 	// Only allow zoom in when gaze upon web view
-	if (!spInput->gazeUponGUI && spInput->insideWebView) // TODO: gazeUsed really good idea here? Maybe later null pointer?
+	if (!spInput->gazeUponGUI && spInput->insideWebView)
 	{
 		// Update deviation value (fade away deviation)
 		_deviation = glm::max(0.f, _deviation - (tpf / DEVIATION_FADING_DURATION));
@@ -59,10 +59,10 @@ bool ZoomCoordinateAction::Update(float tpf, const std::shared_ptr<const TabInpu
 			glm::vec2 pixelZoomCoordinate = _relativeZoomCoordinate * glm::vec2(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY());
 			float pixelDelta = glm::distance(pixelGazeCoordinate, pixelZoomCoordinate);
 
-			// Move zoom coordinate towards new coordinate
+			// Move zoom coordinate towards new coordinate (in relative WebView coordinates)
 			glm::vec2 relativeDelta =
-				(relativeGazeCoordinate + _relativeCenterOffset) // Visually, the zoom coordinate is moved by relative center offset. So adapt input to this
-				- _relativeZoomCoordinate;
+				(relativeGazeCoordinate + _relativeCenterOffset) // visually, the zoom coordinate is moved by relative center offset. So adapt input to this
+				- _relativeZoomCoordinate; // in relative page coordinates
 			_relativeZoomCoordinate += relativeDelta * glm::min(1.f, (tpf / MOVE_DURATION));
 
 			// Set length of delta to deviation if bigger than current deviation

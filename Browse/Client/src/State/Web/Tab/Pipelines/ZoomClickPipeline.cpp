@@ -4,7 +4,7 @@
 //============================================================================
 
 #include "ZoomClickPipeline.h"
-#include "src/State/Web/Tab/Pipelines/Actions/ZoomCoordinateAction.h"
+#include "src/State/Web/Tab/Pipelines/Actions/CoordinateActions/ZoomCoordinateAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/LinkNavigationAction.h"
 
 ZoomClickPipeline::ZoomClickPipeline(TabInteractionInterface* pTab) : Pipeline(pTab)

@@ -27,7 +27,7 @@ struct SampleData
 	double x;
 	double y;
 	SampleDataCoordinateSystem system;
-	std::chrono::milliseconds timestamp;
+	std::chrono::milliseconds timestamp; // expected to be filled initially with system_clock::now().time_since_epoch()
 };
 
 // Typedef for unique pointer of sample queue

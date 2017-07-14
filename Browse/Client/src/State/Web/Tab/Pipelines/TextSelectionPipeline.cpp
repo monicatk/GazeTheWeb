@@ -5,7 +5,7 @@
 
 #include "TextSelectionPipeline.h"
 #include "src/State/Web/Tab/Pipelines/Actions/TextSelectionAction.h"
-#include "src/State/Web/Tab/Pipelines/Actions/ZoomCoordinateAction.h"
+#include "src/State/Web/Tab/Pipelines/Actions/CoordinateActions/ZoomCoordinateAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/HintAction.h"
 #include "src/Utils/MakeUnique.h"
 

@@ -22,7 +22,7 @@ public:
 		bool gazeEmulated,
 		bool gazeUponGUI,
 		bool instantInteraction,
-		bool saccade) : 
+		float fixationDuration) :
 	gazeX(gazeX),
 	gazeY(gazeY),
 	rawGazeX(rawGazeX),
@@ -31,7 +31,7 @@ public:
 	gazeEmulated(gazeEmulated),
 	gazeUponGUI(gazeUponGUI),
 	instantInteraction(instantInteraction),
-	saccade(saccade) {}
+	fixationDuration(fixationDuration) {}
 
 	// Fields
     float gazeX;
@@ -42,7 +42,7 @@ public:
 	bool gazeEmulated;
     bool gazeUponGUI;
 	bool instantInteraction;
-	bool saccade; // indicator whether current gaze is classified as part of a saccade
+	float fixationDuration; // duration of current fixation (zero if currently saccade happening)
 };
 
 class TabInput
@@ -66,15 +66,21 @@ public:
 		gazeEmulated(spInput->gazeEmulated),
 		gazeUponGUI(spInput->gazeUponGUI),
 		instantInteraction(spInput->instantInteraction),
-		saccade(spInput->saccade),
+		fixationDuration(spInput->fixationDuration),
 
 		// TabInput fields
 		webViewPixelGazeX(spInput->gazeX - (float)webViewX),
 		webViewPixelGazeY(spInput->gazeY - (float)webViewY),
+		webViewPixelRawGazeX(spInput->rawGazeX - (float)webViewX),
+		webViewPixelRawGazeY(spInput->rawGazeY - (float)webViewY),
 		webViewRelativeGazeX(webViewPixelGazeX / (float)webViewWidth),
 		webViewRelativeGazeY(webViewPixelGazeY / (float)webViewHeight),
+		webViewRelativeRawGazeX(webViewPixelRawGazeX / (float)webViewWidth),
+		webViewRelativeRawGazeY(webViewPixelRawGazeY / (float)webViewHeight),
 		CEFPixelGazeX(webViewRelativeGazeX * (float)webViewResolutionX),
 		CEFPixelGazeY(webViewRelativeGazeY * (float)webViewResolutionY),
+		CEFPixelRawGazeX(webViewRelativeRawGazeX * (float)webViewResolutionX),
+		CEFPixelRawGazeY(webViewRelativeRawGazeY * (float)webViewResolutionY),
 		insideWebView(
 			webViewRelativeGazeX < 1.f
 			&& webViewRelativeGazeX >= 0
@@ -85,10 +91,16 @@ public:
 	// Fields
 	float webViewPixelGazeX;
 	float webViewPixelGazeY;
+	float webViewPixelRawGazeX;
+	float webViewPixelRawGazeY;
 	float webViewRelativeGazeX;
 	float webViewRelativeGazeY;
+	float webViewRelativeRawGazeX;
+	float webViewRelativeRawGazeY;
 	float CEFPixelGazeX;
 	float CEFPixelGazeY;
+	float CEFPixelRawGazeX;
+	float CEFPixelRawGazeY;
 	bool insideWebView;
 
 	// Fields from input as reference
@@ -100,7 +112,7 @@ public:
 	const bool& gazeEmulated;
 	const bool& gazeUponGUI;
 	const bool& instantInteraction;
-	const bool& saccade;
+	const float& fixationDuration;
 };
 
 #endif // INPUT_H_
