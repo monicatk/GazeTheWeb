@@ -131,10 +131,10 @@ DOMNode.prototype.updateRects = function(altNode){
             // DEBUG - toplayer bitmap
             var bm = [];
             var r = this.rects[0];
-            bm.push(document.elementFromPoint(r[0],r[1]));
-            bm.push(document.elementFromPoint(r[0],r[3]));
-            bm.push(document.elementFromPoint(r[2],r[3]));
-            bm.push(document.elementFromPoint(r[2],r[1]));
+            bm.push(Number(document.elementFromPoint(r[0],r[1]) == (altNode || this.node)));
+            bm.push(Number(document.elementFromPoint(r[0],r[3]) == (altNode || this.node)));
+            bm.push(Number(document.elementFromPoint(r[2],r[3]) == (altNode || this.node)));
+            bm.push(Number(document.elementFromPoint(r[2],r[1]) == (altNode || this.node)));
             this.bitmap = bm;
             ConsolePrint("#TEST#"+bm+"#");
         }
