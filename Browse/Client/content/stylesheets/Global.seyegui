@@ -14,6 +14,7 @@ default
 	ButtonThresholdIncreaseDuration = 1
 	ButtonThresholdDecreaseDuration = 2
 	ButtonPressingDuration = 0.3
+	SoundButtonDown=sounds/ButtonDown.ogg
 }
 
 default_noback : default
