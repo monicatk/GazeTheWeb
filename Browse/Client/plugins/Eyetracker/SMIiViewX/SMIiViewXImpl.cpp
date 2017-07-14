@@ -28,6 +28,7 @@ int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 			SampleData(
 				gazeX, // x
 				gazeY, // y
+				SampleDataCoordinateSystem::SCREEN_PIXELS,
 				duration_cast<milliseconds>(
 					system_clock::now().time_since_epoch() // timestamp
 					)
