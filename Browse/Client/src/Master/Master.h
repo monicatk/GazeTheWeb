@@ -87,6 +87,12 @@ public:
 		eyegui::setKeyboardLayout(_pGUI, keyboardLayout);
 	}
 
+	// Play some sound
+	void PlaySound(std::string filepath)
+	{
+		eyegui::playSound(_pGUI, filepath);
+	}
+
 	// ### ACCESS BY SETTINGS ###
 
 	// Set gaze visualization (of super GUI)

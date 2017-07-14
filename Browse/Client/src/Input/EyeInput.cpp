@@ -318,11 +318,17 @@ std::shared_ptr<Input> EyeInput::Update(
 	double filteredGazeX = _upFilter->GetFilteredGazeX();
 	double filteredGazeY = _upFilter->GetFilteredGazeY();
 
+	// Get raw data
+	double rawGazeX = _upFilter->GetRawGazeX();
+	double rawGazeY = _upFilter->GetRawGazeY();
+
 	// Use mouse when gaze is emulated
 	if (gazeEmulated)
 	{
 		filteredGazeX = mouseX;
 		filteredGazeY = mouseY;
+		rawGazeX = mouseX;
+		rawGazeY = mouseY;
 	}
 
 	// ### GAZE DISTORTION ###
@@ -332,6 +338,8 @@ std::shared_ptr<Input> EyeInput::Update(
 	{
 		filteredGazeX += setup::EYEINPUT_DISTORT_GAZE_BIAS_X;
 		filteredGazeY += setup::EYEINPUT_DISTORT_GAZE_BIAS_Y;
+		rawGazeX += setup::EYEINPUT_DISTORT_GAZE_BIAS_X;
+		rawGazeY += setup::EYEINPUT_DISTORT_GAZE_BIAS_Y;
 	}
 
 	// ### OUTPUT ###
@@ -340,8 +348,8 @@ std::shared_ptr<Input> EyeInput::Update(
 	std::shared_ptr<Input> spInput = std::make_shared<Input>(
 		filteredGazeX, // gazeX,
 		filteredGazeY, // gazeY,
-		_upFilter->GetRawGazeX(), // rawGazeX
-		_upFilter->GetRawGazeY(), // rawGazeY
+		rawGazeX, // rawGazeX
+		rawGazeY, // rawGazeY
 		_upFilter->GetAge(), // gazeAge
 		gazeEmulated, // gazeEmulated,
 		false, // gazeUponGUI,

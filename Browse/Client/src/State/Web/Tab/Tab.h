@@ -274,6 +274,9 @@ public:
 	// Set WebViewParameters for WebView
 	virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }
 
+	// Play sound
+	virtual void PlaySound(std::string filepath);
+
     // #########################
     // ### TAB CEF INTERFACE ###
     // #########################

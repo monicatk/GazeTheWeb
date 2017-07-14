@@ -67,6 +67,9 @@ public:
     // Set WebViewParameters for web view
     virtual void SetWebViewParameters(WebViewParameters parameters) = 0;
 
+	// Play sound
+	virtual void PlaySound(std::string filepath) = 0;
+
 protected:
 
 };

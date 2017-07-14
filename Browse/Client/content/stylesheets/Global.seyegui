@@ -14,7 +14,8 @@ default
 	ButtonThresholdIncreaseDuration = 1
 	ButtonThresholdDecreaseDuration = 2
 	ButtonPressingDuration = 0.3
-	SoundButtonDown=sounds/ButtonDown.ogg
+	SoundButtonHit=sounds/GameAudio/ClickWooden-1.ogg
+	SoundKeyPress=sounds/GameAudio/ClickWooden-2.ogg
 }
 
 default_noback : default
@@ -94,6 +95,7 @@ tab_debug : default
 pause : default
 {
 	Color = 0x505659FF
+	SoundButtonHit=sounds/GameAudio/PingBing.ogg
 }
 
 pause_background
