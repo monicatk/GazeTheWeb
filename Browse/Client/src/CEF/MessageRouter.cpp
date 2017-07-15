@@ -37,10 +37,6 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	const std::string requestString = request.ToString();
 	//LogDebug("MsgRouter: ", requestString);
 
-	if (requestString.substr(0,6) == "#TEST#")
-		return true;
-
-
 	// ###############
 	// ### Favicon ###
 	// ###############

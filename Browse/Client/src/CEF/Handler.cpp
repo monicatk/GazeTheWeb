@@ -149,9 +149,6 @@ void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame
 	// Set loading status of each frame in Tab to load finished in order to display loading icon and status
 	_pMediator->SetLoadingStatus(browser, frame->GetIdentifier(), frame->IsMain(), false);
 
-	// DEBUG: golem.de
-	//LogDebug("OnLoadEnd: frameId=", frame->GetIdentifier(), ", isMain?=", frame->IsMain());
-
     if (frame->IsMain())
     {
 		// Calculate page loading time via Javascript
