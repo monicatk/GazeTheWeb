@@ -499,12 +499,25 @@ void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::property:
 
 void Master::PushNotification(std::u16string content, Type type, bool overridable)
 {
-	_notificationStack.push(Notification(content, type, overridable));
+	std::string sound;
+	switch (type)
+	{
+	case Type::NEUTRAL:
+		// sound = "sounds/GameAudio/TeleportCasual.ogg";
+		break;
+	case Type::SUCCESS:
+		// sound = "sounds/GameAudio/Spacey1upPower-up.ogg";
+		break;
+	case Type::WARNING:
+		// sound = "sounds/GameAudio/SpaceyLoose.ogg";
+		break;
+	}
+	_notificationStack.push(Notification(content, type, overridable, sound));
 }
 
 void Master::PushNotificationByKey(std::string key, Type type, bool overridable)
 {
-	_notificationStack.push(Notification(eyegui::fetchLocalization(_pGUI, key), type, overridable));
+	PushNotification(eyegui::fetchLocalization(_pGUI, key), type, overridable);
 }
 
 void Master::threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status, EyeTrackerDevice device)
@@ -594,6 +607,12 @@ void Master::Loop()
 
 				// Reset time
 				_notificationTime = NOTIFICATION_DISPLAY_DURATION;
+
+				// Play sound
+				if (!notification.sound.empty())
+				{
+					eyegui::playSound(_pGUI, notification.sound);
+				}
 			}
 			else if(_notificationTime <= 0) // hide notification, if empty and time is over
 			{
@@ -636,7 +655,7 @@ void Master::Loop()
 			eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true);
 
 			// Notify user via sound
-			eyegui::playSound(_pGUI, "sounds/GameAudio/TeleportCasual.ogg");
+			eyegui::playSound(_pGUI, "sounds/GameAudio/FlourishSpacey-1.ogg");
 		}
 
         // Update cursor with original mouse input
@@ -800,7 +819,7 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
 			case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
-			case GLFW_KEY_C: { eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true); eyegui::playSound(_pGUI, "sounds/GameAudio/TeleportCasual.ogg");  break; } // TODO: trigger directly calibration
+			case GLFW_KEY_C: { eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true); eyegui::playSound(_pGUI, "sounds/GameAudio/FlourishSpacey-1.ogg");  break; } // TODO: trigger directly calibration
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
 			case GLFW_KEY_6: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::MAGNIFICATION); break; }
 			case GLFW_KEY_7: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::ZOOM); break; }

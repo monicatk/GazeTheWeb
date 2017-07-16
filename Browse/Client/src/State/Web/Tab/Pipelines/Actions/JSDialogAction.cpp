@@ -85,6 +85,9 @@ void JSDialogAction::Draw() const
 void JSDialogAction::Activate()
 {
 	_pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayFrameIndex, true);
+
+	// Play sound
+	_pTab->PlaySound("sounds/GameAudio/TeleportCasual.ogg");
 }
 
 void JSDialogAction::Deactivate()

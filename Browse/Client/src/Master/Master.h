@@ -164,12 +164,13 @@ private:
 	struct Notification
 	{
 		// Constructor
-		Notification(std::u16string message, MasterNotificationInterface::Type type, bool overridable) : message(message), type(type), overridable(overridable) {}
+		Notification(std::u16string message, MasterNotificationInterface::Type type, bool overridable, std::string sound = "") : message(message), type(type), overridable(overridable), sound(sound) {}
 
 		// Fields
 		std::u16string message;
 		MasterNotificationInterface::Type type;
 		bool overridable;
+		std::string sound;
 	};
 
 	// ThreadJob class (class to store a job assigned by a thread)
