@@ -487,12 +487,12 @@ std::u16string Master::FetchLocalization(std::string key) const
 	return eyegui::fetchLocalization(_pGUI, key);
 }
 
-void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyFloat type, std::string value)
+void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::property::Duration type, std::string value)
 {
 	eyegui::setStyleTreePropertyValue(_pGUI, styleClass, type, value);
 }
 
-void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyVec4 type, std::string value)
+void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::property::Color type, std::string value)
 {
 	eyegui::setStyleTreePropertyValue(_pGUI, styleClass, type, value);
 }
@@ -584,7 +584,7 @@ void Master::Loop()
 				}
 				
 				// Set color in state (TODO: would be better to set / add / remove old style of element so color can be defined in stylesheet)
-				eyegui::setStyleTreePropertyValue(_pSuperGUI, "notification", eyegui::StylePropertyVec4::BackgroundColor, RGBAToHexString(color));
+				eyegui::setStyleTreePropertyValue(_pSuperGUI, "notification", eyegui::property::Color::BackgroundColor, RGBAToHexString(color));
 
 				// Remember whether this notification is overridable
 				_notificationOverridable = notification.overridable;
@@ -658,7 +658,7 @@ void Master::Loop()
         eyegui::setStyleTreePropertyValue(
 			_pSuperGUI,
             "pause_background",
-			eyegui::StylePropertyVec4::BackgroundColor,
+			eyegui::property::Color::BackgroundColor,
             RGBAToHexString(glm::vec4(0, 0, 0, MASTER_PAUSE_ALPHA * _pausedDimming.getValue())));
 
 		// Check whether input is desired

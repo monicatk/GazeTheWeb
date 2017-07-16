@@ -632,11 +632,11 @@ void Web::UpdateTabOverview()
 		// Styling
         if (tabId == _currentTabId)
         {
-			_pMaster->SetStyleTreePropertyValue("tab_preview_" + std::to_string(i), eyegui::StylePropertyVec4::BackgroundColor, "0x50BAA6FF");
+			_pMaster->SetStyleTreePropertyValue("tab_preview_" + std::to_string(i), eyegui::property::Color::BackgroundColor, "0x50BAA6FF");
         }
         else
         {
-			_pMaster->SetStyleTreePropertyValue("tab_preview_" + std::to_string(i), eyegui::StylePropertyVec4::BackgroundColor, "0x607d8bFF");
+			_pMaster->SetStyleTreePropertyValue("tab_preview_" + std::to_string(i), eyegui::property::Color::BackgroundColor, "0x607d8bFF");
         }
     }
 

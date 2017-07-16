@@ -618,50 +618,50 @@ void Tab::UpdateAccentColor(float tpf)
 	// Set color of tab_panel style
 	_pMaster->SetStyleTreePropertyValue(
 		"tab_panel",
-		eyegui::StylePropertyVec4::Color,
+		eyegui::property::Color::Color,
 		RGBAToHexString(colorAccent)
 	);
 
 	// Set color of tab_overlay style
 	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay",
-		eyegui::StylePropertyVec4::Color,
+		eyegui::property::Color::Color,
 		RGBAToHexString(colorAccent)
 	);
 	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay",
-		eyegui::StylePropertyVec4::BackgroundColor,
+		eyegui::property::Color::BackgroundColor,
 		RGBAToHexString(backgroundAccentColor)
 	);
 
 	// Set color of tab_overlay_noback style
 	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_noback",
-		eyegui::StylePropertyVec4::Color,
+		eyegui::property::Color::Color,
 		RGBAToHexString(colorAccent)
 	);
 
 	// Set color of tab_overlay_panel style
 	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_panel",
-		eyegui::StylePropertyVec4::Color,
+		eyegui::property::Color::Color,
 		RGBAToHexString(backgroundAccentColor)
 	);
 	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_panel",
-		eyegui::StylePropertyVec4::BackgroundColor,
+		eyegui::property::Color::BackgroundColor,
 		RGBAToHexString(panelBackgroundAccentColor)
 	);
 
 	// Set color and background of tab_overlay_scroll_progress
 	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_scroll_progress",
-		eyegui::StylePropertyVec4::Color,
+		eyegui::property::Color::Color,
 		RGBAToHexString(transparentColorAccent)
 	);
 	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_scroll_progress",
-		eyegui::StylePropertyVec4::BackgroundColor,
+		eyegui::property::Color::BackgroundColor,
 		RGBAToHexString(transparentBackgroundColorAccent)
 	);
 }
