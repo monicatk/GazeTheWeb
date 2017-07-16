@@ -11,6 +11,7 @@
 #include "src/CEF/JSCode.h"
 #include "include/cef_client.h"
 #include "src/CEF/MessageRouter.h"
+#include "src/CEF/ImageDownload.h"
 #include <list>
 #include <set>
 
@@ -22,7 +23,8 @@ class Handler : public CefClient,
                 public CefDisplayHandler,
                 public CefLifeSpanHandler,
                 public CefLoadHandler,
-				public CefJSDialogHandler
+				public CefJSDialogHandler,
+				public HandlerImageInterface
 {
 public:
 
@@ -139,8 +141,6 @@ public:
 	void OnTitleChange(CefRefPtr<CefBrowser> browser,
 		const CefString& title) OVERRIDE;
 
-
-
 	void RegisterJavascriptCallback(std::string prefix, std::function<void(std::string)> callbackFunction)
 	{
 		_msgRouter->RegisterJavascriptCallback(prefix, callbackFunction);
@@ -148,6 +148,10 @@ public:
 
 	// Send log data to LoggingMediator instance in each browser context
 	void SendToJSLoggingMediator(std::string message);
+
+
+	// HandlerImageDownload interface methods
+	bool ForwardFaviconBytes(CefRefPtr<CefBrowser> browser, CefRefPtr<CefImage> img);
 
 private:
 
