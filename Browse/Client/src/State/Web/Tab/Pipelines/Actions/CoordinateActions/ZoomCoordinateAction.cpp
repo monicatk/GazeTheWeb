@@ -22,6 +22,9 @@ bool ZoomCoordinateAction::Update(float tpf, const std::shared_ptr<const TabInpu
 	// Speed of zooming
 	float zoomSpeed = 0.f;
 
+	// Web view resolution
+	const glm::vec2 webViewResolution(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY());
+
 	// Function transforms coordinate from relative WebView coordinates to CEFPixel coordinates on page
 	const std::function<void(const float&, const glm::vec2&, const glm::vec2&, glm::vec2&)> pageCoordinate
 		= [&](const float& rLogZoom, const glm::vec2& rRelativeZoomCoordinate, const glm::vec2& rRelativeCenterOffset, glm::vec2& rCoordinate)
@@ -31,7 +34,7 @@ bool ZoomCoordinateAction::Update(float tpf, const std::shared_ptr<const TabInpu
 		rCoordinate -= rRelativeZoomCoordinate; // move zoom coordinate to origin
 		rCoordinate *= rLogZoom; // apply zoom
 		rCoordinate += rRelativeZoomCoordinate; // move back
-		rCoordinate *= glm::vec2(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY()); // bring into pixel space of CEF
+		rCoordinate *= webViewResolution; // bring into pixel space of CEF
 	};
 
 	// Function calling above function with current values
@@ -42,7 +45,7 @@ bool ZoomCoordinateAction::Update(float tpf, const std::shared_ptr<const TabInpu
 	};
 
 	// Current raw! gaze (filtered here through zoom coordinate calculation)
-	glm::vec2 relativeGazeCoordinate = glm::vec2(spInput->webViewRelativeRawGazeX, spInput->webViewRelativeRawGazeY); // relative WebView space
+	glm::vec2 relativeGazeCoordinate(spInput->webViewRelativeRawGazeX, spInput->webViewRelativeRawGazeY); // relative WebView space
 
 	// Only allow zoom in when gaze upon web view
 	if (!spInput->gazeUponGUI && spInput->insideWebView)
@@ -53,20 +56,17 @@ bool ZoomCoordinateAction::Update(float tpf, const std::shared_ptr<const TabInpu
 		// Update coordinate
 		if (!_firstUpdate)
 		{
-			// Caculate delta on page for deviation
+			// Caculate delta of gaze on page
 			glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate;
 			currentPageCoordinate(pixelGazeCoordinate);
-			glm::vec2 pixelZoomCoordinate = _relativeZoomCoordinate * glm::vec2(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY());
-			float pixelDelta = glm::distance(pixelGazeCoordinate, pixelZoomCoordinate);
+			glm::vec2 pixelZoomCoordinate = _relativeZoomCoordinate * webViewResolution;
 
-			// Move zoom coordinate towards new coordinate (in relative WebView coordinates)
-			glm::vec2 relativeDelta =
-				(relativeGazeCoordinate + _relativeCenterOffset) // visually, the zoom coordinate is moved by relative center offset. So adapt input to this
-				- _relativeZoomCoordinate; // in relative page coordinates
-			_relativeZoomCoordinate += relativeDelta * glm::min(1.f, (tpf / MOVE_DURATION));
+			// Update zoom coordinate
+			_relativeZoomCoordinate += ((pixelGazeCoordinate - pixelZoomCoordinate) / webViewResolution) * glm::min(1.f, (tpf / MOVE_DURATION));
 
 			// Set length of delta to deviation if bigger than current deviation
-			_deviation = glm::min(1.f, glm::max(pixelDelta / glm::max(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY()), _deviation));
+			float pixelDelta = glm::distance(pixelGazeCoordinate, pixelZoomCoordinate);
+			_deviation = glm::min(1.f, glm::max(pixelDelta / glm::max(webViewResolution.x, webViewResolution.y), _deviation));
 
 			// If at the moment a high deviation is given, try to zoom out to give user more overview
 			zoomSpeed = ZOOM_SPEED - glm::min(1.f, DEVIATION_WEIGHT * _deviation); // TODO weight deviation more intelligent
@@ -117,7 +117,7 @@ bool ZoomCoordinateAction::Update(float tpf, const std::shared_ptr<const TabInpu
 		|| ((_logZoom <= 0.45f) && (_deviation < 0.01f))) // coordinate seems to be quite fixed, just do it
 	{
 		// Set coordinate in output value
-        SetOutputValue("coordinate", glm::vec2(_relativeZoomCoordinate * glm::vec2(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY()))); // into pixel space of CEF
+        SetOutputValue("coordinate", glm::vec2(_relativeZoomCoordinate * webViewResolution)); // into pixel space of CEF
 
 		// Return success
 		finished = true;
