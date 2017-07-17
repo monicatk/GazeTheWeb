@@ -372,6 +372,9 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     // ### EYE INPUT ###
 	_upEyeInput = std::unique_ptr<EyeInput>(new EyeInput(this));
 
+	// ### VOICE INPUT ###
+	_upVoiceInput = std::unique_ptr<VoiceInput>(new VoiceInput(_pGUI));
+
     // ### FRAMEBUFFER ###
     _upFramebuffer = std::unique_ptr<Framebuffer>(new Framebuffer(_width, _height));
 	_upFramebuffer->Bind();
@@ -825,8 +828,16 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
 			case GLFW_KEY_7: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::ZOOM); break; }
 			case GLFW_KEY_8: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::DRIFT_CORRECTION); break; }
 			case GLFW_KEY_9: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::DYNAMIC_DRIFT_CORRECTION); break; }
+			case GLFW_KEY_SPACE: { _upVoiceInput->StartAudioRecording(); }
         }
     }
+	else if (action == GLFW_RELEASE)
+	{
+		switch (key)
+		{
+			case GLFW_KEY_SPACE: { auto action = _upVoiceInput->EndAndProcessAudioRecording(); LogInfo("Retrieved VoiceAction: ", static_cast<int>(action)); }
+		}
+	}
 }
 
 void Master::GLFWMouseButtonCallback(int button, int action, int mods)

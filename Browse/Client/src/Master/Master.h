@@ -16,6 +16,7 @@
 #include "src/State/Web/Web.h"
 #include "src/State/Settings/Settings.h"
 #include "src/Input/EyeInput.h"
+#include "src/Input/VoiceInput.h"
 #include "src/Setup.h"
 #include "src/Utils/LerpValue.h"
 #include "src/Utils/Framebuffer.h"
@@ -256,6 +257,9 @@ private:
 
     // Eye input
     std::unique_ptr<EyeInput> _upEyeInput;
+
+	// Voicde input
+	std::unique_ptr<VoiceInput> _upVoiceInput;
 
     // Id of dictionary in eyeGUI
     unsigned int _dictonaryId = 0;
