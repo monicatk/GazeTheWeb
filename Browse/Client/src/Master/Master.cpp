@@ -372,6 +372,9 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     // ### EYE INPUT ###
 	_upEyeInput = std::unique_ptr<EyeInput>(new EyeInput(this));
 
+	// ### VOICE INPUT ###
+	_upVoiceInput = std::unique_ptr<VoiceInput>(new VoiceInput(_pGUI));
+
     // ### FRAMEBUFFER ###
     _upFramebuffer = std::unique_ptr<Framebuffer>(new Framebuffer(_width, _height));
 	_upFramebuffer->Bind();
@@ -487,24 +490,37 @@ std::u16string Master::FetchLocalization(std::string key) const
 	return eyegui::fetchLocalization(_pGUI, key);
 }
 
-void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyFloat type, std::string value)
+void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::property::Duration type, std::string value)
 {
 	eyegui::setStyleTreePropertyValue(_pGUI, styleClass, type, value);
 }
 
-void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyVec4 type, std::string value)
+void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::property::Color type, std::string value)
 {
 	eyegui::setStyleTreePropertyValue(_pGUI, styleClass, type, value);
 }
 
 void Master::PushNotification(std::u16string content, Type type, bool overridable)
 {
-	_notificationStack.push(Notification(content, type, overridable));
+	std::string sound;
+	switch (type)
+	{
+	case Type::NEUTRAL:
+		// sound = "sounds/GameAudio/TeleportCasual.ogg";
+		break;
+	case Type::SUCCESS:
+		// sound = "sounds/GameAudio/Spacey1upPower-up.ogg";
+		break;
+	case Type::WARNING:
+		// sound = "sounds/GameAudio/SpaceyLoose.ogg";
+		break;
+	}
+	_notificationStack.push(Notification(content, type, overridable, sound));
 }
 
 void Master::PushNotificationByKey(std::string key, Type type, bool overridable)
 {
-	_notificationStack.push(Notification(eyegui::fetchLocalization(_pGUI, key), type, overridable));
+	PushNotification(eyegui::fetchLocalization(_pGUI, key), type, overridable);
 }
 
 void Master::threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status, EyeTrackerDevice device)
@@ -584,7 +600,7 @@ void Master::Loop()
 				}
 				
 				// Set color in state (TODO: would be better to set / add / remove old style of element so color can be defined in stylesheet)
-				eyegui::setStyleTreePropertyValue(_pSuperGUI, "notification", eyegui::StylePropertyVec4::BackgroundColor, RGBAToHexString(color));
+				eyegui::setStyleTreePropertyValue(_pSuperGUI, "notification", eyegui::property::Color::BackgroundColor, RGBAToHexString(color));
 
 				// Remember whether this notification is overridable
 				_notificationOverridable = notification.overridable;
@@ -594,6 +610,12 @@ void Master::Loop()
 
 				// Reset time
 				_notificationTime = NOTIFICATION_DISPLAY_DURATION;
+
+				// Play sound
+				if (!notification.sound.empty())
+				{
+					eyegui::playSound(_pGUI, notification.sound);
+				}
 			}
 			else if(_notificationTime <= 0) // hide notification, if empty and time is over
 			{
@@ -636,7 +658,7 @@ void Master::Loop()
 			eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true);
 
 			// Notify user via sound
-			eyegui::playSound(_pGUI, "sounds/Boop.ogg");
+			eyegui::playSound(_pGUI, "sounds/GameAudio/FlourishSpacey-1.ogg");
 		}
 
         // Update cursor with original mouse input
@@ -658,7 +680,7 @@ void Master::Loop()
         eyegui::setStyleTreePropertyValue(
 			_pSuperGUI,
             "pause_background",
-			eyegui::StylePropertyVec4::BackgroundColor,
+			eyegui::property::Color::BackgroundColor,
             RGBAToHexString(glm::vec4(0, 0, 0, MASTER_PAUSE_ALPHA * _pausedDimming.getValue())));
 
 		// Check whether input is desired
@@ -800,14 +822,22 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
 			case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
-			case GLFW_KEY_C: { eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true); eyegui::playSound(_pGUI, "sounds/test.ogg");  break; }
+			case GLFW_KEY_C: { eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true); eyegui::playSound(_pGUI, "sounds/GameAudio/FlourishSpacey-1.ogg");  break; } // TODO: trigger directly calibration
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
 			case GLFW_KEY_6: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::MAGNIFICATION); break; }
 			case GLFW_KEY_7: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::ZOOM); break; }
 			case GLFW_KEY_8: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::DRIFT_CORRECTION); break; }
 			case GLFW_KEY_9: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::DYNAMIC_DRIFT_CORRECTION); break; }
+			case GLFW_KEY_SPACE: { _upVoiceInput->StartAudioRecording(); }
         }
     }
+	else if (action == GLFW_RELEASE)
+	{
+		switch (key)
+		{
+			case GLFW_KEY_SPACE: { auto action = _upVoiceInput->EndAndProcessAudioRecording(); LogInfo("Retrieved VoiceAction: ", static_cast<int>(action)); }
+		}
+	}
 }
 
 void Master::GLFWMouseButtonCallback(int button, int action, int mods)

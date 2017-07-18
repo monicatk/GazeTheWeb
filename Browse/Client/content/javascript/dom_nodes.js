@@ -124,6 +124,22 @@ DOMNode.prototype.updateRects = function(altNode){
     {
         this.rects = adjustedRects;
 
+        var t1 = performance.now();
+        if(this.rects.length > 0)
+        {
+            // TODO: Only update rects, if position contained in window?
+            // DEBUG - toplayer bitmap
+            var bm = [];
+            var r = this.rects[0];
+            bm.push(Number(document.elementFromPoint(r[0],r[1]) == (altNode || this.node)));
+            bm.push(Number(document.elementFromPoint(r[0],r[3]) == (altNode || this.node)));
+            bm.push(Number(document.elementFromPoint(r[2],r[3]) == (altNode || this.node)));
+            bm.push(Number(document.elementFromPoint(r[2],r[1]) == (altNode || this.node)));
+            this.bitmap = bm;
+            ConsolePrint("#TEST#"+bm+"#");
+        }
+        UpdateBitmaskTimer(t1);
+
         SendAttributeChangesToCEF("Rects", this);
         UpdateRectUpdateTimer(t0);
         return true; // Rects changed and were updated

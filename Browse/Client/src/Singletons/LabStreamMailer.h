@@ -7,6 +7,9 @@
 // it in the mailer. This saves one from unregistering callbacks, because
 // weak pointers are used.
 
+#ifndef LABSTREAMMAILER_H_
+#define LABSTREAMMAILER_H_
+
 #include "src/Singletons/LabStream/LabStream.h"
 #include <functional>
 
@@ -73,3 +76,5 @@ private:
 	LabStreamMailer(const LabStreamMailer&) {}
         LabStreamMailer& operator = (const LabStreamMailer &) { return *this; }
 };
+
+#endif // LABSTREAMMAILER_H_

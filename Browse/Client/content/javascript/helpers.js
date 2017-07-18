@@ -390,9 +390,27 @@ function ComputeBoundingRect(parent, child)
 }
 
 var time_spent_rects_updating = 0.0;
+var time_spent_creating_bitmask = 0.0;
 function UpdateRectUpdateTimer(t0)
 {
     time_spent_rects_updating += (performance.now() - t0);
+}
+function UpdateBitmaskTimer(t0)
+{
+    time_spent_creating_bitmask += (performance.now() - t0);
+}
+function PrintPerformanceInformation()
+{
+    window.page_load_time_ = window.performance.now() - starting_time_;
+    var rect_update_time = time_spent_rects_updating;
+    ConsolePrint('### Page load took \t'+Math.round(window.page_load_time_ / 1000)+'s / '
+        +Math.round((window.page_load_time_)*1000)/1000+'ms');
+    ConsolePrint('### Rect updates: \t'+Math.round(rect_update_time / 1000)+'s / '
+        +Math.round(rect_update_time * 1000)/1000+'ms -- '+100*Math.round(rect_update_time/window.page_load_time_
+        *1000)/1000 +'% of page load time');
+    ConsolePrint('### Bitmask creation: \t'+Math.round(time_spent_creating_bitmask / 1000)+'s / '+
+        Math.round(time_spent_creating_bitmask * 1000) / 1000 +'ms -- '+
+            100*Math.round(time_spent_creating_bitmask/window.page_load_time_*1000)/1000 +'% of page load time');
 }
 
 

@@ -16,6 +16,7 @@
 #include "src/State/Web/Web.h"
 #include "src/State/Settings/Settings.h"
 #include "src/Input/EyeInput.h"
+#include "src/Input/VoiceInput.h"
 #include "src/Setup.h"
 #include "src/Utils/LerpValue.h"
 #include "src/Utils/Framebuffer.h"
@@ -77,14 +78,20 @@ public:
 	std::u16string FetchLocalization(std::string key) const;
 
 	// Set value of style property in style tree
-	void SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyFloat type, std::string value);
-	void SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyVec4 type, std::string value);
+	void SetStyleTreePropertyValue(std::string styleClass, eyegui::property::Duration type, std::string value);
+	void SetStyleTreePropertyValue(std::string styleClass, eyegui::property::Color type, std::string value);
 
 	// Set global keyboard layout
 	void SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout)
 	{
 		// Tell it eyeGUI
 		eyegui::setKeyboardLayout(_pGUI, keyboardLayout);
+	}
+
+	// Play some sound
+	void PlaySound(std::string filepath)
+	{
+		eyegui::playSound(_pGUI, filepath);
 	}
 
 	// ### ACCESS BY SETTINGS ###
@@ -158,12 +165,13 @@ private:
 	struct Notification
 	{
 		// Constructor
-		Notification(std::u16string message, MasterNotificationInterface::Type type, bool overridable) : message(message), type(type), overridable(overridable) {}
+		Notification(std::u16string message, MasterNotificationInterface::Type type, bool overridable, std::string sound = "") : message(message), type(type), overridable(overridable), sound(sound) {}
 
 		// Fields
 		std::u16string message;
 		MasterNotificationInterface::Type type;
 		bool overridable;
+		std::string sound;
 	};
 
 	// ThreadJob class (class to store a job assigned by a thread)
@@ -249,6 +257,9 @@ private:
 
     // Eye input
     std::unique_ptr<EyeInput> _upEyeInput;
+
+	// Voicde input
+	std::unique_ptr<VoiceInput> _upVoiceInput;
 
     // Id of dictionary in eyeGUI
     unsigned int _dictonaryId = 0;
