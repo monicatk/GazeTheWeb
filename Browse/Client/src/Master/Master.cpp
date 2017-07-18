@@ -248,6 +248,13 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     eyegui::loadStyleSheet(_pGUI, "stylesheets/Global.seyegui");
 	eyegui::loadStyleSheet(_pSuperGUI, "stylesheets/Global.seyegui");
 
+	// Load overriding styles for demo mode
+	if (setup::DEMO_MODE)
+	{
+		eyegui::loadStyleSheet(_pGUI, "stylesheets/Demo.seyegui");
+		eyegui::loadStyleSheet(_pSuperGUI, "stylesheets/Demo.seyegui");
+	}
+
     // Set resize callback of GUI
     std::function<void(int, int)> resizeGUICallback = [&](int width, int height) { this->GUIResizeCallback(width, height); };
     eyegui::setResizeCallback(_pGUI, resizeGUICallback); // only one GUI needs to callback it. Use standard for it
@@ -649,7 +656,8 @@ void Master::Loop()
 
 		// If last gaze sample age is too high, perform recalibration
 		if (
-			!eyegui::isLayoutVisible(_pSuperCalibrationLayout) // only proceed when layout is not already visible
+			!setup::DEMO_MODE // do not do it in DEMO mode
+			&& !eyegui::isLayoutVisible(_pSuperCalibrationLayout) // only proceed when layout is not already visible
 			&& !spInput->gazeEmulated // only think about calibration if gaze is not emulated
 			&& spInput->gazeAge > setup::DURATION_BEFORE_SUPER_CALIBRATION // also only when for given time no samples received
 			&& _upEyeInput->SamplesReceived()) // and it should not performed when there were no samples so far
