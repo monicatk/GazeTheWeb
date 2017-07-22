@@ -27,7 +27,7 @@ namespace setup
 
 	// Window
 	static const bool	FULLSCREEN = false; // does not work in combination with eye tracker calibration
-	static const bool	MAXIMIZE_WINDOW = false; // only implemented for Windows
+	static const bool	MAXIMIZE_WINDOW = false | DEMO_MODE; // only implemented for Windows
 	static const int	INITIAL_WINDOW_WIDTH = 1280;
 	static const int	INITIAL_WINDOW_HEIGHT = 720;
 
@@ -39,7 +39,7 @@ namespace setup
 	static const float	DURATION_BEFORE_INPUT = 1.f; // wait one second before accepting input
 	static const float	MAX_AGE_OF_USED_GAZE = 1.f; // only accept gaze as input that is not older than one second
 	static const float	DURATION_BEFORE_SUPER_CALIBRATION = 3.f; // duration until recalibration is offered after receiving no gaze samples
-	static const bool	PAUSED_AT_STARTUP = false || DEMO_MODE;
+	static const bool	PAUSED_AT_STARTUP = false | DEMO_MODE;
 	static const float	LINK_CORRECTION_MAX_PIXEL_DISTANCE = 5.f;
 	static const int	TEXT_SELECTION_MARGIN = 4; // area which is selected before / after zoom coordinate in CEFPixels
 	static const int	FILTER_GAZE_FIXATION_PIXEL_RADIUS = 20;
