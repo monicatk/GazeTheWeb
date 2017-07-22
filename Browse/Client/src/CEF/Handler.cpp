@@ -149,9 +149,6 @@ void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame
 	// Set loading status of each frame in Tab to load finished in order to display loading icon and status
 	_pMediator->SetLoadingStatus(browser, frame->GetIdentifier(), frame->IsMain(), false);
 
-	// DEBUG: golem.de
-	//LogDebug("OnLoadEnd: frameId=", frame->GetIdentifier(), ", isMain?=", frame->IsMain());
-
     if (frame->IsMain())
     {
 		// Calculate page loading time via Javascript
@@ -550,6 +547,11 @@ void Handler::IPCLogRenderer(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcess
 void Handler::OnFaviconURLChange(CefRefPtr<CefBrowser> browser,
     const std::vector<CefString>& icon_urls)
 {
+	for (auto url : icon_urls)
+		StartImageDownload(browser, url);
+
+	// TODO: Remove old favicon retrieval
+
     std::string highResURL;
     int currentRes = 0;
     std::string icoURL;
@@ -649,4 +651,11 @@ void Handler::SendToJSLoggingMediator(std::string message)
 		browser->SendProcessMessage(PID_RENDERER, msg);
 	}
 	
+}
+
+bool Handler::ForwardFaviconBytes(CefRefPtr<CefBrowser> browser, CefRefPtr<CefImage> img)
+{
+	// TODO: Add method in Mediator for receiving favicons as CefImages!
+	LogDebug("Handler: TODO: Add method in Mediator for receiving favicons as CefImages!");
+	return false;
 }

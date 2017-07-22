@@ -38,6 +38,7 @@ function DOMNode(node, id, type)
     this.type = type;
 
     this.rects = []
+    this.bitmask = [0];
     // MutationObserver will handle setting up the following references, if necessary
     this.fixObj = undefined;
     this.overflow = undefined;
@@ -119,26 +120,12 @@ DOMNode.prototype.updateRects = function(altNode){
     }
 
     var adjustedRects = this.getAdjustedClientRects(altNode);
-    
+
+    this.updateOccBitmask(altNode);
+
     if(!EqualClientRectsData(this.rects, adjustedRects))
     {
         this.rects = adjustedRects;
-
-        var t1 = performance.now();
-        if(this.rects.length > 0)
-        {
-            // TODO: Only update rects, if position contained in window?
-            // DEBUG - toplayer bitmap
-            var bm = [];
-            var r = this.rects[0];
-            bm.push(Number(document.elementFromPoint(r[0],r[1]) == (altNode || this.node)));
-            bm.push(Number(document.elementFromPoint(r[0],r[3]) == (altNode || this.node)));
-            bm.push(Number(document.elementFromPoint(r[2],r[3]) == (altNode || this.node)));
-            bm.push(Number(document.elementFromPoint(r[2],r[1]) == (altNode || this.node)));
-            this.bitmap = bm;
-            ConsolePrint("#TEST#"+bm+"#");
-        }
-        UpdateBitmaskTimer(t1);
 
         SendAttributeChangesToCEF("Rects", this);
         UpdateRectUpdateTimer(t0);
@@ -146,6 +133,44 @@ DOMNode.prototype.updateRects = function(altNode){
     }
     UpdateRectUpdateTimer(t0);
     return false; // No update needed, no changes
+}
+
+DOMNode.prototype.updateOccBitmask = function(altNode){
+    var t1 = performance.now();
+    var bm = [];
+    if(this.rects.length > 0)
+    {
+        var r = this.rects[0];
+        // rect corners
+        var pts = [[r[1],r[0]], [r[3],r[0]], [r[3],r[2]-0.0001], [r[1],r[2]-0.0001]]; // Note: Seems infinitely small amount to high
+        pts.forEach( (pt) => { // pt[0] == x, pt[1] == y
+            // Rect point in currently shown part of website?
+            if(pt[0] < window.scrollX || pt[0] > window.scrollX + window.innerWidth ||
+                pt[1] < window.scrollY || pt[1] > window.scrollY + window.innerHeight)
+                    bm.push(0);
+            else
+                bm.push(Number(document.elementFromPoint(pt[0],pt[1]) == (altNode || this.node)));
+        });
+
+    }
+    else
+        bm = [0];
+    
+    var changed = false;
+    for(var i = 0, n = bm.length; i < n && !changed; i++)
+        changed = (bm[i] != this.bitmask[i]);
+
+    if (changed)
+    {
+        this.bitmask = bm;
+        SendAttributeChangesToCEF("OccBitmask", this);
+    }
+
+    UpdateBitmaskTimer(t1);
+}
+
+DOMNode.prototype.getOccBitmask = function(){
+    return this.bitmask
 }
 
 // DOMAttribute FixedId
