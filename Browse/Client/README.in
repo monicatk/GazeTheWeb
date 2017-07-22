@@ -1,7 +1,6 @@
 ### Binary release of GazeTheWeb - Browse ###
 Date: ${DATE}
 Version: ${VERSION}
-Build setup: All eyetracker plugins, windowed, no WebGL
 
 Please go to our GitHub repository at https://github.com/MAMEM/GazeTheWeb/tree/master/Browse for more information about the project!
 
@@ -19,7 +18,7 @@ Graphics card with OpenGL 3.3 or higher support
 1. Connect eyetracker
 2. Start eyetracker server application
 3. Calibrate eyetracker
-4. Start GazeTheWeb.exe which was included in this zip 
+4. Start Client.exe which was included in this zip 
 
 ## Shortcuts
 ESC: Exit application
