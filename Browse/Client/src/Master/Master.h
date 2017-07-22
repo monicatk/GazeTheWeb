@@ -61,10 +61,38 @@ public:
 	// Get user directory location
 	std::string GetUserDirectory() const { return _userDirectory; }
 
+	// Register JavaScript callback
 	void RegisterJavascriptCallback(std::string prefix, std::function<void (std::string)>& callbackFunction)
 	{
 		_pCefMediator->RegisterJavascriptCallback(prefix, callbackFunction);
 	};
+
+	// Set data transfer
+	void SetDataTransfer(bool dataTransfer)
+	{
+		// Store value
+		_dataTransfer = dataTransfer;
+
+		// Change mode of web panel and add notification to tell user
+		if (dataTransfer)
+		{
+			_upWeb->SetWebPanelMode(WebPanelMode::STANDARD);
+			PushNotificationByKey("notification:data_transfer_continued", Type::NEUTRAL, true);
+		}
+		else
+		{
+			_upWeb->SetWebPanelMode(WebPanelMode::NO_DATA_TRANSFER);
+			PushNotificationByKey("notification:data_transfer_paused", Type::NEUTRAL, true);
+		}
+
+		// TODO: tell devices and all server connection whether to send or not to send data...
+	}
+
+	// Get data transfer policy
+	bool MayTransferData() const
+	{
+		return _dataTransfer;
+	}
 
     // ### EYEGUI DELEGATION ###
 
@@ -317,6 +345,9 @@ private:
 
 	// Mutex to guarantees that threadJobs are not manipulated while read by master
 	std::mutex _threadJobsMutex;
+
+	// Bool to control data transfer (set by Web as there is the placed the button)
+	bool _dataTransfer = true;
 };
 
 #endif // MASTER_H_

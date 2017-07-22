@@ -33,6 +33,12 @@ panel : default
 	BackgroundColor = 0x1e2021FF
 }
 
+web_panel : default
+{
+	Color = 0x607d8bFF
+	BackgroundColor = 0x1e2021FF
+}
+
 dark_panel : default
 {
 	BackgroundColor = 0x0D0E0EFF
