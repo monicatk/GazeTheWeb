@@ -455,10 +455,9 @@ void Tab::Draw() const
 	}
 
 	// Draw debug overlay
-	if (setup::DRAW_DEBUG_OVERLAY)
-	{
+#ifdef CLIENT_DEBUG
 		DrawDebuggingOverlay();
-	}
+#endif
 }
 
 void Tab::Activate()
@@ -467,7 +466,7 @@ void Tab::Activate()
 	eyegui::setVisibilityOfLayout(_pOverlayLayout, true, true, false);
 	eyegui::setVisibilityOfLayout(_pScrollingOverlayLayout, true, true, false);
 	eyegui::setVisibilityOfLayout(_pPanelLayout, true, true, false);
-    eyegui::setVisibilityOfLayout(_pDebugLayout, setup::DRAW_DEBUG_OVERLAY, true, false);
+    eyegui::setVisibilityOfLayout(_pDebugLayout, setup::DEBUG_MODE, true, false);
 
 	// Setup switches
 	if (_autoScrolling) { eyegui::buttonDown(_pPanelLayout, "auto_scrolling", true); }

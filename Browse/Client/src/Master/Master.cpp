@@ -249,11 +249,10 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	eyegui::loadStyleSheet(_pSuperGUI, "stylesheets/Global.seyegui");
 
 	// Load overriding styles for demo mode
-	if (setup::DEMO_MODE)
-	{
+#ifdef CLIENT_DEMO
 		eyegui::loadStyleSheet(_pGUI, "stylesheets/Demo.seyegui");
 		eyegui::loadStyleSheet(_pSuperGUI, "stylesheets/Demo.seyegui");
-	}
+#endif
 
     // Set resize callback of GUI
     std::function<void(int, int)> resizeGUICallback = [&](int width, int height) { this->GUIResizeCallback(width, height); };
