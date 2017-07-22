@@ -273,6 +273,10 @@ void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string
 		// ### General layout ###
 		if (id == "back")
 		{
+			// Apply and save (TODO: placed here at back because direct toggle_descriptions overrides "PAUSED_AT_STARTUP",
+			// as buttons are virtually pressed by constructor, which is stored until first update of eyeGUI.
+			// This causes the description setting to be overriden by first update.
+			_pSettings->ApplySettings(true);
 			eyegui::setVisibilityOfLayout(_pSettings->_pGeneralLayout, false, false, true);
 		}
 		else if (id == "toggle_descriptions")
@@ -284,9 +288,6 @@ void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string
             _pSettings->_globalSetup.showGazeVisualization = true;
 			JSMailer::instance().Send("gaze_on");
 		}
-
-		// Apply and save
-		_pSettings->ApplySettings(true);
 	}
 	else if (pLayout == _pSettings->_pInfoLayout)
 	{
