@@ -11,8 +11,6 @@ string(TIMESTAMP DATE %d/%m/%Y)
 
 ### PARAMETERS #################################################################
 
-set(CLIENT_DEPLOYMENT OFF CACHE BOOL "Setup for Deployment.")
-
 if(OS_WINDOWS) # Windows
 
 	# OpenGaze
@@ -33,9 +31,22 @@ if(OS_WINDOWS) # Windows
 	
 endif()
 
-# Pipe some of them to C++
+# Deployment prepares ready to share binary version (TODO: installer creation)
+set(CLIENT_DEPLOYMENT OFF CACHE BOOL "Setup for Deployment.")
 if(${CLIENT_DEPLOYMENT})
-	add_definitions(-DDEPLOYMENT)
+	add_definitions(-DCLIENT_DEPLOYMENT)
+endif()
+
+# Debug mode
+set(CLIENT_DEBUG OFF CACHE BOOL "Setup for Debugging.")
+if(${CLIENT_DEBUG})
+	add_definitions(-DCLIENT_DEBUG)
+endif()
+
+# Demo mode
+set(CLIENT_DEMO OFF CACHE BOOL "Setup for Demonstration.")
+if(${CLIENT_DEMO})
+	add_definitions(-DCLIENT_DEMO)
 endif()
 
 if(OS_LINUX) # Linux
@@ -396,14 +407,14 @@ if(CLIENT_DEPLOYMENT)
 
 	# Create text file with version information
 	configure_file(VERSION.in ${CMAKE_BINARY_DIR}/VERSION) # first, create it in build folder
-	add_custom_command(TARGET ${CEF_TARGET} PRE_BUILD #then, copy it to specific binary folder (direct creation there does not work)
+	add_custom_command(TARGET ${CEF_TARGET} PRE_BUILD # then, copy it to specific binary folder (direct creation there does not work)
 		COMMAND ${CMAKE_COMMAND} -E copy
 		${CMAKE_BINARY_DIR}/VERSION
 		$<TARGET_FILE_DIR:${CEF_TARGET}>/VERSION)
 		
 	# Generate end-user readme
 	configure_file(README.in ${CMAKE_BINARY_DIR}/README.txt) # first, create it in build folder
-	add_custom_command(TARGET ${CEF_TARGET} PRE_BUILD #then, copy it to specific binary folder (direct creation there does not work)
+	add_custom_command(TARGET ${CEF_TARGET} PRE_BUILD # then, copy it to specific binary folder (direct creation there does not work)
 		COMMAND ${CMAKE_COMMAND} -E copy
 		${CMAKE_BINARY_DIR}/README.txt
 		$<TARGET_FILE_DIR:${CEF_TARGET}>/README.txt)

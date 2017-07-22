@@ -25,8 +25,9 @@ void MainCefApp::OnBeforeCommandLineProcessing(const CefString& process_type, Ce
 		command_line->AppendSwitch("enable-begin-frame-scheduling"); // breaks WebGL, but better for performance
 	}
 
+#ifndef CLIENT_DEPLOYMENT
 	command_line->AppendSwitch("enable-logging"); // get LOG(..) writes in console
-	command_line->AppendSwitch("no-sandbox"); // for what necessary?
+#endif
 
 	// EXPERIMENTAL: slow loading?
 	// see end of https://bitbucket.org/chromiumembedded/cef/wiki/GeneralUsage#markdown-header-proxy-resolution
