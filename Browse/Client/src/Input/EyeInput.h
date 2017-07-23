@@ -25,6 +25,8 @@
 typedef void(__cdecl *FETCH_SAMPLES)(SampleQueue&);
 typedef bool(__cdecl *IS_TRACKING)();
 typedef bool(__cdecl *CALIBRATE)();
+typedef void(__cdecl *CONTINUE_LAB_STREAM)();
+typedef void(__cdecl *PAUSE_LAB_STREAM)();
 #endif
 
 class EyeInput
@@ -53,6 +55,12 @@ public:
 	// Delegation of filter. Indicated whether age of input does say something...
 	bool SamplesReceived() const;
 
+	// Continue lab streaming layer streaming of eye gaze data
+	void ContinueLabStream();
+
+	// Pause lab streaming layer streaming of eye gaze data
+	void PauseLabStream();
+
 private:
 
 	// Thread that connects to eye tracking device
@@ -73,6 +81,12 @@ private:
 
 	// Handle to calibration
 	CALIBRATE _procCalibrate = NULL;
+
+	// Handle to continue lab stream
+	CONTINUE_LAB_STREAM _procContinueLabStream = NULL;
+
+	// Handle to pause lab stream
+	PAUSE_LAB_STREAM _procPauseLabStream = NULL;
 #endif
 
 	// Remember whether connection has been established

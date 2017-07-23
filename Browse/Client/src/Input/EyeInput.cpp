@@ -54,6 +54,12 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface) :
 				// Fetch procedure to calibrate
 				_procCalibrate = (CALIBRATE)GetProcAddress(_pluginHandle, "Calibrate");
 
+				// Fetch procedure to continue lab stream
+				_procContinueLabStream = (CONTINUE_LAB_STREAM)GetProcAddress(_pluginHandle, "ContinueLabStream");
+
+				// Fetch procedure to pause lab stream
+				_procPauseLabStream = (PAUSE_LAB_STREAM)GetProcAddress(_pluginHandle, "PauseLabStream");
+
 				// Check whether procedures could be loaded
 				if (procConnect != NULL && _procFetchGazeSamples != NULL && _procIsTracking != NULL && _procCalibrate != NULL)
 				{
@@ -72,6 +78,8 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface) :
 						_procFetchGazeSamples = NULL;
 						_procIsTracking = NULL;
 						_procCalibrate = NULL;
+						_procContinueLabStream = NULL;
+						_procPauseLabStream = NULL;
 					}
 				}
 			}
@@ -375,4 +383,24 @@ bool EyeInput::Calibrate()
 bool EyeInput::SamplesReceived() const
 {
 	return _upFilter->IsTimestampSetOnce();
+}
+
+void EyeInput::ContinueLabStream()
+{
+#ifdef _WIN32
+	if (_connected && _procContinueLabStream != NULL)
+	{
+		_procContinueLabStream();
+	}
+#endif // _WIN32
+}
+
+void EyeInput::PauseLabStream()
+{
+#ifdef _WIN32
+	if (_connected && _procPauseLabStream != NULL)
+	{
+		_procPauseLabStream();
+	}
+#endif // _WIN32
 }

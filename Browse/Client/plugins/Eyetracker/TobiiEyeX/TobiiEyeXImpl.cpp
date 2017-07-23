@@ -203,3 +203,13 @@ bool Calibrate()
 	// Not supported
 	return false;
 }
+
+void ContinueLabStream()
+{
+	eyetracker_global::ContinueLabStream();
+}
+
+void PauseLabStream()
+{
+	eyetracker_global::PauseLabStream();
+}

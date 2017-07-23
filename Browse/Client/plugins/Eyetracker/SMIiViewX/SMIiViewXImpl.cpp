@@ -114,3 +114,13 @@ bool Calibrate()
 	// Start calibration
 	return iV_Calibrate() == RET_SUCCESS;
 }
+
+void ContinueLabStream()
+{
+	eyetracker_global::ContinueLabStream();
+}
+
+void PauseLabStream()
+{
+	eyetracker_global::PauseLabStream();
+}

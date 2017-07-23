@@ -73,19 +73,25 @@ public:
 		// Store value
 		_dataTransfer = dataTransfer;
 
-		// Change mode of web panel and add notification to tell user
-		if (dataTransfer)
+		// Take actions
+		if (_dataTransfer)
 		{
+			// Gaze data recording
+			_upEyeInput->ContinueLabStream();
+
+			// Visualization
 			_upWeb->SetWebPanelMode(WebPanelMode::STANDARD);
 			PushNotificationByKey("notification:data_transfer_continued", Type::NEUTRAL, true);
 		}
 		else
 		{
+			// Gaze data recording
+			_upEyeInput->PauseLabStream();
+
+			// Visualization
 			_upWeb->SetWebPanelMode(WebPanelMode::NO_DATA_TRANSFER);
 			PushNotificationByKey("notification:data_transfer_paused", Type::NEUTRAL, true);
 		}
-
-		// TODO: tell devices and all server connection whether to send or not to send data...
 	}
 
 	// Get data transfer policy

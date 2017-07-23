@@ -12,16 +12,27 @@ namespace eyetracker_global
 	auto spSampleDataQueue = SampleQueue(new std::deque<SampleData>);
 	std::mutex sampleDataMutex;
 	std::unique_ptr<LabStreamOutput<double> > upLabStreamOutput = nullptr;
+	bool doLabStream = true;
 
 	void SetupLabStream(lsl::stream_info streamInfo)
 	{
 		upLabStreamOutput = std::unique_ptr<LabStreamOutput<double> >(new LabStreamOutput<double>(streamInfo));
 	}
 
+	void ContinueLabStream()
+	{
+		doLabStream = true;
+	}
+
+	void PauseLabStream()
+	{
+		doLabStream = false;
+	}
+
     void PushBackSample(SampleData sample) // called by eye tracker thread
     {
 		// Send to LabStreamingLayer
-		if (upLabStreamOutput)
+		if (upLabStreamOutput && doLabStream)
 		{
 			upLabStreamOutput->Send({ sample.x, sample.y });
 		}
