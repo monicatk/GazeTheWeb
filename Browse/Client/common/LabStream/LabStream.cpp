@@ -82,31 +82,3 @@ std::vector<std::string> LabStreamInput::Poll()
     // Return received values
     return input;
 }
-
-// #########################
-// ### LAB STREAM OUTPUT ###
-// #########################
-
-LabStreamOutput::LabStreamOutput(std::string streamOutputName, std::string streamOutputSourceId)
-{
-	// Setting up sending
-	_upStreamInfo = std::unique_ptr<lsl::stream_info>(
-		new lsl::stream_info(
-			streamOutputName,
-			"Markers",
-			1,
-			lsl::IRREGULAR_RATE,
-			lsl::cf_string,
-			streamOutputSourceId));
-	_upStreamOutlet = std::unique_ptr<lsl::stream_outlet>(new lsl::stream_outlet(*(_upStreamInfo.get())));
-}
-
-LabStreamOutput::~LabStreamOutput()
-{
-	// Nothing to do
-}
-
-void LabStreamOutput::Send(std::string data)
-{
-	_upStreamOutlet->push_sample(&data);
-}

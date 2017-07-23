@@ -576,7 +576,8 @@ void Master::Loop()
 		_pCefMediator->Poll(tpf);
 
 		// Notification handling
-		if (_notificationTime <= 0 || _notificationOverridable)
+		if (_notificationTime <= 0 // time for the current notification is over
+			|| (_notificationOverridable && !_notificationStack.empty())) // go to next notification if current is overridable and stack not empty
 		{
 			// Show next notification
 			if (!_notificationStack.empty())

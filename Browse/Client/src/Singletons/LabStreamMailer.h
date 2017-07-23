@@ -67,7 +67,7 @@ private:
 
 	// LabStreamingLayer connection
 	std::unique_ptr<LabStreamInput> _upLabStreamInput;
-	std::unique_ptr<LabStreamOutput> _upLabStreamOutput;
+	std::unique_ptr<LabStreamOutput<std::string> > _upLabStreamOutput;
 
 	// Vector of registered callbacks
 	std::vector<std::weak_ptr<LabStreamCallback> > _callbacks;

@@ -8,7 +8,15 @@
 
 LabStreamMailer::LabStreamMailer() :
 	_upLabStreamInput(std::unique_ptr<LabStreamInput>(new LabStreamInput(setup::LAB_STREAM_INPUT_NAME))),
-	_upLabStreamOutput(std::unique_ptr<LabStreamOutput>(new LabStreamOutput(setup::LAB_STREAM_OUTPUT_NAME, setup::LAB_STREAM_OUTPUT_SOURCE_ID)))
+	_upLabStreamOutput(std::unique_ptr<LabStreamOutput<std::string> >(
+		new LabStreamOutput<std::string>(
+			lsl::stream_info(
+				setup::LAB_STREAM_OUTPUT_NAME, // name
+				"Markers", // type
+				1, // channel count
+				lsl::IRREGULAR_RATE, // rate
+				lsl::cf_string, // channel format
+				setup::LAB_STREAM_OUTPUT_SOURCE_ID)))) // source id
 	
 {
 	// Nothing to do	
@@ -16,7 +24,7 @@ LabStreamMailer::LabStreamMailer() :
 
 void LabStreamMailer::Send(std::string message)
 {
-	_upLabStreamOutput->Send(message);
+	_upLabStreamOutput->Send({ message });
 }
 
 void LabStreamMailer::Update()

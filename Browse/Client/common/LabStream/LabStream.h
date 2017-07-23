@@ -58,27 +58,34 @@ private:
 // ### LAB STREAM OUTPUT ###
 // #########################
 
+template<typename Type>
 class LabStreamOutput
 {
 public:
 
 	// Constructor
-	LabStreamOutput(std::string streamOutputName, std::string streamOutputSourceId);
+	LabStreamOutput(lsl::stream_info streamInfo)
+	{
+		// Set up stream outlet
+		_upStreamOutlet = std::unique_ptr<lsl::stream_outlet>(new lsl::stream_outlet(streamInfo));
+	}
 
 	// Destructor
-	virtual ~LabStreamOutput();
+	virtual ~LabStreamOutput() {}
 
 	// Send event
-	void Send(std::string data);
+	void Send(std::vector<Type> data)
+	{
+		_upStreamOutlet->push_sample(data);
+	}
 
 private:
 
-	// Private copy / asignment constructors
+	// Private copy / assignment constructors
 	LabStreamOutput(const LabStreamOutput&) {}
 	LabStreamOutput& operator = (const LabStreamOutput &) { return *this; }
 
 	// Members
-	std::unique_ptr<lsl::stream_info> _upStreamInfo;
 	std::unique_ptr<lsl::stream_outlet> _upStreamOutlet;
 };
 
