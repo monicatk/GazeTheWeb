@@ -7,19 +7,12 @@
 #include <iostream>
 #include <chrono>
 
-LabStream::LabStream(std::string streamOutputName, std::string streamOutputSourceId, std::string streamInputName)
-{
-    // Setting up sending
-    _upStreamInfo = std::unique_ptr<lsl::stream_info>(
-        new lsl::stream_info(
-			streamOutputName,
-            "Markers",
-            1,
-            lsl::IRREGULAR_RATE,
-            lsl::cf_string,
-			streamOutputSourceId));
-    _upStreamOutlet = std::unique_ptr<lsl::stream_outlet>(new lsl::stream_outlet(*(_upStreamInfo.get())));
+// ########################
+// ### LAB STREAM INPUT ###
+// ########################
 
+LabStreamInput::LabStreamInput(std::string streamInputName)
+{
     // Setting up receiving
     std::mutex* pMutex = &_inputMutex; // pointer to mutex because reference of private member is not allowed
     std::vector<std::string>* pBuffer = &_inputBuffer; // same for buffer itself
@@ -70,17 +63,12 @@ LabStream::LabStream(std::string streamOutputName, std::string streamOutputSourc
     }));
 }
 
-LabStream::~LabStream()
+LabStreamInput::~LabStreamInput()
 {
     // Nothing to do
 }
 
-void LabStream::Send(std::string data)
-{
-    _upStreamOutlet->push_sample(&data);
-}
-
-std::vector<std::string> LabStream::Poll()
+std::vector<std::string> LabStreamInput::Poll()
 {
     // Used as return value
     std::vector<std::string> input;
@@ -93,4 +81,32 @@ std::vector<std::string> LabStream::Poll()
 
     // Return received values
     return input;
+}
+
+// #########################
+// ### LAB STREAM OUTPUT ###
+// #########################
+
+LabStreamOutput::LabStreamOutput(std::string streamOutputName, std::string streamOutputSourceId)
+{
+	// Setting up sending
+	_upStreamInfo = std::unique_ptr<lsl::stream_info>(
+		new lsl::stream_info(
+			streamOutputName,
+			"Markers",
+			1,
+			lsl::IRREGULAR_RATE,
+			lsl::cf_string,
+			streamOutputSourceId));
+	_upStreamOutlet = std::unique_ptr<lsl::stream_outlet>(new lsl::stream_outlet(*(_upStreamInfo.get())));
+}
+
+LabStreamOutput::~LabStreamOutput()
+{
+	// Nothing to do
+}
+
+void LabStreamOutput::Send(std::string data)
+{
+	_upStreamOutlet->push_sample(&data);
 }

@@ -6,20 +6,23 @@
 #include "LabStreamMailer.h"
 #include "src/Setup.h"
 
-LabStreamMailer::LabStreamMailer() : _upLabStream(std::unique_ptr<LabStream>(new LabStream(setup::LAB_STREAM_OUTPUT_NAME, setup::LAB_STREAM_OUTPUT_SOURCE_ID, setup::LAB_STREAM_INPUT_NAME)))
+LabStreamMailer::LabStreamMailer() :
+	_upLabStreamInput(std::unique_ptr<LabStreamInput>(new LabStreamInput(setup::LAB_STREAM_INPUT_NAME))),
+	_upLabStreamOutput(std::unique_ptr<LabStreamOutput>(new LabStreamOutput(setup::LAB_STREAM_OUTPUT_NAME, setup::LAB_STREAM_OUTPUT_SOURCE_ID)))
+	
 {
 	// Nothing to do	
 }
 
 void LabStreamMailer::Send(std::string message)
 {
-	_upLabStream->Send(message);
+	_upLabStreamOutput->Send(message);
 }
 
 void LabStreamMailer::Update()
 {
 	// Poll incoming messages
-	auto messages = _upLabStream->Poll();
+	auto messages = _upLabStreamInput->Poll();
 
 	// Go over callbacks and use them, if messages are available
 	if (!messages.empty())
@@ -37,11 +40,11 @@ void LabStreamMailer::Update()
 				// Weak pointer got invalid, so remove it later
 				toBeRemoved.push_back(i);
 			}
-			i++; // increment index
+			++i; // increment index
 		}
 
 		// Remove dead weak pointers
-		for (int j = toBeRemoved.size() - 1; j >= 0; j--) // do it backwards
+		for (int j = toBeRemoved.size() - 1; j >= 0; --j) // do it backwards
 		{
 			_callbacks.erase(_callbacks.begin() + toBeRemoved.at(j));
 		}
