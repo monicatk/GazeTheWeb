@@ -54,129 +54,8 @@ if(OS_LINUX) # Linux
 endif()
 
 if(OS_WINDOWS) # Windows
-	add_definitions(/MT) # Do not use MSVC RUNTIME_LIBRARY_DLL but static one. And no MTd, as CEF only uses MT
-	add_definitions(-D_HAS_EXCEPTIONS=0) # CEF settings disable exceptions. Tell it  VS, so no warnings are generated.
-endif()
-
-### EYETRACKER PLUGINS #########################################################
-
-set(EYETRACKER_PLUGIN_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/plugins/Eyetracker")
-
-# Plugin for OpenGaze API
-if(${CLIENT_BUILD_OPEN_GAZE_PLUGIN})
-
-	# Plugin project
-	add_library(
-		OpenGazePlugin
-		MODULE
-		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
-		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
-		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
-		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
-		${EYETRACKER_PLUGIN_DIRECTORY}/OpenGaze/OpenGazeImpl.cpp
-		${EYETRACKER_PLUGIN_DIRECTORY}/OpenGaze/include/GPClient.cpp)
-
-	# Tell user about it
-	message(STATUS "Plugin for OpenGaze API will be built.")
-	
-endif()
-
-# Plugin for SMI iViewX
-if(${CLIENT_BUILD_SMI_IVIEWX_PLUGIN})
-
-	# Check for SDK path
-	if(EXISTS ${CLIENT_SMI_IVIEWX_SDK_PATH})
-	
-		# SMI iViewX SDK
-		include_directories("${CLIENT_SMI_IVIEWX_SDK_PATH}/include")
-		set(SMI_IVIEWX_SDK_LIBRARIES "${CLIENT_SMI_IVIEWX_SDK_PATH}/iViewXAPI.lib")
-
-		# Plugin project
-		add_library(
-			SMIiViewXPlugin
-			MODULE
-			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
-			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
-			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
-			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
-			${EYETRACKER_PLUGIN_DIRECTORY}/SMIiViewX/SMIiViewXImpl.cpp)
-		
-		# Link SDK
-		target_link_libraries(SMIiViewXPlugin ${SMI_IVIEWX_SDK_LIBRARIES})
-
-		# Tell user about it
-		message(STATUS "Plugin for SMI iViewX will be built.")
-	
-	else()
-		message(WARNING "SMI iViewX SDK directory not found, plugin will *not* be built.")
-	endif()
-endif()
-
-# Plugin for Visual Interaction myGaze
-if(${CLIENT_BUILD_VI_MYGAZE_PLUGIN})
-
-	# Check for SDK path
-	if(EXISTS ${CLIENT_VI_MYGAZE_SDK_PATH})
-	
-		# Visual Interaction myGaze SDK
-		include_directories("${CLIENT_VI_MYGAZE_SDK_PATH}/include")
-		set(VI_MYGAZE_SDK_LIBRARIES "${CLIENT_VI_MYGAZE_SDK_PATH}/myGazeAPI.lib")
-
-		# Plugin project
-		add_library(
-			VImyGazePlugin
-			MODULE
-			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
-			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
-			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
-			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
-			${EYETRACKER_PLUGIN_DIRECTORY}/VImyGaze/VImyGazeImpl.cpp)
-		
-		# Link SDK
-		target_link_libraries(VImyGazePlugin ${VI_MYGAZE_SDK_LIBRARIES})
-
-		# Tell user about it
-		message(STATUS "Plugin for Visual Interaction myGaze will be built.")
-	else()
-		message(WARNING "Visual Interaction myGaze SDK directory not found, plugin will *not* be built.")
-	endif()
-endif()
-
-# Plugin for Tobii EyeX
-if(${CLIENT_BUILD_TOBII_EYEX_PLUGIN})
-
-	# Check for SDK path
-	if(EXISTS ${CLIENT_TOBII_EYEX_SDK_PATH})
-	
-		# Tobii EyeX SDK
-		include_directories("${CLIENT_TOBII_EYEX_SDK_PATH}/include")
-		set(TOBII_EYEX_SDK_LIBRARIES "${CLIENT_TOBII_EYEX_SDK_PATH}/lib/x86/Tobii.EyeX.Client.lib")
-
-		# Plugin project
-		add_library(
-			TobiiEyeXPlugin
-			MODULE
-			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
-			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
-			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
-			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
-			${EYETRACKER_PLUGIN_DIRECTORY}/TobiiEyeX/TobiiEyeXImpl.cpp)
-			
-		# Link SDK
-		target_link_libraries(TobiiEyeXPlugin ${TOBII_EYEX_SDK_LIBRARIES})
-		
-		# Tell user about it
-		message(STATUS "Plugin for Tobii EyeX will be built.")
-		
-		# Copy Tobii EyeX library to output folder
-		add_custom_command(TARGET TobiiEyeXPlugin POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
-			"${CLIENT_TOBII_EYEX_SDK_PATH}/lib/x86/Tobii.EyeX.Client.dll"
-			$<TARGET_FILE_DIR:TobiiEyeXPlugin>)
-	
-	else()
-		message(WARNING "Tobii EyeX SDK directory not found, plugin will *not* be built.")
-	endif()
+	add_definitions(/MT) # Do not use MSVC RUNTIME_LIBRARY_DLL but static one. And no MTd, as CEF only uses MT.
+	add_definitions(-D_HAS_EXCEPTIONS=0) # CEF settings disable exceptions. Tell it VS, so no warnings are generated.
 endif()
 
 ### CONTENT ####################################################################
@@ -192,17 +71,24 @@ add_subdirectory("${CLIENT_CONTENT_PATH}")
 
 ### SOURCES ####################################################################
 
+# Paths
+set(CLIENT_SRC_PATH "${CMAKE_CURRENT_LIST_DIR}/src")
+set(CLIENT_COMMON_PATH "${CMAKE_CURRENT_LIST_DIR}/common")
+
 # Include directory
 include_directories("${CMAKE_CURRENT_LIST_DIR}")
 
 # Collect own code
 file(GLOB_RECURSE SOURCES
-	"src/*.js"
-	"src/*.cpp"
-	"src/*.c")
+	"${CLIENT_SRC_PATH}/*.js"
+	"${CLIENT_SRC_PATH}/*.cpp"
+	"${CLIENT_SRC_PATH}/*.c"
+	"${CLIENT_COMMON_PATH}/*.cpp"
+	"${CLIENT_COMMON_PATH}/*.c")
 
 file(GLOB_RECURSE HEADERS
-	"src/*.h")
+	"${CLIENT_SRC_PATH}/*.h"
+	"${CLIENT_COMMON_PATH}/*.h")
 	
 ### EXTERNALS ##################################################################
 
@@ -425,3 +311,131 @@ if(CLIENT_DEPLOYMENT)
 		${CLIENT_CONTENT_PATH}
 		$<TARGET_FILE_DIR:${CEF_TARGET}>/content)
 endif(CLIENT_DEPLOYMENT)
+
+### EYETRACKER PLUGINS #########################################################
+
+set(EYETRACKER_PLUGIN_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/plugins/Eyetracker")
+
+# Plugin for OpenGaze API (broken, as MFC do not work here. use other implementation for networking)
+if(${CLIENT_BUILD_OPEN_GAZE_PLUGIN})
+
+	# Plugin project
+	add_library(
+		OpenGazePlugin
+		MODULE
+		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
+		${EYETRACKER_PLUGIN_DIRECTORY}/OpenGaze/OpenGazeImpl.cpp
+		${EYETRACKER_PLUGIN_DIRECTORY}/OpenGaze/include/GPClient.cpp
+		${CLIENT_COMMON_PATH}/LabStream/LabStream.cpp)
+		
+	# Link LSL
+	target_link_libraries(OpenGazePlugin ${LIBLSL_LIBRARIES})
+
+	# Tell user about it
+	message(STATUS "Plugin for OpenGaze API will be built.")
+	
+endif()
+
+# Plugin for SMI iViewX
+if(${CLIENT_BUILD_SMI_IVIEWX_PLUGIN})
+
+	# Check for SDK path
+	if(EXISTS ${CLIENT_SMI_IVIEWX_SDK_PATH})
+	
+		# SMI iViewX SDK
+		include_directories("${CLIENT_SMI_IVIEWX_SDK_PATH}/include")
+		set(SMI_IVIEWX_SDK_LIBRARIES "${CLIENT_SMI_IVIEWX_SDK_PATH}/iViewXAPI.lib")
+
+		# Plugin project
+		add_library(
+			SMIiViewXPlugin
+			MODULE
+			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
+			${EYETRACKER_PLUGIN_DIRECTORY}/SMIiViewX/SMIiViewXImpl.cpp
+			${CLIENT_COMMON_PATH}/LabStream/LabStream.cpp)
+		
+		# Link SDK and LSL
+		target_link_libraries(SMIiViewXPlugin ${SMI_IVIEWX_SDK_LIBRARIES} ${LIBLSL_LIBRARIES})
+
+		# Tell user about it
+		message(STATUS "Plugin for SMI iViewX will be built.")
+	
+	else()
+		message(WARNING "SMI iViewX SDK directory not found, plugin will *not* be built.")
+	endif()
+endif()
+
+# Plugin for Visual Interaction myGaze
+if(${CLIENT_BUILD_VI_MYGAZE_PLUGIN})
+
+	# Check for SDK path
+	if(EXISTS ${CLIENT_VI_MYGAZE_SDK_PATH})
+	
+		# Visual Interaction myGaze SDK
+		include_directories("${CLIENT_VI_MYGAZE_SDK_PATH}/include")
+		set(VI_MYGAZE_SDK_LIBRARIES "${CLIENT_VI_MYGAZE_SDK_PATH}/myGazeAPI.lib")
+
+		# Plugin project
+		add_library(
+			VImyGazePlugin
+			MODULE
+			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
+			${EYETRACKER_PLUGIN_DIRECTORY}/VImyGaze/VImyGazeImpl.cpp
+			${CLIENT_COMMON_PATH}/LabStream/LabStream.cpp)
+		
+		# Link SDK and LSL
+		target_link_libraries(VImyGazePlugin ${VI_MYGAZE_SDK_LIBRARIES} ${LIBLSL_LIBRARIES})
+
+		# Tell user about it
+		message(STATUS "Plugin for Visual Interaction myGaze will be built.")
+	else()
+		message(WARNING "Visual Interaction myGaze SDK directory not found, plugin will *not* be built.")
+	endif()
+endif()
+
+# Plugin for Tobii EyeX
+if(${CLIENT_BUILD_TOBII_EYEX_PLUGIN})
+
+	# Check for SDK path
+	if(EXISTS ${CLIENT_TOBII_EYEX_SDK_PATH})
+	
+		# Tobii EyeX SDK
+		include_directories("${CLIENT_TOBII_EYEX_SDK_PATH}/include")
+		set(TOBII_EYEX_SDK_LIBRARIES "${CLIENT_TOBII_EYEX_SDK_PATH}/lib/x86/Tobii.EyeX.Client.lib")
+
+		# Plugin project
+		add_library(
+			TobiiEyeXPlugin
+			MODULE
+			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
+			${EYETRACKER_PLUGIN_DIRECTORY}/TobiiEyeX/TobiiEyeXImpl.cpp
+			${CLIENT_COMMON_PATH}/LabStream/LabStream.cpp)
+			
+		# Link SDK and LSL
+		target_link_libraries(TobiiEyeXPlugin ${TOBII_EYEX_SDK_LIBRARIES} ${LIBLSL_LIBRARIES})
+		
+		# Tell user about it
+		message(STATUS "Plugin for Tobii EyeX will be built.")
+		
+		# Copy Tobii EyeX library to output folder
+		add_custom_command(TARGET TobiiEyeXPlugin POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			"${CLIENT_TOBII_EYEX_SDK_PATH}/lib/x86/Tobii.EyeX.Client.dll"
+			$<TARGET_FILE_DIR:TobiiEyeXPlugin>)
+	
+	else()
+		message(WARNING "Tobii EyeX SDK directory not found, plugin will *not* be built.")
+	endif()
+endif()

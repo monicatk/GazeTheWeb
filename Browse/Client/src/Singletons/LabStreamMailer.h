@@ -10,7 +10,7 @@
 #ifndef LABSTREAMMAILER_H_
 #define LABSTREAMMAILER_H_
 
-#include "src/Singletons/LabStream/LabStream.h"
+#include "common/LabStream/LabStream.h"
 #include <functional>
 
 // Class to abstract callbacks when message is received
@@ -66,15 +66,15 @@ public:
 private:
 
 	// LabStreamingLayer connection
-	LabStream _labStream;
+	std::unique_ptr<LabStream> _upLabStream;
 
 	// Vector of registered callbacks
 	std::vector<std::weak_ptr<LabStreamCallback> > _callbacks;
 
 	// Private copy / asignment constructors
-	LabStreamMailer() {}
+	LabStreamMailer();
 	LabStreamMailer(const LabStreamMailer&) {}
-        LabStreamMailer& operator = (const LabStreamMailer &) { return *this; }
+    LabStreamMailer& operator = (const LabStreamMailer &) { return *this; }
 };
 
 #endif // LABSTREAMMAILER_H_

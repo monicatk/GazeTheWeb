@@ -2,30 +2,31 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// Simple communiction with LabStreamingLayer. Enables one to send and receive
-// strings, called events.
+// Handles communication with LabStreamingLayer.
 
 #ifndef LABSTREAM_H_
 #define LABSTREAM_H_
 
+#include "externals/liblsl/include/lsl_cpp.h"
 #include <thread>
 #include <mutex>
 #include <string>
 #include <vector>
 
 // Forward declaration
+/*
 namespace lsl
 {
 	class stream_info;
 	class stream_outlet;
-}
+}*/
 
 class LabStream
 {
 public:
 
 	// Constructor
-	LabStream();
+	LabStream(std::string streamOutputName, std::string streamOutputSourceId, std::string streamInputName);
 
 	// Destructor
 	virtual ~LabStream();
@@ -37,6 +38,10 @@ public:
 	std::vector<std::string> Poll();
 
 private:
+
+	// Private copy / asignment constructors
+	LabStream(const LabStream&) {}
+	LabStream& operator = (const LabStream &) { return *this; }
 
 	// Members
 	std::unique_ptr<std::thread> _upReceiverThread;

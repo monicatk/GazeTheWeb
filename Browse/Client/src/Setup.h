@@ -52,9 +52,9 @@ namespace setup
 	static const bool	FILTER_USE_OUTLIER_REMOVAL = true;
 
 	// Experiments
-	static const std::string	LAB_STREAM_OUTPUT_NAME = "BrowserOutputStream";
-	static const std::string	LAB_STREAM_OUTPUT_SOURCE_ID = "myuniquesourceid23443";
-	static const std::string	LAB_STREAM_INPUT_NAME = "MiddlewareStream"; // may be set to same value as LAB_STREAM_OUTPUT_NAME to receive own events for debugging purposes
+	static const std::string	LAB_STREAM_OUTPUT_NAME = "GazeTheWebOutput";
+	static const std::string	LAB_STREAM_OUTPUT_SOURCE_ID = std::to_string(CLIENT_VERSION); // use client version as source id
+	static const std::string	LAB_STREAM_INPUT_NAME = LAB_STREAM_OUTPUT_NAME; //  "GazeTheWebInput"; // may be set to same value as LAB_STREAM_OUTPUT_NAME to receive own events for debugging purposes
 	static const bool			LOG_INTERACTIONS = false;
 
 	// Other

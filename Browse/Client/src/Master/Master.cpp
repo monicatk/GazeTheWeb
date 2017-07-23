@@ -405,6 +405,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 		{
 			for (const std::string& rMessage : messages)
 			{
+				// Just print all message received via LabStreamingLayer
 				LogInfo("LabStream: " + rMessage);
 			}
 		}

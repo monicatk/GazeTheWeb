@@ -4,28 +4,26 @@
 //============================================================================
 
 #include "LabStream.h"
-#include "src/Setup.h"
-#include "externals/liblsl/include/lsl_cpp.h"
 #include <iostream>
 #include <chrono>
 
-LabStream::LabStream()
+LabStream::LabStream(std::string streamOutputName, std::string streamOutputSourceId, std::string streamInputName)
 {
     // Setting up sending
     _upStreamInfo = std::unique_ptr<lsl::stream_info>(
         new lsl::stream_info(
-            setup::LAB_STREAM_OUTPUT_NAME,
+			streamOutputName,
             "Markers",
             1,
             lsl::IRREGULAR_RATE,
             lsl::cf_string,
-            setup::LAB_STREAM_OUTPUT_SOURCE_ID));
+			streamOutputSourceId));
     _upStreamOutlet = std::unique_ptr<lsl::stream_outlet>(new lsl::stream_outlet(*(_upStreamInfo.get())));
 
     // Setting up receiving
     std::mutex* pMutex = &_inputMutex; // pointer to mutex because reference of private member is not allowed
     std::vector<std::string>* pBuffer = &_inputBuffer; // same for buffer itself
-    _upReceiverThread = std::unique_ptr<std::thread>(new std::thread([pMutex, pBuffer]() // pass copies of pointers to members
+    _upReceiverThread = std::unique_ptr<std::thread>(new std::thread([pMutex, pBuffer, streamInputName]() // pass copies of pointers to members
     {
         // Receive data
         bool connected = false;
@@ -40,7 +38,7 @@ LabStream::LabStream()
                 streamInfos.clear();
                 while (streamInfos.empty())
                 {
-                    streamInfos = lsl::resolve_stream("name", setup::LAB_STREAM_INPUT_NAME); // search for stream with certain name
+                    streamInfos = lsl::resolve_stream("name", streamInputName); // search for stream with certain name
                     std::this_thread::sleep_for(std::chrono::seconds(1)); // do it every second
                 }
 

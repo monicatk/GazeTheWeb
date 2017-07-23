@@ -4,16 +4,22 @@
 //============================================================================
 
 #include "LabStreamMailer.h"
+#include "src/Setup.h"
+
+LabStreamMailer::LabStreamMailer() : _upLabStream(std::unique_ptr<LabStream>(new LabStream(setup::LAB_STREAM_OUTPUT_NAME, setup::LAB_STREAM_OUTPUT_SOURCE_ID, setup::LAB_STREAM_INPUT_NAME)))
+{
+	// Nothing to do	
+}
 
 void LabStreamMailer::Send(std::string message)
 {
-	_labStream.Send(message);
+	_upLabStream->Send(message);
 }
 
 void LabStreamMailer::Update()
 {
 	// Poll incoming messages
-	auto messages = _labStream.Poll();
+	auto messages = _upLabStream->Poll();
 
 	// Go over callbacks and use them, if messages are available
 	if (!messages.empty())
