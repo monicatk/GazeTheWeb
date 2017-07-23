@@ -67,13 +67,26 @@ bool Connect()
 	// Set sample callback
 	if (ret_connect == RET_SUCCESS)
 	{
-		/*
+		// Get system info
 		iV_GetSystemInfo(&systemInfoData);
-		LogInfo("iViewX ETSystem: ", systemInfoData.iV_ETDevice);
-		LogInfo("iViewX iV_Version: ", systemInfoData.iV_MajorVersion, ".", systemInfoData.iV_MinorVersion, ".", systemInfoData.iV_Buildnumber);
-		LogInfo("iViewX API_Version: ", systemInfoData.API_MajorVersion, ".", systemInfoData.API_MinorVersion, ".", systemInfoData.API_Buildnumber);
-		LogInfo("iViewX SystemInfo Samplerate: ", systemInfoData.samplerate);
-		*/
+
+		// Setup LabStreamingLayer
+		lsl::stream_info streamInfo(
+			"myGazeLSL",
+			"Gaze",
+			2, // must match with number of samples in SampleData structure
+			systemInfoData.samplerate,
+			lsl::cf_double64, // must match with type of samples in SampleData structure
+			"source_id");
+		streamInfo.desc().append_child_value("manufacturer", "Visual Interaction GmbH");
+		lsl::xml_element channels = streamInfo.desc().append_child("channels");
+		channels.append_child("channel")
+			.append_child_value("label", "gazeX")
+			.append_child_value("unit", "screenPixels");
+		channels.append_child("channel")
+			.append_child_value("label", "gazeY")
+			.append_child_value("unit", "screenPixels");
+		eyetracker_global::SetupLabStream(streamInfo);
 
 		// Define a callback function for receiving samples
 		iV_SetSampleCallback(SampleCallbackFunction);
