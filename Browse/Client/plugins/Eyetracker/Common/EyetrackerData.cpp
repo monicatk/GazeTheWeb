@@ -10,44 +10,66 @@ namespace eyetracker_global
 {
     // Variables
 	auto spSampleDataQueue = SampleQueue(new std::deque<SampleData>);
-	std::mutex sampleDataMutex;
-	std::unique_ptr<LabStreamOutput<double> > upLabStreamOutput = nullptr;
-	bool doLabStream = true;
+	std::mutex mutex;
+	
+	// Wrapper for lab stream output
+	struct LabStreamOutputWrapper
+	{
+	public:
+		LabStreamOutputWrapper(lsl::stream_info streamInfo, bool stream) : output(streamInfo), stream(stream) {}
+		void Continue() { stream = true; }
+		void Pause() { stream = false; }
+		void Send(const std::vector<double>& rData) { if (stream) { output.Send(rData); } }
+
+	private:
+		bool stream;
+		LabStreamOutput<double> output;
+	};
+	std::shared_ptr<LabStreamOutputWrapper> spLabStreamOutput = nullptr;
 
 	void SetupLabStream(lsl::stream_info streamInfo)
 	{
-		upLabStreamOutput = std::unique_ptr<LabStreamOutput<double> >(new LabStreamOutput<double>(streamInfo));
+		spLabStreamOutput = 
+			std::shared_ptr<LabStreamOutputWrapper >(new LabStreamOutputWrapper(
+				streamInfo, // stream info given by eye tracker implementation
+				false)); // start directly with streaming
 	}
 
 	void ContinueLabStream()
 	{
-		doLabStream = true;
+		mutex.lock(); // lock
+		spLabStreamOutput->Continue();
+		mutex.unlock(); // unlock
 	}
 
 	void PauseLabStream()
 	{
-		doLabStream = false;
+		mutex.lock(); // lock
+		spLabStreamOutput->Pause();
+		mutex.unlock(); // unlock
 	}
 
     void PushBackSample(SampleData sample) // called by eye tracker thread
     {
-		// Send to LabStreamingLayer
-		if (upLabStreamOutput && doLabStream)
+		mutex.lock(); // lock
+
+		// Send to lab streaming layer
+		if (spLabStreamOutput)
 		{
-			upLabStreamOutput->Send({ sample.x, sample.y });
+			spLabStreamOutput->Send({ sample.x, sample.y });
 		}
 
 		// Push sample to queue
-		sampleDataMutex.lock(); // lock
 		spSampleDataQueue->push_back(sample); // pushes sample
-		sampleDataMutex.unlock(); // unlock
+
+		mutex.unlock(); // unlock
     }
 
 	void FetchSamples(SampleQueue& rspSamples) // called by main thread
     {
-		sampleDataMutex.lock(); // lock
+		mutex.lock(); // lock
 		rspSamples = spSampleDataQueue; // move data to output
 		spSampleDataQueue = SampleQueue(new std::deque<SampleData>); // intialize empty queue for new data
-		sampleDataMutex.unlock(); // unlock
+		mutex.unlock(); // unlock
     }
 }
