@@ -32,23 +32,25 @@ namespace eyetracker_global
 
 	void SetupLabStream(lsl::stream_info streamInfo)
 	{
+		mutex.lock(); // lock
 		spLabStreamOutput = 
 			std::shared_ptr<LabStreamOutputWrapper >(new LabStreamOutputWrapper(
 				streamInfo, // stream info given by eye tracker implementation
 				true)); // start directly with streaming
+		mutex.unlock(); // unlock
 	}
 
 	void ContinueLabStream()
 	{
 		mutex.lock(); // lock
-		spLabStreamOutput->Continue();
+		if (spLabStreamOutput) { spLabStreamOutput->Continue(); }
 		mutex.unlock(); // unlock
 	}
 
 	void PauseLabStream()
 	{
 		mutex.lock(); // lock
-		spLabStreamOutput->Pause();
+		if (spLabStreamOutput) { spLabStreamOutput->Pause(); }
 		mutex.unlock(); // unlock
 	}
 
@@ -57,10 +59,7 @@ namespace eyetracker_global
 		mutex.lock(); // lock
 
 		// Send to lab streaming layer
-		if (spLabStreamOutput)
-		{
-			spLabStreamOutput->Update({ sample.x, sample.y }); // handles pause etc. internally
-		}
+		if (spLabStreamOutput) { spLabStreamOutput->Update({ sample.x, sample.y }); } // handles pause etc. internally
 
 		// Push sample to queue
 		spSampleDataQueue->push_back(sample); // pushes sample
