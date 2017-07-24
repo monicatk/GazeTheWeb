@@ -19,7 +19,10 @@ namespace eyetracker_global
 		LabStreamOutputWrapper(lsl::stream_info streamInfo, bool stream) : output(streamInfo), stream(stream) {}
 		void Continue() { stream = true; }
 		void Pause() { stream = false; }
-		void Send(const std::vector<double>& rData) { if (stream) { output.Send(rData); } }
+		void Update(const std::vector<double>& rData) {
+			if (stream) { output.Send(rData); } // send data if streaming ok
+			else { output.Send({ 0.0,0.0 }); } // send zeros if streaming is not ok (if this is not done, seems to stream original data furter?!)
+		}
 
 	private:
 		bool stream;
@@ -32,7 +35,7 @@ namespace eyetracker_global
 		spLabStreamOutput = 
 			std::shared_ptr<LabStreamOutputWrapper >(new LabStreamOutputWrapper(
 				streamInfo, // stream info given by eye tracker implementation
-				false)); // start directly with streaming
+				true)); // start directly with streaming
 	}
 
 	void ContinueLabStream()
@@ -56,7 +59,7 @@ namespace eyetracker_global
 		// Send to lab streaming layer
 		if (spLabStreamOutput)
 		{
-			spLabStreamOutput->Send({ sample.x, sample.y });
+			spLabStreamOutput->Update({ sample.x, sample.y }); // handles pause etc. internally
 		}
 
 		// Push sample to queue
