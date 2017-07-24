@@ -21,7 +21,7 @@ namespace eyetracker_global
 		void Pause() { stream = false; }
 		void Update(const std::vector<double>& rData) {
 			if (stream) { output.Send(rData); } // send data if streaming ok
-			else { output.Send({ 0.0,0.0 }); } // send zeros if streaming is not ok (if this is not done, seems to stream original data furter?!)
+			else { output.Send({ 0.0,0.0 }); } // send zeros if streaming is not ok (TODO if this is not done, seems to continue with streaming original data?!)
 		}
 
 	private:
