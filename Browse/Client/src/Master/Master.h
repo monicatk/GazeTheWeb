@@ -148,6 +148,9 @@ public:
 	// Notify about eye tracker status
 	virtual void threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status, EyeTrackerDevice device);
 
+	// Get whether data may be transferred
+	virtual bool threadsafe_MayTransferData();
+
 private:
 
     // Give listener full access

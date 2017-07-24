@@ -126,7 +126,6 @@ void TX_CALLCONVENTION OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connect
 	}
 }
 
-
 // Intialization of global interactor snapshot with unfiltered gaze
 bool InitializeGlobalInteractorSnapshot(TX_CONTEXTHANDLE hContext)
 {

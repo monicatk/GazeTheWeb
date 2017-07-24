@@ -570,6 +570,12 @@ void Master::threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status, EyeTrack
 	_threadJobsMutex.unlock();
 }
 
+bool Master::threadsafe_MayTransferData()
+{
+	// No job necessary, just reading bool
+	return _dataTransfer;
+}
+
 void Master::Loop()
 {
 	while (!_exit)
