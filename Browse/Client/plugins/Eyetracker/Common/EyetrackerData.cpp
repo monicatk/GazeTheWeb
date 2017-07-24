@@ -35,7 +35,7 @@ namespace eyetracker_global
 		spLabStreamOutput = 
 			std::shared_ptr<LabStreamOutputWrapper >(new LabStreamOutputWrapper(
 				streamInfo, // stream info given by eye tracker implementation
-				true)); // start directly with streaming
+				true)); // start directly with streaming (TODO: right now in EyeInput it is manually paused if during initialization data transfer was paused. Better ask here what is the state in master then relying on EyeInput class)
 		mutex.unlock(); // unlock
 	}
 
