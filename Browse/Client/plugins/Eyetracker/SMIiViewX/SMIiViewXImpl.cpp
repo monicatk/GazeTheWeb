@@ -42,7 +42,6 @@ int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 bool Connect()
 {
 	// Initialize eyetracker
-	SystemInfoStruct systemInfoData;
 	int ret_connect = 0;
 
 	// Connect to iViewX server
@@ -68,6 +67,7 @@ bool Connect()
 	if (ret_connect == RET_SUCCESS)
 	{
 		/*
+		SystemInfoStruct systemInfoData;
 		iV_GetSystemInfo(&systemInfoData);
 		LogInfo("iViewX ETSystem: ", systemInfoData.iV_ETDevice);
 		LogInfo("iViewX iV_Version: ", systemInfoData.iV_MajorVersion, ".", systemInfoData.iV_MinorVersion, ".", systemInfoData.iV_Buildnumber);

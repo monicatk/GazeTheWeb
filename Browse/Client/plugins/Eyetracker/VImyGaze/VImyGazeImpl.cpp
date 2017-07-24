@@ -42,7 +42,6 @@ int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 bool Connect()
 {
 	// Initialize eyetracker
-	SystemInfoStruct systemInfoData;
 	int ret_connect = 0;
 
 	// Connect to myGaze server
@@ -68,14 +67,15 @@ bool Connect()
 	if (ret_connect == RET_SUCCESS)
 	{
 		// Get system info
-		iV_GetSystemInfo(&systemInfoData);
+		SystemInfoStruct systemInfoData;
+		iV_GetSystemInfo(&systemInfoData); // not used right now
 
 		// Setup LabStreamingLayer
 		lsl::stream_info streamInfo(
 			"myGazeLSL",
 			"Gaze",
 			2, // must match with number of samples in SampleData structure
-			systemInfoData.samplerate,
+			lsl::IRREGULAR_RATE, // otherwise will generate samples even if transmission paused (and somehow even gets the "real" samples, no idea how)
 			lsl::cf_double64, // must match with type of samples in SampleData structure
 			"source_id");
 		streamInfo.desc().append_child_value("manufacturer", "Visual Interaction GmbH");
