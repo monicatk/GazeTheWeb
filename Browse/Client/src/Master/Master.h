@@ -68,31 +68,7 @@ public:
 	};
 
 	// Set data transfer
-	void SetDataTransfer(bool dataTransfer)
-	{
-		// Store value
-		_dataTransfer = dataTransfer;
-
-		// Take actions
-		if (_dataTransfer)
-		{
-			// Gaze data recording
-			_upEyeInput->ContinueLabStream();
-
-			// Visualization
-			_upWeb->SetWebPanelMode(WebPanelMode::STANDARD);
-			PushNotificationByKey("notification:data_transfer_continued", Type::NEUTRAL, true);
-		}
-		else
-		{
-			// Gaze data recording
-			_upEyeInput->PauseLabStream();
-
-			// Visualization
-			_upWeb->SetWebPanelMode(WebPanelMode::NO_DATA_TRANSFER);
-			PushNotificationByKey("notification:data_transfer_paused", Type::NEUTRAL, true);
-		}
-	}
+	void SetDataTransfer(bool dataTransfer);
 
 	// Get data transfer policy
 	bool MayTransferData() const

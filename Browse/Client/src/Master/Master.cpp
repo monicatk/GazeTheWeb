@@ -479,6 +479,38 @@ void Master::Exit()
 	_pCefMediator->DoMessageLoopWork();
 }
 
+void  Master::SetDataTransfer(bool dataTransfer)
+{
+	// Store value
+	_dataTransfer = dataTransfer;
+
+	// Take actions
+	if (_dataTransfer)
+	{
+		// Gaze data recording
+		_upEyeInput->ContinueLabStream();
+
+		// Visualization
+		_upWeb->SetWebPanelMode(WebPanelMode::STANDARD);
+		PushNotificationByKey("notification:data_transfer_continued", Type::NEUTRAL, true);
+
+		// Marker in LabStream
+		LabStreamMailer::instance().Send("Data transfer continued");
+	}
+	else
+	{
+		// Gaze data recording
+		_upEyeInput->PauseLabStream();
+
+		// Visualization
+		_upWeb->SetWebPanelMode(WebPanelMode::NO_DATA_TRANSFER);
+		PushNotificationByKey("notification:data_transfer_paused", Type::NEUTRAL, true);
+
+		// Marker in LabStream
+		LabStreamMailer::instance().Send("Data transfer paused");
+	}
+}
+
 eyegui::Layout* Master::AddLayout(std::string filepath, int layer, bool visible)
 {
     // Add layout
