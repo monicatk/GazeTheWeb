@@ -100,9 +100,42 @@ file(GLOB OGL
 	"${EXTERNALS_DIR}/OGL/*.c")
 include_directories(externals/OGL)
 
-# LabStreamingLayer directory and include
+# LabStreamingLayer 
 set(LIBLSL_DIRECTORY "${EXTERNALS_DIR}/liblsl")
 include_directories("${LIBLSL_DIRECTORY}/include")
+if(OS_WINDOWS) # Windows
+
+	# LabStreamingLayer (dynamic linking)
+	set(LIBLSL_LIBRARIES "${LIBLSL_DIRECTORY}/lib-vs2015_x86_release/liblsl32.lib")
+
+elseif(OS_LINUX) # Linux
+
+	# LabStreamingLayer (static linking)
+	set(LIBLSL_LIBRARIES_DEBUG "${LIBLSL_DIRECTORY}/lib-gcc_x64_debug/liblsl.a")
+	set(LIBLSL_LIBRARIES_RELEASE "${LIBLSL_DIRECTORY}/lib-gcc_x64_release/liblsl.a")
+	set(LIBLSL_BOOST_LIBRARIES_DEBUG "${LIBLSL_DIRECTORY}/lib-gcc_x64_debug/libboost.a")
+	set(LIBLSL_BOOST_LIBRARIES_RELEASE "${LIBLSL_DIRECTORY}/lib-gcc_x64_release/libboost.a")
+
+	# Add liblsl to debug and release builds
+	ADD_LOGICAL_TARGET("lsl_lib" "${LIBLSL_LIBRARIES_DEBUG}" "${LIBLSL_LIBRARIES_RELEASE}")
+	ADD_LOGICAL_TARGET("lsl_boost_lib" "${LIBLSL_BOOST_LIBRARIES_DEBUG}" "${LIBLSL_BOOST_LIBRARIES_RELEASE}")
+
+endif()
+
+# CURL
+if(WIN32) # Windows
+	set(CURL_DIRECTORY "${EXTERNALS_DIR}/curl")
+	set(CURL_INCLUDE_DIR "${CURL_DIRECTORY}/include")
+	set(CURL_LIBRARIES_RELEASE "${CURL_DIRECTORY}/lib/static-release-x86/libcurl_a.lib")
+	set(CURL_LIBRARIES_DEBUG "${CURL_DIRECTORY}/lib/static-debug-x86/libcurl_a_debug.lib")
+	ADD_LOGICAL_TARGET("curl_lib" "${CURL_LIBRARIES_DEBUG}" "${CURL_LIBRARIES_RELEASE}")
+	add_definitions(-DCURL_STATICLIB) # tell MSVC to use static lib of curl
+else() # Linux
+	# ${CURL_LIBRARIES}
+	# ${CURL_INCLUDE_DIR}
+	find_package(CURL REQUIRED)
+endif()
+include_directories(${CURL_INCLUDE_DIR}) 
 	
 ### SUBMODULES #################################################################
 
@@ -138,26 +171,6 @@ include_directories("${SUBMODULES_DIR}/spdlog/include")
 include_directories("${SUBMODULES_DIR}/spdlog/include")
 
 # TinyXML2 already included in eyeGUI
-	
-# Find libraries
-if(OS_WINDOWS) # Windows
-
-	# LabStreamingLayer (dynamic linking)
-	set(LIBLSL_LIBRARIES "${LIBLSL_DIRECTORY}/lib-vs2015_x86_release/liblsl32.lib")
-
-elseif(OS_LINUX) # Linux
-
-	# LabStreamingLayer (static linking)
-	set(LIBLSL_LIBRARIES_DEBUG "${LIBLSL_DIRECTORY}/lib-gcc_x64_debug/liblsl.a")
-	set(LIBLSL_LIBRARIES_RELEASE "${LIBLSL_DIRECTORY}/lib-gcc_x64_release/liblsl.a")
-	set(LIBLSL_BOOST_LIBRARIES_DEBUG "${LIBLSL_DIRECTORY}/lib-gcc_x64_debug/libboost.a")
-	set(LIBLSL_BOOST_LIBRARIES_RELEASE "${LIBLSL_DIRECTORY}/lib-gcc_x64_release/libboost.a")
-
-	# Add liblsl to debug and release builds
-	ADD_LOGICAL_TARGET("lsl_lib" "${LIBLSL_LIBRARIES_DEBUG}" "${LIBLSL_LIBRARIES_RELEASE}")
-	ADD_LOGICAL_TARGET("lsl_boost_lib" "${LIBLSL_BOOST_LIBRARIES_DEBUG}" "${LIBLSL_BOOST_LIBRARIES_RELEASE}")
-
-endif()
 
 # OpenGL (found this way on all systems)
 # ${OPENGL_LIBRARIES}
@@ -203,6 +216,7 @@ if(OS_WINDOWS) # Windows
 		glfw
 		eyeGUI
 		${LIBLSL_LIBRARIES}
+		curl_lib
 		libcef_lib
 		libcef_dll_wrapper
 		${CEF_STANDARD_LIBS})
@@ -247,6 +261,7 @@ elseif(OS_LINUX) # Linux
 		eyeGUI
 		lsl_lib
 		lsl_boost_lib
+		${CURL_LIBRARIES}
 		libcef_lib
 		libcef_dll_wrapper
 		${CEF_STANDARD_LIBS})

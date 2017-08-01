@@ -71,6 +71,7 @@ __submodules__:
 * GLM: http://glm.g-truc.net/0.9.7/index.html (MIT license chosen)
 * spdlog: https://github.com/gabime/spdlog
 * text-csv: https://github.com/roman-kashitsyn/text-csv
+* curl: https://github.com/curl/curl
 
 __plugins__:
 
