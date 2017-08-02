@@ -53,3 +53,5 @@ liblsl: https://github.com/sccn/labstreaminglayer
 	Boost: https://github.com/boostorg/boost
 text-csv: https://github.com/roman-kashitsyn/text-csv
 TinyXML2 (used one from eyeGUI library): https://github.com/leethomason/tinyxml2
+curl: https://github.com/curl/curl
+JSON: https://github.com/nlohmann/json

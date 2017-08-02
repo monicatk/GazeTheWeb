@@ -139,6 +139,12 @@ bool Settings::SaveSettings() const
 	pKeyboardLayout->SetAttribute("layout", layout.c_str());
 	pGlobal->InsertAfterChild(pGazeVisualization, pKeyboardLayout);
 
+	// Firebase email and password
+	tinyxml2::XMLElement* pFirebase = doc.NewElement("firebase");
+	pFirebase->SetAttribute("email", _globalSetup.firebaseEmail.c_str());
+	pFirebase->SetAttribute("password", _globalSetup.firebasePassword.c_str());
+	pGlobal->InsertFirstChild(pFirebase);
+
 	// Create environment for web setup
 	tinyxml2::XMLNode* pWeb = doc.NewElement("web");
 	pRoot->InsertAfterChild(pGlobal, pWeb);
@@ -222,6 +228,14 @@ bool Settings::LoadSettings()
 		{
 			_globalSetup.keyboardLayout = eyegui::KeyboardLayout::US_ENGLISH;
 		}
+	}
+
+	// Firebase email and password
+	tinyxml2::XMLElement* pFirebase = pGlobal->FirstChildElement("firebase");
+	if (pFirebase != NULL)
+	{
+		_globalSetup.firebaseEmail = pFirebase->Attribute("email");
+		_globalSetup.firebasePassword = pFirebase->Attribute("password");
 	}
 
 	// Fetch web setup

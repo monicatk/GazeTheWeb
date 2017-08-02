@@ -92,7 +92,7 @@ file(GLOB_RECURSE HEADERS
 	
 ### EXTERNALS ##################################################################
 
-# Set path to externals folder
+# Set path to externals
 set(EXTERNALS_DIR "${CMAKE_CURRENT_LIST_DIR}/externals")
 
 # Add OpenGLLoader

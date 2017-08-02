@@ -72,6 +72,7 @@ __submodules__:
 * spdlog: https://github.com/gabime/spdlog
 * text-csv: https://github.com/roman-kashitsyn/text-csv
 * curl: https://github.com/curl/curl
+* JSON: https://github.com/nlohmann/json
 
 __plugins__:
 

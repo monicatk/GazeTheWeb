@@ -6,6 +6,7 @@
 #include "Master.h"
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
+#include "src/Singletons/FirebaseMailer.h"
 #include "submodules/glfw/include/GLFW/glfw3.h"
 #include "submodules/text-csv/include/text/csv/ostream.hpp"
 #include <functional>
@@ -108,27 +109,6 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     // Save members
     _pCefMediator = pCefMediator;
 	_userDirectory = userDirectory;
-
-	// TODO testing taken from CURL examples "simple.c"
-	CURL *curl;
-	CURLcode res;
-
-	curl = curl_easy_init();
-	if (curl) {
-		curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
-		/* example.com is redirected, so we tell libcurl to follow redirection */
-		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-
-		/* Perform the request, res will get the return code */
-		res = curl_easy_perform(curl);
-		/* Check for errors */
-		if (res != CURLE_OK)
-			fprintf(stderr, "curl_easy_perform() failed: %s\n",
-				curl_easy_strerror(res));
-
-		/* always cleanup */
-		curl_easy_cleanup(curl);
-	}
 
     // ### GLFW AND OPENGL ###
 
@@ -434,6 +414,10 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
 	// Register callback
 	LabStreamMailer::instance().RegisterCallback(_spLabStreamCallback);
+
+	// ### FirebaseMailer ###
+	FirebaseMailer::Instance().Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword());
+	LogInfo(FirebaseMailer::Instance().Get("name").dump());
 
     // ### OTHER ###
 

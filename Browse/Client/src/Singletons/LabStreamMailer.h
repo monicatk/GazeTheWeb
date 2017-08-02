@@ -72,7 +72,7 @@ private:
 	// Vector of registered callbacks
 	std::vector<std::weak_ptr<LabStreamCallback> > _callbacks;
 
-	// Private copy / asignment constructors
+	// Private copy / assignment constructors
 	LabStreamMailer();
 	LabStreamMailer(const LabStreamMailer&) {}
     LabStreamMailer& operator = (const LabStreamMailer &) { return *this; }

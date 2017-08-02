@@ -38,6 +38,12 @@ public:
 	// Get homepage URL
 	std::string GetHomepage() const { return _webSetup.homepage; }
 
+	// Get Firebase Email
+	std::string GetFirebaseEmail() const { return _globalSetup.firebaseEmail; }
+
+	// Get Firebase Password
+	std::string GetFirebasePassword() const { return _globalSetup.firebasePassword; }
+
 	// Store homepage URL
 	void StoreHomepage(std::string URL) { _webSetup.homepage = URL; ApplySettings(true); }
 
@@ -84,6 +90,8 @@ private:
         bool showDescriptions = true;
         bool showGazeVisualization = false;
 		eyegui::KeyboardLayout keyboardLayout = eyegui::KeyboardLayout::US_ENGLISH;
+		std::string firebaseEmail = "";
+		std::string firebasePassword = "";
     };
 
 	// Setup of web settings

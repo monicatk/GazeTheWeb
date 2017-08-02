@@ -25,9 +25,6 @@
 #include "submodules/eyeGUI/include/eyeGUI.h"
 #include <queue>
 
-// TODO testing
-#include "externals/curl/include/curl/curl.h"
-
 // Forward declaration
 class Texture;
 struct GLFWwindow;
