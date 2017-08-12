@@ -81,6 +81,11 @@ bool FirebaseMailer::Login(std::string email, std::string password)
 	return !_token.empty();
 }
 
+json FirebaseMailer::Get(FirebaseKey key)
+{
+	return Get(FirebaseKeyString.at(key));
+}
+
 json FirebaseMailer::Get(std::string key)
 {
 	// TODO check for token failure and try to relogin

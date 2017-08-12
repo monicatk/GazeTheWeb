@@ -12,12 +12,16 @@
 
 using json = nlohmann::json;
 
-enum class FirebaseValue { PAGE_VISITS };
+enum class FirebaseKey { URL_INPUTS, MAX_BOOKMARK_COUNT, MAX_OPEN_TABS };
+const std::map<FirebaseKey, std::string> FirebaseKeyString
+{
+	{ FirebaseKey::URL_INPUTS,			"URL_INPUT" },
+	{ FirebaseKey::MAX_BOOKMARK_COUNT,	"MAX_BOOKMARK_COUNT" },
+	{ FirebaseKey::MAX_OPEN_TABS,		"MAX_OPEN_TABS" },
+};
 
 // TODO
-// - relogin when token is invalid (at least one atempt)
-// - send / receive data, maybe some intelligent value incrementation
-// - right now, no header evaluation is performed. just the data parsed
+// - refresh token mechanism
 // - Make a command queue and put everything in a single separate thread
 
 class FirebaseMailer
@@ -35,7 +39,14 @@ public:
 	bool Login(std::string email, std::string password);
 
 	// Get of JSON structure by key. Returns empty structure if not available
+	json Get(FirebaseKey key);
 	json Get(std::string key);
+
+	// Transform value
+	void Transform(FirebaseKey key, int delta);
+
+	// Save maximum in database, either my value or the one in database
+	void Maximum(FirebaseKey key, int value);
 
 	// Destructor
 	~FirebaseMailer() {}
@@ -45,8 +56,7 @@ private:
 	// Constants
 	const std::string API_KEY = "AIzaSyBoySYE4mQVhrtCB_1TbPsXa86W8_y35Ug"; // API key for our Firebase
 	const std::string FIREBASE_URL = "https://hellofirebase-2d544.firebaseio.com"; // URL of our Firebase
-	// TODO: at least store refresh token to relogin after timeout of token
-	
+
 	// Members
 	std::string _token = "";
 
