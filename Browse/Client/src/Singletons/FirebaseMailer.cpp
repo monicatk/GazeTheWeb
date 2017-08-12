@@ -4,15 +4,17 @@
 //============================================================================
 
 #include "FirebaseMailer.h"
+#include "src/Utils/glmWrapper.h"
 #include "src/Utils/Logger.h"
 #include "externals/curl/include/curl/curl.h"
 
-
+// ### Helpers ###
 size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
 	((std::string*)userp)->append((char*)contents, size * nmemb);
 	return size * nmemb;
 }
+// ###############
 
 bool FirebaseMailer::Login(std::string email, std::string password)
 {
@@ -29,15 +31,18 @@ bool FirebaseMailer::Login(std::string email, std::string password)
 		// Local variables
 		CURLcode res;
 		std::string postBuffer;
-		std::string answerBuffer;
+		std::string answerHeaderBuffer;
+		std::string answerBodyBuffer;
 		struct curl_slist* headers = NULL; // init to NULL is important 
 		headers = curl_slist_append(headers, "Content-Type: application/json"); // type is JSON
 		
 		// Set options
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers); // apply header
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback); // set callback for answer
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &answerBuffer); // set buffer for answer
-		curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L); // some redirections would be ok
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // follow potential redirection
+		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, WriteCallback); // set callback for answer header
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback); // set callback for answer body
+		curl_easy_setopt(curl, CURLOPT_HEADERDATA, &answerHeaderBuffer); // set buffer for answer header
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &answerBodyBuffer); // set buffer for answer body
 
 		// Post field
 		const json jsonPost =
@@ -65,7 +70,7 @@ bool FirebaseMailer::Login(std::string email, std::string password)
 		curl_easy_cleanup(curl); curl = nullptr;
 
 		// Parse answer to JSON object and extract token
-		auto jsonAnswer = json::parse(answerBuffer);
+		auto jsonAnswer = json::parse(answerBodyBuffer);
 		auto result = jsonAnswer.find("idToken");
 		if (result != jsonAnswer.end())
 		{
@@ -101,16 +106,16 @@ json FirebaseMailer::Get(std::string key)
 			// Local variables
 			std::string answerBuffer;
 			const std::string requestURL =
-				FIREBASE_URL + "/"
+				URL + "/"
 				+ key
 				+ ".json"
 				+ "?auth=" + _token;
 
 			// Setup CURL
-			curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of request
 			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // follow potential redirection
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback); // use write callback
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &answerBuffer); // set pointer to write data into
+			curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of request
 
 			// Perform the request
 			CURLcode res = curl_easy_perform(curl);
@@ -125,4 +130,21 @@ json FirebaseMailer::Get(std::string key)
 		}
 	}
 	return json(); // return empty json as fallback
+}
+
+void FirebaseMailer::Transform(FirebaseKey key, int delta)
+{
+	// Just add the delta to the existing value
+	Apply(key, [delta](int DBvalue) { return DBvalue + delta; });
+}
+
+void FirebaseMailer::Maximum(FirebaseKey key, int value)
+{
+	// Use maximum of database value and this
+	Apply(key, [value](int DBvalue) { return glm::max(DBvalue, value); });
+}
+
+void FirebaseMailer::Apply(FirebaseKey key, std::function<int(int)>)
+{
+	// TODO: implement concurrency proof database writing via ETag!
 }

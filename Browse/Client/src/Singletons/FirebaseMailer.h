@@ -7,13 +7,14 @@
 #ifndef FIREBASEMAILER_H_
 #define FIREBASEMAILER_H_
 
+#include "src/Setup.h"
 #include "submodules/json/src/json.hpp"
 #include <string>
 
 using json = nlohmann::json;
 
 enum class FirebaseKey { URL_INPUTS, MAX_BOOKMARK_COUNT, MAX_OPEN_TABS };
-const std::map<FirebaseKey, std::string> FirebaseKeyString
+const std::map<FirebaseKey, std::string> FirebaseKeyString // run time map, easier to implement than compile time template stuff
 {
 	{ FirebaseKey::URL_INPUTS,			"URL_INPUT" },
 	{ FirebaseKey::MAX_BOOKMARK_COUNT,	"MAX_BOOKMARK_COUNT" },
@@ -21,8 +22,9 @@ const std::map<FirebaseKey, std::string> FirebaseKeyString
 };
 
 // TODO
-// - refresh token mechanism
+// - refresh token mechanism (for this, every answer header must be parsed and checked for the return value)
 // - Make a command queue and put everything in a single separate thread
+// - Make is pausable (aka "Pause Data Transfer")
 
 class FirebaseMailer
 {
@@ -53,9 +55,12 @@ public:
 
 private:
 
+	// Apply function on value in database
+	void Apply(FirebaseKey key, std::function<int(int)>); // function parameter takes value from database on which function is applied. Return value is then written to database
+
 	// Constants
-	const std::string API_KEY = "AIzaSyBoySYE4mQVhrtCB_1TbPsXa86W8_y35Ug"; // API key for our Firebase
-	const std::string FIREBASE_URL = "https://hellofirebase-2d544.firebaseio.com"; // URL of our Firebase
+	const std::string API_KEY = setup::FIREBASE_API_KEY;
+	const std::string URL = setup::FIREBASE_URL;
 
 	// Members
 	std::string _token = "";
