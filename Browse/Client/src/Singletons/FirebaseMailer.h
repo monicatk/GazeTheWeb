@@ -44,6 +44,9 @@ public:
 	std::pair<std::string, json> Get(FirebaseKey key);
 	std::pair<std::string, json> Get(std::string key);
 
+	// Put single value in database. Uses ETag to check whether ok to put or worked on outdated value. Return true if succesful, otherwise do it another time, maybe with new value
+	bool Put(FirebaseKey key, std::string ETag, int value, std::string& rNewETag, int& rNewValue); // Fills newETag and newValue if ETag was outdated. Please try again with these values
+
 	// Transform value
 	void Transform(FirebaseKey key, int delta);
 
@@ -59,11 +62,11 @@ private:
 	bool Relogin();
 
 	// Apply function on value in database
-	void Apply(FirebaseKey key, std::function<int(int)>); // function parameter takes value from database on which function is applied. Return value is then written to database
+	void Apply(FirebaseKey key, std::function<int(int)> function); // function parameter takes value from database on which function is applied. Return value is then written to database
 
 	// Constants
-	const std::string API_KEY = setup::FIREBASE_API_KEY;
-	const std::string URL = setup::FIREBASE_URL;
+	const std::string _API_KEY = setup::FIREBASE_API_KEY;
+	const std::string _URL = setup::FIREBASE_URL;
 
 	// Members
 	std::string _idToken = ""; // short living token for identifying (indicator for being logged in!)
