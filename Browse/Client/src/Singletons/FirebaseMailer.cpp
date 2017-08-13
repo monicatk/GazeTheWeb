@@ -246,7 +246,7 @@ bool FirebaseMailer::Put(FirebaseKey key, std::string ETag, int value, std::stri
 			struct curl_slist* headers = NULL; // init to NULL is important
 			const std::string putHeaderBuffer = "if-match:" + ETag;
 			headers = curl_slist_append(headers, putHeaderBuffer.c_str()); // 'if-match' criteria to use the ETag
-			const std::string stringValue = std::to_string(value);
+			
 
 			// Request URL
 			std::string requestURL =
@@ -260,11 +260,16 @@ bool FirebaseMailer::Put(FirebaseKey key, std::string ETag, int value, std::stri
 			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // follow potential redirection
 			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT"); // tell about PUTting
 			curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L); // CURL told me to use it
-			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, stringValue.c_str()); // value to put
 			curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, WriteCallback); // set callback for answer header
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback); // set callback for answer body
 			curl_easy_setopt(curl, CURLOPT_HEADERDATA, &answerHeaderBuffer); // set buffer for answer header
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &answerBodyBuffer); // set buffer for answer body
+
+			// Post field
+			const std::string postField = std::to_string(value);
+
+			// Fill request
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postField.c_str()); // value to put
 			curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of request
 
 			// Perform the request
@@ -378,7 +383,7 @@ bool FirebaseMailer::Relogin()
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &answerBodyBuffer); // set buffer for answer body
 
 			// Post field
-			std::string postBuffer = "grant_type=refresh_token&refresh_token=" + refreshToken;
+			const std::string postBuffer = "grant_type=refresh_token&refresh_token=" + refreshToken;
 
 			// Fill request
 			curl_easy_setopt(curl, CURLOPT_URL, "https://securetoken.googleapis.com/v1/token?key=" + _API_KEY); // URL to access
