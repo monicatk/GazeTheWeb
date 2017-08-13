@@ -16,15 +16,15 @@ using json = nlohmann::json;
 enum class FirebaseKey { URL_INPUTS, MAX_BOOKMARK_COUNT, MAX_OPEN_TABS };
 const std::map<FirebaseKey, std::string> FirebaseKeyString // run time map, easier to implement than compile time template stuff
 {
-	{ FirebaseKey::URL_INPUTS,			"URL_INPUT" },
-	{ FirebaseKey::MAX_BOOKMARK_COUNT,	"MAX_BOOKMARK_COUNT" },
-	{ FirebaseKey::MAX_OPEN_TABS,		"MAX_OPEN_TABS" },
+	{ FirebaseKey::URL_INPUTS,			"test/URL_INPUT" },
+	{ FirebaseKey::MAX_BOOKMARK_COUNT,	"test/MAX_BOOKMARK_COUNT" },
+	{ FirebaseKey::MAX_OPEN_TABS,		"test/MAX_OPEN_TABS" },
 };
 
 // TODO
-// - refresh token mechanism (for this, every answer header must be parsed and checked for the return value)
 // - Make a command queue and put everything in a single separate thread
-// - Make is pausable (aka "Pause Data Transfer")
+// - Make is pausable (aka "Pause Data Transfer") -> can be done in command queue level
+// - Probably user name necessary to specify exact path the may write and read -> function that combines both, so name can be saved as member here (or via uid?)
 
 class FirebaseMailer
 {
@@ -37,12 +37,12 @@ public:
 		return _instance;
 	}
 
-	// Log in
+	// Log in. Return whether successful
 	bool Login(std::string email, std::string password);
 
-	// Get of JSON structure by key. Returns empty structure if not available
-	json Get(FirebaseKey key);
-	json Get(std::string key);
+	// Get of JSON structure by key. Returns empty structure (pair of ETag and JSON encoded data) if not available
+	std::pair<std::string, json> Get(FirebaseKey key);
+	std::pair<std::string, json> Get(std::string key);
 
 	// Transform value
 	void Transform(FirebaseKey key, int delta);
@@ -55,6 +55,9 @@ public:
 
 private:
 
+	// Relogin via refresh token. Returns whether successful
+	bool Relogin();
+
 	// Apply function on value in database
 	void Apply(FirebaseKey key, std::function<int(int)>); // function parameter takes value from database on which function is applied. Return value is then written to database
 
@@ -63,7 +66,8 @@ private:
 	const std::string URL = setup::FIREBASE_URL;
 
 	// Members
-	std::string _token = "";
+	std::string _idToken = ""; // short living token for identifying (indicator for being logged in!)
+	std::string _refreshToken = ""; // long living token for refreshing itself and idToken
 
 	// Private copy / assignment constructors
 	FirebaseMailer() {};

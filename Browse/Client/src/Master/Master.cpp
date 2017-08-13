@@ -417,7 +417,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
 	// ### FirebaseMailer ###
 	FirebaseMailer::Instance().Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword());
-	LogInfo(FirebaseMailer::Instance().Get("name").dump());
+	LogInfo(FirebaseMailer::Instance().Get("name").second.dump());
 
     // ### OTHER ###
 
