@@ -25,7 +25,6 @@ const std::map<FirebaseKey, std::string> FirebaseKeyString // run time map, easi
 };
 
 // TODO
-// - Make is pausable (aka "Pause Data Transfer") -> can be done in command queue level
 // - Probably user name necessary to specify exact path the may write and read -> function that combines both, so name can be saved as member here (or via uid?)
 // - Implement Get command that returns a future
 
@@ -45,6 +44,12 @@ public:
 
 	// Update (thread polling)
 	void Update();
+
+	// Continue mailer
+	void Continue() { _paused = false; }
+
+	// Pause mailer
+	void Pause() { _paused = true; }
 
 	// Available commands
 	void PushBack_Login(std::string email, std::string password);
@@ -92,17 +97,26 @@ private:
 	};
 	// #################################
 
+	// Typdef of command
+	typedef const std::function<void(FirebaseInterface&)> Command;
+
+	// Method that actually pushes back command (considers whether paused etc.)
+	void PushBackCommand(std::shared_ptr<Command> spCommand);
+
 	// Private copy / assignment constructors
 	FirebaseMailer();
 	FirebaseMailer(const FirebaseMailer&) {}
 	FirebaseMailer& operator = (const FirebaseMailer &) { return *this; }
 
+	// Pause indicator
+	bool _paused = false;
+
 	// Command queue (collecting shared function pointers that are executed sequentially within thread)
-	std::deque<std::shared_ptr<std::function<void(FirebaseInterface&)> > > _commandQueue;
+	std::deque<std::shared_ptr<Command> > _commandQueue;
 
 	// Threadding
 	std::mutex _mutex; // mutex for access of _currentCommand
-	std::shared_ptr<const std::function<void(FirebaseInterface&)> > _currentCommand; // what the thread is working on
+	std::shared_ptr<Command> _currentCommand; // what the thread is working on
 	std::unique_ptr<std::thread> _upThread; // the thread itself
 	bool _shouldStop = false; // written by this, read by thread
 };

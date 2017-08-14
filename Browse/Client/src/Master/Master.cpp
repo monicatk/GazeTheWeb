@@ -421,11 +421,6 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// TODO testing
 	// LogInfo(FirebaseMailer::Instance().Get("name").second.dump());
 	FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
-	FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
-	FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
-	FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
-	FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
-	FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
 
     // ### OTHER ###
 
@@ -503,17 +498,25 @@ void  Master::SetDataTransfer(bool dataTransfer)
 		// Gaze data recording
 		_upEyeInput->ContinueLabStream();
 
+		// FirebaseMailer
+		FirebaseMailer::Instance().Continue();
+
 		// Visualization
 		_upWeb->SetWebPanelMode(WebPanelMode::STANDARD);
 		PushNotificationByKey("notification:data_transfer_continued", Type::NEUTRAL, true);
 
 		// Marker in LabStream
 		LabStreamMailer::instance().Send("Data transfer continued");
+
+		// TODO: what about local logging?
 	}
 	else
 	{
 		// Gaze data recording
 		_upEyeInput->PauseLabStream();
+
+		// FirebaseMailer
+		FirebaseMailer::Instance().Pause();
 
 		// Visualization
 		_upWeb->SetWebPanelMode(WebPanelMode::NO_DATA_TRANSFER);
@@ -764,6 +767,12 @@ void Master::Loop()
         eyeGUIInput.gazeX = (int)spInput->gazeX;
         eyeGUIInput.gazeY = (int)spInput->gazeY;
 		eyeGUIInput.gazeUsed = spInput->gazeUponGUI;
+
+		// TODO Testing
+		if (eyeGUIInput.instantInteraction)
+		{
+			FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
+		}
 
         // Update super GUI, including pause button
 		eyeGUIInput = eyegui::updateGUI(_pSuperGUI, tpf, eyeGUIInput); // update super GUI with pause button

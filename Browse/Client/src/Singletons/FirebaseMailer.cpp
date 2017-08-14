@@ -471,6 +471,7 @@ void FirebaseMailer::FirebaseInterface::Apply(FirebaseKey key, std::function<int
 
 FirebaseMailer::FirebaseMailer()
 {
+	// Create thread where FirebaseInterface lives in
 	auto* pMutex = &_mutex;
 	auto* pCurrentCommand = &_currentCommand;
 	auto const * pShouldStop = &_shouldStop;
@@ -480,14 +481,14 @@ FirebaseMailer::FirebaseMailer()
 		FirebaseInterface interface;
 
 		// Current command to process
-		std::shared_ptr<const std::function<void(FirebaseInterface&)> > localCommand = nullptr;
+		std::shared_ptr<Command> localCommand = nullptr;
 
 		// While loop to work on commands
 		while (!*pShouldStop)
 		{
 			// Wait some time (would be better if threads wakes up at work)
 			using namespace std::chrono_literals;
-			std::this_thread::sleep_for(100ms); // TODO: this limits command execution to 10 per second. do something more intelligent to work on all availabe commands. maybe just swap the queues between threads
+			std::this_thread::sleep_for(1ms); // TODO: this limits command execution to 10 per second. do something more intelligent to work on all availabe commands. maybe just swap the queues between threads
 
 			// Extract current command
 			pMutex->lock();
@@ -526,7 +527,7 @@ void FirebaseMailer::Update()
 void FirebaseMailer::PushBack_Login(std::string email, std::string password)
 {
 	// Add command to queue, take parameters as copy
-	_commandQueue.push_back(std::shared_ptr<std::function<void(FirebaseInterface&)> >(new std::function<void(FirebaseInterface&)>([=](FirebaseInterface& rInterface)
+	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
 		rInterface.Login(email, password);
 	})));
@@ -535,7 +536,7 @@ void FirebaseMailer::PushBack_Login(std::string email, std::string password)
 void FirebaseMailer::PushBack_Transform(FirebaseKey key, int delta)
 {
 	// Add command to queue, take parameters as copy
-	_commandQueue.push_back(std::shared_ptr<std::function<void(FirebaseInterface&)> >(new std::function<void(FirebaseInterface&)>([=](FirebaseInterface& rInterface)
+	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
 		rInterface.Transform(key, delta);
 	})));
@@ -544,8 +545,13 @@ void FirebaseMailer::PushBack_Transform(FirebaseKey key, int delta)
 void FirebaseMailer::PushBack_Maximum(FirebaseKey key, int value)
 {
 	// Add command to queue, take parameters as copy
-	_commandQueue.push_back(std::shared_ptr<std::function<void(FirebaseInterface&)> >(new std::function<void(FirebaseInterface&)>([=](FirebaseInterface& rInterface)
+	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
 		rInterface.Maximum(key, value);
 	})));
+}
+
+void FirebaseMailer::PushBackCommand(std::shared_ptr<Command> spCommand)
+{
+	if (!_paused) { _commandQueue.push_back(spCommand); }
 }
