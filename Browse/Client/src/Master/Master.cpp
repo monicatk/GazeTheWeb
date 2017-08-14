@@ -765,6 +765,12 @@ void Master::Loop()
         eyeGUIInput.gazeY = (int)spInput->gazeY;
 		eyeGUIInput.gazeUsed = spInput->gazeUponGUI;
 
+		// TODO: Testing
+		if (eyeGUIInput.instantInteraction)
+		{
+			FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
+		}
+
         // Update super GUI, including pause button
 		eyeGUIInput = eyegui::updateGUI(_pSuperGUI, tpf, eyeGUIInput); // update super GUI with pause button
         if(_paused)

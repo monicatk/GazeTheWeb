@@ -473,9 +473,10 @@ FirebaseMailer::FirebaseMailer()
 {
 	// Create thread where FirebaseInterface lives in
 	auto* pMutex = &_mutex;
+	auto* pConditionVariable = &_conditionVariable;
 	auto* pCommandQueue = &_commandQueue;
 	auto const * pShouldStop = &_shouldStop;
-	_upThread = std::unique_ptr<std::thread>(new std::thread([pMutex, pCommandQueue, pShouldStop]() // pass copies of pointers to members
+	_upThread = std::unique_ptr<std::thread>(new std::thread([pMutex, pConditionVariable, pCommandQueue, pShouldStop]() // pass copies of pointers to members
 	{
 		// Create interface to firebase
 		FirebaseInterface interface;
@@ -486,15 +487,18 @@ FirebaseMailer::FirebaseMailer()
 		// While loop to work on commands
 		while (!*pShouldStop)
 		{
-			// Wait some time (would be better if threads wakes up at available work)
-			using namespace std::chrono_literals;
-			std::this_thread::sleep_for(1000ms);
-
-			// Extract current command queue in inner scope
+			// Wait for data
 			{
-				std::lock_guard<std::mutex> lock(*pMutex); // lock mutex in this scope
+				std::unique_lock<std::mutex> lock(*pMutex); // acquire lock
+				pConditionVariable->wait(
+					lock, // lock that is handled by condition variable
+					[pCommandQueue, pShouldStop]
+					{
+						return !pCommandQueue->empty() || *pShouldStop; // condition is either there are some commands or it is called to stop and become joinable
+					}); // hand over locking to the conidition variable which waits for notification by main thread
 				localCommandQueue = std::move(*pCommandQueue); // move content of command queue to local one
 				pCommandQueue->clear(); // clear original queue
+				lock.unlock(); // do not trust the scope stuff. But should be not necessary
 			}
 
 			// Work on commands
@@ -537,7 +541,8 @@ void FirebaseMailer::PushBackCommand(std::shared_ptr<Command> spCommand)
 {
 	if (!_paused) // only push back the command if not paused
 	{
-		std::lock_guard<std::mutex> lock(_mutex); // lock mutex in this scope
+		std::lock_guard<std::mutex> lock(_mutex);
 		_commandQueue.push_back(spCommand); // push back command to queue
+		_conditionVariable.notify_all(); // notify thread about new data
 	}
 }

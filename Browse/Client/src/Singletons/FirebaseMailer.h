@@ -13,6 +13,7 @@
 #include <deque>
 #include <thread>
 #include <mutex>
+#include <condition_variable>
 
 using json = nlohmann::json;
 
@@ -40,7 +41,7 @@ public:
 	}
 
 	// Destructor
-	~FirebaseMailer() { _shouldStop = true; _upThread->join(); }
+	~FirebaseMailer() { _shouldStop = true; _conditionVariable.notify_all(); _upThread->join(); } // tell thread to stop
 
 	// Continue mailer
 	void Continue() { _paused = false; }
@@ -109,7 +110,8 @@ private:
 	bool _paused = false;
 
 	// Threading
-	std::mutex _mutex; // mutex for access of _commandQueue (thread grabs all command and works on them)
+	std::mutex _mutex; // mutex for access of _commandQueue (thread grabs all commands and works on them)
+	std::condition_variable _conditionVariable; // used to wake up thread at available work
 	std::deque<std::shared_ptr<Command> > _commandQueue; // shared function pointers that are executed sequentially within thread
 	std::unique_ptr<std::thread> _upThread; // the thread itself
 	bool _shouldStop = false; // written by this, read by thread
