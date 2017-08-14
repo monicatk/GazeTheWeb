@@ -134,13 +134,20 @@ bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string pas
 		{
 			_refreshToken = result.value().get<std::string>();
 		}
+
+		// Search for uid
+		result = jsonAnswer.find("localId");
+		if (result != jsonAnswer.end())
+		{
+			_uid = result.value().get<std::string>(); // one could "break mailer" if not provided as nothing makes sense
+		}
 	}
 	return !_idToken.empty(); // id token is not empty, so something happened
 }
 
 std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(FirebaseKey key)
 {
-	return Get(FirebaseKeyString.at(key));
+	return Get(BuildFirebaseKey(key, _uid));
 }
 
 std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(std::string key)
@@ -252,7 +259,7 @@ bool FirebaseMailer::FirebaseInterface::Put(FirebaseKey key, std::string ETag, i
 			// Request URL
 			std::string requestURL =
 				_URL + "/"
-				+ FirebaseKeyString.at(key)
+				+ BuildFirebaseKey(key, _uid)
 				+ ".json"
 				+ "?auth=" + _idToken;
 
@@ -302,7 +309,7 @@ bool FirebaseMailer::FirebaseInterface::Put(FirebaseKey key, std::string ETag, i
 						answerBodyBuffer.clear();
 						requestURL =
 							_URL + "/"
-							+ FirebaseKeyString.at(key)
+							+ BuildFirebaseKey(key, _uid)
 							+ ".json"
 							+ "?auth=" + _idToken;
 						curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of new request
@@ -485,7 +492,7 @@ FirebaseMailer::FirebaseMailer()
 		std::deque<std::shared_ptr<Command> > localCommandQueue;
 
 		// While loop to work on commands
-		while (!*pShouldStop)
+		while (!*pShouldStop) // exits when should stop, so thread can be joined
 		{
 			// Wait for data
 			{

@@ -17,16 +17,21 @@
 
 using json = nlohmann::json;
 
-enum class FirebaseKey { URL_INPUTS, MAX_BOOKMARK_COUNT, MAX_OPEN_TABS };
-const std::map<FirebaseKey, std::string> FirebaseKeyString // run time map, easier to implement than compile time template stuff
+enum class FirebaseKey { URL_INPUTS, MAX_BOOKMARK_COUNT, MAX_OPEN_TABS }; // TODO: these are (unused!) examples; TODO: divide between user and global Firebase Keys
+static std::string BuildFirebaseKey(FirebaseKey key, std::string uid)
 {
-	{ FirebaseKey::URL_INPUTS,			"test/URL_INPUT" },
-	{ FirebaseKey::MAX_BOOKMARK_COUNT,	"test/MAX_BOOKMARK_COUNT" },
-	{ FirebaseKey::MAX_OPEN_TABS,		"test/MAX_OPEN_TABS" },
-};
+	// Simple mapping of enum to string
+	static const std::map<FirebaseKey, std::string> FirebaseKeyString // run time map, easier to implement than compile time template stuff
+	{
+		{ FirebaseKey::URL_INPUTS,			"urlInput" },
+		{ FirebaseKey::MAX_BOOKMARK_COUNT,	"maxBookmarkCount" },
+		{ FirebaseKey::MAX_OPEN_TABS,		"maxOpenTabs" },
+	};
+
+	return "users/" + uid + "/browse/" + FirebaseKeyString.at(key);
+}
 
 // TODO
-// - Probably user name necessary to specify exact path the may write and read -> function that combines both, so name can be saved as member here (or via uid?)
 // - Implement Get command that returns a future
 
 class FirebaseMailer
@@ -92,6 +97,7 @@ private:
 		// Members
 		std::string _idToken = ""; // short living token for identifying (indicator for being logged in!)
 		std::string _refreshToken = ""; // long living token for refreshing itself and idToken
+		std::string _uid = "0"; // user identifier (initialize with something that indicates "broken")
 	};
 	// #################################
 
