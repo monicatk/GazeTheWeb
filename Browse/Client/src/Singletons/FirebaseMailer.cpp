@@ -8,6 +8,7 @@
 #include "src/Utils/Logger.h"
 #include "externals/curl/include/curl/curl.h"
 #include <sstream>
+#include <chrono>
 
 // ### Helpers ###
 size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
@@ -16,7 +17,7 @@ size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
 	return size * nmemb;
 }
 
-bool HttpHeaderFirstLineFind(const std::string& rHeader, const std::string& rCompareTo)
+bool HttpHeaderFirstLineContains(const std::string& rHeader, const std::string& rCompareTo)
 {
 	std::string firstLine = rHeader.substr(0, rHeader.find("\n"));
 	return firstLine.find(rCompareTo) != std::string::npos;
@@ -24,12 +25,12 @@ bool HttpHeaderFirstLineFind(const std::string& rHeader, const std::string& rCom
 
 bool HttpHeaderOK(const std::string& rHeader)
 {
-	return HttpHeaderFirstLineFind(rHeader, "200 OK");
+	return HttpHeaderFirstLineContains(rHeader, "200 OK");
 }
 
 bool HttpHeaderPreconditionFailed(const std::string& rHeader)
 {
-	return HttpHeaderFirstLineFind(rHeader, "412 Precondition Failed");
+	return HttpHeaderFirstLineContains(rHeader, "412 Precondition Failed");
 }
 
 std::string HttpHeaderExtractETag(const std::string& rHeader)
@@ -59,7 +60,7 @@ std::string HttpHeaderExtractETag(const std::string& rHeader)
 }
 // ###############
 
-bool FirebaseMailer::Login(std::string email, std::string password)
+bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string password)
 {
 	// Invalidate tokens
 	_idToken = "";
@@ -105,7 +106,7 @@ bool FirebaseMailer::Login(std::string email, std::string password)
 		res = curl_easy_perform(curl);
 		if (res != CURLE_OK) // something went wrong
 		{
-			LogError("FirebaseMailer: ", "User login to Firebase failed: ", curl_easy_strerror(res));
+			LogError("FirebaseInterface: ", "User login to Firebase failed: ", curl_easy_strerror(res));
 			return false;
 		}
 
@@ -119,12 +120,12 @@ bool FirebaseMailer::Login(std::string email, std::string password)
 		if (result != jsonAnswer.end())
 		{
 			_idToken = result.value().get<std::string>();
-			LogInfo("FirebaseMailer: ", "User successfully logged into Firebase.");
+			LogInfo("FirebaseInterface: ", "User successfully logged into Firebase.");
 		}
 		else
 		{
 
-			LogError("FirebaseMailer: ", "User login to Firebase failed.");
+			LogError("FirebaseInterface: ", "User login to Firebase failed.");
 		}
 
 		// Search for refresh token (optional)
@@ -137,12 +138,12 @@ bool FirebaseMailer::Login(std::string email, std::string password)
 	return !_idToken.empty(); // id token is not empty, so something happened
 }
 
-std::pair<std::string, json> FirebaseMailer::Get(FirebaseKey key)
+std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(FirebaseKey key)
 {
 	return Get(FirebaseKeyString.at(key));
 }
 
-std::pair<std::string, json> FirebaseMailer::Get(std::string key)
+std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(std::string key)
 {
 	// Return value
 	std::pair<std::string, json> result;
@@ -224,7 +225,7 @@ std::pair<std::string, json> FirebaseMailer::Get(std::string key)
 	return result;
 }
 
-bool FirebaseMailer::Put(FirebaseKey key, std::string ETag, int value, std::string& rNewETag, int& rNewValue)
+bool FirebaseMailer::FirebaseInterface::Put(FirebaseKey key, std::string ETag, int value, std::string& rNewETag, int& rNewValue)
 {
 	bool success = false;
 	rNewETag = "";
@@ -339,19 +340,19 @@ bool FirebaseMailer::Put(FirebaseKey key, std::string ETag, int value, std::stri
 	return success;
 }
 
-void FirebaseMailer::Transform(FirebaseKey key, int delta)
+void FirebaseMailer::FirebaseInterface::Transform(FirebaseKey key, int delta)
 {
 	// Just add the delta to the existing value
 	Apply(key, [delta](int DBvalue) { return DBvalue + delta; });
 }
 
-void FirebaseMailer::Maximum(FirebaseKey key, int value)
+void FirebaseMailer::FirebaseInterface::Maximum(FirebaseKey key, int value)
 {
 	// Use maximum of database value and this
 	Apply(key, [value](int DBvalue) { return glm::max(DBvalue, value); });
 }
 
-bool FirebaseMailer::Relogin()
+bool FirebaseMailer::FirebaseInterface::Relogin()
 {
 	// Store refresh token locally
 	std::string refreshToken = _refreshToken;
@@ -393,7 +394,7 @@ bool FirebaseMailer::Relogin()
 			res = curl_easy_perform(curl);
 			if (res != CURLE_OK) // something went wrong
 			{
-				LogError("FirebaseMailer: ", "User reauthentifiation to Firebase failed: ", curl_easy_strerror(res));
+				LogError("FirebaseInterface: ", "User reauthentifiation to Firebase failed: ", curl_easy_strerror(res));
 				return false;
 			}
 
@@ -407,11 +408,11 @@ bool FirebaseMailer::Relogin()
 			if (result != jsonAnswer.end())
 			{
 				_idToken = result.value().get<std::string>();
-				LogInfo("FirebaseMailer: ", "User reauthentifiation to Firebase successful.");
+				LogInfo("FirebaseInterface: ", "User reauthentifiation to Firebase successful.");
 			}
 			else
 			{
-				LogError("FirebaseMailer: ", "User reauthentifiation to Firebase failed.");
+				LogError("FirebaseInterface: ", "User reauthentifiation to Firebase failed.");
 			}
 
 			// Search for refresh token (optional)
@@ -426,7 +427,7 @@ bool FirebaseMailer::Relogin()
 	return !_idToken.empty(); // ok if id token has been filled
 }
 
-void FirebaseMailer::Apply(FirebaseKey key, std::function<int(int)> function)
+void FirebaseMailer::FirebaseInterface::Apply(FirebaseKey key, std::function<int(int)> function)
 {
 	// Call own get method
 	std::pair<std::string, json> DBvalue = this->Get(key);
@@ -464,6 +465,87 @@ void FirebaseMailer::Apply(FirebaseKey key, std::function<int(int)> function)
 	// Tell user about no success
 	if (!success)
 	{
-		LogError("FirebaseMailer: ", "Data transfer to Firebase failed.");
+		LogError("FirebaseInterface: ", "Data transfer to Firebase failed.");
 	}
+}
+
+FirebaseMailer::FirebaseMailer()
+{
+	auto* pMutex = &_mutex;
+	auto* pCurrentCommand = &_currentCommand;
+	auto const * pShouldStop = &_shouldStop;
+	_upThread = std::unique_ptr<std::thread>(new std::thread([pMutex, pCurrentCommand, pShouldStop]() // pass copies of pointers to members
+	{
+		// Create interface to firebase
+		FirebaseInterface interface;
+
+		// Current command to process
+		std::shared_ptr<const std::function<void(FirebaseInterface&)> > localCommand = nullptr;
+
+		// While loop to work on commands
+		while (!*pShouldStop)
+		{
+			// Wait some time (would be better if threads wakes up at work)
+			using namespace std::chrono_literals;
+			std::this_thread::sleep_for(100ms); // TODO: this limits command execution to 10 per second. do something more intelligent to work on all availabe commands. maybe just swap the queues between threads
+
+			// Extract current command
+			pMutex->lock();
+			localCommand = *pCurrentCommand;
+			pMutex->unlock();
+
+			// When no command available, go back to start of loop
+			if (localCommand == nullptr) { continue; }
+
+			// Work on command
+			(*localCommand.get())(interface);
+
+			// Set current command to nullptr so main thread can feed new
+			pMutex->lock();
+			*pCurrentCommand = nullptr;
+			pMutex->unlock();
+		}
+	}));
+}
+
+void FirebaseMailer::Update()
+{
+	// Check whether commands are left
+	if (!_commandQueue.empty())
+	{
+		// Check whether thread is free to do something
+		std::lock_guard<std::mutex> lock(_mutex); // lock mutex in this scope
+		if (_currentCommand == nullptr) // no current command in thread
+		{
+			_currentCommand = _commandQueue.front();
+			_commandQueue.pop_front();
+		}
+	}
+}
+
+void FirebaseMailer::PushBack_Login(std::string email, std::string password)
+{
+	// Add command to queue, take parameters as copy
+	_commandQueue.push_back(std::shared_ptr<std::function<void(FirebaseInterface&)> >(new std::function<void(FirebaseInterface&)>([=](FirebaseInterface& rInterface)
+	{
+		rInterface.Login(email, password);
+	})));
+}
+
+void FirebaseMailer::PushBack_Transform(FirebaseKey key, int delta)
+{
+	// Add command to queue, take parameters as copy
+	_commandQueue.push_back(std::shared_ptr<std::function<void(FirebaseInterface&)> >(new std::function<void(FirebaseInterface&)>([=](FirebaseInterface& rInterface)
+	{
+		rInterface.Transform(key, delta);
+	})));
+}
+
+void FirebaseMailer::PushBack_Maximum(FirebaseKey key, int value)
+{
+	// Add command to queue, take parameters as copy
+	_commandQueue.push_back(std::shared_ptr<std::function<void(FirebaseInterface&)> >(new std::function<void(FirebaseInterface&)>([=](FirebaseInterface& rInterface)
+	{
+		rInterface.Maximum(key, value);
+	})));
 }

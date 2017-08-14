@@ -416,11 +416,16 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	LabStreamMailer::instance().RegisterCallback(_spLabStreamCallback);
 
 	// ### FirebaseMailer ###
-	FirebaseMailer::Instance().Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword());
+	FirebaseMailer::Instance().PushBack_Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword());
 
 	// TODO testing
-	LogInfo(FirebaseMailer::Instance().Get("name").second.dump());
-	FirebaseMailer::Instance().Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
+	// LogInfo(FirebaseMailer::Instance().Get("name").second.dump());
+	FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
+	FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
+	FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
+	FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
+	FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
+	FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
 
     // ### OTHER ###
 
@@ -617,6 +622,9 @@ void Master::Loop()
 
 		// Update lab streaming layer mailer to get incoming messages
 		LabStreamMailer::instance().Update();
+
+		// Update FirebaseMailer to poll thread
+		FirebaseMailer::Instance().Update();
 
 		// Poll CefMediator
 		_pCefMediator->Poll(tpf);
