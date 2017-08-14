@@ -3,6 +3,7 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Singleton which receives and sends data to Firebase.
+// TODO: Implement Get command that returns a future
 
 #ifndef FIREBASEMAILER_H_
 #define FIREBASEMAILER_H_
@@ -17,6 +18,7 @@
 
 using json = nlohmann::json;
 
+// Keys
 enum class FirebaseKey { URL_INPUTS, MAX_BOOKMARK_COUNT, MAX_OPEN_TABS }; // TODO: these are (unused!) examples; TODO: divide between user and global Firebase Keys
 static std::string BuildFirebaseKey(FirebaseKey key, std::string uid)
 {
@@ -31,9 +33,7 @@ static std::string BuildFirebaseKey(FirebaseKey key, std::string uid)
 	return "users/" + uid + "/browse/" + FirebaseKeyString.at(key);
 }
 
-// TODO
-// - Implement Get command that returns a future
-
+// Firebase mailer class
 class FirebaseMailer
 {
 public:
