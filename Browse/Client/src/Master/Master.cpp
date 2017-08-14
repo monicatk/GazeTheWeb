@@ -626,9 +626,6 @@ void Master::Loop()
 		// Update lab streaming layer mailer to get incoming messages
 		LabStreamMailer::instance().Update();
 
-		// Update FirebaseMailer to poll thread
-		FirebaseMailer::Instance().Update();
-
 		// Poll CefMediator
 		_pCefMediator->Poll(tpf);
 
@@ -767,12 +764,6 @@ void Master::Loop()
         eyeGUIInput.gazeX = (int)spInput->gazeX;
         eyeGUIInput.gazeY = (int)spInput->gazeY;
 		eyeGUIInput.gazeUsed = spInput->gazeUponGUI;
-
-		// TODO Testing
-		if (eyeGUIInput.instantInteraction)
-		{
-			FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
-		}
 
         // Update super GUI, including pause button
 		eyeGUIInput = eyegui::updateGUI(_pSuperGUI, tpf, eyeGUIInput); // update super GUI with pause button

@@ -473,55 +473,37 @@ FirebaseMailer::FirebaseMailer()
 {
 	// Create thread where FirebaseInterface lives in
 	auto* pMutex = &_mutex;
-	auto* pCurrentCommand = &_currentCommand;
+	auto* pCommandQueue = &_commandQueue;
 	auto const * pShouldStop = &_shouldStop;
-	_upThread = std::unique_ptr<std::thread>(new std::thread([pMutex, pCurrentCommand, pShouldStop]() // pass copies of pointers to members
+	_upThread = std::unique_ptr<std::thread>(new std::thread([pMutex, pCommandQueue, pShouldStop]() // pass copies of pointers to members
 	{
 		// Create interface to firebase
 		FirebaseInterface interface;
 
-		// Current command to process
-		std::shared_ptr<Command> localCommand = nullptr;
+		// Local command queue
+		std::deque<std::shared_ptr<Command> > localCommandQueue;
 
 		// While loop to work on commands
 		while (!*pShouldStop)
 		{
-			// Wait some time (would be better if threads wakes up at work)
+			// Wait some time (would be better if threads wakes up at available work)
 			using namespace std::chrono_literals;
-			std::this_thread::sleep_for(1ms); // TODO: this limits command execution to 10 per second. do something more intelligent to work on all availabe commands. maybe just swap the queues between threads
+			std::this_thread::sleep_for(1000ms);
 
-			// Extract current command
-			pMutex->lock();
-			localCommand = *pCurrentCommand;
-			pMutex->unlock();
+			// Extract current command queue in inner scope
+			{
+				std::lock_guard<std::mutex> lock(*pMutex); // lock mutex in this scope
+				localCommandQueue = std::move(*pCommandQueue); // move content of command queue to local one
+				pCommandQueue->clear(); // clear original queue
+			}
 
-			// When no command available, go back to start of loop
-			if (localCommand == nullptr) { continue; }
-
-			// Work on command
-			(*localCommand.get())(interface);
-
-			// Set current command to nullptr so main thread can feed new
-			pMutex->lock();
-			*pCurrentCommand = nullptr;
-			pMutex->unlock();
+			// Work on commands
+			for (const auto& rCommand : localCommandQueue)
+			{
+				(*rCommand.get())(interface);
+			}
 		}
 	}));
-}
-
-void FirebaseMailer::Update()
-{
-	// Check whether commands are left
-	if (!_commandQueue.empty())
-	{
-		// Check whether thread is free to do something
-		std::lock_guard<std::mutex> lock(_mutex); // lock mutex in this scope
-		if (_currentCommand == nullptr) // no current command in thread
-		{
-			_currentCommand = _commandQueue.front();
-			_commandQueue.pop_front();
-		}
-	}
 }
 
 void FirebaseMailer::PushBack_Login(std::string email, std::string password)
@@ -553,5 +535,9 @@ void FirebaseMailer::PushBack_Maximum(FirebaseKey key, int value)
 
 void FirebaseMailer::PushBackCommand(std::shared_ptr<Command> spCommand)
 {
-	if (!_paused) { _commandQueue.push_back(spCommand); }
+	if (!_paused) // only push back the command if not paused
+	{
+		std::lock_guard<std::mutex> lock(_mutex); // lock mutex in this scope
+		_commandQueue.push_back(spCommand); // push back command to queue
+	}
 }

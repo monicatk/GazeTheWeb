@@ -42,9 +42,6 @@ public:
 	// Destructor
 	~FirebaseMailer() { _shouldStop = true; _upThread->join(); }
 
-	// Update (thread polling)
-	void Update();
-
 	// Continue mailer
 	void Continue() { _paused = false; }
 
@@ -111,12 +108,9 @@ private:
 	// Pause indicator
 	bool _paused = false;
 
-	// Command queue (collecting shared function pointers that are executed sequentially within thread)
-	std::deque<std::shared_ptr<Command> > _commandQueue;
-
-	// Threadding
-	std::mutex _mutex; // mutex for access of _currentCommand
-	std::shared_ptr<Command> _currentCommand; // what the thread is working on
+	// Threading
+	std::mutex _mutex; // mutex for access of _commandQueue (thread grabs all command and works on them)
+	std::deque<std::shared_ptr<Command> > _commandQueue; // shared function pointers that are executed sequentially within thread
 	std::unique_ptr<std::thread> _upThread; // the thread itself
 	bool _shouldStop = false; // written by this, read by thread
 };
