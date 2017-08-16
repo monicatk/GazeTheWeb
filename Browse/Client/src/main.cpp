@@ -33,7 +33,7 @@ void Execute(CefRefPtr<MainCefApp> app, std::string userDirectory)
 int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<MainCefApp> app, void* windows_sandbox_info, std::string userDirectory)
 {
 
-#ifdef DEPLOYMENT
+#ifdef CLIENT_DEPLOYMENT
 
 	// Disable logging of CEF
 	settings.log_severity = LOGSEVERITY_DISABLE;
