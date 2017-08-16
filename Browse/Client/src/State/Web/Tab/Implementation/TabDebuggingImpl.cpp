@@ -11,6 +11,9 @@
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
 #include "submodules/glm/glm/gtc/matrix_transform.hpp"
+// Integrating reduce..
+#include <algorithm>
+#include <numeric>
 
 // Shader programs (For debugging rectangles)
 const std::string vertexShaderSource =
@@ -150,10 +153,20 @@ void Tab::DrawDebuggingOverlay() const
 			// Render rects
 			for (const auto rRect : rDOMTextLink->GetRects())
 			{
-				renderRect(
-					rRect, 
-					(rDOMTextLink->IsFixed())
-				);
+				bool visible = false;
+				for (bool b : rDOMTextLink->GetOccBitmask())
+				{
+					visible |= b;
+					if (b)
+						break;
+				}
+				if (visible)
+					renderRect(
+						rRect,
+						(rDOMTextLink->IsFixed())
+					);
+				/*else
+					LogInfo("TabDebuggingImpl: Hiding DOMTextLink with id=", rDOMTextLink->GetId());*/
 			}
 		}
 

@@ -180,15 +180,20 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		_upWebView->GetWidth(),
 		_upWebView->GetHeight(),
 		_upWebView->GetResolutionX(),
-		_upWebView->GetResolutionY());
+		_upWebView->GetResolutionY()
+		);
 
 	// Update highlight rectangle of webview
 	// TODO: alternative: give webview shared pointer to DOM nodes
 	std::vector<Rect> rects;
 	for (const auto& rIdNodePair : _TextLinkMap)
 	{
+		if (!rIdNodePair.second)
+			continue;
+
 		for (const auto& rRect : rIdNodePair.second->GetRects())
 		{
+			// TODO: Sometimes breaks at this position in debug mode
 			rects.push_back(rRect);
 		}
 	}

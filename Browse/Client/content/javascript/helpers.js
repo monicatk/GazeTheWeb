@@ -413,5 +413,9 @@ function PrintPerformanceInformation()
             100*Math.round(time_spent_creating_bitmask/window.page_load_time_*1000)/1000 +'% of page load time');
 }
 
+function SendFaviconURLtoCEF(url)
+{
+    ConsolePrint("#FaviconURL#"+url+"#");
+}
 
 ConsolePrint("Successfully imported helpers.js!");

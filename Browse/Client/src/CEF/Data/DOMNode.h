@@ -64,7 +64,7 @@ public:
 	int GetFixedId() const { return _fixedId; }
 	int GetOverflowId() const { return _overflowId; }
 	int IsFixed() const { return (_fixedId >= 0); }
-
+	std::vector<bool> GetOccBitmask() const { return _occBitmask; }
 private:
 
 	// Setter
@@ -72,10 +72,12 @@ private:
 	void SetRects(std::vector<Rect> rects) { _rects = rects; }
 	void SetFixedId(int fixedId) { _fixedId = fixedId; }
 	void SetOverflowId(int overflowId) { _overflowId = overflowId; }
+	void SetOccBitmask(std::vector<bool> bitmask) { _occBitmask = bitmask; }
 
 	bool IPCSetRects(CefRefPtr<CefListValue> data);
 	bool IPCSetFixedId(CefRefPtr<CefListValue> data);
 	bool IPCSetOverflowId(CefRefPtr<CefListValue> data);
+	bool IPCSetOccBitmask(CefRefPtr<CefListValue> data);
 
 	// Members
 	static const std::vector<DOMAttribute> _description;
@@ -83,6 +85,7 @@ private:
 	std::vector<Rect> _rects = {};
 	int _fixedId = -1;		// first FixedElement's ID, which is hierarchically above this node, if any
 	int _overflowId = -1;	// first DOMOverflowElement's ID, which is hierarchically above this node, if any
+	std::vector<bool> _occBitmask;
 };
 
 /*

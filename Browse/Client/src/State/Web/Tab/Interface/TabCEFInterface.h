@@ -94,6 +94,12 @@ public:
 
 	// Tell about JavaScript dialog
 	virtual void RequestJSDialog(JavaScriptDialogType type, std::string message) = 0;
+
+	// Mediator checks first if favicon image has to be loaded
+	virtual bool IsFaviconAlreadyAvailable(std::string img_url) = 0;
+
+	int _current_favicon_bytes = 0;
+	std::vector<std::string> _loaded_favicon_urls;
 };
 
 #endif // TABCEFINTERFACE_H_

@@ -40,6 +40,16 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	// ###############
 	// ### Favicon ###
 	// ###############
+	if (requestString.compare(0, 12, "#FaviconURL#") == 0)
+	{
+		auto split = SplitBySeparator(requestString, '#');
+		if (split.size() > 1)
+		{
+			// Currently, all finished image downloads trigger set up as favicon image in Tab
+			_pMediator->StartImageDownload(browser, split[1]);
+		}
+		return true;
+	}
 
 	if (requestString == "faviconBytesReady")
 	{
@@ -195,6 +205,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				}
 
 				// Instruct Renderer Process to initialize empty DOM Nodes with data
+				// TODO: Move this to DOM node constructor?
 				CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("LoadDOM" + ipcName + "Data");
 				msg->GetArgumentList()->SetInt(0, type);
 				msg->GetArgumentList()->SetInt(1, id);
@@ -274,7 +285,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	}
 
 	// If request is unknown & couldn't be handled, assume it to be a ConsolePrint call in JS and log it
-	LogDebug("Javascript: ", requestString);
+	LogInfo("Javascript: ", requestString);
 
 	return false;
 }

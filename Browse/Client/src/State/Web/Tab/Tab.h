@@ -290,6 +290,7 @@ public:
     // Getter and setter for favicon URL
     virtual std::string GetFavIconURL() const { return _favIconUrl; }
     virtual void SetFavIconURL(std::string url) { _favIconUrl = url; }
+	virtual bool IsFaviconAlreadyAvailable(std::string img_url);
 
     // Setter of URL. Does not load it. Should be called by CefMediator only
 	virtual void SetURL(std::string URL);

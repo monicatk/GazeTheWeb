@@ -80,11 +80,24 @@ public:
     // Sets Tab's URL attribute, called by Handler when main frame starts loading a page
     void SetURL(CefRefPtr<CefBrowser> browser);
 
-    void ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
-    void ResetFavicon(CefRefPtr<CefBrowser> browser);
+
+	void StartImageDownload(CefRefPtr<CefBrowser> browser, CefString img_url) {
+		_handler->StartImageDownload(browser, img_url);
+	}
 
     void SetCanGoBack(CefRefPtr<CefBrowser> browser, bool canGoBack);
     void SetCanGoForward(CefRefPtr<CefBrowser> browser, bool canGoForward);
+
+
+	// ### FAVICON SETTING ###
+	void ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
+	void ResetFavicon(CefRefPtr<CefBrowser> browser);
+	// Get byte code from CefImage and send it to corresponding Tab
+	bool ForwardFaviconBytes(CefRefPtr<CefBrowser> browser, CefRefPtr<CefImage> img);
+	// Check if favicon was already loaded before new image is also loaded
+	bool IsFaviconAlreadyAvailable(CefRefPtr<CefBrowser> browser, CefString img_url);
+
+
 
     // External zoom level request
     void SetZoomLevel(TabCEFInterface* pTab);

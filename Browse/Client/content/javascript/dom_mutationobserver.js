@@ -192,6 +192,37 @@ function AnalyzeNode(node)
 			CreateDOMSelectField(node);
 		}
 
+		// Find high res favicons
+		// TODO: Loading of smaller resolutions could be prevented
+		if(node.tagName == "LINK")
+		{
+			if(node.rel && node.rel.includes("apple-touch-icon"))
+			{
+				SendFaviconURLtoCEF(node.href);
+			}
+			if(node.href && node.href.includes("favicon") && node.href.includes(".png"))
+			{
+				SendFaviconURLtoCEF(node.href);
+			}
+		}
+		if(node.tagName == "META")
+		{
+			if(prop = node.getAttribute("property"))
+			{
+				if(prop.includes("og:image"))
+				{
+					SendFaviconURLtoCEF(node.content);
+				}
+			}
+			if(name = node.getAttribute("name"))
+			{
+				if(name.includes("msapplication-TileImage"))
+				{
+					SendFaviconURLtoCEF(node.content);
+				}
+			}
+			
+		}
 
 		// Find text links
 		if(node.tagName == 'A' )
