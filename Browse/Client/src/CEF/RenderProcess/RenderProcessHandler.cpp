@@ -165,77 +165,6 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 		}
 	}
 
-    // EXPERIMENTAL: Handle request of favicon image bytes
-    if (msgName == "GetFavIconBytes")
-    {
-        CefRefPtr<CefFrame> frame = browser->GetMainFrame();
-        CefRefPtr<CefV8Context> context = frame->GetV8Context();
-
-		CefRefPtr<CefListValue> args = msg->GetArgumentList();
-		int height = -2, width = -2;
-		const std::string url = args->GetString(0);
-		//height = args->GetInt(1);
-
-        // Create process message, which is to be sent to Handler
-        msg = CefProcessMessage::Create("ReceiveFavIconBytes");
-        args = msg->GetArgumentList();
-
-        if (context->Enter())
-		{
-            CefRefPtr<CefV8Value> globalObj = context->GetGlobal();
-
-			if (globalObj->GetValue("favIconHeight")->IsDouble() && globalObj->GetValue("favIconWidth")->IsDouble())
-			{
-				height = globalObj->GetValue("favIconHeight")->GetDoubleValue();
-				width = globalObj->GetValue("favIconWidth")->GetDoubleValue();
-
-				// Fill msg args with help of this index variable
-				int index = 0;
-				// Write image resolution to IPC response
-				args->SetInt(index++, width);
-				args->SetInt(index++, height);
-
-				if (width > 0 && height > 0)
-				{
-					IPCLogDebug(browser, "Reading bytes of favicon (w: " + std::to_string(width) + ", h: " + std::to_string(height) + ")");
-
-					CefRefPtr<CefV8Value> byteArray = globalObj->GetValue("favIconData");
-
-					// Fill byte array with JS
-					browser->GetMainFrame()->ExecuteJavaScript(_js_favicon_copy_img_bytes_to_v8array, browser->GetMainFrame()->GetURL(), 0);
-
-					// Read out each byte and write it to IPC msg
-					//bool error_occured = false;
-					for (int i = 0; i < byteArray->GetArrayLength(); i++)
-					{
-						//// Check if value IsInt will fail!
-						//error_occured = error_occured || byteArray->GetValue(i)->IsInt();
-						//if (error_occured)
-						//{
-						args->SetInt(index++, byteArray->GetValue(i)->GetIntValue());
-						//}
-					}
-					
-					//if(!error_occured)
-					browser->SendProcessMessage(PID_BROWSER, msg);
-					//else
-					//{
-					//	IPCLogDebug(browser, "An error occured while reading out favicon bytes!");
-					//}
-				}
-				else
-				{
-					IPCLogDebug(browser, "Invalid favicon image resolution: w=" + std::to_string(width) + ", h=" + std::to_string(height));
-				}
-			}
-			else
-			{
-				IPCLogDebug(browser, "Failed to load favicon height and/or width, expected double value, got something different. Aborting.");
-			}
-            context->Exit();
-        }
-
-    }
 
     if (msgName == "GetPageResolution")
     {
@@ -465,9 +394,6 @@ void RenderProcessHandler::OnContextCreated(
             // Create JS variables for width and height of favicon image
             globalObj->SetValue("favIconHeight", CefV8Value::CreateInt(-1), V8_PROPERTY_ATTRIBUTE_NONE);
             globalObj->SetValue("favIconWidth", CefV8Value::CreateInt(-1), V8_PROPERTY_ATTRIBUTE_NONE);
-
-			// Create an image object, which will later contain favicon image 
-            frame->ExecuteJavaScript(_js_favicon_create_img, frame->GetURL(), 0);
 
 			// Inject Javascript code which extends the current page's context by our methods
 			// and automatically creates a MutationObserver instance
