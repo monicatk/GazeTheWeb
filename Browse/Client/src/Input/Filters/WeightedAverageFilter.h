@@ -2,7 +2,10 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// Weighted average filtering.
+// Weighted average filtering. For fixation recogniction, samples are compared
+// with each other and not with potential fixation. Outlier detection intro-
+// duces delay of one sample, regardless whether that sample would fit into
+// a fixation or a saccade.
 
 #ifndef WEIGHTEDAVERAGEFILTER_H_
 #define WEIGHTEDAVERAGEFILTER_H_
