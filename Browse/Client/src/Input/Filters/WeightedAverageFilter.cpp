@@ -19,18 +19,15 @@ WeightedAverageFilter::WeightedAverageFilter(FilterKernel kernel, unsigned int w
 	_gaussianDenominator = (2.f * glm::pow(sigma, 2.f));
 }
 
-void WeightedAverageFilter::Update(SampleQueue spSamples)
+void WeightedAverageFilter::ApplyFilter(const SampleQueue& rSamples, double& rGazeX, double& rGazeY, float& rFixationDuration) const
 {
-	// Super call which moves samples to member
-	Filter::Update(spSamples);
-
 	// Prepare variables
 	double sumX = 0;
 	double sumY = 0;
 	double weightSum = 0;
 	
 	// Indexing
-	const int size = (int)_spSamples->size();
+	const int size = (int)rSamples->size();
 	int endIndex = glm::max(0, size - (int)_windowSize);
 	int startIndex = size - 1;
 
@@ -50,13 +47,13 @@ void WeightedAverageFilter::Update(SampleQueue spSamples)
 	for(int i = startIndex; i >= endIndex; --i) // latest to oldest means reverse order in queue
 	{
 		// Get current sample
-		const auto& rGaze = _spSamples->at(i);
+		const auto& rGaze = rSamples->at(i);
 
 		// Saccade detection
 		if (i < size - 1) // only proceed when there is a previous sample to check against
 		{
 			// Check distance of current sample and previously filtered one
-			const auto& prevGaze = _spSamples->at(i + 1); // in terms of time, prevGaze is newer than gaze
+			const auto& prevGaze = rSamples->at(i + 1); // in terms of time, prevGaze is newer than gaze
 			if (glm::distance(
 				glm::vec2(prevGaze.x, prevGaze.y),
 				glm::vec2(rGaze.x, rGaze.y))
@@ -67,7 +64,7 @@ void WeightedAverageFilter::Update(SampleQueue spSamples)
 					int nextIndex = i - 1; // index of next sample to filter (which is older than current)
 					if (nextIndex >= 0)
 					{
-						const auto& nextGaze = _spSamples->at(nextIndex);
+						const auto& nextGaze = rSamples->at(nextIndex);
 						if (glm::distance(
 							glm::vec2(prevGaze.x, prevGaze.y),
 							glm::vec2(nextGaze.x, nextGaze.y))
@@ -115,52 +112,13 @@ void WeightedAverageFilter::Update(SampleQueue spSamples)
 	if (oldestUsedIndex >= 0)
 	{
 		// Filter gaze
-		_gazeX = sumX / weightSum;
-		_gazeY = sumY / weightSum;
+		rGazeX = sumX / weightSum;
+		rGazeY = sumY / weightSum;
 
 		// Calculate fixation duration (duration from now to receiving of oldest sample contributing to fixation)
-		fixationDuration = (float)((double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch() - _spSamples->at(oldestUsedIndex).timestamp).count() / 1000.0);
+		fixationDuration = (float)((double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch() - rSamples->at(oldestUsedIndex).timestamp).count() / 1000.0);
 	}
-	_fixationDuration = fixationDuration; // update fixation duration
-}
-
-double WeightedAverageFilter::GetFilteredGazeX() const
-{
-	return _gazeX;
-}
-
-double WeightedAverageFilter::GetFilteredGazeY() const
-{
-	return _gazeY;
-}
-
-double WeightedAverageFilter::GetRawGazeX() const
-{
-	if (!_spSamples->empty())
-	{
-		return _spSamples->back().x;
-	}
-	else
-	{
-		return -1;
-	}
-}
-
-double WeightedAverageFilter::GetRawGazeY() const
-{
-	if (!_spSamples->empty())
-	{
-		return _spSamples->back().y;
-	}
-	else
-	{
-		return -1;
-	}
-}
-
-float WeightedAverageFilter::GetFixationDuration() const
-{
-	return _fixationDuration;
+	rFixationDuration = fixationDuration; // update fixation duration
 }
 
 double WeightedAverageFilter::CalculateWeight(unsigned int i) const

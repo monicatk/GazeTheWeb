@@ -22,28 +22,68 @@ Filter::~Filter()
 
 void Filter::Update(SampleQueue spSamples)
 {
+	// Only work with non-empty sample queue
 	if (!spSamples->empty())
 	{
 		// Update timestamp
-		if (!spSamples->empty())
-		{
-			_timestamp = spSamples->back().timestamp; // should be newest sample
-			_timestampSetOnce = true;
-		}
+		_timestamp = spSamples->back().timestamp; // should be newest sample
+		_timestampSetOnce = true;
 
 		// Move samples over to member
 		_spSamples->insert(_spSamples->end(),
 			std::make_move_iterator(spSamples->begin()),
 			std::make_move_iterator(spSamples->end()));
-
-		// Delete front of queue to match maximum allowed queue length (delete oldest samples)
-		int size = (int)_spSamples->size(); // sample queue size
-		int overlap = size - setup::FILTER_MEMORY_SIZE;
-		for (int i = 0; i < overlap; i++)
-		{
-			_spSamples->pop_front();
-		}
 	}
+	
+	// Delete front of queue to match maximum allowed queue length (delete oldest samples)
+	int size = (int)_spSamples->size(); // sample queue size
+	int overlap = size - setup::FILTER_MEMORY_SIZE;
+	for (int i = 0; i < overlap; i++)
+	{
+		_spSamples->pop_front();
+	}
+
+	// Apply filtering to retrieve current filtered gaze coordinate and other information
+	ApplyFilter(_spSamples, _gazeX, _gazeY, _fixationDuration);
+}
+
+double Filter::GetRawGazeX() const
+{
+	if (!_spSamples->empty())
+	{
+		return _spSamples->back().x;
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+double Filter::GetRawGazeY() const
+{
+	if (!_spSamples->empty())
+	{
+		return _spSamples->back().y;
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+double Filter::GetFilteredGazeX() const
+{
+	return _gazeX;
+}
+
+double Filter::GetFilteredGazeY() const
+{
+	return _gazeY;
+}
+
+float Filter::GetFixationDuration() const
+{
+	return _fixationDuration;
 }
 
 float Filter::GetAge() const
