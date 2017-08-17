@@ -11,7 +11,11 @@
 #include "src/Utils/Logger.h"
 #include <algorithm>
 
-Tab::Tab(Master* pMaster, Mediator* pCefMediator, WebTabInterface* pWeb, std::string url)
+Tab::Tab(
+	Master* pMaster,
+	Mediator* pCefMediator,
+	WebTabInterface* pWeb,
+	std::string url)
 {
 	// Fill members
 	_pMaster = pMaster;

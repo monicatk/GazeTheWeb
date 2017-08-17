@@ -20,7 +20,7 @@ Filter::~Filter()
 	// For the sake of the C++ standard
 }
 
-void Filter::Update(SampleQueue spSamples)
+void Filter::Update(const SampleQueue spSamples)
 {
 	// Only work with non-empty sample queue
 	if (!spSamples->empty())
@@ -28,12 +28,12 @@ void Filter::Update(SampleQueue spSamples)
 		// Update timestamp
 		_timestamp = spSamples->back().timestamp; // should be newest sample
 		_timestampSetOnce = true;
-
-		// Move samples over to member
-		_spSamples->insert(_spSamples->end(),
-			std::make_move_iterator(spSamples->begin()),
-			std::make_move_iterator(spSamples->end()));
 	}
+
+	// Copy samples over to member
+	_spSamples->insert(_spSamples->end(),
+		spSamples->begin(),
+		spSamples->end());
 	
 	// Delete front of queue to match maximum allowed queue length (delete oldest samples)
 	int size = (int)_spSamples->size(); // sample queue size
@@ -45,6 +45,44 @@ void Filter::Update(SampleQueue spSamples)
 
 	// Apply filtering to retrieve current filtered gaze coordinate and other information
 	ApplyFilter(_spSamples, _gazeX, _gazeY, _fixationDuration);
+
+	// Work on custom transformations
+	for (auto& rCustomTransformation : _customTransformations)
+	{
+		// Make reference on custom transformation within map
+		auto& rTrans = rCustomTransformation.second;
+
+		// Copy current samples and apply current transformation
+		SampleQueue tmpQueue;
+		tmpQueue->insert(tmpQueue->end(),
+			spSamples->begin(),
+			spSamples->end());
+		for (auto& rSample : *tmpQueue.get())
+		{
+			rTrans.transformation(rSample.x, rSample.y);
+		}
+
+		// Move samples to queue
+		rTrans.queue->insert(rTrans.queue->end(),
+			std::make_move_iterator(tmpQueue->begin()),
+			std::make_move_iterator(tmpQueue->end()));
+
+		// Delete front of queue to match maximum allowed queue length (delete oldest samples)
+		size = (int)rTrans.queue->size(); // sample queue size
+		overlap = size - setup::FILTER_MEMORY_SIZE;
+		for (int i = 0; i < overlap; i++)
+		{
+			rTrans.queue->pop_front();
+		}
+
+		// Apply filtering
+		float fixationDuration = 0; // not used
+		ApplyFilter(
+			rTrans.queue,
+			rTrans.gazeX,
+			rTrans.gazeY,
+			fixationDuration);
+	}
 }
 
 double Filter::GetRawGazeX() const
@@ -103,4 +141,67 @@ float Filter::GetAge() const
 bool Filter::IsTimestampSetOnce() const
 {
 	return _timestampSetOnce;
+}
+
+bool Filter::RegisterCustomTransformation(std::string name, FilterTransformation transformation)
+{
+	// Check whether custom transformation already exists
+	auto it = _customTransformations.find(name);
+	if (it == _customTransformations.end())
+	{
+		// Create and fill structure
+		CustomTransformation trans; // create struct
+		trans.transformation = transformation; // set transformation
+		trans.queue = SampleQueue(new std::deque<SampleData>(*_spSamples.get())); // deep copy of sample data
+
+		// Apply transformation on already retrieved samples
+		for (auto& rSample : *trans.queue.get())
+		{
+			trans.transformation(rSample.x, rSample.y);
+		}
+
+		// Insert this custom transformation
+		_customTransformations.insert(std::make_pair(
+			name,
+			trans
+		));
+		return true;
+	}
+	return false;
+}
+
+bool Filter::ChangeCustomTransformation(std::string name, FilterTransformation transformation)
+{
+	auto it = _customTransformations.find(name);
+	if (it != _customTransformations.end())
+	{
+		it->second.transformation = transformation;
+		return true;
+	}
+	return false;
+}
+
+bool Filter::UnregisterCustomTransformation(std::string name)
+{
+	// Check whether custom transformation exists
+	auto it = _customTransformations.find(name);
+	if (it != _customTransformations.end())
+	{
+		_customTransformations.erase(it);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+double Filter::GetFilteredGazeX(std::string name) const
+{
+	return _customTransformations.at(name).gazeX;
+}
+
+double Filter::GetFilteredGazeY(std::string name) const
+{
+	return _customTransformations.at(name).gazeY;
 }

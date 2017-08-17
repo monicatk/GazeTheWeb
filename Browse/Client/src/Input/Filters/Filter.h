@@ -7,15 +7,13 @@
 #ifndef FILTER_H_
 #define FILTER_H_
 
+#include "src/Input/Filters/CustomTransformationInteface.h"
 #include "plugins/Eyetracker/Interface/EyetrackerSample.h"
-#include <functional>
 #include <map>
 
-// Typedef for custom transformation
-typedef std::function<std::pair<double, double>(double, double)> FilterTransformation;
 
 // Filter class
-class Filter
+class Filter : public CustomTransformationInterface
 {
 public:
 
@@ -25,8 +23,8 @@ public:
 	// Destructor
 	virtual ~Filter() = 0;
 
-	// Update. Takes samples in window pixel coordinates. Samples are moved from provided variable
-	void Update(SampleQueue spSamples);
+	// Update. Takes samples in window pixel coordinates
+	void Update(const SampleQueue spSamples);
 
 	// Various getters
 	double GetRawGazeX() const;
@@ -41,24 +39,26 @@ public:
 	// Getter which returns whether timestamp was actively set at least once (aka at least one sample received)
 	bool IsTimestampSetOnce() const;
 
-	/*
+	// #######################################
+	// ### CUSTOM TRANSFORMATION INTERFACE ###
+	// #######################################
 
 	// Register custom transformation of gaze before filtering (smooth pursuit fixation).
 	// For each custom transformation, retrieved samples are transformed with provided transformation and stored.
-	// At registration, provided transformation is applied on all existing samples after copying
-	bool RegisterCustomTransformation(std::string name, FilterTransformation transformation); // return whether successful
+	// At registration, provided transformation is applied on all existing samples after copying them
+	bool RegisterCustomTransformation(std::string name, FilterTransformation transformation) override; // return whether successful
 
-	// Set transformation for incoming gaze data for the chosen custom transformation
-	bool ChangeCustomTransformation(std::string name, FilterTransformation transformation);
+	// Set transformation for incoming gaze data for the named custom transformation
+	bool ChangeCustomTransformation(std::string name, FilterTransformation transformation) override;
 
 	// Unregister custom transformation
-	bool UnregisterCustomTransformation(std::string name);
+	bool UnregisterCustomTransformation(std::string name) override;
 
 	// Retrieve filtered gaze with custom transformation
-	virtual double GetFilteredGazeX(std::string name) const = 0;
-	virtual double GetFilteredGazeY(std::string name) const = 0;
+	double GetFilteredGazeX(std::string name) const override;
+	double GetFilteredGazeY(std::string name) const override;
 
-	*/
+	// #######################################
 
 private:
 
@@ -72,18 +72,19 @@ private:
 	bool _timestampSetOnce = false;
 
 	// Samples to filter
-	SampleQueue _spSamples;
+	SampleQueue _spSamples; // samples as delivered by eye tracker / EyeInput class
 
-	// Samples of custom transformations
-	struct CustomTranformation
+	// Values per custom transformations
+	struct CustomTransformation
 	{
+		// Fields
 		FilterTransformation transformation;
 		SampleQueue queue;
 		double gazeX = -1;
 		double gazeY = -1;
 		float fixationDuration = 0;
 	};
-	std::map<std::string, CustomTranformation> _customTransformationSamples;
+	std::map<std::string, CustomTransformation> _customTransformations;
 
 	// Filtered stuff
 	double _gazeX = -1; // filtered

@@ -18,24 +18,28 @@
 
 using json = nlohmann::json;
 
-// Keys
+// Keys (fill in mapping to strings below!)
 enum class FirebaseKey { URL_INPUTS, MAX_BOOKMARK_COUNT, MAX_OPEN_TABS }; // TODO: these are (unused!) examples; TODO: divide between user and global Firebase Keys
-static std::string BuildFirebaseKey(FirebaseKey key, std::string uid)
-{
-	// Simple mapping of enum to string
-	static const std::map<FirebaseKey, std::string> FirebaseKeyString // run time map, easier to implement than compile time template stuff
-	{
-		{ FirebaseKey::URL_INPUTS,			"urlInput" },
-		{ FirebaseKey::MAX_BOOKMARK_COUNT,	"maxBookmarkCount" },
-		{ FirebaseKey::MAX_OPEN_TABS,		"maxOpenTabs" },
-	};
-
-	return "users/" + uid + "/browse/" + FirebaseKeyString.at(key);
-}
 
 // Firebase mailer class
 class FirebaseMailer
 {
+private:
+
+	// Fill mapping from FirebaseKey to string here!
+	static const std::string BuildFirebaseKey(FirebaseKey key, std::string uid)
+	{
+		// Simple mapping of enum to string
+		static const std::map<FirebaseKey, std::string> FirebaseKeyString // run time map, easier to implement than compile time template stuff
+		{
+			{ FirebaseKey::URL_INPUTS,			"urlInput" },
+			{ FirebaseKey::MAX_BOOKMARK_COUNT,	"maxBookmarkCount" },
+			{ FirebaseKey::MAX_OPEN_TABS,		"maxOpenTabs" },
+		};
+
+		return "users/" + uid + "/browse/" + FirebaseKeyString.at(key);
+	}
+
 public:
 
 	// Getter of static instance

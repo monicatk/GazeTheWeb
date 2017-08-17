@@ -527,6 +527,11 @@ void  Master::SetDataTransfer(bool dataTransfer)
 	}
 }
 
+std::weak_ptr<CustomTransformationInterface> Master::GetCustomTransformationInterface()
+{
+	return _upEyeInput->GetCustomTransformationInterface();
+}
+
 eyegui::Layout* Master::AddLayout(std::string filepath, int layer, bool visible)
 {
     // Add layout

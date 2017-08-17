@@ -61,6 +61,9 @@ public:
 	// Pause lab streaming layer streaming of eye gaze data
 	void PauseLabStream();
 
+	// Get pointer to interface for custom transformation of samples before filtering
+	std::weak_ptr<CustomTransformationInterface> GetCustomTransformationInterface();
+
 private:
 
 	// Thread that connects to eye tracking device
@@ -108,7 +111,7 @@ private:
     bool _mouseOverrideInitFrame = false;
 
 	// Filter of gaze data
-	std::unique_ptr<Filter> _upFilter;
+	std::shared_ptr<Filter> _spFilter;
 };
 
 #endif // EYEINPUT_H_

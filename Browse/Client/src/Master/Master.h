@@ -21,6 +21,7 @@
 #include "src/Utils/LerpValue.h"
 #include "src/Utils/Framebuffer.h"
 #include "src/Utils/RenderItem.h"
+#include "src/Input/Filters/CustomTransformationInteface.h"
 #include "externals/OGL/gl_core_3_3.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 #include <queue>
@@ -75,6 +76,9 @@ public:
 	{
 		return _dataTransfer;
 	}
+
+	// Get pointer to interface of custom transformation of eye input
+	std::weak_ptr<CustomTransformationInterface> GetCustomTransformationInterface();
 
     // ### EYEGUI DELEGATION ###
 

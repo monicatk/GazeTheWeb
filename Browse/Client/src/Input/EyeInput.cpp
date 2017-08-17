@@ -11,7 +11,7 @@
 #include <functional>
 
 EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface) :
-	_upFilter(std::unique_ptr<Filter>(
+	_spFilter(std::shared_ptr<Filter>(
 		new WeightedAverageFilter(
 			setup::FILTER_KERNEL,
 			setup::FILTER_WINDOW_SIZE,
@@ -248,7 +248,7 @@ std::shared_ptr<Input> EyeInput::Update(
 		}
 
 		// Update filter algorithm and provide local variables as reference
-		_upFilter->Update(spSamples);
+		_spFilter->Update(spSamples);
 
 		// Check, whether eye tracker is tracking
 		isTracking = _procIsTracking();
@@ -331,12 +331,12 @@ std::shared_ptr<Input> EyeInput::Update(
 	_mouseY = mouseY;
 
 	// Get data from filter
-	double filteredGazeX = _upFilter->GetFilteredGazeX();
-	double filteredGazeY = _upFilter->GetFilteredGazeY();
+	double filteredGazeX = _spFilter->GetFilteredGazeX();
+	double filteredGazeY = _spFilter->GetFilteredGazeY();
 
 	// Get raw data
-	double rawGazeX = _upFilter->GetRawGazeX();
-	double rawGazeY = _upFilter->GetRawGazeY();
+	double rawGazeX = _spFilter->GetRawGazeX();
+	double rawGazeY = _spFilter->GetRawGazeY();
 
 	// Use mouse when gaze is emulated
 	if (gazeEmulated)
@@ -366,11 +366,11 @@ std::shared_ptr<Input> EyeInput::Update(
 		filteredGazeY, // gazeY,
 		rawGazeX, // rawGazeX
 		rawGazeY, // rawGazeY
-		_upFilter->GetAge(), // gazeAge
+		_spFilter->GetAge(), // gazeAge
 		gazeEmulated, // gazeEmulated,
 		false, // gazeUponGUI,
 		false, // instantInteraction,
-		_upFilter->GetFixationDuration()); // fixationDuration
+		_spFilter->GetFixationDuration()); // fixationDuration
 
 	// Return whether gaze coordinates comes from eye tracker
 	return spInput;
@@ -390,7 +390,7 @@ bool EyeInput::Calibrate()
 
 bool EyeInput::SamplesReceived() const
 {
-	return _upFilter->IsTimestampSetOnce();
+	return _spFilter->IsTimestampSetOnce();
 }
 
 void EyeInput::ContinueLabStream()
@@ -411,4 +411,9 @@ void EyeInput::PauseLabStream()
 		_procPauseLabStream();
 	}
 #endif // _WIN32
+}
+
+std::weak_ptr<CustomTransformationInterface> EyeInput::GetCustomTransformationInterface()
+{
+	return _spFilter;
 }
