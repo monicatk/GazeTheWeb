@@ -35,8 +35,14 @@ void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upDa
 {
 	// Go over colors and get most colorful as accent (should be always RGBA)
 	int size; // width * height * 4
-	if (upData != NULL && ((size = (int)upData->size()) >= 4) && width > 0 && height > 0)
+	if (upData != NULL && ((size = (int)upData->size()) >= 4) && width > 0 && height == width) // only accept square icons
 	{
+		if (size <= _current_favicon_bytes)
+			return;
+
+		LogInfo("Tab: Current favicon resolution -- ", width, " x ", height);
+		_current_favicon_bytes = size;
+
 		// Load icon into eyeGUI
 		eyegui::fetchImage(_pPanelLayout, GetFaviconIdentifier(), width, height, eyegui::ColorFormat::RGBA, upData->data(), true);
 		_faviconLoaded = true;
@@ -105,7 +111,20 @@ void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upDa
 
 void Tab::ResetFaviconBytes()
 {
+	LogInfo("Tab: ResetFaviconBytes called!");
     _faviconLoaded = false;
+	_current_favicon_bytes = 0;
+	_loaded_favicon_urls.clear();
+}
+
+bool Tab::IsFaviconAlreadyAvailable(std::string img_url)
+{
+	if (std::find(_loaded_favicon_urls.begin(), _loaded_favicon_urls.end(), img_url) == _loaded_favicon_urls.end())
+	{
+		_loaded_favicon_urls.push_back(img_url);
+		return false;
+	}
+	return true;
 }
 
 void Tab::AddDOMTextInput(CefRefPtr<CefBrowser> browser, int id)
@@ -166,6 +185,13 @@ void Tab::AddDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id)
 		SendRenderMessage));
 }
 
+void Tab::AddDOMVideo(CefRefPtr<CefBrowser> browser, int id)
+{
+	_VideoMap.emplace(id, std::make_shared<DOMVideo>(
+		id,
+		SendRenderMessage));
+}
+
 
 std::weak_ptr<DOMTextInput> Tab::GetDOMTextInput(int id)
 {
@@ -185,6 +211,11 @@ std::weak_ptr<DOMSelectField> Tab::GetDOMSelectField(int id)
 std::weak_ptr<DOMOverflowElement> Tab::GetDOMOverflowElement(int id)
 {
 	return (_OverflowElementMap.find(id) != _OverflowElementMap.end()) ? _OverflowElementMap.at(id) : std::weak_ptr<DOMOverflowElement>();
+}
+
+std::weak_ptr<DOMVideo> Tab::GetDOMVideo(int id)
+{
+	return (_VideoMap.find(id) != _VideoMap.end()) ? _VideoMap.at(id) : std::weak_ptr<DOMVideo>();
 }
 
 void Tab::ClearDOMNodes()
@@ -231,6 +262,11 @@ void Tab::RemoveDOMSelectField(int id)
 void Tab::RemoveDOMOverflowElement(int id)
 {
 	if (_OverflowElementMap.find(id) != _OverflowElementMap.end()) { _OverflowElementMap.erase(id); }
+}
+
+void Tab::RemoveDOMVideo(int id)
+{
+	if (_VideoMap.find(id) != _VideoMap.end()) { _VideoMap.erase(id); }
 }
 
 void Tab::SetScrollingOffset(double x, double y)

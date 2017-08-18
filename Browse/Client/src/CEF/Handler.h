@@ -149,7 +149,8 @@ public:
 	// Send log data to LoggingMediator instance in each browser context
 	void SendToJSLoggingMediator(std::string message);
 
-
+	// Check if favicon was already loaded, if not download it
+	bool StartFaviconImageDownload(CefRefPtr<CefBrowser> browser, CefString img_url);
 	// HandlerImageDownload interface methods
 	bool ForwardFaviconBytes(CefRefPtr<CefBrowser> browser, CefRefPtr<CefImage> img);
 

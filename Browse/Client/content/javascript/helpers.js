@@ -176,6 +176,7 @@ function CreateDOMTextInput(node) { CreateDOMObject(node, 0); }
 function CreateDOMLink(node){ CreateDOMObject(node, 1); }
 function CreateDOMSelectField(node) { CreateDOMObject(node, 2); }
 function CreateDOMOverflowElement(node) { CreateDOMObject(node, 3); }
+function CreateDOMVideo(node){ CreateDOMObject(node, 4); }
 
 function CreateDOMObject(node, type)
 {
@@ -188,6 +189,7 @@ function CreateDOMObject(node, type)
         case 1: return new DOMLink(node);
         case 2: return new DOMSelectField(node);
         case 3: return new DOMOverflowElement(node);
+        case 4: return new DOMVideo(node);
         default: {
             console.log("Warning: Unknown DOM node type: "+type);
             return undefined;
@@ -212,6 +214,7 @@ function GetDOMTextInput(id){ return GetDOMObject(0, id);}
 function GetDOMLink(id){ return GetDOMObject(1, id);}
 function GetDOMSelectField(id){ return GetDOMObject(2, id); }
 function GetDOMOverflowElement(id){ return GetDOMObject(3, id); }
+function GetDOMVideo(id){ return GetDOMObject(4, id); }
 
 function GetCorrespondingDOMObject(node, expected_type)
 {
@@ -413,5 +416,9 @@ function PrintPerformanceInformation()
             100*Math.round(time_spent_creating_bitmask/window.page_load_time_*1000)/1000 +'% of page load time');
 }
 
+function SendFaviconURLtoCEF(url)
+{
+    ConsolePrint("#FaviconURL#"+url+"#");
+}
 
 ConsolePrint("Successfully imported helpers.js!");

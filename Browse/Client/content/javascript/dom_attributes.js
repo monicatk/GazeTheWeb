@@ -5,10 +5,9 @@
 
 ConsolePrint("Starting to import dom_attributes.js ...");
 
-
+// Filled using C++
 window.attrStrToInt = new Map();
 
-// TODO: Call in CEF Renderer OnContextInitialized
 function AddDOMAttribute(attrStr, attrInt)
 {
     if(typeof(attrStr) !== "string" || typeof(attrInt) !== "number")

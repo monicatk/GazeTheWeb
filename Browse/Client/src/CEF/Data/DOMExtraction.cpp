@@ -68,6 +68,24 @@ const CefRefPtr<CefListValue> V8ToCefListValue::ListOfIntegers(CefRefPtr<CefV8Va
 	return wrapper;
 }
 
+const CefRefPtr<CefListValue> V8ToCefListValue::ListOfBools(CefRefPtr<CefV8Value> attrData)
+{
+	if (!attrData->IsArray())
+		return CefRefPtr<CefListValue>();
+
+	CefRefPtr<CefListValue> wrapper = CefListValue::Create();
+	CefRefPtr<CefListValue> list = CefListValue::Create();
+	for (int i = 0; i < attrData->GetArrayLength(); i++)
+	{
+		if (!attrData->GetValue(i)->IsBool())
+			list->SetBool(i, false);
+		else
+			list->SetBool(i, attrData->GetValue(i)->GetBoolValue());
+	}
+	wrapper->SetList(0, list);
+	return wrapper;
+}
+
 const CefRefPtr<CefListValue> V8ToCefListValue::Boolean(CefRefPtr<CefV8Value> attrData)
 {
 	if (!attrData->IsBool())
@@ -198,6 +216,20 @@ const CefRefPtr<CefListValue> StringToCefListValue::ListOfIntegers(std::string a
 	for (int i = 0; i < (int)options.size(); i++)
 	{
 		extracted_data->SetInt(i, std::stoi(options[i]));
+	}
+	wrapper->SetList(0, extracted_data);
+	return wrapper;
+}
+
+const CefRefPtr<CefListValue> StringToCefListValue::ListOfBools(std::string attrData)
+{
+	CefRefPtr<CefListValue> wrapper = CefListValue::Create();
+	CefRefPtr<CefListValue> extracted_data = CefListValue::Create();
+
+	std::vector<std::string> options = SplitBySeparator(attrData, ';');
+	for (int i = 0; i < (int)options.size(); i++)
+	{
+		extracted_data->SetBool(i, (std::stoi(options[i]) > 0) );
 	}
 	wrapper->SetList(0, extracted_data);
 	return wrapper;

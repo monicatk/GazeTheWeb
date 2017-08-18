@@ -11,7 +11,7 @@ void PendingImageDownload::OnDownloadImageFinished(const CefString& image_url,
 	int http_status_code,
 	CefRefPtr<CefImage> image)
 {
-	LogDebug("PendingImageDownload: Finished image download for url:\n", image_url.ToString());
+	//LogDebug("PendingImageDownload: Finished image download for url:\n", image_url.ToString());
 	_handler->ForwardFaviconBytes(_corresponding_browser, image);
 	_handler->FinishImageDownload(this);
 }
@@ -21,7 +21,7 @@ void HandlerImageInterface::StartImageDownload(CefRefPtr<CefBrowser> browser, Ce
 {
 	CefRefPtr<PendingImageDownload> download(new PendingImageDownload(this, browser));
 	_downloads.push_back(download);
-	LogDebug("HandlerImageInterface: Starting new image download for url:\n", img_url.ToString());
+	//LogDebug("HandlerImageInterface: Starting new image download for url:\n", img_url.ToString());
 	browser->GetHost()->DownloadImage(img_url, true, 0, false, download);
 }
 

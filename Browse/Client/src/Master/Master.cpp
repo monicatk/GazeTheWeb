@@ -786,7 +786,7 @@ void Master::Loop()
 		eyeGUIInput = eyegui::updateGUI(_pGUI, tpf, eyeGUIInput); // update GUI
 
         // Do message loop of CEF
-        _pCefMediator->DoMessageLoopWork();
+        _pCefMediator->DoMessageLoopWork(); // TODO: Breaks randomly after sometime in debug mode?
 
         // Update our input structure
 		spInput->gazeUponGUI = eyeGUIInput.gazeUsed;

@@ -24,6 +24,7 @@ namespace V8ToCefListValue
 	// Lists
 	const CefRefPtr<CefListValue> ListOfStrings(CefRefPtr<CefV8Value> attrData);
 	const CefRefPtr<CefListValue> ListOfIntegers(CefRefPtr<CefV8Value> attrData);
+	const CefRefPtr<CefListValue> ListOfBools(CefRefPtr<CefV8Value> attrData);
 
 	// Primitive types - TODO: There certainly exists a more generic approach for each primitive type!
 	const CefRefPtr<CefListValue> Boolean(CefRefPtr<CefV8Value> attrData);
@@ -40,7 +41,9 @@ namespace V8ToCefListValue
 		{ DOMAttribute::Url,				"getUrl" },
 		{ DOMAttribute::Options,			"getOptions" },
 		{ DOMAttribute::MaxScrolling,		"getMaxScrolling"},
-		{ DOMAttribute::CurrentScrolling,	"getCurrentScrolling"}
+		{ DOMAttribute::CurrentScrolling,	"getCurrentScrolling"},
+		{ DOMAttribute::OccBitmask,			"getOccBitmask"}
+	// TODO: Getter in Javascript are uniformly named, so this map is kind of superfluous now ;)
 
 	};
 
@@ -54,7 +57,8 @@ namespace V8ToCefListValue
 		{ DOMAttribute::Url,				&String },
 		{ DOMAttribute::Options,			&ListOfStrings },
 		{ DOMAttribute::MaxScrolling,		&ListOfIntegers },
-		{ DOMAttribute::CurrentScrolling,	&ListOfIntegers }
+		{ DOMAttribute::CurrentScrolling,	&ListOfIntegers },
+		{ DOMAttribute::OccBitmask,			&ListOfBools }
 	
 	};
 
@@ -74,6 +78,7 @@ namespace StringToCefListValue
 	// Lists
 	const CefRefPtr<CefListValue> ListOfStrings(std::string attrData);
 	const CefRefPtr<CefListValue> ListOfIntegers(std::string attrData);
+	const CefRefPtr<CefListValue> ListOfBools(std::string attrData);
 
 	// Primitive types
 	const CefRefPtr<CefListValue> Boolean(std::string attrData);
@@ -91,7 +96,8 @@ namespace StringToCefListValue
 		{DOMAttribute::Url,					&String},
 		{DOMAttribute::Options,				&ListOfStrings},
 		{DOMAttribute::MaxScrolling,		&ListOfIntegers},
-		{DOMAttribute::CurrentScrolling,	&ListOfIntegers}	
+		{DOMAttribute::CurrentScrolling,	&ListOfIntegers},
+		{DOMAttribute::OccBitmask,			&ListOfBools}	
 	};
 
 	// Extract attribute data

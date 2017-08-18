@@ -498,4 +498,34 @@ DOMOverflowElement.prototype.cutRectsWith = function(domObj, skip_update=true){
     )
 }
 
+
+/*
+    ____  ____  __  ____    ___     __         
+   / __ \/ __ \/  |/  / |  / (_)___/ /__  ____ 
+  / / / / / / / /|_/ /| | / / / __  / _ \/ __ \
+ / /_/ / /_/ / /  / / | |/ / / /_/ /  __/ /_/ /
+/_____/\____/_/  /_/  |___/_/\__,_/\___/\____/ 
+*/
+window.domVideos = []
+if(window.domNodes[4] !== undefined)
+    console.log("Warning! DOMNode list slot 4 already in use!");
+window.domNodes[4] = window.domVideos;
+
+function DOMVideo(node)
+{
+    window.domVideos.push(this);
+    var id = window.domVideos.indexOf(this);
+
+    DOMNode.call(this, node, id, 4);
+
+    /* Currently now attributes, only interaction */
+    console.log("DOMVideo node successfully created.");
+}
+DOMVideo.prototype = Object.create(DOMNode.prototype);
+DOMVideo.prototype.constructor = DOMOverflowElement;
+DOMVideo.prototype.Class = "DOMVideo";  // Override base class identifier for this derivated class
+
+
+
+
 ConsolePrint("Successfully imported dom_nodes.js!");
