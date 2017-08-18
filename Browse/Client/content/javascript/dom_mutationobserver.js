@@ -186,7 +186,10 @@ function AnalyzeNode(node)
 				UpdateDOMRects();
 		}
 
-
+		if(node.tagName === "VIDEO")
+		{
+			CreateDOMVideo(node);
+		}
 		if(node.tagName === "SELECT")
 		{
 			CreateDOMSelectField(node);

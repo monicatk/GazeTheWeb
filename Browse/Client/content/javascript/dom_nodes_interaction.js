@@ -125,4 +125,35 @@ DOMOverflowElement.prototype.scroll = function(gazeX, gazeY, fixedIds){
 	
 }
 
+DOMVideo.prototype.setPlaying = function(playing)
+{
+	if (!playing)
+	{
+		this.node.pause();
+		ConsolePrint("DOMVideo id="+this.getId()+": Now paused.");
+		return;
+	}
+	this.node.play();
+	ConsolePrint("DOMVideo id="+this.getId()+": Now playing.");
+}
+
+DOMVideo.prototype.setMuted = function(muted)
+{
+	this.node.muted = muted;
+	ConsolePrint("DOMVideo id="+this.getId()+": muted="+muted);
+}
+
+DOMVideo.prototype.setVolume = function(volume)
+{
+	this.node.volume = volume;
+	ConsolePrint("DOMVideo id="+this.getId()+": Volume is now "+volume);
+}
+
+DOMVideo.prototype.jumpToSecond = function(sec)
+{
+	this.node.currentTime = sec;
+	ConsolePrint("DOMVideo id="+this.getId()+": Now playing from second "+sec);
+
+}
+
 ConsolePrint("Successfully imported dom_nodes_interaction.js!");

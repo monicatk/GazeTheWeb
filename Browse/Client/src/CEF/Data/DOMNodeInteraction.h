@@ -58,6 +58,7 @@ private:
     friend class DOMTextInputInteraction;
     friend class DOMOverflowElementInteraction;
     friend class DOMSelectFieldInteraction;
+	friend class DOMVideoInteraction;
 
 };
 
@@ -96,6 +97,21 @@ public:
 
 	// Send IPC message to JS in order to execute JS function
 	void SetSelectionIndex(int idx);
+};
+
+// Interaction with videos
+class DOMVideoInteraction : public virtual DOMJavascriptCommunication
+{
+public:
+
+	// Constructor
+	DOMVideoInteraction() {}
+
+	// Send IPC message to JS in order to execute JS function
+	void SetPlaying(bool playing = true);
+	void SetMuted(bool muted = true);
+	void SetVolume(float volume);
+	void JumpToSecond(float sec = 0.f);
 };
 
 #endif // DOMNODEINTERACTION_H_

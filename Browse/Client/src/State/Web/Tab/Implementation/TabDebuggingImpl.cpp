@@ -227,6 +227,19 @@ void Tab::DrawDebuggingOverlay() const
 					(rOverflowElement->IsFixed())
 				);
 		}
+
+		// ### DOM VIDEO ELEMENTS ### 
+		_upDebugLineQuad->GetShader()->UpdateValue("color", glm::vec3(0.f / 255.f, 255.f / 255.f, 255.f / 255.f));
+
+		for (const auto& rIdNodePair : _VideoMap)
+		{
+			const auto& rVideoNode = rIdNodePair.second;
+			for (const auto& rect : rVideoNode->GetRects())
+				renderRect(
+					rect,
+					(rVideoNode->IsFixed())
+				);
+		}
 	}
 
 	// ### EXACT GAZE INPUT VISUALIZTION ###

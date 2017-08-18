@@ -63,7 +63,7 @@ public:
 	std::vector<Rect> GetRects() const { return _rects; }
 	int GetFixedId() const { return _fixedId; }
 	int GetOverflowId() const { return _overflowId; }
-	int IsFixed() const { return (_fixedId >= 0); }
+	bool IsFixed() const { return (_fixedId >= 0); }
 	std::vector<bool> GetOccBitmask() const { return _occBitmask; }
 private:
 
@@ -330,6 +330,57 @@ private:
 	int _scrollTopMax = 0; 
 	int _scrollLeft = 0;		// current position in interval [0, max value]
 	int _scrollTop = 0; 
+};
+
+/*
+    ____  ____  __  ____    ___     __         
+   / __ \/ __ \/  |/  / |  / (_)___/ /__  ____ 
+  / / / / / / / /|_/ /| | / / / __  / _ \/ __ \
+ / /_/ / /_/ / /  / / | |/ / / /_/ /  __/ /_/ /
+/_____/\____/_/  /_/  |___/_/\__,_/\___/\____/ 
+*/
+class DOMVideo :
+	public virtual DOMNode,
+	public virtual DOMVideoInteraction
+{
+public:
+
+	// Empty construction
+	DOMVideo(int id, SendRenderMessage sendRenderMessage) :
+		DOMNode(id),
+		DOMJavascriptCommunication(sendRenderMessage),
+		DOMVideoInteraction() {}
+
+	// Define initialization through ICP message in each DOMNode subclass
+	virtual int Initialize(CefRefPtr<CefProcessMessage> msg) override;
+
+	// CefProcessMessage to C++ object
+	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data) override;
+
+	// Build description
+	static void GetDescription(std::vector< const std::vector<DOMAttribute>* >* descriptions) {
+		super::GetDescription(descriptions);
+		descriptions->push_back(&_description);
+	}
+
+	// TODO: why no abstract declaration in DOMNode?
+	static const std::string GetJSObjectGetter()
+	{
+		return "GetDOMVideo";
+	}
+
+	// TODO: somehow set enum per subclass and return this in DOMNode?
+	virtual int GetType() override { return 4; }
+
+
+private:
+
+	typedef DOMNode super;
+
+	// Setter
+
+	// Members
+	static const std::vector<DOMAttribute> _description;
 };
 
 #pragma warning(pop) // warning about dominance inheritage

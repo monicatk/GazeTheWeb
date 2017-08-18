@@ -257,6 +257,14 @@ void Mediator::AddDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id)
 	}
 }
 
+void Mediator::AddDOMVideo(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		pTab->AddDOMVideo(browser, id);
+	}
+}
+
 void Mediator::ClearDOMNodes(CefRefPtr<CefBrowser> browser)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
@@ -374,11 +382,28 @@ std::weak_ptr<DOMOverflowElement> Mediator::GetDOMOverflowElement(CefRefPtr<CefB
 	return std::weak_ptr<DOMOverflowElement>();
 }
 
+std::weak_ptr<DOMVideo> Mediator::GetDOMVideo(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		return pTab->GetDOMVideo(id);
+	}
+	return std::weak_ptr<DOMVideo>();
+}
+
 void Mediator::RemoveDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
 		pTab->RemoveDOMOverflowElement(id);
+	}
+}
+
+void Mediator::RemoveDOMVideo(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		pTab->RemoveDOMVideo(id);
 	}
 }
 

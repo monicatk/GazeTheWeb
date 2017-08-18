@@ -185,6 +185,13 @@ void Tab::AddDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id)
 		SendRenderMessage));
 }
 
+void Tab::AddDOMVideo(CefRefPtr<CefBrowser> browser, int id)
+{
+	_VideoMap.emplace(id, std::make_shared<DOMVideo>(
+		id,
+		SendRenderMessage));
+}
+
 
 std::weak_ptr<DOMTextInput> Tab::GetDOMTextInput(int id)
 {
@@ -204,6 +211,11 @@ std::weak_ptr<DOMSelectField> Tab::GetDOMSelectField(int id)
 std::weak_ptr<DOMOverflowElement> Tab::GetDOMOverflowElement(int id)
 {
 	return (_OverflowElementMap.find(id) != _OverflowElementMap.end()) ? _OverflowElementMap.at(id) : std::weak_ptr<DOMOverflowElement>();
+}
+
+std::weak_ptr<DOMVideo> Tab::GetDOMVideo(int id)
+{
+	return (_VideoMap.find(id) != _VideoMap.end()) ? _VideoMap.at(id) : std::weak_ptr<DOMVideo>();
 }
 
 void Tab::ClearDOMNodes()
@@ -250,6 +262,11 @@ void Tab::RemoveDOMSelectField(int id)
 void Tab::RemoveDOMOverflowElement(int id)
 {
 	if (_OverflowElementMap.find(id) != _OverflowElementMap.end()) { _OverflowElementMap.erase(id); }
+}
+
+void Tab::RemoveDOMVideo(int id)
+{
+	if (_VideoMap.find(id) != _VideoMap.end()) { _VideoMap.erase(id); }
 }
 
 void Tab::SetScrollingOffset(double x, double y)

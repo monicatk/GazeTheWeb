@@ -32,6 +32,7 @@ class DOMOverflowElement;
 class DOMTextInput;
 class DOMLink;
 class DOMSelectField;
+class DOMVideo;
 
 typedef int BrowserID;
 
@@ -131,6 +132,7 @@ public:
 	void AddDOMLink(CefRefPtr<CefBrowser> browser, int id);
 	void AddDOMSelectField(CefRefPtr<CefBrowser> browser, int id);
 	void AddDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id);
+	void AddDOMVideo(CefRefPtr<CefBrowser> browser, int id);
 	
 	void ClearDOMNodes(CefRefPtr<CefBrowser> browser);
 
@@ -138,12 +140,15 @@ public:
 	void RemoveDOMLink(CefRefPtr<CefBrowser> browser, int id);
 	void RemoveDOMSelectField(CefRefPtr<CefBrowser> browser, int id);
 	void RemoveDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id);
+	void RemoveDOMVideo(CefRefPtr<CefBrowser> browser, int id);
+	
 
 	// Receive weak_ptr, only perform Initialize(objMsg) and Update(attr) operations
 	std::weak_ptr<DOMTextInput> GetDOMTextInput(CefRefPtr<CefBrowser> browser, int id);
 	std::weak_ptr<DOMLink> GetDOMLink(CefRefPtr<CefBrowser> browser, int id);
 	std::weak_ptr<DOMSelectField> GetDOMSelectField(CefRefPtr<CefBrowser> browser, int id);
 	std::weak_ptr<DOMOverflowElement> GetDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id);
+	std::weak_ptr<DOMVideo> GetDOMVideo(CefRefPtr<CefBrowser> browser, int id);
 
 	// DOM node objects can directly send interaction messages to Renderer
 	bool SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg, TabCEFInterface* pTab);
