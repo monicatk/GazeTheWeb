@@ -186,6 +186,7 @@ public:
 	void SetMuted(bool muted = true) { SendExecuteFunctionMessage("setMuted", muted); }
 	void SetVolume(float volume) { SendExecuteFunctionMessage("setVolume", volume); }
 	void ShowControls(bool show = true) { SendExecuteFunctionMessage("showControls", show); }
+	void SetFullscreen(bool fullscreen = true) { SendExecuteFunctionMessage("setFullscreen", fullscreen); }
 };
 
 

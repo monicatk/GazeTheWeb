@@ -155,5 +155,13 @@ DOMVideo.prototype.jumpToSecond = function(sec)
 	ConsolePrint("DOMVideo id="+this.getId()+": Now playing from second "+sec);
 
 }
+DOMVideo.prototype.setFullscreen = function(fullscreen)
+{
+	if(fullscreen)
+		this.node.webkitEnterFullscreen();
+	else
+		this.node.webkitExitFullscreen();
+	ConsolePrint("DOMVideo id="+this.getId()+": Fullscreen is set to "+fullscreen);
+}
 
 ConsolePrint("Successfully imported dom_nodes_interaction.js!");
