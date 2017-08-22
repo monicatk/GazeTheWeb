@@ -16,7 +16,7 @@
 /____/\____/_/  /_/_/|_/\___/\_,_/\__/___/
 */
 const std::vector<DOMAttribute> DOMNode::_description = {
-	Rects, FixedId, OverflowId
+	Rects, FixedId, OverflowId, OccBitmask
 };
 
 int DOMNode::Initialize(CefRefPtr<CefProcessMessage> msg)
@@ -33,7 +33,9 @@ int DOMNode::Initialize(CefRefPtr<CefProcessMessage> msg)
 		for (unsigned int i = 0; i < _description.size(); i++)
 		{
 			CefRefPtr<CefListValue> data = args->GetList(i + 1);	
-			if (!Update(_description[i], data))
+			if (
+				!Update(_description[i], data)
+				)
 			{
 				LogError("DOMNode: Failed to assign value of type ", data->GetType(0),
 					" to attribute ", DOMAttrToString(_description[i]), "!");
@@ -49,6 +51,7 @@ bool DOMNode::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 		case DOMAttribute::Rects:			return IPCSetRects(data);
 		case DOMAttribute::FixedId:			return IPCSetFixedId(data);
 		case DOMAttribute::OverflowId:		return IPCSetOverflowId(data);
+		case DOMAttribute::OccBitmask:		return IPCSetOccBitmask(data);
 	}
 
 	LogError("DOMNode: Could not find attribute ", attr, " in order to assign data");
@@ -57,13 +60,12 @@ bool DOMNode::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 
 bool DOMNode::IPCSetRects(CefRefPtr<CefListValue> data)
 {
-
-	if (data->GetSize() > 0  && data->GetValue(0)->GetType() != CefValueType::VTYPE_LIST)
+	if (data == nullptr || data->GetSize() > 0  && data->GetValue(0)->GetType() != CefValueType::VTYPE_LIST)
 		return false;
 
 	const auto rectList = data->GetList(0);
 	std::vector<Rect> rects;
-	//LogDebug("IPCSetRects: #Rects: ", rectList->GetSize());
+
 	for (int i = 0; i < (int)rectList->GetSize(); i++)
 	{
 		const auto rectData = rectList->GetList(i);
@@ -81,7 +83,7 @@ bool DOMNode::IPCSetRects(CefRefPtr<CefListValue> data)
 
 bool DOMNode::IPCSetFixedId(CefRefPtr<CefListValue> data)
 {
-	if (data->GetSize() < 1 || data->GetType(0) != CefValueType::VTYPE_INT)
+	if (data == nullptr || data->GetSize() < 1 || data->GetType(0) != CefValueType::VTYPE_INT)
 	{
 		LogDebug("Expected CefValueType: ", CefValueType::VTYPE_INT, ", but got: ", data->GetType(0));
 		return false;
@@ -93,10 +95,27 @@ bool DOMNode::IPCSetFixedId(CefRefPtr<CefListValue> data)
 
 bool DOMNode::IPCSetOverflowId(CefRefPtr<CefListValue> data)
 {
-	if (data->GetSize() < 1 || data->GetType(0) != CefValueType::VTYPE_INT)
+	if (data == nullptr || data->GetSize() < 1 || data->GetType(0) != CefValueType::VTYPE_INT)
 		return false;
 
 	SetOverflowId(data->GetInt(0));
+	return true;
+}
+
+bool DOMNode::IPCSetOccBitmask(CefRefPtr<CefListValue> data)
+{
+	if (data == nullptr || data->GetSize() > 0 && data->GetValue(0)->GetType() != CefValueType::VTYPE_LIST)
+		return false;
+
+	const auto list = data->GetList(0);
+	std::vector<bool> mask;
+
+	for (int i = 0; i < (int)list->GetSize(); i++)
+	{
+		mask.push_back(list->GetBool(i));
+	}
+
+	SetOccBitmask(mask);
 	return true;
 }
 
@@ -150,7 +169,7 @@ bool DOMTextInput::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 
 bool DOMTextInput::IPCSetText(CefRefPtr<CefListValue> data)
 {
-	if (data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_STRING)
+	if (data == nullptr || data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_STRING)
 		return false;
 
 	SetText(data->GetString(0));
@@ -159,7 +178,7 @@ bool DOMTextInput::IPCSetText(CefRefPtr<CefListValue> data)
 
 bool DOMTextInput::IPCSetPassword(CefRefPtr<CefListValue> data)
 {
-	if (data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_BOOL)
+	if (data == nullptr || data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_BOOL)
 		return false;
 
 	SetPassword(data->GetBool(0));
@@ -215,7 +234,7 @@ bool DOMLink::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 
 bool DOMLink::IPCSetText(CefRefPtr<CefListValue> data)
 {
-	if (data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_STRING)
+	if (data == nullptr || data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_STRING)
 		return false;
 
 	SetText(data->GetString(0));
@@ -224,7 +243,7 @@ bool DOMLink::IPCSetText(CefRefPtr<CefListValue> data)
 
 bool DOMLink::IPCSetUrl(CefRefPtr<CefListValue> data)
 {
-	if (data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_STRING)
+	if (data == nullptr || data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_STRING)
 		return false;
 
 	SetUrl(data->GetString(0));
@@ -281,7 +300,7 @@ bool DOMSelectField::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 
 bool DOMSelectField::IPCSetOptions(CefRefPtr<CefListValue> data)
 {
-	if (data->GetSize() < 1)
+	if (data == nullptr || data->GetSize() < 1)
 	{
 		LogDebug("DOMSelectField: Size of option list is less than 1. Aborting.");
 		return false;
@@ -356,7 +375,7 @@ bool DOMOverflowElement::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 
 bool DOMOverflowElement::IPCSetMaxScrolling(CefRefPtr<CefListValue> data)
 {
-	if (data->GetSize() < 1)
+	if (data == nullptr || data->GetSize() < 1)
 		return false;
 
 	CefRefPtr<CefListValue> list = data->GetList(0);
@@ -369,7 +388,7 @@ bool DOMOverflowElement::IPCSetMaxScrolling(CefRefPtr<CefListValue> data)
 
 bool DOMOverflowElement::IPCSetCurrentScrolling(CefRefPtr<CefListValue> data)
 {
-	if (data->GetSize() < 1) 
+	if (data == nullptr || data->GetSize() < 1)
 		return false;
 
 	CefRefPtr<CefListValue> list = data->GetList(0);
@@ -379,6 +398,8 @@ bool DOMOverflowElement::IPCSetCurrentScrolling(CefRefPtr<CefListValue> data)
 	SetCurrentScrolling(list->GetInt(0), list->GetInt(1));
 	return true;
 }
+
+// TODO: Get rid of this somehow...
 void DOM::GetJSRepresentation(
 	std::string nodeType,
 	std::vector<const std::vector<DOMAttribute>*>& description,
@@ -411,4 +432,57 @@ void DOM::GetJSRepresentation(
 		obj_getter_name = DOMOverflowElement::GetJSObjectGetter(); 
 		return;
 	}
+	if (nodeType == "VideoData")
+	{
+		DOMVideo::GetDescription(&description);
+		obj_getter_name = DOMVideo::GetJSObjectGetter();
+		return;
+	}
+}
+
+/*
+    ____  ____  __  ____    ___     __         
+   / __ \/ __ \/  |/  / |  / (_)___/ /__  ____ 
+  / / / / / / / /|_/ /| | / / / __  / _ \/ __ \
+ / /_/ / /_/ / /  / / | |/ / / /_/ /  __/ /_/ /
+/_____/\____/_/  /_/  |___/_/\__,_/\___/\____/ 
+*/
+
+const std::vector<DOMAttribute> DOMVideo::_description = { };
+
+int DOMVideo::Initialize(CefRefPtr<CefProcessMessage> msg)
+{
+
+	// First list element to start interpretation as this class's attributes
+	int pivot = super::Initialize(msg);
+
+	const auto args = msg->GetArgumentList();
+	// Check if there are enough arguments in msg to initialize each attribute
+	if ((int)_description.size() > (int)args->GetSize() - pivot)
+	{
+		LogError("DOMVideo: On initialization: Object description and message size do not match!");
+	}
+	else
+	{
+		for (unsigned int i = 0; i < _description.size(); i++)
+		{
+			CefRefPtr<CefListValue> data = args->GetList(pivot + i);
+
+			if (!Update(_description[i], data))
+			{
+				LogError("DOMVideo: Failed to assign value of type ", data->GetType(0),
+					" to attribute ", DOMAttrToString(_description[i]), "!");
+			}
+		}
+	}
+
+
+	return _description.size() + pivot;
+}
+
+bool DOMVideo::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
+{
+	//switch (attr) {
+	//}
+	return super::Update(attr, data);
 }

@@ -4,7 +4,7 @@
 //============================================================================
 
 #include "TestPipeline.h"
-#include "src/State/Web/Tab/Pipelines/Actions/ZoomCoordinateAction.h"
+#include "src/State/Web/Tab/Pipelines/Actions/CoordinateActions/ZoomCoordinateAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/LeftMouseButtonClickAction.h"
 
 TestPipeline::TestPipeline(TabInteractionInterface* pTab) : Pipeline(pTab)

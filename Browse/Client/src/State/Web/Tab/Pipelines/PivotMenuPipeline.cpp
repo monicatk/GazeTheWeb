@@ -4,7 +4,7 @@
 //============================================================================
 
 #include "PivotMenuPipeline.h"
-#include "src/State/Web/Tab/Pipelines/Actions/ZoomCoordinateAction.h"
+#include "src/State/Web/Tab/Pipelines/Actions/CoordinateActions/ZoomCoordinateAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/PivotMenuAction.h"
 
 PivotMenuPipeline::PivotMenuPipeline(TabInteractionInterface* pTab) : Pipeline(pTab)

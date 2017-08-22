@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <layout style="default slow_animation">
-	<grid showbackground="true" style="super_calibration_background">
+	<grid showbackground="true" style="super_calibration_background" consumeinput="true">
 		<row size="100%">
 			<column size="20%">
 				<circlebutton id="continue" border="30%" icon="icons/Cross.png" desckey="super_calibration:continue"/>

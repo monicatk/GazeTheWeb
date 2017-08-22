@@ -257,6 +257,14 @@ void Mediator::AddDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id)
 	}
 }
 
+void Mediator::AddDOMVideo(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		pTab->AddDOMVideo(browser, id);
+	}
+}
+
 void Mediator::ClearDOMNodes(CefRefPtr<CefBrowser> browser)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
@@ -374,11 +382,28 @@ std::weak_ptr<DOMOverflowElement> Mediator::GetDOMOverflowElement(CefRefPtr<CefB
 	return std::weak_ptr<DOMOverflowElement>();
 }
 
+std::weak_ptr<DOMVideo> Mediator::GetDOMVideo(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		return pTab->GetDOMVideo(id);
+	}
+	return std::weak_ptr<DOMVideo>();
+}
+
 void Mediator::RemoveDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
 		pTab->RemoveDOMOverflowElement(id);
+	}
+}
+
+void Mediator::RemoveDOMVideo(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		pTab->RemoveDOMVideo(id);
 	}
 }
 
@@ -412,6 +437,57 @@ void Mediator::SetCanGoForward(CefRefPtr<CefBrowser> browser, bool canGoForward)
     {
         pTab->SetCanGoForward(canGoForward);
     }
+}
+
+bool Mediator::ForwardFaviconBytes(CefRefPtr<CefBrowser> browser, CefRefPtr<CefImage> img)
+{
+	if (const auto pTab = GetTab(browser))
+	{
+		if (!img)
+			return true;
+
+		int width, height;
+
+		auto binary_value = img->GetAsBitmap(1.0, CEF_COLOR_TYPE_RGBA_8888, CEF_ALPHA_TYPE_PREMULTIPLIED, width, height);
+		if (!binary_value)
+		{
+			LogInfo("Mediator: Favicon CefImage conversion to bitmap failed.");
+			return true;
+		}
+
+		const size_t byte_size = binary_value->GetSize();
+		if (byte_size == 0)
+		{
+			LogInfo("Mediator: Favicon CefImage conversion failed due to byte stream being empty.");
+			return true;
+		}
+		
+		auto upData = std::make_unique< std::vector<unsigned char> >();
+		upData->resize(byte_size / sizeof(unsigned char));
+
+		if (width * height * sizeof(unsigned char) > byte_size)
+		{
+			LogInfo("Mediator: Something went wrong when retrieving images resolution. Aborting...");
+			return true;
+		}
+
+		int bytes_read = binary_value->GetData(static_cast<void*>(upData->data()), byte_size, 0);
+
+		pTab->ReceiveFaviconBytes(std::move(upData), width, height);
+		return true;
+	}
+	LogInfo("Mediator: Forwarding favicon bytes to Tab failed. It might not exist anymore.");
+	return false;
+}
+
+bool Mediator::IsFaviconAlreadyAvailable(CefRefPtr<CefBrowser> browser, CefString img_url)
+{
+	if (auto pTab = GetTab(browser))
+	{
+		return !pTab->IsFaviconAlreadyAvailable(img_url.ToString());
+	}
+	// Don't load image if Tab isn't available anymore
+	return true;
 }
 
 void Mediator::SetZoomLevel(TabCEFInterface * pTab)

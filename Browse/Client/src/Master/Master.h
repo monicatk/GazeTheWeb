@@ -16,10 +16,12 @@
 #include "src/State/Web/Web.h"
 #include "src/State/Settings/Settings.h"
 #include "src/Input/EyeInput.h"
+#include "src/Input/VoiceInput.h"
 #include "src/Setup.h"
 #include "src/Utils/LerpValue.h"
 #include "src/Utils/Framebuffer.h"
 #include "src/Utils/RenderItem.h"
+#include "src/Input/Filters/CustomTransformationInteface.h"
 #include "externals/OGL/gl_core_3_3.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 #include <queue>
@@ -60,10 +62,23 @@ public:
 	// Get user directory location
 	std::string GetUserDirectory() const { return _userDirectory; }
 
+	// Register JavaScript callback
 	void RegisterJavascriptCallback(std::string prefix, std::function<void (std::string)>& callbackFunction)
 	{
 		_pCefMediator->RegisterJavascriptCallback(prefix, callbackFunction);
 	};
+
+	// Set data transfer
+	void SetDataTransfer(bool dataTransfer);
+
+	// Get data transfer policy
+	bool MayTransferData() const
+	{
+		return _dataTransfer;
+	}
+
+	// Get pointer to interface of custom transformation of eye input
+	std::weak_ptr<CustomTransformationInterface> GetCustomTransformationInterface();
 
     // ### EYEGUI DELEGATION ###
 
@@ -77,14 +92,20 @@ public:
 	std::u16string FetchLocalization(std::string key) const;
 
 	// Set value of style property in style tree
-	void SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyFloat type, std::string value);
-	void SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyVec4 type, std::string value);
+	void SetStyleTreePropertyValue(std::string styleClass, eyegui::property::Duration type, std::string value);
+	void SetStyleTreePropertyValue(std::string styleClass, eyegui::property::Color type, std::string value);
 
 	// Set global keyboard layout
 	void SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout)
 	{
 		// Tell it eyeGUI
 		eyegui::setKeyboardLayout(_pGUI, keyboardLayout);
+	}
+
+	// Play some sound
+	void PlaySound(std::string filepath)
+	{
+		eyegui::playSound(_pGUI, filepath);
 	}
 
 	// ### ACCESS BY SETTINGS ###
@@ -131,6 +152,9 @@ public:
 	// Notify about eye tracker status
 	virtual void threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status, EyeTrackerDevice device);
 
+	// Get whether data may be transferred
+	virtual bool threadsafe_MayTransferData();
+
 private:
 
     // Give listener full access
@@ -158,12 +182,13 @@ private:
 	struct Notification
 	{
 		// Constructor
-		Notification(std::u16string message, MasterNotificationInterface::Type type, bool overridable) : message(message), type(type), overridable(overridable) {}
+		Notification(std::u16string message, MasterNotificationInterface::Type type, bool overridable, std::string sound = "") : message(message), type(type), overridable(overridable), sound(sound) {}
 
 		// Fields
 		std::u16string message;
 		MasterNotificationInterface::Type type;
 		bool overridable;
+		std::string sound;
 	};
 
 	// ThreadJob class (class to store a job assigned by a thread)
@@ -250,6 +275,9 @@ private:
     // Eye input
     std::unique_ptr<EyeInput> _upEyeInput;
 
+	// Voicde input
+	std::unique_ptr<VoiceInput> _upVoiceInput;
+
     // Id of dictionary in eyeGUI
     unsigned int _dictonaryId = 0;
 
@@ -306,6 +334,9 @@ private:
 
 	// Mutex to guarantees that threadJobs are not manipulated while read by master
 	std::mutex _threadJobsMutex;
+
+	// Bool to control data transfer (set by Web as there is the placed the button)
+	bool _dataTransfer = true;
 };
 
 #endif // MASTER_H_

@@ -27,7 +27,7 @@ std::shared_ptr<spdlog::logger> Log()
         GlobalLog->set_pattern("[%D-%T] %l: %v");
 
 		// Set logging level
-		if (setup::LOG_DEBUG_MESSAGES)
+		if (setup::DEBUG_MODE)
 		{
 			GlobalLog->set_level(spdlog::level::debug);
 		}

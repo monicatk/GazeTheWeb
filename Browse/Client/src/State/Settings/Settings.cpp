@@ -139,6 +139,12 @@ bool Settings::SaveSettings() const
 	pKeyboardLayout->SetAttribute("layout", layout.c_str());
 	pGlobal->InsertAfterChild(pGazeVisualization, pKeyboardLayout);
 
+	// Firebase email and password
+	tinyxml2::XMLElement* pFirebase = doc.NewElement("firebase");
+	pFirebase->SetAttribute("email", _globalSetup.firebaseEmail.c_str());
+	pFirebase->SetAttribute("password", _globalSetup.firebasePassword.c_str());
+	pGlobal->InsertFirstChild(pFirebase);
+
 	// Create environment for web setup
 	tinyxml2::XMLNode* pWeb = doc.NewElement("web");
 	pRoot->InsertAfterChild(pGlobal, pWeb);
@@ -224,6 +230,14 @@ bool Settings::LoadSettings()
 		}
 	}
 
+	// Firebase email and password
+	tinyxml2::XMLElement* pFirebase = pGlobal->FirstChildElement("firebase");
+	if (pFirebase != NULL)
+	{
+		_globalSetup.firebaseEmail = pFirebase->Attribute("email");
+		_globalSetup.firebasePassword = pFirebase->Attribute("password");
+	}
+
 	// Fetch web setup
 	tinyxml2::XMLNode* pWeb = pGlobal->NextSibling();
 	if (pWeb == NULL) { return false; }
@@ -273,6 +287,10 @@ void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string
 		// ### General layout ###
 		if (id == "back")
 		{
+			// Apply and save (TODO: placed here at back because direct toggle_descriptions overrides "PAUSED_AT_STARTUP",
+			// as buttons are virtually pressed by constructor, which is stored until first update of eyeGUI.
+			// This causes the description setting to be overriden by first update.
+			_pSettings->ApplySettings(true);
 			eyegui::setVisibilityOfLayout(_pSettings->_pGeneralLayout, false, false, true);
 		}
 		else if (id == "toggle_descriptions")
@@ -284,9 +302,6 @@ void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string
             _pSettings->_globalSetup.showGazeVisualization = true;
 			JSMailer::instance().Send("gaze_on");
 		}
-
-		// Apply and save
-		_pSettings->ApplySettings(true);
 	}
 	else if (pLayout == _pSettings->_pInfoLayout)
 	{

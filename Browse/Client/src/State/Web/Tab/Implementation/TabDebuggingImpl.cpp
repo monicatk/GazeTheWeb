@@ -11,6 +11,9 @@
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
 #include "submodules/glm/glm/gtc/matrix_transform.hpp"
+// Integrating reduce..
+#include <algorithm>
+#include <numeric>
 
 // Shader programs (For debugging rectangles)
 const std::string vertexShaderSource =
@@ -150,10 +153,20 @@ void Tab::DrawDebuggingOverlay() const
 			// Render rects
 			for (const auto rRect : rDOMTextLink->GetRects())
 			{
-				renderRect(
-					rRect, 
-					(rDOMTextLink->IsFixed())
-				);
+				bool visible = false;
+				for (bool b : rDOMTextLink->GetOccBitmask())
+				{
+					visible |= b;
+					if (b)
+						break;
+				}
+				if (visible)
+					renderRect(
+						rRect,
+						(rDOMTextLink->IsFixed())
+					);
+				/*else
+					LogInfo("TabDebuggingImpl: Hiding DOMTextLink with id=", rDOMTextLink->GetId());*/
 			}
 		}
 
@@ -212,6 +225,19 @@ void Tab::DrawDebuggingOverlay() const
 				renderRect(
 					rect,
 					(rOverflowElement->IsFixed())
+				);
+		}
+
+		// ### DOM VIDEO ELEMENTS ### 
+		_upDebugLineQuad->GetShader()->UpdateValue("color", glm::vec3(0.f / 255.f, 255.f / 255.f, 255.f / 255.f));
+
+		for (const auto& rIdNodePair : _VideoMap)
+		{
+			const auto& rVideoNode = rIdNodePair.second;
+			for (const auto& rect : rVideoNode->GetRects())
+				renderRect(
+					rect,
+					(rVideoNode->IsFixed())
 				);
 		}
 	}
@@ -286,7 +312,7 @@ void Tab::Debug_DrawLine(glm::vec2 originCoordinate, glm::vec2 targetCoordinate,
 		glm::vec3(
 			glm::vec2(originCoordinate.x, _pMaster->GetWindowHeight() - (originCoordinate.y)) // coordinate in correct system TODO: breaks when web view is not filling complete height
 			+ glm::vec2(_upWebView->GetX(), _upWebView->GetY()), 1)); // offset of web view
-	model = glm::rotate(model, atan2(-(targetCoordinate.y - originCoordinate.y), targetCoordinate.x - originCoordinate.x), glm::vec3(0, 0, 1)); // atan2 takes first y then x TODO: breaks when web view is not filling complete height
+    model = glm::rotate(model, (float)atan2(-(targetCoordinate.y - originCoordinate.y), targetCoordinate.x - originCoordinate.x), glm::vec3(0, 0, 1)); // atan2 takes first y then x TODO: breaks when web view is not filling complete height
 	model = glm::scale(model, glm::vec3(glm::distance(originCoordinate, targetCoordinate), 0.f, 0.f));
 
 	// Combine matrics

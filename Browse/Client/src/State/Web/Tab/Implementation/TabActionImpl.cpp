@@ -8,6 +8,7 @@
 #include "src/CEF/Mediator.h"
 #include "src/Utils/Texture.h"
 #include "src/Singletons/LabStreamMailer.h"
+#include "src/Master/Master.h"
 
 void Tab::PushBackPipeline(std::unique_ptr<Pipeline> upPipeline)
 {
@@ -156,4 +157,9 @@ void Tab::ConvertToWebViewPixel(double& rCEFPixelX, double& rCEFPixelY) const
 void Tab::ReplyJSDialog(bool clickedOk, std::string userInput)
 {
 	_pCefMediator->ReplyJSDialog(this, clickedOk, userInput);
+}
+
+void Tab::PlaySound(std::string filepath)
+{
+	_pMaster->PlaySound(filepath);
 }

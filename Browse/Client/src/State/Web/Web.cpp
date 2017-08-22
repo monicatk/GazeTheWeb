@@ -42,6 +42,7 @@ Web::Web(Master* pMaster, Mediator* pCefMediator) : State(pMaster)
     eyegui::registerButtonListener(_pWebLayout, "settings", _spWebButtonListener);
     eyegui::registerButtonListener(_pWebLayout, "back", _spWebButtonListener);
     eyegui::registerButtonListener(_pWebLayout, "forward", _spWebButtonListener);
+	eyegui::registerButtonListener(_pWebLayout, "no_data_transfer", _spWebButtonListener);
     eyegui::registerButtonListener(_pTabOverviewLayout, "close", _spWebButtonListener);
 	eyegui::registerButtonListener(_pTabOverviewLayout, "history", _spWebButtonListener);
     eyegui::registerButtonListener(_pTabOverviewLayout, "back", _spWebButtonListener);
@@ -342,6 +343,23 @@ void Web::PushBackPointingEvaluationPipeline(PointingApproach approach)
 	}
 }
 
+void Web::SetWebPanelMode(WebPanelMode mode)
+{
+	switch(mode)
+	{
+	case WebPanelMode::STANDARD:
+		_pMaster->SetStyleTreePropertyValue("web_panel", eyegui::property::Color::Color, "0x607d8bFF");
+		_pMaster->SetStyleTreePropertyValue("web_panel", eyegui::property::Color::BackgroundColor, "0x1e2021FF");
+		eyegui::setContentOfTextBlock(_pWebLayout, "no_data_transfer_info", std::string());
+		break;
+	case WebPanelMode::NO_DATA_TRANSFER:
+		_pMaster->SetStyleTreePropertyValue("web_panel", eyegui::property::Color::Color, "0x8d20aeFF");
+		_pMaster->SetStyleTreePropertyValue("web_panel", eyegui::property::Color::BackgroundColor, "0x1c023cFF");
+		eyegui::setContentOfTextBlock(_pWebLayout, "no_data_transfer_info", _pMaster->FetchLocalization("web:no_data_transfer_info"));
+		break;
+	}
+}
+
 StateType Web::Update(float tpf, const std::shared_ptr<const Input> spInput)
 {
     // Process jobs first
@@ -632,11 +650,11 @@ void Web::UpdateTabOverview()
 		// Styling
         if (tabId == _currentTabId)
         {
-			_pMaster->SetStyleTreePropertyValue("tab_preview_" + std::to_string(i), eyegui::StylePropertyVec4::BackgroundColor, "0x50BAA6FF");
+			_pMaster->SetStyleTreePropertyValue("tab_preview_" + std::to_string(i), eyegui::property::Color::BackgroundColor, "0x50BAA6FF");
         }
         else
         {
-			_pMaster->SetStyleTreePropertyValue("tab_preview_" + std::to_string(i), eyegui::StylePropertyVec4::BackgroundColor, "0x607d8bFF");
+			_pMaster->SetStyleTreePropertyValue("tab_preview_" + std::to_string(i), eyegui::property::Color::BackgroundColor, "0x607d8bFF");
         }
     }
 
@@ -830,61 +848,65 @@ void Web::AddPageToHistoryJob::Execute(Web* pCallee)
 
 void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 {
-    if(pLayout == _pWeb->_pWebLayout)
-    {
-        // ### Web layout ###
-        if (id == "tab_overview")
-        {
-            _pWeb->ShowTabOverview(true);
+	if (pLayout == _pWeb->_pWebLayout)
+	{
+		// ### Web layout ###
+		if (id == "tab_overview")
+		{
+			_pWeb->ShowTabOverview(true);
 			JSMailer::instance().Send("tabs");
 			LabStreamMailer::instance().Send("Open Tab Overview");
-        }
-        else if (id == "settings")
-        {
-            _pWeb->_goToSettings = true;
+		}
+		else if (id == "settings")
+		{
+			_pWeb->_goToSettings = true;
 			JSMailer::instance().Send("settings");
-        }
-        else if (id == "back")
-        {
-            int tabId = _pWeb->_currentTabId;
-            if (tabId >= 0)
-            {
-                _pWeb->_tabs[tabId]->GoBack();
-            }
+		}
+		else if (id == "back")
+		{
+			int tabId = _pWeb->_currentTabId;
+			if (tabId >= 0)
+			{
+				_pWeb->_tabs[tabId]->GoBack();
+			}
 			LabStreamMailer::instance().Send("Go back");
-        }
-        else if (id == "forward")
-        {
-            int tabId = _pWeb->_currentTabId;
-            if (tabId >= 0)
-            {
-                _pWeb->_tabs[tabId]->GoForward();
-            }
+		}
+		else if (id == "forward")
+		{
+			int tabId = _pWeb->_currentTabId;
+			if (tabId >= 0)
+			{
+				_pWeb->_tabs[tabId]->GoForward();
+			}
 			LabStreamMailer::instance().Send("Go forward");
-        }
-    }
-    else
-    {
-        // ### Tab overview layout ###
-        if(id == "close")
-        {
-            _pWeb->ShowTabOverview(false);
+		}
+		else if (id == "no_data_transfer")
+		{
+			_pWeb->_pMaster->SetDataTransfer(false);
+		}
+	}
+	else
+	{
+		// ### Tab overview layout ###
+		if (id == "close")
+		{
+			_pWeb->ShowTabOverview(false);
 			JSMailer::instance().Send("close");
 			LabStreamMailer::instance().Send("Close Tab Overview");
-        }
+		}
 		else if (id == "history")
 		{
 			_pWeb->ShowTabOverview(false);
 			_pWeb->_upHistory->Activate(_pWeb->_currentTabId);
 			LabStreamMailer::instance().Send("Access History");
 		}
-        else if (id == "edit_url")
-        {
-            _pWeb->ShowTabOverview(false);
-            _pWeb->_upURLInput->Activate(_pWeb->_currentTabId);
+		else if (id == "edit_url")
+		{
+			_pWeb->ShowTabOverview(false);
+			_pWeb->_upURLInput->Activate(_pWeb->_currentTabId);
 			JSMailer::instance().Send("edit");
 			LabStreamMailer::instance().Send("Edit URL");
-        }
+		}
 		else if (id == "bookmark_tab")
 		{
 			int currentTab = _pWeb->_currentTabId;
@@ -909,88 +931,100 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 
 			JSMailer::instance().Send("bookmark_add");
 		}
-        else if (id == "reload_tab")
-        {
-            int tabId = _pWeb->_currentTabId;
-            if (tabId >= 0)
-            {
-                _pWeb->_tabs[tabId]->Reload();
-                _pWeb->ShowTabOverview(false);
-            }
+		else if (id == "reload_tab")
+		{
+			int tabId = _pWeb->_currentTabId;
+			if (tabId >= 0)
+			{
+				_pWeb->_tabs[tabId]->Reload();
+				_pWeb->ShowTabOverview(false);
+			}
 			LabStreamMailer::instance().Send("Reload tab");
-        }
-        else if (id == "close_tab")
-        {
-            if (!_pWeb->_tabs.empty())
-            {
-                _pWeb->RemoveTab(_pWeb->_currentTabId);
-                _pWeb->UpdateTabOverview();
-            }
+		}
+		else if (id == "close_tab")
+		{
+			if (!_pWeb->_tabs.empty())
+			{
+				_pWeb->RemoveTab(_pWeb->_currentTabId);
+				_pWeb->UpdateTabOverview();
+			}
 			LabStreamMailer::instance().Send("Close tab");
-        }
-        else if (id == "back")
-        {
-            // Go to back to previous page but not under zero
-            _pWeb->_tabOverviewPage--;
-            _pWeb->_tabOverviewPage = std::max(0, _pWeb->_tabOverviewPage);
-            _pWeb->UpdateTabOverview();
-        }
-        else if (id == "forward")
-        {
-            // Go forward to next page but not over maximum count
-            _pWeb->_tabOverviewPage++;
-            _pWeb->_tabOverviewPage = std::min(_pWeb->CalculatePageCountOfTabOverview() - 1, _pWeb->_tabOverviewPage);
-            _pWeb->UpdateTabOverview();
-        }
-        else if(id == "new_tab")
-        {
-            // Add tab
-            int tabId = _pWeb->AddTab(BLANK_PAGE_URL, true);
+		}
+		else if (id == "back")
+		{
+			// Go to back to previous page but not under zero
+			_pWeb->_tabOverviewPage--;
+			_pWeb->_tabOverviewPage = std::max(0, _pWeb->_tabOverviewPage);
+			_pWeb->UpdateTabOverview();
+		}
+		else if (id == "forward")
+		{
+			// Go forward to next page but not over maximum count
+			_pWeb->_tabOverviewPage++;
+			_pWeb->_tabOverviewPage = std::min(_pWeb->CalculatePageCountOfTabOverview() - 1, _pWeb->_tabOverviewPage);
+			_pWeb->UpdateTabOverview();
+		}
+		else if (id == "new_tab")
+		{
+			// Add tab
+			int tabId = _pWeb->AddTab(BLANK_PAGE_URL, true);
 
-            // Close tab overview
-            _pWeb->ShowTabOverview(false);
+			// Close tab overview
+			_pWeb->ShowTabOverview(false);
 
-            // Open URLInput to type in URL which should be loaded in new tab
-            _pWeb->_upURLInput->Activate(tabId);
+			// Open URLInput to type in URL which should be loaded in new tab
+			_pWeb->_upURLInput->Activate(tabId);
 
 			JSMailer::instance().Send("new_tab");
 			LabStreamMailer::instance().Send("Open new tab");
-        }
-        else if(id == "tab_button_0")
-        {
-            if(_pWeb->SwitchToTabByIndex(0 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
-            {
-                _pWeb->ShowTabOverview(false);
+		}
+		else if (id == "tab_button_0")
+		{
+			if (_pWeb->SwitchToTabByIndex(0 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
+			{
+				_pWeb->ShowTabOverview(false);
 				JSMailer::instance().Send("tab0");
-            }
-        }
-        else if(id == "tab_button_1")
-        {
-            if(_pWeb->SwitchToTabByIndex(1 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
-            {
-                _pWeb->ShowTabOverview(false);
-            }
-        }
-        else if(id == "tab_button_2")
-        {
-            if(_pWeb->SwitchToTabByIndex(2 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
-            {
-                _pWeb->ShowTabOverview(false);
-            }
-        }
-        else if (id == "tab_button_3")
-        {
-            if(_pWeb->SwitchToTabByIndex(3 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
-            {
-                _pWeb->ShowTabOverview(false);
-            }
-        }
-        else if (id == "tab_button_4")
-        {
-            if(_pWeb->SwitchToTabByIndex(4 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
-            {
-                _pWeb->ShowTabOverview(false);
-            }
-        }
-    }
+			}
+		}
+		else if (id == "tab_button_1")
+		{
+			if (_pWeb->SwitchToTabByIndex(1 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
+			{
+				_pWeb->ShowTabOverview(false);
+			}
+		}
+		else if (id == "tab_button_2")
+		{
+			if (_pWeb->SwitchToTabByIndex(2 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
+			{
+				_pWeb->ShowTabOverview(false);
+			}
+		}
+		else if (id == "tab_button_3")
+		{
+			if (_pWeb->SwitchToTabByIndex(3 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
+			{
+				_pWeb->ShowTabOverview(false);
+			}
+		}
+		else if (id == "tab_button_4")
+		{
+			if (_pWeb->SwitchToTabByIndex(4 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
+			{
+				_pWeb->ShowTabOverview(false);
+			}
+		}
+	}
+}
+
+void Web::WebButtonListener::up(eyegui::Layout* pLayout, std::string id)
+{
+	if (pLayout == _pWeb->_pWebLayout)
+	{
+		// ### Web layout ###
+		if (id == "no_data_transfer")
+		{
+			_pWeb->_pMaster->SetDataTransfer(true);
+		}
+	}
 }

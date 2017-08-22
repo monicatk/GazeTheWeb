@@ -5,10 +5,9 @@
 
 ConsolePrint("Starting to import dom_attributes.js ...");
 
-
+// Filled using C++
 window.attrStrToInt = new Map();
 
-// TODO: Call in CEF Renderer OnContextInitialized
 function AddDOMAttribute(attrStr, attrInt)
 {
     if(typeof(attrStr) !== "string" || typeof(attrInt) !== "number")
@@ -28,7 +27,9 @@ function GetAttributeCode(attrStr)
     return attrInt;
 }
 
-
+/**
+ * Fetch attribute, named |attrStr|, data by calling |domObj|s getter domObj['get'+|attr|]();
+ */
 function SendAttributeChangesToCEF(attrStr, domObj)
 {
     if (typeof(domObj.getType) !== "function")
@@ -60,6 +61,7 @@ function SendAttributeChangesToCEF(attrStr, domObj)
 window.attrStrToEncodingFunc = new Map();
 var simpleReturn = (data) => { return data; };
 var listReturn = (data) => { return data.reduce( (i,j) => {return i+";"+j; })};
+var bitmaskReturn = (data) => {return data.reduce( (i,j) => {return i+j;}, "" )};
 
 window.attrStrToEncodingFunc.set("Rects", (data) => {
     if(data.length === 0)
@@ -77,6 +79,7 @@ window.attrStrToEncodingFunc.set("Url", simpleReturn);
 window.attrStrToEncodingFunc.set("Options", listReturn);
 window.attrStrToEncodingFunc.set("MaxScrolling", listReturn);
 window.attrStrToEncodingFunc.set("CurrentScrolling", listReturn);
+window.attrStrToEncodingFunc.set("OccBitmask", bitmaskReturn);
 
 function FetchAndEncodeAttribute(domObj, attrStr)
 {

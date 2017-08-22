@@ -63,3 +63,35 @@ void DOMSelectFieldInteraction::SetSelectionIndex(int idx)
 	SendProcessMessageToRenderer(msg);
 }
 
+void DOMVideoInteraction::SetPlaying(bool playing)
+{
+	// TODO: There must be a more generic way to create those messages with given params
+	CefRefPtr<CefListValue> param = CefListValue::Create();
+	param->SetBool(0, playing);
+	CefRefPtr<CefProcessMessage> msg = SetupExecuteFunctionMessage("setPlaying", param);
+	SendProcessMessageToRenderer(msg);
+}
+
+void DOMVideoInteraction::SetMuted(bool muted)
+{
+	CefRefPtr<CefListValue> param = CefListValue::Create();
+	param->SetBool(0, muted);
+	CefRefPtr<CefProcessMessage> msg = SetupExecuteFunctionMessage("setMuted", param);
+	SendProcessMessageToRenderer(msg);
+}
+
+void DOMVideoInteraction::SetVolume(float volume)
+{
+	CefRefPtr<CefListValue> param = CefListValue::Create();
+	param->SetDouble(0, volume);
+	CefRefPtr<CefProcessMessage> msg = SetupExecuteFunctionMessage("setVolume", param);
+	SendProcessMessageToRenderer(msg);
+}
+
+void DOMVideoInteraction::JumpToSecond(float sec)
+{
+	CefRefPtr<CefListValue> param = CefListValue::Create();
+	param->SetDouble(0, sec);
+	CefRefPtr<CefProcessMessage> msg = SetupExecuteFunctionMessage("jumpToSecond", param);
+	SendProcessMessageToRenderer(msg);
+}

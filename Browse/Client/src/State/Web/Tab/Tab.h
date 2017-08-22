@@ -93,6 +93,9 @@ public:
 	// Pushs back pointing evaluation pipeline
 	void PushBackPointingEvaluationPipeline(PointingApproach approach);
 
+	// Get last time per frame
+	float GetLastTimePerFrame() const { return _lastTimePerFrame; }
+
     // #################################
     // ### TAB INTERACTIVE INTERFACE ###
     // #################################
@@ -271,6 +274,9 @@ public:
 	// Set WebViewParameters for WebView
 	virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }
 
+	// Play sound
+	virtual void PlaySound(std::string filepath);
+
     // #########################
     // ### TAB CEF INTERFACE ###
     // #########################
@@ -284,6 +290,7 @@ public:
     // Getter and setter for favicon URL
     virtual std::string GetFavIconURL() const { return _favIconUrl; }
     virtual void SetFavIconURL(std::string url) { _favIconUrl = url; }
+	virtual bool IsFaviconAlreadyAvailable(std::string img_url);
 
     // Setter of URL. Does not load it. Should be called by CefMediator only
 	virtual void SetURL(std::string URL);
@@ -304,16 +311,19 @@ public:
 	virtual void AddDOMLink(CefRefPtr<CefBrowser> browser, int id);
 	virtual void AddDOMSelectField(CefRefPtr<CefBrowser> browser, int id);
 	virtual void AddDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id);
+	virtual void AddDOMVideo(CefRefPtr<CefBrowser> browser, int id);
 
 	virtual std::weak_ptr<DOMTextInput> GetDOMTextInput(int id);
 	virtual std::weak_ptr<DOMLink> GetDOMLink(int id);
 	virtual std::weak_ptr<DOMSelectField> GetDOMSelectField(int id);
 	virtual std::weak_ptr<DOMOverflowElement> GetDOMOverflowElement(int id);
+	virtual std::weak_ptr<DOMVideo> GetDOMVideo(int id);
 
 	virtual void RemoveDOMTextInput(int id);
 	virtual void RemoveDOMLink(int id);
 	virtual void RemoveDOMSelectField(int id);
 	virtual void RemoveDOMOverflowElement(int id);
+	virtual void RemoveDOMVideo(int id);
 	virtual void ClearDOMNodes();
 
     // Receive callbacks from CefMediator upon scrolling offset changes
@@ -500,6 +510,7 @@ private:
 	std::map<int, std::shared_ptr<DOMTextInput> > _TextInputMap;
 	std::map<int, std::shared_ptr<DOMSelectField> > _SelectFieldMap;
 	std::map<int, std::shared_ptr<DOMOverflowElement> > _OverflowElementMap;
+	std::map<int, std::shared_ptr<DOMVideo> > _VideoMap;
 
     // Web view in which website is rendered and displayed
     std::unique_ptr<WebView> _upWebView;
@@ -605,6 +616,9 @@ private:
 
 	// Current loading icon frame
 	int _loadingIconFrame = 0;
+
+	// Last time per frame
+	float _lastTimePerFrame = 1.f; // initialize with something that is not zero, as may be used for divisions
 };
 
 #endif // TAB_H_

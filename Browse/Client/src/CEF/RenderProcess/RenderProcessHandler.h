@@ -44,20 +44,18 @@ public:
         CefRefPtr<CefV8Context> context) OVERRIDE;
 
 	// Helper for automatic transformation between IPC messages and V8 values
-	CefRefPtr<CefV8Value> RenderProcessHandler::CefValueToCefV8Value(CefRefPtr<CefValue> val);
+    CefRefPtr<CefV8Value> CefValueToCefV8Value(CefRefPtr<CefValue> val);
 
 private:
 
     // Send logs to main process
     void IPCLog(CefRefPtr<CefBrowser> browser, std::string text, bool debugLog = false);
-	void IPCLogDebug(CefRefPtr<CefBrowser> browser, std::string text) { IPCLog(browser, text, true); };
+    void IPCLogDebug(CefRefPtr<CefBrowser> browser, std::string text) { IPCLog(browser, text, true); }
 
     // Message router instance
 	CefRefPtr<CefMessageRouterRendererSide> _msgRouter;
 
     // JavaScript code as Strings
-	const std::string _js_favicon_create_img = GetJSCode(FAVICON_CREATE_IMG);
-	const std::string _js_favicon_copy_img_bytes_to_v8array = GetJSCode(FAVICON_COPY_IMG_BYTES_TO_V8ARRAY);
 	const std::string _js_dom_nodes				= GetJSCode(DOM_NODES);
 	const std::string _js_dom_nodes_interaction	= GetJSCode(DOM_NODES_INTERACTION);
 	const std::string _js_dom_mutationobserver	= GetJSCode(DOM_MUTATIONOBSERVER);

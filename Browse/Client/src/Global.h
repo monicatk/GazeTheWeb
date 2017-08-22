@@ -32,7 +32,7 @@ static const int TAB_DEBUGGING_GAZE_COUNT = 10;
 static const float MASTER_PAUSE_ALPHA = 0.35f;
 static const float EYEINPUT_MOUSE_OVERRIDE_INIT_FRAME_DURATION = 0.25f; // duration between mouse movement is expected. Triggered by initial movement
 static const float EYEINPUT_MOUSE_OVERRIDE_INIT_DISTANCE = 100.f; // pixels on screen (not best but works)
-static const float EYEINPUT_MOUSE_OVERRIDE_STOP_DURATION = 3.f; // duration until override is stopped when no mouse movement done
+static const float EYEINPUT_MOUSE_OVERRIDE_STOP_DURATION = 1.5f; // duration until override is stopped when no mouse movement done
 static const std::string LOG_FILE_NAME = "log";
 static const std::string INTERACTION_FILE_NAME = "interaction";
 static const int LOG_FILE_MAX_SIZE = 1024 * 1024;
@@ -61,6 +61,6 @@ static const std::string SEARCH_PREFIX = "duckduckgo.com?q="; // TODO: move to s
 static const glm::vec4 NOTIFICATION_NEUTRAL_COLOR = glm::vec4(0.2f, 0.2f, 0.2f, 0.75f);
 static const glm::vec4 NOTIFICATION_SUCCESS_COLOR = glm::vec4(0.15f, 1.0f, 0.0f, 0.75f);
 static const glm::vec4 NOTIFICATION_WARNING_COLOR = glm::vec4(1.0f, 0.15f, 0.0f, 0.75f);
-static const float FILTER_MAXIMUM_SAMPLE_AGE = 1000; // seconds
+static const float FILTER_MAXIMUM_SAMPLE_AGE = 1000; // maximum time returned as sample age by filter, in seconds
 
 #endif // GLOBAL_H_

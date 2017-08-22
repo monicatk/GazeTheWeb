@@ -9,11 +9,13 @@ default
 	MarkColor = 0xFFFFFF33
 	// GazeVisualizationColor = 0xFF820080
 	AnimationDuration = 0.125
-	SensorPenetrationIncreaseDuration = 2
+	SensorPenetrationIncreaseDuration = 4
 	SensorPenetrationDecreaseDuration = 0.5
 	ButtonThresholdIncreaseDuration = 1
 	ButtonThresholdDecreaseDuration = 2
 	ButtonPressingDuration = 0.3
+	ButtonHitSound=sounds/GameAudio/ClickWooden-1.ogg
+	KeyPressSound=sounds/GameAudio/ClickWooden-2.ogg
 }
 
 default_noback : default
@@ -28,6 +30,12 @@ slow_animation
 
 panel : default
 {
+	BackgroundColor = 0x1e2021FF
+}
+
+web_panel : default
+{
+	Color = 0x607d8bFF
 	BackgroundColor = 0x1e2021FF
 }
 
@@ -93,6 +101,7 @@ tab_debug : default
 pause : default
 {
 	Color = 0x505659FF
+	ButtonHitSound=sounds/GameAudio/PingBing.ogg
 }
 
 pause_background

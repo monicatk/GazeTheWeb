@@ -19,6 +19,7 @@ std::string DOMAttrToString(DOMAttribute attr)
 	case Options:			return "Options"; break;
 	case MaxScrolling:		return "MaxScrolling"; break;
 	case CurrentScrolling:	return "CurrentScrolling"; break;
+	case OccBitmask:		return "OccBitmask"; break;
 	default:				return std::to_string(attr);
 	}
 }

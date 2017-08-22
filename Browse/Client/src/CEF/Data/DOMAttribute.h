@@ -13,7 +13,8 @@
 enum DOMAttribute {
 	Rects, FixedId, OverflowId,
 	Text, IsPassword, Url, Options,
-	MaxScrolling, CurrentScrolling
+	MaxScrolling, CurrentScrolling,
+	OccBitmask
 };
 
 // Helper for debug output

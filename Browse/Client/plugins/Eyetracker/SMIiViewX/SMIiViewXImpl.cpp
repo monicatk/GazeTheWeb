@@ -28,6 +28,7 @@ int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 			SampleData(
 				gazeX, // x
 				gazeY, // y
+				SampleDataCoordinateSystem::SCREEN_PIXELS,
 				duration_cast<milliseconds>(
 					system_clock::now().time_since_epoch() // timestamp
 					)
@@ -41,7 +42,6 @@ int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 bool Connect()
 {
 	// Initialize eyetracker
-	SystemInfoStruct systemInfoData;
 	int ret_connect = 0;
 
 	// Connect to iViewX server
@@ -67,6 +67,7 @@ bool Connect()
 	if (ret_connect == RET_SUCCESS)
 	{
 		/*
+		SystemInfoStruct systemInfoData;
 		iV_GetSystemInfo(&systemInfoData);
 		LogInfo("iViewX ETSystem: ", systemInfoData.iV_ETDevice);
 		LogInfo("iViewX iV_Version: ", systemInfoData.iV_MajorVersion, ".", systemInfoData.iV_MinorVersion, ".", systemInfoData.iV_Buildnumber);
@@ -112,4 +113,14 @@ bool Calibrate()
 {
 	// Start calibration
 	return iV_Calibrate() == RET_SUCCESS;
+}
+
+void ContinueLabStream()
+{
+	eyetracker_global::ContinueLabStream();
+}
+
+void PauseLabStream()
+{
+	eyetracker_global::PauseLabStream();
 }

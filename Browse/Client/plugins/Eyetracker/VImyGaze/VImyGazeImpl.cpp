@@ -28,6 +28,7 @@ int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 			SampleData(
 				gazeX, // x
 				gazeY, // y
+				SampleDataCoordinateSystem::SCREEN_PIXELS,
 				duration_cast<milliseconds>(
 					system_clock::now().time_since_epoch() // timestamp
 					)
@@ -41,7 +42,6 @@ int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 bool Connect()
 {
 	// Initialize eyetracker
-	SystemInfoStruct systemInfoData;
 	int ret_connect = 0;
 
 	// Connect to myGaze server
@@ -66,13 +66,27 @@ bool Connect()
 	// Set sample callback
 	if (ret_connect == RET_SUCCESS)
 	{
-		/*
-		iV_GetSystemInfo(&systemInfoData);
-		LogInfo("iViewX ETSystem: ", systemInfoData.iV_ETDevice);
-		LogInfo("iViewX iV_Version: ", systemInfoData.iV_MajorVersion, ".", systemInfoData.iV_MinorVersion, ".", systemInfoData.iV_Buildnumber);
-		LogInfo("iViewX API_Version: ", systemInfoData.API_MajorVersion, ".", systemInfoData.API_MinorVersion, ".", systemInfoData.API_Buildnumber);
-		LogInfo("iViewX SystemInfo Samplerate: ", systemInfoData.samplerate);
-		*/
+		// Get system info
+		SystemInfoStruct systemInfoData;
+		iV_GetSystemInfo(&systemInfoData); // not used right now
+
+		// Setup LabStreamingLayer
+		lsl::stream_info streamInfo(
+			"myGazeLSL",
+			"Gaze",
+			2, // must match with number of samples in SampleData structure
+			lsl::IRREGULAR_RATE, // otherwise will generate samples even if transmission paused (and somehow even gets the "real" samples, no idea how)
+			lsl::cf_double64, // must match with type of samples in SampleData structure
+			"source_id");
+		streamInfo.desc().append_child_value("manufacturer", "Visual Interaction GmbH");
+		lsl::xml_element channels = streamInfo.desc().append_child("channels");
+		channels.append_child("channel")
+			.append_child_value("label", "gazeX")
+			.append_child_value("unit", "screenPixels");
+		channels.append_child("channel")
+			.append_child_value("label", "gazeY")
+			.append_child_value("unit", "screenPixels");
+		eyetracker_global::SetupLabStream(streamInfo);
 
 		// Define a callback function for receiving samples
 		iV_SetSampleCallback(SampleCallbackFunction);
@@ -112,4 +126,14 @@ bool Calibrate()
 {
 	// Start calibration (setup does not work of licensing reasons)
 	return iV_Calibrate() == RET_SUCCESS;
+}
+
+void ContinueLabStream()
+{
+	eyetracker_global::ContinueLabStream();
+}
+
+void PauseLabStream()
+{
+	eyetracker_global::PauseLabStream();
 }

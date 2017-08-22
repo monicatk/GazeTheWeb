@@ -11,7 +11,7 @@
 #ifndef TEXTSELECTIONACTION_H_
 #define TEXTSELECTIONACTION_H_
 
-#include "src/State/Web/Tab/Pipelines/Actions/ZoomCoordinateAction.h"
+#include "src/State/Web/Tab/Pipelines/Actions/CoordinateActions/ZoomCoordinateAction.h"
 #include "src/Utils/LerpValue.h"
 
 class TextSelectionAction : public ZoomCoordinateAction

@@ -6,6 +6,7 @@
 #include "Master.h"
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
+#include "src/Singletons/FirebaseMailer.h"
 #include "submodules/glfw/include/GLFW/glfw3.h"
 #include "submodules/text-csv/include/text/csv/ostream.hpp"
 #include <functional>
@@ -248,6 +249,12 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     eyegui::loadStyleSheet(_pGUI, "stylesheets/Global.seyegui");
 	eyegui::loadStyleSheet(_pSuperGUI, "stylesheets/Global.seyegui");
 
+	// Load overriding styles for demo mode
+#ifdef CLIENT_DEMO
+		eyegui::loadStyleSheet(_pGUI, "stylesheets/Demo.seyegui");
+		eyegui::loadStyleSheet(_pSuperGUI, "stylesheets/Demo.seyegui");
+#endif
+
     // Set resize callback of GUI
     std::function<void(int, int)> resizeGUICallback = [&](int width, int height) { this->GUIResizeCallback(width, height); };
     eyegui::setResizeCallback(_pGUI, resizeGUICallback); // only one GUI needs to callback it. Use standard for it
@@ -326,6 +333,8 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     _upWeb->Activate();
 
     // ### HOMEPAGE ###
+	// _upWeb->AddTab("https://developer.mozilla.org/en-US/docs/Web/CSS/overflow");
+	// _upWeb->AddTab(std::string(CONTENT_PATH) + "/websites/index.html");
 	_upWeb->AddTab(_upSettings->GetHomepage());
 
     // ### SUPER LAYOUT ###
@@ -370,6 +379,9 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     // ### EYE INPUT ###
 	_upEyeInput = std::unique_ptr<EyeInput>(new EyeInput(this));
 
+	// ### VOICE INPUT ###
+	_upVoiceInput = std::unique_ptr<VoiceInput>(new VoiceInput(_pGUI));
+
     // ### FRAMEBUFFER ###
     _upFramebuffer = std::unique_ptr<Framebuffer>(new Framebuffer(_width, _height));
 	_upFramebuffer->Bind();
@@ -394,6 +406,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 		{
 			for (const std::string& rMessage : messages)
 			{
+				// Just print all message received via LabStreamingLayer
 				LogInfo("LabStream: " + rMessage);
 			}
 		}
@@ -401,6 +414,13 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
 	// Register callback
 	LabStreamMailer::instance().RegisterCallback(_spLabStreamCallback);
+
+	// ### FirebaseMailer ###
+	FirebaseMailer::Instance().PushBack_Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword());
+
+	// TODO testing
+	// LogInfo(FirebaseMailer::Instance().Get("name").second.dump());
+	FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
 
     // ### OTHER ###
 
@@ -467,6 +487,51 @@ void Master::Exit()
 	_pCefMediator->DoMessageLoopWork();
 }
 
+void  Master::SetDataTransfer(bool dataTransfer)
+{
+	// Store value
+	_dataTransfer = dataTransfer;
+
+	// Take actions
+	if (_dataTransfer)
+	{
+		// Gaze data recording
+		_upEyeInput->ContinueLabStream();
+
+		// FirebaseMailer
+		FirebaseMailer::Instance().Continue();
+
+		// Visualization
+		_upWeb->SetWebPanelMode(WebPanelMode::STANDARD);
+		PushNotificationByKey("notification:data_transfer_continued", Type::NEUTRAL, true);
+
+		// Marker in LabStream
+		LabStreamMailer::instance().Send("Data transfer continued");
+
+		// TODO: what about local logging?
+	}
+	else
+	{
+		// Gaze data recording
+		_upEyeInput->PauseLabStream();
+
+		// FirebaseMailer
+		FirebaseMailer::Instance().Pause();
+
+		// Visualization
+		_upWeb->SetWebPanelMode(WebPanelMode::NO_DATA_TRANSFER);
+		PushNotificationByKey("notification:data_transfer_paused", Type::NEUTRAL, true);
+
+		// Marker in LabStream
+		LabStreamMailer::instance().Send("Data transfer paused");
+	}
+}
+
+std::weak_ptr<CustomTransformationInterface> Master::GetCustomTransformationInterface()
+{
+	return _upEyeInput->GetCustomTransformationInterface();
+}
+
 eyegui::Layout* Master::AddLayout(std::string filepath, int layer, bool visible)
 {
     // Add layout
@@ -485,24 +550,37 @@ std::u16string Master::FetchLocalization(std::string key) const
 	return eyegui::fetchLocalization(_pGUI, key);
 }
 
-void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyFloat type, std::string value)
+void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::property::Duration type, std::string value)
 {
 	eyegui::setStyleTreePropertyValue(_pGUI, styleClass, type, value);
 }
 
-void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::StylePropertyVec4 type, std::string value)
+void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::property::Color type, std::string value)
 {
 	eyegui::setStyleTreePropertyValue(_pGUI, styleClass, type, value);
 }
 
 void Master::PushNotification(std::u16string content, Type type, bool overridable)
 {
-	_notificationStack.push(Notification(content, type, overridable));
+	std::string sound;
+	switch (type)
+	{
+	case Type::NEUTRAL:
+		// sound = "sounds/GameAudio/TeleportCasual.ogg";
+		break;
+	case Type::SUCCESS:
+		// sound = "sounds/GameAudio/Spacey1upPower-up.ogg";
+		break;
+	case Type::WARNING:
+		// sound = "sounds/GameAudio/SpaceyLoose.ogg";
+		break;
+	}
+	_notificationStack.push(Notification(content, type, overridable, sound));
 }
 
 void Master::PushNotificationByKey(std::string key, Type type, bool overridable)
 {
-	_notificationStack.push(Notification(eyegui::fetchLocalization(_pGUI, key), type, overridable));
+	PushNotification(eyegui::fetchLocalization(_pGUI, key), type, overridable);
 }
 
 void Master::threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status, EyeTrackerDevice device)
@@ -511,6 +589,12 @@ void Master::threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus status, EyeTrack
 	_threadJobsMutex.lock();
 	_threadJobs.push_back(std::make_shared<PushEyetrackerStatusThreadJob>(this, status, device));
 	_threadJobsMutex.unlock();
+}
+
+bool Master::threadsafe_MayTransferData()
+{
+	// No job necessary, just reading bool
+	return _dataTransfer;
 }
 
 void Master::Loop()
@@ -551,7 +635,8 @@ void Master::Loop()
 		_pCefMediator->Poll(tpf);
 
 		// Notification handling
-		if (_notificationTime <= 0 || _notificationOverridable)
+		if (_notificationTime <= 0 // time for the current notification is over
+			|| (_notificationOverridable && !_notificationStack.empty())) // go to next notification if current is overridable and stack not empty
 		{
 			// Show next notification
 			if (!_notificationStack.empty())
@@ -582,7 +667,7 @@ void Master::Loop()
 				}
 				
 				// Set color in state (TODO: would be better to set / add / remove old style of element so color can be defined in stylesheet)
-				eyegui::setStyleTreePropertyValue(_pSuperGUI, "notification", eyegui::StylePropertyVec4::BackgroundColor, RGBAToHexString(color));
+				eyegui::setStyleTreePropertyValue(_pSuperGUI, "notification", eyegui::property::Color::BackgroundColor, RGBAToHexString(color));
 
 				// Remember whether this notification is overridable
 				_notificationOverridable = notification.overridable;
@@ -592,6 +677,12 @@ void Master::Loop()
 
 				// Reset time
 				_notificationTime = NOTIFICATION_DISPLAY_DURATION;
+
+				// Play sound
+				if (!notification.sound.empty())
+				{
+					eyegui::playSound(_pGUI, notification.sound);
+				}
 			}
 			else if(_notificationTime <= 0) // hide notification, if empty and time is over
 			{
@@ -625,7 +716,8 @@ void Master::Loop()
 
 		// If last gaze sample age is too high, perform recalibration
 		if (
-			!eyegui::isLayoutVisible(_pSuperCalibrationLayout) // only proceed when layout is not already visible
+			!setup::DEMO_MODE // do not do it in DEMO mode
+			&& !eyegui::isLayoutVisible(_pSuperCalibrationLayout) // only proceed when layout is not already visible
 			&& !spInput->gazeEmulated // only think about calibration if gaze is not emulated
 			&& spInput->gazeAge > setup::DURATION_BEFORE_SUPER_CALIBRATION // also only when for given time no samples received
 			&& _upEyeInput->SamplesReceived()) // and it should not performed when there were no samples so far
@@ -634,7 +726,7 @@ void Master::Loop()
 			eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true);
 
 			// Notify user via sound
-			eyegui::playSound(_pGUI, "sounds/Boop.ogg");
+			eyegui::playSound(_pGUI, "sounds/GameAudio/FlourishSpacey-1.ogg");
 		}
 
         // Update cursor with original mouse input
@@ -656,7 +748,7 @@ void Master::Loop()
         eyegui::setStyleTreePropertyValue(
 			_pSuperGUI,
             "pause_background",
-			eyegui::StylePropertyVec4::BackgroundColor,
+			eyegui::property::Color::BackgroundColor,
             RGBAToHexString(glm::vec4(0, 0, 0, MASTER_PAUSE_ALPHA * _pausedDimming.getValue())));
 
 		// Check whether input is desired
@@ -678,6 +770,12 @@ void Master::Loop()
         eyeGUIInput.gazeY = (int)spInput->gazeY;
 		eyeGUIInput.gazeUsed = spInput->gazeUponGUI;
 
+		// TODO: Testing
+		if (eyeGUIInput.instantInteraction)
+		{
+			FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
+		}
+
         // Update super GUI, including pause button
 		eyeGUIInput = eyegui::updateGUI(_pSuperGUI, tpf, eyeGUIInput); // update super GUI with pause button
         if(_paused)
@@ -688,7 +786,7 @@ void Master::Loop()
 		eyeGUIInput = eyegui::updateGUI(_pGUI, tpf, eyeGUIInput); // update GUI
 
         // Do message loop of CEF
-        _pCefMediator->DoMessageLoopWork();
+        _pCefMediator->DoMessageLoopWork(); // TODO: Breaks randomly after sometime in debug mode?
 
         // Update our input structure
 		spInput->gazeUponGUI = eyeGUIInput.gazeUsed;
@@ -798,14 +896,22 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
 			case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
-			case GLFW_KEY_C: { eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true); eyegui::playSound(_pGUI, "sounds/test.ogg");  break; }
+			case GLFW_KEY_C: { _upEyeInput->Calibrate();  break; }
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
 			case GLFW_KEY_6: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::MAGNIFICATION); break; }
 			case GLFW_KEY_7: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::ZOOM); break; }
 			case GLFW_KEY_8: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::DRIFT_CORRECTION); break; }
 			case GLFW_KEY_9: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::DYNAMIC_DRIFT_CORRECTION); break; }
+			case GLFW_KEY_SPACE: { _upVoiceInput->StartAudioRecording(); }
         }
     }
+	else if (action == GLFW_RELEASE)
+	{
+		switch (key)
+		{
+			case GLFW_KEY_SPACE: { auto voiceAction = _upVoiceInput->EndAndProcessAudioRecording(); LogInfo("Retrieved VoiceAction: ", static_cast<int>(voiceAction)); }
+		}
+	}
 }
 
 void Master::GLFWMouseButtonCallback(int button, int action, int mods)
@@ -912,6 +1018,9 @@ void Master::PushEyetrackerStatusThreadJob::Execute()
 	case EyeTrackerStatus::CONNECTED:
 		switch (_device)
 		{
+		case EyeTrackerDevice::OPEN_GAZE:
+			_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected_open_gaze", MasterNotificationInterface::Type::SUCCESS, false);
+			break;
 		case EyeTrackerDevice::SMI_REDN:
 			_pMaster->PushNotificationByKey("notification:eye_tracker_status:connected_smi_redn", MasterNotificationInterface::Type::SUCCESS, false);
 			break;

@@ -21,6 +21,7 @@ class DOMTextInput;
 class DOMLink;
 class DOMSelectField;
 class DOMOverflowElement;
+class DOMVideo;
 
 
 class TabCEFInterface
@@ -53,16 +54,19 @@ public:
 	virtual void AddDOMLink(CefRefPtr<CefBrowser> browser, int id) = 0;
 	virtual void AddDOMSelectField(CefRefPtr<CefBrowser> browser, int id) = 0;
 	virtual void AddDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id) = 0;
+	virtual void AddDOMVideo(CefRefPtr<CefBrowser> browser, int id) = 0;
 
 	virtual std::weak_ptr<DOMTextInput> GetDOMTextInput(int id) = 0;
 	virtual std::weak_ptr<DOMLink> GetDOMLink(int id) = 0;
 	virtual std::weak_ptr<DOMSelectField> GetDOMSelectField(int id) = 0;
 	virtual std::weak_ptr<DOMOverflowElement> GetDOMOverflowElement(int id) = 0;
+	virtual std::weak_ptr<DOMVideo> GetDOMVideo(int id) = 0;
 
 	virtual void RemoveDOMTextInput(int id) = 0;
 	virtual void RemoveDOMLink(int id) = 0;
 	virtual void RemoveDOMSelectField(int id) = 0;
 	virtual void RemoveDOMOverflowElement(int id) = 0;
+	virtual void RemoveDOMVideo(int id) = 0;
 	virtual void ClearDOMNodes() = 0;
 
     // Receive callbacks from CefMediator upon scrolling offset changes
@@ -94,6 +98,12 @@ public:
 
 	// Tell about JavaScript dialog
 	virtual void RequestJSDialog(JavaScriptDialogType type, std::string message) = 0;
+
+	// Mediator checks first if favicon image has to be loaded
+	virtual bool IsFaviconAlreadyAvailable(std::string img_url) = 0;
+
+	int _current_favicon_bytes = 0;
+	std::vector<std::string> _loaded_favicon_urls;
 };
 
 #endif // TABCEFINTERFACE_H_

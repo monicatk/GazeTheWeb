@@ -22,6 +22,11 @@
 // Forward declaration
 class Mediator;
 
+enum class WebPanelMode
+{
+	STANDARD, NO_DATA_TRANSFER
+};
+
 class Web : public State, public WebTabInterface
 {
 public:
@@ -61,6 +66,9 @@ public:
 
 	// Pushs back pointing evaluation pipeline in current tab
 	void PushBackPointingEvaluationPipeline(PointingApproach approach);
+
+	// Web panel mode
+	void SetWebPanelMode(WebPanelMode mode);
 
     // #############
     // ### STATE ###
@@ -161,7 +169,7 @@ private:
         WebButtonListener(Web* pWeb) { _pWeb = pWeb; }
         virtual void hit(eyegui::Layout* pLayout, std::string id) {}
         virtual void down(eyegui::Layout* pLayout, std::string id);
-        virtual void up(eyegui::Layout* pLayout, std::string id) {}
+		virtual void up(eyegui::Layout* pLayout, std::string id);
 
     private:
 

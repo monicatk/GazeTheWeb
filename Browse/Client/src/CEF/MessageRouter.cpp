@@ -40,6 +40,16 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	// ###############
 	// ### Favicon ###
 	// ###############
+	if (requestString.compare(0, 12, "#FaviconURL#") == 0)
+	{
+		auto split = SplitBySeparator(requestString, '#');
+		if (split.size() > 1)
+		{
+			// Currently, all finished image downloads trigger set up as favicon image in Tab
+			_pMediator->StartImageDownload(browser, split[1]);
+		}
+		return true;
+	}
 
 	if (requestString == "faviconBytesReady")
 	{
@@ -176,6 +186,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					case(1): {_pMediator->AddDOMLink(browser, id); break; }
 					case(2): {_pMediator->AddDOMSelectField(browser, id); break; }
 					case(3): {_pMediator->AddDOMOverflowElement(browser, id); break; }
+					case(4): {_pMediator->AddDOMVideo(browser, id); break; }
 					default: {
 						LogError("MsgRouter: Adding DOMNode - Unknown type of DOMNode! type=", type);
 					}
@@ -188,6 +199,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				case(1) : ipcName = "Link"; break;
 				case(2) : ipcName = "SelectField"; break;
 				case(3) : ipcName = "OverflowElement"; break;
+				case(4) : ipcName = "Video"; break;
 				default: {
 					LogError("MsgRouter: - ERROR: Unknown numeric DOM node type value: ", type);
 					return true;
@@ -195,6 +207,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				}
 
 				// Instruct Renderer Process to initialize empty DOM Nodes with data
+				// TODO: Move this to DOM node constructor?
 				CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("LoadDOM" + ipcName + "Data");
 				msg->GetArgumentList()->SetInt(0, type);
 				msg->GetArgumentList()->SetInt(1, id);
@@ -210,6 +223,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					case(1): {_pMediator->RemoveDOMLink(browser, id); break; }
 					case(2): {_pMediator->RemoveDOMSelectField(browser, id); break; }
 					case(3) : {_pMediator->RemoveDOMOverflowElement(browser, id); break; }
+					case(4): {_pMediator->RemoveDOMVideo(browser, id); break; }
 					default: {
 						LogError("MsgRouter: Removing DOMNode - Unknown type of DOMNode! type=", type);
 					}
@@ -226,6 +240,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					case(1): {target = _pMediator->GetDOMLink(browser, id); break; }
 					case(2): {target = _pMediator->GetDOMSelectField(browser, id); break; }
 					case(3) : {target = _pMediator->GetDOMOverflowElement(browser, id); break; }
+					case(4): {target = _pMediator->GetDOMVideo(browser, id); break; }
 					default: {
 						LogError("MsgRouter: Updating DOMNode - Unknown type of DOMNode! type=", type);
 					}
@@ -274,7 +289,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	}
 
 	// If request is unknown & couldn't be handled, assume it to be a ConsolePrint call in JS and log it
-	LogDebug("Javascript: ", requestString);
+	LogInfo("Javascript: ", requestString);
 
 	return false;
 }

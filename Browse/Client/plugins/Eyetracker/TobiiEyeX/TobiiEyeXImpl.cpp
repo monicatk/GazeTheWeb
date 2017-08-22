@@ -61,6 +61,7 @@ void OnGazeDataEvent(TX_HANDLE hGazeDataBehavior)
 			SampleData(
 				eventParams.X, // x
 				eventParams.Y, // y
+				SampleDataCoordinateSystem::SCREEN_PIXELS,
 				duration_cast<milliseconds>(
 					system_clock::now().time_since_epoch() // timestamp
 					)
@@ -124,7 +125,6 @@ void TX_CALLCONVENTION OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connect
 		break;
 	}
 }
-
 
 // Intialization of global interactor snapshot with unfiltered gaze
 bool InitializeGlobalInteractorSnapshot(TX_CONTEXTHANDLE hContext)
@@ -201,4 +201,14 @@ bool Calibrate()
 {
 	// Not supported
 	return false;
+}
+
+void ContinueLabStream()
+{
+	eyetracker_global::ContinueLabStream();
+}
+
+void PauseLabStream()
+{
+	eyetracker_global::PauseLabStream();
 }

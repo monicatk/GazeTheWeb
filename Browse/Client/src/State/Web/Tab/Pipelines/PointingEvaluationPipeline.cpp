@@ -4,10 +4,10 @@
 //============================================================================
 
 #include "PointingEvaluationPipeline.h"
-#include "src/State/Web/Tab/Pipelines/Actions/MagnificationCoordinateAction.h"
-#include "src/State/Web/Tab/Pipelines/Actions/ZoomCoordinateAction.h"
-#include "src/State/Web/Tab/Pipelines/Actions/DriftCorrectionAction.h"
-#include "src/State/Web/Tab/Pipelines/Actions/DynamicDriftCorrectionAction.h"
+#include "src/State/Web/Tab/Pipelines/Actions/CoordinateActions/MagnificationCoordinateAction.h"
+#include "src/State/Web/Tab/Pipelines/Actions/CoordinateActions/ZoomCoordinateAction.h"
+#include "src/State/Web/Tab/Pipelines/Actions/CoordinateActions/DriftCorrectionAction.h"
+#include "src/State/Web/Tab/Pipelines/Actions/CoordinateActions/DynamicDriftCorrectionAction.h"
 #include "src/State/Web/Tab/Pipelines/Actions/LeftMouseButtonClickAction.h"
 
 PointingEvaluationPipeline::PointingEvaluationPipeline(TabInteractionInterface* pTab, PointingApproach approach) : Pipeline(pTab)

@@ -11,7 +11,11 @@
 #include "src/Utils/Logger.h"
 #include <algorithm>
 
-Tab::Tab(Master* pMaster, Mediator* pCefMediator, WebTabInterface* pWeb, std::string url)
+Tab::Tab(
+	Master* pMaster,
+	Mediator* pCefMediator,
+	WebTabInterface* pWeb,
+	std::string url)
 {
 	// Fill members
 	_pMaster = pMaster;
@@ -113,6 +117,9 @@ Tab::~Tab()
 
 void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 {
+	// Store tpf
+	_lastTimePerFrame = tpf;
+
 	// #######################
 	// ### UPDATE WEB VIEW ###
 	// #######################
@@ -177,15 +184,20 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		_upWebView->GetWidth(),
 		_upWebView->GetHeight(),
 		_upWebView->GetResolutionX(),
-		_upWebView->GetResolutionY());
+		_upWebView->GetResolutionY()
+		);
 
 	// Update highlight rectangle of webview
 	// TODO: alternative: give webview shared pointer to DOM nodes
 	std::vector<Rect> rects;
 	for (const auto& rIdNodePair : _TextLinkMap)
 	{
+		if (!rIdNodePair.second)
+			continue;
+
 		for (const auto& rRect : rIdNodePair.second->GetRects())
 		{
+			// TODO: Sometimes breaks at this position in debug mode
 			rects.push_back(rRect);
 		}
 	}
@@ -362,7 +374,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 			// yOffset = (glm::max(0.f, yOffset - 0.05f) / 0.95f); // In the center of view no movement
 			yOffset = negative ? -yOffset : yOffset; // [-1..1]
 
-			// Update the auto scrolling value (TODO: not frame rate independend)
+			// Update the auto scrolling value (TODO: not really frame rate independend)
 			_autoScrollingValue += tpf * (yOffset - _autoScrollingValue);
 		}
 		else if (_autoScrollingValue != 0)
@@ -452,10 +464,9 @@ void Tab::Draw() const
 	}
 
 	// Draw debug overlay
-	if (setup::DRAW_DEBUG_OVERLAY)
-	{
+#ifdef CLIENT_DEBUG
 		DrawDebuggingOverlay();
-	}
+#endif
 }
 
 void Tab::Activate()
@@ -464,7 +475,7 @@ void Tab::Activate()
 	eyegui::setVisibilityOfLayout(_pOverlayLayout, true, true, false);
 	eyegui::setVisibilityOfLayout(_pScrollingOverlayLayout, true, true, false);
 	eyegui::setVisibilityOfLayout(_pPanelLayout, true, true, false);
-    eyegui::setVisibilityOfLayout(_pDebugLayout, setup::DRAW_DEBUG_OVERLAY, true, false);
+    eyegui::setVisibilityOfLayout(_pDebugLayout, setup::DEBUG_MODE, true, false);
 
 	// Setup switches
 	if (_autoScrolling) { eyegui::buttonDown(_pPanelLayout, "auto_scrolling", true); }
@@ -615,50 +626,50 @@ void Tab::UpdateAccentColor(float tpf)
 	// Set color of tab_panel style
 	_pMaster->SetStyleTreePropertyValue(
 		"tab_panel",
-		eyegui::StylePropertyVec4::Color,
+		eyegui::property::Color::Color,
 		RGBAToHexString(colorAccent)
 	);
 
 	// Set color of tab_overlay style
 	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay",
-		eyegui::StylePropertyVec4::Color,
+		eyegui::property::Color::Color,
 		RGBAToHexString(colorAccent)
 	);
 	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay",
-		eyegui::StylePropertyVec4::BackgroundColor,
+		eyegui::property::Color::BackgroundColor,
 		RGBAToHexString(backgroundAccentColor)
 	);
 
 	// Set color of tab_overlay_noback style
 	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_noback",
-		eyegui::StylePropertyVec4::Color,
+		eyegui::property::Color::Color,
 		RGBAToHexString(colorAccent)
 	);
 
 	// Set color of tab_overlay_panel style
 	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_panel",
-		eyegui::StylePropertyVec4::Color,
+		eyegui::property::Color::Color,
 		RGBAToHexString(backgroundAccentColor)
 	);
 	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_panel",
-		eyegui::StylePropertyVec4::BackgroundColor,
+		eyegui::property::Color::BackgroundColor,
 		RGBAToHexString(panelBackgroundAccentColor)
 	);
 
 	// Set color and background of tab_overlay_scroll_progress
 	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_scroll_progress",
-		eyegui::StylePropertyVec4::Color,
+		eyegui::property::Color::Color,
 		RGBAToHexString(transparentColorAccent)
 	);
 	_pMaster->SetStyleTreePropertyValue(
 		"tab_overlay_scroll_progress",
-		eyegui::StylePropertyVec4::BackgroundColor,
+		eyegui::property::Color::BackgroundColor,
 		RGBAToHexString(transparentBackgroundColorAccent)
 	);
 }

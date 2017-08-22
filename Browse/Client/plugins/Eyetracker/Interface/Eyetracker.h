@@ -35,6 +35,12 @@ extern "C" {
 	// Perform calibration, returns whether succesfull
 	DLL_API bool Calibrate();
 
+	// Continue lab streaming layer streaming
+	DLL_API void ContinueLabStream();
+
+	// Pause lab streaming layer streaming
+	DLL_API void PauseLabStream();
+
 #ifdef __cplusplus
 }
 #endif
