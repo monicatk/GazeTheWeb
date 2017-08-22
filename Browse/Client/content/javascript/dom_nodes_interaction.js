@@ -63,8 +63,8 @@ DOMOverflowElement.prototype.scroll = function(gazeX, gazeY, fixedIds){
 	if(this.hidden_overflow)
 		return [0,0];
 
-	// TODO: Refactore this method?
-	if(fixedIds.length > 0 && fixedIds.indexOf(this.getFixedId()) === -1)
+
+	if(fixedIds === undefined || fixedIds.length > 0 && fixedIds.indexOf(this.getFixedId()) === -1)
 		return;
 
 	// Do not use cut-off rect and keep scrolling velocity untouched if partially hidden

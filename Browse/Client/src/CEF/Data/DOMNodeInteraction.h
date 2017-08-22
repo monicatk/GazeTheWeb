@@ -39,10 +39,83 @@ public:
 	// Sending message to renderer
 	bool SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg);
 
-	// Helper
+
+	/* ### Helpers ### */
+
+	// Maps given data type to CefListValue function in order to set idx to this value
+	template<typename T>
+	void AppendToList(CefRefPtr<CefListValue> list, T val) { LogInfo("DOMJavascriptCommunication: Unhandled data type!"); };
+
+	template<> void AppendToList<bool>(CefRefPtr<CefListValue> list, bool val) 
+	{ 
+		list->SetBool(list->GetSize(), val); 
+	};
+
+	template<> void AppendToList<double>(CefRefPtr<CefListValue> list, double val) 
+	{ 
+		list->SetDouble(list->GetSize(), val);
+	};
+
+	template<> void AppendToList<int>(CefRefPtr<CefListValue> list, int val) 
+	{ 
+		list->SetInt(list->GetSize(), val);
+	};
+
+	template<> void AppendToList<std::string>(CefRefPtr<CefListValue> list, std::string val) 
+	{ 
+		list->SetString(list->GetSize(), val);
+	};
+
+	template<typename T>
+	void AppendToList(CefRefPtr<CefListValue> list, std::vector<T> val)
+	{
+		CefRefPtr<CefListValue> sublist = CefListValue::Create();
+		for (const auto subval : val)
+			AppendToList<T>(sublist, subval);
+		list->SetList(list->GetSize(), sublist);
+	};
+
+	// Add an arbitrarily typed value to a CefListValue
+	template<typename T>
+	void AddToList(CefRefPtr<CefListValue> list, T val)
+	{
+		AppendToList(list, val);
+	};
+
+	// Add several arbitrarily typed values to a CefListValue
+	template<typename T, typename... Args>
+	void AddToList(CefRefPtr<CefListValue> list, T val, Args... args)
+	{
+		AppendToList(list, val);
+		AddToList(list, args...);
+	}
+
+	// Given a JS function name and a list of parameters, a process message is send to JS, which executes given
+	// node's function with the provided parameters
+	template<typename T, typename... Args>
+	void SendExecuteFunctionMessage(std::string func_name, T param, Args... args)
+	{
+		CefRefPtr<CefListValue> params = CefListValue::Create();
+		AddToList<T>(params, param, args...);
+		CefRefPtr<CefProcessMessage> msg = SetupExecuteFunctionMessage(func_name, params);
+		SendProcessMessageToRenderer(msg);
+	}
+	// TODO: Is this function really neccessary?
+	template<typename T>
+	void SendExecuteFunctionMessage(std::string func_name, T param)
+	{
+		CefRefPtr<CefListValue> params = CefListValue::Create();
+		AddToList<T>(params, param);
+		CefRefPtr<CefProcessMessage> msg = SetupExecuteFunctionMessage(func_name, params);
+		SendProcessMessageToRenderer(msg);
+	}
+
+	// Setup process message by adding a header (node id and type) and given params to its argument list
 	CefRefPtr<CefProcessMessage> SetupExecuteFunctionMessage(
 		std::string func_name,
 		CefRefPtr<CefListValue> param);
+
+
 
 	// Member
 	SendRenderMessage _sendRenderMessage;
@@ -71,7 +144,7 @@ public:
     DOMTextInputInteraction() {}
 
 	// Send IPC message to JS in order to execute text input function
-	void InputText(std::string text, bool submit);
+	void InputText(std::string text, bool submit){ SendExecuteFunctionMessage("inputText", submit); }
 };
 
 // Interaction with overflow element
@@ -84,7 +157,7 @@ public:
 
 	// TODO taking gaze, should take scrolling offset
 	// Send IPC message to JS in order to execute scrolling function
-	void Scroll(int x, int y, std::vector<int> fixedIds = {});
+	void Scroll(int x, int y, std::vector<int> fixedIds = {}) { SendExecuteFunctionMessage("scroll", x, y, fixedIds); }
 };
 
 // Interaction with select field
@@ -96,7 +169,7 @@ public:
     DOMSelectFieldInteraction() {}
 
 	// Send IPC message to JS in order to execute JS function
-	void SetSelectionIndex(int idx);
+	void SetSelectionIndex(int idx) { SendExecuteFunctionMessage("setSelectionIndex", idx); }
 };
 
 // Interaction with videos
@@ -108,10 +181,12 @@ public:
 	DOMVideoInteraction() {}
 
 	// Send IPC message to JS in order to execute JS function
-	void SetPlaying(bool playing = true);
-	void SetMuted(bool muted = true);
-	void SetVolume(float volume);
-	void JumpToSecond(float sec = 0.f);
+	void JumpToSecond(float sec = 0.f) { SendExecuteFunctionMessage("jumptToSecond", sec); }
+	void SetPlaying(bool playing = true) { SendExecuteFunctionMessage("setPlaying", playing); }
+	void SetMuted(bool muted = true) { SendExecuteFunctionMessage("setMuted", muted); }
+	void SetVolume(float volume) { SendExecuteFunctionMessage("setVolume", volume); }
+	void ShowControls(bool show = true) { SendExecuteFunctionMessage("showControls", show); }
 };
+
 
 #endif // DOMNODEINTERACTION_H_
