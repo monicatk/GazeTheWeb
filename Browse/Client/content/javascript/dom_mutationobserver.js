@@ -18,6 +18,10 @@ document.onreadystatechange = function()
 	}
 }
 
+window.onwebkitfullscreenchange = function()
+{
+	UpdateDOMRects();
+}
 
 window.onresize = function()
 {
@@ -26,9 +30,6 @@ window.onresize = function()
 	ConsolePrint("Javascript detected window resize, update of fixed element Rects.");
 }
 
-
-// DEBUG
-window.te = []
 
 // Update rects if CSS transition took place (TODO: Needed if parent's rects didn't change?)
 document.addEventListener('transitionend', function(event){

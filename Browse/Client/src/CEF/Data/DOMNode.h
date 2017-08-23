@@ -55,6 +55,9 @@ public:
 	static void GetDescription(std::vector<const std::vector<DOMAttribute>* >* descriptions) {
 		descriptions->push_back(&_description);
 	}
+
+	// Enable accessing attribute data while running the program
+	virtual bool PrintAttribute(DOMAttribute attr);	// TODO: Return or receive genericly typed value and check if same value is on Javascript side?
 	
 	// Getter from DOMBaseInterface
 	virtual int GetId() override { return _id; }
@@ -126,6 +129,8 @@ public:
 		return "GetDOMTextInput";
 	}
 
+	virtual bool PrintAttribute(DOMAttribute attr);
+
 	// TODO: somehow set enum per subclass and return this in DOMNode?
     virtual int GetType() override { return 0; }
 	
@@ -184,6 +189,8 @@ public:
 	{
 		return "GetDOMLink";
 	}
+
+	virtual bool PrintAttribute(DOMAttribute attr);
 
 	// TODO: somehow set enum per subclass and return this in DOMNode?
     virtual int GetType() override { return 1; }
@@ -248,6 +255,8 @@ public:
 		return "GetDOMSelectField";
 	}
 
+	virtual bool PrintAttribute(DOMAttribute attr);
+
 	// TODO: somehow set enum per subclass and return this in DOMNode?
     virtual int GetType() override { return 2; }
 
@@ -306,6 +315,8 @@ public:
 		return "GetDOMOverflowElement";
 	}
 
+	virtual bool PrintAttribute(DOMAttribute attr);
+
 	// TODO: somehow set enum per subclass and return this in DOMNode?
     virtual int GetType() override { return 3; }
 
@@ -354,7 +365,7 @@ public:
 	// Define initialization through ICP message in each DOMNode subclass
 	virtual int Initialize(CefRefPtr<CefProcessMessage> msg) override;
 
-	// CefProcessMessage to C++ object
+	// Extract data from CefProcessMessage to C++ object's corresponding attibute
 	virtual bool Update(DOMAttribute attr, CefRefPtr<CefListValue> data) override;
 
 	// Build description
@@ -368,6 +379,8 @@ public:
 	{
 		return "GetDOMVideo";
 	}
+
+	virtual bool PrintAttribute(DOMAttribute attr);
 
 	// TODO: somehow set enum per subclass and return this in DOMNode?
 	virtual int GetType() override { return 4; }

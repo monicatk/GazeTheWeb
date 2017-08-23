@@ -7,7 +7,6 @@ ConsolePrint("Starting to import dom_attributes.js ...");
 
 // Filled using C++
 window.attrStrToInt = new Map();
-
 function AddDOMAttribute(attrStr, attrInt)
 {
     if(typeof(attrStr) !== "string" || typeof(attrInt) !== "number")
@@ -26,6 +25,7 @@ function GetAttributeCode(attrStr)
         console.log("Error in GetAttributeCode: Tried to handle an attribute called '"+attrStr+"', but is unknown.");
     return attrInt;
 }
+
 
 /**
  * Fetch attribute, named |attrStr|, data by calling |domObj|s getter domObj['get'+|attr|]();

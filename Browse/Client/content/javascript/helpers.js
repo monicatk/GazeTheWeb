@@ -418,7 +418,34 @@ function PrintPerformanceInformation()
 
 function SendFaviconURLtoCEF(url)
 {
+    console.log("Found favicon url: "+url);
     ConsolePrint("#FaviconURL#"+url+"#");
+}
+
+function AttrRequest(domObj, attrStr, compare_with_js=true)
+{
+    if (domObj === undefined)
+        return;
+    var attrCode = GetAttributeCode(attrStr);
+    if (attrCode === undefined)
+    {
+        ConsolePrint("AttrRequest: Couldn't find integer represantion for DOMAttribute with name "+attrStr);
+        return;
+    }
+    
+    if(compare_with_js)
+    {
+        var data, getter = domObj["get"+attrStr];
+        if (getter !== undefined)
+            data = domObj["get"+attrStr](false); 
+        else
+            ConsolePrint("AttrRequest: Didn't find Javascript getter for DOMAttribute "+attrStr);
+
+    }
+    ConsolePrint("DOMAttrReq#"+domObj.getType()+"#"+domObj.getId()+"#"+attrCode+"#");
+
+    if (compare_with_js)
+        ConsolePrint(attrStr+" data:\n\t"+data);
 }
 
 ConsolePrint("Successfully imported helpers.js!");

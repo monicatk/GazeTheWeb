@@ -8,6 +8,7 @@
 #include "src/Utils/Logger.h"
 #include "src/Utils/Helper.h"
 #include <algorithm>
+#include <sstream>
 
 /*
    ___  ____  __  ____  __        __      
@@ -56,6 +57,37 @@ bool DOMNode::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 
 	LogError("DOMNode: Could not find attribute ", attr, " in order to assign data");
 	return false;
+}
+
+bool DOMNode::PrintAttribute(DOMAttribute attr)
+{
+	if (std::find(_description.begin(), _description.end(), attr) == _description.end())
+	{
+		LogInfo("DOMAttrReq: DOMAttribute '", DOMAttrToString(attr), "' could not been found!");
+		return false;
+	}
+	
+	std::ostringstream acc;
+	acc << "DOMAttrReq: " << DOMAttrToString(attr) << std::endl;
+	switch (attr) {
+	case Rects: { 
+		int count = 0;
+		for (auto rect : GetRects())
+			acc << "\t" << std::to_string(count++) << ": " << rect.ToString() << std::endl;
+		break;
+	}
+	case FixedId: { acc << "\t" << std::to_string(GetFixedId()) << std::endl; break; }
+	case OverflowId: { acc << "\t" << std::to_string(GetOverflowId()) << std::endl; break; }
+	case OccBitmask: {
+		acc << "\t";
+		for (auto bit : GetOccBitmask())
+			acc << std::to_string(static_cast<int>(bit));
+		acc << std::endl;
+		break;
+	}
+	}
+	LogInfo(acc.str());
+	return true;
 }
 
 bool DOMNode::IPCSetRects(CefRefPtr<CefListValue> data)
@@ -167,6 +199,23 @@ bool DOMTextInput::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 }
 
 
+bool DOMTextInput::PrintAttribute(DOMAttribute attr)
+{
+	if (std::find(_description.begin(), _description.end(), attr) == _description.end())
+	{
+		return super::PrintAttribute(attr);
+	}
+
+	std::ostringstream acc;
+	acc << "DOMAttrReq: " << DOMAttrToString(attr) << std::endl;
+	switch (attr) {
+	case Text: { acc << "\t" << GetText() << std::endl; break; }
+	case IsPassword: { acc << "\t" << std::to_string(IsPasswordField()) << std::endl; break; }
+	}
+	LogInfo(acc.str());
+	return true;
+}
+
 bool DOMTextInput::IPCSetText(CefRefPtr<CefListValue> data)
 {
 	if (data == nullptr || data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_STRING)
@@ -230,6 +279,23 @@ bool DOMLink::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 	}
 
 	return super::Update(attr, data);
+}
+
+bool DOMLink::PrintAttribute(DOMAttribute attr)
+{
+	if (std::find(_description.begin(), _description.end(), attr) == _description.end())
+	{
+		return super::PrintAttribute(attr);
+	}
+
+	std::ostringstream acc;
+	acc << "DOMAttrReq: " << DOMAttrToString(attr) << std::endl;
+	switch (attr) {
+	case Text: { acc << "\t" << GetText() << std::endl; break; }
+	case Url: { acc << "\t" << GetUrl() << std::endl; break; }
+	}
+	LogInfo(acc.str());
+	return true;
 }
 
 bool DOMLink::IPCSetText(CefRefPtr<CefListValue> data)
@@ -296,6 +362,27 @@ bool DOMSelectField::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 		case DOMAttribute::Options:		return IPCSetOptions(data);
 	}
 	return super::Update(attr, data);
+}
+
+bool DOMSelectField::PrintAttribute(DOMAttribute attr)
+{
+	if (std::find(_description.begin(), _description.end(), attr) == _description.end())
+	{
+		return super::PrintAttribute(attr);
+	}
+
+	std::ostringstream acc;
+	acc << "DOMAttrReq: " << DOMAttrToString(attr) << std::endl;
+	switch (attr) {
+	case Options: {
+		int count = 0;
+		for (auto opt : GetOptions())
+			acc << "\t" << std::to_string(count++) << ": " << opt << std::endl;
+		break;
+	}
+	}
+	LogInfo(acc.str());
+	return true;
 }
 
 bool DOMSelectField::IPCSetOptions(CefRefPtr<CefListValue> data)
@@ -371,6 +458,31 @@ bool DOMOverflowElement::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 	case DOMAttribute::CurrentScrolling:	return IPCSetCurrentScrolling(data);
 	}
 	return super::Update(attr, data);
+}
+
+bool DOMOverflowElement::PrintAttribute(DOMAttribute attr)
+{
+	if (std::find(_description.begin(), _description.end(), attr) == _description.end())
+	{
+		return super::PrintAttribute(attr);
+	}
+
+	std::ostringstream acc;
+	acc << "DOMAttrReq: " << DOMAttrToString(attr) << std::endl;
+	switch (attr) {
+	case MaxScrolling: {
+		acc << "\t" << std::to_string(GetMaxScrolling().first) << ", " <<
+			std::to_string(GetMaxScrolling().second) << std::endl;
+		break;
+	}
+	case CurrentScrolling: {
+		acc << "\t" << std::to_string(GetCurrentScrolling().first) << ", " <<
+			std::to_string(GetCurrentScrolling().second) << std::endl;
+		break;
+	}
+	}
+	LogInfo(acc.str());
+	return true;
 }
 
 bool DOMOverflowElement::IPCSetMaxScrolling(CefRefPtr<CefListValue> data)
@@ -485,4 +597,9 @@ bool DOMVideo::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 	//switch (attr) {
 	//}
 	return super::Update(attr, data);
+}
+
+bool DOMVideo::PrintAttribute(DOMAttribute attr)
+{
+	return super::PrintAttribute(attr);
 }

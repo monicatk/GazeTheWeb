@@ -155,7 +155,53 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	//	data : depends on attribute
 	// Example: DOM#upd#7#1337#0#0.9;0.7;0.5;0.7#
 
-	if (requestString.compare(0, 4, "DOM#") == 0)
+	// Debug extension: Request C++ sided DOM attribute information
+	if (requestString.compare(0, 10, "DOMAttrReq") == 0)
+	{
+		LogInfo("DOMAttrReq: Received.");
+
+		std::vector<std::string> data = SplitBySeparator(requestString, '#');
+		if (data.size() > 3)
+		{
+			const std::string& typeStr = data[1];
+			const std::string& idStr = data[2];
+			const std::string& attrStr = data[3];
+
+			const int& id = std::stoi(idStr);
+			const int& type = std::stoi(typeStr);
+			const DOMAttribute& attr = static_cast<DOMAttribute>(std::stoi(attrStr));
+
+			std::weak_ptr<DOMNode> target;
+			switch (type)
+			{
+			case(0): {target = _pMediator->GetDOMTextInput(browser, id); break; }
+			case(1): {target = _pMediator->GetDOMLink(browser, id); break; }
+			case(2): {target = _pMediator->GetDOMSelectField(browser, id); break; }
+			case(3): {target = _pMediator->GetDOMOverflowElement(browser, id); break; }
+			case(4): {target = _pMediator->GetDOMVideo(browser, id); break; }
+			default: {
+				LogError("MsgRouter: DOMAttrReq - Unknown type of DOMNode! type=", type);
+			}
+			}
+
+			if (auto node = target.lock())
+			{
+				node->PrintAttribute(attr);
+			}
+			else
+			{
+				LogError("MessageRouter: Couldn't access corresponding DOM object with id=", id, " & type=", type);
+			}
+
+			callback->Success("success");
+		}
+		else
+			callback->Failure(-1, "Not enough data provided for DOMAttrReq.");
+
+		return true;
+	}
+
+	if (requestString.compare(0, 3, "DOM") == 0)
 	{
 		std::vector<std::string> data = SplitBySeparator(requestString, '#');
 
@@ -282,7 +328,8 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			}
 
 		}
-		
+	
+
 		// Success! (TODO: there may be failures which can be passed to JavaScript)
 		callback->Success("success");
 		return true;

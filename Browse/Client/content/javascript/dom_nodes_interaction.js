@@ -158,9 +158,9 @@ DOMVideo.prototype.jumpToSecond = function(sec)
 DOMVideo.prototype.setFullscreen = function(fullscreen)
 {
 	if(fullscreen)
-		this.node.webkitEnterFullscreen();
+		this.node.webkitRequestFullscreen();
 	else
-		this.node.webkitExitFullscreen();
+		document.webkitExitFullscreen();		
 	ConsolePrint("DOMVideo id="+this.getId()+": Fullscreen is set to "+fullscreen);
 }
 

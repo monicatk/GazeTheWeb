@@ -12,9 +12,11 @@
 #include <functional>
 
 class Tab;	// Forward declaration
+enum DOMAttribute;
 
 typedef std::function<bool(CefRefPtr<CefProcessMessage>)> SendRenderMessage;
 
+// TODO: Strange place (this header file) for BaseInterface?
 class DOMBaseInterface
 {
 public:
@@ -22,6 +24,9 @@ public:
 	// Required in order to being able to access corresponding JS DOM object
 	virtual int GetId() = 0;
 	virtual int GetType() = 0;
+
+	// Enable accessing attribute data while running the program
+	virtual bool PrintAttribute(DOMAttribute attr) = 0;
 };
 
 /*
