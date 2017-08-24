@@ -63,8 +63,8 @@ DOMOverflowElement.prototype.scroll = function(gazeX, gazeY, fixedIds){
 	if(this.hidden_overflow)
 		return [0,0];
 
-	// TODO: Refactore this method?
-	if(fixedIds.length > 0 && fixedIds.indexOf(this.getFixedId()) === -1)
+
+	if(fixedIds === undefined || fixedIds.length > 0 && fixedIds.indexOf(this.getFixedId()) === -1)
 		return;
 
 	// Do not use cut-off rect and keep scrolling velocity untouched if partially hidden
@@ -154,6 +154,14 @@ DOMVideo.prototype.jumpToSecond = function(sec)
 	this.node.currentTime = sec;
 	ConsolePrint("DOMVideo id="+this.getId()+": Now playing from second "+sec);
 
+}
+DOMVideo.prototype.setFullscreen = function(fullscreen)
+{
+	if(fullscreen)
+		this.node.webkitRequestFullscreen();
+	else
+		document.webkitExitFullscreen();		
+	ConsolePrint("DOMVideo id="+this.getId()+": Fullscreen is set to "+fullscreen);
 }
 
 ConsolePrint("Successfully imported dom_nodes_interaction.js!");
