@@ -20,6 +20,7 @@ Tab::Tab(
 	// Fill members
 	_pMaster = pMaster;
 	_pCefMediator = pCefMediator;
+	_wpTrans = wpTrans;
 	_pWeb = pWeb;
 	_url = url;
 

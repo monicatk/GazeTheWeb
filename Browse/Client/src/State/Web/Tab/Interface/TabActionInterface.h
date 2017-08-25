@@ -56,6 +56,12 @@ public:
 	// Reply JavaScript dialog callback
 	virtual void ReplyJSDialog(bool clickedOk, std::string userInput) = 0;
 
+	// Play sound
+	virtual void PlaySound(std::string filepath) = 0;
+
+	// Get interface for custom transformations of input
+	virtual std::weak_ptr<CustomTransformationInterface> const GetCustomTransformationInterface() = 0;
+
     // ### METHODS WHICH SET PARAMETERS THAT MUST BE RESET WHEN NO PIPELINE / ACTION IS ACTIVE ###
 
     // Reset method (called by pipeline at destruction, finish and abort)
@@ -66,9 +72,6 @@ public:
 
     // Set WebViewParameters for web view
     virtual void SetWebViewParameters(WebViewParameters parameters) = 0;
-
-	// Play sound
-	virtual void PlaySound(std::string filepath) = 0;
 
 protected:
 
