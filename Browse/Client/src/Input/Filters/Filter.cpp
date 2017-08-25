@@ -53,19 +53,19 @@ void Filter::Update(const SampleQueue spSamples)
 		auto& rTrans = rCustomTransformation.second;
 
 		// Copy current samples and apply current transformation
-		SampleQueue tmpQueue;
-		tmpQueue->insert(tmpQueue->end(),
+		std::deque<SampleData> tmpQueue;
+		tmpQueue.insert(tmpQueue.end(),
 			spSamples->begin(),
 			spSamples->end());
-		for (auto& rSample : *tmpQueue.get())
+		for (auto& rSample : tmpQueue)
 		{
 			rTrans.transformation(rSample.x, rSample.y);
 		}
 
 		// Move samples to queue
 		rTrans.queue->insert(rTrans.queue->end(),
-			std::make_move_iterator(tmpQueue->begin()),
-			std::make_move_iterator(tmpQueue->end()));
+			std::make_move_iterator(tmpQueue.begin()),
+			std::make_move_iterator(tmpQueue.end()));
 
 		// Delete front of queue to match maximum allowed queue length (delete oldest samples)
 		size = (int)rTrans.queue->size(); // sample queue size

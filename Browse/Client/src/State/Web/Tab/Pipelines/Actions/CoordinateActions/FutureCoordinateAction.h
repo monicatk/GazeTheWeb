@@ -11,6 +11,7 @@
 
 #include "src/State/Web/Tab/Pipelines/Actions/Action.h"
 #include "src/Utils/LerpValue.h"
+#include "src/Input/Filters/CustomTransformationInteface.h"
 #include <deque>
 #include <vector>
 
@@ -92,6 +93,9 @@ protected:
 
 	// Potential fixations
 	std::vector<std::pair<glm::vec2, glm::vec2> > _potentialFixations; // collect fixations (fixation + direction)
+
+	// Shared pointer to custom transformation interface of input
+	std::shared_ptr<CustomTransformationInterface> _spTrans;
 };
 
 #endif // FUTURECOORDINATEACTION_H_

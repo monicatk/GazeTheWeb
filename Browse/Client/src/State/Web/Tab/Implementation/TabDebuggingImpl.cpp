@@ -244,6 +244,8 @@ void Tab::DrawDebuggingOverlay() const
 
 	// ### EXACT GAZE INPUT VISUALIZTION ###
 
+	/*
+
 	// Bind render item and set color
 	_upDebugFillQuad->Bind();
 	_upDebugFillQuad->GetShader()->UpdateValue("color", glm::vec3(255.f / 255.f, 127.f / 255.f, 35.f / 255.f));
@@ -266,6 +268,8 @@ void Tab::DrawDebuggingOverlay() const
 		// Render rectangle
 		_upDebugFillQuad->Draw(GL_TRIANGLES);
 	}
+
+	*/
 }
 
 void Tab::Debug_DrawRectangle(glm::vec2 coordinate, glm::vec2 size, glm::vec3 color) const

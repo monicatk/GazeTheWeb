@@ -27,13 +27,16 @@ const float CENTER_OFFSET_MULTIPLIER = 0.f; // TODO integrate in drift offset ca
 const float MOVE_DURATION = 1.0f;
 
 // Maximum zoom level
-const float MAX_ZOOM = 0.1f;
+const float MAX_ZOOM = 0.3f;
 
 // Maximum linear zoom duration
-const float ZOOM_DURATION = 4.0f;
+const float ZOOM_DURATION = 1.75f;
 
 // Steepnes of zooming
 const float ZOOM_STEEPNESS = 1.25f;
+
+// Name of custom transformation
+const std::string TRANS_NAME = "FutureCoordinateAction";
 
 FutureCoordinateAction::FutureCoordinateAction(TabInteractionInterface* pTab, bool doDimming) : Action(pTab)
 {
@@ -46,6 +49,10 @@ FutureCoordinateAction::FutureCoordinateAction(TabInteractionInterface* pTab, bo
 
 bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
+	// ####################
+	// ### DECLARATIONS ###
+	// ####################
+
 	// Speed of zooming
 	float zoomSpeed = 0.f;
 
@@ -85,12 +92,26 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 		rCoordinate -= rRelativeCenterOffset; // inverse to WebView shader
 	};
 
-	// Current raw! gaze (filtered here through zoom coordinate calculation)
-	glm::vec2 relativeGazeCoordinate(spInput->webViewRelativeRawGazeX, spInput->webViewRelativeRawGazeY); // relative WebView space
+	// Function calling above function with current values
+	const std::function<void(glm::vec2&)> currentWebViewCoordinate
+		= [&](glm::vec2& rCoordinate)
+	{
+		webViewCoordinate(_zoom, _relativeZoomCoordinate, _relativeCenterOffset, rCoordinate);
+	};
 
-	// Current gaze in page pixel coordinates
-	glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate;
-	currentPageCoordinate(pixelGazeCoordinate);
+	// Current raw! gaze (filtered here through zoom coordinate calculation)
+	// glm::vec2 relativeGazeCoordinate(spInput->webViewRelativeRawGazeX, spInput->webViewRelativeRawGazeY); // relative WebView space
+
+	// Current gaze in page pixel coordinates (filtered by custom transformation so filtered in page space!)
+	glm::vec2 pixelGazeCoordinate(_spTrans->GetFilteredGazeX(TRANS_NAME), _spTrans->GetFilteredGazeY(TRANS_NAME));
+
+	// Relative gaze coordinate in web view
+	glm::vec2 relativeGazeCoordinate = pixelGazeCoordinate;
+	currentWebViewCoordinate(relativeGazeCoordinate);
+
+	// #########################
+	// ### COORDINATE UPDATE ###
+	// #########################
 
 	// Only allow zoom in when gaze upon web view
 	if (!spInput->gazeUponGUI && spInput->insideWebView)
@@ -137,16 +158,23 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 	_linZoom += tpf * zoomSpeed; // frame rate depended, because zoomSpeed is depending on deviation which is depending on tpf
 
 	// Clamp linear zoom (zero is standard, everything higher is zoomed)
-	_linZoom = glm::clamp(_linZoom, 0.f, 1.f);
+	// _linZoom = glm::clamp(_linZoom, 0.f, 1.f);
 
 	// Make zoom better with exponential function and some delay for orientation
 	// float x = _linZoom;
 	// float n = ZOOM_STEEPNESS;
 	// _zoom = 1 - (glm::pow(x, n) / (glm::pow(x, n) + glm::pow(1 - x, n))); // apply ease in / out function
+
+	// Trying something different
+	_linZoom = glm::max(0.f, _linZoom);
 	_zoom = glm::min(1.f, glm::exp(-(_linZoom - 0.1f)));
 
 	// Scale
-	_zoom = (1.f - MAX_ZOOM) * _zoom + MAX_ZOOM;
+	// _zoom = (1.f - MAX_ZOOM) * _zoom + MAX_ZOOM;
+
+	// #########################
+	// ### SAMPLE EVALUATION ###
+	// #########################
 
 	// Update and clean samples
 	std::for_each(_sampleData.begin(), _sampleData.end(), [&](SampleData& rSampleData) { rSampleData.lifetime -= tpf; });
@@ -158,7 +186,7 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 		_sampleData.end());
 
 	// Add new sample storing current values
-	_sampleData.push_back(SampleData(_zoom, glm::vec2(spInput->webViewRelativeGazeX, spInput->webViewRelativeGazeY), _relativeZoomCoordinate, _relativeCenterOffset));
+	_sampleData.push_back(SampleData(_zoom, relativeGazeCoordinate, _relativeZoomCoordinate, _relativeCenterOffset));
 
 	// Decide whether zooming is finished
 	SampleData sample = _sampleData.front();
@@ -168,8 +196,7 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 		// ### WebView pixels
 
 		// Current gaze in WebView pixels
-		glm::vec2 relativeGaze(spInput->webViewRelativeGazeX, spInput->webViewRelativeGazeY); // relative WebView space filtered gaze
-		glm::vec2 pixelGaze = relativeGaze * webViewPixels; // on screen
+		glm::vec2 pixelGaze = relativeGazeCoordinate * webViewPixels; // on screen
 
 		// Sample gaze in WebView pixels
 		glm::vec2 sampleRelativeGaze = sample.relativeGazeCoordinate;
@@ -214,6 +241,13 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 		// Fixation in CEF pixels
 		glm::vec2 pixelFixation = samplePixelZoomCoordinate + (direction * radius);
 
+		// Output fixation
+		LogInfo("Fixation: ", pixelFixation.x, ", ", pixelFixation.y);
+
+		// Fill output
+		SetOutputValue("coordinate", pixelFixation);
+
+		/*
 		// Skip sample when no zoom happened etc., resulting in NaN
 		if (!std::isnan(pixelFixation.x) && !std::isnan(pixelFixation.y))
 		{
@@ -244,7 +278,6 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 
 			LogInfo("AggFixation: ", aggFixation.x, ", ", aggFixation.y);
 			
-			/*
 			if (supporters >= SUPPORTER_COUNT)
 			{
 				aggFixation /= (float)supporters;
@@ -255,11 +288,49 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 				finished = true;
 				LogInfo("Drift correction applied");
 			}
-			*/
 		}
+		*/
 	}
 
-	if (!finished && _zoom <= MAX_ZOOM)
+	// ##############
+	// ### FINISH ###
+	// ##############
+
+	// Update custom transformation
+	double webViewX = _pTab->GetWebViewX();
+	double webViewY = _pTab->GetWebViewY();
+	double webViewWidth = _pTab->GetWebViewWidth();
+	double webViewHeight = _pTab->GetWebViewHeight();
+	auto zoom = _zoom;
+	auto relativeZoomCoordinate = _relativeZoomCoordinate;
+	auto relativeCenterOffset = _relativeCenterOffset;
+	_spTrans->ChangeCustomTransformation(
+		TRANS_NAME,
+		[webViewX, webViewY, webViewWidth, webViewHeight, zoom, relativeZoomCoordinate, relativeCenterOffset, cefPixels](double& x, double& y)
+	{
+		// Bring raw gaze into relative space of WebView
+		glm::vec2 gaze(x, y); // double 2D vector
+		gaze.x -= webViewX;
+		gaze.y -= webViewY;
+		gaze.x /= webViewWidth;
+		gaze.y /= webViewHeight;
+		gaze = glm::clamp(gaze, glm::vec2(0, 0), glm::vec2(1, 1));
+
+		// Now transform to pixel space of webpage
+		gaze += relativeCenterOffset; // add center offset
+		gaze -= relativeZoomCoordinate; // move zoom coordinate to origin
+		gaze *= zoom; // apply zoom
+		gaze += relativeZoomCoordinate; // move back
+		gaze *= cefPixels; // bring into pixel space of CEF
+
+		// Set references
+		x = gaze.x;
+		y = gaze.y;
+	}
+	);
+
+	// Finishing condition
+	if (_zoom <= MAX_ZOOM)
 	{
 		finished = true;
 	}
@@ -282,6 +353,7 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 
 void FutureCoordinateAction::Draw() const
 {
+	/*
 	// Do draw some stuff for debugging
 #ifdef CLIENT_DEBUG
 	// WebView pixels
@@ -315,15 +387,21 @@ void FutureCoordinateAction::Draw() const
 	applyZooming(testCoordinate);
 	_pTab->Debug_DrawRectangle(testCoordinate, glm::vec2(5, 5), glm::vec3(0, 0, 1));
 #endif // CLIENT_DEBUG
+*/
 }
 
 void FutureCoordinateAction::Activate()
 {
-
+	// TODO: could go wrong, as taken from weak pointer
+	_spTrans = _pTab->GetCustomTransformationInterface().lock();
+	_spTrans->RegisterCustomTransformation(TRANS_NAME, [](double& x, double& y) {}); // tell transformation to not transform anything
 }
 
 void FutureCoordinateAction::Deactivate()
 {
+	// Unregister transformation
+	_spTrans->UnregisterCustomTransformation(TRANS_NAME);
+
 	// Reset web view (necessary because of dimming)
 	WebViewParameters webViewParameters;
 	_pTab->SetWebViewParameters(webViewParameters);
@@ -331,5 +409,5 @@ void FutureCoordinateAction::Deactivate()
 
 void FutureCoordinateAction::Abort()
 {
-
+	_spTrans->UnregisterCustomTransformation(TRANS_NAME);
 }
