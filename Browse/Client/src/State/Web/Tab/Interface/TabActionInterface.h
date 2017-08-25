@@ -61,7 +61,7 @@ public:
 	virtual void PlaySound(std::string filepath) = 0;
 
 	// Get interface for custom transformations of input
-	virtual std::weak_ptr<CustomTransformationInterface> const GetCustomTransformationInterface() = 0;
+	virtual std::weak_ptr<CustomTransformationInterface> GetCustomTransformationInterface() const = 0;
 
     // ### METHODS WHICH SET PARAMETERS THAT MUST BE RESET WHEN NO PIPELINE / ACTION IS ACTIVE ###
 
