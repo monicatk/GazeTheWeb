@@ -8,6 +8,7 @@
 #define TABACTIONINTERFACE_H_
 
 #include "src/State/Web/Tab/WebViewParameters.h"
+#include "src/Input/Filters/CustomTransformationInteface.h"
 #include "src/Typedefs.h"
 #include <memory>
 #include <string>

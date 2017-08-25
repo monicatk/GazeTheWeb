@@ -275,7 +275,7 @@ public:
 	virtual void PlaySound(std::string filepath);
 
 	// Get interface for custom transformations of input
-	virtual std::weak_ptr<CustomTransformationInterface> GetCustomTransformationInterface() const { return _pMaster->GetCustomTransformationInterface(); }
+	virtual std::weak_ptr<CustomTransformationInterface> GetCustomTransformationInterface() const;
 
 	// Set WebViewParameters for WebView
 	virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }

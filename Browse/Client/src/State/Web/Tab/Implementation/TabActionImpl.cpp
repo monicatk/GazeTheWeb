@@ -163,3 +163,8 @@ void Tab::PlaySound(std::string filepath)
 {
 	_pMaster->PlaySound(filepath);
 }
+
+std::weak_ptr<CustomTransformationInterface> Tab::GetCustomTransformationInterface() const
+{
+	return _pMaster->GetCustomTransformationInterface();
+}
