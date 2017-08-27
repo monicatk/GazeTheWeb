@@ -149,7 +149,14 @@ DOMNode.prototype.updateOccBitmask = function(altNode){
                 pt[1] < window.scrollY || pt[1] > window.scrollY + window.innerHeight)
                     bm.push(0);
             else
-                bm.push(Number(document.elementFromPoint(pt[0],pt[1]) == (altNode || this.node)));
+            {
+                var topNode = document.elementFromPoint(pt[0],pt[1]);
+                // TODO: Quick fix
+                if (topNode === null)
+                    bm.push(1);
+                else
+                    bm.push(Number(topNode === (altNode || this.node)));
+            }
         });
 
     }

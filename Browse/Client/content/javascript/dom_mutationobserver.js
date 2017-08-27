@@ -11,16 +11,23 @@ document.onreadystatechange = function()
 {
 	if(document.readyState == 'interactive' || document.readyState == 'complete')
 	{
-		// GMail fix
-		ForEveryChild(document.documentElement, AnalyzeNode);
-
-		UpdateDOMRects();
+		FixRects();
 	}
+	if(document.readyState === "complete")
+		ConsolePrint("document.readyState == 'complete'");
+}
+
+function FixRects()
+{
+	// GMail fix
+	ForEveryChild(document.documentElement, AnalyzeNode);
+
+	UpdateDOMRects("onreadystatechange");
 }
 
 window.onwebkitfullscreenchange = function()
 {
-	UpdateDOMRects();
+	UpdateDOMRects("onwebkitfullscreenchange");
 }
 
 window.onresize = function()
@@ -184,7 +191,8 @@ function AnalyzeNode(node)
 		{
 			// Returns true if new FixedElement was added; false if already linked to FixedElement Object
 			if(AddFixedElement(node))
-				UpdateDOMRects();
+				UpdateChildNodesRects(node.parent);
+				// UpdateDOMRects("AnalyzeNode -- AddFixedElement "+node.className);
 		}
 
 		if(node.tagName === "VIDEO")
@@ -461,7 +469,8 @@ function MutationObserverInit()
 								{
 									if(AddFixedElement(node))
 										// Update every Rect, just in case anything changed due to an additional fixed element
-										UpdateDOMRects();
+										// UpdateDOMRects("AddFixedElement");
+										UpdateChildNodesRects(node.parent);
 								}
 								else 
 								{
