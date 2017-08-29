@@ -9,10 +9,11 @@
 #define DOMNODEINTERACTION_H_
 
 #include "include/cef_browser.h"
+#include "src/CEF/Data/DOMAttribute.h"
+#include "src/Utils/Logger.h"
 #include <functional>
 
 class Tab;	// Forward declaration
-enum DOMAttribute;
 
 typedef std::function<bool(CefRefPtr<CefProcessMessage>)> SendRenderMessage;
 
@@ -51,22 +52,22 @@ public:
 	template<typename T>
 	void AppendToList(CefRefPtr<CefListValue> list, T val) { LogInfo("DOMJavascriptCommunication: Unhandled data type!"); };
 
-	template<> void AppendToList<bool>(CefRefPtr<CefListValue> list, bool val) 
+	void AppendToList(CefRefPtr<CefListValue> list, bool val) 
 	{ 
 		list->SetBool(list->GetSize(), val); 
 	};
 
-	template<> void AppendToList<double>(CefRefPtr<CefListValue> list, double val) 
+	void AppendToList(CefRefPtr<CefListValue> list, double val) 
 	{ 
 		list->SetDouble(list->GetSize(), val);
 	};
 
-	template<> void AppendToList<int>(CefRefPtr<CefListValue> list, int val) 
+	void AppendToList(CefRefPtr<CefListValue> list, int val) 
 	{ 
 		list->SetInt(list->GetSize(), val);
 	};
 
-	template<> void AppendToList<std::string>(CefRefPtr<CefListValue> list, std::string val) 
+	void AppendToList(CefRefPtr<CefListValue> list, std::string val) 
 	{ 
 		list->SetString(list->GetSize(), val);
 	};
@@ -76,7 +77,7 @@ public:
 	{
 		CefRefPtr<CefListValue> sublist = CefListValue::Create();
 		for (const auto subval : val)
-			AppendToList<T>(sublist, subval);
+			AppendToList(sublist, subval);
 		list->SetList(list->GetSize(), sublist);
 	};
 

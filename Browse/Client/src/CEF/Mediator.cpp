@@ -462,7 +462,7 @@ bool Mediator::ForwardFaviconBytes(CefRefPtr<CefBrowser> browser, CefRefPtr<CefI
 			return true;
 		}
 		
-		auto upData = std::make_unique< std::vector<unsigned char> >();
+		auto upData = std::unique_ptr< std::vector<unsigned char> >(new std::vector<unsigned char>());
 		upData->resize(byte_size / sizeof(unsigned char));
 
 		if (width * height * sizeof(unsigned char) > byte_size)

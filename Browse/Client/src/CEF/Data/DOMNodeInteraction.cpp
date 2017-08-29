@@ -5,7 +5,6 @@
 //============================================================================
 
 #include "DOMNodeInteraction.h"
-#include "src/Utils/Logger.h"
 #include "src/State/Web/Tab/Tab.h"
 
 bool DOMJavascriptCommunication::SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg)
