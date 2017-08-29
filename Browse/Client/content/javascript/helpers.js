@@ -143,9 +143,13 @@ function DeleteFixedElement(fixId)
     console.log("Removed fixed element with id: "+fixId);
 }
 
-
-function UpdateDOMRects()
+var debug_updateDOMRects_count = 0;
+function UpdateDOMRects(why)
 {
+
+    console.log("UpdateDOMRects called because "+why+", "+(++debug_updateDOMRects_count)+" times until now");
+
+    
     window.domNodes.forEach(domList => {
         domList.forEach(obj => {
             if(typeof(obj.updateRects) === "function")
@@ -168,6 +172,17 @@ function UpdateNodesRect(node)
     var fixObj = GetFixedElementByNode(node);
     if(fixObj !== undefined)
         fixObj.updateRects();
+}
+
+function UpdateChildNodesRects(node)
+{
+    if(node === null || node === undefined)
+        return;
+
+    for(var i = 0, n = node.childNodes.length; i < n; i++)
+        UpdateNodesRect(node.childNodes[i]);
+    for(var i = 0, n = node.childNodes.length; i < n; i++)
+        UpdateChildNodesRects(node.childNodes[i]);
 }
 
 

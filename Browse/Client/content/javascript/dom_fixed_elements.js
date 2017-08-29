@@ -217,7 +217,8 @@ function RemoveFixedElement(node)
     }
     
     // Just in case
-    UpdateDOMRects();
+    // UpdateDOMRects("RemoveFixedElement");
+    UpdateChildNodesRects(node.parent);
 }
 
 
