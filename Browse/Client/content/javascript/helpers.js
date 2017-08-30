@@ -288,11 +288,17 @@ function CefExecute(header, param)
     var obj = (id === undefined || type === undefined) ? window : GetDOMObject(type, id);
 
     if(obj === undefined || obj[f] === undefined)
+    {
+        if(!obj)
+            console.log("CefExecute: Invalid object for id: "+id+" and type: "+type);
+        else
+            console.log("CefExecute: Could not find function called "+f+" in DOM object with id: "+id+
+                " and type: "+type);
         return false; 
-
+    }
     // Execute function with obj as context and parameters given
     // Return value may be e.g. a DOMNodeInteractionResponse
-    return obj[f](a, b, c, d);
+    return obj[f](a, b, c, d); // TODO: Use variadic approach? But sufficient right now
 }
 
 
