@@ -2,7 +2,7 @@ ConsolePrint("Starting to import dom_nodes_interaction.js ...");
 
 
 
-DOMTextInput.prototype.setTextInput = function(text, submit){
+DOMTextInput.prototype.inputText = function(text, submit){
 	// TODO: To be refactored!
 	if(this.node.tagName == "TEXTAREA")
 	{

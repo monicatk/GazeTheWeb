@@ -190,6 +190,8 @@ void Tab::AddDOMVideo(CefRefPtr<CefBrowser> browser, int id)
 	_VideoMap.emplace(id, std::make_shared<DOMVideo>(
 		id,
 		SendRenderMessage));
+
+	_VideoMap.at(id)->SetVolume(0.5);
 }
 
 

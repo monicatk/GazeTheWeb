@@ -9,10 +9,11 @@
 #define DOMNODEINTERACTION_H_
 
 #include "include/cef_browser.h"
+#include "src/CEF/Data/DOMAttribute.h"
+#include "src/Utils/Logger.h"
 #include <functional>
 
 class Tab;	// Forward declaration
-enum DOMAttribute;
 
 typedef std::function<bool(CefRefPtr<CefProcessMessage>)> SendRenderMessage;
 
@@ -51,22 +52,28 @@ public:
 	template<typename T>
 	void AppendToList(CefRefPtr<CefListValue> list, T val) { LogInfo("DOMJavascriptCommunication: Unhandled data type!"); };
 
-	template<> void AppendToList<bool>(CefRefPtr<CefListValue> list, bool val) 
+	void AppendToList(CefRefPtr<CefListValue> list, bool val) 
 	{ 
 		list->SetBool(list->GetSize(), val); 
 	};
 
-	template<> void AppendToList<double>(CefRefPtr<CefListValue> list, double val) 
+	void AppendToList(CefRefPtr<CefListValue> list, double val) 
 	{ 
 		list->SetDouble(list->GetSize(), val);
 	};
 
-	template<> void AppendToList<int>(CefRefPtr<CefListValue> list, int val) 
+
+	void AppendToList(CefRefPtr<CefListValue> list, float val)
+	{
+		list->SetDouble(list->GetSize(), val);
+	};
+
+	void AppendToList(CefRefPtr<CefListValue> list, int val) 
 	{ 
 		list->SetInt(list->GetSize(), val);
 	};
 
-	template<> void AppendToList<std::string>(CefRefPtr<CefListValue> list, std::string val) 
+	void AppendToList(CefRefPtr<CefListValue> list, std::string val) 
 	{ 
 		list->SetString(list->GetSize(), val);
 	};
@@ -76,7 +83,7 @@ public:
 	{
 		CefRefPtr<CefListValue> sublist = CefListValue::Create();
 		for (const auto subval : val)
-			AppendToList<T>(sublist, subval);
+			AppendToList(sublist, subval);
 		list->SetList(list->GetSize(), sublist);
 	};
 
@@ -102,18 +109,24 @@ public:
 	{
 		CefRefPtr<CefListValue> params = CefListValue::Create();
 		AddToList<T>(params, param, args...);
+
+		LogInfo("DOMNodeInteraction: Sending ExecuteFunctionMessage named ", func_name, " with ", params->GetSize(), " parameters. (multipe args)");
+
 		CefRefPtr<CefProcessMessage> msg = SetupExecuteFunctionMessage(func_name, params);
 		SendProcessMessageToRenderer(msg);
 	}
 	// TODO: Is this function really neccessary?
-	template<typename T>
-	void SendExecuteFunctionMessage(std::string func_name, T param)
-	{
-		CefRefPtr<CefListValue> params = CefListValue::Create();
-		AddToList<T>(params, param);
-		CefRefPtr<CefProcessMessage> msg = SetupExecuteFunctionMessage(func_name, params);
-		SendProcessMessageToRenderer(msg);
-	}
+	//template<typename T>
+	//void SendExecuteFunctionMessage(std::string func_name, T param)
+	//{
+	//	CefRefPtr<CefListValue> params = CefListValue::Create();
+	//	AddToList<T>(params, param);
+
+	//	LogInfo("DOMNodeInteraction: Sending ExecuteFunctionMessage named ", func_name, " with ", params->GetSize(), " parameters.");
+
+	//	CefRefPtr<CefProcessMessage> msg = SetupExecuteFunctionMessage(func_name, params);
+	//	SendProcessMessageToRenderer(msg);
+	//}
 
 	// Setup process message by adding a header (node id and type) and given params to its argument list
 	CefRefPtr<CefProcessMessage> SetupExecuteFunctionMessage(
@@ -149,7 +162,7 @@ public:
     DOMTextInputInteraction() {}
 
 	// Send IPC message to JS in order to execute text input function
-	void InputText(std::string text, bool submit){ SendExecuteFunctionMessage("inputText", submit); }
+	void InputText(std::string text, bool submit){ SendExecuteFunctionMessage("inputText", text, submit); }
 };
 
 // Interaction with overflow element
