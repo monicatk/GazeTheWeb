@@ -95,13 +95,6 @@ public:
 	void SetStyleTreePropertyValue(std::string styleClass, eyegui::property::Duration type, std::string value);
 	void SetStyleTreePropertyValue(std::string styleClass, eyegui::property::Color type, std::string value);
 
-	// Set global keyboard layout
-	void SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout)
-	{
-		// Tell it eyeGUI
-		eyegui::setKeyboardLayout(_pGUI, keyboardLayout);
-	}
-
 	// Play some sound
 	void PlaySound(std::string filepath)
 	{
@@ -121,6 +114,13 @@ public:
 			(show ?
 				eyegui::DescriptionVisibility::ON_PENETRATION
 				: eyegui::DescriptionVisibility::HIDDEN));
+	}
+
+	// Set global keyboard layout
+	void SetKeyboardLayout(eyegui::KeyboardLayout keyboardLayout)
+	{
+		// Tell it eyeGUI
+		eyegui::setKeyboardLayout(_pGUI, keyboardLayout);
 	}
 
 	// ### STORING OF SETTINGS ###
