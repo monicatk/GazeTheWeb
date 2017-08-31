@@ -358,6 +358,9 @@ void Tab::SetLoadingStatus(int64 frameID, bool isMain, bool isLoading)
             eyegui::setImageOfPicture(_pPanelLayout, "icon", "icons/TabLoading_0.png");
             _timeUntilNextLoadingIconFrame = TAB_LOADING_ICON_FRAME_DURATION;
             _iconState = IconState::LOADING;
+
+			// Abort any pipeline execution when loading of main frame starts
+			AbortAndClearPipelines();
         }
         else
         {
