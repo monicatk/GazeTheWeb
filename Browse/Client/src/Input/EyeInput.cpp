@@ -117,13 +117,13 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface) :
 			ConnectEyeTracker("TobiiEyeXPlugin");
 		}
 
-		// If not connected to any eye tracker, provide feedback and setup current policy about data transfer
+		// If not connected to any eye tracker and provide feedback
 		if (!_connected)
 		{
 			LogInfo("EyeInput: No eye tracker connected. Input emulated by mouse.");
 			_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::DISCONNECTED, EyeTrackerDevice::NONE);
 		}
-		else
+		else // if connected, setup current policy about data transfer
 		{
 			_pMasterThreadsafeInterface->threadsafe_NotifyEyeTrackerStatus(EyeTrackerStatus::CONNECTED, device);
 			if (_pMasterThreadsafeInterface->threadsafe_MayTransferData())
@@ -141,12 +141,11 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface) :
 
 EyeInput::~EyeInput()
 {
-
-#ifdef _WIN32
-
 	// First, wait for eye tracker connection thread to join
 	LogInfo("EyeInput: Make sure that eye tracker connection thread is joined.");
 	_upConnectionThread->join();
+
+#ifdef _WIN32
 
 	// Check whether necessary to disconnect
 	if (_pluginHandle != NULL)

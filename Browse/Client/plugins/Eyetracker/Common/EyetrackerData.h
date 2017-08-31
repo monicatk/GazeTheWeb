@@ -15,6 +15,7 @@
 namespace eyetracker_global
 {
 	void SetupLabStream(lsl::stream_info streamInfo); // must be called before data can be send to lab streaming layer
+	void TerminateLabStream();
 	void ContinueLabStream();
 	void PauseLabStream();
 	void PushBackSample(SampleData sample);

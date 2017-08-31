@@ -530,17 +530,25 @@ void Tab::AbortAndClearPipelines()
 void Tab::GoForward()
 {
 	_pCefMediator->GoForward(this);
+
+	// Abort any pipeline execution
+	AbortAndClearPipelines();
 }
 
 void Tab::GoBack()
 {
 	_pCefMediator->GoBack(this);
+
+	// Abort any pipeline execution
+	AbortAndClearPipelines();
 }
 
 void Tab::Reload()
 {
 	_pCefMediator->ReloadTab(this);
-	this->AbortAndClearPipelines();
+
+	// Abort any pipeline execution
+	AbortAndClearPipelines();
 }
 
 void Tab::PushBackPointingEvaluationPipeline(PointingApproach approach)
@@ -673,7 +681,6 @@ void Tab::UpdateAccentColor(float tpf)
 		RGBAToHexString(transparentBackgroundColorAccent)
 	);
 }
-
 
 void Tab::PushBackClickVisualization(double x, double y)
 {

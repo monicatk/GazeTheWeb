@@ -103,6 +103,9 @@ bool IsTracking()
 
 bool Disconnect()
 {
+	// Just terminate lab stream (not necessary to have done setup)
+	eyetracker_global::TerminateLabStream();
+
 	// Disable callbacks
 	iV_SetSampleCallback(NULL);
 

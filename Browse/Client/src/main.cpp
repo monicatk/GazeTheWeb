@@ -38,16 +38,14 @@ int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<MainCefA
 	// Disable logging of CEF
 	settings.log_severity = LOGSEVERITY_DISABLE;
 
-#else
-
-	// Open Windows console for debugging purposes
-#ifdef _WIN32
-    AllocConsole();
-    freopen("conin$", "r", stdin);
-    freopen("conout$", "w", stdout);
-    freopen("conout$", "w", stderr);
 #endif
 
+	// Open Windows console for debugging purposes (even when deployed)
+#ifdef _WIN32
+	AllocConsole();
+	freopen("conin$", "r", stdin);
+	freopen("conout$", "w", stdout);
+	freopen("conout$", "w", stderr);
 #endif
 
 	// Set path for CEF data: cache, user data and debug.log
