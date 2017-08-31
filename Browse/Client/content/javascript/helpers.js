@@ -290,7 +290,7 @@ function CefExecute(header, param)
     if(obj === undefined || obj[f] === undefined)
     {
         if(!obj)
-            console.log("CefExecute: Invalid object for id: "+id+" and type: "+type);
+            console.log("CefExecute: Invalid object for id: "+id+" and type: "+type+" for function named "+f);
         else
             console.log("CefExecute: Could not find function called "+f+" in DOM object with id: "+id+
                 " and type: "+type);

@@ -52,31 +52,11 @@ public:
 	template<typename T>
 	void AppendToList(CefRefPtr<CefListValue> list, T val) { LogInfo("DOMJavascriptCommunication: Unhandled data type!"); };
 
-	void AppendToList(CefRefPtr<CefListValue> list, bool val) 
-	{ 
-		list->SetBool(list->GetSize(), val); 
-	};
-
-	void AppendToList(CefRefPtr<CefListValue> list, double val) 
-	{ 
-		list->SetDouble(list->GetSize(), val);
-	};
-
-
-	void AppendToList(CefRefPtr<CefListValue> list, float val)
-	{
-		list->SetDouble(list->GetSize(), val);
-	};
-
-	void AppendToList(CefRefPtr<CefListValue> list, int val) 
-	{ 
-		list->SetInt(list->GetSize(), val);
-	};
-
-	void AppendToList(CefRefPtr<CefListValue> list, std::string val) 
-	{ 
-		list->SetString(list->GetSize(), val);
-	};
+	void AppendToList(CefRefPtr<CefListValue> list, bool val)	{ list->SetBool(list->GetSize(), val);   };
+	void AppendToList(CefRefPtr<CefListValue> list, double val) { list->SetDouble(list->GetSize(), val); };
+	void AppendToList(CefRefPtr<CefListValue> list, float val)	{ list->SetDouble(list->GetSize(), val); };
+	void AppendToList(CefRefPtr<CefListValue> list, int val)	{ list->SetInt(list->GetSize(), val);	 };
+	void AppendToList(CefRefPtr<CefListValue> list, std::string val) { list->SetString(list->GetSize(), val); };
 
 	template<typename T>
 	void AppendToList(CefRefPtr<CefListValue> list, std::vector<T> val)
@@ -109,8 +89,6 @@ public:
 	{
 		CefRefPtr<CefListValue> params = CefListValue::Create();
 		AddToList<T>(params, param, args...);
-
-		LogInfo("DOMNodeInteraction: Sending ExecuteFunctionMessage named ", func_name, " with ", params->GetSize(), " parameters. (multipe args)");
 
 		CefRefPtr<CefProcessMessage> msg = SetupExecuteFunctionMessage(func_name, params);
 		SendProcessMessageToRenderer(msg);

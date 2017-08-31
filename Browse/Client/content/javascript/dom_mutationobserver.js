@@ -429,15 +429,12 @@ function MutationObserverInit()
 								var skip_subtree = false;
 								if(domObj !== undefined)
 								{
-								// id of null or -1 will reset overflow object in domObj
+									// id of null or -1 will reset overflow object in domObj
 									domObj.setOverflowViaId(id);
 
 									if(domObj.Class === "DOMOverflowElement")
 										skip_subtree = true;
 								}
-								// TODO: This node should automatically get an overflowId (on Overflow test site), but it doesn't --> DocFrag!
-								// if(node.className === "scroll-wrapper scrollbar-inner")
-								// 	console.log("overflowId changed to: "+id);
 
 								if(!skip_subtree)
 								{
@@ -446,11 +443,7 @@ function MutationObserverInit()
 										var child = node.childNodes[i];	
 
 										if(child === undefined || typeof(child.setAttribute) !== "function")
-										{			
-											// console.log(i+"/"+n+": Skipped.");
 											continue;
-										}
-										// console.log(i+"/"+n+": "+child.className);
 
 										if(id !== null)
 											child.setAttribute("overflowId", id);
@@ -458,7 +451,7 @@ function MutationObserverInit()
 											child.removeAttribute("overflowid");	// TODO: Search for hierachically higher overflows!
 									}
 								}
-							}
+						}
 
 
 							
@@ -586,11 +579,20 @@ function MutationObserverInit()
 							}
 
 							// If parent is contained in overflow element, then child will also be
-							if(parent !== undefined && typeof(parent.getAttribute) === "function" && typeof(node.setAttribute) === "function")
+							if(parent !== undefined && typeof(parent.getAttribute) === "function" 
+								&& typeof(node.setAttribute) === "function")
 							{
-								var overflowId = parent.getAttribute("overflowid");
-								if(overflowId !== null)
-									node.setAttribute("overflowid", overflowId);
+								var domObj = GetCorrespondingDOMObject(parent);
+								// If parent is overflow element, use its id instead
+								if(domObj !== undefined && domObj.Class === "DOMOverflowElement")
+									node.setAttribute("overflowid", domObj.getId());
+								else
+								{
+									var overflowId = parent.getAttribute("overflowid");
+									if(overflowId !== null)
+										node.setAttribute("overflowid", overflowId);
+							
+								}
 							}
 
 			  				AnalyzeNode(node);

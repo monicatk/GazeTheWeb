@@ -48,12 +48,13 @@ function DOMNode(node, id, type)
     if(this.fixObj === undefined)
         this.setFixObj(  GetFixedElementById( node.getAttribute("childFixedId") )  );
 
+
     // Initial setup of overflow, if already set in node
     var overflowId = node.getAttribute("overflowid");
     if(overflowId !== null)
         this.setOverflow(GetDOMOverflowElement(overflowId));
 
-    this.cppReady = false; // TODO: Queuing calls, when node isn't ready yet?
+    this.cppReady = false; // TODO: Queueing calls, when node isn't ready yet?
 
     // Inform C++ about added DOMNode
     ConsolePrint("DOM#add#"+type+"#"+id+"#");
@@ -497,9 +498,8 @@ DOMOverflowElement.prototype.cutRectsWith = function(domObj, skip_update=true){
     return objRects.map(
         (objRect) => {
             return oeRects.reduce(
-                (acc, oeRect) => {
-                    return CutRectOnRectWindow(acc, oeRect);
-                }, objRect
+                (acc, oeRect) => { return CutRectOnRectWindow(acc, oeRect); },
+                objRect
             )
         }
     )
