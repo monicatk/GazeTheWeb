@@ -93,7 +93,7 @@ function EqualClientRectsData(r1, r2)
 
 function ForEveryChild(parentNode, applyFunction, abortFunction)
 {
-    if(parentNode === undefined || typeof(applyFunction) !== "function")
+    if(parentNode === null || parentNode === undefined || typeof(applyFunction) !== "function")
         return;
         
 	var childs = parentNode.childNodes;
@@ -104,9 +104,9 @@ function ForEveryChild(parentNode, applyFunction, abortFunction)
 
 	if(childs && applyFunction)
 	{
+		// childs.forEach((child) => {	// TODO: This line needs a Chromium update to work
 		for(var i = 0; i < childs.length; i++)
 		{
-			// childs.forEach((child) => {	// TODO: This line needs a Chromium update to work
 			var child = childs[i];
 			// Execute function of every child node
 			applyFunction(child);
@@ -127,7 +127,7 @@ function GetFixedElementByNode(node)
 
 function GetFixedElementById(id)
 {
-    if(id !== null && id >= 0 && id < window.domFixedElements.length)
+    if(id !== null && id !== undefined && id >= 0 && id < window.domFixedElements.length)
         return window.domFixedElements[id];
     return undefined;
 }

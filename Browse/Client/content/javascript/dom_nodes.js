@@ -44,10 +44,10 @@ function DOMNode(node, id, type, cef_hidden=false)
     this.fixObj = undefined;
     this.overflow = undefined;
 
-    // Initial setup of fixObj, if already set in node
-    this.setFixObj(  GetFixedElementById( node.getAttribute("fixedId") )  );
+    // Initial setup of fixObj
+    this.setFixObj(  GetFixedElementById( this.node.getAttribute("fixedId") )  );
     if(this.fixObj === undefined)
-        this.setFixObj(  GetFixedElementById( node.getAttribute("childFixedId") )  );
+        this.setFixObj(  GetFixedElementById( this.node.getAttribute("childFixedId") )  );
 
 
     // Initial setup of overflow, if already set in node

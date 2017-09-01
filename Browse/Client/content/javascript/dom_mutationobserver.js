@@ -16,6 +16,12 @@ document.onreadystatechange = function()
 	// domOverflowElements.forEach(
 	// 	(o) => { o.checkIfOverflown(); }
 	// );
+
+	// if(document.readyState === "complete")
+	// {
+	// 	console.log("Marking all available nodes...");
+	// 	ForEveryChild(document.documentElement, (n) => {n.seen = true; })
+	// }
 }
 
 function FixRects()
@@ -173,11 +179,31 @@ Document.prototype.createDocumentFragment = function() {
 	return fragment;
 };
 
-
-
+var analyzed_nodes = [], not_analyzed_nodes = [];
+function CountAnalyzedNodes(print_nodes=false){
+	var count = 0;
+	analyzed_nodes = [];
+	not_analyzed_nodes = [];
+	ForEveryChild(document.documentElement, (n) => {
+		count++;
+		if(n.analyzed)
+			analyzed_nodes.push(n);
+		else
+		{
+			not_analyzed_nodes.push(n);
+			if(print_nodes)
+				console.log(n);
+		}
+	});
+	console.log("Found "+analyzed_nodes.length+" analyzed and "+not_analyzed_nodes.length+" not analyzed nodes of "+count
+		+"\n percentage: "+not_analyzed_nodes.length/count);
+}
 
 function AnalyzeNode(node)
 {
+	// DEBUG
+	node.analyzed = true;
+
 	if( (node.nodeType == 1 || node.nodeType > 8) && (node.hasAttribute && !node.hasAttribute("nodeType")) && (node !== window)) // 1 == ELEMENT_NODE
 	{
 
@@ -398,25 +424,28 @@ function MutationObserverInit()
 		  					attr = mutation.attributeName;
 
 							// ### FIXED HIERARCHY HANDLING ###
-							// 1.) Cascading copy of current childFixedId for whole subtree
-							// 2.) Update of fixObj in each DOM object in this subtree
+							// Created FixedElement adds attribute childFixedId with its id as value to all
+							// its direct child nodes. Rest of the tree cascade down by using MutationObserver
+							// as follows:
+							// 1.) Set equivalently valued childFixedId attribute in each direct child node
+							// 2.) Check if corresponding domObj exists and add fixObj with childFixedId as id
 							if(attr === "childfixedid")
 							{
 								var id = node.getAttribute(attr);
 
 								// Set childFixedId for each child of altered node
-								// Works also with fixObj === undefined
-								var fixObj = GetFixedElementById(id);
 
 								node.childNodes.forEach((child) => {
 									// Extend node by given attribute
 									if(typeof(child.setAttribute) === "function")
 										child.setAttribute("childFixedId", id);
-										// Update fixObj in DOMObject
-										var domObj = GetCorrespondingDOMObject(child);
-										if(domObj !== undefined)
-											domObj.setFixObj(fixObj);	// fixObj may be undefined
 								});
+								
+								// Update fixObj in DOMObject
+								var fixObj = GetFixedElementById(id);
+								var domObj = GetCorrespondingDOMObject(node);
+								if(domObj !== undefined)
+									domObj.setFixObj(fixObj);	// fixObj may be undefined
 							}
 
 							if(attr === "scrollWidth" || attr === "scrollHeight")
