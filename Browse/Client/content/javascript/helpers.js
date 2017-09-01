@@ -27,7 +27,7 @@ if(ClientRectList.prototype.map === undefined)
 
 if(NodeList.prototype.forEach === undefined)
 {
-    ConsolePrint("JS: Extending JS NodeList by own forEach function.")
+    ConsolePrint("JS: Extending JS NodeList by own forEach function.");
 
     NodeList.prototype.forEach = function(f){
         var n = this.length;

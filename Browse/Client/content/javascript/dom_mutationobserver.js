@@ -13,8 +13,15 @@ document.onreadystatechange = function()
 	{
 		FixRects();
 	}
-	if(document.readyState === "complete")
-		ConsolePrint("document.readyState == 'complete'");
+
+	console.log("document.readyState == "+document.readyState);
+	ConsolePrint("document.readyState == "+document.readyState);
+
+	domOverflowElements.forEach(
+		(o) => { o.checkIfOverflown(); }
+		// TODO: Implement method!
+		// TODO: Call function in a callback-manner if it could have overflown!
+	);
 }
 
 function FixRects()
@@ -418,7 +425,8 @@ function MutationObserverInit()
 								});
 							}
 
-
+							if(attr === "scrollWidth" || attr === "scrollHeight")
+								console.log("### Detected changes in attr "+attr+" ###");
 
 							// ### OVERFLOW HIERARCHY HANDLING ###
 							// Set childrens' overflowIds when node gets tagged as part of overflow subtree 
