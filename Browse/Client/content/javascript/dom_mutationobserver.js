@@ -9,19 +9,13 @@ window.appendedSubtreeRoots = new Set();
 // Trigger DOM data update on changing document loading status
 document.onreadystatechange = function()
 {
-	if(document.readyState == 'interactive' || document.readyState == 'complete')
-	{
-		FixRects();
-	}
-
+	FixRects();
 	console.log("document.readyState == "+document.readyState);
 	ConsolePrint("document.readyState == "+document.readyState);
 
-	domOverflowElements.forEach(
-		(o) => { o.checkIfOverflown(); }
-		// TODO: Implement method!
-		// TODO: Call function in a callback-manner if it could have overflown!
-	);
+	// domOverflowElements.forEach(
+	// 	(o) => { o.checkIfOverflown(); }
+	// );
 }
 
 function FixRects()
