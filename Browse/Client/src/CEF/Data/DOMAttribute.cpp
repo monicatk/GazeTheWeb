@@ -23,3 +23,8 @@ std::string DOMAttrToString(DOMAttribute attr)
 	default:				return std::to_string(attr);
 	}
 }
+
+DOMAttribute IntToDOMAttribute(int const& val)
+{
+	return static_cast<DOMAttribute>(val);
+}

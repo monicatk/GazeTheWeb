@@ -31,10 +31,6 @@ enum DOMAttribute {
 std::string DOMAttrToString(DOMAttribute attr);
 
 // Straight forward mapping from integer to enum
-static DOMAttribute IntToDOMAttribute(int const& val)
-{
-	return static_cast<DOMAttribute>(val);
-}
-
+DOMAttribute IntToDOMAttribute(int const& val);
 
 #endif // DOMATTRIBUTE_H_

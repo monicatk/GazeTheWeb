@@ -342,7 +342,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			else
 			{
 				IPCLog(browser, "Renderer: Failed to set node ready in Javascript! Attribute updates won't be received for"\
-					"node of type: " + nodeType + "and id: ", id);
+					"node of type: " + nodeType + "and id: ", (int)id);
 			}
 
 			context->Exit();
