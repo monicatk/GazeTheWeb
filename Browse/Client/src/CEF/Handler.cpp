@@ -156,8 +156,6 @@ void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame
 		frame->ExecuteJavaScript(
 			"PrintPerformanceInformation();", "", 0);
 
-		frame->ExecuteJavaScript("FixRects();", "", 0);
-
         // Set zoom level according to Tab's settings
         SetZoomLevel(browser, false);
 

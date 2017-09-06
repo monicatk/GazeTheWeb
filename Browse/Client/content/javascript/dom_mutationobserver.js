@@ -13,6 +13,9 @@ document.onreadystatechange = function()
 	console.log("document.readyState == "+document.readyState);
 	ConsolePrint("document.readyState == "+document.readyState);
 
+	if (document.readyState === "complete")
+		ForEveryChild(document.documentElement, AnalyzeNode);
+		
 	// domOverflowElements.forEach(
 	// 	(o) => { o.checkIfOverflown(); }
 	// );
@@ -22,14 +25,10 @@ document.onreadystatechange = function()
 	// 	console.log("Marking all available nodes...");
 	// 	ForEveryChild(document.documentElement, (n) => {n.seen = true; })
 	// }
-}
 
-function FixRects()
-{
-	// GMail fix
-	ForEveryChild(document.documentElement, AnalyzeNode);
-
-	UpdateDOMRects("onreadystatechange");
+	// INFO: Not analyzed nodes are more commenly added after page load completion!
+	//if(document.readyState === "complete")
+		// CountAnalyzedNodes();
 }
 
 window.onwebkitfullscreenchange = function()
@@ -179,6 +178,7 @@ Document.prototype.createDocumentFragment = function() {
 	return fragment;
 };
 
+// DEBUGGING
 var analyzed_nodes = [], not_analyzed_nodes = [];
 function CountAnalyzedNodes(print_nodes=false){
 	var count = 0;
@@ -195,8 +195,8 @@ function CountAnalyzedNodes(print_nodes=false){
 				console.log(n);
 		}
 	});
-	console.log("Found "+analyzed_nodes.length+" analyzed and "+not_analyzed_nodes.length+" not analyzed nodes of "+count
-		+"\n percentage: "+not_analyzed_nodes.length/count);
+	ConsolePrint("Found "+analyzed_nodes.length+" analyzed and "+not_analyzed_nodes.length+" not analyzed of "+count+" nodes "
+		+"| percentage not analyzed: "+not_analyzed_nodes.length/count*100+"%");
 }
 
 function AnalyzeNode(node)
