@@ -258,8 +258,15 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 		// Up
 		event.type = KEYEVENT_KEYUP;
 		browser->GetHost()->SendKeyEvent(event);
+	}
+	if (msgName == "EmulateMouseClick")
+	{
+		double x = msg->GetArgumentList()->GetDouble(0);
+		double y = msg->GetArgumentList()->GetDouble(1);
 
+		LogDebug("Handler: Emulating a click (", x, ",", y, ").");
 
+		EmulateLeftMouseButtonClick(browser, x, y);
 	}
 
     if (msgName == "ReceiveFavIconBytes")
