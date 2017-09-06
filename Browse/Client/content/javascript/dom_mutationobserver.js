@@ -9,7 +9,6 @@ window.appendedSubtreeRoots = new Set();
 // Trigger DOM data update on changing document loading status
 document.onreadystatechange = function()
 {
-	FixRects();
 	console.log("document.readyState == "+document.readyState);
 	ConsolePrint("document.readyState == "+document.readyState);
 
@@ -195,8 +194,8 @@ function CountAnalyzedNodes(print_nodes=false){
 				console.log(n);
 		}
 	});
-	ConsolePrint("Found "+analyzed_nodes.length+" analyzed and "+not_analyzed_nodes.length+" not analyzed of "+count+" nodes "
-		+"| percentage not analyzed: "+not_analyzed_nodes.length/count*100+"%");
+	ConsolePrint("Found "+analyzed_nodes.length+" analyzed and "+not_analyzed_nodes.length+" not analyzed of "+count+" nodes"
+		+" | percentage not analyzed: "+not_analyzed_nodes.length/count*100+"%");
 }
 
 function AnalyzeNode(node)

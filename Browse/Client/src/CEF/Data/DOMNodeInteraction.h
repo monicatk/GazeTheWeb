@@ -165,7 +165,7 @@ public:
     DOMSelectFieldInteraction() {}
 
 	// Send IPC message to JS in order to execute JS function
-	void SetSelectionIndex(int idx) { SendExecuteFunctionMessage("setSelectionIndex", idx); }
+	void SetSelectionIndex(int idx) { SendExecuteFunctionMessage("setSelectionIdx", idx); }
 };
 
 // Interaction with videos
