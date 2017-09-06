@@ -244,8 +244,35 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 		// Output fixation
 		LogInfo("Fixation: ", pixelFixation.x, ", ", pixelFixation.y);
 
+		// Push back fixation
+		_fixations.push_back(pixelFixation); // TODO limit etc
+
+		// Go over last fixations and calculate deviation
+		const int n = 5;
+		const int size = _fixations.size();
+		glm::vec2 mean(0, 0);
+		for (int i = size - 1; i >= glm::max(0, size - n); i--)
+		{
+			mean += _fixations.at(i);
+		}
+		mean /= (float)glm::min(n, size);
+		float deviation = 0;
+		for (int i = size - 1; i >= glm::max(0, size - n); i--)
+		{
+			deviation += glm::distance(mean, _fixations.at(i));
+		}
+		deviation /= (float)glm::min(n, size);
+
+		// Output fixation
+		LogInfo("Deviation: ", deviation);
+
 		// Fill output
 		SetOutputValue("coordinate", pixelFixation);
+
+		if (deviation < 1.f)
+		{
+			finished = true;
+		}
 
 		/*
 		// Skip sample when no zoom happened etc., resulting in NaN
