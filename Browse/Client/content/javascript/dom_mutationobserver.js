@@ -396,18 +396,9 @@ function MutationObserverInit()
 		  	mutations.forEach(
 		  		function(mutation)
 		  		{
-					// TODO: Refactoring:
-					// When attributes changed:
-					// 		- Fetch corresponding DOMNode object at the beginning, if it exists
-					// 		- Pipe attribute type to object and get corresponding setter, if it exists
-					// 		- Call setter with given (updated) data
-					// Recognition of needed rect updates:
-					// 		- As before
-					// Adding & removal of nodes:
-					// 		- Try to access existing DOMNode object, first
 
 					if(debug)
-					console.log(mutation.type, "\t", mutation.attributeName, "\t", mutation.oldValue, "\t", mutation.target);
+						console.log(mutation.type, "\t", mutation.attributeName, "\t", mutation.oldValue, "\t", mutation.target);
 					
 					var working_time_start = Date.now();
 
