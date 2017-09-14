@@ -420,7 +420,8 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
 	// TODO testing
 	// LogInfo(FirebaseMailer::Instance().Get("name").second.dump());
-	FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
+	FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::URL_INPUTS, 1); // add one URL input
+	FirebaseMailer::Instance().PushBack_Put(FirebaseIntegerKey::MAX_OPEN_TABS, 43);
 
     // ### OTHER ###
 
@@ -773,7 +774,7 @@ void Master::Loop()
 		// TODO: Testing
 		if (eyeGUIInput.instantInteraction)
 		{
-			FirebaseMailer::Instance().PushBack_Transform(FirebaseKey::URL_INPUTS, 1); // add one URL input
+			FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::URL_INPUTS, 1); // add one URL input
 		}
 
         // Update super GUI, including pause button

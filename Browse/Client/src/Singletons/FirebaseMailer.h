@@ -19,22 +19,35 @@
 using json = nlohmann::json;
 
 // Keys (fill in mapping to strings below!)
-enum class FirebaseKey { URL_INPUTS, MAX_BOOKMARK_COUNT, MAX_OPEN_TABS }; // TODO: these are (unused!) examples; TODO: divide between user and global Firebase Keys
+enum class FirebaseIntegerKey { URL_INPUTS, MAX_BOOKMARK_COUNT, MAX_OPEN_TABS }; // TODO: these are (unused!) examples; TODO: divide between user and global Firebase Keys
+enum class FirebaseStringKey { TEST_STRING };
 
 // Firebase mailer class
 class FirebaseMailer
 {
 private:
 
-	// Fill mapping from FirebaseKey to string here!
-	static const std::string BuildFirebaseKey(FirebaseKey key, std::string uid)
+	// Fill mapping from FirebaseIntegerKey to string here!
+	static const std::string BuildFirebaseKey(FirebaseIntegerKey key, std::string uid)
 	{
 		// Simple mapping of enum to string
-		static const std::map<FirebaseKey, std::string> FirebaseKeyString // run time map, easier to implement than compile time template stuff
+		static const std::map<FirebaseIntegerKey, std::string> FirebaseKeyString // run time map, easier to implement than compile time template stuff
 		{
-			{ FirebaseKey::URL_INPUTS,			"urlInput" },
-			{ FirebaseKey::MAX_BOOKMARK_COUNT,	"maxBookmarkCount" },
-			{ FirebaseKey::MAX_OPEN_TABS,		"maxOpenTabs" },
+			{ FirebaseIntegerKey::URL_INPUTS,			"urlInput" },
+			{ FirebaseIntegerKey::MAX_BOOKMARK_COUNT,	"maxBookmarkCount" },
+			{ FirebaseIntegerKey::MAX_OPEN_TABS,		"maxOpenTabs" },
+		};
+
+		return "users/" + uid + "/browse/" + FirebaseKeyString.at(key);
+	}
+
+	// Fill mapping from FirebaseStringKey to string here!
+	static const std::string BuildFirebaseKey(FirebaseStringKey key, std::string uid)
+	{
+		// Simple mapping of enum to string
+		static const std::map<FirebaseStringKey, std::string> FirebaseKeyString // run time map, easier to implement than compile time template stuff
+		{
+			{ FirebaseStringKey::TEST_STRING,			"testString" },
 		};
 
 		return "users/" + uid + "/browse/" + FirebaseKeyString.at(key);
@@ -60,12 +73,14 @@ public:
 
 	// Available commands
 	void PushBack_Login(std::string email, std::string password);
-	void PushBack_Transform(FirebaseKey key, int delta);
-	void PushBack_Maximum(FirebaseKey key, int value);
+	void PushBack_Transform(FirebaseIntegerKey key, int delta);
+	void PushBack_Maximum(FirebaseIntegerKey key, int value);
+	void PushBack_Put(FirebaseIntegerKey key, int value);
+	// void PushBack_Put(FirebaseStringKey key, int value);
 
 private:
 
-	// ### Delegate running a thread ###
+	// ### Delegate running in a thread ###
 	class FirebaseInterface
 	{
 	public:
@@ -74,17 +89,21 @@ private:
 		bool Login(std::string email, std::string password);
 
 		// Get of JSON structure by key. Returns empty structure (pair of ETag and JSON encoded data) if not available
-		std::pair<std::string, json> Get(FirebaseKey key);
+		std::pair<std::string, json> Get(FirebaseIntegerKey key);
 		std::pair<std::string, json> Get(std::string key);
 
 		// Put single value in database. Uses ETag to check whether ok to put or worked on outdated value. Return true if succesful, otherwise do it another time, maybe with new value
-		bool Put(FirebaseKey key, std::string ETag, int value, std::string& rNewETag, int& rNewValue); // Fills newETag and newValue if ETag was outdated. Please try again with these values
+		bool Put(FirebaseIntegerKey key, std::string ETag, int value, std::string& rNewETag, int& rNewValue); // Fills newETag and newValue if ETag was outdated. Please try again with these values
+
+		// Simple put functionality. Can replace existing value
+		template<typename K, typename T>
+		void Put(K key, T value);
 
 		// Transform value
-		void Transform(FirebaseKey key, int delta);
+		void Transform(FirebaseIntegerKey key, int delta);
 
 		// Save maximum in database, either my value or the one in database
-		void Maximum(FirebaseKey key, int value);
+		void Maximum(FirebaseIntegerKey key, int value);
 
 	private:
 
@@ -92,7 +111,7 @@ private:
 		bool Relogin();
 
 		// Apply function on value in database
-		void Apply(FirebaseKey key, std::function<int(int)> function); // function parameter takes value from database on which function is applied. Return value is then written to database
+		void Apply(FirebaseIntegerKey key, std::function<int(int)> function); // function parameter takes value from database on which function is applied. Return value is then written to database
 
 		// Constants
 		const std::string _API_KEY = setup::FIREBASE_API_KEY;

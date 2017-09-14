@@ -145,7 +145,7 @@ bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string pas
 	return !_idToken.empty(); // id token is not empty, so something happened
 }
 
-std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(FirebaseKey key)
+std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(FirebaseIntegerKey key)
 {
 	return Get(BuildFirebaseKey(key, _uid));
 }
@@ -232,7 +232,7 @@ std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(std::string 
 	return result;
 }
 
-bool FirebaseMailer::FirebaseInterface::Put(FirebaseKey key, std::string ETag, int value, std::string& rNewETag, int& rNewValue)
+bool FirebaseMailer::FirebaseInterface::Put(FirebaseIntegerKey key, std::string ETag, int value, std::string& rNewETag, int& rNewValue)
 {
 	bool success = false;
 	rNewETag = "";
@@ -347,13 +347,54 @@ bool FirebaseMailer::FirebaseInterface::Put(FirebaseKey key, std::string ETag, i
 	return success;
 }
 
-void FirebaseMailer::FirebaseInterface::Transform(FirebaseKey key, int delta)
+template<typename K, typename T>
+void FirebaseMailer::FirebaseInterface::Put(K key, T value)
+{
+	// Call own get method to get the value if already set
+	std::pair<std::string, json> DBvalue = this->Get(key);
+
+	// Put value in database
+	std::string ETag = DBvalue.first;
+	std::string newETag = "";
+	int newValue = 0;
+	bool success = false;
+	const int maxTrialCount = 10;
+	int trialCount = 0;
+
+	// Try as long as no success but still new ETags
+	do
+	{
+		// Try to put on database
+		newETag = "";
+		newValue = 0;
+		success = Put(key, ETag, value, newETag, newValue);
+
+		// If empty new ETag, just quit this (either success or database just does not like us)
+		if (newETag.empty()) { break; }
+
+		// Store new values
+		ETag = newETag;
+		// value = newValue; -> this would override the value to put
+
+		// Increase trial count
+		++trialCount;
+
+	} while (!success && trialCount <= maxTrialCount);
+
+	// Tell user about no success
+	if (!success)
+	{
+		LogError("FirebaseInterface: ", "Data transfer to Firebase failed.");
+	}
+}
+
+void FirebaseMailer::FirebaseInterface::Transform(FirebaseIntegerKey key, int delta)
 {
 	// Just add the delta to the existing value
 	Apply(key, [delta](int DBvalue) { return DBvalue + delta; });
 }
 
-void FirebaseMailer::FirebaseInterface::Maximum(FirebaseKey key, int value)
+void FirebaseMailer::FirebaseInterface::Maximum(FirebaseIntegerKey key, int value)
 {
 	// Use maximum of database value and this
 	Apply(key, [value](int DBvalue) { return glm::max(DBvalue, value); });
@@ -434,7 +475,7 @@ bool FirebaseMailer::FirebaseInterface::Relogin()
 	return !_idToken.empty(); // ok if id token has been filled
 }
 
-void FirebaseMailer::FirebaseInterface::Apply(FirebaseKey key, std::function<int(int)> function)
+void FirebaseMailer::FirebaseInterface::Apply(FirebaseIntegerKey key, std::function<int(int)> function)
 {
 	// Call own get method
 	std::pair<std::string, json> DBvalue = this->Get(key);
@@ -463,6 +504,13 @@ void FirebaseMailer::FirebaseInterface::Apply(FirebaseKey key, std::function<int
 
 		// If empty new ETag, just quit this (either success or database just does not like us)
 		if (newETag.empty()) { break; }
+
+		// Store new values
+		ETag = newETag;
+		value = newValue;
+
+		// Transform retrieved value
+		value = function(value);
 
 		// Increase trial count
 		++trialCount;
@@ -526,7 +574,7 @@ void FirebaseMailer::PushBack_Login(std::string email, std::string password)
 	})));
 }
 
-void FirebaseMailer::PushBack_Transform(FirebaseKey key, int delta)
+void FirebaseMailer::PushBack_Transform(FirebaseIntegerKey key, int delta)
 {
 	// Add command to queue, take parameters as copy
 	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
@@ -535,12 +583,21 @@ void FirebaseMailer::PushBack_Transform(FirebaseKey key, int delta)
 	})));
 }
 
-void FirebaseMailer::PushBack_Maximum(FirebaseKey key, int value)
+void FirebaseMailer::PushBack_Maximum(FirebaseIntegerKey key, int value)
 {
 	// Add command to queue, take parameters as copy
 	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
 		rInterface.Maximum(key, value);
+	})));
+}
+
+void FirebaseMailer::PushBack_Put(FirebaseIntegerKey key, int value)
+{
+	// Add command to queue, take parameters as copy
+	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
+	{
+		rInterface.Put(key, value);
 	})));
 }
 
