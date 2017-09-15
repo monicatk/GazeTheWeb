@@ -3,7 +3,6 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Singleton which receives and sends data to Firebase.
-// TODO: Implement Get command that returns a future
 
 #ifndef FIREBASEMAILER_H_
 #define FIREBASEMAILER_H_
@@ -15,6 +14,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <future>
 
 using json = nlohmann::json;
 
@@ -90,13 +90,16 @@ public:
 	// Pause mailer
 	void Pause() { _paused = true; }
 
-	// Available commands
+	// Available commands (TODO: use more templates?)
 	void PushBack_Login(std::string email, std::string password);
-	void PushBack_Transform(FirebaseIntegerKey key, int delta);
-	void PushBack_Maximum(FirebaseIntegerKey key, int value);
+	void PushBack_Transform(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise = nullptr); // promise delivers future database value
+	void PushBack_Maximum(FirebaseIntegerKey key, int value, std::promise<int>* pPromise = nullptr); // promise delivers future database value
 	void PushBack_Put(FirebaseIntegerKey key, int value);
 	void PushBack_Put(FirebaseStringKey key, std::string value);
 	void PushBack_Put(FirebaseJSONKey key, json value);
+	void PushBack_Get(FirebaseIntegerKey key, std::promise<int>* pPromise);
+	void PushBack_Get(FirebaseStringKey key, std::promise<std::string>* pPromise);
+	void PushBack_Get(FirebaseJSONKey key, std::promise<json>* pPromise);
 
 private:
 
@@ -108,18 +111,19 @@ private:
 		// Log in. Return whether successful
 		bool Login(std::string email, std::string password);
 
-		// Get of JSON structure by key. Returns empty structure (pair of ETag and JSON encoded data) if not available
-		std::pair<std::string, json> Get(std::string key);
-
 		// Simple put functionality. Can replace existing value
 		template<typename T>
 		void Put(T key, typename FirebaseValue<T>::type value);
 
+		// Get
+		template<typename T>
+		void Get(T key, std::promise<typename FirebaseValue<T>::type>* pPromise);
+
 		// Transform value
-		void Transform(FirebaseIntegerKey key, int delta);
+		void Transform(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise = nullptr); // if nullptr, no future is set
 
 		// Save maximum in database, either my value or the one in database
-		void Maximum(FirebaseIntegerKey key, int value);
+		void Maximum(FirebaseIntegerKey key, int value, std::promise<int>* pPromise = nullptr); // if nullptr, no future is set
 
 	private:
 
@@ -130,8 +134,11 @@ private:
 		template<typename T>
 		bool Put(T key, std::string ETag, typename FirebaseValue<T>::type value, std::string& rNewETag, typename FirebaseValue<T>::type& rNewValue); // Fills newETag and newValue if ETag was outdated. Please try again with these values
 
-		// Apply function on value in database
-		void Apply(FirebaseIntegerKey key, std::function<int(int)> function); // function parameter takes value from database on which function is applied. Return value is then written to database
+		// Get of JSON structure by key. Returns empty structure (pair of ETag and JSON encoded data) if not available
+		std::pair<std::string, json> Get(std::string key);
+
+		// Apply function on value in database. Returns final value in database
+		int Apply(FirebaseIntegerKey key, std::function<int(int)> function); // function parameter takes value from database on which function is applied. Return value is then written to database
 
 		// Constants
 		const std::string _API_KEY = setup::FIREBASE_API_KEY;

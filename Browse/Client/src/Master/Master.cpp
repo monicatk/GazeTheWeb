@@ -435,6 +435,10 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 			}
 		}
 	});
+	std::promise<std::string> testPromise;
+	auto testFuture = testPromise.get_future();
+	FirebaseMailer::Instance().PushBack_Get(FirebaseStringKey::TEST_STRING, &testPromise);
+	LogInfo("FUTURE: ", testFuture.get());
 
     // ### OTHER ###
 

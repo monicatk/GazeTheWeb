@@ -153,88 +153,6 @@ bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string pas
 	return !_idToken.empty(); // id token is not empty, so something happened
 }
 
-std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(std::string key)
-{
-	// Return value
-	std::pair<std::string, json> result;
-
-	// Only continue if logged in
-	if (!_idToken.empty())
-	{
-		// Setup CURL
-		CURL *curl;
-		curl = curl_easy_init();
-
-		// Continue if CURL was initialized
-		if (curl)
-		{
-			// Local variables
-			std::string answerHeaderBuffer;
-			std::string answerBodyBuffer;
-			struct curl_slist* headers = NULL; // init to NULL is important 
-			headers = curl_slist_append(headers, "X-Firebase-ETag: true"); // tell it to deliver ETag to identify the state
-
-			// Request URL
-			std::string requestURL =
-				_URL + "/"
-				+ key
-				+ ".json"
-				+ "?auth=" + _idToken;
-
-			// Setup CURL
-			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers); // apply header
-			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // follow potential redirection
-			curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, WriteCallback); // set callback for answer header
-			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback); // set callback for answer body
-			curl_easy_setopt(curl, CURLOPT_HEADERDATA, &answerHeaderBuffer); // set buffer for answer header
-			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &answerBodyBuffer); // set buffer for answer body
-			curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of request
-
-			// Perform the request
-			CURLcode res = curl_easy_perform(curl);
-			if (res == CURLE_OK) // everything ok with CURL
-			{
-				// Check header for OK
-				if (HttpHeaderOK(answerHeaderBuffer))
-				{
-					// Parse
-					result = std::make_pair(HttpHeaderExtractETag(answerHeaderBuffer), json::parse(answerBodyBuffer));
-				}
-				else // not ok, guess timeout of id token?
-				{
-					// Try to relogin
-					if (Relogin() && !_idToken.empty()) // returns whether successful
-					{
-						// Setup CURL request (reuse stuff from first)
-						answerHeaderBuffer.clear();
-						answerBodyBuffer.clear();
-						requestURL =
-							_URL + "/"
-							+ key
-							+ ".json"
-							+ "?auth=" + _idToken; // update request URL as id token should be new
-						curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of new request
-
-						 // Try again to GET data
-						res = curl_easy_perform(curl);
-						if (res == CURLE_OK && HttpHeaderOK(answerHeaderBuffer)) // everything ok with CURL and header
-						{
-							// Parse
-							result = std::make_pair(HttpHeaderExtractETag(answerHeaderBuffer), json::parse(answerBodyBuffer));
-						}
-					}
-				}
-			}
-
-			// Cleanup of CURL
-			curl_easy_cleanup(curl); curl = nullptr;
-		}
-	}
-
-	// Return result
-	return result;
-}
-
 template<typename T>
 void FirebaseMailer::FirebaseInterface::Put(T key, typename FirebaseValue<T>::type value)
 {
@@ -276,16 +194,25 @@ void FirebaseMailer::FirebaseInterface::Put(T key, typename FirebaseValue<T>::ty
 	}
 }
 
-void FirebaseMailer::FirebaseInterface::Transform(FirebaseIntegerKey key, int delta)
+template<typename T>
+void FirebaseMailer::FirebaseInterface::Get(T key, std::promise<typename FirebaseValue<T>::type>* pPromise)
 {
-	// Just add the delta to the existing value
-	Apply(key, [delta](int DBvalue) { return DBvalue + delta; });
+	auto result = Get(BuildFirebaseKey(key, _uid));
+	pPromise->set_value(result.second.get<typename FirebaseValue<T>::type>());
 }
 
-void FirebaseMailer::FirebaseInterface::Maximum(FirebaseIntegerKey key, int value)
+void FirebaseMailer::FirebaseInterface::Transform(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise)
+{
+	// Just add the delta to the existing value
+	auto result = Apply(key, [delta](int DBvalue) { return DBvalue + delta; });
+	if (pPromise != nullptr) { pPromise->set_value(result); }
+}
+
+void FirebaseMailer::FirebaseInterface::Maximum(FirebaseIntegerKey key, int value, std::promise<int>* pPromise)
 {
 	// Use maximum of database value and this
-	Apply(key, [value](int DBvalue) { return glm::max(DBvalue, value); });
+	auto result = Apply(key, [value](int DBvalue) { return glm::max(DBvalue, value); });
+	if (pPromise != nullptr) { pPromise->set_value(result); }
 }
 
 bool FirebaseMailer::FirebaseInterface::Relogin()
@@ -478,7 +405,89 @@ bool FirebaseMailer::FirebaseInterface::Put(T key, std::string ETag, typename Fi
 	return success;
 }
 
-void FirebaseMailer::FirebaseInterface::Apply(FirebaseIntegerKey key, std::function<int(int)> function)
+std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(std::string key)
+{
+	// Return value
+	std::pair<std::string, json> result;
+
+	// Only continue if logged in
+	if (!_idToken.empty())
+	{
+		// Setup CURL
+		CURL *curl;
+		curl = curl_easy_init();
+
+		// Continue if CURL was initialized
+		if (curl)
+		{
+			// Local variables
+			std::string answerHeaderBuffer;
+			std::string answerBodyBuffer;
+			struct curl_slist* headers = NULL; // init to NULL is important 
+			headers = curl_slist_append(headers, "X-Firebase-ETag: true"); // tell it to deliver ETag to identify the state
+
+																		   // Request URL
+			std::string requestURL =
+				_URL + "/"
+				+ key
+				+ ".json"
+				+ "?auth=" + _idToken;
+
+			// Setup CURL
+			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers); // apply header
+			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // follow potential redirection
+			curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, WriteCallback); // set callback for answer header
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback); // set callback for answer body
+			curl_easy_setopt(curl, CURLOPT_HEADERDATA, &answerHeaderBuffer); // set buffer for answer header
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &answerBodyBuffer); // set buffer for answer body
+			curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of request
+
+																	 // Perform the request
+			CURLcode res = curl_easy_perform(curl);
+			if (res == CURLE_OK) // everything ok with CURL
+			{
+				// Check header for OK
+				if (HttpHeaderOK(answerHeaderBuffer))
+				{
+					// Parse
+					result = std::make_pair(HttpHeaderExtractETag(answerHeaderBuffer), json::parse(answerBodyBuffer));
+				}
+				else // not ok, guess timeout of id token?
+				{
+					// Try to relogin
+					if (Relogin() && !_idToken.empty()) // returns whether successful
+					{
+						// Setup CURL request (reuse stuff from first)
+						answerHeaderBuffer.clear();
+						answerBodyBuffer.clear();
+						requestURL =
+							_URL + "/"
+							+ key
+							+ ".json"
+							+ "?auth=" + _idToken; // update request URL as id token should be new
+						curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of new request
+
+																				 // Try again to GET data
+						res = curl_easy_perform(curl);
+						if (res == CURLE_OK && HttpHeaderOK(answerHeaderBuffer)) // everything ok with CURL and header
+						{
+							// Parse
+							result = std::make_pair(HttpHeaderExtractETag(answerHeaderBuffer), json::parse(answerBodyBuffer));
+						}
+					}
+				}
+			}
+
+			// Cleanup of CURL
+			curl_easy_cleanup(curl); curl = nullptr;
+		}
+	}
+
+	// Return result
+	return result;
+}
+
+int FirebaseMailer::FirebaseInterface::Apply(FirebaseIntegerKey key, std::function<int(int)> function)
 {
 	// Call own get method
 	std::pair<std::string, json> DBvalue = this->Get(BuildFirebaseKey(key, _uid));
@@ -525,6 +534,8 @@ void FirebaseMailer::FirebaseInterface::Apply(FirebaseIntegerKey key, std::funct
 	{
 		LogError("FirebaseInterface: ", "Data transfer to Firebase failed.");
 	}
+
+	return value;
 }
 
 FirebaseMailer::FirebaseMailer()
@@ -577,21 +588,21 @@ void FirebaseMailer::PushBack_Login(std::string email, std::string password)
 	})));
 }
 
-void FirebaseMailer::PushBack_Transform(FirebaseIntegerKey key, int delta)
+void FirebaseMailer::PushBack_Transform(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise)
 {
 	// Add command to queue, take parameters as copy
 	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
-		rInterface.Transform(key, delta);
+		rInterface.Transform(key, delta, pPromise);
 	})));
 }
 
-void FirebaseMailer::PushBack_Maximum(FirebaseIntegerKey key, int value)
+void FirebaseMailer::PushBack_Maximum(FirebaseIntegerKey key, int value, std::promise<int>* pPromise)
 {
 	// Add command to queue, take parameters as copy
 	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
-		rInterface.Maximum(key, value);
+		rInterface.Maximum(key, value, pPromise);
 	})));
 }
 
@@ -619,6 +630,33 @@ void FirebaseMailer::PushBack_Put(FirebaseJSONKey key, json value)
 	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
 		rInterface.Put(key, value);
+	})));
+}
+
+void FirebaseMailer::PushBack_Get(FirebaseIntegerKey key, std::promise<int>* pPromise)
+{
+	// Add command to queue, take parameters as copy
+	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
+	{
+		rInterface.Get(key, pPromise);
+	})));
+}
+
+void FirebaseMailer::PushBack_Get(FirebaseStringKey key, std::promise<std::string>* pPromise)
+{
+	// Add command to queue, take parameters as copy
+	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
+	{
+		rInterface.Get(key, pPromise);
+	})));
+}
+
+void FirebaseMailer::PushBack_Get(FirebaseJSONKey key, std::promise<json>* pPromise)
+{
+	// Add command to queue, take parameters as copy
+	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
+	{
+		rInterface.Get(key, pPromise);
 	})));
 }
 
