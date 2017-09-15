@@ -10,7 +10,15 @@
 #include <sstream>
 #include <chrono>
 
-// ### Helpers ###
+// ### TEMPLATE HELPERS ###
+
+// Fallback for values when not found in database etc.
+template<typename Type> Type fallback();
+template<> int fallback<int>() { return 0; };
+template<> std::string fallback<std::string>() { return ""; };
+template<> json fallback<json>() { return json(); };
+
+// ### HTTP HELPERS ###
 size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
 	((std::string*)userp)->append((char*)contents, size * nmemb);
@@ -145,11 +153,6 @@ bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string pas
 	return !_idToken.empty(); // id token is not empty, so something happened
 }
 
-std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(FirebaseIntegerKey key)
-{
-	return Get(BuildFirebaseKey(key, _uid));
-}
-
 std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(std::string key)
 {
 	// Return value
@@ -232,131 +235,16 @@ std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(std::string 
 	return result;
 }
 
-bool FirebaseMailer::FirebaseInterface::Put(FirebaseIntegerKey key, std::string ETag, int value, std::string& rNewETag, int& rNewValue)
-{
-	bool success = false;
-	rNewETag = "";
-	rNewValue = 0;
-
-	// Only continue if logged in
-	if (!_idToken.empty())
-	{
-		// Setup CURL
-		CURL *curl;
-		curl = curl_easy_init();
-
-		// Continue if CURL was initialized
-		if (curl)
-		{
-			// Local variables
-			std::string answerHeaderBuffer;
-			std::string answerBodyBuffer;
-			struct curl_slist* headers = NULL; // init to NULL is important
-			const std::string putHeaderBuffer = "if-match:" + ETag;
-			headers = curl_slist_append(headers, putHeaderBuffer.c_str()); // 'if-match' criteria to use the ETag
-			
-
-			// Request URL
-			std::string requestURL =
-				_URL + "/"
-				+ BuildFirebaseKey(key, _uid)
-				+ ".json"
-				+ "?auth=" + _idToken;
-
-			// Setup CURL
-			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers); // apply header
-			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // follow potential redirection
-			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT"); // tell about PUTting
-			curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L); // CURL told me to use it
-			curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, WriteCallback); // set callback for answer header
-			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback); // set callback for answer body
-			curl_easy_setopt(curl, CURLOPT_HEADERDATA, &answerHeaderBuffer); // set buffer for answer header
-			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &answerBodyBuffer); // set buffer for answer body
-
-			// Post field
-			const std::string postField = std::to_string(value);
-
-			// Fill request
-			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postField.c_str()); // value to put
-			curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of request
-
-			// Perform the request
-			CURLcode res = curl_easy_perform(curl);
-			if (res == CURLE_OK) // everything ok with CURL
-			{
-				// Check header
-				if (HttpHeaderOK(answerHeaderBuffer))
-				{
-					success = true; // fine!
-				}
-				else if (HttpHeaderPreconditionFailed(answerHeaderBuffer))
-				{
-					// Fill newETag and newValue
-					rNewETag = HttpHeaderExtractETag(answerHeaderBuffer);
-					auto DBvalue = json::parse(answerBodyBuffer);
-					if (DBvalue.is_number_integer())
-					{
-						rNewValue = DBvalue.get<int>();
-					}
-				}
-				else // there is something else in header
-				{
-					// Try to relogin
-					if (Relogin() && !_idToken.empty()) // returns whether successful
-					{
-						// Setup CURL request (reuse stuff from first)
-						answerHeaderBuffer.clear();
-						answerBodyBuffer.clear();
-						requestURL =
-							_URL + "/"
-							+ BuildFirebaseKey(key, _uid)
-							+ ".json"
-							+ "?auth=" + _idToken;
-						curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of new request
-
-						// Try again to PUT data
-						res = curl_easy_perform(curl);
-						if (res == CURLE_OK) // everything ok with CURL
-						{
-							if (HttpHeaderOK(answerHeaderBuffer))
-							{
-								success = true; // fine!
-							}
-							else if (HttpHeaderPreconditionFailed(answerHeaderBuffer))
-							{
-								// Fill newETag and newValue
-								rNewETag = HttpHeaderExtractETag(answerHeaderBuffer);
-								auto DBvalue = json::parse(answerBodyBuffer);
-								if (DBvalue.is_number_integer())
-								{
-									rNewValue = DBvalue.get<int>();
-								}
-							}
-							// else: ok, it failed.
-						}
-					}
-				}
-			}
-
-			// Cleanup
-			curl_slist_free_all(headers); headers = nullptr;
-			curl_easy_cleanup(curl); curl = nullptr;
-		}
-	}
-
-	return success;
-}
-
-template<typename K, typename T>
-void FirebaseMailer::FirebaseInterface::Put(K key, T value)
+template<typename T>
+void FirebaseMailer::FirebaseInterface::Put(T key, typename FirebaseValue<T>::type value)
 {
 	// Call own get method to get the value if already set
-	std::pair<std::string, json> DBvalue = this->Get(key);
+	std::pair<std::string, json> DBvalue = this->Get(BuildFirebaseKey(key, _uid)); // here we are only interesed in the ETag
 
 	// Put value in database
 	std::string ETag = DBvalue.first;
 	std::string newETag = "";
-	int newValue = 0;
+	typename FirebaseValue<T>::type newValue = fallback<typename FirebaseValue<T>::type>();
 	bool success = false;
 	const int maxTrialCount = 10;
 	int trialCount = 0;
@@ -366,7 +254,7 @@ void FirebaseMailer::FirebaseInterface::Put(K key, T value)
 	{
 		// Try to put on database
 		newETag = "";
-		newValue = 0;
+		newValue = fallback<typename FirebaseValue<T>::type>();
 		success = Put(key, ETag, value, newETag, newValue);
 
 		// If empty new ETag, just quit this (either success or database just does not like us)
@@ -475,10 +363,125 @@ bool FirebaseMailer::FirebaseInterface::Relogin()
 	return !_idToken.empty(); // ok if id token has been filled
 }
 
+template<typename T>
+bool FirebaseMailer::FirebaseInterface::Put(T key, std::string ETag, typename FirebaseValue<T>::type value, std::string& rNewETag, typename FirebaseValue<T>::type& rNewValue)
+{
+	bool success = false;
+	rNewETag = "";
+	rNewValue = fallback<typename FirebaseValue<T>::type>();
+
+	// Only continue if logged in
+	if (!_idToken.empty())
+	{
+		// Setup CURL
+		CURL *curl;
+		curl = curl_easy_init();
+
+		// Continue if CURL was initialized
+		if (curl)
+		{
+			// Local variables
+			std::string answerHeaderBuffer;
+			std::string answerBodyBuffer;
+			struct curl_slist* headers = NULL; // init to NULL is important
+			const std::string putHeaderBuffer = "if-match:" + ETag;
+			headers = curl_slist_append(headers, putHeaderBuffer.c_str()); // 'if-match' criteria to use the ETag
+
+			// Request URL
+			std::string requestURL =
+				_URL + "/"
+				+ BuildFirebaseKey(key, _uid)
+				+ ".json"
+				+ "?auth=" + _idToken;
+
+			// Setup CURL
+			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers); // apply header
+			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // follow potential redirection
+			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT"); // tell about PUTting
+			curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L); // CURL told me to use it
+			curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, WriteCallback); // set callback for answer header
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback); // set callback for answer body
+			curl_easy_setopt(curl, CURLOPT_HEADERDATA, &answerHeaderBuffer); // set buffer for answer header
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &answerBodyBuffer); // set buffer for answer body
+
+			// Post field
+			const std::string postField = json(value).dump();
+
+			// Fill request
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postField.c_str()); // value to put
+			curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of request
+
+			// Perform the request
+			CURLcode res = curl_easy_perform(curl);
+			if (res == CURLE_OK) // everything ok with CURL
+			{
+				// Check header
+				if (HttpHeaderOK(answerHeaderBuffer))
+				{
+					success = true; // fine!
+				}
+				else if (HttpHeaderPreconditionFailed(answerHeaderBuffer))
+				{
+					// Fill newETag and newValue
+					rNewETag = HttpHeaderExtractETag(answerHeaderBuffer);
+					auto DBvalue = json::parse(answerBodyBuffer);
+					// if (DBvalue.is_number_integer())
+					{
+						rNewValue = DBvalue.get<typename FirebaseValue<T>::type>();
+					}
+				}
+				else // there is something else in header
+				{
+					// Try to relogin
+					if (Relogin() && !_idToken.empty()) // returns whether successful
+					{
+						// Setup CURL request (reuse stuff from first)
+						answerHeaderBuffer.clear();
+						answerBodyBuffer.clear();
+						requestURL =
+							_URL + "/"
+							+ BuildFirebaseKey(key, _uid)
+							+ ".json"
+							+ "?auth=" + _idToken;
+						curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of new request
+
+						// Try again to PUT data
+						res = curl_easy_perform(curl);
+						if (res == CURLE_OK) // everything ok with CURL
+						{
+							if (HttpHeaderOK(answerHeaderBuffer))
+							{
+								success = true; // fine!
+							}
+							else if (HttpHeaderPreconditionFailed(answerHeaderBuffer))
+							{
+								// Fill newETag and newValue
+								rNewETag = HttpHeaderExtractETag(answerHeaderBuffer);
+								auto DBvalue = json::parse(answerBodyBuffer);
+								// if (DBvalue.is_number_integer())
+								{
+									rNewValue = DBvalue.get<typename FirebaseValue<T>::type>();
+								}
+							}
+							// else: ok, it failed.
+						}
+					}
+				}
+			}
+
+			// Cleanup
+			curl_slist_free_all(headers); headers = nullptr;
+			curl_easy_cleanup(curl); curl = nullptr;
+		}
+	}
+
+	return success;
+}
+
 void FirebaseMailer::FirebaseInterface::Apply(FirebaseIntegerKey key, std::function<int(int)> function)
 {
 	// Call own get method
-	std::pair<std::string, json> DBvalue = this->Get(key);
+	std::pair<std::string, json> DBvalue = this->Get(BuildFirebaseKey(key, _uid));
 
 	// Check whether data was found, create new with single zero integer value, if necessary
 	int value = (!DBvalue.second.empty() && DBvalue.second.is_number_integer()) ? DBvalue.second.get<int>() : 0;
@@ -593,6 +596,24 @@ void FirebaseMailer::PushBack_Maximum(FirebaseIntegerKey key, int value)
 }
 
 void FirebaseMailer::PushBack_Put(FirebaseIntegerKey key, int value)
+{
+	// Add command to queue, take parameters as copy
+	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
+	{
+		rInterface.Put(key, value);
+	})));
+}
+
+void FirebaseMailer::PushBack_Put(FirebaseStringKey key, std::string value)
+{
+	// Add command to queue, take parameters as copy
+	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
+	{
+		rInterface.Put(key, value);
+	})));
+}
+
+void FirebaseMailer::PushBack_Put(FirebaseJSONKey key, json value)
 {
 	// Add command to queue, take parameters as copy
 	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)

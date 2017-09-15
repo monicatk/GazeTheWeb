@@ -422,6 +422,19 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// LogInfo(FirebaseMailer::Instance().Get("name").second.dump());
 	FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::URL_INPUTS, 1); // add one URL input
 	FirebaseMailer::Instance().PushBack_Put(FirebaseIntegerKey::MAX_OPEN_TABS, 43);
+	FirebaseMailer::Instance().PushBack_Put(FirebaseStringKey::TEST_STRING, "HALLO");
+	FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::TEST_JSON,
+	{
+		{ "pi", 3.141 },
+		{ "happy", true },
+		{ "name", "test" },
+		{ "nothing", nullptr },
+		{ "answer",
+			{
+				{ "everything", 42 }
+			}
+		}
+	});
 
     // ### OTHER ###
 

@@ -21,6 +21,13 @@ using json = nlohmann::json;
 // Keys (fill in mapping to strings below!)
 enum class FirebaseIntegerKey { URL_INPUTS, MAX_BOOKMARK_COUNT, MAX_OPEN_TABS }; // TODO: these are (unused!) examples; TODO: divide between user and global Firebase Keys
 enum class FirebaseStringKey { TEST_STRING };
+enum class FirebaseJSONKey { TEST_JSON };
+
+// Mapping from key to raw type
+template<typename Type> struct FirebaseValue;
+template<> struct FirebaseValue<FirebaseIntegerKey> { typedef int type; };
+template<> struct FirebaseValue<FirebaseStringKey> { typedef std::string type; };
+template<> struct FirebaseValue<FirebaseJSONKey> { typedef json type; };
 
 // Firebase mailer class
 class FirebaseMailer
@@ -53,6 +60,18 @@ private:
 		return "users/" + uid + "/browse/" + FirebaseKeyString.at(key);
 	}
 
+	// Fill mapping from FirebaseJSONKey to string here!
+	static const std::string BuildFirebaseKey(FirebaseJSONKey key, std::string uid)
+	{
+		// Simple mapping of enum to string
+		static const std::map<FirebaseJSONKey, std::string> FirebaseKeyString // run time map, easier to implement than compile time template stuff
+		{
+			{ FirebaseJSONKey::TEST_JSON,				"JSONString" },
+		};
+
+		return "users/" + uid + "/browse/" + FirebaseKeyString.at(key);
+	}
+
 public:
 
 	// Getter of static instance
@@ -76,7 +95,8 @@ public:
 	void PushBack_Transform(FirebaseIntegerKey key, int delta);
 	void PushBack_Maximum(FirebaseIntegerKey key, int value);
 	void PushBack_Put(FirebaseIntegerKey key, int value);
-	// void PushBack_Put(FirebaseStringKey key, int value);
+	void PushBack_Put(FirebaseStringKey key, std::string value);
+	void PushBack_Put(FirebaseJSONKey key, json value);
 
 private:
 
@@ -89,15 +109,11 @@ private:
 		bool Login(std::string email, std::string password);
 
 		// Get of JSON structure by key. Returns empty structure (pair of ETag and JSON encoded data) if not available
-		std::pair<std::string, json> Get(FirebaseIntegerKey key);
 		std::pair<std::string, json> Get(std::string key);
 
-		// Put single value in database. Uses ETag to check whether ok to put or worked on outdated value. Return true if succesful, otherwise do it another time, maybe with new value
-		bool Put(FirebaseIntegerKey key, std::string ETag, int value, std::string& rNewETag, int& rNewValue); // Fills newETag and newValue if ETag was outdated. Please try again with these values
-
 		// Simple put functionality. Can replace existing value
-		template<typename K, typename T>
-		void Put(K key, T value);
+		template<typename T>
+		void Put(T key, typename FirebaseValue<T>::type value);
 
 		// Transform value
 		void Transform(FirebaseIntegerKey key, int delta);
@@ -109,6 +125,10 @@ private:
 
 		// Relogin via refresh token. Returns whether successful
 		bool Relogin();
+
+		// Put single value in database. Uses ETag to check whether ok to put or working on outdated value. Return true if succesful, otherwise do it another time, maybe with new value provided by this method
+		template<typename T>
+		bool Put(T key, std::string ETag, typename FirebaseValue<T>::type value, std::string& rNewETag, typename FirebaseValue<T>::type& rNewValue); // Fills newETag and newValue if ETag was outdated. Please try again with these values
 
 		// Apply function on value in database
 		void Apply(FirebaseIntegerKey key, std::function<int(int)> function); // function parameter takes value from database on which function is applied. Return value is then written to database
