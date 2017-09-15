@@ -269,7 +269,8 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 		// Fill output
 		SetOutputValue("coordinate", pixelFixation);
 
-		if (deviation < 1.f)
+		// if (deviation < 1.f)
+		if (_zoom < 0.25f)
 		{
 			finished = true;
 		}

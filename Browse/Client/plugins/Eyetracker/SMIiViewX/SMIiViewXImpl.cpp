@@ -3,6 +3,11 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 
+//============================================================================
+// Distributed under the Apache License, Version 2.0.
+// Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
+//============================================================================
+
 // This is an implementation
 #define DLL_IMPLEMENTATION
 
@@ -45,13 +50,13 @@ bool Connect()
 	int ret_connect = 0;
 
 	// Connect to iViewX server
-	ret_connect = iV_ConnectLocal(); // TODO BUG: never works, but it does for minimal sample code :(
+	ret_connect = iV_ConnectLocal();
 
 	// If server not running, try to start it
 	if (ret_connect != RET_SUCCESS)
 	{
 		// Start iViewX server
-		iV_Start(iViewX);
+		iV_Start(iViewNG);
 
 		// Retry to connect to iViewX server
 		ret_connect = iV_ConnectLocal();
@@ -66,14 +71,9 @@ bool Connect()
 	// Set sample callback
 	if (ret_connect == RET_SUCCESS)
 	{
-		/*
+		// Get system info
 		SystemInfoStruct systemInfoData;
-		iV_GetSystemInfo(&systemInfoData);
-		LogInfo("iViewX ETSystem: ", systemInfoData.iV_ETDevice);
-		LogInfo("iViewX iV_Version: ", systemInfoData.iV_MajorVersion, ".", systemInfoData.iV_MinorVersion, ".", systemInfoData.iV_Buildnumber);
-		LogInfo("iViewX API_Version: ", systemInfoData.API_MajorVersion, ".", systemInfoData.API_MinorVersion, ".", systemInfoData.API_Buildnumber);
-		LogInfo("iViewX SystemInfo Samplerate: ", systemInfoData.samplerate);
-		*/
+		iV_GetSystemInfo(&systemInfoData); // not used right now
 
 		// Define a callback function for receiving samples
 		iV_SetSampleCallback(SampleCallbackFunction);
