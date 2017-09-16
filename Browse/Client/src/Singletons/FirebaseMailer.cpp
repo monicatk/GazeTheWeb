@@ -10,37 +10,47 @@
 #include <sstream>
 #include <chrono>
 
+// ########################
 // ### TEMPLATE HELPERS ###
+// ########################
 
 // Fallback for values when not found in database etc.
 template<typename Type> Type fallback();
-template<> int fallback<int>() { return 0; };
-template<> std::string fallback<std::string>() { return ""; };
-template<> json fallback<json>() { return json(); };
+template<> int fallback<int>()					{ return 0; };
+template<> std::string fallback<std::string>()	{ return ""; };
+template<> json fallback<json>()				{ return json(); };
 
+// ####################
 // ### HTTP HELPERS ###
+// ####################
+
+// Write callback for CURL
 size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
 	((std::string*)userp)->append((char*)contents, size * nmemb);
 	return size * nmemb;
 }
 
+// Checks for something in the first line of HTTP header
 bool HttpHeaderFirstLineContains(const std::string& rHeader, const std::string& rCompareTo)
 {
 	std::string firstLine = rHeader.substr(0, rHeader.find("\n"));
 	return firstLine.find(rCompareTo) != std::string::npos;
 }
 
+// Checks header for ok
 bool HttpHeaderOK(const std::string& rHeader)
 {
 	return HttpHeaderFirstLineContains(rHeader, "200 OK");
 }
 
+// Checks header for failed precondition
 bool HttpHeaderPreconditionFailed(const std::string& rHeader)
 {
 	return HttpHeaderFirstLineContains(rHeader, "412 Precondition Failed");
 }
 
+// Extract ETag from header, returns empty string if not found
 std::string HttpHeaderExtractETag(const std::string& rHeader)
 {
 	std::istringstream lineStream(rHeader);
@@ -66,7 +76,10 @@ std::string HttpHeaderExtractETag(const std::string& rHeader)
 
 	return ""; // return empty string in case of non exisiting ETag
 }
-// ###############
+
+// ##########################
+// ### FIREBASE INTERFACE ###
+// ##########################
 
 bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string password)
 {
@@ -86,7 +99,7 @@ bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string pas
 		std::string postBuffer;
 		std::string answerHeaderBuffer;
 		std::string answerBodyBuffer;
-		struct curl_slist* headers = NULL; // init to NULL is important 
+		struct curl_slist* headers = nullptr; // init to NULL is important 
 		headers = curl_slist_append(headers, "Content-Type: application/json"); // type is JSON
 		
 		// Set options
@@ -104,7 +117,7 @@ bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string pas
 			{ "password", password }, // password to access database
 			{ "returnSecureToken", true } // of course, thats what this is about
 		};
-		postBuffer = jsonPost.dump(); // store in a string, otherwise it breaks
+		postBuffer = jsonPost.dump(); // store in a string, otherwise it breaks (CURL probably wants a reference)
 
 		// Fill request
 		curl_easy_setopt(curl, CURLOPT_URL, "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + _API_KEY); // URL to access
@@ -123,7 +136,7 @@ bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string pas
 		curl_easy_cleanup(curl); curl = nullptr;
 
 		// Parse answer to JSON object and extract id token
-		auto jsonAnswer = json::parse(answerBodyBuffer);
+		const auto jsonAnswer = json::parse(answerBodyBuffer);
 		auto result = jsonAnswer.find("idToken");
 		if (result != jsonAnswer.end())
 		{
@@ -157,10 +170,10 @@ template<typename T>
 void FirebaseMailer::FirebaseInterface::Put(T key, typename FirebaseValue<T>::type value)
 {
 	// Call own get method to get the value if already set
-	std::pair<std::string, json> DBvalue = this->Get(BuildFirebaseKey(key, _uid)); // here we are only interesed in the ETag
+	const DBEntry entry = this->Get(BuildFirebaseKey(key, _uid)); // here we are only interesed in the ETag
 
 	// Put value in database
-	std::string ETag = DBvalue.first;
+	std::string ETag = entry.ETag;
 	std::string newETag = "";
 	typename FirebaseValue<T>::type newValue = fallback<typename FirebaseValue<T>::type>();
 	bool success = false;
@@ -198,7 +211,7 @@ template<typename T>
 void FirebaseMailer::FirebaseInterface::Get(T key, std::promise<typename FirebaseValue<T>::type>* pPromise)
 {
 	auto result = Get(BuildFirebaseKey(key, _uid));
-	pPromise->set_value(result.second.get<typename FirebaseValue<T>::type>());
+	pPromise->set_value(result.value.get<typename FirebaseValue<T>::type>());
 }
 
 void FirebaseMailer::FirebaseInterface::Transform(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise)
@@ -237,7 +250,7 @@ bool FirebaseMailer::FirebaseInterface::Relogin()
 			// Local variables
 			CURLcode res;
 			std::string answerBodyBuffer;
-			struct curl_slist* headers = NULL; // init to NULL is important 
+			struct curl_slist* headers = nullptr; // init to NULL is important 
 			headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded"); // type is simple form encoding
 
 			// Set options
@@ -266,7 +279,7 @@ bool FirebaseMailer::FirebaseInterface::Relogin()
 			curl_easy_cleanup(curl); curl = nullptr;
 
 			// Parse answer to JSON object and extract id token
-			auto jsonAnswer = json::parse(answerBodyBuffer);
+			const auto jsonAnswer = json::parse(answerBodyBuffer);
 			auto result = jsonAnswer.find("id_token"); // different from email and password login
 			if (result != jsonAnswer.end())
 			{
@@ -310,7 +323,7 @@ bool FirebaseMailer::FirebaseInterface::Put(T key, std::string ETag, typename Fi
 			// Local variables
 			std::string answerHeaderBuffer;
 			std::string answerBodyBuffer;
-			struct curl_slist* headers = NULL; // init to NULL is important
+			struct curl_slist* headers = nullptr; // init to NULL is important
 			const std::string putHeaderBuffer = "if-match:" + ETag;
 			headers = curl_slist_append(headers, putHeaderBuffer.c_str()); // 'if-match' criteria to use the ETag
 
@@ -351,11 +364,7 @@ bool FirebaseMailer::FirebaseInterface::Put(T key, std::string ETag, typename Fi
 				{
 					// Fill newETag and newValue
 					rNewETag = HttpHeaderExtractETag(answerHeaderBuffer);
-					auto DBvalue = json::parse(answerBodyBuffer);
-					// if (DBvalue.is_number_integer())
-					{
-						rNewValue = DBvalue.get<typename FirebaseValue<T>::type>();
-					}
+					rNewValue = json::parse(answerBodyBuffer).get<typename FirebaseValue<T>::type>();
 				}
 				else // there is something else in header
 				{
@@ -384,11 +393,7 @@ bool FirebaseMailer::FirebaseInterface::Put(T key, std::string ETag, typename Fi
 							{
 								// Fill newETag and newValue
 								rNewETag = HttpHeaderExtractETag(answerHeaderBuffer);
-								auto DBvalue = json::parse(answerBodyBuffer);
-								// if (DBvalue.is_number_integer())
-								{
-									rNewValue = DBvalue.get<typename FirebaseValue<T>::type>();
-								}
+								rNewValue = json::parse(answerBodyBuffer).get<typename FirebaseValue<T>::type>();
 							}
 							// else: ok, it failed.
 						}
@@ -405,10 +410,10 @@ bool FirebaseMailer::FirebaseInterface::Put(T key, std::string ETag, typename Fi
 	return success;
 }
 
-std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(std::string key)
+FirebaseMailer::FirebaseInterface::DBEntry FirebaseMailer::FirebaseInterface::Get(std::string key)
 {
 	// Return value
-	std::pair<std::string, json> result;
+	DBEntry result;
 
 	// Only continue if logged in
 	if (!_idToken.empty())
@@ -423,10 +428,10 @@ std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(std::string 
 			// Local variables
 			std::string answerHeaderBuffer;
 			std::string answerBodyBuffer;
-			struct curl_slist* headers = NULL; // init to NULL is important 
+			struct curl_slist* headers = nullptr; // init to NULL is important 
 			headers = curl_slist_append(headers, "X-Firebase-ETag: true"); // tell it to deliver ETag to identify the state
 
-																		   // Request URL
+			// Request URL
 			std::string requestURL =
 				_URL + "/"
 				+ key
@@ -442,7 +447,7 @@ std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(std::string 
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &answerBodyBuffer); // set buffer for answer body
 			curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of request
 
-																	 // Perform the request
+			// Perform the request
 			CURLcode res = curl_easy_perform(curl);
 			if (res == CURLE_OK) // everything ok with CURL
 			{
@@ -450,7 +455,7 @@ std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(std::string 
 				if (HttpHeaderOK(answerHeaderBuffer))
 				{
 					// Parse
-					result = std::make_pair(HttpHeaderExtractETag(answerHeaderBuffer), json::parse(answerBodyBuffer));
+					result = DBEntry(HttpHeaderExtractETag(answerHeaderBuffer), json::parse(answerBodyBuffer));
 				}
 				else // not ok, guess timeout of id token?
 				{
@@ -467,12 +472,12 @@ std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(std::string 
 							+ "?auth=" + _idToken; // update request URL as id token should be new
 						curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of new request
 
-																				 // Try again to GET data
+						// Try again to GET data
 						res = curl_easy_perform(curl);
 						if (res == CURLE_OK && HttpHeaderOK(answerHeaderBuffer)) // everything ok with CURL and header
 						{
 							// Parse
-							result = std::make_pair(HttpHeaderExtractETag(answerHeaderBuffer), json::parse(answerBodyBuffer));
+							result = DBEntry(HttpHeaderExtractETag(answerHeaderBuffer), json::parse(answerBodyBuffer));
 						}
 					}
 				}
@@ -490,16 +495,16 @@ std::pair<std::string, json> FirebaseMailer::FirebaseInterface::Get(std::string 
 int FirebaseMailer::FirebaseInterface::Apply(FirebaseIntegerKey key, std::function<int(int)> function)
 {
 	// Call own get method
-	std::pair<std::string, json> DBvalue = this->Get(BuildFirebaseKey(key, _uid));
+	const auto entry = this->Get(BuildFirebaseKey(key, _uid));
 
-	// Check whether data was found, create new with single zero integer value, if necessary
-	int value = (!DBvalue.second.empty() && DBvalue.second.is_number_integer()) ? DBvalue.second.get<int>() : 0;
+	// Check whether data was found, create new with fallback value, if necessary
+	int value = (!entry.value.empty() && entry.value.is_number_integer()) ? entry.value.get<int>() : fallback<int>();
 
 	// Apply function on the value
 	value = function(value);
 
 	// Put value in database
-	std::string ETag = DBvalue.first;
+	std::string ETag = entry.ETag;
 	std::string newETag = "";
 	int newValue = 0;
 	bool success = false;
@@ -538,19 +543,23 @@ int FirebaseMailer::FirebaseInterface::Apply(FirebaseIntegerKey key, std::functi
 	return value;
 }
 
+// #######################
+// ### FIREBASE MAILER ###
+// #######################
+
 FirebaseMailer::FirebaseMailer()
 {
 	// Create thread where FirebaseInterface lives in
 	auto* pMutex = &_mutex;
 	auto* pConditionVariable = &_conditionVariable;
 	auto* pCommandQueue = &_commandQueue;
-	auto const * pShouldStop = &_shouldStop;
+	auto const * pShouldStop = &_shouldStop; // read-only
 	_upThread = std::unique_ptr<std::thread>(new std::thread([pMutex, pConditionVariable, pCommandQueue, pShouldStop]() // pass copies of pointers to members
 	{
 		// Create interface to firebase
-		FirebaseInterface interface;
+		FirebaseInterface interface; // object of inner class
 
-		// Local command queue
+		// Local command queue where command are moved from mailer thread to this thread
 		std::deque<std::shared_ptr<Command> > localCommandQueue;
 
 		// While loop to work on commands
@@ -563,7 +572,7 @@ FirebaseMailer::FirebaseMailer()
 					lock, // lock that is handled by condition variable
 					[pCommandQueue, pShouldStop]
 					{
-						return !pCommandQueue->empty() || *pShouldStop; // condition is either there are some commands or it is called to stop and become joinable
+						return !pCommandQueue->empty() || *pShouldStop; // condition is either there are some commands or it is called to stop and becomes joinable
 					}); // hand over locking to the conidition variable which waits for notification by main thread
 				localCommandQueue = std::move(*pCommandQueue); // move content of command queue to local one
 				pCommandQueue->clear(); // clear original queue
