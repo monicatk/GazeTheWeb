@@ -507,7 +507,15 @@ function MutationObserverInit()
 						
 							if(attr == 'class')
 							{
-								// Update (if it exists) DOM object's rects if node's class changed
+								// Node might get fixed or un-fixed if class changes
+								if(typeof(node.getAttribute) === "function" && 
+									window.getComputedStyle(node, null).getPropertyValue("position") === "fixed")
+								{
+									AddFixedElement(node);
+								}
+								// TODO: Remove corresponding fixed element if node gets unfixed
+
+								// Update (if existant) DOM object's rects if node's class changed
 								var domObj = GetCorrespondingDOMObject(node);
 								if(domObj !== undefined)
 									domObj.updateRects();
