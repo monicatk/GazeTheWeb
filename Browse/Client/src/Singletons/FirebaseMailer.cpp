@@ -211,7 +211,14 @@ template<typename T>
 void FirebaseMailer::FirebaseInterface::Get(T key, std::promise<typename FirebaseValue<T>::type>* pPromise)
 {
 	auto result = Get(BuildFirebaseKey(key, _uid));
-	pPromise->set_value(result.value.get<typename FirebaseValue<T>::type>());
+	if(!result.value.empty()) // result might be empty and json does not like to convert empty stuff
+	{
+		pPromise->set_value(result.value.get<typename FirebaseValue<T>::type>());
+	}
+	else
+	{
+		pPromise->set_value(fallback<typename FirebaseValue<T>::type>()); // for empty result, just use fallback
+	}
 }
 
 void FirebaseMailer::FirebaseInterface::Transform(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise)

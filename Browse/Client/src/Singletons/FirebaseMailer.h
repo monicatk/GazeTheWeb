@@ -117,11 +117,11 @@ private:
 
 		// Simple put functionality. Replaces existing value if available
 		template<typename T>
-		void Put(T key, typename FirebaseValue<T>::type value);
+		void Put(T key, typename FirebaseValue<T>::type value); // delegates private put
 
 		// Get
 		template<typename T>
-		void Get(T key, std::promise<typename FirebaseValue<T>::type>* pPromise);
+		void Get(T key, std::promise<typename FirebaseValue<T>::type>* pPromise); // delegates private get
 
 		// Transform value
 		void Transform(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise = nullptr); // if nullptr, no future is set
@@ -144,7 +144,7 @@ private:
 		bool Relogin();
 
 		// Put single value in database. Uses ETag to check whether ok to put or working on outdated value. Return true if successful, otherwise do it another time, maybe with new value provided by this method
-		template<typename T>
+		template<typename T> // TODO: here on could get rid of templates and just work on JSON objects
 		bool Put(T key, std::string ETag, typename FirebaseValue<T>::type value, std::string& rNewETag, typename FirebaseValue<T>::type& rNewValue); // fills newETag and newValue if ETag was outdated. Please try again with these values
 
 		// Get of JSON structure by key. Returns empty structure if not available
