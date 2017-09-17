@@ -19,7 +19,7 @@ ConsolePrint("Starting to import dom_nodes.js ...");
 // Contains lists to all kinds of DOMNode derivates, position defined by numeric node type
 window.domNodes = [];
 
-function DOMNode(node, id, type)
+function DOMNode(node, id, type, cef_hidden=false)
 {    
     // TODO: Check if node already refers to an DOMObject?
 
@@ -36,6 +36,7 @@ function DOMNode(node, id, type)
     this.node = node;
     this.id = id;
     this.type = type;
+    this.cef_hidden = cef_hidden;
 
     this.rects = []
     this.bitmask = [0];
@@ -43,20 +44,24 @@ function DOMNode(node, id, type)
     this.fixObj = undefined;
     this.overflow = undefined;
 
-    // Initial setup of fixObj, if already set in node
-    this.setFixObj(  GetFixedElementById( node.getAttribute("fixedId") )  );
+    // Initial setup of fixObj
+    this.setFixObj(  GetFixedElementById( this.node.getAttribute("fixedId") )  );
     if(this.fixObj === undefined)
-        this.setFixObj(  GetFixedElementById( node.getAttribute("childFixedId") )  );
+        this.setFixObj(  GetFixedElementById( this.node.getAttribute("childFixedId") )  );
+
 
     // Initial setup of overflow, if already set in node
     var overflowId = node.getAttribute("overflowid");
     if(overflowId !== null)
         this.setOverflow(GetDOMOverflowElement(overflowId));
 
-    this.cppReady = false; // TODO: Queuing calls, when node isn't ready yet?
+    this.cppReady = false; // TODO: Queueing calls, when node isn't ready yet?
 
-    // Inform C++ about added DOMNode
-    ConsolePrint("DOM#add#"+type+"#"+id+"#");
+    if(!this.cef_hidden)
+    {
+        // Inform C++ about added DOMNode
+        ConsolePrint("DOM#add#"+type+"#"+id+"#");
+    }
 }
 DOMNode.prototype.Class = "DOMNode";
 
@@ -66,6 +71,19 @@ DOMNode.prototype.getId = function(){
 }
 DOMNode.prototype.getType = function(){
     return this.type;
+}
+DOMNode.prototype.setCefHidden = function(hidden){
+    if(hidden === this.cef_hidden)
+        return;
+
+    this.cef_hidden = hidden;
+    if(hidden)
+        ConsolePrint("DOM#rem#"+this.getType()+"#"+this.getId()+"#");
+    else
+        ConsolePrint("DOM#add#"+this.getType()+"#"+this.getId()+"#");
+}
+DOMNode.prototype.getCefHidden = function(){
+    return this.cef_hidden;
 }
 
 // DOMAttribute Rects
@@ -232,6 +250,7 @@ DOMNode.prototype.setOverflowViaId = function(id){
 
 // TODO: What was this good for? oO
 DOMNode.prototype.setDOMAttribute = function(str){
+    console.log("DOMNode.setDOMAttribute called. Why?");
     switch(str){
         case "fixed":
             return this.setFixed;
@@ -254,7 +273,7 @@ if(window.domNodes[0] !== undefined)
     console.log("Warning! DOMNode list slot 0 already in use!");
 window.domNodes[0] = window.domTextInputs;
 
-function DOMTextInput(node)
+function DOMTextInput(node, cef_hidden=false)
 {
     if(typeof(node.getAttribute) === "function" && node.getAttribute("aria-hidden") === "true")
     {
@@ -264,7 +283,7 @@ function DOMTextInput(node)
 
     window.domTextInputs.push(this);
     var id = window.domTextInputs.indexOf(this);
-    DOMNode.call(this, node, id, 0);
+    DOMNode.call(this, node, id, 0, cef_hidden);
 
     this.text = "";
 }
@@ -300,11 +319,11 @@ if(window.domNodes[1] !== undefined)
     console.log("Warning! DOMNode list slot 1 already in use!");
 window.domNodes[1] = window.domLinks;
 
-function DOMLink(node)
+function DOMLink(node, cef_hidden=false)
 {
     window.domLinks.push(this);
     var id = window.domLinks.indexOf(this);
-    DOMNode.call(this, node, id, 1);
+    DOMNode.call(this, node, id, 1, cef_hidden);
 
     this.text = "";
     this.url = "";
@@ -359,12 +378,12 @@ if(window.domNodes[2] !== undefined)
     console.log("Warning! DOMNode list slot 2 already in use!");
 window.domNodes[2] = window.domSelectFields;
 
-function DOMSelectField(node)
+function DOMSelectField(node, cef_hidden=false)
 {
     window.domSelectFields.push(this);
     var id = window.domSelectFields.indexOf(this);
 
-    DOMNode.call(this, node, id, 2);
+    DOMNode.call(this, node, id, 2, cef_hidden);
 }
 DOMSelectField.prototype = Object.create(DOMNode.prototype);
 DOMSelectField.prototype.constructor = DOMSelectField;
@@ -401,15 +420,23 @@ if(window.domNodes[3] !== undefined)
     console.log("Warning! DOMNode list slot 3 already in use!");
 window.domNodes[3] = window.domOverflowElements;
 
-function DOMOverflowElement(node)
+function DOMOverflowElement(node, cef_hidden=false)
 {
     window.domOverflowElements.push(this);
     var id = window.domOverflowElements.indexOf(this);
 
-    DOMNode.call(this, node, id, 3);
+    var cs_overflow = window.getComputedStyle(node, null).getPropertyValue("overflow");
+    var visible_overflows = ["scroll", "auto"];
+    cef_hidden = cef_hidden || (visible_overflows.indexOf(cs_overflow) === -1);
+    // Check if auto-overflow is really overflowing // TODO: Check regularly if overflow property changed?
+    if(cs_overflow === "auto")
+        this.auto_overflow_hidden = false;  // Initially set to false, later checked
 
+    DOMNode.call(this, node, id, 3, cef_hidden);
+
+    // TODO: Deprecated?
     // Disable scrolling for divs which shouldn't be scrolled
-    this.hidden_overflow = window.getComputedStyle(node, null).getPropertyValue("overflow") === "hidden";
+    this.hidden_overflow = (cs_overflow === "hidden");
 
     this.scrollLeftMax = -1
     this.scrollTopMax = -1
@@ -444,10 +471,18 @@ function DOMOverflowElement(node)
         child.setAttribute("overflowId", id);
     }
 
+    // If overflow is set to auto, check if it is really overflowing before using it in CEF
+    this.checkIfOverflown();
+
 }
 DOMOverflowElement.prototype = Object.create(DOMNode.prototype);
 DOMOverflowElement.prototype.constructor = DOMOverflowElement;
 DOMOverflowElement.prototype.Class = "DOMOverflowElement";  // Override base class identifier for this derivated class
+
+DOMOverflowElement.prototype.updateRects = function(){
+    DOMNode.prototype.updateRects.call(this);
+    this.checkIfOverflown();
+}
 
 // DOMAttribute MaxScrolling
 DOMOverflowElement.prototype.getMaxScrolling = function(){
@@ -497,12 +532,36 @@ DOMOverflowElement.prototype.cutRectsWith = function(domObj, skip_update=true){
     return objRects.map(
         (objRect) => {
             return oeRects.reduce(
-                (acc, oeRect) => {
-                    return CutRectOnRectWindow(acc, oeRect);
-                }, objRect
+                (acc, oeRect) => { return CutRectOnRectWindow(acc, oeRect); },
+                objRect
             )
         }
     )
+}
+
+DOMOverflowElement.prototype.checkIfOverflown = function(){
+    if(this.auto_overflow_hidden === undefined)
+        return;
+
+    this.setAutoOverflowHidden(
+        this.node.scrollHeight <= this.node.clientHeight 
+            && this.node.scrollWidth <= this.node.clientWidth
+    );
+}
+
+DOMOverflowElement.prototype.setAutoOverflowHidden = function(hidden){
+    if(hidden === this.auto_overflow_hidden)
+        return;
+
+    this.auto_overflow_hidden = hidden;
+    // Only hide or show auto-overflow if not already hidden for CEF
+    if(!this.cef_hidden)
+    {
+        if(hidden)
+            ConsolePrint("DOM#rem#3#"+this.getId()+"#");
+        else
+            ConsolePrint("DOM#add#3#"+this.getId()+"#");
+    }
 }
 
 
@@ -518,12 +577,12 @@ if(window.domNodes[4] !== undefined)
     console.log("Warning! DOMNode list slot 4 already in use!");
 window.domNodes[4] = window.domVideos;
 
-function DOMVideo(node)
+function DOMVideo(node, cef_hidden=false)
 {
     window.domVideos.push(this);
     var id = window.domVideos.indexOf(this);
 
-    DOMNode.call(this, node, id, 4);
+    DOMNode.call(this, node, id, 4, cef_hidden);
 
     /* Currently now attributes, only interaction */
     console.log("DOMVideo node successfully created.");

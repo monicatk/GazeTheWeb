@@ -104,14 +104,14 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 				msg = CefProcessMessage::Create(command);
 				const auto& innerArgs = msg->GetArgumentList();
 				// TODO: This could be move to DOMNodeInteraction.h
-				if (command == "EmulateEnterKey")
+				if (command == "EmulateEnterKey" || command == "EmulateMouseClick")
 				{
 					innerArgs->SetDouble(0, ret_val->GetValue("x")->GetDoubleValue());
 					innerArgs->SetDouble(1, ret_val->GetValue("y")->GetDoubleValue());
 					browser->SendProcessMessage(PID_BROWSER, msg);
 					
 				}
-
+				
 			}
 
 			context->Exit();

@@ -4,25 +4,39 @@
 //============================================================================
 ConsolePrint("Starting to import dom_mutationobserver.js ...");
 
+// LSL: Log which type of HTML element was clicked
+document.onclick = function(e){
+	if (e && e.target && e.target.tagName)
+	{
+		SendLSLMessage("Click on "+e.target.tagName);
+	}
+}
+
+
 window.appendedSubtreeRoots = new Set();
 
 // Trigger DOM data update on changing document loading status
 document.onreadystatechange = function()
 {
-	if(document.readyState == 'interactive' || document.readyState == 'complete')
-	{
-		FixRects();
-	}
-	if(document.readyState === "complete")
-		ConsolePrint("document.readyState == 'complete'");
-}
+	console.log("document.readyState == "+document.readyState);
+	ConsolePrint("document.readyState == "+document.readyState);
 
-function FixRects()
-{
-	// GMail fix
-	ForEveryChild(document.documentElement, AnalyzeNode);
+	if (document.readyState === "complete")
+		ForEveryChild(document.documentElement, AnalyzeNode);
+		
+	// domOverflowElements.forEach(
+	// 	(o) => { o.checkIfOverflown(); }
+	// );
 
-	UpdateDOMRects("onreadystatechange");
+	// if(document.readyState === "complete")
+	// {
+	// 	console.log("Marking all available nodes...");
+	// 	ForEveryChild(document.documentElement, (n) => {n.seen = true; })
+	// }
+
+	// INFO: Not analyzed nodes are more commenly added after page load completion!
+	//if(document.readyState === "complete")
+		// CountAnalyzedNodes();
 }
 
 window.onwebkitfullscreenchange = function()
@@ -172,11 +186,32 @@ Document.prototype.createDocumentFragment = function() {
 	return fragment;
 };
 
-
-
+// DEBUGGING
+var analyzed_nodes = [], not_analyzed_nodes = [];
+function CountAnalyzedNodes(print_nodes=false){
+	var count = 0;
+	analyzed_nodes = [];
+	not_analyzed_nodes = [];
+	ForEveryChild(document.documentElement, (n) => {
+		count++;
+		if(n.analyzed)
+			analyzed_nodes.push(n);
+		else
+		{
+			not_analyzed_nodes.push(n);
+			if(print_nodes)
+				console.log(n);
+		}
+	});
+	ConsolePrint("Found "+analyzed_nodes.length+" analyzed and "+not_analyzed_nodes.length+" not analyzed of "+count+" nodes"
+		+" | percentage not analyzed: "+not_analyzed_nodes.length/count*100+"%");
+}
 
 function AnalyzeNode(node)
 {
+	// DEBUG
+	node.analyzed = true;
+
 	if( (node.nodeType == 1 || node.nodeType > 8) && (node.hasAttribute && !node.hasAttribute("nodeType")) && (node !== window)) // 1 == ELEMENT_NODE
 	{
 
@@ -369,18 +404,9 @@ function MutationObserverInit()
 		  	mutations.forEach(
 		  		function(mutation)
 		  		{
-					// TODO: Refactoring:
-					// When attributes changed:
-					// 		- Fetch corresponding DOMNode object at the beginning, if it exists
-					// 		- Pipe attribute type to object and get corresponding setter, if it exists
-					// 		- Call setter with given (updated) data
-					// Recognition of needed rect updates:
-					// 		- As before
-					// Adding & removal of nodes:
-					// 		- Try to access existing DOMNode object, first
 
 					if(debug)
-					console.log(mutation.type, "\t", mutation.attributeName, "\t", mutation.oldValue, "\t", mutation.target);
+						console.log(mutation.type, "\t", mutation.attributeName, "\t", mutation.oldValue, "\t", mutation.target);
 					
 					var working_time_start = Date.now();
 
@@ -397,28 +423,32 @@ function MutationObserverInit()
 		  					attr = mutation.attributeName;
 
 							// ### FIXED HIERARCHY HANDLING ###
-							// 1.) Cascading copy of current childFixedId for whole subtree
-							// 2.) Update of fixObj in each DOM object in this subtree
+							// Created FixedElement adds attribute childFixedId with its id as value to all
+							// its direct child nodes. Rest of the tree cascade down by using MutationObserver
+							// as follows:
+							// 1.) Set equivalently valued childFixedId attribute in each direct child node
+							// 2.) Check if corresponding domObj exists and add fixObj with childFixedId as id
 							if(attr === "childfixedid")
 							{
 								var id = node.getAttribute(attr);
 
 								// Set childFixedId for each child of altered node
-								// Works also with fixObj === undefined
-								var fixObj = GetFixedElementById(id);
 
 								node.childNodes.forEach((child) => {
 									// Extend node by given attribute
 									if(typeof(child.setAttribute) === "function")
 										child.setAttribute("childFixedId", id);
-										// Update fixObj in DOMObject
-										var domObj = GetCorrespondingDOMObject(child);
-										if(domObj !== undefined)
-											domObj.setFixObj(fixObj);	// fixObj may be undefined
 								});
+								
+								// Update fixObj in DOMObject
+								var fixObj = GetFixedElementById(id);
+								var domObj = GetCorrespondingDOMObject(node);
+								if(domObj !== undefined)
+									domObj.setFixObj(fixObj);	// fixObj may be undefined
 							}
 
-
+							if(attr === "scrollWidth" || attr === "scrollHeight")
+								console.log("### Detected changes in attr "+attr+" ###");
 
 							// ### OVERFLOW HIERARCHY HANDLING ###
 							// Set childrens' overflowIds when node gets tagged as part of overflow subtree 
@@ -429,15 +459,12 @@ function MutationObserverInit()
 								var skip_subtree = false;
 								if(domObj !== undefined)
 								{
-								// id of null or -1 will reset overflow object in domObj
+									// id of null or -1 will reset overflow object in domObj
 									domObj.setOverflowViaId(id);
 
 									if(domObj.Class === "DOMOverflowElement")
 										skip_subtree = true;
 								}
-								// TODO: This node should automatically get an overflowId (on Overflow test site), but it doesn't --> DocFrag!
-								// if(node.className === "scroll-wrapper scrollbar-inner")
-								// 	console.log("overflowId changed to: "+id);
 
 								if(!skip_subtree)
 								{
@@ -446,11 +473,7 @@ function MutationObserverInit()
 										var child = node.childNodes[i];	
 
 										if(child === undefined || typeof(child.setAttribute) !== "function")
-										{			
-											// console.log(i+"/"+n+": Skipped.");
 											continue;
-										}
-										// console.log(i+"/"+n+": "+child.className);
 
 										if(id !== null)
 											child.setAttribute("overflowId", id);
@@ -458,7 +481,7 @@ function MutationObserverInit()
 											child.removeAttribute("overflowid");	// TODO: Search for hierachically higher overflows!
 									}
 								}
-							}
+						}
 
 
 							
@@ -493,7 +516,15 @@ function MutationObserverInit()
 						
 							if(attr == 'class')
 							{
-								// Update (if it exists) DOM object's rects if node's class changed
+								// Node might get fixed or un-fixed if class changes
+								if(typeof(node.getAttribute) === "function" && 
+									window.getComputedStyle(node, null).getPropertyValue("position") === "fixed")
+								{
+									AddFixedElement(node);
+								}
+								// TODO: Remove corresponding fixed element if node gets unfixed
+
+								// Update (if existant) DOM object's rects if node's class changed
 								var domObj = GetCorrespondingDOMObject(node);
 								if(domObj !== undefined)
 									domObj.updateRects();
@@ -586,11 +617,20 @@ function MutationObserverInit()
 							}
 
 							// If parent is contained in overflow element, then child will also be
-							if(parent !== undefined && typeof(parent.getAttribute) === "function" && typeof(node.setAttribute) === "function")
+							if(parent !== undefined && typeof(parent.getAttribute) === "function" 
+								&& typeof(node.setAttribute) === "function")
 							{
-								var overflowId = parent.getAttribute("overflowid");
-								if(overflowId !== null)
-									node.setAttribute("overflowid", overflowId);
+								var domObj = GetCorrespondingDOMObject(parent);
+								// If parent is overflow element, use its id instead
+								if(domObj !== undefined && domObj.Class === "DOMOverflowElement")
+									node.setAttribute("overflowid", domObj.getId());
+								else
+								{
+									var overflowId = parent.getAttribute("overflowid");
+									if(overflowId !== null)
+										node.setAttribute("overflowid", overflowId);
+							
+								}
 							}
 
 			  				AnalyzeNode(node);

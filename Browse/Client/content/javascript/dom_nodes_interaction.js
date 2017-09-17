@@ -36,7 +36,17 @@ DOMTextInput.prototype.inputText = function(text, submit){
 	this.setText(text);
 
 	if(!submit)
-		return {'command': "Success"};
+		if(this.rects.length > 0)
+		{
+			var rect = this.getRects()[0];
+			var response = {  
+						'command' : "EmulateMouseClick",
+						'x': rect[1] + (rect[3]-rect[1])/2, 
+						'y': rect[0] + (rect[2]-rect[0])/2
+			};
+			ConsolePrint("Returning rect's center: "+response.x+", "+response.y);
+			return response;
+		}
 
 	// Used for Enter-Button emulation, when submitting text
 	if(this.rects.length > 0)

@@ -241,6 +241,7 @@ function AdjustRectToZoom(rect)
 	return output;
 }
 
+// TODO: move to geometry_helpers.js or something like that
 function IsRectContained(rect, container)
 {
     if(rect.width === 0 || rect.height === 0)

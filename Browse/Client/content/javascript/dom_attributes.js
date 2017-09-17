@@ -37,6 +37,9 @@ function SendAttributeChangesToCEF(attrStr, domObj)
 
     if(typeof(domObj.isCppReady) !== "function" || !domObj.isCppReady())
         return "Node not yet ready on C++ side!";
+
+    if(domObj.getCefHidden())
+        return "Given domObj with id: "+domObj.getId()+" & type: "+domObj.getType()+" is CefHidden!";
     
     var attrCode = GetAttributeCode(attrStr);
     if(attrCode === undefined)
@@ -53,7 +56,7 @@ function SendAttributeChangesToCEF(attrStr, domObj)
 
     ConsolePrint(msg);
     // console.log("AttrChanges: "+msg);
-    return msg;
+    return "Success, sent: "+msg;
 }
 
 
