@@ -2,7 +2,7 @@
 // Distributed under the Apache License, Version 2.0.
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
-// Structure to hold a social record like a Facebook visit.
+// Structure to hold a social record, for example a Facebook visit.
 
 #ifndef SOCIALRECORD_H_
 #define SOCIALRECORD_H_
@@ -47,6 +47,12 @@ public:
 	// Virtual destructor
 	virtual ~SocialRecord();
 
+	// Start recrod
+	void Start();
+
+	// End record
+	void End();
+
 	// Add time in foreground
 	void AddTimeInForeground(float time);
 
@@ -61,9 +67,6 @@ public:
 
 	// Add subpage
 	void AddSubpage();
-
-	// End record
-	void End();
 
 	// Convert to JSON for storing in database
 	nlohmann::json ToJSON() const;
@@ -85,6 +88,7 @@ private:
 	const std::string DATE_FORMAT = "%d-%m-%Y %H-%M-%S";
 	const SocialPlatform _platform = SocialPlatform::YouTube; // TODO change back to unkown
 	const std::string _URL; // URL where this was started this
+	bool _writeable = false;
 	std::chrono::time_point<std::chrono::system_clock> _startTime;
 	std::chrono::time_point<std::chrono::system_clock> _endTime;
 	std::string _startDate;

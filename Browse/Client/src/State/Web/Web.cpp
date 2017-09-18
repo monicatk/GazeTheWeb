@@ -15,7 +15,7 @@
 // Include singleton for mailing to JavaScript
 #include "src/Singletons/JSMailer.h"
 
-Web::Web(Master* pMaster, Mediator* pCefMediator) : State(pMaster)
+Web::Web(Master* pMaster, Mediator* pCefMediator, bool dataTransfer) : State(pMaster), _dataTransfer(dataTransfer)
 {
     // Save member
     _pCefMediator = pCefMediator;
@@ -92,7 +92,7 @@ int Web::AddTab(std::string URL, bool show)
 
     // Create tab
     std::unique_ptr<Tab> upTab =
-        std::unique_ptr<Tab>(new Tab(_pMaster, _pCefMediator, this, URL));
+        std::unique_ptr<Tab>(new Tab(_pMaster, _pCefMediator, this, URL, _dataTransfer));
 
     // Put tab in map
     _tabs.emplace(id, std::move(upTab));
@@ -358,6 +358,18 @@ void Web::SetWebPanelMode(WebPanelMode mode)
 		eyegui::setContentOfTextBlock(_pWebLayout, "no_data_transfer_info", _pMaster->FetchLocalization("web:no_data_transfer_info"));
 		break;
 	}
+}
+
+void Web::SetDataTransfer(bool active)
+{
+	_dataTransfer = active;
+
+	// Tell all tabs
+	for (auto& rTabEntry : _tabs)
+	{
+		rTabEntry.second->SetDataTransfer(_dataTransfer);
+	}
+
 }
 
 StateType Web::Update(float tpf, const std::shared_ptr<const Input> spInput)

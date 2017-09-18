@@ -325,7 +325,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     // ### STATES ###
 
     // Create states
-    _upWeb = std::unique_ptr<Web>(new Web(this, _pCefMediator));
+    _upWeb = std::unique_ptr<Web>(new Web(this, _pCefMediator, _dataTransfer));
     _upSettings = std::unique_ptr<Settings>(new Settings(this));
 
     // Set first state
@@ -497,8 +497,8 @@ void  Master::SetDataTransfer(bool dataTransfer)
 		// FirebaseMailer
 		FirebaseMailer::Instance().Continue();
 
-		// SocialRecords
-		// TODO: allow new records -> pipe into Tab
+		// Tabs (doing social records etc.)
+		_upWeb->SetDataTransfer(true);
 
 		// Visualization
 		_upWeb->SetWebPanelMode(WebPanelMode::STANDARD);
@@ -517,8 +517,8 @@ void  Master::SetDataTransfer(bool dataTransfer)
 		// FirebaseMailer
 		FirebaseMailer::Instance().Pause();
 
-		// SocialRecords
-		// TODO: clear current list and prohibit new ones -> pipe into Tab
+		// Tabs (doing no social records etc.)
+		_upWeb->SetDataTransfer(false);
 
 		// Visualization
 		_upWeb->SetWebPanelMode(WebPanelMode::NO_DATA_TRANSFER);

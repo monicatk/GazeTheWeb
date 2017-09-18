@@ -32,7 +32,7 @@ class Web : public State, public WebTabInterface
 public:
 
     // Constructor
-    Web(Master* pMaster, Mediator* pCefMediator);
+    Web(Master* pMaster, Mediator* pCefMediator, bool dataTransfer);
 
     // Destructor
     virtual ~Web();
@@ -69,6 +69,9 @@ public:
 
 	// Web panel mode
 	void SetWebPanelMode(WebPanelMode mode);
+
+	// Pause data transfer
+	void SetDataTransfer(bool active);
 
     // #############
     // ### STATE ###
@@ -233,6 +236,9 @@ private:
 
 	// URL input object
 	std::unique_ptr<URLInput> _upURLInput;
+
+	// Data transfer
+	bool _dataTransfer = false;
 
 	// Regex for URL validation
 	std::unique_ptr<std::regex> _upURLregex;

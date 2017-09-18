@@ -374,10 +374,13 @@ void Tab::SetLoadingStatus(int64 frameID, bool isMain, bool isLoading)
             }
 
 			// Add page to history after loading
-			HistoryManager::Page page;
-			page.URL = _url;
-			page.title = _title;
-			_pWeb->PushAddPageToHistoryJob(this, page);
+			if (_dataTransfer)
+			{
+				HistoryManager::Page page;
+				page.URL = _url;
+				page.title = _title;
+				_pWeb->PushAddPageToHistoryJob(this, page);
+			}
         }
 	}
 }

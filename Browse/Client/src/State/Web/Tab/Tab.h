@@ -55,7 +55,7 @@ public:
 	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Constructor
-    Tab(Master* pMaster, Mediator* pCefMediator, WebTabInterface* pWeb, std::string url);
+    Tab(Master* pMaster, Mediator* pCefMediator, WebTabInterface* pWeb, std::string url, bool dataTransfer);
 
     // Destructor
     virtual ~Tab();
@@ -96,6 +96,9 @@ public:
 
 	// Get last time per frame
 	float GetLastTimePerFrame() const { return _lastTimePerFrame; }
+
+	// Pause data transfer
+	void SetDataTransfer(bool active);
 
     // #################################
     // ### TAB INTERACTIVE INTERFACE ###
@@ -476,6 +479,12 @@ private:
     // Set pipeline activity (indicates whether there is some pipeline to work on)
     void SetPipelineActivity(bool active);
 
+	// Start social record
+	void StartSocialRecord(SocialPlatform platform);
+
+	// End social record and send to database
+	void EndSocialRecord();
+
     // Method to update and pipe accent color to eyeGUI
     void UpdateAccentColor(float tpf);
 
@@ -633,6 +642,9 @@ private:
 	// Social record helpers
 	std::string _prevURL = ""; // for determining URL change
 	double _prevScrolling = 0; // for determining scrolling delta
+
+	// Data transfer (indicates whether social record is allowed or not, also controls whether history is filled or not)
+	bool _dataTransfer = false;
 
 };
 

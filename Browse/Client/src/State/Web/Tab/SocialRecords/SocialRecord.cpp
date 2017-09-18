@@ -10,55 +10,65 @@
 
 using json = nlohmann::json;
 
-SocialRecord::SocialRecord(std::string URL) : _URL(URL)
-{
-	// Store start date
-	_startDate = GetDate();
+SocialRecord::SocialRecord(std::string URL) : _URL(URL) {}
 
-	// Store start time for duration estimation
-	_startTime = std::chrono::system_clock::now();
-}
-
-SocialRecord::SocialRecord(std::string URL, SocialPlatform platform) : _URL(URL), _platform(platform)
-{
-	// Store start date
-	_startDate = GetDate();
-}
+SocialRecord::SocialRecord(std::string URL, SocialPlatform platform) : _URL(URL), _platform(platform) {}
 
 SocialRecord::~SocialRecord() {}
 
-void SocialRecord::AddTimeInForeground(float time)
+void SocialRecord::Start()
 {
-	_durationInForeground += time;
-}
+	if (_startDate.empty()) // only allow once
+	{
+		// Store start date
+		_startDate = GetDate();
 
-void SocialRecord::AddTimeActiveUser(float time)
-{
-	_durationUserActive += time;
-}
+		// Store start time for duration estimation
+		_startTime = std::chrono::system_clock::now();
 
-void SocialRecord::AddScrollingDelta(float delta)
-{
-	_scrollAmount += delta;
-}
-
-void SocialRecord::AddClick()
-{
-	_clickCount++;
-}
-
-void SocialRecord::AddSubpage()
-{
-	_subpageCount++;
+		// Set to writeable
+		_writeable = true;
+	}
 }
 
 void SocialRecord::End()
 {
-	// Store end date
-	_endDate = GetDate();
+	if (!_startDate.empty() && _endDate.empty()) // only allow once and after start was called 
+	{
+		// Store end date
+		_endDate = GetDate();
 
-	// Store end time for duration estimation
-	_endTime = std::chrono::system_clock::now();
+		// Store end time for duration estimation
+		_endTime = std::chrono::system_clock::now();
+
+		// Set to not writeable
+		_writeable = false;
+	}
+}
+
+void SocialRecord::AddTimeInForeground(float time)
+{
+	if (_writeable) { _durationInForeground += time; }
+}
+
+void SocialRecord::AddTimeActiveUser(float time)
+{
+	if (_writeable) { _durationUserActive += time; }
+}
+
+void SocialRecord::AddScrollingDelta(float delta)
+{
+	if (_writeable) { _scrollAmount += delta; }
+}
+
+void SocialRecord::AddClick()
+{
+	if (_writeable) { _clickCount++; }
+}
+
+void SocialRecord::AddSubpage()
+{
+	if (_writeable) { _subpageCount++; }
 }
 
 nlohmann::json SocialRecord::ToJSON() const

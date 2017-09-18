@@ -16,7 +16,8 @@ Tab::Tab(
 	Master* pMaster,
 	Mediator* pCefMediator,
 	WebTabInterface* pWeb,
-	std::string url)
+	std::string url,
+	bool dataTransfer) : _dataTransfer(dataTransfer)
 {
 	// Fill members
 	_pMaster = pMaster;
@@ -102,6 +103,9 @@ Tab::Tab(
 
 Tab::~Tab()
 {
+	// Store current social record if available
+	EndSocialRecord();
+
 	// Delete DOM Nodes and triggers (right now only DOMTriggers) before removing layout
 	ClearDOMNodes();
 
@@ -443,67 +447,48 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		// ### UPDATE SOCIAL RECORD ###
 		// ############################
 
-		// Update ongoing social record
-		if (_spSocialRecord != nullptr)
+		if (_dataTransfer) // only proceed when data transfer is allowed
 		{
-			// Update social record
-			_spSocialRecord->AddTimeInForeground(tpf); // this update is only called when in foreground
-			_spSocialRecord->AddTimeActiveUser(tpf); // TODO: ask whether user is really looking
-			_spSocialRecord->AddScrollingDelta(glm::abs(_scrollingOffsetY - _prevScrolling));
-			
-			// Prepare next update
-			_prevScrolling = _scrollingOffsetY; // scrolling delta helper
-		}
-
-		// Check for URL change and whether to start new social record
-		if (_prevURL != _url)
-		{
-			_prevURL = _url; // store new URL
-			auto platform = SocialRecord::ClassifyURL(_url); // classify url
-
-			// Decide how to proceed after URL change
-			if (_spSocialRecord == nullptr) // no current record going on
+			// Update ongoing social record
+			if (_spSocialRecord != nullptr)
 			{
-				// Start new record
-				if (platform != SocialPlatform::Unknown)
-				{
-					_spSocialRecord = std::shared_ptr<SocialRecord>(new SocialRecord(_url));
-				}
-				else
-				{
-					_spSocialRecord = nullptr;
-				}
+				// Update social record
+				_spSocialRecord->AddTimeInForeground(tpf); // this update is only called when in foreground
+				_spSocialRecord->AddTimeActiveUser(tpf); // TODO: ask whether user is really looking
+				_spSocialRecord->AddScrollingDelta(glm::abs(_scrollingOffsetY - _prevScrolling));
+
+				// Prepare next update
+				_prevScrolling = _scrollingOffsetY; // scrolling delta helper
 			}
-			else if (_spSocialRecord->GetPlatform() != platform) // record for different platform going on
-			{
-				// Store current record
-				_spSocialRecord->End(); // end current record
-				auto record = _spSocialRecord->ToJSON(); // convert record to JSON
-				std::promise<int> sessionPromise; auto sessionFuture = sessionPromise.get_future(); // prepare to get value
-				FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::SOCIAL_RECORD_YOUTUBE_COUNT, 1, &sessionPromise); // adds one to the count
-				std::string sessionString = "session " + std::to_string(sessionFuture.get() - 1); // start session indices at zero (may block thread some time but simpler than async call)
-				sessionString = std::string((unsigned int)glm::max(setup::SOCIAL_RECORD_SESSION_DIGIT_COUNT - (int)sessionString.length(), 0), '0') + sessionString; // preceeding zeros for string
-				FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::SOCIAL_RECORD_YOUTUBE, record, sessionString); // send JSON to database
 
-				// Start new record
-				if (platform != SocialPlatform::Unknown)
-				{
-					_spSocialRecord = std::shared_ptr<SocialRecord>(new SocialRecord(_url));
-				}
-				else
-				{
-					_spSocialRecord = nullptr;
-				}
-			}
-			else // recording of platform continues
+			// Check for URL change and whether to start new social record
+			if (_prevURL != _url)
 			{
-				_spSocialRecord->AddSubpage();
+				// Classify URL, which platform was entered?
+				auto platform = SocialRecord::ClassifyURL(_url);
+
+				// Decide how to proceed after URL change
+				if (_spSocialRecord == nullptr) // no current record going on
+				{
+					StartSocialRecord(platform);
+				}
+				else if (_spSocialRecord->GetPlatform() != platform) // record for different platform going on
+				{
+					// Store current record
+					EndSocialRecord();
+
+					// Start new record
+					StartSocialRecord(platform);
+				}
+				else // recording of platform continues
+				{
+					_spSocialRecord->AddSubpage(); // seems that a subpage was opened
+				}
+
+				// Update previous URL
+				_prevURL = _url; // store new URL
 			}
 		}
-
-		// TODO:
-		// - persist social record also at destruction
-		// - continue implementing SocialRecord inclusive specializations
 	}
 }
 
@@ -632,6 +617,16 @@ void Tab::PushBackPointingEvaluationPipeline(PointingApproach approach)
 	PushBackPipeline(std::unique_ptr<PointingEvaluationPipeline>(new PointingEvaluationPipeline(this, approach)));
 }
 
+void Tab::SetDataTransfer(bool active)
+{
+	_dataTransfer = active;
+	if (_dataTransfer == false)
+	{
+		// Abort current social record
+		_spSocialRecord = nullptr;
+	}
+}
+
 void Tab::SetPipelineActivity(bool active)
 {
 	if (active)
@@ -661,6 +656,46 @@ void Tab::SetPipelineActivity(bool active)
 
 		// Activate scrolling overlay
 		eyegui::setVisibilityOfLayout(_pScrollingOverlayLayout, true, true, true);
+	}
+}
+
+void Tab::StartSocialRecord(SocialPlatform platform)
+{
+	// End current social record if necessary
+	if (_spSocialRecord != nullptr)
+	{
+		EndSocialRecord();
+	}
+
+	// Start new record
+	if (platform != SocialPlatform::Unknown)
+	{
+		_spSocialRecord = std::shared_ptr<SocialRecord>(new SocialRecord(_url));
+		_spSocialRecord->Start();
+	}
+	else
+	{
+		_spSocialRecord = nullptr;
+	}
+}
+
+void Tab::EndSocialRecord()
+{
+	if (_spSocialRecord != nullptr)
+	{
+		// Tell record to end
+		_spSocialRecord->End();
+
+		// Store in database
+		auto record = _spSocialRecord->ToJSON(); // convert record to JSON
+		std::promise<int> sessionPromise; auto sessionFuture = sessionPromise.get_future(); // prepare to get value
+		FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::SOCIAL_RECORD_YOUTUBE_COUNT, 1, &sessionPromise); // adds one to the count
+		std::string sessionString = "session " + std::to_string(sessionFuture.get() - 1); // start session indices at zero (blocks thread until get was executed but simpler than async call)
+		sessionString = std::string((unsigned int)glm::max(setup::SOCIAL_RECORD_SESSION_DIGIT_COUNT - (int)sessionString.length(), 0), '0') + sessionString; // preceeding zeros for string
+		FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::SOCIAL_RECORD_YOUTUBE, record, sessionString); // send JSON to database
+
+		// Make record null
+		_spSocialRecord = nullptr;
 	}
 }
 
