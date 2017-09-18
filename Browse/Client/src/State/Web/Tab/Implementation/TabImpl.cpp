@@ -452,9 +452,12 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 			// Update ongoing social record
 			if (_spSocialRecord != nullptr)
 			{
+				// Check for active user
+				bool userActive = spInput->gazeEmulated || (spInput->gazeAge < setup::MAX_AGE_OF_USED_GAZE); // taken partly from Master.cpp
+
 				// Update social record
 				_spSocialRecord->AddTimeInForeground(tpf); // this update is only called when in foreground
-				_spSocialRecord->AddTimeActiveUser(tpf); // TODO: ask whether user is really looking
+				if (userActive) { _spSocialRecord->AddTimeActiveUser(tpf); }// add on duration while user is active
 				_spSocialRecord->AddScrollingDelta(glm::abs(_scrollingOffsetY - _prevScrolling));
 
 				// Prepare next update

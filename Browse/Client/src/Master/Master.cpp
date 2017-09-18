@@ -417,6 +417,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
 	// ### FirebaseMailer ###
 	FirebaseMailer::Instance().PushBack_Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword());
+	FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_APPLICATION_STARTS, 1); // count application starts (would miss some when Firebase connection fails for some reason)
 
     // ### OTHER ###
 

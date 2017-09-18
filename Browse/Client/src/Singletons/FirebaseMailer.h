@@ -18,7 +18,7 @@
 #include <future>
 
 // Available database keys
-enum class FirebaseIntegerKey	{ SOCIAL_RECORD_YOUTUBE_COUNT };
+enum class FirebaseIntegerKey	{ GENERAL_APPLICATION_STARTS, SOCIAL_RECORD_YOUTUBE_COUNT };
 enum class FirebaseStringKey	{ TEST_STRING };
 enum class FirebaseJSONKey		{ SOCIAL_RECORD_YOUTUBE };
 
@@ -34,8 +34,10 @@ template<> std::string FirebaseAddress<FirebaseIntegerKey>(FirebaseIntegerKey ke
 {
 	switch (key)
 	{
+	case FirebaseIntegerKey::GENERAL_APPLICATION_STARTS:
+		return "general/startups";
 	case FirebaseIntegerKey::SOCIAL_RECORD_YOUTUBE_COUNT:
-		return "youtube/count";
+		return "social/youtube/count";
 	default: return "";
 	}
 };
@@ -53,7 +55,7 @@ template<> std::string FirebaseAddress<FirebaseJSONKey>(FirebaseJSONKey key)
 	switch (key)
 	{
 	case FirebaseJSONKey::SOCIAL_RECORD_YOUTUBE:
-		return "youtube";
+		return "social/youtube";
 	default: return "";
 	}
 };
