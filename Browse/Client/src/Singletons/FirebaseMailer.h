@@ -18,7 +18,7 @@
 #include <future>
 
 // Available database keys
-enum class FirebaseIntegerKey	{ URL_INPUTS, MAX_BOOKMARK_COUNT, MAX_OPEN_TABS };
+enum class FirebaseIntegerKey	{ SOCIAL_RECORD_YOUTUBE_COUNT };
 enum class FirebaseStringKey	{ TEST_STRING };
 enum class FirebaseJSONKey		{ SOCIAL_RECORD_YOUTUBE };
 
@@ -34,12 +34,8 @@ template<> std::string FirebaseAddress<FirebaseIntegerKey>(FirebaseIntegerKey ke
 {
 	switch (key)
 	{
-	case FirebaseIntegerKey::URL_INPUTS:
-		return "urlInput";
-	case FirebaseIntegerKey::MAX_BOOKMARK_COUNT:
-		return "maxBookmarkCount";
-	case FirebaseIntegerKey::MAX_OPEN_TABS:
-		return "maxOpenTabs";
+	case FirebaseIntegerKey::SOCIAL_RECORD_YOUTUBE_COUNT:
+		return "youtube/count";
 	default: return "";
 	}
 };

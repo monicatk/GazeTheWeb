@@ -447,7 +447,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		if (_spSocialRecord != nullptr)
 		{
 			// Update social record
-			_spSocialRecord->AddTimeInForeground(tpf);
+			_spSocialRecord->AddTimeInForeground(tpf); // this update is only called when in foreground
 			_spSocialRecord->AddTimeActiveUser(tpf); // TODO: ask whether user is really looking
 			_spSocialRecord->AddScrollingDelta(glm::abs(_scrollingOffsetY - _prevScrolling));
 			
@@ -464,21 +464,28 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 			// Decide how to proceed after URL change
 			if (_spSocialRecord == nullptr) // no current record going on
 			{
-				// TODO: create new record corresponding to platform
-				if (platform != SocialPlatform::Unknown) { _spSocialRecord = std::shared_ptr<SocialRecord>(new SocialRecord(_url)); }
+				// Start new record
+				if (platform != SocialPlatform::Unknown)
+				{
+					_spSocialRecord = std::shared_ptr<SocialRecord>(new SocialRecord(_url));
+				}
+				else
+				{
+					_spSocialRecord = nullptr;
+				}
 			}
 			else if (_spSocialRecord->GetPlatform() != platform) // record for different platform going on
 			{
+				// Store current record
 				_spSocialRecord->End(); // end current record
-				// FirebaseMailer::Instance().PushBack_Get(FirebaseIntegerKey::) // TODO get session id for platform and move somehow to update loop so future can be filled by thread in parallel
-				
-				int session = 44;
-				std::string sessionString = std::to_string(session);
-				sessionString = std::string((unsigned int)glm::max(setup::SOCIAL_RECORD_SESSION_DIGIT_COUNT - (int)sessionString.length(), 0), '0') + sessionString;
-				auto record = _spSocialRecord->ToJSON();
-				FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::SOCIAL_RECORD_YOUTUBE, record, sessionString);
+				auto record = _spSocialRecord->ToJSON(); // convert record to JSON
+				std::promise<int> sessionPromise; auto sessionFuture = sessionPromise.get_future(); // prepare to get value
+				FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::SOCIAL_RECORD_YOUTUBE_COUNT, 1, &sessionPromise); // adds one to the count
+				std::string sessionString = "session " + std::to_string(sessionFuture.get() - 1); // start session indices at zero (may block thread some time but simpler than async call)
+				sessionString = std::string((unsigned int)glm::max(setup::SOCIAL_RECORD_SESSION_DIGIT_COUNT - (int)sessionString.length(), 0), '0') + sessionString; // preceeding zeros for string
+				FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::SOCIAL_RECORD_YOUTUBE, record, sessionString); // send JSON to database
 
-				// TODO: create new record corresponding to platform
+				// Start new record
 				if (platform != SocialPlatform::Unknown)
 				{
 					_spSocialRecord = std::shared_ptr<SocialRecord>(new SocialRecord(_url));
@@ -494,7 +501,9 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 			}
 		}
 
-		// TODO: manage old records which are about to be sent to the database. make sure to finish these before shutdown!
+		// TODO:
+		// - persist social record also at destruction
+		// - continue implementing SocialRecord inclusive specializations
 	}
 }
 
