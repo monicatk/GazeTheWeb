@@ -17,18 +17,16 @@
 #include <condition_variable>
 #include <future>
 
-using json = nlohmann::json;
-
 // Available database keys
 enum class FirebaseIntegerKey	{ URL_INPUTS, MAX_BOOKMARK_COUNT, MAX_OPEN_TABS };
 enum class FirebaseStringKey	{ TEST_STRING };
-enum class FirebaseJSONKey		{ TEST_JSON };
+enum class FirebaseJSONKey		{ SOCIAL_RECORD_YOUTUBE };
 
 // Mapping from key to raw type
 template<typename Type> struct FirebaseValue;
 template<> struct FirebaseValue<FirebaseIntegerKey>	{ typedef int type; };
 template<> struct FirebaseValue<FirebaseStringKey>	{ typedef std::string type; };
-template<> struct FirebaseValue<FirebaseJSONKey>	{ typedef json type; };
+template<> struct FirebaseValue<FirebaseJSONKey>	{ typedef nlohmann::json type; };
 
 // Mapping from key to address
 template<typename T> static std::string FirebaseAddress(T key);
@@ -58,8 +56,8 @@ template<> std::string FirebaseAddress<FirebaseJSONKey>(FirebaseJSONKey key)
 {
 	switch (key)
 	{
-	case FirebaseJSONKey::TEST_JSON:
-		return "JSONString";
+	case FirebaseJSONKey::SOCIAL_RECORD_YOUTUBE:
+		return "youtube";
 	default: return "";
 	}
 };
@@ -73,7 +71,7 @@ private:
 	template<typename T>
 	static const std::string BuildFirebaseKey(T key, std::string uid)
 	{
-		return "users/" + uid + "/browse/" + FirebaseAddress<T>(key);
+		return "users/" + uid + "/" + FirebaseAddress<T>(key);
 	}
 
 public:
@@ -98,12 +96,12 @@ public:
 	void PushBack_Login		(std::string email, std::string password);
 	void PushBack_Transform	(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise = nullptr); // promise delivers future database value
 	void PushBack_Maximum	(FirebaseIntegerKey key, int value, std::promise<int>* pPromise = nullptr); // promise delivers future database value
-	void PushBack_Put		(FirebaseIntegerKey key, int value);
-	void PushBack_Put		(FirebaseStringKey key, std::string value);
-	void PushBack_Put		(FirebaseJSONKey key, json value);
+	void PushBack_Put		(FirebaseIntegerKey key, int value, std::string subpath = "");
+	void PushBack_Put		(FirebaseStringKey key, std::string value, std::string subpath = "");
+	void PushBack_Put		(FirebaseJSONKey key, nlohmann::json value, std::string subpath = "");
 	void PushBack_Get		(FirebaseIntegerKey key, std::promise<int>* pPromise);
 	void PushBack_Get		(FirebaseStringKey key, std::promise<std::string>* pPromise);
-	void PushBack_Get		(FirebaseJSONKey key, std::promise<json>* pPromise);
+	void PushBack_Get		(FirebaseJSONKey key, std::promise<nlohmann::json>* pPromise);
 
 private:
 
@@ -117,7 +115,7 @@ private:
 
 		// Simple put functionality. Replaces existing value if available
 		template<typename T>
-		void Put(T key, typename FirebaseValue<T>::type value); // delegates private put
+		void Put(T key, typename FirebaseValue<T>::type value, std::string subpath = ""); // delegates private put
 
 		// Get
 		template<typename T>
@@ -135,9 +133,9 @@ private:
 		struct DBEntry
 		{
 			DBEntry() {};
-			DBEntry(std::string ETag, json value) : ETag(ETag), value(value) {};
+			DBEntry(std::string ETag, nlohmann::json value) : ETag(ETag), value(value) {};
 			std::string ETag = "";
-			json value;
+			nlohmann::json value;
 		};
 
 		// Relogin via refresh token. Returns whether successful
@@ -145,7 +143,7 @@ private:
 
 		// Put single value in database. Uses ETag to check whether ok to put or working on outdated value. Return true if successful, otherwise do it another time, maybe with new value provided by this method
 		template<typename T> // TODO: here on could get rid of templates and just work on JSON objects
-		bool Put(T key, std::string ETag, typename FirebaseValue<T>::type value, std::string& rNewETag, typename FirebaseValue<T>::type& rNewValue); // fills newETag and newValue if ETag was outdated. Please try again with these values
+		bool Put(T key, std::string ETag, typename FirebaseValue<T>::type value, std::string& rNewETag, typename FirebaseValue<T>::type& rNewValue, std::string subpath = ""); // fills newETag and newValue if ETag was outdated. Please try again with these values
 
 		// Get of JSON structure by key. Returns empty structure if not available
 		DBEntry Get(std::string key);

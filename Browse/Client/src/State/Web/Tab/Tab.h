@@ -32,6 +32,7 @@
 #include "src/Input/Input.h"
 #include "src/Global.h"
 #include "src/State/Web/Tab/Pipelines/PointingEvaluationPipeline.h"
+#include "src/State/Web/Tab/SocialRecords/SocialRecord.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 #include <vector>
 #include <deque>
@@ -542,6 +543,9 @@ private:
     glm::vec4 _currentColorAccent = TAB_DEFAULT_COLOR_ACCENT;
     float _colorInterpolation = 1.f;
 
+	// Bool to indicate whether tab is active
+	bool _active = false;
+
     // Bool to indicate whether some pipeline is active
     bool _pipelineActive = false;
 
@@ -622,6 +626,14 @@ private:
 
 	// Last time per frame
 	float _lastTimePerFrame = 1.f; // initialize with something that is not zero, as may be used for divisions
+
+	// Active social record
+	std::shared_ptr<SocialRecord> _spSocialRecord = nullptr; // can be nullptr when currently not browsing a social page
+
+	// Social record helpers
+	std::string _prevURL = ""; // for determining URL change
+	double _prevScrolling = 0; // for determining scrolling delta
+
 };
 
 #endif // TAB_H_

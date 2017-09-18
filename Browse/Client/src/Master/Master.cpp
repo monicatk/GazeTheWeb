@@ -418,28 +418,6 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// ### FirebaseMailer ###
 	FirebaseMailer::Instance().PushBack_Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword());
 
-	// TODO testing
-	// LogInfo(FirebaseMailer::Instance().Get("name").second.dump());
-	FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::URL_INPUTS, 1); // add one URL input
-	FirebaseMailer::Instance().PushBack_Put(FirebaseIntegerKey::MAX_OPEN_TABS, 1337);
-	FirebaseMailer::Instance().PushBack_Put(FirebaseStringKey::TEST_STRING, "HALLOLE3");
-	FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::TEST_JSON,
-	{
-		{ "nopi", -2.141 },
-		{ "happy", false },
-		{ "name", "peter" },
-		{ "nothing", nullptr },
-		{ "answer",
-			{
-				{ "everything", 42 }
-			}
-		}
-	});
-	std::promise<std::string> testPromise;
-	auto testFuture = testPromise.get_future();
-	FirebaseMailer::Instance().PushBack_Get(FirebaseStringKey::TEST_STRING, &testPromise);
-	LogInfo("FUTURE: ", testFuture.get());
-
     // ### OTHER ###
 
 	// Maximize window if required
@@ -519,6 +497,9 @@ void  Master::SetDataTransfer(bool dataTransfer)
 		// FirebaseMailer
 		FirebaseMailer::Instance().Continue();
 
+		// SocialRecords
+		// TODO: allow new records -> pipe into Tab
+
 		// Visualization
 		_upWeb->SetWebPanelMode(WebPanelMode::STANDARD);
 		PushNotificationByKey("notification:data_transfer_continued", Type::NEUTRAL, true);
@@ -535,6 +516,9 @@ void  Master::SetDataTransfer(bool dataTransfer)
 
 		// FirebaseMailer
 		FirebaseMailer::Instance().Pause();
+
+		// SocialRecords
+		// TODO: clear current list and prohibit new ones -> pipe into Tab
 
 		// Visualization
 		_upWeb->SetWebPanelMode(WebPanelMode::NO_DATA_TRANSFER);
@@ -787,12 +771,6 @@ void Master::Loop()
         eyeGUIInput.gazeX = (int)spInput->gazeX;
         eyeGUIInput.gazeY = (int)spInput->gazeY;
 		eyeGUIInput.gazeUsed = spInput->gazeUponGUI;
-
-		// TODO: Testing
-		if (eyeGUIInput.instantInteraction)
-		{
-			FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::URL_INPUTS, 1); // add one URL input
-		}
 
         // Update super GUI, including pause button
 		eyeGUIInput = eyegui::updateGUI(_pSuperGUI, tpf, eyeGUIInput); // update super GUI with pause button

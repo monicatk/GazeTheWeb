@@ -10,6 +10,8 @@
 #include <sstream>
 #include <chrono>
 
+using json = nlohmann::json;
+
 // ########################
 // ### TEMPLATE HELPERS ###
 // ########################
@@ -167,7 +169,7 @@ bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string pas
 }
 
 template<typename T>
-void FirebaseMailer::FirebaseInterface::Put(T key, typename FirebaseValue<T>::type value)
+void FirebaseMailer::FirebaseInterface::Put(T key, typename FirebaseValue<T>::type value, std::string subpath)
 {
 	// Call own get method to get the value if already set
 	const DBEntry entry = this->Get(BuildFirebaseKey(key, _uid)); // here we are only interesed in the ETag
@@ -186,7 +188,7 @@ void FirebaseMailer::FirebaseInterface::Put(T key, typename FirebaseValue<T>::ty
 		// Try to put on database
 		newETag = "";
 		newValue = fallback<typename FirebaseValue<T>::type>();
-		success = Put(key, ETag, value, newETag, newValue);
+		success = Put(key, ETag, value, newETag, newValue, subpath);
 
 		// If empty new ETag, just quit this (either success or database just does not like us)
 		if (newETag.empty()) { break; }
@@ -311,7 +313,7 @@ bool FirebaseMailer::FirebaseInterface::Relogin()
 }
 
 template<typename T>
-bool FirebaseMailer::FirebaseInterface::Put(T key, std::string ETag, typename FirebaseValue<T>::type value, std::string& rNewETag, typename FirebaseValue<T>::type& rNewValue)
+bool FirebaseMailer::FirebaseInterface::Put(T key, std::string ETag, typename FirebaseValue<T>::type value, std::string& rNewETag, typename FirebaseValue<T>::type& rNewValue, std::string subpath)
 {
 	bool success = false;
 	rNewETag = "";
@@ -337,7 +339,7 @@ bool FirebaseMailer::FirebaseInterface::Put(T key, std::string ETag, typename Fi
 			// Request URL
 			std::string requestURL =
 				_URL + "/"
-				+ BuildFirebaseKey(key, _uid)
+				+ BuildFirebaseKey(key, _uid) + "/" + subpath
 				+ ".json"
 				+ "?auth=" + _idToken;
 
@@ -383,7 +385,7 @@ bool FirebaseMailer::FirebaseInterface::Put(T key, std::string ETag, typename Fi
 						answerBodyBuffer.clear();
 						requestURL =
 							_URL + "/"
-							+ BuildFirebaseKey(key, _uid)
+							+ BuildFirebaseKey(key, _uid) + "/" + subpath
 							+ ".json"
 							+ "?auth=" + _idToken;
 						curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of new request
@@ -622,30 +624,30 @@ void FirebaseMailer::PushBack_Maximum(FirebaseIntegerKey key, int value, std::pr
 	})));
 }
 
-void FirebaseMailer::PushBack_Put(FirebaseIntegerKey key, int value)
+void FirebaseMailer::PushBack_Put(FirebaseIntegerKey key, int value, std::string subpath)
 {
 	// Add command to queue, take parameters as copy
 	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
-		rInterface.Put(key, value);
+		rInterface.Put(key, value, subpath);
 	})));
 }
 
-void FirebaseMailer::PushBack_Put(FirebaseStringKey key, std::string value)
+void FirebaseMailer::PushBack_Put(FirebaseStringKey key, std::string value, std::string subpath)
 {
 	// Add command to queue, take parameters as copy
 	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
-		rInterface.Put(key, value);
+		rInterface.Put(key, value, subpath);
 	})));
 }
 
-void FirebaseMailer::PushBack_Put(FirebaseJSONKey key, json value)
+void FirebaseMailer::PushBack_Put(FirebaseJSONKey key, json value, std::string subpath)
 {
 	// Add command to queue, take parameters as copy
 	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
-		rInterface.Put(key, value);
+		rInterface.Put(key, value, subpath);
 	})));
 }
 

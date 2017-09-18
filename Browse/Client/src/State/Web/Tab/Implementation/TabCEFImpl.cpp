@@ -10,8 +10,8 @@
 #include "src/State/Web/Managers/HistoryManager.h"
 #include "src/State/Web/Tab/Pipelines/JSDialogPipeline.h"
 #include "src/Singletons/LabStreamMailer.h"
-#include <algorithm>
 #include "src/CEF/Mediator.h"
+#include <algorithm>
 
 #define SendRenderMessage [this](CefRefPtr<CefProcessMessage> msg) { return _pCefMediator->SendProcessMessageToRenderer(msg, this); }
 
@@ -382,9 +382,7 @@ void Tab::SetLoadingStatus(int64 frameID, bool isMain, bool isLoading)
 	}
 }
 
-
 void Tab::RequestJSDialog(JavaScriptDialogType type, std::string message)
 {
 	this->PushBackPipeline(std::unique_ptr<Pipeline>(new JSDialogPipeline(this, type, message)));
 }
-

@@ -9,6 +9,7 @@
 #include "src/Setup.h"
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
+#include "src/Singletons/FirebaseMailer.h"
 #include <algorithm>
 
 Tab::Tab(
@@ -113,6 +114,8 @@ Tab::~Tab()
 	_pMaster->RemoveLayout(_pOverlayLayout);
 	_pMaster->RemoveLayout(_pScrollingOverlayLayout);
     _pMaster->RemoveLayout(_pDebugLayout);
+
+	// TODO: end current social record and wait for all pending to be processed
 }
 
 void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
@@ -435,6 +438,63 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		{
 			pTrigger->Update(tpf, spTabInput);
 		}
+
+		// ############################
+		// ### UPDATE SOCIAL RECORD ###
+		// ############################
+
+		// Update ongoing social record
+		if (_spSocialRecord != nullptr)
+		{
+			// Update social record
+			_spSocialRecord->AddTimeInForeground(tpf);
+			_spSocialRecord->AddTimeActiveUser(tpf); // TODO: ask whether user is really looking
+			_spSocialRecord->AddScrollingDelta(glm::abs(_scrollingOffsetY - _prevScrolling));
+			
+			// Prepare next update
+			_prevScrolling = _scrollingOffsetY; // scrolling delta helper
+		}
+
+		// Check for URL change and whether to start new social record
+		if (_prevURL != _url)
+		{
+			_prevURL = _url; // store new URL
+			auto platform = SocialRecord::ClassifyURL(_url); // classify url
+
+			// Decide how to proceed after URL change
+			if (_spSocialRecord == nullptr) // no current record going on
+			{
+				// TODO: create new record corresponding to platform
+				if (platform != SocialPlatform::Unknown) { _spSocialRecord = std::shared_ptr<SocialRecord>(new SocialRecord(_url)); }
+			}
+			else if (_spSocialRecord->GetPlatform() != platform) // record for different platform going on
+			{
+				_spSocialRecord->End(); // end current record
+				// FirebaseMailer::Instance().PushBack_Get(FirebaseIntegerKey::) // TODO get session id for platform and move somehow to update loop so future can be filled by thread in parallel
+				
+				int session = 44;
+				std::string sessionString = std::to_string(session);
+				sessionString = std::string((unsigned int)glm::max(setup::SOCIAL_RECORD_SESSION_DIGIT_COUNT - (int)sessionString.length(), 0), '0') + sessionString;
+				auto record = _spSocialRecord->ToJSON();
+				FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::SOCIAL_RECORD_YOUTUBE, record, sessionString);
+
+				// TODO: create new record corresponding to platform
+				if (platform != SocialPlatform::Unknown)
+				{
+					_spSocialRecord = std::shared_ptr<SocialRecord>(new SocialRecord(_url));
+				}
+				else
+				{
+					_spSocialRecord = nullptr;
+				}
+			}
+			else // recording of platform continues
+			{
+				_spSocialRecord->AddSubpage();
+			}
+		}
+
+		// TODO: manage old records which are about to be sent to the database. make sure to finish these before shutdown!
 	}
 }
 
@@ -484,6 +544,9 @@ void Tab::Activate()
 	// Screw color interpolation
 	_currentColorAccent = _targetColorAccent;
 	_colorInterpolation = 1.f;
+
+	// Remember being active
+	_active = true;
 }
 
 void Tab::Deactivate()
@@ -502,6 +565,9 @@ void Tab::Deactivate()
 
 	// Abort pipeline, which also hides GUI for manual abortion
 	AbortAndClearPipelines();
+
+	// Remember being not active
+	_active = false;
 }
 
 void Tab::OpenURL(std::string URL)
@@ -518,6 +584,7 @@ void Tab::OpenURL(std::string URL)
 	// Reset scrolling
 	_scrollingOffsetX = 0.0;
 	_scrollingOffsetY = 0.0;
+	_prevScrolling = 0.0;
 }
 
 void Tab::AbortAndClearPipelines()
