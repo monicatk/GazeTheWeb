@@ -26,6 +26,8 @@ public:
 	// Function to classify current URL
 	static SocialPlatform ClassifyURL(std::string URL)
 	{
+		// TODO: clean up method, add more synoyms and more platforms
+
 		std::string shortURL = ShortenURL(URL);
 
 		std::string searchString = "youtube";
