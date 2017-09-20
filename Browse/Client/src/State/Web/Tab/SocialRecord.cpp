@@ -10,8 +10,6 @@
 
 using json = nlohmann::json;
 
-SocialRecord::SocialRecord(std::string URL) : _URL(URL) {}
-
 SocialRecord::SocialRecord(std::string URL, SocialPlatform platform) : _URL(URL), _platform(platform) {}
 
 SocialRecord::~SocialRecord() {}
@@ -46,6 +44,30 @@ void SocialRecord::End()
 	}
 }
 
+void SocialRecord::Persist()
+{
+	// Check whether it is ok to persist if it is an unknown social platform aka normal webpage
+	if (!setup::SOCIAL_RECORD_PERSIST_UNKNOWN && _platform == SocialPlatform::Unknown)
+	{
+		return;
+	}
+
+	// Convert record to JSON
+	auto record = ToJSON(); 
+
+	// Get keys of Firebase
+	FirebaseIntegerKey countKey;
+	FirebaseJSONKey recordKey;
+	std::tie(countKey, recordKey) = SocialFirebaseKeys.at(_platform);
+
+	// Persist
+	std::promise<int> sessionPromise; auto sessionFuture = sessionPromise.get_future(); // prepare to get value
+	FirebaseMailer::Instance().PushBack_Transform(countKey, 1, &sessionPromise); // adds one to the count
+	std::string sessionString = std::to_string(sessionFuture.get() - 1); // start session indices at zero (blocks thread until get was executed but simpler than async call)
+	sessionString = "session " + std::string((unsigned int)glm::max(setup::SOCIAL_RECORD_SESSION_DIGIT_COUNT - (int)sessionString.length(), 0), '0') + sessionString; // preceeding zeros for string
+	FirebaseMailer::Instance().PushBack_Put(recordKey, record, sessionString); // send JSON to database
+}
+
 void SocialRecord::AddTimeInForeground(float time)
 {
 	if (_writeable) { _durationInForeground += time; }
@@ -75,7 +97,8 @@ nlohmann::json SocialRecord::ToJSON() const
 {
 	// Return JSON structure
 	return {
-		{ "url", _URL },
+		{ "url", GetURL() },
+		{ "domain", GetDomain() },
 		{ "startDate", _startDate },
 		{ "endDate", _endDate },
 		{ "duration", std::chrono::duration<float>(_endTime-_startTime).count() },

@@ -981,6 +981,9 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				_pMaster->PushNotificationByKey("notification:calibration_failure", MasterNotificationInterface::Type::WARNING, false);
 			}
 
+			// Store event in database
+			FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_CALIBRATION_ATTEMPTS, 1);
+
 			// Hide layout after calibration
 			eyegui::setVisibilityOfLayout(_pMaster->_pSuperCalibrationLayout, false, false, true);
 		}

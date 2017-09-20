@@ -59,6 +59,7 @@ namespace setup
 	static const std::string	FIREBASE_API_KEY = "AIzaSyBoySYE4mQVhrtCB_1TbPsXa86W8_y35Ug"; // API key for our Firebase
 	static const std::string	FIREBASE_URL = "https://hellofirebase-2d544.firebaseio.com"; // URL of our Firebase
 	static const int			SOCIAL_RECORD_SESSION_DIGIT_COUNT = 6;
+	static const bool			SOCIAL_RECORD_PERSIST_UNKNOWN = true;
 
 	// Other
 	static const bool	ENABLE_WEBGL = false; // only on Windows

@@ -32,7 +32,6 @@
 #include "src/Input/Input.h"
 #include "src/Global.h"
 #include "src/State/Web/Tab/Pipelines/PointingEvaluationPipeline.h"
-#include "src/State/Web/Tab/SocialRecords/SocialRecord.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 #include <vector>
 #include <deque>
@@ -44,6 +43,8 @@
 // Forward declaration
 class Master;
 class Mediator;
+class SocialRecord;
+enum class SocialPlatform;
 
 // Class
 class Tab : public TabInteractionInterface, public TabCEFInterface
@@ -480,7 +481,7 @@ private:
     void SetPipelineActivity(bool active);
 
 	// Start social record
-	void StartSocialRecord(SocialPlatform platform);
+	void StartSocialRecord(std::string URL, SocialPlatform platform);
 
 	// End social record and send to database
 	void EndSocialRecord();

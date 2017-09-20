@@ -9,7 +9,7 @@
 #include "src/Setup.h"
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
-#include "src/Singletons/FirebaseMailer.h"
+#include "src/State/Web/Tab/SocialRecord.h"
 #include <algorithm>
 
 Tab::Tab(
@@ -464,32 +464,44 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 				_prevScrolling = _scrollingOffsetY; // scrolling delta helper
 			}
 
-			// Check for URL change and whether to start new social record
-			if (_prevURL != _url)
+			// Ignore the change to blank page (abused for some internal stuff, so record produces missleading results if somebody stares for some time on blank page...)
+			if (_url != BLANK_PAGE_URL)
 			{
-				// Classify URL, which platform was entered?
-				auto platform = SocialRecord::ClassifyURL(_url);
-
-				// Decide how to proceed after URL change
-				if (_spSocialRecord == nullptr) // no current record going on
+				// Check for URL change and whether to start new social record
+				if (_prevURL != _url)
 				{
-					StartSocialRecord(platform);
-				}
-				else if (_spSocialRecord->GetPlatform() != platform) // record for different platform going on
-				{
-					// Store current record
-					EndSocialRecord();
+					// Classify URL, which platform was entered?
+					auto platform = SocialRecord::ClassifyURL(_url);
 
-					// Start new record
-					StartSocialRecord(platform);
-				}
-				else // recording of platform continues
-				{
-					_spSocialRecord->AddSubpage(); // seems that a subpage was opened
-				}
+					// Decide how to proceed after URL change
+					if (_spSocialRecord == nullptr) // no current record going on
+					{
+						StartSocialRecord(_url, platform);
+					}
+					else if (_spSocialRecord->GetPlatform() != platform) // record for different platform going on
+					{
+						// Store current record
+						EndSocialRecord();
 
-				// Update previous URL
-				_prevURL = _url; // store new URL
+						// Start new record
+						StartSocialRecord(_url, platform);
+					}
+					else if ((_spSocialRecord->GetPlatform() == SocialPlatform::Unknown) && (_spSocialRecord->GetDomain() != ShortenURL(_url))) // record for unknown platform going on but domain changes 
+					{
+						// Store current record
+						EndSocialRecord();
+
+						// Start new record
+						StartSocialRecord(_url, platform);
+					}
+					else // recording of platform continues
+					{
+						_spSocialRecord->AddSubpage(); // seems that a subpage was opened
+					}
+
+					// Update previous URL
+					_prevURL = _url; // store new URL
+				}
 			}
 		}
 	}
@@ -662,24 +674,17 @@ void Tab::SetPipelineActivity(bool active)
 	}
 }
 
-void Tab::StartSocialRecord(SocialPlatform platform)
+void Tab::StartSocialRecord(std::string URL, SocialPlatform platform)
 {
 	// End current social record if necessary
 	if (_spSocialRecord != nullptr)
 	{
-		EndSocialRecord();
+		EndSocialRecord(); // makes social record null
 	}
 
 	// Start new record
-	if (platform != SocialPlatform::Unknown)
-	{
-		_spSocialRecord = std::shared_ptr<SocialRecord>(new SocialRecord(_url));
-		_spSocialRecord->Start();
-	}
-	else
-	{
-		_spSocialRecord = nullptr;
-	}
+	_spSocialRecord = std::shared_ptr<SocialRecord>(new SocialRecord(URL, platform));
+	_spSocialRecord->Start();
 }
 
 void Tab::EndSocialRecord()
@@ -690,12 +695,7 @@ void Tab::EndSocialRecord()
 		_spSocialRecord->End();
 
 		// Store in database
-		auto record = _spSocialRecord->ToJSON(); // convert record to JSON
-		std::promise<int> sessionPromise; auto sessionFuture = sessionPromise.get_future(); // prepare to get value
-		FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::SOCIAL_RECORD_YOUTUBE_COUNT, 1, &sessionPromise); // adds one to the count
-		std::string sessionString = "session " + std::to_string(sessionFuture.get() - 1); // start session indices at zero (blocks thread until get was executed but simpler than async call)
-		sessionString = std::string((unsigned int)glm::max(setup::SOCIAL_RECORD_SESSION_DIGIT_COUNT - (int)sessionString.length(), 0), '0') + sessionString; // preceeding zeros for string
-		FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::SOCIAL_RECORD_YOUTUBE, record, sessionString); // send JSON to database
+		_spSocialRecord->Persist();
 
 		// Make record null
 		_spSocialRecord = nullptr;

@@ -18,9 +18,9 @@
 #include <future>
 
 // Available database keys
-enum class FirebaseIntegerKey	{ GENERAL_APPLICATION_STARTS, SOCIAL_RECORD_YOUTUBE_COUNT };
+enum class FirebaseIntegerKey	{ SOCIAL_RECORD_UNKNOWN_COUNT, SOCIAL_RECORD_FACEBOOK_COUNT, SOCIAL_RECORD_LINKEDIN_COUNT, SOCIAL_RECORD_YOUTUBE_COUNT, GENERAL_APPLICATION_STARTS, GENERAL_CALIBRATION_ATTEMPTS };
 enum class FirebaseStringKey	{ TEST_STRING };
-enum class FirebaseJSONKey		{ SOCIAL_RECORD_YOUTUBE };
+enum class FirebaseJSONKey		{ SOCIAL_RECORD_UNKNOWN, SOCIAL_RECORD_FACEBOOK, SOCIAL_RECORD_LINKEDIN, SOCIAL_RECORD_YOUTUBE };
 
 // Mapping from key to raw type
 template<typename Type> struct FirebaseValue;
@@ -34,10 +34,18 @@ template<> std::string FirebaseAddress<FirebaseIntegerKey>(FirebaseIntegerKey ke
 {
 	switch (key)
 	{
-	case FirebaseIntegerKey::GENERAL_APPLICATION_STARTS:
-		return "general/startups";
+	case FirebaseIntegerKey::SOCIAL_RECORD_UNKNOWN_COUNT:
+		return "social/_unknown/count";
+	case FirebaseIntegerKey::SOCIAL_RECORD_FACEBOOK_COUNT:
+		return "social/facebook/count";
+	case FirebaseIntegerKey::SOCIAL_RECORD_LINKEDIN_COUNT:
+		return "social/linkedin/count";
 	case FirebaseIntegerKey::SOCIAL_RECORD_YOUTUBE_COUNT:
 		return "social/youtube/count";
+	case FirebaseIntegerKey::GENERAL_APPLICATION_STARTS:
+		return "general/startups";
+	case FirebaseIntegerKey::GENERAL_CALIBRATION_ATTEMPTS:
+		return "general/calibrations";
 	default: return "";
 	}
 };
@@ -54,6 +62,12 @@ template<> std::string FirebaseAddress<FirebaseJSONKey>(FirebaseJSONKey key)
 {
 	switch (key)
 	{
+	case FirebaseJSONKey::SOCIAL_RECORD_UNKNOWN:
+		return "social/_unknown";
+	case FirebaseJSONKey::SOCIAL_RECORD_FACEBOOK:
+		return "social/facebook";
+	case FirebaseJSONKey::SOCIAL_RECORD_LINKEDIN:
+		return "social/linkedin";
 	case FirebaseJSONKey::SOCIAL_RECORD_YOUTUBE:
 		return "social/youtube";
 	default: return "";
