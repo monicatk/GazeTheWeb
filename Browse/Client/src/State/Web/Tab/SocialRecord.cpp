@@ -88,9 +88,9 @@ void SocialRecord::AddClick()
 	if (_writeable) { _clickCount++; }
 }
 
-void SocialRecord::AddSubpage()
+void SocialRecord::AddSubpage(std::string URL)
 {
-	if (_writeable) { _subpageCount++; }
+	if (_writeable) { _subpages.push_back(URL); }
 }
 
 nlohmann::json SocialRecord::ToJSON() const
@@ -105,7 +105,8 @@ nlohmann::json SocialRecord::ToJSON() const
 		{ "durationInForeground", _durationInForeground },
 		{ "durationUserActive", _durationUserActive },
 		{ "scrollAmount", _scrollAmount },
-		{ "subpageCount", _subpageCount },
+		{ "subpageCount", _subpages.size() },
+		{ "subpages", _subpages },
 		{ "clickCount", _clickCount }
 	};
 }

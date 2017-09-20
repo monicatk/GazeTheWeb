@@ -43,7 +43,7 @@ template<> std::string FirebaseAddress<FirebaseIntegerKey>(FirebaseIntegerKey ke
 	case FirebaseIntegerKey::SOCIAL_RECORD_YOUTUBE_COUNT:
 		return "social/youtube/count";
 	case FirebaseIntegerKey::GENERAL_APPLICATION_STARTS:
-		return "general/startups";
+		return "general/starts";
 	case FirebaseIntegerKey::GENERAL_CALIBRATION_ATTEMPTS:
 		return "general/calibrations";
 	default: return "";

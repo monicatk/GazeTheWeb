@@ -93,7 +93,7 @@ public:
 	void AddClick(); // TODO call
 
 	// Add subpage
-	void AddSubpage();
+	void AddSubpage(std::string URL);
 
 	// Convert to JSON for storing in database
 	nlohmann::json ToJSON() const;
@@ -126,7 +126,7 @@ private:
 	double _durationInForeground = 0.0;
 	double _durationUserActive = 0.0; // and tab in foreground
 	double _scrollAmount = 0.0;
-	int _subpageCount = 0;
+	std::vector<std::string> _subpages;
 	int _clickCount = 0;
 };
 

@@ -496,7 +496,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 					}
 					else // recording of platform continues
 					{
-						_spSocialRecord->AddSubpage(); // seems that a subpage was opened
+						_spSocialRecord->AddSubpage(_url); // seems that a subpage was opened
 					}
 
 					// Update previous URL
