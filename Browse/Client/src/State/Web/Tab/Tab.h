@@ -39,6 +39,7 @@
 #include <string>
 #include <map>
 #include <set>
+#include <future>
 
 // Forward declaration
 class Master;
@@ -486,6 +487,9 @@ private:
 	// End social record and send to database
 	void EndSocialRecord();
 
+	// Update persisting
+	void UpdatePersisting(bool wait); // wait indicates that it should wait until all persisting is finished
+
     // Method to update and pipe accent color to eyeGUI
     void UpdateAccentColor(float tpf);
 
@@ -639,6 +643,9 @@ private:
 
 	// Active social record
 	std::shared_ptr<SocialRecord> _spSocialRecord = nullptr; // can be nullptr when currently not browsing a social page
+
+	// Asyncronous calls to persist social records
+	std::vector<std::future<bool> > _asyncPersisting; // abuse async calls since it is easier to determine whether finished or not
 
 	// Social record helpers
 	std::string _prevURL = ""; // for determining URL change

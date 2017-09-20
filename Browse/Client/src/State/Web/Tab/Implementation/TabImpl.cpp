@@ -106,6 +106,9 @@ Tab::~Tab()
 	// Store current social record if available
 	EndSocialRecord();
 
+	// Finish persisting social records before destruction
+	UpdatePersisting(true); // do wait so block
+
 	// Delete DOM Nodes and triggers (right now only DOMTriggers) before removing layout
 	ClearDOMNodes();
 
@@ -447,6 +450,10 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		// ### UPDATE SOCIAL RECORD ###
 		// ############################
 
+		// Update persisting
+		UpdatePersisting(false); // do not wait so do not block
+		
+		// Ongoing social records
 		if (_dataTransfer) // only proceed when data transfer is allowed
 		{
 			// Update ongoing social record
@@ -694,11 +701,47 @@ void Tab::EndSocialRecord()
 		// Tell record to end
 		_spSocialRecord->End();
 
-		// Store in database
-		_spSocialRecord->Persist();
+		// Delegate persisting into thread
+		_asyncPersisting.push_back(std::async(
+			std::launch::async, // do it asynchronously
+			[](std::shared_ptr<SocialRecord> spSocialRecord) // provide copy of shared pointer
+		{
+			// Store in database
+			spSocialRecord->Persist();
+			return true; // give the future some value
+		}, _spSocialRecord));
 
-		// Make record null
+		// Make local copy of record null
 		_spSocialRecord = nullptr;
+	}
+}
+
+void Tab::UpdatePersisting(bool wait)
+{
+	// Check asynchronous persisting
+	for (int i = _asyncPersisting.size() - 1; i >= 0; i--) // do it from the back
+	{
+		// Retrieve whether asynchronous call is done
+		bool remove = false;
+		if (wait)
+		{
+			_asyncPersisting.at(i).wait();
+			remove = true; // waited until it is done, so remove it
+		}
+		else
+		{
+			// We have no time, so wait for nothing and just check
+			if (std::future_status::ready == _asyncPersisting.at(i).wait_for(std::chrono::seconds(0)))
+			{
+				remove = true; // done by now, so remove it
+			}
+		}
+
+		// Remove future from list when persisting is done
+		if (remove)
+		{
+			_asyncPersisting.erase(_asyncPersisting.begin() + i);
+		}
 	}
 }
 
