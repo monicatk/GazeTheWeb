@@ -9,7 +9,7 @@
 #include <algorithm>
 
 // Deviation weight function
-const std::function<float(float)> DEVIATION_WEIGHT = [](float dev) { return 3.f * dev; };
+const std::function<float(float)> DEVIATION_WEIGHT = [](float dev) { return 10.f * dev; };
 
 // Dimming duration
 const float DIMMING_DURATION = 0.5f; // seconds until it is dimmed
@@ -24,10 +24,10 @@ const float DEVIATION_FADING_DURATION = 0.5f;
 const float CENTER_OFFSET_MULTIPLIER = 0.f; // TODO integrate in drift offset calculation 0.1f;
 
 // Duration to replace current coordinate with input
-const float MOVE_DURATION = 1.0f;
+const float MOVE_DURATION = 0.1f;
 
 // Maximum zoom level
-const float MAX_ZOOM = 0.3f;
+const float MAX_ZOOM = 0.1f;
 
 // Maximum linear zoom duration
 const float ZOOM_DURATION = 1.75f;
@@ -99,8 +99,16 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 		webViewCoordinate(_zoom, _relativeZoomCoordinate, _relativeCenterOffset, rCoordinate);
 	};
 
+	/*
+
 	// Current raw! gaze (filtered here through zoom coordinate calculation)
-	// glm::vec2 relativeGazeCoordinate(spInput->webViewRelativeRawGazeX, spInput->webViewRelativeRawGazeY); // relative WebView space
+	glm::vec2 relativeGazeCoordinate(spInput->webViewRelativeRawGazeX, spInput->webViewRelativeRawGazeY); // relative WebView space
+
+	// Current gaze in page pixel coordinates
+	glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate;
+	currentPageCoordinate(pixelGazeCoordinate);
+
+	*/
 
 	// Current gaze in page pixel coordinates (filtered by custom transformation so filtered in page space!)
 	glm::vec2 pixelGazeCoordinate(_spTrans->GetFilteredGazeX(TRANS_NAME), _spTrans->GetFilteredGazeY(TRANS_NAME));
@@ -108,6 +116,7 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 	// Relative gaze coordinate in web view
 	glm::vec2 relativeGazeCoordinate = pixelGazeCoordinate;
 	currentWebViewCoordinate(relativeGazeCoordinate);
+
 
 	// #########################
 	// ### COORDINATE UPDATE ###
@@ -191,7 +200,7 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 	// Decide whether zooming is finished
 	SampleData sample = _sampleData.front();
 	bool finished = false;
-	if (sample.lifetime < 0.25f)
+	if (_zoom < sample.zoom)
 	{
 		// ### WebView pixels
 
@@ -248,76 +257,34 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 		_fixations.push_back(pixelFixation); // TODO limit etc
 
 		// Go over last fixations and calculate deviation
-		const int n = 5;
+		const int n = 30;
 		const int size = _fixations.size();
-		glm::vec2 mean(0, 0);
-		for (int i = size - 1; i >= glm::max(0, size - n); i--)
+		if (size >= n)
 		{
-			mean += _fixations.at(i);
-		}
-		mean /= (float)glm::min(n, size);
-		float deviation = 0;
-		for (int i = size - 1; i >= glm::max(0, size - n); i--)
-		{
-			deviation += glm::distance(mean, _fixations.at(i));
-		}
-		deviation /= (float)glm::min(n, size);
-
-		// Output fixation
-		LogInfo("Deviation: ", deviation);
-
-		// Fill output
-		SetOutputValue("coordinate", pixelFixation);
-
-		// if (deviation < 1.f)
-		if (_zoom < 0.25f)
-		{
-			finished = true;
-		}
-
-		/*
-		// Skip sample when no zoom happened etc., resulting in NaN
-		if (!std::isnan(pixelFixation.x) && !std::isnan(pixelFixation.y))
-		{
-			// Collect fixations inclusive weight
-			_potentialFixations.push_back(std::make_pair(pixelFixation, direction)); // fixation and direction of gaze delta
-
-			// Aggregate collection
-			glm::vec2 aggFixation(0, 0);
-			float aggWeight = 0;
-			for (int i = _potentialFixations.size() - 1; i >= 0; i--)
+			glm::vec2 mean(0, 0);
+			for (int i = size - 1; i >= glm::max(0, size - n); i--)
 			{
-				const auto& rFixation = _potentialFixations.at(i).first; // calculated fixation
-				const auto& rDirection = _potentialFixations.at(i).second; // direction of gaze offset
-				float angle = glm::abs(glm::degrees(glm::angle(rDirection, glm::normalize(pixelZoomCoordinateDelta))));
-				float distance = glm::distance(rFixation, pixelFixation);
-				angle = glm::max(angle, 1.f);
-				distance = glm::max(distance, 1.f);
-				float weight = glm::min(angle, distance);
-				weight = 1.f / weight;
-				aggFixation += rFixation * weight;
-				aggWeight += weight;
-				
+				mean += _fixations.at(i);
 			}
-			if (aggWeight > 0)
+			mean /= (float)glm::min(n, size);
+			float deviation = 0;
+			for (int i = size - 1; i >= glm::max(0, size - n); i--)
 			{
-				aggFixation /= aggWeight;
+				deviation += glm::distance(mean, _fixations.at(i));
 			}
+			deviation /= (float)glm::min(n, size);
 
-			LogInfo("AggFixation: ", aggFixation.x, ", ", aggFixation.y);
-			
-			if (supporters >= SUPPORTER_COUNT)
+			// Output deviation
+			LogInfo("Deviation: ", deviation);
+
+			if (deviation < 5.f)
 			{
-				aggFixation /= (float)supporters;
-
 				// Fill output
-				SetOutputValue("coordinate", pixelFixation);
+				SetOutputValue("coordinate", mean);
 
 				finished = true;
-				LogInfo("Drift correction applied");
 			}
 		}
-		*/
 	}
 
 	// ##############
@@ -381,7 +348,6 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 
 void FutureCoordinateAction::Draw() const
 {
-	/*
 	// Do draw some stuff for debugging
 #ifdef CLIENT_DEBUG
 	// WebView pixels
@@ -403,19 +369,18 @@ void FutureCoordinateAction::Draw() const
 	_pTab->Debug_DrawRectangle(zoomCoordinate, glm::vec2(5, 5), glm::vec3(1, 0, 0));
 
 	// Click coordinate
-	glm::vec2 coordinate;
-	if (GetOutputValue("coordinate", coordinate)) // only show when set
-	{
-		// TODO: convert from CEF Pixel space to WebView Pixel space
-		_pTab->Debug_DrawRectangle(coordinate, glm::vec2(5, 5), glm::vec3(0, 1, 0));
-	}
+	// glm::vec2 coordinate;
+	// if (GetOutputValue("coordinate", coordinate)) // only show when set
+	// {
+	// 	// TODO: convert from CEF Pixel space to WebView Pixel space
+	// 	_pTab->Debug_DrawRectangle(coordinate, glm::vec2(5, 5), glm::vec3(0, 1, 0));
+	// }
 
 	// Testing visualization
 	glm::vec2 testCoordinate(0.3f, 0.5f);
 	applyZooming(testCoordinate);
 	_pTab->Debug_DrawRectangle(testCoordinate, glm::vec2(5, 5), glm::vec3(0, 0, 1));
 #endif // CLIENT_DEBUG
-*/
 }
 
 void FutureCoordinateAction::Activate()
