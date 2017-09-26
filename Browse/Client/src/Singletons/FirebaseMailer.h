@@ -125,7 +125,7 @@ private:
 		// Log in. Return whether successful
 		bool Login(std::string email, std::string password);
 
-		// Simple put functionality. Replaces existing value if available
+		// Simple put functionality. Replaces existing value if available, no ETag used
 		template<typename T>
 		void Put(T key, typename FirebaseValue<T>::type value, std::string subpath = ""); // delegates private put
 

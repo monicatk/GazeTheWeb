@@ -171,36 +171,86 @@ bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string pas
 template<typename T>
 void FirebaseMailer::FirebaseInterface::Put(T key, typename FirebaseValue<T>::type value, std::string subpath)
 {
-	// Call own get method to get the value if already set
-	const DBEntry entry = this->Get(BuildFirebaseKey(key, _uid)); // here we are only interesed in the ETag
-
-	// Put value in database
-	std::string ETag = entry.ETag;
-	std::string newETag = "";
-	typename FirebaseValue<T>::type newValue = fallback<typename FirebaseValue<T>::type>();
+	// Only continue if logged in
 	bool success = false;
-	const int maxTrialCount = 10;
-	int trialCount = 0;
-
-	// Try as long as no success but still new ETags
-	do
+	if (!_idToken.empty())
 	{
-		// Try to put on database
-		newETag = "";
-		newValue = fallback<typename FirebaseValue<T>::type>();
-		success = Put(key, ETag, value, newETag, newValue, subpath);
+		// Setup CURL
+		CURL *curl;
+		curl = curl_easy_init();
 
-		// If empty new ETag, just quit this (either success or database just does not like us)
-		if (newETag.empty()) { break; }
+		// Continue if CURL was initialized
+		if (curl)
+		{
+			// Local variables
+			std::string answerHeaderBuffer;
+			std::string answerBodyBuffer;
 
-		// Store new values
-		ETag = newETag;
-		// value = newValue; -> this would override the value to put
+			// Request URL
+			std::string requestURL =
+				_URL + "/"
+				+ BuildFirebaseKey(key, _uid) + "/" + subpath
+				+ ".json"
+				+ "?auth=" + _idToken;
 
-		// Increase trial count
-		++trialCount;
+			// Setup CURL
+			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // follow potential redirection
+			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT"); // tell about PUTting
+			curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L); // CURL told me to use it
+			curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, WriteCallback); // set callback for answer header
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback); // set callback for answer body
+			curl_easy_setopt(curl, CURLOPT_HEADERDATA, &answerHeaderBuffer); // set buffer for answer header
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &answerBodyBuffer); // set buffer for answer body
 
-	} while (!success && trialCount <= maxTrialCount);
+			// Post field
+			const std::string postField = json(value).dump();
+
+			// Fill request
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postField.c_str()); // value to put
+			curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of request
+
+			 // Perform the request
+			CURLcode res = curl_easy_perform(curl);
+			if (res == CURLE_OK) // everything ok with CURL
+			{
+				// Check header
+				if (HttpHeaderOK(answerHeaderBuffer))
+				{
+					success = true; // fine!
+				}
+				else // there is something else in header
+				{
+					// Try to relogin
+					if (Relogin() && !_idToken.empty()) // returns whether successful
+					{
+						// Setup CURL request (reuse stuff from first)
+						answerHeaderBuffer.clear();
+						answerBodyBuffer.clear();
+						requestURL =
+							_URL + "/"
+							+ BuildFirebaseKey(key, _uid) + "/" + subpath
+							+ ".json"
+							+ "?auth=" + _idToken;
+						curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of new request
+
+						// Try again to PUT data
+						res = curl_easy_perform(curl);
+						if (res == CURLE_OK) // everything ok with CURL
+						{
+							if (HttpHeaderOK(answerHeaderBuffer))
+							{
+								success = true; // fine!
+							}
+							// else: ok, it failed.
+						}
+					}
+				}
+			}
+
+			// Cleanup
+			curl_easy_cleanup(curl); curl = nullptr;
+		}
+	}
 
 	// Tell user about no success
 	if (!success)
@@ -528,7 +578,7 @@ int FirebaseMailer::FirebaseInterface::Apply(FirebaseIntegerKey key, std::functi
 		newValue = 0;
 		success = Put(key, ETag, value, newETag, newValue);
 
-		// If empty new ETag, just quit this (either success or database just does not like us)
+		// If no new ETag provided, just quit this (either success or database just does not like us)
 		if (newETag.empty()) { break; }
 
 		// Store new values
