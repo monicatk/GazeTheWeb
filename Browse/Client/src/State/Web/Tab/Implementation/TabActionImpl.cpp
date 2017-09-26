@@ -9,6 +9,7 @@
 #include "src/Utils/Texture.h"
 #include "src/Singletons/LabStreamMailer.h"
 #include "src/Master/Master.h"
+#include "src/State/Web/Tab/SocialRecord.h"
 
 void Tab::PushBackPipeline(std::unique_ptr<Pipeline> upPipeline)
 {
@@ -167,4 +168,13 @@ void Tab::PlaySound(std::string filepath)
 std::weak_ptr<CustomTransformationInterface> Tab::GetCustomTransformationInterface() const
 {
 	return _pMaster->GetCustomTransformationInterface();
+}
+
+void Tab::NotifyTextInput(int charCount)
+{
+	// Tell social record
+	if (_spSocialRecord != nullptr)
+	{
+		_spSocialRecord->AddTextInput(charCount);
+	}
 }

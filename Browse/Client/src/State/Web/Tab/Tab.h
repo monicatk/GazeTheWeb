@@ -283,6 +283,9 @@ public:
 	// Get interface for custom transformations of input
 	virtual std::weak_ptr<CustomTransformationInterface> GetCustomTransformationInterface() const;
 
+	// Notify about text input
+	virtual void NotifyTextInput(int charCount);
+
 	// Set WebViewParameters for WebView
 	virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }
 

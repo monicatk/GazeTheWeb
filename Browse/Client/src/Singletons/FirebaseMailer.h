@@ -35,13 +35,13 @@ template<> std::string FirebaseAddress<FirebaseIntegerKey>(FirebaseIntegerKey ke
 	switch (key)
 	{
 	case FirebaseIntegerKey::SOCIAL_RECORD_UNKNOWN_COUNT:
-		return "social/_unknown/count";
+		return "social/_unknown/sessionCount";
 	case FirebaseIntegerKey::SOCIAL_RECORD_FACEBOOK_COUNT:
-		return "social/facebook/count";
+		return "social/facebook/sessionCount";
 	case FirebaseIntegerKey::SOCIAL_RECORD_LINKEDIN_COUNT:
-		return "social/linkedin/count";
+		return "social/linkedin/sessionCount";
 	case FirebaseIntegerKey::SOCIAL_RECORD_YOUTUBE_COUNT:
-		return "social/youtube/count";
+		return "social/youtube/sessionCount";
 	case FirebaseIntegerKey::GENERAL_APPLICATION_STARTS:
 		return "general/starts";
 	case FirebaseIntegerKey::GENERAL_CALIBRATION_ATTEMPTS:

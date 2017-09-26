@@ -58,7 +58,7 @@ namespace setup
 	static const bool			LOG_INTERACTIONS = false;
 	static const std::string	FIREBASE_API_KEY = "AIzaSyBMa9gSXsoDo27S7P959QZYf3rJBGDGEIA"; // API key for our Firebase
 	static const std::string	FIREBASE_URL = "https://mamem-phase2-fall17.firebaseio.com"; // URL of our Firebase
-	static const int			SOCIAL_RECORD_SESSION_DIGIT_COUNT = 6;
+	static const int			SOCIAL_RECORD_DIGIT_COUNT = 6;
 	static const bool			SOCIAL_RECORD_PERSIST_UNKNOWN = false;
 
 	// Other

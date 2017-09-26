@@ -36,6 +36,8 @@ bool TextInputAction::Update(float tpf, const std::shared_ptr<const TabInput> sp
 	// Input text
 	_spInteractionNode->InputText(text8, submit > 0); // TODO: Call LSL Logging?
 
+	// Tell tab about for social record
+	_pTab->NotifyTextInput(text.length());
 
     // Action is done
     return true;

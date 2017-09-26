@@ -121,8 +121,6 @@ Tab::~Tab()
 	_pMaster->RemoveLayout(_pOverlayLayout);
 	_pMaster->RemoveLayout(_pScrollingOverlayLayout);
     _pMaster->RemoveLayout(_pDebugLayout);
-
-	// TODO: end current social record and wait for all pending to be processed
 }
 
 void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
@@ -453,62 +451,58 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		// Update persisting
 		UpdatePersisting(false); // do not wait so do not block
 		
-		// Ongoing social records
-		if (_dataTransfer) // only proceed when data transfer is allowed
+		// Update ongoing social record
+		if (_spSocialRecord != nullptr)
 		{
-			// Update ongoing social record
-			if (_spSocialRecord != nullptr)
+			// Check for active user
+			bool userActive = spInput->gazeEmulated || (spInput->gazeAge < setup::MAX_AGE_OF_USED_GAZE); // taken partly from Master.cpp
+
+			// Update social record
+			_spSocialRecord->AddTimeInForeground(tpf); // this update is only called when in foreground
+			if (userActive) { _spSocialRecord->AddTimeActiveUser(tpf); }// add on duration while user is active
+			_spSocialRecord->AddScrollingDelta(glm::abs(_scrollingOffsetY - _prevScrolling));
+
+			// Prepare next update
+			_prevScrolling = _scrollingOffsetY; // scrolling delta helper
+		}
+
+		// Ignore the change to blank page (abused for some internal stuff, so record produces missleading results if somebody stares for some time on blank page...)
+		if (_url != BLANK_PAGE_URL)
+		{
+			// Check for URL change and whether to start new social record
+			if (_prevURL != _url)
 			{
-				// Check for active user
-				bool userActive = spInput->gazeEmulated || (spInput->gazeAge < setup::MAX_AGE_OF_USED_GAZE); // taken partly from Master.cpp
+				// Classify URL, which platform was entered?
+				auto platform = SocialRecord::ClassifyURL(_url);
 
-				// Update social record
-				_spSocialRecord->AddTimeInForeground(tpf); // this update is only called when in foreground
-				if (userActive) { _spSocialRecord->AddTimeActiveUser(tpf); }// add on duration while user is active
-				_spSocialRecord->AddScrollingDelta(glm::abs(_scrollingOffsetY - _prevScrolling));
-
-				// Prepare next update
-				_prevScrolling = _scrollingOffsetY; // scrolling delta helper
-			}
-
-			// Ignore the change to blank page (abused for some internal stuff, so record produces missleading results if somebody stares for some time on blank page...)
-			if (_url != BLANK_PAGE_URL)
-			{
-				// Check for URL change and whether to start new social record
-				if (_prevURL != _url)
+				// Decide how to proceed after URL change
+				if (_spSocialRecord == nullptr) // no current record going on
 				{
-					// Classify URL, which platform was entered?
-					auto platform = SocialRecord::ClassifyURL(_url);
-
-					// Decide how to proceed after URL change
-					if (_spSocialRecord == nullptr) // no current record going on
-					{
-						StartSocialRecord(_url, platform);
-					}
-					else if (_spSocialRecord->GetPlatform() != platform) // record for different platform going on
-					{
-						// Store current record
-						EndSocialRecord();
-
-						// Start new record
-						StartSocialRecord(_url, platform);
-					}
-					else if ((_spSocialRecord->GetPlatform() == SocialPlatform::Unknown) && (_spSocialRecord->GetDomain() != ShortenURL(_url))) // record for unknown platform going on but domain changes 
-					{
-						// Store current record
-						EndSocialRecord();
-
-						// Start new record
-						StartSocialRecord(_url, platform);
-					}
-					else // recording of platform continues
-					{
-						_spSocialRecord->AddSubpage(_url); // seems that a subpage was opened
-					}
-
-					// Update previous URL
-					_prevURL = _url; // store new URL
+					StartSocialRecord(_url, platform);
 				}
+				else if (_spSocialRecord->GetPlatform() != platform) // record for different platform going on
+				{
+					// Store current record
+					EndSocialRecord();
+
+					// Start new record
+					StartSocialRecord(_url, platform);
+				}
+				else if ((_spSocialRecord->GetPlatform() == SocialPlatform::Unknown) && (_spSocialRecord->GetDomain() != ShortenURL(_url))) // record for unknown platform going on but domain changes 
+				{
+					// Store current record
+					EndSocialRecord();
+
+					// Start new record
+					StartSocialRecord(_url, platform);
+				}
+				else // recording of platform continues
+				{
+					_spSocialRecord->AddPage(_url); // seems that a subpage was opened
+				}
+
+				// Update previous URL
+				_prevURL = _url; // store new URL
 			}
 		}
 	}
@@ -683,15 +677,18 @@ void Tab::SetPipelineActivity(bool active)
 
 void Tab::StartSocialRecord(std::string URL, SocialPlatform platform)
 {
-	// End current social record if necessary
-	if (_spSocialRecord != nullptr)
+	if (_dataTransfer) // only proceed when data transfer is allowed
 	{
-		EndSocialRecord(); // makes social record null
-	}
+		// End current social record if necessary
+		if (_spSocialRecord != nullptr)
+		{
+			EndSocialRecord(); // makes social record null
+		}
 
-	// Start new record
-	_spSocialRecord = std::shared_ptr<SocialRecord>(new SocialRecord(URL, platform));
-	_spSocialRecord->Start();
+		// Start new record
+		_spSocialRecord = std::shared_ptr<SocialRecord>(new SocialRecord(SocialRecord::ExtractDomain(URL), platform));
+		_spSocialRecord->StartAndAddPage(URL);
+	}
 }
 
 void Tab::EndSocialRecord()

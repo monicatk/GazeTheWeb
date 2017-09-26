@@ -10,11 +10,11 @@
 
 using json = nlohmann::json;
 
-SocialRecord::SocialRecord(std::string URL, SocialPlatform platform) : _URL(URL), _platform(platform) {}
+SocialRecord::SocialRecord(std::string domain, SocialPlatform platform) : _domain(domain), _platform(platform) {}
 
 SocialRecord::~SocialRecord() {}
 
-void SocialRecord::Start()
+void SocialRecord::StartAndAddPage(std::string URL)
 {
 	if (_startDate.empty()) // only allow once
 	{
@@ -26,6 +26,9 @@ void SocialRecord::Start()
 
 		// Set to writeable
 		_writeable = true;
+
+		// Add page
+		AddPage(URL); // otherwise page vector would be empty and any attempt of updating would throw exception
 	}
 }
 
@@ -33,6 +36,12 @@ void SocialRecord::End()
 {
 	if (!_startDate.empty() && _endDate.empty()) // only allow once and after start was called 
 	{
+		// Set duration of last page
+		if (!_pages.empty())
+		{
+			_pages.back().duration = std::chrono::duration<float>(std::chrono::system_clock::now() - _lastAddPage).count();
+		}
+
 		// Store end date
 		_endDate = GetDate();
 
@@ -63,52 +72,93 @@ void SocialRecord::Persist()
 	// Persist
 	std::promise<int> sessionPromise; auto sessionFuture = sessionPromise.get_future(); // prepare to get value
 	FirebaseMailer::Instance().PushBack_Transform(countKey, 1, &sessionPromise); // adds one to the count
-	std::string sessionString = std::to_string(sessionFuture.get() - 1); // start session indices at zero (blocks thread until get was executed but simpler than async call)
-	sessionString = "session " + std::string((unsigned int)glm::max(setup::SOCIAL_RECORD_SESSION_DIGIT_COUNT - (int)sessionString.length(), 0), '0') + sessionString; // preceeding zeros for string
-	FirebaseMailer::Instance().PushBack_Put(recordKey, record, sessionString); // send JSON to database
+	FirebaseMailer::Instance().PushBack_Put(recordKey, record, "sessions/" + std::to_string(sessionFuture.get() - 1)); // send JSON to database
 }
 
 void SocialRecord::AddTimeInForeground(float time)
 {
-	if (_writeable) { _durationInForeground += time; }
+	if (_writeable) { _totalDurationInForeground += time; _pages.back().durationInForeground += time; }
 }
 
 void SocialRecord::AddTimeActiveUser(float time)
 {
-	if (_writeable) { _durationUserActive += time; }
+	if (_writeable) { _totalDurationUserActive += time; _pages.back().durationUserActive += time; }
 }
 
 void SocialRecord::AddScrollingDelta(float delta)
 {
-	if (_writeable) { _scrollAmount += delta; }
+	if (_writeable) { _pages.back().scrollAmount += delta; }
 }
 
-void SocialRecord::AddClick()
+void SocialRecord::AddClick(std::string target)
 {
-	if (_writeable) { _clickCount++; }
+	if (_writeable) { _pages.back().clicks.push_back(target); }
 }
 
-void SocialRecord::AddSubpage(std::string URL)
+void SocialRecord::AddTextInput(int charCount)
 {
-	if (_writeable) { _subpages.push_back(URL); }
+	if (_writeable) { _pages.back().textInputs.push_back(charCount); }
+}
+
+void SocialRecord::AddPage(std::string URL)
+{
+	if (_writeable)
+	{
+		// Set duration of previous page
+		if (!_pages.empty())
+		{
+			_pages.back().duration = std::chrono::duration<float>(std::chrono::system_clock::now() - _lastAddPage).count();
+		}
+		_lastAddPage = std::chrono::system_clock::now(); // store time of adding the page
+
+		// Add new page
+		_pages.push_back(Page(URL));
+	}
 }
 
 nlohmann::json SocialRecord::ToJSON() const
 {
-	// Return JSON structure
-	return {
-		{ "url", GetURL() },
+	// Domain JSON structure
+	json JSON = {
 		{ "domain", GetDomain() },
 		{ "startDate", _startDate },
 		{ "endDate", _endDate },
 		{ "duration", std::chrono::duration<float>(_endTime-_startTime).count() },
-		{ "durationInForeground", _durationInForeground },
-		{ "durationUserActive", _durationUserActive },
-		{ "scrollAmount", _scrollAmount },
-		{ "subpageCount", _subpages.size() },
-		{ "subpages", _subpages },
-		{ "clickCount", _clickCount }
+		{ "durationInForeground", _totalDurationInForeground },
+		{ "durationUserActive", _totalDurationUserActive },
+		{ "pageCount", _pages.size() },
 	};
+
+	// Add pages to JSON structure
+	std::vector<json> pagesJSON;
+	for (const auto& rPage : _pages)
+	{
+		JSON["pages"].push_back(
+		{
+			{ "url",  rPage.URL },
+			{ "duration", rPage.duration },
+			{ "durationInForeground",  rPage.durationInForeground },
+			{ "durationUserActive",  rPage.durationUserActive },
+			{ "scrollAmount",  rPage.scrollAmount },
+			{ "clickCount",  rPage.clicks.size() },
+			{ "textInputCount",  rPage.textInputs.size() }
+		});
+
+		// Add clicks to JSON structure of page
+		for (const auto& rClick : rPage.clicks)
+		{
+			JSON["pages"].back()["clicks"].push_back(rClick);
+		}
+
+		// Add text inputs to JSON structure of page
+		for (const auto& rCharCount : rPage.textInputs)
+		{
+			JSON["pages"].back()["textInputs"].push_back(rCharCount);
+		}
+	}
+
+	// Return result
+	return JSON;
 }
 
 std::string SocialRecord::GetDate() const
@@ -118,4 +168,9 @@ std::string SocialRecord::GetDate() const
 	std::ostringstream oss;
 	oss << std::put_time(&tm, DATE_FORMAT.c_str());
 	return oss.str();
+}
+
+std::string SocialRecord::PrecedeZeros(const std::string& rInput, const int digitCount) const
+{
+	return std::string((unsigned int)glm::max(digitCount - (int)rInput.length(), 0), '0') + rInput; // preceding zeros for string
 }
