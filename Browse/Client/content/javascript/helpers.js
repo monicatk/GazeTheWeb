@@ -341,9 +341,12 @@ function DrawObject(obj)
 	}
 }
 
-
 function SendLSLMessage(msg) {
     window.cefQuery({ request: ("lsl:" + msg), persistent: false, onSuccess: (response) => { }, onFailure: (error_code, error_message) => { } });
+}
+
+function SendDataMessage(msg) {
+    window.cefQuery({ request: ("data:" + msg), persistent: false, onSuccess: (response) => { }, onFailure: (error_code, error_message) => { } });
 }
 
 function LoggingMediator()

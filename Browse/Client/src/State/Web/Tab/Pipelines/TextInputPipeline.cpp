@@ -26,7 +26,7 @@ TextInputPipeline::TextInputPipeline(
 	_actions.push_back(spKeyboardAction);
 
     // At last, fill input into text field
-	std::shared_ptr<TextInputAction> spTextInputAction = std::make_shared<TextInputAction>(_pTab, spInteractionNode);
+	std::shared_ptr<TextInputAction> spTextInputAction = std::make_shared<TextInputAction>(_pTab, spInteractionNode, spNode->IsPasswordField());
 	_actions.push_back(spTextInputAction);
 
     // Connect those actions

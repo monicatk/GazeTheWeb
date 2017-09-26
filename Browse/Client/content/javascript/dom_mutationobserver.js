@@ -4,14 +4,13 @@
 //============================================================================
 ConsolePrint("Starting to import dom_mutationobserver.js ...");
 
-// LSL: Log which type of HTML element was clicked
+// Log which type of HTML element was clicked
 document.onclick = function(e){
 	if (e && e.target && e.target.tagName)
 	{
-		SendLSLMessage("Click on "+e.target.tagName);
+	    SendDataMessage(e.target.tagName.toLowerCase() + "," + e.target.id);
 	}
 }
-
 
 window.appendedSubtreeRoots = new Set();
 

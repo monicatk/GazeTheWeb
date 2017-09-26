@@ -96,10 +96,10 @@ public:
 	void AddScrollingDelta(float delta);
 
 	// Add click
-	void AddClick(std::string target);
+	void AddClick(std::string tag, std::string id);
 
 	// Add text input
-	void AddTextInput(int charCount);
+	void AddTextInput(std::string id, int charCount);
 
 	// Add page
 	void AddPage(std::string URL);
@@ -115,6 +115,28 @@ public:
 
 private:
 
+	// Struct for click record
+	struct Click
+	{
+		// Constructor
+		Click(std::string tag, std::string id) : tag(tag), id(id) {}
+
+		// Fields
+		const std::string tag;
+		const std::string id;
+	};
+
+	// Struct for text input record
+	struct TextInput
+	{
+		// Constructor
+		TextInput(std::string id, int charCount) : id(id), charCount(charCount) {}
+
+		// Fields
+		const std::string id;
+		const int charCount = 0;
+	};
+
 	// Struct for page record
 	struct Page
 	{
@@ -127,8 +149,8 @@ private:
 		double durationInForeground = 0.0;
 		double durationUserActive = 0.0; // and tab in foreground
 		double scrollAmount = 0.0;
-		std::vector<std::string> clicks;
-		std::vector<int> textInputs;
+		std::vector<Click> clicks;
+		std::vector<TextInput> textInputs;
 	};
 
 	// Get date

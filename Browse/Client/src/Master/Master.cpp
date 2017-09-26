@@ -398,6 +398,19 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// Registers a JavaScript callback function that pipes JS callbacks starting with "lsl:" to LabStreamingLayer
 	_pCefMediator->RegisterJavascriptCallback("lsl:", [this](std::string message) { LabStreamMailer::instance().Send(message); });
 
+	// ### JavaScript data transfer ###
+
+	// Register callback
+	_pCefMediator->RegisterJavascriptCallback("data:", [this](std::string message)
+	{
+		std::string tag;
+		std::string id;
+		auto tokens = SplitBySeparator(message, ',');
+		if (tokens.size() > 0) { tag = tokens.at(0); }
+		if (tokens.size() > 1) { id = tokens.at(1); }
+		this->NotifyClick(tag, id);
+	});
+
 	// ### LabStreamCallback ###
 
 	// Create callback
@@ -561,6 +574,11 @@ void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::property:
 void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::property::Color type, std::string value)
 {
 	eyegui::setStyleTreePropertyValue(_pGUI, styleClass, type, value);
+}
+
+void Master::NotifyClick(std::string tag, std::string id)
+{
+	_upWeb->NotifyClick(tag, id);
 }
 
 void Master::PushNotification(std::u16string content, Type type, bool overridable)

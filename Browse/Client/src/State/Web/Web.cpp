@@ -372,6 +372,14 @@ void Web::SetDataTransfer(bool active)
 
 }
 
+void Web::NotifyClick(std::string tag, std::string id)
+{
+	if (_currentTabId >= 0)
+	{
+		_tabs.at(_currentTabId)->NotifyClick(tag, id);
+	}
+}
+
 StateType Web::Update(float tpf, const std::shared_ptr<const Input> spInput)
 {
     // Process jobs first

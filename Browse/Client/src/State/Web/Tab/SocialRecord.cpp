@@ -90,14 +90,14 @@ void SocialRecord::AddScrollingDelta(float delta)
 	if (_writeable) { _pages.back().scrollAmount += delta; }
 }
 
-void SocialRecord::AddClick(std::string target)
+void SocialRecord::AddClick(std::string tag, std::string id)
 {
-	if (_writeable) { _pages.back().clicks.push_back(target); }
+	if (_writeable) { _pages.back().clicks.push_back(Click(tag, id)); }
 }
 
-void SocialRecord::AddTextInput(int charCount)
+void SocialRecord::AddTextInput(std::string id, int charCount)
 {
-	if (_writeable) { _pages.back().textInputs.push_back(charCount); }
+	if (_writeable) { _pages.back().textInputs.push_back(TextInput(id, charCount)); }
 }
 
 void SocialRecord::AddPage(std::string URL)
@@ -147,13 +147,23 @@ nlohmann::json SocialRecord::ToJSON() const
 		// Add clicks to JSON structure of page
 		for (const auto& rClick : rPage.clicks)
 		{
-			JSON["pages"].back()["clicks"].push_back(rClick);
+			JSON["pages"].back()["clicks"].push_back(
+			{
+				{ "tag", rClick.tag },
+				{ "id", rClick.id }
+			}
+			);
 		}
 
 		// Add text inputs to JSON structure of page
-		for (const auto& rCharCount : rPage.textInputs)
+		for (const auto& rTextInput : rPage.textInputs)
 		{
-			JSON["pages"].back()["textInputs"].push_back(rCharCount);
+			JSON["pages"].back()["textInputs"].push_back(
+			{
+				{ "id", rTextInput.id },
+				{ "charCount", rTextInput.charCount }
+			}
+			);
 		}
 	}
 

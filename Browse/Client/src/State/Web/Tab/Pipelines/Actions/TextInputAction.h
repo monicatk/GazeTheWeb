@@ -18,7 +18,7 @@ class TextInputAction : public Action
 public:
 
     // Constructor
-    TextInputAction(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInputInteraction> spInteractionNode);
+    TextInputAction(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInputInteraction> spInteractionNode, bool isPasswordField);
 
     // Destructor
     virtual ~TextInputAction();
@@ -42,6 +42,7 @@ private:
 
 	// Members
 	std::shared_ptr<DOMTextInputInteraction> _spInteractionNode;
+	bool _isPasswordField;
 
 };
 

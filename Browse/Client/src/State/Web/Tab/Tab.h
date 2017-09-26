@@ -102,6 +102,9 @@ public:
 	// Pause data transfer
 	void SetDataTransfer(bool active);
 
+	// Notify about click
+	void NotifyClick(std::string tag, std::string id);
+
     // #################################
     // ### TAB INTERACTIVE INTERFACE ###
     // #################################
@@ -284,7 +287,7 @@ public:
 	virtual std::weak_ptr<CustomTransformationInterface> GetCustomTransformationInterface() const;
 
 	// Notify about text input
-	virtual void NotifyTextInput(int charCount);
+	virtual void NotifyTextInput(std::string id, int charCount);
 
 	// Set WebViewParameters for WebView
 	virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }

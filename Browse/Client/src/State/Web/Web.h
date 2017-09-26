@@ -73,6 +73,9 @@ public:
 	// Pause data transfer
 	void SetDataTransfer(bool active);
 
+	// Notify about click
+	void NotifyClick(std::string tag, std::string id);
+
     // #############
     // ### STATE ###
     // #############

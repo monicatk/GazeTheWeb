@@ -101,6 +101,9 @@ public:
 		eyegui::playSound(_pGUI, filepath);
 	}
 
+	// Notify about click
+	void NotifyClick(std::string tag, std::string id);
+
 	// ### ACCESS BY SETTINGS ###
 
 	// Set gaze visualization (of super GUI)

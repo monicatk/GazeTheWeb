@@ -7,9 +7,10 @@
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 
-TextInputAction::TextInputAction(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInputInteraction> spInteractionNode) :
+TextInputAction::TextInputAction(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInputInteraction> spInteractionNode, bool isPasswordField) :
 	Action(pTab),
-	_spInteractionNode(spInteractionNode)
+	_spInteractionNode(spInteractionNode),
+	_isPasswordField(isPasswordField)
 {
     // Add in- and output data slots
     AddString16InputSlot("text");
@@ -23,11 +24,11 @@ TextInputAction::~TextInputAction()
 
 bool TextInputAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
-    // Fetch input values
-    std::u16string text;
-    int submit = 0;
-    GetInputValue("text", text);
-    GetInputValue("submit", submit);
+	// Fetch input values
+	std::u16string text;
+	int submit = 0;
+	GetInputValue("text", text);
+	GetInputValue("submit", submit);
 
 	// Convert u16string to string
 	std::string text8;
@@ -37,7 +38,10 @@ bool TextInputAction::Update(float tpf, const std::shared_ptr<const TabInput> sp
 	_spInteractionNode->InputText(text8, submit > 0); // TODO: Call LSL Logging?
 
 	// Tell tab about for social record
-	_pTab->NotifyTextInput(text.length());
+	if (!_isPasswordField) // only if no password field
+	{
+		_pTab->NotifyTextInput("", text.length()); // todo fetch id
+	}
 
     // Action is done
     return true;

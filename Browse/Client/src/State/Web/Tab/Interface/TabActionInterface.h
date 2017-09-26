@@ -64,7 +64,7 @@ public:
 	virtual std::weak_ptr<CustomTransformationInterface> GetCustomTransformationInterface() const = 0;
 
 	// Notify about text input
-	virtual void NotifyTextInput(int charCount) = 0;
+	virtual void NotifyTextInput(std::string id, int charCount) = 0;
 
     // ### METHODS WHICH SET PARAMETERS THAT MUST BE RESET WHEN NO PIPELINE / ACTION IS ACTIVE ###
 
