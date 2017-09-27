@@ -561,6 +561,12 @@ void Mediator::RemoveFixedElement(CefRefPtr<CefBrowser> browser, int id)
 void Mediator::Poll(float tpf)
 {
     // TODO Daniel
+	for (auto id_browser_pair : _browsers)
+	{
+		auto browser = id_browser_pair.second;
+		browser->GetMainFrame()->ExecuteJavaScript("CefPoll(" + std::to_string(tpf) + ");", "CefPolling", 0);
+	}
+	
 }
 
 void Mediator::OnTabTitleChange(CefRefPtr<CefBrowser> browser, std::string title)
