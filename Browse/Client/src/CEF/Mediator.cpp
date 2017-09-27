@@ -359,18 +359,14 @@ void Mediator::SetActiveTab(TabCEFInterface * pTab)
 
 
 
-bool Mediator::SetLoadingStatus(CefRefPtr<CefBrowser> browser, int64 frameID, bool isMain, bool isLoading)
+bool Mediator::SetLoadingStatus(CefRefPtr<CefBrowser> browser, bool isLoading)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
-		pTab->SetLoadingStatus(frameID, isMain, isLoading);
+		pTab->SetLoadingStatus(isLoading);
 		return true;
 	}
-	else
-	{
-		return false;
-	}
-	
+	return false;	
 }
 
 std::weak_ptr<DOMOverflowElement> Mediator::GetDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id)

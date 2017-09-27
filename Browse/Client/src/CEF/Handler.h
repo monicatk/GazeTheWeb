@@ -130,7 +130,7 @@ public:
     void SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged = true);
 
     // Write page resolution to V8 variables, read them and update Tab
-    void UpdatePageResolution(CefRefPtr<CefBrowser> browser);
+	void UpdatePageResolution(CefRefPtr<CefBrowser> browser);				// TODO: <--- Needs refactoring!
 
     // EXPERIMENTAL: Request coordinates of fixed elements (like bars on top of pages)
     void GetFixedElements(CefRefPtr<CefBrowser> browser);

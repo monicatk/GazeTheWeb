@@ -115,25 +115,13 @@ void Handler::OnLoadError(
 
 void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, TransitionType transition_type)
 {
-	// TODO CEF UPDATE: what is transition_type
-
 	// Set loading status of each in Tab to loading in order to display loading icon and status
-	_pMediator->SetLoadingStatus(browser, frame->GetIdentifier(), frame->IsMain(), true);
-
-	// DEBUG: golem.de
-	//LogDebug("OnLoadStart: frameId=", frame->GetIdentifier(), ", isMain?=", frame->IsMain());
-	//frame->ExecuteJavaScript("document.onreadystatechange = function(){console.log('" + std::to_string(frame->GetIdentifier())
-	//	+ ": '+document.readyState)}", "", 0);
+	_pMediator->SetLoadingStatus(browser, true);
 
     if (frame->IsMain())
     {
 		_pMediator->ResetFavicon(browser);
 		//LogDebug("Handler: Started loading frame id = ", frame->GetIdentifier(), " (main = ", frame->IsMain(), "), browserID = ", browser->GetIdentifier());
-
-		//frame->ExecuteJavaScript("StartPageLoadingTimer();", "", 0);
-
-        // Set Tab's URL when page is loading
-        _pMediator->SetURL(browser);
 
         // Set zoom level according to Tab's settings
         SetZoomLevel(browser, false);
@@ -148,7 +136,7 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
 void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode)
 {
 	// Set loading status of each frame in Tab to load finished in order to display loading icon and status
-	_pMediator->SetLoadingStatus(browser, frame->GetIdentifier(), frame->IsMain(), false);
+	_pMediator->SetLoadingStatus(browser, false);
 
     if (frame->IsMain())
     {
@@ -170,8 +158,9 @@ void Handler::OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
     bool canGoBack,
     bool canGoForward)
 {
+	// Fetch main frame's url and set it in Tab, if it changed
+	_pMediator->SetURL(browser);
 
-    // TODO: There might be a more performant way to set those values not as regularly as with every callback
     _pMediator->SetCanGoBack(browser, canGoBack);
     _pMediator->SetCanGoForward(browser, canGoForward);
 
