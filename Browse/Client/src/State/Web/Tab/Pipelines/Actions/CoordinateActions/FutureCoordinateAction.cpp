@@ -187,7 +187,7 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 	// Decide whether zooming is finished
 	bool finished = false;
 	SampleData sample = _sampleData.front(); // only use front of samples
-	if (_zoom < 0.7f && _zoom < sample.zoom) // only proceed if current zoom is smaller than the on from the sample, so zoomed more
+	if (_zoom < 0.65f && _zoom < sample.zoom) // only proceed if current zoom is smaller than the on from the sample, so zoomed more
 	{
 		// ### WebView pixels
 
