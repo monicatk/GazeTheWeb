@@ -910,7 +910,6 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
 			case GLFW_KEY_6: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::MAGNIFICATION); break; }
 			case GLFW_KEY_7: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::FUTURE); break; }
-			case GLFW_KEY_P: { _pCefMediator->Poll(0.f); break; } // TODO: remove tpf from poll call?
 			case GLFW_KEY_SPACE: { _upVoiceInput->StartAudioRecording(); break; }
         }
     }

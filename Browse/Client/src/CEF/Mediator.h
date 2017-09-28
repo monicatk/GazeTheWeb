@@ -113,8 +113,7 @@ public:
     void ReceiveFixedElements(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
     void RemoveFixedElement(CefRefPtr<CefBrowser> browser, int id);
 
-    // Called by master, only. Quite similar to a update method
-    void Poll(float tpf);
+	void Poll(TabCEFInterface* pTab);
 
 	// Update Tab's title when title change callback is received
 	void OnTabTitleChange(CefRefPtr<CefBrowser> browser, std::string title);

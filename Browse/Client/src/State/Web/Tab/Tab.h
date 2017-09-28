@@ -660,6 +660,9 @@ private:
 	// Data transfer (indicates whether social record is allowed or not, also controls whether history is filled or not)
 	bool _dataTransfer = false;
 
+	// Time until next polling
+	float _timeUntilPolling = 0.f;
+
 };
 
 #endif // TAB_H_

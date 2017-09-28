@@ -66,6 +66,8 @@ namespace setup
 	static const bool	BLUR_PERIPHERY = false;
 	static const float	WEB_VIEW_RESOLUTION_SCALE = 1.f;
 	static const unsigned int	HISTORY_MAX_PAGE_COUNT = 100; // maximal length of history
+	static const bool	USE_DOM_NODE_POLLING = true;
+	static const float	DOM_POLLING_FREQUENCY = 0.25f; // times per second
 }
 
 #endif // SETUP_H_

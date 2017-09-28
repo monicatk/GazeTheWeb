@@ -128,6 +128,20 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 	// Store tpf
 	_lastTimePerFrame = tpf;
 
+	// Poll mediator to update DOM nodes (computed styles etc.)
+	if (setup::USE_DOM_NODE_POLLING)
+	{
+		if (_timeUntilPolling <= 0.f)
+		{
+			_pCefMediator->Poll(this); // TODO: maybe only start after completely loaded
+			_timeUntilPolling = 1.f / setup::DOM_POLLING_FREQUENCY;
+		}
+		else
+		{
+			_timeUntilPolling -= tpf;
+		}
+	}
+	
 	// #######################
 	// ### UPDATE WEB VIEW ###
 	// #######################

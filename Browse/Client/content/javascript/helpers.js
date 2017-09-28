@@ -12,7 +12,7 @@ function ConsolePrint(msg)
 
 ConsolePrint("Starting to import helpers.js ...");
 
-function CefPoll(tpf)
+function CefPoll()
 {
     UpdateDOMRects();
 }
