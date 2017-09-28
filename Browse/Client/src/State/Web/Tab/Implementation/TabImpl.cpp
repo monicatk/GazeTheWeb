@@ -203,10 +203,23 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		if (!rIdNodePair.second)
 			continue;
 
-		for (const auto& rRect : rIdNodePair.second->GetRects())
+		// Check whether link is visible
+		const auto bitmask = rIdNodePair.second->GetOccBitmask();
+		bool visible = true;
+		/*
+		for (const auto& bit : bitmask)
 		{
-			// TODO: Sometimes breaks at this position in debug mode
-			rects.push_back(rRect);
+			visible &= bit;
+		}
+		*/
+
+		// Only highlight if visible
+		if (visible)
+		{
+			for (const auto& rRect : rIdNodePair.second->GetRects())
+			{
+				rects.push_back(rRect);
+			}
 		}
 	}
 	_upWebView->SetHighlightRects(rects);
