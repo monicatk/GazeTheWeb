@@ -27,8 +27,11 @@ void Tab::GetWebRenderResolution(int& rWidth, int& rHeight) const
 
 void Tab::SetURL(std::string URL)
 {
-	_url = URL;
-	LabStreamMailer::instance().Send("Loading URL: " + _url);
+	if (URL != _url)
+	{
+		_url = URL;
+		LabStreamMailer::instance().Send("Loading URL: " + _url);
+	}
 }
 
 void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upData, int width, int height)
@@ -344,45 +347,42 @@ void Tab::RemoveFixedElement(int id)
 	//}
 }
 
-void Tab::SetLoadingStatus(int64 frameID, bool isMain, bool isLoading)
+void Tab::SetLoadingStatus(bool isLoading)
 {
-	// isMain=true && isLoading=false may indicate, that site has completely finished loading
-	if (isMain)
-	{
-        if(isLoading)
-        {
-            // Main frame is loading
-            eyegui::setImageOfPicture(_pPanelLayout, "icon", "icons/TabLoading_0.png");
-            _timeUntilNextLoadingIconFrame = TAB_LOADING_ICON_FRAME_DURATION;
-            _iconState = IconState::LOADING;
+	// isLoading=false may indicate, that site has completely finished loading
+	if(isLoading)
+    {
+        // Main frame is loading
+        eyegui::setImageOfPicture(_pPanelLayout, "icon", "icons/TabLoading_0.png");
+        _timeUntilNextLoadingIconFrame = TAB_LOADING_ICON_FRAME_DURATION;
+        _iconState = IconState::LOADING;
 
-			// Abort any pipeline execution when loading of main frame starts
-			AbortAndClearPipelines();
+		// Abort any pipeline execution when loading of main frame starts
+		AbortAndClearPipelines();
+    }
+    else
+    {
+        // Main frame is done with loading
+        if (_faviconLoaded)
+        {
+            eyegui::setImageOfPicture(_pPanelLayout, "icon", GetFaviconIdentifier());
+            _iconState = IconState::FAVICON;
         }
         else
         {
-            // Main frame is done with loading
-            if (_faviconLoaded)
-            {
-                eyegui::setImageOfPicture(_pPanelLayout, "icon", GetFaviconIdentifier());
-                _iconState = IconState::FAVICON;
-            }
-            else
-            {
-                eyegui::setImageOfPicture(_pPanelLayout, "icon", "icons/TabIconNotFound.png");
-                _iconState = IconState::ICON_NOT_FOUND;
-            }
-
-			// Add page to history after loading
-			if (_dataTransfer)
-			{
-				HistoryManager::Page page;
-				page.URL = _url;
-				page.title = _title;
-				_pWeb->PushAddPageToHistoryJob(this, page);
-			}
+            eyegui::setImageOfPicture(_pPanelLayout, "icon", "icons/TabIconNotFound.png");
+            _iconState = IconState::ICON_NOT_FOUND;
         }
-	}
+
+		// Add page to history after loading
+		if (_dataTransfer)
+		{
+			HistoryManager::Page page;
+			page.URL = _url;
+			page.title = _title;
+			_pWeb->PushAddPageToHistoryJob(this, page);
+		}
+    }
 }
 
 void Tab::RequestJSDialog(JavaScriptDialogType type, std::string message)

@@ -12,7 +12,7 @@ document.onclick = function(e){
 	}
 }
 
-window.appendedSubtreeRoots = new Set();
+// window.appendedSubtreeRoots = new Set();
 
 // Trigger DOM data update on changing document loading status
 document.onreadystatechange = function()
@@ -117,106 +117,179 @@ document.addEventListener('transitionend', function(event){
 
 
 var docFrags = [];
-
+var debug_nodes = [];
 
 /* Modify appendChild in order to get notifications when this function is called */
 var originalAppendChild = Element.prototype.appendChild;
 Element.prototype.appendChild = function(child){
 	// appendChild extension: Check if root is already part of DOM tree
-    if(this.nodeType == 1 || this.nodeType > 8)
-    {
-		var subtreeRoot = this;
+	var previous_root = this.getRootNode();
 
-		// Stop going up the tree when parentNode is documentElement or doesn't exist (null or undefined)
-		while(subtreeRoot !== document.documentElement && subtreeRoot.parentNode && subtreeRoot.parentNode !== undefined)
-			subtreeRoot = subtreeRoot.parentNode;
+	if(arguments[0].first_root === undefined)
+	{
+		arguments[0].first_root = previous_root;
+		debug_nodes.push(arguments[0]);
+	}
+	// /* ### SUBTREE IS NOT PART OF GLOBAL DOM TREE ### */
+	// // Register subtree roots, whose children have to be checked outside of MutationObserver
+	// if(subtreeRoot !== document) 
+	// {
+	// 	/* ### NODE GETS APPENDED TO DOCUMENT FRAGMENT PARENT ### */
+	// 	// When DocumentFragments get appended to DOM, they "lose" all their children and only their children are added to DOM
+	// 	if(subtreeRoot.nodeType == 11) // 11 == DocumentFragment
+	// 	{
+	// 		// console.log(child, " was appended to a document fragment parent");
+	// 		// Mark all 1st generation child nodes of DocumentFragments as subtree roots
+	// 		window.appendedSubtreeRoots.add(child);
+	// 		for(var i = 0, n = subtreeRoot.childNodes.length; i < n; i++)
+	// 		{
+	// 			window.appendedSubtreeRoots.add(subtreeRoot.childNodes[i]);
+	// 		}
+	// 	}
+	// 	/* ### ROOT IS NO DOCUMENT FRAGMENT, BUT ALSO NOT YET PART OF GLOBAL DOM TREE ### */
+	// 	else 
+	// 	{
+	// 		// console.log(child, " was appended to a subtree ", subtreeRoot," where root isn't a document fragment & not global DOM tree");	
+	// 		// Add subtree root to Set of subtree roots
+	// 		window.appendedSubtreeRoots.add(subtreeRoot);	
 
-		// Register subtree roots, whose children have to be checked outside of MutationObserver
-        if(subtreeRoot !== document.documentElement) 
-		{
+	// 		// Remove children of this subtree root from subtree root set --> prevent double-checking of branches
+	// 		ForEveryChild(subtreeRoot, (n) => {window.appendedSubtreeRoots.delete(n); });
+	// 	} 
+	// }
 
-			// When DocumentFragments get appended to DOM, they "lose" all their children and only their children are added to DOM
-			if(subtreeRoot.nodeType == 11) // 11 == DocumentFragment
-			{
-				// Mark all 1st generation child nodes of DocumentFragments as subtree roots
-				for(var i = 0, n = subtreeRoot.childNodes.length; i < n; i++)
-					window.appendedSubtreeRoots.add(subtreeRoot.childNodes[i]);
-			}
-			else 
-			{	
-				// Add subtree root to Set of subtree roots
-				window.appendedSubtreeRoots.add(subtreeRoot);	
+	// /* ### DOCUMENT FRAGMENT GETS APPENDED TO GLOBAL DOM TREE */
+	// // DocumentFragment as parent: children disappear when fragment is appended to DOM tree
+	// if(child.nodeType === 11)
+	// {
+	// 	// console.log("Appending document fragment to parent ", this);
+	// 	for(var i = 0, n = child.childNodes.length; i < n; i++)
+	// 	{
+	// 		ForEveryChild(child.childNodes[i], 
+	// 			(childNode) => { window.appendedSubtreeRoots.delete(childNode); }
+	// 		);
 
-				// Remove children of this subtree root from subtree root set --> prevent double-checking of branches
-				ForEveryChild(subtreeRoot, (child) => {window.appendedSubtreeRoots.delete(child); });
-			} 
-		}
-    }  
+	// 		window.appendedSubtreeRoots.add(child.childNodes[i]);
+	// 	}
+	// }
 
-	// DocumentFragment as parent: children disappear when fragment is appended to DOM tree
-	if(child.nodeType === 11)
+	var was_document_fragment = (child.nodeType === 11);
+	var skip_nodes = [];
+	if(was_document_fragment)
 	{
 		for(var i = 0, n = child.childNodes.length; i < n; i++)
-		{
-			ForEveryChild(child.childNodes[i], 
-				(childNode) => { window.appendedSubtreeRoots.delete(childNode); }
-			);
+			skip_nodes.push(child.childNodes[i]);
+	}
 
-			window.appendedSubtreeRoots.add(child.childNodes[i]);
+	// Execute real appendChild
+    var return_value = originalAppendChild.apply(this, arguments); // Doesn't work with child, why?? Where does arguments come from?
+
+	/* ### ANALYZE APPENDED SUBTREE AFTER DOCUMENT FRAGMENT DISPERSES ### */
+	// if(child.nodeType === 11 && child.getRootNode().nodeType !== 11) //  && subtreeRoot !== document)
+	var new_root = this.getRootNode();
+	// if(previous_root !== new_root && new_root === document)
+	// if(was_document_fragment && new_root === document) //  && previous_root !== document)
+	if(new_root !== previous_root )//&& new_root === document)
+	{
+		console.log("previous root: ", previous_root, "\nnew root: ", new_root, "\nnew parent: ", this);
+		for(var i = 0, n = this.childNodes.length; i < n; i++)
+		{
+			var node = this.childNodes[i];
+			if(node in skip_nodes)
+				continue;
+		
+			AnalyzeNode(node);
+			// Also, check its whole subtree
+			ForEveryChild(node, AnalyzeNode);
 		}
 	}
 
-	// Finally: Execute appendChild
-    return originalAppendChild.apply(this, arguments); // Doesn't work with child, why?? Where does arguments come from?
+	return return_value;
+
 };
 
+var document_fragments = [];
+// TODO: Still necessary?
 Document.prototype.createDocumentFragment = function() {
 	var fragment = new DocumentFragment();
 
-	// TODO: childList in config not needed? Or later for children, added to DOM, relevant?
-	if(window.observer !== undefined)
-	{
-		var config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: false, attributeOldValue: true};
-		window.observer.observe(fragment, config);
-	}
-	else
-		console.log("Custom createDocumentFragment: MutationObserver doesn't seem to have been set up properly.");
+	// // TODO: childList in config not needed? Or later for children, added to DOM, relevant?
+	// if(window.observer !== undefined)
+	// {
+	// 	var config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: false, attributeOldValue: true};
+	// 	window.observer.observe(fragment, config);
+	// }
+	// else
+	// 	console.log("Custom createDocumentFragment: MutationObserver doesn't seem to have been set up properly.");
 
+	document_fragments.push(fragment);
 	return fragment;
 };
 
 // DEBUGGING
 var analyzed_nodes = [], not_analyzed_nodes = [];
-function CountAnalyzedNodes(print_nodes=false){
+var not_analyzed_roots = new Set();
+function CountAnalyzedNodes(root=document.documentElement, print_nodes=false){
 	var count = 0;
 	analyzed_nodes = [];
 	not_analyzed_nodes = [];
-	ForEveryChild(document.documentElement, (n) => {
+	times_analyzed_histogram = [];
+	ForEveryChild(root, (n) => {
 		count++;
 		if(n.analyzed)
+		{
 			analyzed_nodes.push(n);
+			if(times_analyzed_histogram[n.times_analyzed] === undefined)
+				times_analyzed_histogram[n.times_analyzed] = 1;
+			else
+				times_analyzed_histogram[n.times_analyzed]++;
+		}
 		else
 		{
 			not_analyzed_nodes.push(n);
+			if(n.parentNode && n.parentNode.analyzed)
+			{
+				not_analyzed_roots.add(n.parentNode);
+			}
 			if(print_nodes)
 				console.log(n);
 		}
 	});
-	ConsolePrint("Found "+analyzed_nodes.length+" analyzed and "+not_analyzed_nodes.length+" not analyzed of "+count+" nodes"
-		+" | percentage not analyzed: "+not_analyzed_nodes.length/count*100+"%");
+	times_analyzed_histogram[0] = not_analyzed_nodes.length;
+
+	if(root === document.documentElement)
+	{
+		ConsolePrint("Found "+analyzed_nodes.length+" analyzed and "+not_analyzed_nodes.length+" not analyzed of "+count+" nodes"
+			+" | percentage not analyzed: "+not_analyzed_nodes.length/count*100+"%");
+		ConsolePrint("Found "+not_analyzed_roots.size+" not analyzed root nodes.");
+	}
+	return {"analyzed" : analyzed_nodes, 
+		"not_analyzed" : not_analyzed_nodes, 
+		"not_analyzed_roots" : not_analyzed_roots,
+		"times_analyzed_histogram" : times_analyzed_histogram};
 }
 
 function AnalyzeNode(node)
 {
 	// DEBUG
-	node.analyzed = true;
-
-	if( (node.nodeType == 1 || node.nodeType > 8) && (node.hasAttribute && !node.hasAttribute("nodeType")) && (node !== window)) // 1 == ELEMENT_NODE
+	if(!node.analyzed)
 	{
+		node.analyzed = true;
+		node.times_analyzed = 0;
+	}
+	node.times_analyzed++;
+	
 
-		// If node is possible DocFrag subtree root node, remove it from set and analyze its subtree too
-		if(window.appendedSubtreeRoots.delete(node))
-			ForEveryChild(node, AnalyzeNode);
+	//if( (node.nodeType == 1 || node.nodeType > 8) && (node.hasAttribute && !node.hasAttribute("nodeType")) && (node !== window)) // 1 == ELEMENT_NODE
+	if(typeof(node.hasAttribute) === "function")
+	{
+		// /* ### HANDLING APPENDED### */
+		// // If node is possible DocFrag subtree root node, remove it from set and analyze its subtree too
+		// if(window.appendedSubtreeRoots.delete(node))
+		// {
+		// 	// console.log("Found document fragment child, whose subtree still has to be analyzed. Performing now.");
+		// 	ForEveryChild(node, AnalyzeNode);
+		// }
 
 		var computedStyle = window.getComputedStyle(node, null);
 
@@ -585,14 +658,20 @@ function MutationObserverInit()
 							if(node === undefined)
 								return;
 
-							// Mark child nodes of DocumentFragment, in order to being able to analyze their subtrees later
-							if(mutation.target.nodeType === 11)
-							{
-								// Add node as possible root, which might not be recognized when DocFrag disappears
-								window.appendedSubtreeRoots.add(node);
-								// Remove knowledge about every possible root due to a DocFrag in whole subtree
-								ForEveryChild(node, function(child){ window.appendedSubtreeRoots.delete(child); });
-							}
+							// // Never executed!
+							// if(node.nodeType === 11)
+							// {
+							// 	console.log("Realized that document fragment was appended to DOM tree!");
+							// }
+							// // TODO: This is already done in appendChild method!
+							// // Mark child nodes of DocumentFragment, in order to being able to analyze their subtrees later
+							// if(mutation.target.nodeType === 11)
+							// {
+							// 	// Add node as possible root, which might not be recognized when DocFrag disappears
+							// 	window.appendedSubtreeRoots.add(node);
+							// 	// Remove knowledge about every possible root due to a DocFrag in whole subtree
+							// 	ForEveryChild(node, function(child){ window.appendedSubtreeRoots.delete(child); });
+							// }
 
 							// DEBUG
 							if(node.className === "scroll-wrapper scrollbar-inner")

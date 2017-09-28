@@ -92,7 +92,7 @@ public:
     virtual void AddTabAfter(std::string URL) = 0;
 
 	// Receive current loading status of each frame
-	virtual void SetLoadingStatus(int64 frameID, bool isMain, bool isLoading) = 0;
+	virtual void SetLoadingStatus(bool isLoading) = 0;
 
 
 

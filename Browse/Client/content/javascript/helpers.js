@@ -12,6 +12,11 @@ function ConsolePrint(msg)
 
 ConsolePrint("Starting to import helpers.js ...");
 
+function CefPoll(tpf)
+{
+    UpdateDOMRects();
+}
+
 if(ClientRectList.prototype.map === undefined)
 {
     ConsolePrint("JS: Extending JS ClientRectList by own map function.");
