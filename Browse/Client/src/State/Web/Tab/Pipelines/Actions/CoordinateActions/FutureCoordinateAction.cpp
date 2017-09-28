@@ -21,7 +21,7 @@ const float DIMMING_VALUE = 0.0f; // no dimming for experiment
 const float DEVIATION_FADING_DURATION = 0.5f;
 
 // Multiplier of movement towards center (one means that on maximum zoom the outermost corner is moved into center)
-const float CENTER_OFFSET_MULTIPLIER = 0.f; // TODO integrate in drift offset calculation 0.1f;
+const float CENTER_OFFSET_MULTIPLIER = 0.25f;
 
 // Duration to replace current coordinate with input
 const float MOVE_DURATION = 0.5f;
@@ -187,7 +187,7 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 	// Decide whether zooming is finished
 	bool finished = false;
 	SampleData sample = _sampleData.front(); // only use front of samples
-	if (_zoom < 0.8f && _zoom < sample.zoom) // only proceed if current zoom is smaller than the on from the sample, so zoomed more
+	if (_zoom < 0.7f && _zoom < sample.zoom) // only proceed if current zoom is smaller than the on from the sample, so zoomed more
 	{
 		// ### WebView pixels
 
@@ -210,10 +210,10 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 		sampleZoomCoordinate *= webViewPixels; // WebView pixels
 		glm::vec2 pixelZoomCoordinateDelta = zoomCoordinate - sampleZoomCoordinate; // on screen delta
 
-		// Remove offset introduced by center offset TODO: think about it, right now not integrated
-		// glm::vec2 pixelCenterOffsetDelta = (_relativeCenterOffset - sample.relativeCenterOffset) * webViewPixels; // screen offset caused by center offset application
-		// pixelGazeDelta -= pixelCenterOffsetDelta;
-		// pixelZoomCoordinateDelta -= pixelCenterOffsetDelta; -> relative to page, not WebView
+		// Remove offset introduced by center offset
+		glm::vec2 pixelCenterOffsetDelta = (_relativeCenterOffset - sample.relativeCenterOffset) * webViewPixels; // screen offset caused by center offset application
+		pixelGazeDelta += pixelCenterOffsetDelta;
+		pixelZoomCoordinateDelta += pixelCenterOffsetDelta;
 
 		// Bring pixel gaze delta from WebView pixels dimension to CEF webpage pixels dimension
 		pixelGazeDelta = (pixelGazeDelta / webViewPixels) * cefPixels;
@@ -238,8 +238,7 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 		glm::vec2 pixelFixation = samplePixelZoomCoordinate + (direction * radius);
 
 		// Output fixation
-		// LogInfo("Fixation: ", pixelFixation.x, ", ", pixelFixation.y);
-		LogInfo("Drift: ", direction.x * radius, ", ", direction.y * radius);
+		LogInfo("Fixation: ", pixelFixation.x, ", ", pixelFixation.y);
 
 		// Push back fixation
 		_fixations.push_back(pixelFixation);
