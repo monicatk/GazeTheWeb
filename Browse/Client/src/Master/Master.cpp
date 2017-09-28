@@ -652,9 +652,6 @@ void Master::Loop()
 		// Update lab streaming layer mailer to get incoming messages
 		LabStreamMailer::instance().Update();
 
-		// Poll CefMediator
-		_pCefMediator->Poll(tpf);
-
 		// Notification handling
 		if (_notificationTime <= 0 // time for the current notification is over
 			|| (_notificationOverridable && !_notificationStack.empty())) // go to next notification if current is overridable and stack not empty
