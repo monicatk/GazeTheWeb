@@ -38,6 +38,9 @@ const float ZOOM_STEEPNESS = 1.25f;
 // Name of custom transformation
 const std::string TRANS_NAME = "FutureCoordinateAction";
 
+// Count of fixations considered for final output
+const int FIXATION_COUNT = 15;
+
 FutureCoordinateAction::FutureCoordinateAction(TabInteractionInterface* pTab, bool doDimming) : Action(pTab)
 {
 	// Save members
@@ -49,18 +52,15 @@ FutureCoordinateAction::FutureCoordinateAction(TabInteractionInterface* pTab, bo
 
 bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
-	// ####################
-	// ### DECLARATIONS ###
-	// ####################
+	// ###################
+	// ### DEFINITIONS ###
+	// ###################
 
-	// Speed of zooming
-	float zoomSpeed = 0.f;
-
-	// Web view resolution
+	// WebView resolution
 	const glm::vec2 cefPixels(_pTab->GetWebViewResolutionX(), _pTab->GetWebViewResolutionY());
 
 	// WebView resolution
-	glm::vec2 webViewPixels(_pTab->GetWebViewWidth(), _pTab->GetWebViewHeight());
+	const glm::vec2 webViewPixels(_pTab->GetWebViewWidth(), _pTab->GetWebViewHeight());
 
 	// Function transforms coordinate from relative WebView coordinates to CEFPixel coordinates on page
 	const std::function<void(const float&, const glm::vec2&, const glm::vec2&, glm::vec2&)> pageCoordinate
@@ -100,15 +100,15 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 	};
 
 	// Current raw! gaze (filtered here through zoom coordinate calculation)
-	glm::vec2 relativeGazeCoordinate(spInput->webViewRelativeRawGazeX, spInput->webViewRelativeRawGazeY); // relative WebView space
-
-	// Current gaze in page pixel coordinates
-	glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate;
+	glm::vec2 pixelGazeCoordinate(spInput->webViewRelativeRawGazeX, spInput->webViewRelativeRawGazeY);
 	currentPageCoordinate(pixelGazeCoordinate);
 
-	// #########################
-	// ### COORDINATE UPDATE ###
-	// #########################
+	// ##############################
+	// ### ZOOM COORDINATE UPDATE ###
+	// ##############################
+
+	// Speed of zooming
+	float zoomSpeed = 0.f;
 
 	// Only allow zoom in when gaze upon web view
 	if (!spInput->gazeUponGUI && spInput->insideWebView)
@@ -136,7 +136,7 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 		else // first frame of execution
 		{
 			// Use raw coordinate as new coordinate
-			_relativeZoomCoordinate = relativeGazeCoordinate;
+			_relativeZoomCoordinate = glm::vec2(spInput->webViewRelativeRawGazeX, spInput->webViewRelativeRawGazeY);
 
 			// Since only for first frame, do not do it again
 			_firstUpdate = false;
@@ -154,55 +154,39 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 	// Update linear zoom
 	_linZoom += tpf * zoomSpeed; // frame rate depended, because zoomSpeed is depending on deviation which is depending on tpf
 
-	// Clamp linear zoom (zero is standard, everything higher is zoomed)
-	// _linZoom = glm::clamp(_linZoom, 0.f, 1.f);
-
-	// Make zoom better with exponential function and some delay for orientation
-	// float x = _linZoom;
-	// float n = ZOOM_STEEPNESS;
-	// _zoom = 1 - (glm::pow(x, n) / (glm::pow(x, n) + glm::pow(1 - x, n))); // apply ease in / out function
-
-	// Trying something different
+	// Exponential zoom
 	_linZoom = glm::max(0.f, _linZoom);
 	_zoom = glm::min(1.f, glm::exp(-(_linZoom - 0.1f)));
 
-	// Scale
-	// _zoom = (1.f - MAX_ZOOM) * _zoom + MAX_ZOOM;
-
-	// #########################
-	// ### SAMPLE EVALUATION ###
-	// #########################
+	// ########################
+	// ### DRIFT CORRECTION ###
+	// ########################
 
 	// Update and clean samples
-	std::for_each(_sampleData.begin(), _sampleData.end(), [&](SampleData& rSampleData) { rSampleData.lifetime -= tpf; });
+	std::for_each(_sampleData.begin(), _sampleData.end(), [&](SampleData& rSampleData) { rSampleData.lifetime -= tpf; }); // update remaining lifetime
 	_sampleData.erase(
 		std::remove_if(
 			_sampleData.begin(),
 			_sampleData.end(),
 			[&](const SampleData& rSampleData) { return rSampleData.lifetime <= 0.f; }),
-		_sampleData.end());
+		_sampleData.end()); // clean samples
 
-	/*
-	// Current gaze in page pixel coordinates (filtered by custom transformation so filtered in page space!)
-	glm::vec2 pixelGazeCoordinate(_spTrans->GetFilteredGazeX(TRANS_NAME), _spTrans->GetFilteredGazeY(TRANS_NAME));
-
-	// Relative gaze coordinate in web view
-	glm::vec2 relativeGazeCoordinate = pixelGazeCoordinate;
-	currentWebViewCoordinate(relativeGazeCoordinate);
-	*/
+	// Use filtered gaze here (on page space)
+	glm::vec2 filteredRelativeGazeCoordinate(_spTrans->GetFilteredGazeX(TRANS_NAME), _spTrans->GetFilteredGazeY(TRANS_NAME)); // CEF page pixels
+	currentWebViewCoordinate(filteredRelativeGazeCoordinate); // relative WebView space
 
 	// Add new sample storing current values
-	_sampleData.push_back(SampleData(_zoom, relativeGazeCoordinate, _relativeZoomCoordinate, _relativeCenterOffset));
+	_sampleData.push_back(SampleData(_zoom, filteredRelativeGazeCoordinate, _relativeZoomCoordinate, _relativeCenterOffset));
 
 	// Decide whether zooming is finished
-	SampleData sample = _sampleData.front();
+	SampleData sample = _sampleData.front(); // only use front of samples
 	bool finished = false;
-	if (_zoom < sample.zoom)
+	if (_zoom < sample.zoom) // only proceed if current zoom is smaller than the on from the sample, so zoomed more
 	{
 		// ### WebView pixels
 
 		// Current gaze in WebView pixels
-		glm::vec2 pixelGaze = relativeGazeCoordinate * webViewPixels; // on screen
+		glm::vec2 pixelGaze = filteredRelativeGazeCoordinate * webViewPixels; // on screen
 
 		// Sample gaze in WebView pixels
 		glm::vec2 sampleRelativeGaze = sample.relativeGazeCoordinate;
@@ -251,42 +235,47 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 		LogInfo("Fixation: ", pixelFixation.x, ", ", pixelFixation.y);
 
 		// Push back fixation
-		_fixations.push_back(pixelFixation); // TODO limit etc
+		_fixations.push_back(pixelFixation);
+
+		// Limit fixations
+		int overlap = glm::max(0, (int)_fixations.size() - FIXATION_COUNT);
+		for (int i = 0; i < overlap; i++)
+		{
+			_fixations.pop_front();
+		}
 
 		// Go over last fixations and calculate deviation
-		const int n = 30;
 		const int size = _fixations.size();
-		if (size >= n)
+		if (size >= FIXATION_COUNT)
 		{
 			glm::vec2 mean(0, 0);
-			for (int i = size - 1; i >= glm::max(0, size - n); i--)
+			for (const auto& rValue : _fixations)
 			{
-				mean += _fixations.at(i);
+				mean += rValue;
 			}
-			mean /= (float)glm::min(n, size);
+			mean /= (float)size;
 			float deviation = 0;
-			for (int i = size - 1; i >= glm::max(0, size - n); i--)
+			for (const auto& rValue : _fixations)
 			{
-				deviation += glm::distance(mean, _fixations.at(i));
+				deviation += glm::distance(mean, rValue);
 			}
-			deviation /= (float)glm::min(n, size);
+			deviation /= (float)size;
 
 			// Output deviation
 			LogInfo("Deviation: ", deviation);
 
-			if (deviation < 5.f)
+			if (deviation < 3.f)
 			{
 				// Fill output
 				SetOutputValue("coordinate", mean);
-
 				finished = true;
 			}
 		}
 	}
 
-	// ##############
-	// ### FINISH ###
-	// ##############
+	// ############################
+	// ### PAGE SPACE FILTERING ###
+	// ############################
 
 	// Update custom transformation
 	double webViewX = _pTab->GetWebViewX();
@@ -321,11 +310,9 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 	}
 	);
 
-	// Finishing condition
-	if (_zoom <= MAX_ZOOM)
-	{
-		finished = true;
-	}
+	// #####################
+	// ### VISUALIZATION ###
+	// #####################	
 
 	// Decrement dimming
 	_dimming += tpf;
@@ -338,6 +325,27 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 	webViewParameters.zoomPosition = _relativeZoomCoordinate;
 	if (_doDimming) { webViewParameters.dim = DIMMING_VALUE * (_dimming / DIMMING_DURATION); }
 	_pTab->SetWebViewParameters(webViewParameters);
+
+	// ################
+	// ### FALLBACK ###
+	// ################
+
+	// Finishing condition
+	if (_zoom <= MAX_ZOOM)
+	{
+		finished = true;
+	}
+
+	// If finished but no coordinate determined, use zoom coordinate as fallback
+	if(finished)
+	{
+		// Check whether coordinate was set
+		glm::vec2 helper;
+		if (!this->GetOutputValue("coordinate", helper))
+		{
+			SetOutputValue("coordinate", glm::vec2(_relativeZoomCoordinate * webViewPixels)); // into pixel space of CEF
+		}
+	}
 
     // Return whether finished
     return finished;
@@ -384,7 +392,7 @@ void FutureCoordinateAction::Activate()
 {
 	// TODO: could go wrong, as taken from weak pointer
 	_spTrans = _pTab->GetCustomTransformationInterface().lock();
-	_spTrans->RegisterCustomTransformation(TRANS_NAME, [](double& x, double& y) {}); // tell transformation to not transform anything
+	_spTrans->RegisterCustomTransformation(TRANS_NAME, [](double& x, double& y) {}); // tell transformation to not transform anything, done in update
 }
 
 void FutureCoordinateAction::Deactivate()

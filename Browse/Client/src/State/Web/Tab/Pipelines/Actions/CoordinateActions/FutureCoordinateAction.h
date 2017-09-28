@@ -92,7 +92,7 @@ protected:
 	std::vector<SampleData> _sampleData;
 
 	// Potential fixations
-	std::vector<glm::vec2> _fixations;
+	std::deque<glm::vec2> _fixations;
 
 	// Shared pointer to custom transformation interface of input
 	std::shared_ptr<CustomTransformationInterface> _spTrans;
