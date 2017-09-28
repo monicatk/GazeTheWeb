@@ -24,7 +24,7 @@ const float DEVIATION_FADING_DURATION = 0.5f;
 const float CENTER_OFFSET_MULTIPLIER = 0.f; // TODO integrate in drift offset calculation 0.1f;
 
 // Duration to replace current coordinate with input
-const float MOVE_DURATION = 0.1f;
+const float MOVE_DURATION = 0.5f;
 
 // Maximum zoom level
 const float MAX_ZOOM = 0.1f;
@@ -99,24 +99,12 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 		webViewCoordinate(_zoom, _relativeZoomCoordinate, _relativeCenterOffset, rCoordinate);
 	};
 
-	/*
-
 	// Current raw! gaze (filtered here through zoom coordinate calculation)
 	glm::vec2 relativeGazeCoordinate(spInput->webViewRelativeRawGazeX, spInput->webViewRelativeRawGazeY); // relative WebView space
 
 	// Current gaze in page pixel coordinates
 	glm::vec2 pixelGazeCoordinate = relativeGazeCoordinate;
 	currentPageCoordinate(pixelGazeCoordinate);
-
-	*/
-
-	// Current gaze in page pixel coordinates (filtered by custom transformation so filtered in page space!)
-	glm::vec2 pixelGazeCoordinate(_spTrans->GetFilteredGazeX(TRANS_NAME), _spTrans->GetFilteredGazeY(TRANS_NAME));
-
-	// Relative gaze coordinate in web view
-	glm::vec2 relativeGazeCoordinate = pixelGazeCoordinate;
-	currentWebViewCoordinate(relativeGazeCoordinate);
-
 
 	// #########################
 	// ### COORDINATE UPDATE ###
@@ -193,6 +181,15 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 			_sampleData.end(),
 			[&](const SampleData& rSampleData) { return rSampleData.lifetime <= 0.f; }),
 		_sampleData.end());
+
+	/*
+	// Current gaze in page pixel coordinates (filtered by custom transformation so filtered in page space!)
+	glm::vec2 pixelGazeCoordinate(_spTrans->GetFilteredGazeX(TRANS_NAME), _spTrans->GetFilteredGazeY(TRANS_NAME));
+
+	// Relative gaze coordinate in web view
+	glm::vec2 relativeGazeCoordinate = pixelGazeCoordinate;
+	currentWebViewCoordinate(relativeGazeCoordinate);
+	*/
 
 	// Add new sample storing current values
 	_sampleData.push_back(SampleData(_zoom, relativeGazeCoordinate, _relativeZoomCoordinate, _relativeCenterOffset));

@@ -560,7 +560,7 @@ void Mediator::RemoveFixedElement(CefRefPtr<CefBrowser> browser, int id)
 
 void Mediator::Poll(float tpf)
 {
-    // TODO Daniel
+    // TODO maybe only active browser?
 	for (auto id_browser_pair : _browsers)
 	{
 		auto browser = id_browser_pair.second;
