@@ -41,6 +41,9 @@ const std::string TRANS_NAME = "FutureCoordinateAction";
 // Count of fixations considered for final output
 const int FIXATION_COUNT = 15;
 
+// Expected precision of fixation
+const float FIXATION_PIXEL_PRECISION = 2.5f;
+
 FutureCoordinateAction::FutureCoordinateAction(TabInteractionInterface* pTab, bool doDimming) : Action(pTab)
 {
 	// Save members
@@ -168,7 +171,10 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 		std::remove_if(
 			_sampleData.begin(),
 			_sampleData.end(),
-			[&](const SampleData& rSampleData) { return rSampleData.lifetime <= 0.f; }),
+			[&](const SampleData& rSampleData)
+	{
+		return rSampleData.lifetime <= 0.f;
+	}),
 		_sampleData.end()); // clean samples
 
 	// Use filtered gaze here (on page space)
@@ -179,9 +185,9 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 	_sampleData.push_back(SampleData(_zoom, filteredRelativeGazeCoordinate, _relativeZoomCoordinate, _relativeCenterOffset));
 
 	// Decide whether zooming is finished
-	SampleData sample = _sampleData.front(); // only use front of samples
 	bool finished = false;
-	if (_zoom < sample.zoom) // only proceed if current zoom is smaller than the on from the sample, so zoomed more
+	SampleData sample = _sampleData.front(); // only use front of samples
+	if (_zoom < 0.8f && _zoom < sample.zoom) // only proceed if current zoom is smaller than the on from the sample, so zoomed more
 	{
 		// ### WebView pixels
 
@@ -232,44 +238,46 @@ bool FutureCoordinateAction::Update(float tpf, const std::shared_ptr<const TabIn
 		glm::vec2 pixelFixation = samplePixelZoomCoordinate + (direction * radius);
 
 		// Output fixation
-		LogInfo("Fixation: ", pixelFixation.x, ", ", pixelFixation.y);
+		// LogInfo("Fixation: ", pixelFixation.x, ", ", pixelFixation.y);
+		LogInfo("Drift: ", direction.x * radius, ", ", direction.y * radius);
 
 		// Push back fixation
 		_fixations.push_back(pixelFixation);
+	}
 
-		// Limit fixations
-		int overlap = glm::max(0, (int)_fixations.size() - FIXATION_COUNT);
-		for (int i = 0; i < overlap; i++)
+	// Limit fixations
+	int overlap = glm::max(0, (int)_fixations.size() - FIXATION_COUNT);
+	for (int i = 0; i < overlap; i++)
+	{
+		_fixations.pop_front();
+	}
+
+	// Go over last fixations and calculate deviation
+	const int size = _fixations.size();
+	if (size >= FIXATION_COUNT)
+	{
+		// Calculate mean
+		glm::vec2 mean(0, 0);
+		for (const auto& rValue : _fixations)
 		{
-			_fixations.pop_front();
+			mean += rValue;
 		}
+		mean /= (float)size;
 
-		// Go over last fixations and calculate deviation
-		const int size = _fixations.size();
-		if (size >= FIXATION_COUNT)
+		// Calculate mean distance to mean
+		float meanDistance = 0.f;
+		for (const auto& rValue : _fixations)
 		{
-			glm::vec2 mean(0, 0);
-			for (const auto& rValue : _fixations)
-			{
-				mean += rValue;
-			}
-			mean /= (float)size;
-			float deviation = 0;
-			for (const auto& rValue : _fixations)
-			{
-				deviation += glm::distance(mean, rValue);
-			}
-			deviation /= (float)size;
+			meanDistance += glm::distance(rValue, mean);
+		}
+		meanDistance /= (float)size;
 
-			// Output deviation
-			LogInfo("Deviation: ", deviation);
-
-			if (deviation < 3.f)
-			{
-				// Fill output
-				SetOutputValue("coordinate", mean);
-				finished = true;
-			}
+		// Decide whether precision is high enough
+		if (meanDistance < FIXATION_PIXEL_PRECISION)
+		{
+			// Fill output
+			SetOutputValue("coordinate", mean);
+			finished = true;
 		}
 	}
 
@@ -368,10 +376,12 @@ void FutureCoordinateAction::Draw() const
 		rCoordinate *= webViewPixels;
 	};
 
+	/*
 	// Zoom coordinate
 	glm::vec2 zoomCoordinate(_relativeZoomCoordinate);
 	applyZooming(zoomCoordinate);
 	_pTab->Debug_DrawRectangle(zoomCoordinate, glm::vec2(5, 5), glm::vec3(1, 0, 0));
+	*/
 
 	// Click coordinate
 	// glm::vec2 coordinate;
