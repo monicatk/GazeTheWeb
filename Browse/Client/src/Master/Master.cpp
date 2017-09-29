@@ -334,8 +334,9 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
     // ### HOMEPAGE ###
 	// _upWeb->AddTab("https://developer.mozilla.org/en-US/docs/Web/CSS/overflow");
+	_upWeb->AddTab("https://www.w3schools.com/html/html5_video.asp");
 	// _upWeb->AddTab(std::string(CONTENT_PATH) + "/websites/index.html");
-	_upWeb->AddTab(_upSettings->GetHomepage());
+	// _upWeb->AddTab(_upSettings->GetHomepage());
 
     // ### SUPER LAYOUT ###
 

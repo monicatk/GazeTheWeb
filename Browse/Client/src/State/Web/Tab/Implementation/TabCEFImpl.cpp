@@ -190,9 +190,24 @@ void Tab::AddDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id)
 
 void Tab::AddDOMVideo(CefRefPtr<CefBrowser> browser, int id)
 {
-	_VideoMap.emplace(id, std::make_shared<DOMVideo>(
+	std::shared_ptr<DOMVideo> spNode = std::make_shared<DOMVideo>(
 		id,
-		SendRenderMessage));
+		SendRenderMessage);
+
+	// Add node to ID->node map
+	_VideoMap.emplace(id, spNode);
+
+	// Create DOMTrigger
+	std::unique_ptr<VideoModeTrigger> upDOMTrigger = std::unique_ptr<VideoModeTrigger>(new VideoModeTrigger(this, _triggers, spNode));
+
+	// Activate trigger
+	if (!_pipelineActive)
+	{
+		upDOMTrigger->Activate();
+	}
+
+	// Place trigger in map
+	_videoModeTriggers.emplace(id, std::move(upDOMTrigger));
 }
 
 std::weak_ptr<DOMTextInput> Tab::GetDOMTextInput(int id)
@@ -222,7 +237,7 @@ std::weak_ptr<DOMVideo> Tab::GetDOMVideo(int id)
 
 void Tab::ClearDOMNodes()
 {
-	// Deactivate all triggers (TODO: when there are other triggers than only DOM based triggers, this has to be handled differently)
+	// Deactivate all triggers
 	for (auto pTrigger : _triggers)
 	{
 		pTrigger->Deactivate();
@@ -231,11 +246,13 @@ void Tab::ClearDOMNodes()
 	// Clear vector with triggers
 	_textInputTriggers.clear();
 	_selectFieldTriggers.clear();
+	_videoModeTriggers.clear();
 
 	// Clear ID->node maps
 	_TextLinkMap.clear();
 	_TextInputMap.clear();
 	_SelectFieldMap.clear();
+	_VideoMap.clear();
 
 	// Clear fixed elements
 	_fixedElements.clear();
@@ -246,9 +263,8 @@ void Tab::ClearDOMNodes()
 
 void Tab::RemoveDOMTextInput(int id)
 {
+	if (_textInputTriggers.find(id) != _textInputTriggers.end()) { _textInputTriggers.erase(id); }
 	if (_TextInputMap.find(id) != _TextInputMap.end()) { _TextInputMap.erase(id); }
-
-	// TODO: Remove DOMTrigger, if corresponding DOMTextInput gets removed and destroyed?
 }
 
 void Tab::RemoveDOMLink(int id)
@@ -258,6 +274,7 @@ void Tab::RemoveDOMLink(int id)
 
 void Tab::RemoveDOMSelectField(int id)
 {
+	if (_selectFieldTriggers.find(id) != _selectFieldTriggers.end()) { _selectFieldTriggers.erase(id); }
 	if (_SelectFieldMap.find(id) != _SelectFieldMap.end()) { _SelectFieldMap.erase(id); }
 }
 
@@ -268,6 +285,7 @@ void Tab::RemoveDOMOverflowElement(int id)
 
 void Tab::RemoveDOMVideo(int id)
 {
+	if (_videoModeTriggers.find(id) != _videoModeTriggers.end()) { _videoModeTriggers.erase(id); }
 	if (_VideoMap.find(id) != _VideoMap.end()) { _VideoMap.erase(id); }
 }
 
