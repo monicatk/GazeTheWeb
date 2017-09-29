@@ -340,29 +340,6 @@ void Tab::AddFixedElementsCoordinates(int id, std::vector<Rect> elements)
 	}
 	_fixedElements[id] = elements;
 
-	 //DEBUG
-	//LogDebug("------------------ TAB ------------------> BEGIN");
-	//LogDebug("Added fixed element with id=", id);
-	//LogDebug("#fixedElements: ", _fixedElements.size());
-	//for (int i = 0; i < _fixedElements.size(); i++)
-	//{
-	//	if (_fixedElements[i].empty())
-	//	{
-	//		LogDebug(i, ": {}");
-	//	}
-	//	else if (_fixedElements[i][0].isZero())
-	//	{
-	//		LogDebug(i, ": 0");
-	//	}
-	//	else
-	//	{
-	//		for (const auto& rect : _fixedElements[i])
-	//		{
-	//			LogDebug(i, ": ", rect.toString());
-	//		}
-	//	}
-	//}
-	//LogDebug("------------------ TAB ------------------< END");
 }
 
 void Tab::RemoveFixedElement(int id)
@@ -382,28 +359,42 @@ void Tab::RemoveFixedElement(int id)
 
 void Tab::SetTitle(std::string title)
 {
+	// Fetch last history entry
+	auto last_entry = _pWeb->GetLastHistoryEntry();
+
+	// Tab received new title
 	if (title != _title)
 	{
 		LogDebug("Tab: Set title to ", title, " - previous title=", _title);
 
 		_title = title;
 
-		auto last_entry = _pWeb->GetLastHistoryEntry();
+		LogDebug("Tab: last entry url=", last_entry.URL, " title=", last_entry.title, "\n -- now: title=", title, " url=", _url);
 
-		LogDebug("Tab: last entry url=", last_entry.URL, " title=", last_entry.title, " -- now: title=", title, " url=", _url);
-
-		if (last_entry.URL == _url && last_entry.title != title)
+		// New title and different URLs is clearly a new history entry
+		if (last_entry.URL != _url)
 		{
 			HistoryManager::Page page;
-			page.title = _title;
 			page.URL = _url;
-
-			// Delete last entry with identical URL from history (also XML)
-			_pWeb->PushDeletePageFromHistoryJob(this, page, true);
-
-			// Add updated entry to history
+			page.title = title;
 			_pWeb->PushAddPageToHistoryJob(this, page);
 		}
+		// Newly set title, same URL as last history entry and different titles lead to conclusion,
+		// that previously added history entry might be wrong
+		else if (last_entry.title != title)
+		{
+			// Delete last entry with identical URL from history (also XML)
+			_pWeb->PushDeletePageFromHistoryJob(this, last_entry, true);
+
+			last_entry.title = title;
+			// Add updated entry to history
+			_pWeb->PushAddPageToHistoryJob(this, last_entry);
+		}
+	}
+	else if(last_entry.URL != _url)
+	{
+		// Delete wrong previous entry where title and url shouldn't match
+		_pWeb->PushDeletePageFromHistoryJob(this, last_entry, true);
 	}
 }
 

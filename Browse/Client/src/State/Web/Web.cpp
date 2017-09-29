@@ -12,6 +12,7 @@
 #include "src/Utils/MakeUnique.h"
 #include <algorithm>
 
+
 // Include singleton for mailing to JavaScript
 #include "src/Singletons/JSMailer.h"
 
@@ -385,8 +386,8 @@ StateType Web::Update(float tpf, const std::shared_ptr<const Input> spInput)
     // Process jobs first
     while(!_jobs.empty())
     {
-        auto upJob = std::move(_jobs.top());
-        _jobs.pop();
+        auto upJob = std::move(_jobs.back());
+        _jobs.pop_back();
         upJob->Execute(this);
     }
 
@@ -530,19 +531,19 @@ void Web::Deactivate()
 
 void Web::PushAddTabAfterJob(Tab* pCaller, std::string URL)
 {
-    _jobs.push(std::unique_ptr<TabJob>(new AddTabAfterJob(pCaller, URL, true)));
+    _jobs.push_front(std::unique_ptr<TabJob>(new AddTabAfterJob(pCaller, URL, true)));
 }
 
 void Web::PushAddPageToHistoryJob(Tab* pCaller, HistoryManager::Page page)
 {
 	LogDebug("Web: PushAddPageToHistoryJob called for url=", page.URL, ", title=", page.title);
 
-	_jobs.push(std::unique_ptr<TabJob>(new AddPageToHistoryJob(pCaller, page)));
+	_jobs.push_front(std::unique_ptr<TabJob>(new AddPageToHistoryJob(pCaller, page)));
 }
 
 void Web::PushDeletePageFromHistoryJob(Tab* pCaller, HistoryManager::Page page, bool delete_only_first)
 {
-	_jobs.push(std::unique_ptr<TabJob>(new DeletePageFromHistoryJob(pCaller, page, delete_only_first)));
+	_jobs.push_front(std::unique_ptr<TabJob>(new DeletePageFromHistoryJob(pCaller, page, delete_only_first)));
 }
 
 HistoryManager::Page Web::GetLastHistoryEntry() const

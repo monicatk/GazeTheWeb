@@ -19,6 +19,7 @@
 #include <stack>
 #include <regex>
 
+
 // Forward declaration
 class Mediator;
 
@@ -257,7 +258,7 @@ private:
     bool _goToSettings = false;
 
     // List of jobs which have to be executed
-    std::stack<std::unique_ptr<TabJob> > _jobs;
+    std::deque<std::unique_ptr<TabJob> > _jobs;
 
 	// Bookmark manager
 	std::unique_ptr<BookmarkManager> _upBookmarkManager;

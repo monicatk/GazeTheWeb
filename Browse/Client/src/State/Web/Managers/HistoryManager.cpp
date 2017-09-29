@@ -33,6 +33,8 @@ void HistoryManager::AddPage(Page page)
 		return;
 	}
 
+	LogDebug("HistoryManager: Pushing page url=", page.URL, " title=", page.title, " to front...");
+
 	// Add to vector storing pages
 	_pages.push_front(page);
 
@@ -87,7 +89,7 @@ void HistoryManager::AddPage(Page page)
 		int deleteCount = pagesSize - setup::HISTORY_MAX_PAGE_COUNT;
 
 		// Delete older ones from vector
-		_pages.erase(_pages.begin(), _pages.begin() + deleteCount);
+		_pages.erase(_pages.end() - deleteCount, _pages.end());
 
 		// Delete older ones from XML file
 		for (int i = 0; i < deleteCount; i++)
@@ -135,17 +137,20 @@ bool HistoryManager::DeletePageByUrl(HistoryManager::Page page, bool delete_only
 		return false;
 	}
 
-	// Search each node in history pages list in xml file
+	// Search each node (except the first, current page) in history pages list in xml file
 	auto entry = pRoot->FirstChildElement("page");
-	std::vector<unsigned int> removed_idx;
-	unsigned int count = 0;
+	if(entry)
+		entry = entry->NextSiblingElement("page");
+
+	std::deque<unsigned int> removed_idx;
+	unsigned int count = 1;
 	while (entry != NULL)
 	{
 		// If url matches entry, remove entry and keep index in mind to also delete it locally
 		if (entry->Attribute("url") == page.URL)
 		{
 			pRoot->DeleteChild(entry);
-			removed_idx.push_back(count);
+			removed_idx.push_front(count);
 		}
 
 		// Escape when first entry is checked
@@ -156,8 +161,7 @@ bool HistoryManager::DeletePageByUrl(HistoryManager::Page page, bool delete_only
 		count++;
 		entry = entry->NextSiblingElement("page");
 	}
-
-	// Remove entries locally
+	// Remove entries locally, deque used for proper deletion order
 	for (auto idx : removed_idx)
 		_pages.erase(_pages.begin() + idx);
 
