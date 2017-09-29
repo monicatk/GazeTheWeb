@@ -467,8 +467,6 @@ bool Mediator::ForwardFaviconBytes(CefRefPtr<CefBrowser> browser, CefRefPtr<CefI
 			return true;
 		}
 
-		int bytes_read = binary_value->GetData(static_cast<void*>(upData->data()), byte_size, 0);
-
 		pTab->ReceiveFaviconBytes(std::move(upData), width, height);
 		return true;
 	}

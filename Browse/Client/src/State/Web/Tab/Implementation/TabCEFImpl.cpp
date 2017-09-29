@@ -31,6 +31,12 @@ void Tab::SetURL(std::string URL)
 	{
 		_url = URL;
 		LabStreamMailer::instance().Send("Loading URL: " + _url);
+
+		// Add history entry for new url with current title, will be updated asap
+		HistoryManager::Page page;
+		page.URL = _url;
+		page.title = _title;
+		_pWeb->PushAddPageToHistoryJob(this, page);
 	}
 }
 
@@ -59,8 +65,7 @@ void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upDa
 		{
 			// Extract colors
 			float r = upData->at(i);
-			float g = upData->at(i + 1);
-			float b = upData->at(i + 2);
+			float g = upData->at(i + 1);float b = upData->at(i + 2);
 			// float a = upData->at(i + 3); // not used
 
 			// Calculate saturation like in HSV color space
@@ -375,6 +380,33 @@ void Tab::RemoveFixedElement(int id)
 	//}
 }
 
+void Tab::SetTitle(std::string title)
+{
+	if (title != _title)
+	{
+		LogDebug("Tab: Set title to ", title, " - previous title=", _title);
+
+		_title = title;
+
+		auto last_entry = _pWeb->GetLastHistoryEntry();
+
+		LogDebug("Tab: last entry url=", last_entry.URL, " title=", last_entry.title, " -- now: title=", title, " url=", _url);
+
+		if (last_entry.URL == _url && last_entry.title != title)
+		{
+			HistoryManager::Page page;
+			page.title = _title;
+			page.URL = _url;
+
+			// Delete last entry with identical URL from history (also XML)
+			_pWeb->PushDeletePageFromHistoryJob(this, page, true);
+
+			// Add updated entry to history
+			_pWeb->PushAddPageToHistoryJob(this, page);
+		}
+	}
+}
+
 void Tab::SetLoadingStatus(bool isLoading)
 {
 	// isLoading=false may indicate, that site has completely finished loading
@@ -402,14 +434,14 @@ void Tab::SetLoadingStatus(bool isLoading)
             _iconState = IconState::ICON_NOT_FOUND;
         }
 
-		// Add page to history after loading
-		if (_dataTransfer)
-		{
-			HistoryManager::Page page;
-			page.URL = _url;
-			page.title = _title;
-			_pWeb->PushAddPageToHistoryJob(this, page);
-		}
+		//// Add page to history after loading
+		//if (_dataTransfer)
+		//{
+		//	HistoryManager::Page page;
+		//	page.URL = _url;
+		//	page.title = _title;
+		//	_pWeb->PushAddPageToHistoryJob(this, page);
+		//}
     }
 }
 

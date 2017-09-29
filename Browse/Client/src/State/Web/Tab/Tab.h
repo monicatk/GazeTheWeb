@@ -358,7 +358,7 @@ public:
     virtual void RemoveFixedElement(int id);
 
     // Set Tab's title text
-	virtual void SetTitle(std::string title) { _title = title; }
+	virtual void SetTitle(std::string title);
 
     // Add new Tab after that one
 	virtual void AddTabAfter(std::string URL) { _pWeb->PushAddTabAfterJob(this, URL); }

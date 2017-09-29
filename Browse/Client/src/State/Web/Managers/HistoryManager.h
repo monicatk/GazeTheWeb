@@ -31,6 +31,12 @@ public:
 	// Add page
 	void AddPage(Page page);
 
+	// Review last history entry
+	Page GetLastEntry() const;
+
+	// Delete last history entry (also in XML file)
+	bool DeletePageByUrl(Page page, bool delete_only_first=false);
+
 	// Get history (TODO: get history from certain date etc)
 	std::deque<Page> GetHistory() const;
 	std::deque<Page> GetHistory(int count) const;
