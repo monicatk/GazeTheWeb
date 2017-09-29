@@ -488,6 +488,12 @@ private:
     // Set pipeline activity (indicates whether there is some pipeline to work on)
     void SetPipelineActivity(bool active);
 
+	// Enter video mode
+	void EnterVideoMode(int id); // id of video node
+
+	// Exit video mode
+	void ExitVideoMode();
+
 	// Start social record
 	void StartSocialRecord(std::string URL, SocialPlatform platform);
 
@@ -552,11 +558,12 @@ private:
 
     // Layouts
     eyegui::Layout* _pPanelLayout;
+	eyegui::Layout* _pVideoModeLayout;
     eyegui::Layout* _pPipelineAbortLayout;
     eyegui::Layout* _pOverlayLayout;
     eyegui::Layout* _pScrollingOverlayLayout;
     eyegui::Layout* _pDebugLayout;
-
+	
     // Parameters for WebView
     WebViewParameters _webViewParameters;
 
@@ -664,6 +671,9 @@ private:
 
 	// Time until next polling
 	float _timeUntilPolling = 0.f;
+
+	// Id of DOMVideo in map that is currently shown in video mode
+	int _videoModeId = -1; // -1 is indicator that currently no video mode active
 
 };
 

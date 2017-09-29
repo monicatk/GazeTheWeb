@@ -58,12 +58,36 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		}
 		*/
 	}
-	else
+	else if(pLayout == _pTab->_pPipelineAbortLayout)
 	{
 		// ### Pipeline abort layout ###
 		if (id == "abort")
 		{
 			_pTab->AbortAndClearPipelines();
+		}
+	}
+	else
+	{
+		// ### Vide mode layout ###
+		if (id == "play")
+		{
+			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
+			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+			{
+				iter->second->SetPlaying(true);
+			}
+		}
+		else if (id == "pause")
+		{
+			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
+			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+			{
+				iter->second->SetPlaying(false);
+			}
+		}
+		else if (id == "exit")
+		{
+			_pTab->ExitVideoMode();
 		}
 	}
 }

@@ -91,3 +91,6 @@ notification:data_transfer_continued=Data Transfer Continued
 notification:data_transfer_paused=Data Transfer Paused
 super_calibration:continue=Continue
 super_calibration:recalibration=Recalibrate
+video_mode:play=Play
+video_mode:pause=Pause
+video_mode:exit=Exit

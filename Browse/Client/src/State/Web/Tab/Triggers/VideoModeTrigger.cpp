@@ -7,7 +7,8 @@
 #include "src/State/Web/Tab/Pipelines/TextInputPipeline.h"
 #include "src/Singletons/LabStreamMailer.h"
 
-VideoModeTrigger::VideoModeTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection, std::shared_ptr<DOMVideo> spNode) : DOMTrigger<DOMVideo>(pTab, rTriggerCollection, spNode, "bricks/triggers/VideoMode.beyegui", "video")
+VideoModeTrigger::VideoModeTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection, std::shared_ptr<DOMVideo> spNode, std::function<void(int)> callback)
+	: DOMTrigger<DOMVideo>(pTab, rTriggerCollection, spNode, "bricks/triggers/VideoMode.beyegui", "video"), _callback(callback)
 {
 	// Nothing to do here
 }
@@ -25,7 +26,7 @@ bool VideoModeTrigger::Update(float tpf, const std::shared_ptr<const TabInput> s
 	// When triggered, do something
 	if (triggered)
 	{
-		_spNode->SetPlaying(true); // TODO testing
+		_callback(_spNode->GetId());
 	}
 
 	// Return whether triggered

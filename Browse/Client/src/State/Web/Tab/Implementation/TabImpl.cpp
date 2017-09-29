@@ -29,8 +29,10 @@ Tab::Tab(
 	_pOverlayLayout = _pMaster->AddLayout("layouts/Overlay.xeyegui", EYEGUI_TAB_LAYER, false);
 	_pScrollingOverlayLayout = _pMaster->AddLayout("layouts/Overlay.xeyegui", EYEGUI_TAB_LAYER, false);
 	_pPanelLayout = _pMaster->AddLayout("layouts/Tab.xeyegui", EYEGUI_TAB_LAYER, false);
+	_pVideoModeLayout = _pMaster->AddLayout("layouts/TabVideoMode.xeyegui", EYEGUI_TAB_LAYER, false);
 	_pPipelineAbortLayout = _pMaster->AddLayout("layouts/TabPipelineAbort.xeyegui", EYEGUI_TAB_LAYER, false);
     _pDebugLayout = _pMaster->AddLayout("layouts/TabDebug.xeyegui", EYEGUI_TAB_LAYER, false);
+	
 
 	// Create scroll up and down floating frames in special overlay layout which always on top of standard overlay
 	_scrollUpProgressFrameIndex = eyegui::addFloatingFrameWithBrick(
@@ -81,6 +83,9 @@ Tab::Tab(
     eyegui::registerButtonListener(_pPanelLayout, "selection", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPanelLayout, "zoom", _spTabButtonListener);
 	// eyegui::registerButtonListener(_pPanelLayout, "test_button", _spTabButtonListener); // TODO: only for testing new features
+	eyegui::registerButtonListener(_pVideoModeLayout, "play", _spTabButtonListener);
+	eyegui::registerButtonListener(_pVideoModeLayout, "pause", _spTabButtonListener);
+	eyegui::registerButtonListener(_pVideoModeLayout, "exit", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPipelineAbortLayout, "abort", _spTabButtonListener);
 	eyegui::registerSensorListener(_pScrollingOverlayLayout, "scroll_up_sensor", _spTabSensorListener);
 	eyegui::registerSensorListener(_pScrollingOverlayLayout, "scroll_down_sensor", _spTabSensorListener);
@@ -601,6 +606,9 @@ void Tab::Deactivate()
 	// Abort pipeline, which also hides GUI for manual abortion
 	AbortAndClearPipelines();
 
+	// Exit video mode
+	ExitVideoMode();
+
 	// Remember being not active
 	_active = false;
 }
@@ -612,6 +620,9 @@ void Tab::OpenURL(std::string URL)
 
 	// Abort any pipeline execution
 	AbortAndClearPipelines();
+
+	// Exit video mode
+	ExitVideoMode();
 
 	// Tell CEF to refresh this tab (which will fetch the URL and load it)
 	_pCefMediator->RefreshTab(this);
@@ -635,6 +646,9 @@ void Tab::GoForward()
 
 	// Abort any pipeline execution
 	AbortAndClearPipelines();
+
+	// Exit video mode
+	ExitVideoMode();
 }
 
 void Tab::GoBack()
@@ -643,6 +657,9 @@ void Tab::GoBack()
 
 	// Abort any pipeline execution
 	AbortAndClearPipelines();
+
+	// Exit video mode
+	ExitVideoMode();
 }
 
 void Tab::Reload()
@@ -651,6 +668,9 @@ void Tab::Reload()
 
 	// Abort any pipeline execution
 	AbortAndClearPipelines();
+
+	// Exit video mode
+	ExitVideoMode();
 }
 
 void Tab::PushBackPointingEvaluationPipeline(PointingApproach approach)
@@ -680,6 +700,9 @@ void Tab::SetPipelineActivity(bool active)
 {
 	if (active)
 	{
+		// Exit video mode
+		ExitVideoMode();
+
 		_pipelineActive = true;
 		eyegui::setVisibilityOfLayout(_pPipelineAbortLayout, true, true, true);
 
@@ -696,6 +719,62 @@ void Tab::SetPipelineActivity(bool active)
 	{
 		_pipelineActive = false;
 		eyegui::setVisibilityOfLayout(_pPipelineAbortLayout, false, false, true);
+
+		// Activate all triggers
+		for (auto pTrigger : _triggers)
+		{
+			pTrigger->Activate();
+		}
+
+		// Activate scrolling overlay
+		eyegui::setVisibilityOfLayout(_pScrollingOverlayLayout, true, true, true);
+	}
+}
+
+void Tab::EnterVideoMode(int id)
+{
+	if (!_pipelineActive)
+	{
+		auto iter = _VideoMap.find(id);
+		if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+		{
+			// Set fullscreen
+			iter->second->SetFullscreen(true);
+
+			// Store id
+			_videoModeId = id;
+
+			// Set visibility of layout
+			eyegui::setVisibilityOfLayout(_pVideoModeLayout, true, true, true);
+
+			// Deactivate all triggers
+			for (auto pTrigger : _triggers)
+			{
+				pTrigger->Deactivate();
+			}
+
+			// Deactivate scrolling overlay
+			eyegui::setVisibilityOfLayout(_pScrollingOverlayLayout, false, false, true);
+		}
+	}
+}
+
+void Tab::ExitVideoMode()
+{
+	if (_videoModeId >= 0)
+	{
+		auto iter = _VideoMap.find(_videoModeId);
+		if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+		{
+			// Return from fullscreen
+			iter->second->SetFullscreen(false);
+		}
+
+		// Reset id
+		_videoModeId = -1; // indicating that video mode is off
+
+		// Set visibility of layout
+		eyegui::setVisibilityOfLayout(_pVideoModeLayout, false, false, true);
 
 		// Activate all triggers
 		for (auto pTrigger : _triggers)

@@ -14,13 +14,18 @@ class VideoModeTrigger : public DOMTrigger<DOMVideo>
 public:
 
 	// Constructor
-	VideoModeTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection, std::shared_ptr<DOMVideo> spNode);
+	VideoModeTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& rTriggerCollection, std::shared_ptr<DOMVideo> spNode, std::function<void(int id)> callback);
 
 	// Destructor
 	virtual ~VideoModeTrigger();
 
 	// Update
 	virtual bool Update(float tpf, const std::shared_ptr<const TabInput> spInput);
+
+private:
+
+	// Members
+	std::function<void(int)> _callback;
 };
 
 #endif // VIDEOMODETRIGGER_H_

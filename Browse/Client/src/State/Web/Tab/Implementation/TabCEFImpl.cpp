@@ -198,7 +198,11 @@ void Tab::AddDOMVideo(CefRefPtr<CefBrowser> browser, int id)
 	_VideoMap.emplace(id, spNode);
 
 	// Create DOMTrigger
-	std::unique_ptr<VideoModeTrigger> upDOMTrigger = std::unique_ptr<VideoModeTrigger>(new VideoModeTrigger(this, _triggers, spNode));
+	std::unique_ptr<VideoModeTrigger> upDOMTrigger = std::unique_ptr<VideoModeTrigger>(new VideoModeTrigger(this, _triggers, spNode,
+		[&](int id)
+	{
+		this->EnterVideoMode(id);
+	}));
 
 	// Activate trigger
 	if (!_pipelineActive)
@@ -285,6 +289,12 @@ void Tab::RemoveDOMOverflowElement(int id)
 
 void Tab::RemoveDOMVideo(int id)
 {
+	// Exit video mode if currently showing the video
+	if (id == _videoModeId)
+	{
+		ExitVideoMode();
+	}
+
 	if (_videoModeTriggers.find(id) != _videoModeTriggers.end()) { _videoModeTriggers.erase(id); }
 	if (_VideoMap.find(id) != _VideoMap.end()) { _VideoMap.erase(id); }
 }
