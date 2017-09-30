@@ -363,6 +363,8 @@ void Tab::RemoveFixedElement(int id)
 
 void Tab::SetTitle(std::string title)
 {
+	// TODO: does not work if mutliple tabs are chaning the history
+
 	// Fetch last history entry
 	auto frontEntry = _pWeb->GetFrontHistoryEntry();
 
