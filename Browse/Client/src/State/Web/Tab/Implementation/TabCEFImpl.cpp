@@ -32,11 +32,14 @@ void Tab::SetURL(std::string URL)
 		_url = URL;
 		LabStreamMailer::instance().Send("Loading URL: " + _url);
 
-		// Add history entry for new url with current title, will be updated asap
-		HistoryManager::Page page;
-		page.URL = _url;
-		page.title = _title;
-		_pWeb->PushAddPageToHistoryJob(this, page);
+		if (_dataTransfer)
+		{
+			// Add history entry for new url with current title, will be updated asap
+			HistoryManager::Page page;
+			page.URL = _url;
+			page.title = _title;
+			_pWeb->PushAddPageToHistoryJob(this, page);
+		}
 	}
 }
 
@@ -65,7 +68,8 @@ void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upDa
 		{
 			// Extract colors
 			float r = upData->at(i);
-			float g = upData->at(i + 1);float b = upData->at(i + 2);
+			float g = upData->at(i + 1);
+			float b = upData->at(i + 2);
 			// float a = upData->at(i + 3); // not used
 
 			// Calculate saturation like in HSV color space
@@ -359,8 +363,10 @@ void Tab::RemoveFixedElement(int id)
 
 void Tab::SetTitle(std::string title)
 {
+	// TODO: does not work if mutliple tabs are chaning the history
+
 	// Fetch last history entry
-	auto last_entry = _pWeb->GetLastHistoryEntry();
+	auto frontEntry = _pWeb->GetFrontHistoryEntry();
 
 	// Tab received new title
 	if (title != _title)
@@ -369,33 +375,36 @@ void Tab::SetTitle(std::string title)
 
 		_title = title;
 
-		LogDebug("Tab: last entry url=", last_entry.URL, " title=", last_entry.title, "\n -- now: title=", title, " url=", _url);
+		LogDebug("Tab: last entry url=", frontEntry.URL, " title=", frontEntry.title, "\n -- now: title=", title, " url=", _url);
 
-		// New title and different URLs is clearly a new history entry
-		if (last_entry.URL != _url)
+		if (_dataTransfer)
 		{
-			HistoryManager::Page page;
-			page.URL = _url;
-			page.title = title;
-			_pWeb->PushAddPageToHistoryJob(this, page);
-		}
-		// Newly set title, same URL as last history entry and different titles lead to conclusion,
-		// that previously added history entry might be wrong
-		else if (last_entry.title != title)
-		{
+			// New title and different URLs is clearly a new history entry
+			if (frontEntry.URL != _url)
+			{
+				HistoryManager::Page page;
+				page.URL = _url;
+				page.title = title;
+				_pWeb->PushAddPageToHistoryJob(this, page);
+			}
+			// Newly set title, same URL as last history entry and different titles lead to conclusion,
+			// that previously added history entry might be wrong
+			else if (frontEntry.title != title)
+			{
+				// Delete front entry with identical URL from history (also XML)
+				_pWeb->PushDeletePageFromHistoryJob(this, frontEntry, true);
 
-			// TODO: Create PushUpdateHistoryEntry and avoid concurrent creation and trying to delete same item!
-			// Comparison before deletion is currently done to early!
+				// TODO: Create PushUpdateHistoryEntry and avoid concurrent creation and trying to delete same item!
+				// Comparison before deletion is currently done to early!
 
-			// Delete last entry with identical URL from history (also XML)
-			_pWeb->PushDeletePageFromHistoryJob(this, last_entry, true);
+				frontEntry.title = title;
 
-			last_entry.title = title;
-			// Add updated entry to history
-			_pWeb->PushAddPageToHistoryJob(this, last_entry);
+				// Add updated entry to history
+				_pWeb->PushAddPageToHistoryJob(this, frontEntry);
+			}
 		}
 	}
-	else if(last_entry.URL != _url)
+	else if(frontEntry.URL != _url)
 	{
 		// Delete wrong previous entry where title and url shouldn't match
 		_pWeb->PushDeletePageFromHistoryJob(this, last_entry, true);
@@ -429,14 +438,6 @@ void Tab::SetLoadingStatus(bool isLoading)
             _iconState = IconState::ICON_NOT_FOUND;
         }
 
-		//// Add page to history after loading
-		//if (_dataTransfer)
-		//{
-		//	HistoryManager::Page page;
-		//	page.URL = _url;
-		//	page.title = _title;
-		//	_pWeb->PushAddPageToHistoryJob(this, page);
-		//}
     }
 }
 

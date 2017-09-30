@@ -31,11 +31,11 @@ public:
 	// Add page
 	void AddPage(Page page);
 
-	// Review last history entry
-	Page GetLastEntry() const;
+	// Review front history entry
+	Page GetFrontEntry() const;
 
 	// Delete last history entry (also in XML file)
-	bool DeletePageByUrl(Page page, bool delete_only_first=false);
+	bool DeletePageByUrl(Page page, bool deleteOnlyFirst = false);
 
 	// Get history (TODO: get history from certain date etc)
 	std::deque<Page> GetHistory() const;
@@ -55,7 +55,7 @@ private:
 	// Filter pages like about:blank. Returns true when page should be NOT added
 	bool FilterPage(Page page) const;
 
-	// Vector of pages
+	// Deque of pages
 	std::deque<Page> _pages;
 
 	// Fullpath to history file

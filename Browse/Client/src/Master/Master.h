@@ -80,6 +80,9 @@ public:
 	// Get pointer to interface of custom transformation of eye input
 	std::weak_ptr<CustomTransformationInterface> GetCustomTransformationInterface();
 
+	// Push back async job
+	void PushBackAsyncJob(std::function<bool()> job);
+
     // ### EYEGUI DELEGATION ###
 
     // Add layout to eyeGUI
@@ -239,6 +242,9 @@ private:
     // Loop of master
     void Loop();
 
+	// Update async jobs
+	void UpdateAsyncJobs(bool wait); // wait indicates that it should block the thread until all async jobs are finished
+
     // Callbacks
     void GLFWKeyCallback(int key, int scancode, int action, int mods);
     void GLFWMouseButtonCallback(int button, int action, int mods);
@@ -340,6 +346,9 @@ private:
 
 	// Bool to control data transfer (set by Web as there is the placed the button)
 	bool _dataTransfer = true;
+
+	// Asyncronous calls, e.g. persist Firebase entries
+	std::vector<std::future<bool> > _asyncJobs; // abuse async calls since it is easier to determine whether finished or not
 };
 
 #endif // MASTER_H_

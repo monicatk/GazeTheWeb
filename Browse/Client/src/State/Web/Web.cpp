@@ -541,14 +541,14 @@ void Web::PushAddPageToHistoryJob(Tab* pCaller, HistoryManager::Page page)
 	_jobs.push_front(std::unique_ptr<TabJob>(new AddPageToHistoryJob(pCaller, page)));
 }
 
-void Web::PushDeletePageFromHistoryJob(Tab* pCaller, HistoryManager::Page page, bool delete_only_first)
+void Web::PushDeletePageFromHistoryJob(Tab* pCaller, HistoryManager::Page page, bool deleteOnlyFirst)
 {
-	_jobs.push_front(std::unique_ptr<TabJob>(new DeletePageFromHistoryJob(pCaller, page, delete_only_first)));
+	_jobs.push_front(std::unique_ptr<TabJob>(new DeletePageFromHistoryJob(pCaller, page, deleteOnlyFirst)));
 }
 
-HistoryManager::Page Web::GetLastHistoryEntry() const
+HistoryManager::Page Web::GetFrontHistoryEntry() const
 {
-	return _upHistoryManager->GetLastEntry();
+	return _upHistoryManager->GetFrontEntry();
 }
 
 int Web::GetIdOfTab(Tab const * pCaller) const
@@ -1067,6 +1067,6 @@ void Web::DeletePageFromHistoryJob::Execute(Web * pCallee)
 	LogDebug("Web: DeletePageFromHistoryJob called for url=", _page.URL,", title=", _page.title);
 
 	// Add page to history
-	pCallee->_upHistoryManager->DeletePageByUrl(_page, _delete_only_first);
+	pCallee->_upHistoryManager->DeletePageByUrl(_page, _deleteOnlyFirst);
 }
 

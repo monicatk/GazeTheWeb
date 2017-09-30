@@ -468,6 +468,9 @@ Master::~Master()
     // Manual destruction of Web. Otherwise there are errors in CEF at shutdown (TODO: understand why)
     _upWeb.reset();
 
+	// Wait for all async jobs to finish
+	UpdateAsyncJobs(true);
+
     // Terminate eyeGUI
     eyegui::terminateGUI(_pSuperGUI);
     eyegui::terminateGUI(_pGUI);
@@ -549,6 +552,14 @@ std::weak_ptr<CustomTransformationInterface> Master::GetCustomTransformationInte
 	return _upEyeInput->GetCustomTransformationInterface();
 }
 
+void Master::PushBackAsyncJob(std::function<bool()> job)
+{
+	// Delegate job into thread
+	_asyncJobs.push_back(std::async(
+		std::launch::async, // do it asynchronously
+		job));
+}
+
 eyegui::Layout* Master::AddLayout(std::string filepath, int layer, bool visible)
 {
     // Add layout
@@ -623,6 +634,9 @@ void Master::Loop()
 {
 	while (!_exit)
 	{
+		// Update the async computations
+		UpdateAsyncJobs(false); // do not wait until finished
+
 		// Call exit when window should close
 		if (glfwWindowShouldClose(_pWindow))
 		{
@@ -895,6 +909,35 @@ void Master::Loop()
         glfwSwapBuffers(_pWindow);
         glfwPollEvents();
     }
+}
+
+void Master::UpdateAsyncJobs(bool wait)
+{
+	// Check asynchronous jobs
+	for (int i = _asyncJobs.size() - 1; i >= 0; i--) // do it from the back
+	{
+		// Retrieve whether asynchronous call is done
+		bool remove = false;
+		if (wait)
+		{
+			_asyncJobs.at(i).wait();
+			remove = true; // waited until it is done, so remove it
+		}
+		else
+		{
+			// We have no time, so wait for nothing and just check
+			if (std::future_status::ready == _asyncJobs.at(i).wait_for(std::chrono::seconds(0)))
+			{
+				remove = true; // done by now, so remove it
+			}
+		}
+
+		// Remove future from list when job is done
+		if (remove)
+		{
+			_asyncJobs.erase(_asyncJobs.begin() + i);
+		}
+	}
 }
 
 void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)

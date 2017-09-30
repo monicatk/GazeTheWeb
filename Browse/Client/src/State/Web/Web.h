@@ -106,10 +106,10 @@ public:
 	// Add delete page from history job
 	virtual void PushDeletePageFromHistoryJob(Tab* pCaller,
 		HistoryManager::Page page,
-		bool delete_only_first = false);
+		bool deleteOnlyFirst = false);
 
-	// Review latest history entry
-	virtual HistoryManager::Page GetLastHistoryEntry() const;
+	// Review front history entry
+	virtual HistoryManager::Page GetFrontHistoryEntry() const;
 
     // Get own id in web. Returns -1 if not found
     virtual int GetIdOfTab(Tab const * pCaller) const;
@@ -180,10 +180,10 @@ private:
 		// Constructor
 		DeletePageFromHistoryJob(Tab* pCaller, 
 			HistoryManager::Page page,
-			bool delete_only_first) : TabJob(pCaller)
+			bool deleteOnlyFirst) : TabJob(pCaller)
 		{
 			_page = page;
-			_delete_only_first = delete_only_first;
+			_deleteOnlyFirst = deleteOnlyFirst;
 		}
 
 		// Execute
@@ -193,7 +193,7 @@ private:
 
 		// Members
 		HistoryManager::Page _page;
-		bool _delete_only_first;
+		bool _deleteOnlyFirst;
 	};
 
     // Give listener full access
