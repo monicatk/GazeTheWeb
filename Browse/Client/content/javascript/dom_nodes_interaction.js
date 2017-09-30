@@ -178,4 +178,20 @@ DOMVideo.prototype.setFullscreen = function(fullscreen)
 	ConsolePrint("DOMVideo id="+this.getId()+": Fullscreen is set to "+fullscreen);
 }
 
+DOMVideo.prototype.toggleMuted = function () {
+    this.node.muted = !this.node.muted;
+    ConsolePrint("DOMVideo id=" + this.getId() + ": muted=" + this.node.muted);
+}
+
+DOMVideo.prototype.togglePlayPause = function () {
+    if (this.node.paused) {
+        this.node.play();
+        ConsolePrint("DOMVideo id=" + this.getId() + ": Now playing.");
+    }
+    else {
+        this.node.pause();
+        ConsolePrint("DOMVideo id=" + this.getId() + ": Now paused.");
+    }
+}
+
 ConsolePrint("Successfully imported dom_nodes_interaction.js!");
