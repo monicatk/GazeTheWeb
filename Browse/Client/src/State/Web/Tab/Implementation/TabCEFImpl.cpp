@@ -407,7 +407,7 @@ void Tab::SetTitle(std::string title)
 	else if(frontEntry.URL != _url)
 	{
 		// Delete wrong previous entry where title and url shouldn't match
-		_pWeb->PushDeletePageFromHistoryJob(this, last_entry, true);
+		_pWeb->PushDeletePageFromHistoryJob(this, frontEntry, true);
 	}
 }
 
