@@ -79,11 +79,19 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		}
 		else if (id == "volume_up")
 		{
-			// TODO
+			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
+			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+			{
+				iter->second->ChangeVolume(0.25f);
+			}
 		}
 		else if (id == "volume_down")
 		{
-			// TODO
+			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
+			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+			{
+				iter->second->ChangeVolume(-0.25f);
+			}
 		}
 		else if (id == "mute")
 		{

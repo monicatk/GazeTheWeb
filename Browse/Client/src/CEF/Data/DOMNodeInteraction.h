@@ -193,6 +193,7 @@ public:
 	void SetFullscreen(bool fullscreen = true) { SendExecuteFunctionMessage("setFullscreen", fullscreen); }
 	void ToggleMuted() { SendExecuteFunctionMessage("toggleMuted"); }
 	void TogglePlayPause() { SendExecuteFunctionMessage("togglePlayPause"); }
+	void ChangeVolume(float delta) { SendExecuteFunctionMessage("changeVolume", delta); }
 };
 
 

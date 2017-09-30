@@ -194,4 +194,10 @@ DOMVideo.prototype.togglePlayPause = function () {
     }
 }
 
+DOMVideo.prototype.changeVolume = function (delta) {
+    var value = this.node.volume;
+    value = Math.min(Math.max(0.0, value + delta), 1.0);
+    this.node.volume = value;
+}
+
 ConsolePrint("Successfully imported dom_nodes_interaction.js!");
