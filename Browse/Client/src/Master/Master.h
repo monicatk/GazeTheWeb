@@ -243,7 +243,7 @@ private:
     void Loop();
 
 	// Update async jobs
-	void UpdateAsyncJobs(bool wait); // wait indicates that it should wait until all async jobs are finished
+	void UpdateAsyncJobs(bool wait); // wait indicates that it should block the thread until all async jobs are finished
 
     // Callbacks
     void GLFWKeyCallback(int key, int scancode, int action, int mods);

@@ -805,8 +805,6 @@ void Tab::EndSocialRecord()
 		_spSocialRecord->End();
 
 		// Delegate persisting into thread
-		_spSocialRecord->Persist(); // TODO: use async persisting...
-		/*
 		auto spSocialRecord = _spSocialRecord;
 		_pMaster->PushBackAsyncJob(
 			[spSocialRecord]() // provide copy of shared pointer
@@ -815,9 +813,8 @@ void Tab::EndSocialRecord()
 			spSocialRecord->Persist();
 			return true; // give the future some value
 		});
-		*/
 
-		// Make local copy of record null
+		// Make member pointer to record null
 		_spSocialRecord = nullptr;
 	}
 }
