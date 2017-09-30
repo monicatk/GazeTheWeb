@@ -30,8 +30,8 @@ public:
 		HistoryManager::Page page, 
 		bool delete_only_first = false) = 0;
 
-	// Review latest history entry
-	virtual HistoryManager::Page GetLastHistoryEntry() const = 0;
+	// Review front history entry
+	virtual HistoryManager::Page GetFrontHistoryEntry() const = 0;
 
     // Get own id in web. Returns -1 if not found
     virtual int GetIdOfTab(Tab const * pCaller) const = 0;
