@@ -383,6 +383,10 @@ void Tab::SetTitle(std::string title)
 		// that previously added history entry might be wrong
 		else if (last_entry.title != title)
 		{
+
+			// TODO: Create PushUpdateHistoryEntry and avoid concurrent creation and trying to delete same item!
+			// Comparison before deletion is currently done to early!
+
 			// Delete last entry with identical URL from history (also XML)
 			_pWeb->PushDeletePageFromHistoryJob(this, last_entry, true);
 
