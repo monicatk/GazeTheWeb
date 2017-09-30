@@ -83,8 +83,10 @@ Tab::Tab(
     eyegui::registerButtonListener(_pPanelLayout, "selection", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPanelLayout, "zoom", _spTabButtonListener);
 	// eyegui::registerButtonListener(_pPanelLayout, "test_button", _spTabButtonListener); // TODO: only for testing new features
-	eyegui::registerButtonListener(_pVideoModeLayout, "play", _spTabButtonListener);
-	eyegui::registerButtonListener(_pVideoModeLayout, "pause", _spTabButtonListener);
+	eyegui::registerButtonListener(_pVideoModeLayout, "play_pause", _spTabButtonListener);
+	eyegui::registerButtonListener(_pVideoModeLayout, "volume_up", _spTabButtonListener);
+	eyegui::registerButtonListener(_pVideoModeLayout, "volume_down", _spTabButtonListener);
+	eyegui::registerButtonListener(_pVideoModeLayout, "mute", _spTabButtonListener);
 	eyegui::registerButtonListener(_pVideoModeLayout, "exit", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPipelineAbortLayout, "abort", _spTabButtonListener);
 	eyegui::registerSensorListener(_pScrollingOverlayLayout, "scroll_up_sensor", _spTabSensorListener);
@@ -735,6 +737,9 @@ void Tab::EnterVideoMode(int id)
 			// Set fullscreen
 			iter->second->SetFullscreen(true);
 
+			// Hide controls
+			iter->second->ShowControls(false);
+
 			// Store id
 			_videoModeId = id;
 
@@ -762,6 +767,9 @@ void Tab::ExitVideoMode()
 		{
 			// Return from fullscreen
 			iter->second->SetFullscreen(false);
+
+			// Show controls
+			iter->second->ShowControls(true);
 		}
 
 		// Reset id

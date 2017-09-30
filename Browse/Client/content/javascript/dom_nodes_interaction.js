@@ -137,14 +137,16 @@ DOMOverflowElement.prototype.scroll = function(gazeX, gazeY, fixedIds){
 
 DOMVideo.prototype.setPlaying = function(playing)
 {
-	if (!playing)
+    if (playing)
+    {
+        this.node.play();
+        ConsolePrint("DOMVideo id=" + this.getId() + ": Now playing.");
+    }
+    else
 	{
 		this.node.pause();
 		ConsolePrint("DOMVideo id="+this.getId()+": Now paused.");
-		return;
 	}
-	this.node.play();
-	ConsolePrint("DOMVideo id="+this.getId()+": Now playing.");
 }
 
 DOMVideo.prototype.setMuted = function(muted)
@@ -167,10 +169,14 @@ DOMVideo.prototype.jumpToSecond = function(sec)
 }
 DOMVideo.prototype.setFullscreen = function(fullscreen)
 {
-	if(fullscreen)
-		this.node.webkitRequestFullscreen();
-	else
-		document.webkitExitFullscreen();		
+    if (fullscreen) {
+        if (this.node.webkitRequestFullscreen) {
+            this.node.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+        }
+    }
+    else {
+        document.webkitCancelFullScreen();
+    }
 	ConsolePrint("DOMVideo id="+this.getId()+": Fullscreen is set to "+fullscreen);
 }
 
