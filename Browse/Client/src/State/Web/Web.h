@@ -19,6 +19,7 @@
 #include <stack>
 #include <regex>
 
+
 // Forward declaration
 class Mediator;
 
@@ -102,6 +103,14 @@ public:
 	// Add page to history job
 	virtual void PushAddPageToHistoryJob(Tab* pCaller, HistoryManager::Page page);
 
+	// Add delete page from history job
+	virtual void PushDeletePageFromHistoryJob(Tab* pCaller,
+		HistoryManager::Page page,
+		bool delete_only_first = false);
+
+	// Review latest history entry
+	virtual HistoryManager::Page GetLastHistoryEntry() const;
+
     // Get own id in web. Returns -1 if not found
     virtual int GetIdOfTab(Tab const * pCaller) const;
 
@@ -162,6 +171,29 @@ private:
 
 		// Members
 		HistoryManager::Page _page;
+	};
+
+	class DeletePageFromHistoryJob : public TabJob
+	{
+	public:
+
+		// Constructor
+		DeletePageFromHistoryJob(Tab* pCaller, 
+			HistoryManager::Page page,
+			bool delete_only_first) : TabJob(pCaller)
+		{
+			_page = page;
+			_delete_only_first = delete_only_first;
+		}
+
+		// Execute
+		virtual void Execute(Web* pCallee);
+
+	protected:
+
+		// Members
+		HistoryManager::Page _page;
+		bool _delete_only_first;
 	};
 
     // Give listener full access
@@ -226,7 +258,7 @@ private:
     bool _goToSettings = false;
 
     // List of jobs which have to be executed
-    std::stack<std::unique_ptr<TabJob> > _jobs;
+    std::deque<std::unique_ptr<TabJob> > _jobs;
 
 	// Bookmark manager
 	std::unique_ptr<BookmarkManager> _upBookmarkManager;

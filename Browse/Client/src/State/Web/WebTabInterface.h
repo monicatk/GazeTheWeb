@@ -25,6 +25,14 @@ public:
 	// Add page to history job
 	virtual void PushAddPageToHistoryJob(Tab* pCaller, HistoryManager::Page page) = 0;
 
+	// Add delete page from history job
+	virtual void PushDeletePageFromHistoryJob(Tab* pCaller, 
+		HistoryManager::Page page, 
+		bool delete_only_first = false) = 0;
+
+	// Review latest history entry
+	virtual HistoryManager::Page GetLastHistoryEntry() const = 0;
+
     // Get own id in web. Returns -1 if not found
     virtual int GetIdOfTab(Tab const * pCaller) const = 0;
 };
