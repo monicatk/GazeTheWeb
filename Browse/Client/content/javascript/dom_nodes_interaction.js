@@ -170,9 +170,7 @@ DOMVideo.prototype.jumpToSecond = function(sec)
 DOMVideo.prototype.setFullscreen = function(fullscreen)
 {
     if (fullscreen) {
-        if (this.node.webkitRequestFullscreen) {
-            this.node.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-        }
+        this.node.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
     }
     else {
         document.webkitCancelFullScreen();
