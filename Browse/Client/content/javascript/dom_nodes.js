@@ -420,6 +420,9 @@ if(window.domNodes[3] !== undefined)
     console.log("Warning! DOMNode list slot 3 already in use!");
 window.domNodes[3] = window.domOverflowElements;
 
+// TODO: cef_hidden should have been toggled on/off without being affected by other hiding variables
+// but this isn't the case at the moment. Overflow elements will toggle themselves hidden or visible if
+// necessary!
 function DOMOverflowElement(node, cef_hidden=false)
 {
     window.domOverflowElements.push(this);
@@ -428,9 +431,11 @@ function DOMOverflowElement(node, cef_hidden=false)
     var cs_overflow = window.getComputedStyle(node, null).getPropertyValue("overflow");
     var visible_overflows = ["scroll", "auto"];
     cef_hidden = cef_hidden || (visible_overflows.indexOf(cs_overflow) === -1);
+    /*
     // Check if auto-overflow is really overflowing // TODO: Check regularly if overflow property changed?
     if(cs_overflow === "auto")
         this.auto_overflow_hidden = false;  // Initially set to false, later checked
+    */
 
     DOMNode.call(this, node, id, 3, cef_hidden);
 
@@ -471,17 +476,32 @@ function DOMOverflowElement(node, cef_hidden=false)
         child.setAttribute("overflowId", id);
     }
 
+    // DEBUG
+    if(this.getId() === 3)
+        console.log("initial checkIfOverflown call starts...");
+
+    //var visible_overflows = ["scroll", "auto"];
+    //cef_hidden = cef_hidden || (visible_overflows.indexOf(cs_overflow) === -1);
+
+    // Check if auto-overflow is really overflowing // TODO: Check regularly if overflow property changed?
+    if(cs_overflow === "auto")
+        this.auto_overflow_hidden = false;  // Initially set to false, later checked
+
+
     // If overflow is set to auto, check if it is really overflowing before using it in CEF
     this.checkIfOverflown();
 
+    // DEBUG
+    if(this.getId() === 3)
+        console.log("initial checkIfOverflown call ended.");
 }
 DOMOverflowElement.prototype = Object.create(DOMNode.prototype);
 DOMOverflowElement.prototype.constructor = DOMOverflowElement;
 DOMOverflowElement.prototype.Class = "DOMOverflowElement";  // Override base class identifier for this derivated class
 
 DOMOverflowElement.prototype.updateRects = function(){
-    DOMNode.prototype.updateRects.call(this);
     this.checkIfOverflown();
+    DOMNode.prototype.updateRects.call(this);
 }
 
 // DOMAttribute MaxScrolling
@@ -550,19 +570,48 @@ DOMOverflowElement.prototype.checkIfOverflown = function(){
 }
 
 DOMOverflowElement.prototype.setAutoOverflowHidden = function(hidden){
+    // Value doesn't change
     if(hidden === this.auto_overflow_hidden)
         return;
 
+    // Monitor if overall visibility changed when setting variable
+    var sum_hidden = this.getCefHidden();
+
+    var debug = this.auto_overflow_hidden;
+
     this.auto_overflow_hidden = hidden;
-    // Only hide or show auto-overflow if not already hidden for CEF
-    if(!this.cef_hidden)
+
+    var sum_hidden_updated = this.getCefHidden();
+    
+    // DEBUG
+    if(this.getId() === 3)
     {
-        if(hidden)
+        console.log("cef_hidden: ", this.cef_hidden, "former auto_overflow_hidden: ", debug, 
+             "hidden: ", hidden, "old: ", sum_hidden, "new: ", sum_hidden_updated);
+    }
+    // Compare old and new value, when changes happened, react accordingly
+    if(sum_hidden !== sum_hidden_updated)
+    {
+        if(this.getId() === 3)
+            if(sum_hidden_updated)
+               console.log("Removing overflow element due to hiding change.")
+            else
+                console.log("Adding overflow element due to hiding change.");
+
+        if(sum_hidden_updated)
             ConsolePrint("DOM#rem#3#"+this.getId()+"#");
         else
             ConsolePrint("DOM#add#3#"+this.getId()+"#");
     }
 }
+
+DOMOverflowElement.prototype.getCefHidden = function()
+{
+    if(this.auto_overflow_hidden === undefined)
+        return this.cef_hidden;
+    return this.cef_hidden || this.auto_overflow_hidden;
+}
+
 
 
 /*
