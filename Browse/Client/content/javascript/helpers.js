@@ -7,6 +7,10 @@
 // Helper function for console output
 function ConsolePrint(msg)
 {
+    // DEBUG
+    if(msg.indexOf("#3#") !== -1)
+        console.log(msg);
+
 	window.cefQuery({ request: (""+msg), persistent : false, onSuccess : (response) => {}, onFailure : (error_code, error_message) => {} });
 }
 
@@ -475,6 +479,17 @@ function AttrRequest(domObj, attrStr, compare_with_js=true)
 
     if (compare_with_js)
         ConsolePrint(attrStr+" data:\n\t"+data);
+}
+
+function SetObjectAvailabilityForCEFto(domObj, val)
+{
+    if(typeof(domObj.getType) !== "function")
+        return;
+    
+    if(val)
+        ConsolePrint("DOM#add#"+domObj.getType()+"#"+domObj.getId()+"#");
+    else
+        ConsolePrint("DOM#rem#"+domObj.getType()+"#"+domObj.getId()+"#");
 }
 
 ConsolePrint("Successfully imported helpers.js!");
