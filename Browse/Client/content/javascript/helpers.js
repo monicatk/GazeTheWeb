@@ -152,7 +152,7 @@ var debug_updateDOMRects_count = 0;
 function UpdateDOMRects(why)
 {
 
-    console.log("UpdateDOMRects called because "+why+", "+(++debug_updateDOMRects_count)+" times until now");
+    // console.log("UpdateDOMRects called because "+why+", "+(++debug_updateDOMRects_count)+" times until now");
 
     
     window.domNodes.forEach(domList => {

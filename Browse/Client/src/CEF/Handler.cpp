@@ -116,7 +116,7 @@ void Handler::OnLoadError(
 void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, TransitionType transition_type)
 {
 	// Set loading status of each in Tab to loading in order to display loading icon and status
-	_pMediator->SetLoadingStatus(browser, true);
+	_pMediator->SetLoadingStatus(browser, true, frame->IsMain());
 
     if (frame->IsMain())
     {
@@ -136,7 +136,7 @@ void Handler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
 void Handler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode)
 {
 	// Set loading status of each frame in Tab to load finished in order to display loading icon and status
-	_pMediator->SetLoadingStatus(browser, false);
+	_pMediator->SetLoadingStatus(browser, false, frame->IsMain());
 
     if (frame->IsMain())
     {

@@ -411,8 +411,11 @@ void Tab::SetTitle(std::string title)
 	}
 }
 
-void Tab::SetLoadingStatus(bool isLoading)
+void Tab::SetLoadingStatus(bool isLoading, bool isMainFrame)
 {
+	if (!isMainFrame)
+		return;
+
 	// isLoading=false may indicate, that site has completely finished loading
 	if(isLoading)
     {

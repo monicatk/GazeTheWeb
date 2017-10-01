@@ -364,7 +364,7 @@ public:
 	virtual void AddTabAfter(std::string URL) { _pWeb->PushAddTabAfterJob(this, URL); }
 
 	// Receive current loading status of each frame
-	virtual void SetLoadingStatus(bool isLoading);
+	virtual void SetLoadingStatus(bool isLoading, bool isMainFrame);
 	
 	// Tell about JavaScript dialog
 	virtual void RequestJSDialog(JavaScriptDialogType type, std::string message);
