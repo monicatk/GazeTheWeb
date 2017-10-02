@@ -1056,10 +1056,10 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			std::string date = GetDate(); // current date
 			int startIndex = _pMaster->GetStartIndex(); // start index
 			_pMaster->PushBackAsyncJob(
-				[date, startIndex]() // copy of date and start index
+				[date, startIndex, success]() // copy of date, start index and success
 			{
 				// Create record
-				nlohmann::json record = { { "date", date }, { "startIndex", startIndex } };
+				nlohmann::json record = { { "date", date }, { "startIndex", startIndex }, { "success", success } };
 
 				// Persist record
 				std::promise<int> promise; auto future = promise.get_future(); // future provides index
