@@ -513,7 +513,7 @@ void Master::Exit()
 	_pCefMediator->DoMessageLoopWork();
 }
 
-void  Master::SetDataTransfer(bool dataTransfer)
+void Master::SetDataTransfer(bool dataTransfer)
 {
 	// Store value
 	_dataTransfer = dataTransfer;
