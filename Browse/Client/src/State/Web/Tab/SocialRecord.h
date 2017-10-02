@@ -72,7 +72,7 @@ public:
 	}
 
 	// Constructor
-	SocialRecord(std::string domain, SocialPlatform platform);
+	SocialRecord(std::string domain, SocialPlatform platform, int startIndex);
 
 	// Virtual destructor
 	virtual ~SocialRecord();
@@ -176,6 +176,7 @@ private:
 	double _totalDurationInForeground = 0.0;
 	double _totalDurationUserActive = 0.0; // and tab in foreground
 	std::vector<Page> _pages; // should have at least one element and current one is at back
+	int _startIndex = -1;
 };
 
 #endif // SOCIALRECORD_H_

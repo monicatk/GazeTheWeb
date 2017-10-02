@@ -9,7 +9,7 @@
 
 using json = nlohmann::json;
 
-SocialRecord::SocialRecord(std::string domain, SocialPlatform platform) : _domain(domain), _platform(platform) {}
+SocialRecord::SocialRecord(std::string domain, SocialPlatform platform, int startIndex) : _domain(domain), _platform(platform), _startIndex(startIndex) {}
 
 SocialRecord::~SocialRecord() {}
 
@@ -126,6 +126,7 @@ nlohmann::json SocialRecord::ToJSON() const
 		{ "durationInForeground", _totalDurationInForeground },
 		{ "durationUserActive", _totalDurationUserActive },
 		{ "pageCount", _pages.size() },
+		{ "startIndex" , _startIndex}
 	};
 
 	// Add pages to JSON structure
