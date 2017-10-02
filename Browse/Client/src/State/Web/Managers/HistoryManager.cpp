@@ -141,13 +141,11 @@ bool HistoryManager::DeletePageByUrl(HistoryManager::Page page, bool deleteOnlyF
 
 	// Search each node (except the first, current page) in history pages list in xml file
 	auto entry = pRoot->FirstChildElement("page");
-	if (entry)
-	{
+	/*if(entry)
 		entry = entry->NextSiblingElement("page");
-	}
-
+*/
 	std::deque<unsigned int> removed_idx;
-	unsigned int count = 1;
+	unsigned int count = 0;
 	while (entry != NULL)
 	{
 		// If url matches entry, remove entry and keep index in mind to also delete it locally

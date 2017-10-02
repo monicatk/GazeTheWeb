@@ -225,6 +225,9 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			// ADDING DOMNODE
 			if (op.compare("add") == 0) // adding of DOM node
 			{
+				if(type == 3)
+					LogDebug("MsgRouter: Adding overflow element with id: ", id);
+
 				// Create blank node object in corresponding Tab object
 				switch (type)
 				{
@@ -263,6 +266,9 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			// REMOVE DOMNODE
 			if (op.compare("rem") == 0)
 			{
+				if(type == 3)
+					LogDebug("MsgRouter: Removing overflow element with id: ",id, " ...");
+
 				switch (type)
 				{
 					case(0): {_pMediator->RemoveDOMTextInput(browser, id); break; }

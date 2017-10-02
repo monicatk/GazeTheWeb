@@ -70,12 +70,14 @@ DOMTextInput.prototype.inputText = function(text, submit){
 
 
 DOMOverflowElement.prototype.scroll = function(gazeX, gazeY, fixedIds){
+	console.log("scroll called with "+gazeX+" "+gazeY+" (ids: "+fixedIds+") -- hidden? "+this.hidden_overflow);
+
 	if(this.hidden_overflow)
 		return [0,0];
 
 
-	if(fixedIds === undefined || fixedIds.length > 0 && fixedIds.indexOf(this.getFixedId()) === -1)
-		return;
+	// if(fixedIds === undefined || fixedIds.length > 0 && fixedIds.indexOf(this.getFixedId()) === -1)
+	// 	return;
 
 	// Do not use cut-off rect and keep scrolling velocity untouched if partially hidden
 	var rects = this.getAdjustedClientRects();
@@ -129,9 +131,13 @@ DOMOverflowElement.prototype.scroll = function(gazeX, gazeY, fixedIds){
 		this.node.scrollLeft += scrollX;
 		this.node.scrollTop += scrollY;
 
+		// DEBUG
+		console.log("scrolling by "+scrollX+" "+scrollY);
+
 		return [scrollX, scrollY];
 	}
 	return [0,0];
+		console.log("scrolling by 0 0");
 	
 }
 

@@ -359,11 +359,11 @@ void Mediator::SetActiveTab(TabCEFInterface * pTab)
 
 
 
-bool Mediator::SetLoadingStatus(CefRefPtr<CefBrowser> browser, bool isLoading)
+bool Mediator::SetLoadingStatus(CefRefPtr<CefBrowser> browser, bool isLoading, bool isMainFrame)
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
-		pTab->SetLoadingStatus(isLoading);
+		pTab->SetLoadingStatus(isLoading, isMainFrame);
 		return true;
 	}
 	return false;	

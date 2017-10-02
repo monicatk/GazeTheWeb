@@ -394,6 +394,9 @@ void Tab::SetTitle(std::string title)
 				// Delete front entry with identical URL from history (also XML)
 				_pWeb->PushDeletePageFromHistoryJob(this, frontEntry, true);
 
+				// TODO: Create PushUpdateHistoryEntry and avoid concurrent creation and trying to delete same item!
+				// Comparison before deletion is currently done to early!
+
 				frontEntry.title = title;
 
 				// Add updated entry to history
@@ -401,10 +404,18 @@ void Tab::SetTitle(std::string title)
 			}
 		}
 	}
+	else if(frontEntry.URL != _url)
+	{
+		// Delete wrong previous entry where title and url shouldn't match
+		_pWeb->PushDeletePageFromHistoryJob(this, frontEntry, true);
+	}
 }
 
-void Tab::SetLoadingStatus(bool isLoading)
+void Tab::SetLoadingStatus(bool isLoading, bool isMainFrame)
 {
+	if (!isMainFrame)
+		return;
+
 	// isLoading=false may indicate, that site has completely finished loading
 	if(isLoading)
     {
@@ -429,6 +440,7 @@ void Tab::SetLoadingStatus(bool isLoading)
             eyegui::setImageOfPicture(_pPanelLayout, "icon", "icons/TabIconNotFound.png");
             _iconState = IconState::ICON_NOT_FOUND;
         }
+
     }
 }
 
