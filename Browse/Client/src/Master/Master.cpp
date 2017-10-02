@@ -352,13 +352,6 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	eyegui::registerButtonListener(_pSuperCalibrationLayout, "continue", _spMasterButtonListener);
 	eyegui::registerButtonListener(_pSuperCalibrationLayout, "recalibration", _spMasterButtonListener);
 
-    // Initialization
-    if(setup::PAUSED_AT_STARTUP)
-    {
-        eyegui::buttonDown(_pSuperLayout, "pause", true);
-    }
-    _pausedDimming.setValue(0);
-
 	// Add floating frame for notification
 	_notificationFrameIndex = eyegui::addFloatingFrameWithBrick(
 		_pSuperLayout,
@@ -444,6 +437,21 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// Create record about start
 	nlohmann::json record = { { "date", GetDate() } };
 	FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_APPLICATION_START, record, std::to_string(_startIndex)); // send JSON to database
+
+	// ### INITIALIZATION ###
+
+	// Paused at startup
+	if (setup::PAUSED_AT_STARTUP)
+	{
+		eyegui::buttonDown(_pSuperLayout, "pause", true);
+	}
+	_pausedDimming.setValue(0);
+
+	// Show super calibration layout at startup
+	if (setup::CALIBRATION_AT_STARTUP)
+	{
+		eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true);
+	}
 
     // ### OTHER ###
 

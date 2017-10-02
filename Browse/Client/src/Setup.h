@@ -24,6 +24,11 @@ namespace setup
 #else
 	static const bool	DEMO_MODE = false;
 #endif
+#ifdef CLIENT_DEPLOYMENT
+	static const bool	DEPLOYMENT = true;
+#else
+	static const bool	DEPLOYMENT = false;
+#endif
 
 	// Window
 	static const bool	FULLSCREEN = false; // does not work in combination with eye tracker calibration
@@ -40,6 +45,7 @@ namespace setup
 	static const float	MAX_AGE_OF_USED_GAZE = 1.f; // only accept gaze as input that is not older than one second (TODO: this is not used by filter but by master to determine when to stop taking gaze input as serious)
 	static const float	DURATION_BEFORE_SUPER_CALIBRATION = 3.f; // duration until recalibration is offered after receiving no gaze samples
 	static const bool	PAUSED_AT_STARTUP = false | DEMO_MODE;
+	static const bool	CALIBRATION_AT_STARTUP = true | DEPLOYMENT;
 	static const float	LINK_CORRECTION_MAX_PIXEL_DISTANCE = 5.f;
 	static const int	TEXT_SELECTION_MARGIN = 4; // area which is selected before / after zoom coordinate in CEFPixels
 	static const int	FILTER_GAZE_FIXATION_PIXEL_RADIUS = 20;
