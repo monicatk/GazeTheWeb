@@ -90,14 +90,14 @@ void SocialRecord::AddScrollingDelta(float delta)
 	if (_writeable) { _pages.back().scrollAmount += delta; }
 }
 
-void SocialRecord::AddClick(std::string tag, std::string id)
+void SocialRecord::AddClick(std::string tag, std::string id, float x, float y)
 {
-	if (_writeable) { _pages.back().clicks.push_back(Click(tag, id)); }
+	if (_writeable) { _pages.back().clicks.push_back(Click(tag, id, x, y)); }
 }
 
-void SocialRecord::AddTextInput(std::string id, int charCount)
+void SocialRecord::AddTextInput(std::string id, int charCount, float x, float y)
 {
-	if (_writeable) { _pages.back().textInputs.push_back(TextInput(id, charCount)); }
+	if (_writeable) { _pages.back().textInputs.push_back(TextInput(id, charCount, x, y)); }
 }
 
 void SocialRecord::AddPage(std::string URL)
@@ -150,7 +150,8 @@ nlohmann::json SocialRecord::ToJSON() const
 			JSON["pages"].back()["clicks"].push_back(
 			{
 				{ "tag", rClick.tag },
-				{ "id", rClick.id }
+				{ "id", rClick.id },
+				{ "coord", std::to_string(rClick.x) + ", " + std::to_string(rClick.y) }
 			}
 			);
 		}
@@ -161,7 +162,8 @@ nlohmann::json SocialRecord::ToJSON() const
 			JSON["pages"].back()["textInputs"].push_back(
 			{
 				{ "id", rTextInput.id },
-				{ "charCount", rTextInput.charCount }
+				{ "charCount", rTextInput.charCount },
+				{ "coord", std::to_string(rTextInput.x) + ", " + std::to_string(rTextInput.y) }
 			}
 			);
 		}

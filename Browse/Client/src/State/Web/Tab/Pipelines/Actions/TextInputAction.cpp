@@ -7,8 +7,9 @@
 #include "src/State/Web/Tab/Interface/TabInteractionInterface.h"
 #include "submodules/eyeGUI/include/eyeGUI.h"
 
-TextInputAction::TextInputAction(TabInteractionInterface* pTab, std::shared_ptr<DOMTextInputInteraction> spInteractionNode, bool isPasswordField) :
+TextInputAction::TextInputAction(TabInteractionInterface* pTab, std::shared_ptr<const DOMTextInput> spNode, std::shared_ptr<DOMTextInputInteraction> spInteractionNode, bool isPasswordField) :
 	Action(pTab),
+	_spNode(spNode),
 	_spInteractionNode(spInteractionNode),
 	_isPasswordField(isPasswordField)
 {
@@ -40,7 +41,16 @@ bool TextInputAction::Update(float tpf, const std::shared_ptr<const TabInput> sp
 	// Tell tab about for social record
 	if (!_isPasswordField) // only if no password field
 	{
-		_pTab->NotifyTextInput("", text.length()); // todo fetch id
+		float x = -1;
+		float y = -1;
+		if (!_spNode->GetRects().empty())
+		{
+			auto coord = _spNode->GetRects()[0].Center();
+			x = coord.x;
+			y = coord.y;
+		}
+
+		_pTab->NotifyTextInput("", text.length(), x, y); // todo fetch id
 	}
 
     // Action is done

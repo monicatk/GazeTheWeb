@@ -8,7 +8,7 @@ ConsolePrint("Starting to import dom_mutationobserver.js ...");
 document.onclick = function(e){
 	if (e && e.target && e.target.tagName)
 	{
-	    SendDataMessage(e.target.tagName.toLowerCase() + "," + e.target.id);
+	    SendDataMessage(e.target.tagName.toLowerCase() + "," + e.target.id + "," + e.pageX + "," + e.pageY);
 	}
 }
 

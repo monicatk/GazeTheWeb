@@ -373,11 +373,11 @@ void Web::SetDataTransfer(bool active)
 
 }
 
-void Web::NotifyClick(std::string tag, std::string id)
+void Web::NotifyClick(std::string tag, std::string id, float x, float y)
 {
 	if (_currentTabId >= 0)
 	{
-		_tabs.at(_currentTabId)->NotifyClick(tag, id);
+		_tabs.at(_currentTabId)->NotifyClick(tag, id, x, y);
 	}
 }
 

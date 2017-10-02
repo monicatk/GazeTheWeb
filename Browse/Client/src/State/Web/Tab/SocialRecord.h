@@ -96,10 +96,10 @@ public:
 	void AddScrollingDelta(float delta);
 
 	// Add click
-	void AddClick(std::string tag, std::string id);
+	void AddClick(std::string tag, std::string id, float x, float y);
 
 	// Add text input
-	void AddTextInput(std::string id, int charCount);
+	void AddTextInput(std::string id, int charCount, float x, float y);
 
 	// Add page
 	void AddPage(std::string URL);
@@ -119,22 +119,26 @@ private:
 	struct Click
 	{
 		// Constructor
-		Click(std::string tag, std::string id) : tag(tag), id(id) {}
+		Click(std::string tag, std::string id, float x, float y) : tag(tag), id(id), x(x), y(y) {}
 
 		// Fields
 		const std::string tag;
 		const std::string id;
+		const float x;
+		const float y;
 	};
 
 	// Struct for text input record
 	struct TextInput
 	{
 		// Constructor
-		TextInput(std::string id, int charCount) : id(id), charCount(charCount) {}
+		TextInput(std::string id, int charCount, float x, float y) : id(id), charCount(charCount), x(x), y(y) {}
 
 		// Fields
 		const std::string id;
 		const int charCount = 0;
+		const float x;
+		const float y;
 	};
 
 	// Struct for page record

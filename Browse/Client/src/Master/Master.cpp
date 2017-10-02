@@ -406,10 +406,14 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	{
 		std::string tag;
 		std::string id;
+		float x = -1;
+		float y = -1;
 		auto tokens = SplitBySeparator(message, ',');
 		if (tokens.size() > 0) { tag = tokens.at(0); }
 		if (tokens.size() > 1) { id = tokens.at(1); }
-		this->NotifyClick(tag, id);
+		if (tokens.size() > 2) { x = std::stof(tokens.at(2)); }
+		if (tokens.size() > 3) { y = std::stof(tokens.at(3)); }
+		this->NotifyClick(tag, id, x, y);
 	});
 
 	// ### LabStreamCallback ###
@@ -588,9 +592,9 @@ void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::property:
 	eyegui::setStyleTreePropertyValue(_pGUI, styleClass, type, value);
 }
 
-void Master::NotifyClick(std::string tag, std::string id)
+void Master::NotifyClick(std::string tag, std::string id, float x, float y)
 {
-	_upWeb->NotifyClick(tag, id);
+	_upWeb->NotifyClick(tag, id, x, y);
 }
 
 void Master::PushNotification(std::u16string content, Type type, bool overridable)

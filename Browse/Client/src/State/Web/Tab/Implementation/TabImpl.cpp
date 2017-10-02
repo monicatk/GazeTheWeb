@@ -684,11 +684,11 @@ void Tab::SetDataTransfer(bool active)
 	}
 }
 
-void Tab::NotifyClick(std::string tag, std::string id)
+void Tab::NotifyClick(std::string tag, std::string id, float x, float y)
 {
 	if (_spSocialRecord != nullptr)
 	{
-		_spSocialRecord->AddClick(tag, id);
+		_spSocialRecord->AddClick(tag, id, x, y);
 	}
 }
 

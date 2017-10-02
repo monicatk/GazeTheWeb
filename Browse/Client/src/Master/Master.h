@@ -105,7 +105,7 @@ public:
 	}
 
 	// Notify about click
-	void NotifyClick(std::string tag, std::string id);
+	void NotifyClick(std::string tag, std::string id, float x, float y);
 
 	// ### ACCESS BY SETTINGS ###
 

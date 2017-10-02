@@ -170,11 +170,11 @@ std::weak_ptr<CustomTransformationInterface> Tab::GetCustomTransformationInterfa
 	return _pMaster->GetCustomTransformationInterface();
 }
 
-void Tab::NotifyTextInput(std::string id, int charCount)
+void Tab::NotifyTextInput(std::string id, int charCount, float x, float y)
 {
 	// Tell social record
 	if (_spSocialRecord != nullptr)
 	{
-		_spSocialRecord->AddTextInput(id, charCount);
+		_spSocialRecord->AddTextInput(id, charCount, x, y);
 	}
 }
