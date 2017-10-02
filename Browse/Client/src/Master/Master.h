@@ -80,7 +80,7 @@ public:
 	// Get pointer to interface of custom transformation of eye input
 	std::weak_ptr<CustomTransformationInterface> GetCustomTransformationInterface();
 
-	// Push back async job
+	// Push back async job. Only provide threadsafe calls to the job!!!
 	void PushBackAsyncJob(std::function<bool()> job);
 
     // ### EYEGUI DELEGATION ###

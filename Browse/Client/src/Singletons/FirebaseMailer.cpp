@@ -609,7 +609,7 @@ int FirebaseMailer::FirebaseInterface::Apply(FirebaseIntegerKey key, std::functi
 FirebaseMailer::FirebaseMailer()
 {
 	// Create thread where FirebaseInterface lives in
-	auto* pMutex = &_mutex;
+	auto* pMutex = &_commandMutex;
 	auto* pConditionVariable = &_conditionVariable;
 	auto* pCommandQueue = &_commandQueue;
 	auto const * pShouldStop = &_shouldStop; // read-only
@@ -732,7 +732,7 @@ void FirebaseMailer::PushBackCommand(std::shared_ptr<Command> spCommand)
 {
 	if (!_paused) // only push back the command if not paused
 	{
-		std::lock_guard<std::mutex> lock(_mutex);
+		std::lock_guard<std::mutex> lock(_commandMutex);
 		_commandQueue.push_back(spCommand); // push back command to queue
 		_conditionVariable.notify_all(); // notify thread about new data
 	}

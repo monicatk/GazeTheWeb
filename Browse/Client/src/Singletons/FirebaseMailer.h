@@ -4,6 +4,7 @@
 //============================================================================
 // Singleton which receives and sends data to Firebase. The mailer manages
 // the command queue and the interface the connection to the Firebase.
+// Mailer access is threadsafe.
 
 #ifndef FIREBASEMAILER_H_
 #define FIREBASEMAILER_H_
@@ -91,7 +92,7 @@ public:
 	// Getter of static instance
 	static FirebaseMailer& Instance()
 	{
-		static FirebaseMailer _instance;
+		static FirebaseMailer _instance; // threadsafe through C++11 standard
 		return _instance;
 	}
 
@@ -181,19 +182,19 @@ private:
 	void PushBackCommand(std::shared_ptr<Command> spCommand);
 
 	// Private copy / assignment constructors
-	FirebaseMailer();
+	FirebaseMailer(); // threadsafe as only called by Instance()
 	FirebaseMailer(const FirebaseMailer&) {}
 	FirebaseMailer& operator = (const FirebaseMailer &) { return *this; }
 
 	// Pause indicator (if true, avoids pushing to command queue)
-	bool _paused = false;
+	std::atomic<bool> _paused = false;
 
 	// Threading (thread defined in constructor of FirebaseMailer)
-	std::mutex _mutex; // mutex for access of _commandQueue (thread grabs all commands and works on them)
+	std::mutex _commandMutex; // mutex for access of _commandQueue (thread grabs all commands and works on them)
 	std::condition_variable _conditionVariable; // used to wake up thread at available work
 	std::deque<std::shared_ptr<Command> > _commandQueue; // shared function pointers that are executed sequentially within thread
 	std::unique_ptr<std::thread> _upThread; // the thread itself
-	bool _shouldStop = false; // written by this, read by thread
+	std::atomic<bool> _shouldStop = false; // written by this, read by thread
 };
 
 #endif // FIREBASEMAILER_H_
