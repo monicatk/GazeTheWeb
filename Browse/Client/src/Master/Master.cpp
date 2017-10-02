@@ -1052,8 +1052,23 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				_pMaster->PushNotificationByKey("notification:calibration_failure", MasterNotificationInterface::Type::WARNING, false);
 			}
 
-			// Store event in database
-			FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_CALIBRATION_ATTEMPTS, 1);
+			// Store this recalibration in Firebase
+			std::string date = GetDate(); // current date
+			int startIndex = _pMaster->GetStartIndex(); // start index
+			_pMaster->PushBackAsyncJob(
+				[date, startIndex]() // copy of date and start index
+			{
+				// Create record
+				nlohmann::json record = { { "date", date }, { "startIndex", startIndex } };
+
+				// Persist record
+				std::promise<int> promise; auto future = promise.get_future(); // future provides index
+				FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_RECALIBRATION_COUNT, 1, &promise); // adds one to the count
+				FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_RECALIBRATION, record, std::to_string(future.get() - 1)); // send JSON to database
+
+				// Return some value (not used)
+				return true;
+			});
 
 			// Hide layout after calibration
 			eyegui::setVisibilityOfLayout(_pMaster->_pSuperCalibrationLayout, false, false, true);
