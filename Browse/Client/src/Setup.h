@@ -32,20 +32,20 @@ namespace setup
 
 	// Window
 	static const bool	FULLSCREEN = false; // does not work in combination with eye tracker calibration
-	static const bool	MAXIMIZE_WINDOW = false | DEMO_MODE; // only implemented for Windows
+	static const bool	MAXIMIZE_WINDOW = false | DEPLOYMENT | DEMO_MODE; // only implemented for Windows
 	static const int	INITIAL_WINDOW_WIDTH = 1280;
 	static const int	INITIAL_WINDOW_HEIGHT = 720;
 
 	// Control TODO: move connect bools to config file
 	static const bool	CONNECT_OPEN_GAZE = false;
 	static const bool	CONNECT_SMI_IVIEWX = true;
-	static const bool	CONNECT_VI_MYGAZE = false;
+	static const bool	CONNECT_VI_MYGAZE = false | DEPLOYMENT;
 	static const bool	CONNECT_TOBII_EYEX = true;
 	static const float	DURATION_BEFORE_INPUT = 1.f; // wait one second before accepting input
 	static const float	MAX_AGE_OF_USED_GAZE = 1.f; // only accept gaze as input that is not older than one second (TODO: this is not used by filter but by master to determine when to stop taking gaze input as serious)
 	static const float	DURATION_BEFORE_SUPER_CALIBRATION = 3.f; // duration until recalibration is offered after receiving no gaze samples
 	static const bool	PAUSED_AT_STARTUP = false | DEMO_MODE;
-	static const bool	CALIBRATION_AT_STARTUP = true | DEPLOYMENT;
+	static const bool	SUPER_CALIBRATION_AT_STARTUP = false | DEPLOYMENT;
 	static const float	LINK_CORRECTION_MAX_PIXEL_DISTANCE = 5.f;
 	static const int	TEXT_SELECTION_MARGIN = 4; // area which is selected before / after zoom coordinate in CEFPixels
 	static const int	FILTER_GAZE_FIXATION_PIXEL_RADIUS = 20;

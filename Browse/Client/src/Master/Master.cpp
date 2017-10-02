@@ -448,7 +448,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	_pausedDimming.setValue(0);
 
 	// Show super calibration layout at startup
-	if (setup::CALIBRATION_AT_STARTUP)
+	if (setup::SUPER_CALIBRATION_AT_STARTUP)
 	{
 		eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true);
 	}

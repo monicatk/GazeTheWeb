@@ -397,27 +397,23 @@ StateType Web::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		// Update it and wait for it to finish
 		if (_upHistory->Update())
 		{
-			// Update it and wait for finish of URL input
-			if (_upHistory->Update())
+			// Get input and decide
+			std::string URL = _upHistory->GetURL();
+			if (!URL.empty())
 			{
-				// Get input and decide
-				std::string URL = _upHistory->GetURL();
-				if (!URL.empty())
-				{
-					int tabId = _upHistory->GetCurrentTabId();
+				int tabId = _upHistory->GetCurrentTabId();
 
-					// Check whether tab id is valid
-					auto iter = _tabs.find(tabId);
-					if (iter != _tabs.end())
-					{
-						// Open URL in current tab
-						_tabs.at(tabId)->OpenURL(URL);
-					}
-					else
-					{
-						// Since there is no tab, create one
-						AddTab(URL, true);
-					}
+				// Check whether tab id is valid
+				auto iter = _tabs.find(tabId);
+				if (iter != _tabs.end())
+				{
+					// Open URL in current tab
+					_tabs.at(tabId)->OpenURL(URL);
+				}
+				else
+				{
+					// Since there is no tab, create one
+					AddTab(URL, true);
 				}
 			}
 
