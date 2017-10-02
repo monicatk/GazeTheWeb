@@ -34,5 +34,6 @@ TextInputPipeline::TextInputPipeline(
         std::unique_ptr<ActionConnector>(new ActionConnector(spKeyboardAction, spTextInputAction));
     upConnector->ConnectString16("text", "text");
     upConnector->ConnectInt("submit", "submit");
+	upConnector->ConnectFloat("duration", "duration");
     _connectors.push_back(std::move(upConnector));
 }

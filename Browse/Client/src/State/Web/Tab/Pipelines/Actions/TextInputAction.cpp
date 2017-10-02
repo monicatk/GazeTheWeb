@@ -16,6 +16,7 @@ TextInputAction::TextInputAction(TabInteractionInterface* pTab, std::shared_ptr<
     // Add in- and output data slots
     AddString16InputSlot("text");
     AddIntInputSlot("submit");
+	AddFloatInputSlot("duration");
 }
 
 TextInputAction::~TextInputAction()
@@ -50,7 +51,9 @@ bool TextInputAction::Update(float tpf, const std::shared_ptr<const TabInput> sp
 			y = coord.y;
 		}
 
-		_pTab->NotifyTextInput("", text.length(), x, y); // todo fetch id
+		float duration = -1.f;
+		GetInputValue("duration", duration);
+		_pTab->NotifyTextInput("", text.length(), x, y, duration); // todo fetch id
 	}
 
     // Action is done

@@ -15,6 +15,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 	AddString16InputSlot("text");
     AddString16OutputSlot("text");
     AddIntOutputSlot("submit");
+	AddFloatOutputSlot("duration", 0.f);
 
 	// TODO: forget about ids and move all of this into activation
 
@@ -402,6 +403,11 @@ KeyboardAction::~KeyboardAction()
 
 bool KeyboardAction::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
+	// Update duration
+	float duration = 0.f;
+	GetOutputValue("duration", duration);
+	SetOutputValue("duration", duration + tpf);
+
 	// ######################################################
 	// ### TODO CERTH #######################################
 	// ######################################################

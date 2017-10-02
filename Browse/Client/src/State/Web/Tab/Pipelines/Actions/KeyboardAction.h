@@ -6,6 +6,7 @@
 // - Input: std::u16string text (which is given)
 // - Output: std::u16string text (which is edited by keyboard)
 // - Output: int submit (0 if not, else submit)
+// - Output: float duration (how long text input took)
 
 #ifndef KEYBOARDACTION_H_
 #define KEYBOARDACTION_H_

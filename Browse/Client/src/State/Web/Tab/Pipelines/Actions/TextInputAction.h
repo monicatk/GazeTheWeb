@@ -5,6 +5,7 @@
 // Action to input text into a text input field on a webpage.
 // - Input: std::u16string text
 // - Input: int submit (0 if not, else submit)
+// - Input: float duration (how long text input took)
 // - Output: none
 
 #ifndef TEXTINPUTACTION_H_
