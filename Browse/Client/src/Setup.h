@@ -60,6 +60,7 @@ namespace setup
 	static const std::string	FIREBASE_URL = "https://mamem-phase2-fall17.firebaseio.com"; // URL of our Firebase
 	static const int			SOCIAL_RECORD_DIGIT_COUNT = 6;
 	static const bool			SOCIAL_RECORD_PERSIST_UNKNOWN = true;
+	static const std::string	DATE_FORMAT = "%d-%m-%Y %H-%M-%S";
 
 	// Other
 	static const bool	ENABLE_WEBGL = false; // only on Windows

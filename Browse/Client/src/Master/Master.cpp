@@ -435,7 +435,23 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
 	// ### FirebaseMailer ###
 	FirebaseMailer::Instance().PushBack_Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword());
-	FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_APPLICATION_STARTS, 1); // count application starts (would miss some when Firebase connection fails for some reason)
+
+	// Store this start
+	std::string date = GetDate(); // current date
+	PushBackAsyncJob(
+		[date]() // copy of date
+	{
+		// Create record
+		nlohmann::json record = { { "date", date } };
+
+		// Persist record
+		std::promise<int> promise; auto future = promise.get_future(); // future provides index
+		FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT, 1, &promise); // adds one to the count
+		FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_APPLICATION_START, record, std::to_string(future.get() - 1)); // send JSON to database
+
+		// Return some value (not used)
+		return true;
+	});
 
     // ### OTHER ###
 

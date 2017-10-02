@@ -827,8 +827,6 @@ void Tab::EndSocialRecord()
 	}
 }
 
-
-
 void Tab::UpdateAccentColor(float tpf)
 {
 	// Move accent color accent towards target accent color

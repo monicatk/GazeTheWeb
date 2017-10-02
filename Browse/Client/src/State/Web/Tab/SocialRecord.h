@@ -161,14 +161,10 @@ private:
 		std::vector<TextInput> textInputs;
 	};
 
-	// Get date
-	std::string GetDate() const;
-
 	// Get numbering with preceding zeros
 	std::string PrecedeZeros(const std::string& rInput, const int digitCount) const;
 
 	// Members
-	const std::string DATE_FORMAT = "%d-%m-%Y %H-%M-%S";
 	const SocialPlatform _platform = SocialPlatform::Unknown;
 	const std::string _domain;
 	bool _writeable = false;
@@ -180,7 +176,6 @@ private:
 	double _totalDurationInForeground = 0.0;
 	double _totalDurationUserActive = 0.0; // and tab in foreground
 	std::vector<Page> _pages; // should have at least one element and current one is at back
-	
 };
 
 #endif // SOCIALRECORD_H_

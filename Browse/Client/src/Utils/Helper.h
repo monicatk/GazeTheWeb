@@ -26,4 +26,7 @@ float StringToFloat(std::string value);
 // Split string by separator
 std::vector<std::string> SplitBySeparator(std::string str, char separator);
 
+// Simple getter of date
+std::string GetDate();
+
 #endif // HELPER_H_

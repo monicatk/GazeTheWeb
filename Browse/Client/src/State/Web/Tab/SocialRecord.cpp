@@ -4,8 +4,7 @@
 //============================================================================
 
 #include "SocialRecord.h"
-#include <iomanip>
-#include <ctime>
+#include "src/Utils/Helper.h"
 #include <sstream>
 
 using json = nlohmann::json;
@@ -175,15 +174,6 @@ nlohmann::json SocialRecord::ToJSON() const
 
 	// Return result
 	return JSON;
-}
-
-std::string SocialRecord::GetDate() const
-{
-	auto t = std::time(nullptr);
-	auto tm = *std::localtime(&t);
-	std::ostringstream oss;
-	oss << std::put_time(&tm, DATE_FORMAT.c_str());
-	return oss.str();
 }
 
 std::string SocialRecord::PrecedeZeros(const std::string& rInput, const int digitCount) const
