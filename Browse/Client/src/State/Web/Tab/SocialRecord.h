@@ -99,7 +99,7 @@ public:
 	void AddClick(std::string tag, std::string id, float x, float y);
 
 	// Add text input
-	void AddTextInput(std::string id, int charCount, float x, float y, float duration);
+	void AddTextInput(std::string id, int charCount, int charDistance, float x, float y, float duration);
 
 	// Add page
 	void AddPage(std::string URL);
@@ -133,11 +133,12 @@ private:
 	struct TextInput
 	{
 		// Constructor
-		TextInput(std::string id, int charCount, float x, float y, double time, float duration) : id(id), charCount(charCount), x(x), y(y), time(time), duration(duration) {}
+		TextInput(std::string id, int charCount, int charDistance, float x, float y, double time, float duration) : id(id), charCount(charCount), charDistance(charDistance), x(x), y(y), time(time), duration(duration) {}
 
 		// Fields
 		const std::string id;
 		const int charCount = 0;
+		const int charDistance = 0;
 		const float x;
 		const float y;
 		const double time;
