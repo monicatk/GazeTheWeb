@@ -119,26 +119,28 @@ private:
 	struct Click
 	{
 		// Constructor
-		Click(std::string tag, std::string id, float x, float y) : tag(tag), id(id), x(x), y(y) {}
+		Click(std::string tag, std::string id, float x, float y, double time) : tag(tag), id(id), x(x), y(y), time(time) {}
 
 		// Fields
 		const std::string tag;
 		const std::string id;
 		const float x;
 		const float y;
+		const double time;
 	};
 
 	// Struct for text input record
 	struct TextInput
 	{
 		// Constructor
-		TextInput(std::string id, int charCount, float x, float y) : id(id), charCount(charCount), x(x), y(y) {}
+		TextInput(std::string id, int charCount, float x, float y, double time) : id(id), charCount(charCount), x(x), y(y), time(time) {}
 
 		// Fields
 		const std::string id;
 		const int charCount = 0;
 		const float x;
 		const float y;
+		const double time;
 	};
 
 	// Struct for page record
