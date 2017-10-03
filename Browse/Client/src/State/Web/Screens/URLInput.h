@@ -68,14 +68,15 @@ private:
         URLInput* _pURLInput;
     };
 
-    class URLButtonListener : public eyegui::ButtonListener
-    {
-    public:
+	class URLButtonListener : public eyegui::ButtonListener
+	{
+	public:
 
-        URLButtonListener(URLInput* pURLInput) { _pURLInput = pURLInput; }
-        void hit(eyegui::Layout* pLayout, std::string id) {}
-        void down(eyegui::Layout* pLayout, std::string id);
-        void up(eyegui::Layout* pLayout, std::string id) {}
+		URLButtonListener(URLInput* pURLInput) { _pURLInput = pURLInput; }
+		virtual void hit(eyegui::Layout* pLayout, std::string id) {}
+		virtual void down(eyegui::Layout* pLayout, std::string id);
+		virtual void up(eyegui::Layout* pLayout, std::string id) {}
+		virtual void selected(eyegui::Layout* pLayout, std::string id) {}
 
     private:
 

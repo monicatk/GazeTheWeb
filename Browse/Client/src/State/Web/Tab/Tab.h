@@ -150,10 +150,13 @@ public:
     virtual void RemoveFloatingFrameFromOverlay(int index);
 
     // Register button listener in overlay
-    virtual void RegisterButtonListenerInOverlay(std::string id, std::function<void(void)> downCallback, std::function<void(void)> upCallback);
+    virtual void RegisterButtonListenerInOverlay(std::string id, std::function<void(void)> downCallback, std::function<void(void)> upCallback, std::function<void(void)> selectedCallback);
 
     // Unregister button listener callback in overlay
     virtual void UnregisterButtonListenerInOverlay(std::string id);
+
+	// Classify button hit
+	virtual void ClassifyButton(std::string id, bool accept);
 
     // Register keyboard listener in overlay
     virtual void RegisterKeyboardListenerInOverlay(std::string id, std::function<void(std::string)> selectCallback, std::function<void(std::u16string)> pressCallback);
@@ -414,6 +417,7 @@ private:
         virtual void hit(eyegui::Layout* pLayout, std::string id) {}
         virtual void down(eyegui::Layout* pLayout, std::string id);
         virtual void up(eyegui::Layout* pLayout, std::string id);
+		virtual void selected(eyegui::Layout* pLayout, std::string id) {}
 
     private:
 
@@ -440,6 +444,7 @@ private:
         virtual void hit(eyegui::Layout* pLayout, std::string id) {}
         virtual void down(eyegui::Layout* pLayout, std::string id);
         virtual void up(eyegui::Layout* pLayout, std::string id);
+		virtual void selected(eyegui::Layout* pLayout, std::string id);
 
     private:
 
@@ -605,6 +610,7 @@ private:
     // Ids of elements in overlay (added / removed by triggers or actions)
     std::map<std::string, std::function<void(void)> > _overlayButtonDownCallbacks;
     std::map<std::string, std::function<void(void)> > _overlayButtonUpCallbacks;
+	std::map<std::string, std::function<void(void)> > _overlayButtonSelectedCallbacks;
 	std::map<std::string, std::function<void(std::string)> > _overlayKeyboardSelectCallbacks;
     std::map<std::string, std::function<void(std::u16string)> > _overlayKeyboardPressCallbacks;
     std::map<std::string, std::function<void(std::u16string)> > _overlayWordSuggestCallbacks;

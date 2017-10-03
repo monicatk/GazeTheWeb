@@ -76,7 +76,7 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
     // Add overlay
     _overlayFrameIndex = _pTab->AddFloatingFrameToOverlay("bricks/actions/Keyboard.beyegui", x, y, sizeX, sizeY, idMapper);
 
-    // Register listeners
+    // ### Register listeners
 
 	// Keyboard
     _pTab->RegisterKeyboardListenerInOverlay(
@@ -92,11 +92,13 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 			// Start classification here (send something to LSL)
 			_classificationTime = CLASSIFICATION_DURATION;
 
+			// Tell member it was a key from keyboard
+			_classifyingButton = false;
+
 			// ######################################################
 
 			// Send marker about key selection into lab streaming layer
 			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_" + value);
-
 		},
         [&](std::u16string value) // press callback
         {
@@ -173,7 +175,29 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 			// Clear suggestions
 			_pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, u"");
         },
-		[](){}); // up callback
+		[](){}, // up callback
+		[&]() // select callback
+		{
+			// ######################################################
+			// ### TODO CERTH #######################################
+			// ######################################################
+			// This lambda function is called when the space bar button is selected by user.
+			// In this example, the timer for classification is reset.
+
+			// TODO: Deactivate input for all other buttons and the keyboard which interaction can be classified while classification.
+			// Otherwise one can select something else for classification while the previous is still pending.
+
+			// Start classification here (send something to LSL)
+			_classificationTime = CLASSIFICATION_DURATION;
+
+			// Tell member it was a button
+			_classifyingButton = true;
+
+			// ######################################################
+
+			// Send marker about button selection into lab streaming layer
+			LabStreamMailer::instance().Send("GAZE_SELECTED_BUTTON_SPACE");
+		});
 
 	// Word suggestion
     _pTab->RegisterWordSuggestListenerInOverlay(
@@ -423,7 +447,15 @@ bool KeyboardAction::Update(float tpf, const std::shared_ptr<const TabInput> spI
 		// When timer is complete, accept selection
 		if (_classificationTime <= 0)
 		{
-			_pTab->ClassifyKey(_overlayKeyboardId, true); // true for accept
+			if (_classifyingButton)
+			{
+				_pTab->ClassifyButton(_overlaySpaceButtonId, true); // true for accept (TODO: encode id of button-to-classify in LabStream message or store it in member)
+
+			}
+			else // key from keyboard
+			{
+				_pTab->ClassifyKey(_overlayKeyboardId, true); // true for accept
+			}
 		}
 	}
 
