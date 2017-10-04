@@ -327,10 +327,11 @@ if(CLIENT_DEPLOYMENT)
 		$<TARGET_FILE_DIR:${CEF_TARGET}>/content)
 		
 	# Copy Windows tile styltijg
-	add_custom_command(TARGET ${CEF_TARGET} PRE_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy
-		${CMAKE_BINARY_DIR}/Client.VisualElementsManifest.xml
-		$<TARGET_FILE_DIR:${CEF_TARGET}>/Client.VisualElementsManifest.xml)
+	add_custom_command(
+	TARGET ${CEF_TARGET} PRE_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+			${CMAKE_CURRENT_LIST_DIR}/Client.VisualElementsManifest.xml
+			$<TARGET_FILE_DIR:${CEF_TARGET}>/Client.VisualElementsManifest.xml)
 		
 endif(CLIENT_DEPLOYMENT)
 
