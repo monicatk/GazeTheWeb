@@ -14,7 +14,7 @@
     					<column size="10%">
     						<stack showbackground="true">
 								  <picture style="default_noback" src="icons/TabIconNotFound.png" id="icon" relativescale="10%" border="5%"/>
-									<boxbutton icon="icons/Circle.png" id="dashboard" relativescale="20%" style="dashboard"/>
+									<boxbutton icon="icons/Award_gold.png" id="dashboard" relativescale="20%" style="dashboard"/>
 									<block style="default_noback" relativescale="2%"/>
 			  					<stack showbackground="false" separator="0.1%">
 										<boxbutton icon="icons/ScrollToTop.png" desckey="tab:scroll_to_top" id="scroll_to_top" relativescale="80%"/>
