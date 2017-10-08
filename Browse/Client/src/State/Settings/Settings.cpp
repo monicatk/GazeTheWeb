@@ -277,7 +277,7 @@ void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string
 		{
 			eyegui::setVisibilityOfLayout(_pSettings->_pInfoLayout, true, true, true);
 		}
-		else if (id == "shudown")
+		else if (id == "shutdown")
 		{
 			_pSettings->_pMaster->Exit(true);
 		}
