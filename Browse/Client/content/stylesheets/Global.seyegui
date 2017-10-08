@@ -94,8 +94,8 @@ tab_overlay_panel : panel
 
 tab_debug : default
 {
-	BackgroundColor = 0x000000FF
-	FontColor = 0x00FF00FF
+	BackgroundColor = 0x00000060
+	FontColor = 0x00FF00A0
 }
 
 pause : default
