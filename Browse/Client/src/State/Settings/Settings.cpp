@@ -40,7 +40,7 @@ Settings::Settings(Master* pMaster) : State(pMaster)
 	eyegui::registerButtonListener(_pSettingsLayout, "close", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pSettingsLayout, "general", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pSettingsLayout, "info", _spSettingsButtonListener);
-	eyegui::registerButtonListener(_pSettingsLayout, "exit", _spSettingsButtonListener);
+	eyegui::registerButtonListener(_pSettingsLayout, "shutdown", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pGeneralLayout, "toggle_descriptions", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pGeneralLayout, "toggle_gaze_visualization", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pGeneralLayout, "back", _spSettingsButtonListener);
