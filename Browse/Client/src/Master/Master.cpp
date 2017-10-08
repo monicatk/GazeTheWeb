@@ -499,9 +499,10 @@ Master::~Master()
     glfwTerminate();
 }
 
-void Master::Run()
+bool Master::Run()
 {
     this->Loop();
+	return _shouldShutdownAtExit;
 }
 
 double Master::GetTime() const
@@ -509,7 +510,7 @@ double Master::GetTime() const
     return glfwGetTime();
 }
 
-void Master::Exit()
+void Master::Exit(bool shutdown)
 {
 	// Close all tabs
 	_upWeb->RemoveAllTabs();
@@ -517,8 +518,8 @@ void Master::Exit()
 	// Stop update loop
 	_exit = true;
 
-	// Let CEF do a last message loop to be able to clean up
-	_pCefMediator->DoMessageLoopWork();
+	// Should shutdown after exit
+	_shouldShutdownAtExit = shutdown;
 }
 
 void Master::SetDataTransfer(bool dataTransfer)
@@ -661,7 +662,7 @@ void Master::Loop()
 		if (glfwWindowShouldClose(_pWindow))
 		{
 			Exit();
-			continue; // or break because _exit is set by Exit()
+			continue; // let it do one last loop
 		}
 
 		// Time per frame

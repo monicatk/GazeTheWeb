@@ -40,8 +40,8 @@ public:
     // Destructor
     virtual ~Master();
 
-    // Run the master which updates CEF
-    void Run();
+    // Run the master which updates CEF. Returns whether computer should shut down
+    bool Run();
 
     // Getter for window width and height
     int GetWindowWidth() const { return _width; }
@@ -54,7 +54,7 @@ public:
 	bool IsPaused() const { return _paused; }
 
     // Exit
-    void Exit();
+    void Exit(bool shutdown = false);
 
     // Get id of dictionary
     unsigned int GetDictionary() const { return _dictonaryId; }
@@ -356,6 +356,9 @@ private:
 
 	// Start index (indicates how often user has started the application)
 	int _startIndex = -1;
+
+	// Indicator whether computer should shut down at exit
+	bool _shouldShutdownAtExit = false;
 };
 
 #endif // MASTER_H_

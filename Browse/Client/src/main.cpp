@@ -15,7 +15,7 @@
 #include "src/Utils/Logger.h"
 
 // Execute function to have Master object on stack which might be faster than on heap
-void Execute(CefRefPtr<MainCefApp> app, std::string userDirectory)
+bool Execute(CefRefPtr<MainCefApp> app, std::string userDirectory) // returns whether system should shut down
 {
     // Initialize master
     Master master(app.get(), userDirectory);
@@ -24,7 +24,7 @@ void Execute(CefRefPtr<MainCefApp> app, std::string userDirectory)
 	app->SetMaster(&master);
 
     // Run master which communicates with CEF over mediator
-    master.Run();
+    return master.Run();
 
     // Destructor of master is called implicity
 }
@@ -72,7 +72,7 @@ int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<MainCefA
     LogInfo("..done.");
 
     // Execute our code
-    Execute(app, userDirectory);
+    bool shutdownOnExit = Execute(app, userDirectory);
 
     // Shutdown CEF
     LogInfo("Shutdown CEF...");
@@ -82,5 +82,13 @@ int CommonMain(const CefMainArgs& args, CefSettings settings, CefRefPtr<MainCefA
     // Return zero
     LogInfo("Successful termination of program.");
     LogInfo("####################################################");
+
+	// Tell computer to shut down
+	if (shutdownOnExit)
+	{
+		shutdown();
+	}
+
+	// Exit
     return 0;
 }
