@@ -7,10 +7,6 @@
 // Helper function for console output
 function ConsolePrint(msg)
 {
-    // DEBUG
-    if(msg.indexOf("#3#") !== -1)
-        console.log(msg);
-
 	window.cefQuery({ request: (""+msg), persistent : false, onSuccess : (response) => {}, onFailure : (error_code, error_message) => {} });
 }
 

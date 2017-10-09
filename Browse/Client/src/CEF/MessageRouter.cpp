@@ -225,8 +225,6 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			// ADDING DOMNODE
 			if (op.compare("add") == 0) // adding of DOM node
 			{
-				if(type == 3)
-					LogDebug("MsgRouter: Adding overflow element with id: ", id);
 
 				// Create blank node object in corresponding Tab object
 				switch (type)

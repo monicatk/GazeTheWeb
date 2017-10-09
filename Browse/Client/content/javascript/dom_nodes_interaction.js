@@ -70,7 +70,7 @@ DOMTextInput.prototype.inputText = function(text, submit){
 
 
 DOMOverflowElement.prototype.scroll = function(gazeX, gazeY, fixedIds){
-	console.log("scroll called with "+gazeX+" "+gazeY+" (ids: "+fixedIds+") -- hidden? "+this.hidden_overflow);
+	// console.log("scroll called with "+gazeX+" "+gazeY+" (ids: "+fixedIds+") -- hidden? "+this.hidden_overflow);
 
 	if(this.hidden_overflow)
 		return [0,0];
@@ -132,7 +132,7 @@ DOMOverflowElement.prototype.scroll = function(gazeX, gazeY, fixedIds){
 		this.node.scrollTop += scrollY;
 
 		// DEBUG
-		console.log("scrolling by "+scrollX+" "+scrollY);
+		// console.log("scrolling by "+scrollX+" "+scrollY);
 
 		return [scrollX, scrollY];
 	}
@@ -174,7 +174,50 @@ DOMVideo.prototype.jumpToSecond = function(sec)
 DOMVideo.prototype.setFullscreen = function(fullscreen)
 {
 	if(fullscreen)
-		this.node.webkitRequestFullscreen();
+	{
+		// DO MAGIC INSTEAD
+		// this.node.webkitRequestFullscreen();
+
+		var button = document.createElement("button");
+		button.style.position = "fixed";
+		button.style.top = "0px";
+		button.style.left = "0px";
+		button.style.width = "100%";
+		button.style.height = "100%";
+		button.style.zIndex = "99999";
+		button.style.opacity = "0.1";
+		button.id = "gtw-helper";
+		button.className = "gtw-helper";
+
+		var scoped_id = this.getId();
+		var scoped_node = this.node;
+		// Don't interact with this button anymore after it was clicked the first time
+		button.onclick = function(e){
+			// this.style.pointerEvents = "none";
+			ConsolePrint("DOMVideo id="+scoped_id+": Fullscreen is set to true");
+			// Request fullscreen for given video
+			scoped_node.webkitRequestFullscreen();
+
+			this.style.position = "static";
+			this.id += "-finished";
+			this.className += "-finished";
+
+			// Remove button from DOM tree again when it's purpose is done
+			document.documentElement.removeChild(this);
+		}
+		
+		// Add newly created button to DOM tree
+		document.documentElement.appendChild(button);
+
+		// Tell CEF to emulate click on newly created button
+		var rect = button.getBoundingClientRect();
+		var response = {
+			"command" 	: "EmulateMouseClick",
+			"x" 		: (rect.left + rect.width / 2.0),
+			"y"			: (rect.top + rect.height / 2.0)
+		};
+		return response;
+	}
 	else
 		document.webkitExitFullscreen();		
 	ConsolePrint("DOMVideo id="+this.getId()+": Fullscreen is set to "+fullscreen);
