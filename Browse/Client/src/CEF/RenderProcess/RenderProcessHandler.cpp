@@ -103,7 +103,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 				// TODO: If command is known command!
 				msg = CefProcessMessage::Create(command);
 				const auto& innerArgs = msg->GetArgumentList();
-				// TODO: This could be move to DOMNodeInteraction.h
+				// TODO: This could be moved to DOMNodeInteraction.h
 				if (command == "EmulateEnterKey" || command == "EmulateMouseClick")
 				{
 					innerArgs->SetDouble(0, ret_val->GetValue("x")->GetDoubleValue());
@@ -271,10 +271,6 @@ bool RenderProcessHandler::OnProcessMessageReceived(
         }
     }
 
-	if (msgName == "FetchDOMTextLink" || msgName == "FetchDOMTextInput")
-	{
-		IPCLogDebug(browser, "Received deprecated "+msgName+" message!");
-	}
 
 	if (msgName.substr(0, 7) == "LoadDOM")
 	{

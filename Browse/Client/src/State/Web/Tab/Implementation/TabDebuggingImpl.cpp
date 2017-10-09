@@ -223,10 +223,12 @@ void Tab::DrawDebuggingOverlay() const
 		{
 			const auto& rOverflowElement = rIdNodePair.second;
 			for (const auto& rect : rOverflowElement->GetRects())
+			{
 				renderRect(
 					rect,
 					(rOverflowElement->IsFixed())
 				);
+			}
 		}
 
 		// ### DOM VIDEO ELEMENTS ### 
@@ -236,10 +238,12 @@ void Tab::DrawDebuggingOverlay() const
 		{
 			const auto& rVideoNode = rIdNodePair.second;
 			for (const auto& rect : rVideoNode->GetRects())
+			{
 				renderRect(
 					rect,
 					(rVideoNode->IsFixed())
 				);
+			}
 		}
 	}
 

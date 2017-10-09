@@ -15,6 +15,8 @@ ConsolePrint("Starting to import helpers.js ...");
 function CefPoll()
 {
     UpdateDOMRects();
+
+    domVideos.forEach((n) => { SendAttributeChangesToCEF("Rects", n); });
 }
 
 if(ClientRectList.prototype.map === undefined)
