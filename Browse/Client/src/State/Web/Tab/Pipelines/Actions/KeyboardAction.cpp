@@ -132,7 +132,6 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
             this->_complete = true;
         },
 		[](){}); // up callback
-		*/
 	// Delete character button
     _pTab->RegisterButtonListenerInOverlay(
         _overlayDeleteCharacterButtonId,
@@ -163,7 +162,6 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 		_pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, _pTab->GetActiveEntityContentInTextEdit(_overlayTextEditId));
 	},
 		[]() {}); // up callback
-		*/
 
 	// Space button
     _pTab->RegisterButtonListenerInOverlay(
@@ -179,12 +177,13 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
         },
 		[](){}); // up callback
 
-	// Word suggestion _pTab->RegisterWordSuggestListenerInOverlay(
+	// Word suggestion 
+	_pTab->RegisterWordSuggestListenerInOverlay(
         _overlayWordSuggestId,
         [&](std::u16string value)
         {
 			// Fill chosen suggestion into text edit
-			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_WORD_SUGGEST_" + str);
+			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_WORD_SUGGEST_");
 			_pTab->SetActiveEntityContentInTextEdit(_overlayTextEditId, value);
         });
 	// Shift button (switch)
