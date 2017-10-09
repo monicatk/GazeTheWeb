@@ -227,7 +227,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	guiBuilder.width = _width;
 	guiBuilder.height = _height;
 	guiBuilder.fontFilepath = "fonts/dejavu-sans/ttf/DejaVuSans.ttf";
-	guiBuilder.localizationFilepath = "localizations/English.leyegui";
+	guiBuilder.localizationFilepath = "localizations/Greek.leyegui";
 	guiBuilder.fontTallSize = 0.07f;
 
 	// Create splash screen GUI, render it one time and throw it away
