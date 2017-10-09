@@ -333,8 +333,6 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     _upWeb->Activate();
 
     // ### HOMEPAGE ###
-	// _upWeb->AddTab("https://developer.mozilla.org/en-US/docs/Web/CSS/overflow");
-	// _upWeb->AddTab(std::string(CONTENT_PATH) + "/websites/index.html");
 	_upWeb->AddTab(_upSettings->GetHomepage());
 
     // ### SUPER LAYOUT ###
@@ -903,6 +901,8 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
 			case GLFW_KEY_8: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::DRIFT_CORRECTION); break; }
 			case GLFW_KEY_9: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::DYNAMIC_DRIFT_CORRECTION); break; }
 			case GLFW_KEY_SPACE: { _upVoiceInput->StartAudioRecording(); }
+			//case GLFW_KEY_F: { eyegui::setValueOfConfigAttribute(_pGUI, "keyboard-key-selection-duration", "0.5"); LabStreamMailer::instance().Send("Key-Selection-Duration to 0.5 seconds"); break; }
+			//case GLFW_KEY_S: { eyegui::setValueOfConfigAttribute(_pGUI, "keyboard-key-selection-duration", "1.0"); LabStreamMailer::instance().Send("Key-Selection-Duration to 1.0 seconds"); break; }
         }
     }
 	else if (action == GLFW_RELEASE)
