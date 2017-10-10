@@ -7,6 +7,7 @@
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
 #include "src/Singletons/FirebaseMailer.h"
+#include "src/Arguments.h"
 #include "submodules/glfw/include/GLFW/glfw3.h"
 #include "submodules/text-csv/include/text/csv/ostream.hpp"
 #include <functional>
@@ -216,6 +217,21 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
     // ### EYEGUI ###
 
+	// Decide on localization
+	std::string localizationFilepath = "";
+	switch (Argument::localization)
+	{
+	case Argument::Localization::English:
+		localizationFilepath = "localizations/English.leyegui";
+		break;
+	case Argument::Localization::Greek:
+		localizationFilepath = "localizations/Greek.leyegui";
+		break;
+	case Argument::Localization::Hebrew:
+		localizationFilepath = "localizations/Hebrew.leyegui";
+		break;
+	}
+
     // Set print callbacks
     std::function<void(std::string)> printGUICallback = [&](std::string message) { this->GUIPrintCallback(message); };
     eyegui::setErrorCallback(printGUICallback);
@@ -227,7 +243,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	guiBuilder.width = _width;
 	guiBuilder.height = _height;
 	guiBuilder.fontFilepath = "fonts/dejavu-sans/ttf/DejaVuSans.ttf";
-	guiBuilder.localizationFilepath = "localizations/Hebrew.leyegui";
+	guiBuilder.localizationFilepath = localizationFilepath;
 	guiBuilder.fontTallSize = 0.07f;
 
 	// Create splash screen GUI, render it one time and throw it away
