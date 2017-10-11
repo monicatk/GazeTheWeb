@@ -25,7 +25,8 @@ bool TextInputTrigger::Update(float tpf, const std::shared_ptr<const TabInput> s
 	// When triggered, push back pipeline to input text
 	if (triggered)
 	{
-		LabStreamMailer::instance().Send("Text input started");
+		LabStreamMailer::instance().Send(213);
+//		LabStreamMailer::instance().Send("Text input started");
 
 		_pTab->PushBackPipeline(
 			std::move(

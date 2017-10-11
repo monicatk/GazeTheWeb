@@ -94,8 +94,8 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 			// ######################################################
 
 			// Send marker about key selection into lab streaming layer
-			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_" + value);
-
+//			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_" + value);
+			LabStreamMailer::instance().Send(1.0);
 		},
         [&](std::u16string value) // press callback
         {
@@ -116,7 +116,8 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
         _overlayCompleteButtonId,
         [&]() // down callback
         {
-			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_OVERLAYCOMPLETE");
+//			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_OVERLAYCOMPLETE");
+			LabStreamMailer::instance().Send(213);
             this->_complete = true;
         },
 		[](){}); // up callback
@@ -127,7 +128,8 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
         _overlaySubmitButtonId,
         [&]() // down callback
         {
-			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_SUBMIT");
+			//LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_SUBMIT");
+			LabStreamMailer::instance().Send(213);
             this->_submit = true;
             this->_complete = true;
         },
@@ -139,7 +141,8 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
         {
 			// Delete a letter from content
 			_pTab->DeleteContentAtCursorInTextEdit(_overlayTextEditId, -1);
-			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_BACKSPACE");
+			//LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_BACKSPACE");
+			LabStreamMailer::instance().Send(213);
 			// Refresh suggestions
 			_pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, _pTab->GetActiveEntityContentInTextEdit(_overlayTextEditId));
         },
@@ -154,7 +157,8 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 		std::string clipboard = _pTab->GetClipboardText();
 		std::u16string clipboard16;
 		eyegui_helper::convertUTF8ToUTF16(clipboard, clipboard16);
-		LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_PASTE");
+		//LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_PASTE");
+		LabStreamMailer::instance().Send(213);
 		// Add text from clipboard to collected text
 		_pTab->AddContentAtCursorInTextEdit(_overlayTextEditId, clipboard16);
 
@@ -170,7 +174,8 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
         {
 			// Add space to content
 			_pTab->AddContentAtCursorInTextEdit(_overlayTextEditId, u" ");
-			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_SPACE");
+			//LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_SPACE");
+			LabStreamMailer::instance().Send(1);
 			// Clear suggestions
 			_pTab->DisplaySuggestionsInWordSuggest(_overlayWordSuggestId, u"");
 
@@ -183,7 +188,8 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
         [&](std::u16string value)
         {
 			// Fill chosen suggestion into text edit
-			LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_WORD_SUGGEST_");
+			//LabStreamMailer::instance().Send("GAZE_SELECTED_KEY_WORD_SUGGEST_");
+		LabStreamMailer::instance().Send(213);
 			_pTab->SetActiveEntityContentInTextEdit(_overlayTextEditId, value);
         });
 	// Shift button (switch)
@@ -358,6 +364,17 @@ KeyboardAction::KeyboardAction(TabInteractionInterface *pTab) : Action(pTab)
 	{
 		for (const std::string& rMessage : messages)
 		{
+			LogInfo(rMessage);
+			if (!strcmp(rMessage.c_str(), "1"))
+			{
+				//Classification correct
+				lastkeyresult = true;
+			}
+			else {
+				//Classification incorrect
+				_pTab->DeleteContentAtCursorInTextEdit(_overlayTextEditId, -1);
+				lastkeyresult = false;
+			}
 			// ######################################################
 			// ### TODO CERTH #######################################
 			// ######################################################
@@ -420,7 +437,13 @@ bool KeyboardAction::Update(float tpf, const std::shared_ptr<const TabInput> spI
 		// When timer is complete, accept selection
 		if (_classificationTime <= 0)
 		{
-			_pTab->ClassifyKey(_overlayKeyboardId, true); // true for accept
+			//if (lastkeyresult) {
+				_pTab->ClassifyKey(_overlayKeyboardId, true); // true for accept
+			/*}
+			else {
+				_pTab->ClassifyKey(_overlayKeyboardId, false);
+			}
+			*/
 		}
 	}
 

@@ -72,7 +72,7 @@ bool Connect()
 
 		// Setup LabStreamingLayer
 		lsl::stream_info streamInfo(
-			"myGazeLSL",
+			"myGazeLSLGTW",
 			"Gaze",
 			2, // must match with number of samples in SampleData structure
 			lsl::IRREGULAR_RATE, // otherwise will generate samples even if transmission paused (and somehow even gets the "real" samples, no idea how)

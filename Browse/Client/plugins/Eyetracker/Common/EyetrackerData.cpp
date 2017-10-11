@@ -20,7 +20,7 @@ namespace eyetracker_global
 		void Continue() { stream = true; }
 		void Pause() { stream = false; }
 		void Update(const std::vector<double>& rData) {
-			if (stream) { output.Send(rData); } // send data if streaming ok
+			//if (stream) { output.Send( rData ); } // send data if streaming ok
 		}
 
 	private:

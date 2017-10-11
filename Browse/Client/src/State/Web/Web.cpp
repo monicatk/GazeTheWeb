@@ -855,7 +855,8 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		{
 			_pWeb->ShowTabOverview(true);
 			JSMailer::instance().Send("tabs");
-			LabStreamMailer::instance().Send("Open Tab Overview");
+			//LabStreamMailer::instance().Send("Open Tab Overview");
+			LabStreamMailer::instance().Send(213);
 		}
 		else if (id == "settings")
 		{
@@ -869,7 +870,8 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			{
 				_pWeb->_tabs[tabId]->GoBack();
 			}
-			LabStreamMailer::instance().Send("Go back");
+//			LabStreamMailer::instance().Send("Go back");
+			LabStreamMailer::instance().Send(213);
 		}
 		else if (id == "forward")
 		{
@@ -878,7 +880,8 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			{
 				_pWeb->_tabs[tabId]->GoForward();
 			}
-			LabStreamMailer::instance().Send("Go forward");
+			//LabStreamMailer::instance().Send("Go forward");
+			LabStreamMailer::instance().Send(213);
 		}
 		else if (id == "no_data_transfer")
 		{
@@ -892,20 +895,23 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		{
 			_pWeb->ShowTabOverview(false);
 			JSMailer::instance().Send("close");
-			LabStreamMailer::instance().Send("Close Tab Overview");
+			//LabStreamMailer::instance().Send("Close Tab Overview");
+			LabStreamMailer::instance().Send(213);
 		}
 		else if (id == "history")
 		{
 			_pWeb->ShowTabOverview(false);
 			_pWeb->_upHistory->Activate(_pWeb->_currentTabId);
-			LabStreamMailer::instance().Send("Access History");
+			//LabStreamMailer::instance().Send("Access History");
+			LabStreamMailer::instance().Send(213);
 		}
 		else if (id == "edit_url")
 		{
 			_pWeb->ShowTabOverview(false);
 			_pWeb->_upURLInput->Activate(_pWeb->_currentTabId);
 			JSMailer::instance().Send("edit");
-			LabStreamMailer::instance().Send("Edit URL");
+			//LabStreamMailer::instance().Send("Edit URL");
+			LabStreamMailer::instance().Send(213);
 		}
 		else if (id == "bookmark_tab")
 		{
@@ -939,7 +945,8 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				_pWeb->_tabs[tabId]->Reload();
 				_pWeb->ShowTabOverview(false);
 			}
-			LabStreamMailer::instance().Send("Reload tab");
+			//LabStreamMailer::instance().Send("Reload tab");
+			LabStreamMailer::instance().Send(213);
 		}
 		else if (id == "close_tab")
 		{
@@ -948,7 +955,8 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				_pWeb->RemoveTab(_pWeb->_currentTabId);
 				_pWeb->UpdateTabOverview();
 			}
-			LabStreamMailer::instance().Send("Close tab");
+			//LabStreamMailer::instance().Send("Close tab");
+			LabStreamMailer::instance().Send(213);
 		}
 		else if (id == "back")
 		{
@@ -976,7 +984,8 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			_pWeb->_upURLInput->Activate(tabId);
 
 			JSMailer::instance().Send("new_tab");
-			LabStreamMailer::instance().Send("Open new tab");
+//			LabStreamMailer::instance().Send("Open new tab");
+			LabStreamMailer::instance().Send(213);
 		}
 		else if (id == "tab_button_0")
 		{

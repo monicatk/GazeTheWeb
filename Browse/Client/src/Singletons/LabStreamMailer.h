@@ -55,7 +55,7 @@ public:
 	~LabStreamMailer() {}
 
 	// Send message
-	void Send(std::string message);
+	void Send(double message);
 
 	// Someone has to poll this so new messages are read and sent to callbacks. Should be done by master.
 	void Update();

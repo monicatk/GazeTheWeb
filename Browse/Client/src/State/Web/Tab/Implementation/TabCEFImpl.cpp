@@ -28,7 +28,8 @@ void Tab::GetWebRenderResolution(int& rWidth, int& rHeight) const
 void Tab::SetURL(std::string URL)
 {
 	_url = URL;
-	LabStreamMailer::instance().Send("Loading URL: " + _url);
+	//LabStreamMailer::instance().Send("Loading URL: " + _url);
+	LabStreamMailer::instance().Send(213);
 }
 
 void Tab::ReceiveFaviconBytes(std::unique_ptr< std::vector<unsigned char> > upData, int width, int height)

@@ -101,8 +101,10 @@ protected:
 	// Key selection classification duration in seconds
 	const float CLASSIFICATION_DURATION = 0.0001f; // set low since currently not used
 
+	bool lastkeyresult = true;
+
 	// Key selection classification time in seconds
-	float _classificationTime = 0.f;
+	float _classificationTime = 0.0001f;
 
 	// LabStreamMailer callback to receive classification of key
 	std::shared_ptr<LabStreamCallback> _spLabStreamCallback;

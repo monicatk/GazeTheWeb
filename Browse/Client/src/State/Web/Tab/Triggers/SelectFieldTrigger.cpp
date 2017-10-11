@@ -25,7 +25,8 @@ bool SelectFieldTrigger::Update(float tpf, const std::shared_ptr<const TabInput>
 	// When triggered, push back pipeline to input text
 	if (triggered)
 	{
-		LabStreamMailer::instance().Send("Select field hit");
+//		LabStreamMailer::instance().Send("Select field hit");
+		LabStreamMailer::instance().Send(213);
 
 		_pTab->PushBackPipeline(
 			std::move(

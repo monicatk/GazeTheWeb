@@ -170,14 +170,16 @@ void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			_pURLInput->_finished = true;
 
 			JSMailer::instance().Send("close");
-			LabStreamMailer::instance().Send("Close URL input");
+			//LabStreamMailer::instance().Send("Close URL input");
+			LabStreamMailer::instance().Send(213);
 		}
 		else if (id == "bookmarks")
 		{
 			// Show bookmarks
 			_pURLInput->ShowBookmarks();
 			JSMailer::instance().Send("bookmarks");
-			LabStreamMailer::instance().Send("Display bookmarks");
+			//LabStreamMailer::instance().Send("Display bookmarks");
+			LabStreamMailer::instance().Send(213);
 		}
 		else if (id == "delete")
 		{
@@ -195,7 +197,8 @@ void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		else if (id == "complete")
 		{
 			_pURLInput->_finished = true;
-			LabStreamMailer::instance().Send("URL input done");
+			//LabStreamMailer::instance().Send("URL input done");
+			LabStreamMailer::instance().Send(213);
 		}
 	}
 	else
@@ -204,7 +207,8 @@ void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		if (id == "back")
 		{
 			eyegui::setVisibilityOfLayout(_pURLInput->_pBookmarksLayout, false, false, true);
-			LabStreamMailer::instance().Send("Hide bookmarks");
+			//LabStreamMailer::instance().Send("Hide bookmarks");
+			LabStreamMailer::instance().Send(213);
 		}
 		else
 		{
@@ -221,7 +225,8 @@ void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				eyegui_helper::convertUTF8ToUTF16(URL, URL16);
 				_pURLInput->_collectedURL = URL16;
 				_pURLInput->_finished = true;
-				LabStreamMailer::instance().Send("Open bookmark: " + URL);
+				//LabStreamMailer::instance().Send("Open bookmark: " + URL);
+				LabStreamMailer::instance().Send(213);
 			}
 
 			JSMailer::instance().Send("open_bookmark");

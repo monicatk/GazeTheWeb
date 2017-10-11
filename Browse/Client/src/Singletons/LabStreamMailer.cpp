@@ -15,16 +15,22 @@ LabStreamMailer::LabStreamMailer() :
 				"Markers", // type
 				1, // channel count
 				lsl::IRREGULAR_RATE, // rate
-				lsl::cf_string, // channel format
+				//lsl::cf_string, // channel format
+				lsl::cf_double64,
 				setup::LAB_STREAM_OUTPUT_SOURCE_ID)))) // source id
 	
 {
 	// Nothing to do	
 }
 
-void LabStreamMailer::Send(std::string message)
+//void LabStreamMailer::Send(std::string message)
+//{
+//	_upLabStreamOutput->Send({ message });
+//}
+
+void LabStreamMailer::Send(double message)
 {
-	_upLabStreamOutput->Send({ message });
+	_upLabStreamOutput->Send(message);
 }
 
 void LabStreamMailer::Update()

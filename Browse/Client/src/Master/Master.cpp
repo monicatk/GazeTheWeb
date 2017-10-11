@@ -394,7 +394,9 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// ### JavaScript to LSL ###
 
 	// Registers a JavaScript callback function that pipes JS callbacks starting with "lsl:" to LabStreamingLayer
-	_pCefMediator->RegisterJavascriptCallback("lsl:", [this](std::string message) { LabStreamMailer::instance().Send(message); });
+//	_pCefMediator->RegisterJavascriptCallback("lsl:", [this](std::string message) { LabStreamMailer::instance().Send(message); });
+	_pCefMediator->RegisterJavascriptCallback("lsl:", [this](std::string message) { LabStreamMailer::instance().Send(213); });
+
 
 	// ### LabStreamCallback ###
 
@@ -504,7 +506,8 @@ void  Master::SetDataTransfer(bool dataTransfer)
 		PushNotificationByKey("notification:data_transfer_continued", Type::NEUTRAL, true);
 
 		// Marker in LabStream
-		LabStreamMailer::instance().Send("Data transfer continued");
+		//LabStreamMailer::instance().Send("Data transfer continued");
+		LabStreamMailer::instance().Send(213);
 
 		// TODO: what about local logging?
 	}
@@ -521,7 +524,8 @@ void  Master::SetDataTransfer(bool dataTransfer)
 		PushNotificationByKey("notification:data_transfer_paused", Type::NEUTRAL, true);
 
 		// Marker in LabStream
-		LabStreamMailer::instance().Send("Data transfer paused");
+		//LabStreamMailer::instance().Send("Data transfer paused");
+		LabStreamMailer::instance().Send(213);
 	}
 }
 
@@ -893,7 +897,7 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_ESCAPE: { Exit(); break; }
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
-			case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
+			//case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
 			case GLFW_KEY_C: { _upEyeInput->Calibrate();  break; }
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
 			case GLFW_KEY_6: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::MAGNIFICATION); break; }

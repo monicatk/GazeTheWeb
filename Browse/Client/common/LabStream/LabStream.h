@@ -74,9 +74,15 @@ public:
 	virtual ~LabStreamOutput() {}
 
 	// Send event
-	void Send(std::vector<Type> data)
+//	void Send(std::vector<Type> data)
+//	{
+//		_upStreamOutlet->push_sample(data);
+//	}
+	void Send(double data)
 	{
-		_upStreamOutlet->push_sample(data);
+		std::vector<double> vdata;
+		vdata.push_back(data);
+		_upStreamOutlet->push_sample(vdata);
 	}
 
 private:

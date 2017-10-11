@@ -44,7 +44,8 @@ void Tab::EmulateLeftMouseButtonClick(double x, double y, bool visualize, bool i
 		ConvertToCEFPixel(x, y);
 	}
 
-	LabStreamMailer::instance().Send("Click performed");
+//	LabStreamMailer::instance().Send("Click performed");
+	LabStreamMailer::instance().Send(213);
 
 	// Tell mediator about the click
 	_pCefMediator->EmulateLeftMouseButtonClick(this, x, y);

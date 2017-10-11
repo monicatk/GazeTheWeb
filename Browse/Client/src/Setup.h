@@ -34,7 +34,7 @@ namespace setup
 	// Control TODO: move connect bools to config file
 	static const bool	CONNECT_OPEN_GAZE = false;
 	static const bool	CONNECT_SMI_IVIEWX = false;
-	static const bool	CONNECT_VI_MYGAZE = false;
+	static const bool	CONNECT_VI_MYGAZE = true;
 	static const bool	CONNECT_TOBII_EYEX = true;
 	static const float	DURATION_BEFORE_INPUT = 1.f; // wait one second before accepting input
 	static const float	MAX_AGE_OF_USED_GAZE = 1.f; // only accept gaze as input that is not older than one second (TODO: this is not used by filter but by master to determine when to stop taking gaze input as serious)
@@ -54,7 +54,7 @@ namespace setup
 	// Experiments
 	static const std::string	LAB_STREAM_OUTPUT_NAME = "GazeTheWebOutput";
 	static const std::string	LAB_STREAM_OUTPUT_SOURCE_ID = std::to_string(CLIENT_VERSION); // use client version as source id
-	static const std::string	LAB_STREAM_INPUT_NAME = LAB_STREAM_OUTPUT_NAME; //  "GazeTheWebInput"; // may be set to same value as LAB_STREAM_OUTPUT_NAME to receive own events for debugging purposes
+	static const std::string	LAB_STREAM_INPUT_NAME = "GazeTheWebInput";// LAB_STREAM_OUTPUT_NAME; //  "GazeTheWebInput"; // may be set to same value as LAB_STREAM_OUTPUT_NAME to receive own events for debugging purposes
 	static const bool			LOG_INTERACTIONS = false;
 	static const std::string	FIREBASE_API_KEY = "AIzaSyBoySYE4mQVhrtCB_1TbPsXa86W8_y35Ug"; // API key for our Firebase
 	static const std::string	FIREBASE_URL = "https://hellofirebase-2d544.firebaseio.com"; // URL of our Firebase
