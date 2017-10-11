@@ -123,9 +123,6 @@ public:
 	// Pause mailer
 	void Pause() { _paused = true; }
 
-	// Login method which waits until execution is finished (either successful or not, but then GetIdToken can be called with confidence)
-	// TODO
-
 	// Available commands
 	void PushBack_Login		(std::string email, std::string password, std::promise<std::string>* pPromise = nullptr); // promise delivers initial idToken value
 	void PushBack_Transform	(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise = nullptr); // promise delivers future database value

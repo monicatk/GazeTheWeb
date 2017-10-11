@@ -288,7 +288,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT, 1, &startPromise); // adds one to the count
 	_startIndex = startFuture.get() - 1; // is zero for both initial start and failure
 
-										 // Create record about start
+	// Create record about start
 	nlohmann::json record = { { "date", GetDate() } };
 	FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_APPLICATION_START, record, std::to_string(_startIndex)); // send JSON to database
 
