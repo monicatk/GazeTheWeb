@@ -85,87 +85,11 @@ std::string HttpHeaderExtractETag(const std::string& rHeader)
 
 bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string password)
 {
-	// Invalidate tokens
-	_idToken = "";
-	_refreshToken = "";
+	// Store email and password
+	_email = email;
+	_password = password;
 
-	// Setup CURL
-	CURL *curl;
-	curl = curl_easy_init();
-
-	// Continue if CURL was initialized
-	if (curl)
-	{
-		// Local variables
-		CURLcode res;
-		std::string postBuffer;
-		std::string answerHeaderBuffer;
-		std::string answerBodyBuffer;
-		struct curl_slist* headers = nullptr; // init to NULL is important 
-		headers = curl_slist_append(headers, "Content-Type: application/json"); // type is JSON
-		
-		// Set options
-		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers); // apply header
-		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // follow potential redirection
-		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, WriteCallback); // set callback for answer header
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback); // set callback for answer body
-		curl_easy_setopt(curl, CURLOPT_HEADERDATA, &answerHeaderBuffer); // set buffer for answer header
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &answerBodyBuffer); // set buffer for answer body
-
-		// Post field
-		const json jsonPost =
-		{
-			{ "email", email }, // email of user
-			{ "password", password }, // password to access database
-			{ "returnSecureToken", true } // of course, thats what this is about
-		};
-		postBuffer = jsonPost.dump(); // store in a string, otherwise it breaks (CURL probably wants a reference)
-
-		// Fill request
-		curl_easy_setopt(curl, CURLOPT_URL, "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + _API_KEY); // URL to access
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postBuffer); // fill post body
-		
-		// Execute request
-		res = curl_easy_perform(curl);
-		if (res != CURLE_OK) // something went wrong
-		{
-			LogError("FirebaseInterface: ", "User login to Firebase failed: ", curl_easy_strerror(res));
-			return false;
-		}
-
-		// Cleanup
-		curl_slist_free_all(headers); headers = nullptr;
-		curl_easy_cleanup(curl); curl = nullptr;
-
-		// Parse answer to JSON object and extract id token
-		const auto jsonAnswer = json::parse(answerBodyBuffer);
-		auto result = jsonAnswer.find("idToken");
-		if (result != jsonAnswer.end())
-		{
-			_idToken = result.value().get<std::string>();
-			LogInfo("FirebaseInterface: ", "User successfully logged into Firebase.");
-		}
-		else
-		{
-
-			LogError("FirebaseInterface: ", "User login to Firebase failed.");
-		}
-
-		// Search for refresh token (optional)
-		result = jsonAnswer.find("refreshToken");
-		if (result != jsonAnswer.end())
-		{
-			_refreshToken = result.value().get<std::string>();
-		}
-
-		// Search for uid
-		result = jsonAnswer.find("localId");
-		if (result != jsonAnswer.end())
-		{
-			_uid = result.value().get<std::string>(); // one could "break mailer" if not provided as nothing makes sense
-		}
-	}
-	return !_idToken.empty(); // id token is not empty, so something happened
+	return Login();
 }
 
 template<typename T>
@@ -173,7 +97,7 @@ void FirebaseMailer::FirebaseInterface::Put(T key, typename FirebaseValue<T>::ty
 {
 	// Only continue if logged in
 	bool success = false;
-	if (!_idToken.empty())
+	if (_pIdToken->IsSet())
 	{
 		// Setup CURL
 		CURL *curl;
@@ -191,7 +115,7 @@ void FirebaseMailer::FirebaseInterface::Put(T key, typename FirebaseValue<T>::ty
 				_URL + "/"
 				+ BuildFirebaseKey(key, _uid) + "/" + subpath
 				+ ".json"
-				+ "?auth=" + _idToken;
+				+ "?auth=" + _pIdToken->Get();
 
 			// Setup CURL
 			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // follow potential redirection
@@ -221,7 +145,7 @@ void FirebaseMailer::FirebaseInterface::Put(T key, typename FirebaseValue<T>::ty
 				else // there is something else in header
 				{
 					// Try to relogin
-					if (Relogin() && !_idToken.empty()) // returns whether successful
+					if (Relogin()) // returns whether successful
 					{
 						// Setup CURL request (reuse stuff from first)
 						answerHeaderBuffer.clear();
@@ -230,7 +154,7 @@ void FirebaseMailer::FirebaseInterface::Put(T key, typename FirebaseValue<T>::ty
 							_URL + "/"
 							+ BuildFirebaseKey(key, _uid) + "/" + subpath
 							+ ".json"
-							+ "?auth=" + _idToken;
+							+ "?auth=" + _pIdToken->Get();
 						curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of new request
 
 						// Try again to PUT data
@@ -287,17 +211,112 @@ void FirebaseMailer::FirebaseInterface::Maximum(FirebaseIntegerKey key, int valu
 	if (pPromise != nullptr) { pPromise->set_value(result); }
 }
 
+bool FirebaseMailer::FirebaseInterface::Login()
+{
+	bool success = false;
+
+	// Invalidate tokens
+	_pIdToken->Reset();
+	_refreshToken = "";
+
+	// Setup CURL
+	CURL *curl;
+	curl = curl_easy_init();
+
+	// Continue if CURL was initialized
+	if (curl)
+	{
+		// Local variables
+		CURLcode res;
+		std::string postBuffer;
+		std::string answerHeaderBuffer;
+		std::string answerBodyBuffer;
+		struct curl_slist* headers = nullptr; // init to NULL is important 
+		headers = curl_slist_append(headers, "Content-Type: application/json"); // type is JSON
+
+		// Set options
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers); // apply header
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // follow potential redirection
+		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, WriteCallback); // set callback for answer header
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback); // set callback for answer body
+		curl_easy_setopt(curl, CURLOPT_HEADERDATA, &answerHeaderBuffer); // set buffer for answer header
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &answerBodyBuffer); // set buffer for answer body
+
+																	  // Post field
+		const json jsonPost =
+		{
+			{ "email", _email }, // email of user
+			{ "password", _password }, // password to access database
+			{ "returnSecureToken", true } // of course, thats what this is about
+		};
+		postBuffer = jsonPost.dump(); // store in a string, otherwise it breaks (CURL probably wants a reference)
+
+									  // Fill request
+		curl_easy_setopt(curl, CURLOPT_URL, "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + _API_KEY); // URL to access
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postBuffer); // fill post body
+
+																// Execute request
+		res = curl_easy_perform(curl);
+		if (res != CURLE_OK) // something went wrong
+		{
+			LogError("FirebaseInterface: ", "User login to Firebase failed: ", curl_easy_strerror(res));
+			return false;
+		}
+
+		// Cleanup
+		curl_slist_free_all(headers); headers = nullptr;
+		curl_easy_cleanup(curl); curl = nullptr;
+
+		// Parse answer to JSON object and extract id token
+		const auto jsonAnswer = json::parse(answerBodyBuffer);
+		auto result = jsonAnswer.find("idToken");
+		if (result != jsonAnswer.end())
+		{
+			_pIdToken->Set(result.value().get<std::string>());
+			LogInfo("FirebaseInterface: ", "User successfully logged into Firebase.");
+			success = true;
+		}
+		else
+		{
+
+			LogError("FirebaseInterface: ", "User login to Firebase failed.");
+		}
+
+		// Search for refresh token (optional)
+		result = jsonAnswer.find("refreshToken");
+		if (result != jsonAnswer.end())
+		{
+			_refreshToken = result.value().get<std::string>();
+		}
+
+		// Search for uid
+		result = jsonAnswer.find("localId");
+		if (result != jsonAnswer.end())
+		{
+			_uid = result.value().get<std::string>(); // one could "break mailer" if not provided as nothing makes sense
+		}
+	}
+	return success;
+}
+
 bool FirebaseMailer::FirebaseInterface::Relogin()
 {
+	bool success = false;
+
 	// Store refresh token locally
 	std::string refreshToken = _refreshToken;
 
 	// Invalidate tokens
-	_idToken = "";
+	_pIdToken->Reset();
 	_refreshToken = "";
 
-	// Check for nonempty refresh token
-	if (!refreshToken.empty())
+	// Check for empty refresh token
+	if (refreshToken.empty())
+	{
+		// No relogin through refresh token possible, try complete relogin
+		success = Login();
+	}
+	else // relogin possilbe
 	{
 		// Setup CURL
 		CURL *curl;
@@ -342,8 +361,9 @@ bool FirebaseMailer::FirebaseInterface::Relogin()
 			auto result = jsonAnswer.find("id_token"); // different from email and password login
 			if (result != jsonAnswer.end())
 			{
-				_idToken = result.value().get<std::string>();
+				_pIdToken->Set(result.value().get<std::string>());
 				LogInfo("FirebaseInterface: ", "User reauthentifiation to Firebase successful.");
+				success = true;
 			}
 			else
 			{
@@ -359,7 +379,7 @@ bool FirebaseMailer::FirebaseInterface::Relogin()
 		}
 	}
 
-	return !_idToken.empty(); // ok if id token has been filled
+	return success;
 }
 
 template<typename T>
@@ -370,7 +390,7 @@ bool FirebaseMailer::FirebaseInterface::Put(T key, std::string ETag, typename Fi
 	rNewValue = fallback<typename FirebaseValue<T>::type>();
 
 	// Only continue if logged in
-	if (!_idToken.empty())
+	if (_pIdToken->IsSet())
 	{
 		// Setup CURL
 		CURL *curl;
@@ -391,7 +411,7 @@ bool FirebaseMailer::FirebaseInterface::Put(T key, std::string ETag, typename Fi
 				_URL + "/"
 				+ BuildFirebaseKey(key, _uid) + "/" + subpath
 				+ ".json"
-				+ "?auth=" + _idToken;
+				+ "?auth=" + _pIdToken->Get();
 
 			// Setup CURL
 			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers); // apply header
@@ -428,7 +448,7 @@ bool FirebaseMailer::FirebaseInterface::Put(T key, std::string ETag, typename Fi
 				else // there is something else in header
 				{
 					// Try to relogin
-					if (Relogin() && !_idToken.empty()) // returns whether successful
+					if (Relogin()) // returns whether successful
 					{
 						// Setup CURL request (reuse stuff from first)
 						answerHeaderBuffer.clear();
@@ -437,7 +457,7 @@ bool FirebaseMailer::FirebaseInterface::Put(T key, std::string ETag, typename Fi
 							_URL + "/"
 							+ BuildFirebaseKey(key, _uid) + "/" + subpath
 							+ ".json"
-							+ "?auth=" + _idToken;
+							+ "?auth=" + _pIdToken->Get();
 						curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of new request
 
 						// Try again to PUT data
@@ -475,7 +495,7 @@ FirebaseMailer::FirebaseInterface::DBEntry FirebaseMailer::FirebaseInterface::Ge
 	DBEntry result;
 
 	// Only continue if logged in
-	if (!_idToken.empty())
+	if (_pIdToken->IsSet())
 	{
 		// Setup CURL
 		CURL *curl;
@@ -495,7 +515,7 @@ FirebaseMailer::FirebaseInterface::DBEntry FirebaseMailer::FirebaseInterface::Ge
 				_URL + "/"
 				+ key
 				+ ".json"
-				+ "?auth=" + _idToken;
+				+ "?auth=" + _pIdToken->Get();
 
 			// Setup CURL
 			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers); // apply header
@@ -519,7 +539,7 @@ FirebaseMailer::FirebaseInterface::DBEntry FirebaseMailer::FirebaseInterface::Ge
 				else // not ok, guess timeout of id token?
 				{
 					// Try to relogin
-					if (Relogin() && !_idToken.empty()) // returns whether successful
+					if (Relogin()) // returns whether successful
 					{
 						// Setup CURL request (reuse stuff from first)
 						answerHeaderBuffer.clear();
@@ -528,7 +548,7 @@ FirebaseMailer::FirebaseInterface::DBEntry FirebaseMailer::FirebaseInterface::Ge
 							_URL + "/"
 							+ key
 							+ ".json"
-							+ "?auth=" + _idToken; // update request URL as id token should be new
+							+ "?auth=" + _pIdToken->Get(); // update request URL as id token should be new
 						curl_easy_setopt(curl, CURLOPT_URL, requestURL.c_str()); // set address of new request
 
 						// Try again to GET data
@@ -553,6 +573,8 @@ FirebaseMailer::FirebaseInterface::DBEntry FirebaseMailer::FirebaseInterface::Ge
 
 int FirebaseMailer::FirebaseInterface::Apply(FirebaseIntegerKey key, std::function<int(int)> function)
 {
+	bool success = false;
+
 	// Call own get method
 	const auto entry = this->Get(BuildFirebaseKey(key, _uid));
 
@@ -566,7 +588,6 @@ int FirebaseMailer::FirebaseInterface::Apply(FirebaseIntegerKey key, std::functi
 	std::string ETag = entry.ETag;
 	std::string newETag = "";
 	int newValue = 0;
-	bool success = false;
 	const int maxTrialCount = 10;
 	int trialCount = 0;
 
@@ -612,11 +633,12 @@ FirebaseMailer::FirebaseMailer()
 	auto* pMutex = &_commandMutex;
 	auto* pConditionVariable = &_conditionVariable;
 	auto* pCommandQueue = &_commandQueue;
+	auto* pIdToken = &_idToken;
 	auto const * pShouldStop = &_shouldStop; // read-only
-	_upThread = std::unique_ptr<std::thread>(new std::thread([pMutex, pConditionVariable, pCommandQueue, pShouldStop]() // pass copies of pointers to members
+	_upThread = std::unique_ptr<std::thread>(new std::thread([pMutex, pConditionVariable, pCommandQueue, pIdToken, pShouldStop]() // pass copies of pointers to members
 	{
 		// Create interface to firebase
-		FirebaseInterface interface; // object of inner class
+		FirebaseInterface interface(pIdToken); // object of inner class
 
 		// Local command queue where command are moved from mailer thread to this thread
 		std::deque<std::shared_ptr<Command> > localCommandQueue;
@@ -736,4 +758,10 @@ void FirebaseMailer::PushBackCommand(std::shared_ptr<Command> spCommand)
 		_commandQueue.push_back(spCommand); // push back command to queue
 		_conditionVariable.notify_all(); // notify thread about new data
 	}
+}
+
+std::string FirebaseMailer::GetIdToken() const
+{
+	// Only read in FirebaseMailer, do not set!
+	return _idToken.Get();
 }

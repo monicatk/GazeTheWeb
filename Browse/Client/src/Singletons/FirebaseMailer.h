@@ -123,6 +123,9 @@ public:
 	// Pause mailer
 	void Pause() { _paused = true; }
 
+	// Login method which waits until execution is finished (either successful or not, but then GetIdToken can be called with confidence)
+	// TODO
+
 	// Available commands
 	void PushBack_Login		(std::string email, std::string password);
 	void PushBack_Transform	(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise = nullptr); // promise delivers future database value
@@ -134,12 +137,21 @@ public:
 	void PushBack_Get		(FirebaseStringKey key, std::promise<std::string>* pPromise);
 	void PushBack_Get		(FirebaseJSONKey key, std::promise<nlohmann::json>* pPromise);
 
+	// Get id token (is empty before login or at failure)
+	std::string GetIdToken() const;
+
 private:
+
+	// Forward declaration
+	class IdToken;
 
 	// ### Delegate running in a thread ###
 	class FirebaseInterface
 	{
 	public:
+
+		// Constructor
+		FirebaseInterface(IdToken* pIdToken) : _pIdToken(pIdToken) {}
 
 		// Log in. Return whether successful
 		bool Login(std::string email, std::string password);
@@ -169,6 +181,9 @@ private:
 			nlohmann::json value;
 		};
 
+		// Login via set email and password
+		bool Login();
+
 		// Relogin via refresh token. Returns whether successful
 		bool Relogin();
 
@@ -187,9 +202,11 @@ private:
 		const std::string _URL = setup::FIREBASE_URL;
 
 		// Members
-		std::string _idToken = ""; // short living token for identification (indicator for being logged in!)
+		IdToken* _pIdToken = nullptr; // set at construction
 		std::string _refreshToken = ""; // long living token for refreshing itself and idToken
 		std::string _uid = "0"; // user identifier (initialized with something that indicates "broken")
+		std::string _email = ""; // taken from login attempt
+		std::string _password = ""; // taken from login attempt (guess this is bad design to store password, but simplies everything a lot)
 	};
 	// #################################
 
@@ -205,7 +222,23 @@ private:
 	FirebaseMailer& operator = (const FirebaseMailer &) { return *this; }
 
 	// Pause indicator (if true, avoids pushing to command queue)
-	std::atomic<bool> _paused = false;
+	std::atomic<bool> _paused = false; // atomic since could be accessed from multiple async threads
+
+	// #### THREAD-RELATED MEMBERS ####
+
+	// Id token may be readable from outside, but only set within FirebaseInterface thread
+	class IdToken
+	{
+	public:
+		void Set(std::string value)	{ std::lock_guard<std::mutex> lock(_lock); _value = value; }
+		void Reset()				{ std::lock_guard<std::mutex> lock(_lock); _value = ""; }
+		std::string Get() const		{ std::lock_guard<std::mutex> lock(_lock); return _value; }
+		bool IsSet() const			{ std::lock_guard<std::mutex> lock(_lock); return !_value.empty(); }
+
+	private:
+		std::string _value = "";
+		mutable std::mutex _lock; // mutable as can be even changed in const methods
+	};
 
 	// Threading (thread defined in constructor of FirebaseMailer)
 	std::mutex _commandMutex; // mutex for access of _commandQueue (thread grabs all commands and works on them)
@@ -213,6 +246,9 @@ private:
 	std::deque<std::shared_ptr<Command> > _commandQueue; // shared function pointers that are executed sequentially within thread
 	std::unique_ptr<std::thread> _upThread; // the thread itself
 	std::atomic<bool> _shouldStop = false; // written by this, read by thread
+	IdToken _idToken; // short living token for identification (indicator for being logged in!)
+
+	// ################################
 };
 
 #endif // FIREBASEMAILER_H_
