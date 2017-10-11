@@ -278,6 +278,20 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     // Load dictionary
     _dictonaryId = eyegui::addDictionary(_pGUI, "dictionaries/NewEnglishUS.dic");
 
+	// ### FIREBASE MAILER ###
+	std::promise<std::string> idTokenPromise; auto idTokenFuture = idTokenPromise.get_future(); // future provides initial idToken
+	FirebaseMailer::Instance().PushBack_Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword(), &idTokenPromise);
+	LogInfo(idTokenFuture.get());
+
+	// Find out which run this is
+	std::promise<int> startPromise; auto startFuture = startPromise.get_future(); // future provides index
+	FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT, 1, &startPromise); // adds one to the count
+	_startIndex = startFuture.get() - 1; // is zero for both initial start and failure
+
+										 // Create record about start
+	nlohmann::json record = { { "date", GetDate() } };
+	FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_APPLICATION_START, record, std::to_string(_startIndex)); // send JSON to database
+
     // ### INTERACTION LOGGING ###
 
     // New CSV file for interaction logging
@@ -441,20 +455,6 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
 	// Register callback
 	LabStreamMailer::instance().RegisterCallback(_spLabStreamCallback);
-
-	// ### FirebaseMailer ###
-	std::promise<std::string> idTokenPromise; auto idTokenFuture = idTokenPromise.get_future(); // future provides initial idToken
-	FirebaseMailer::Instance().PushBack_Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword(), &idTokenPromise);
-	LogInfo(idTokenFuture.get());
-
-	// Find out which run this is
-	std::promise<int> startPromise; auto startFuture = startPromise.get_future(); // future provides index
-	FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT, 1, &startPromise); // adds one to the count
-	_startIndex = startFuture.get() - 1; // is zero for both initial start and failure
-
-	// Create record about start
-	nlohmann::json record = { { "date", GetDate() } };
-	FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_APPLICATION_START, record, std::to_string(_startIndex)); // send JSON to database
 
 	// ### INITIALIZATION ###
 
