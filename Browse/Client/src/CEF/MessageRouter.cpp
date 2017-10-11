@@ -217,10 +217,6 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			}
 			const int& type = std::stoi(data[2]);
 			const int& id = std::stoi(data[3]);
-		
-			//LogDebug(requestString, " id: ", id);
-			//if (type == 3) // DEBUG: OverflowElement
-			//	LogDebug("MsgRouter: Processing " + requestString);
 
 			// ADDING DOMNODE
 			if (op.compare("add") == 0) // adding of DOM node
@@ -264,8 +260,6 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			// REMOVE DOMNODE
 			if (op.compare("rem") == 0)
 			{
-				if(type == 3)
-					LogDebug("MsgRouter: Removing overflow element with id: ",id, " ...");
 
 				switch (type)
 				{

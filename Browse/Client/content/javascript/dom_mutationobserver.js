@@ -736,13 +736,15 @@ function MutationObserverInit()
 			  				if(node !== undefined && node.nodeType === 1)
 			  				{
 								RemoveFixedElement(node, false);
-
+								
+								/* Don't remove Overflow if only a child was removed!
 								var overflowId = node.getAttribute("overflowId");
 								if(overflowId !== null)
 								{
-									RemoveDOMOverflowElement(overflowId);
+									console.log("Nope. ", overflowId, node);
+									// RemoveDOMOverflowElement(overflowId);
 								}
-
+								*/	
 			  				}
 
 							UpdateNodesRect(node);

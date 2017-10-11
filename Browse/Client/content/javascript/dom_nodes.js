@@ -541,21 +541,15 @@ DOMOverflowElement.prototype.checkIfAutoOverflows = function(){
     if(this.hidden_auto_overflow === undefined)
         return;
 
-    this.setAutoOverflowHidden(
-        this.node.scrollHeight <= this.node.clientHeight 
-            && this.node.scrollWidth <= this.node.clientWidth
-    );
-}
+    var hidden = (this.node.scrollHeight <= this.node.clientHeight) && 
+                    (this.node.scrollWidth <= this.node.clientWidth);
 
-DOMOverflowElement.prototype.setAutoOverflowHidden = function(hidden){
     // Value doesn't change
     if(hidden === this.hidden_auto_overflow)
         return;
 
-    // Monitor if overall visibility changed when setting variable
+    // Monitor if overall visibility changes when setting variable
     var sum_hidden = this.getCefHidden();
-
-    var debug = this.hidden_auto_overflow;
 
     this.hidden_auto_overflow = hidden;
 
@@ -563,8 +557,12 @@ DOMOverflowElement.prototype.setAutoOverflowHidden = function(hidden){
     
     // Compare old and new value, when changes happened, react accordingly
     if(sum_hidden !== sum_hidden_updated)
-    {
-        SetObjectAvailabilityForCEFto(!sum_hidden_updated);
+    {   
+        // DEBUG
+        console.log("Overflow id: ", this.getId(), " now: ", !sum_hidden_updated, " -- ",
+                this.cef_hidden, this.hidden_overflow, this.hidden_auto_overflow);
+
+        SetObjectAvailabilityForCEFto(this, !sum_hidden_updated);
     }
 }
 
