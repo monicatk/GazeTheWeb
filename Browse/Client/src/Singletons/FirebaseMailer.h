@@ -127,7 +127,7 @@ public:
 	// TODO
 
 	// Available commands
-	void PushBack_Login		(std::string email, std::string password);
+	void PushBack_Login		(std::string email, std::string password, std::promise<std::string>* pPromise = nullptr); // promise delivers initial idToken value
 	void PushBack_Transform	(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise = nullptr); // promise delivers future database value
 	void PushBack_Maximum	(FirebaseIntegerKey key, int value, std::promise<int>* pPromise = nullptr); // promise delivers future database value
 	void PushBack_Put		(FirebaseIntegerKey key, int value, std::string subpath = "");
@@ -154,7 +154,7 @@ private:
 		FirebaseInterface(IdToken* pIdToken) : _pIdToken(pIdToken) {}
 
 		// Log in. Return whether successful
-		bool Login(std::string email, std::string password);
+		bool Login(std::string email, std::string password, std::promise<std::string>* pPromise);
 
 		// Simple put functionality. Replaces existing value if available, no ETag used
 		template<typename T>

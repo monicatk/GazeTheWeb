@@ -83,13 +83,20 @@ std::string HttpHeaderExtractETag(const std::string& rHeader)
 // ### FIREBASE INTERFACE ###
 // ##########################
 
-bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string password)
+bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string password, std::promise<std::string>* pPromise)
 {
 	// Store email and password
 	_email = email;
 	_password = password;
 
-	return Login();
+	// Perform actual login
+	bool success = Login();
+
+	// Fullfill the promise
+	pPromise->set_value(_pIdToken->Get());
+
+	// Return the success
+	return success;
 }
 
 template<typename T>
@@ -242,7 +249,7 @@ bool FirebaseMailer::FirebaseInterface::Login()
 		curl_easy_setopt(curl, CURLOPT_HEADERDATA, &answerHeaderBuffer); // set buffer for answer header
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &answerBodyBuffer); // set buffer for answer body
 
-																	  // Post field
+		// Post field
 		const json jsonPost =
 		{
 			{ "email", _email }, // email of user
@@ -255,7 +262,7 @@ bool FirebaseMailer::FirebaseInterface::Login()
 		curl_easy_setopt(curl, CURLOPT_URL, "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + _API_KEY); // URL to access
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postBuffer); // fill post body
 
-																// Execute request
+		// Execute request
 		res = curl_easy_perform(curl);
 		if (res != CURLE_OK) // something went wrong
 		{
@@ -669,12 +676,12 @@ FirebaseMailer::FirebaseMailer()
 	}));
 }
 
-void FirebaseMailer::PushBack_Login(std::string email, std::string password)
+void FirebaseMailer::PushBack_Login(std::string email, std::string password, std::promise<std::string>* pPromise)
 {
 	// Add command to queue, take parameters as copy
 	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
-		rInterface.Login(email, password);
+		rInterface.Login(email, password, pPromise);
 	})));
 }
 

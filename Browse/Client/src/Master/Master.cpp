@@ -443,12 +443,14 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	LabStreamMailer::instance().RegisterCallback(_spLabStreamCallback);
 
 	// ### FirebaseMailer ###
-	FirebaseMailer::Instance().PushBack_Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword());
+	std::promise<std::string> idTokenPromise; auto idTokenFuture = idTokenPromise.get_future(); // future provides initial idToken
+	FirebaseMailer::Instance().PushBack_Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword(), &idTokenPromise);
+	LogInfo(idTokenFuture.get());
 
 	// Find out which run this is
-	std::promise<int> promise; auto future = promise.get_future(); // future provides index
-	FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT, 1, &promise); // adds one to the count
-	_startIndex = future.get() - 1; // is zero for both initial start and failure
+	std::promise<int> startPromise; auto startFuture = startPromise.get_future(); // future provides index
+	FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT, 1, &startPromise); // adds one to the count
+	_startIndex = startFuture.get() - 1; // is zero for both initial start and failure
 
 	// Create record about start
 	nlohmann::json record = { { "date", GetDate() } };
