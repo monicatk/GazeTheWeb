@@ -149,18 +149,22 @@ bool Calibrate()
 	// Check calibration points
 	for (int i = 1; i <= 5; i++)
 	{
-		CalibrationPointQualityStruct left, right;
-		iV_GetCalibrationQuality(i, &left, &right);
-		if (
-			(left.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
-			|| (right.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
-			|| left.qualityIndex < 0.5f
-			|| right.qualityIndex < 0.5f)
+		for (int j = 0; j < 3; j++) // three attempts per point
 		{
-			std::cout << "RecalibrationOnePoint: " << iV_RecalibrateOnePoint(i) << std::endl;
+			CalibrationPointQualityStruct left, right;
+			iV_GetCalibrationQuality(i, &left, &right);
+			if (
+				(left.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
+				|| (right.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
+				|| (left.qualityIndex < 0.5f && right.qualityIndex < 0.5f))
+			{
+				iV_RecalibrateOnePoint(i);
+			}
+			else
+			{
+				break; // break the loop of this point
+			}
 		}
-		
-		std::cout << "Calibration Point " << std::to_string(i) << ": " << std::to_string(left.qualityIndex * 100) << "%, " << std::to_string(right.qualityIndex * 100) << "%" << std::endl;
 	}
 
 	// Return whether successful
