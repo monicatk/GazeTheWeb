@@ -92,13 +92,10 @@ private:
 
 	// Handle to pause lab stream
 	PAUSE_LAB_STREAM _procPauseLabStream = NULL;
-#endif
-
-	// Remember whether connection has been established
-	bool _connected = false; // indicator whether thread was successfully finished
+#endif // _WIN32
 
 	// Info about eye tracking device
-	EyetrackerInfo _info;
+	EyetrackerInfo _info; // also indicator for successful connection
 	
 	// ###################################
 
