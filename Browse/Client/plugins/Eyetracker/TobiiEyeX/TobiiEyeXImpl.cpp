@@ -142,7 +142,7 @@ bool InitializeGlobalInteractorSnapshot(TX_CONTEXTHANDLE hContext)
 	return success;
 }
 
-EyetrackerInfo Connect()
+EyetrackerInfo Connect(EyetrackerGeometry geometry)
 {
 	EyetrackerInfo info;
 	info.connected = false;

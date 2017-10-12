@@ -16,6 +16,7 @@
 #include "src/Input/Input.h"
 #include "plugins/Eyetracker/Interface/EyetrackerSample.h"
 #include "plugins/Eyetracker/Interface/EyetrackerInfo.h"
+#include "plugins/Eyetracker/Interface/EyetrackerGeometry.h"
 #include <memory>
 #include <vector>
 #include <thread>

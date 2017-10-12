@@ -11,12 +11,6 @@
 #include "myGazeAPI.h"
 #include <algorithm>
 
-#include <iostream>
-
-// TODO: 
-// - recalibrate single points when not successful
-// - setup geometry
-
 // Global variables
 static bool serverOwner = false;
 
@@ -45,7 +39,7 @@ int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 	return 1;
 }
 
-EyetrackerInfo Connect()
+EyetrackerInfo Connect(EyetrackerGeometry geometry)
 {
 	// Variables
 	EyetrackerInfo info;
@@ -78,6 +72,18 @@ EyetrackerInfo Connect()
 		// Connection successful
 		info.connected = true;
 
+		// Set geometry
+		char buf[256] = "GazeTheWeb";
+		GeometryStruct REDgeometry;
+		REDgeometry.geometryType = GeometryType::myGazeGeometry;
+		REDgeometry.stimX = geometry.monitorWidth;
+		REDgeometry.stimY = geometry.monitorHeight;
+		REDgeometry.inclAngle = geometry.mountingAngle;
+		REDgeometry.stimDistHeight = geometry.relativeDistanceHeight;
+		REDgeometry.stimDistDepth = geometry.relativeDistanceDepth;
+		strcpy(REDgeometry.setupName, "GazeTheWeb");
+		iV_SetREDGeometry(&REDgeometry);
+
 		// Enable low power pick up mode
 		iV_EnableLowPowerPickUpMode();
 
@@ -108,7 +114,7 @@ EyetrackerInfo Connect()
 		iV_SetSampleCallback(SampleCallbackFunction);
 	}
 
-	// Return success or failure
+	// Return info structure
 	return info;
 }
 

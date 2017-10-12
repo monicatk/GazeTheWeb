@@ -23,7 +23,7 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface) :
 #ifdef _WIN32
 
 		// Define procedure signature for connection
-		typedef EyetrackerInfo(__cdecl *CONNECT)();
+		typedef EyetrackerInfo(__cdecl *CONNECT)(EyetrackerGeometry);
 
 		// Variable about device
 		EyeTrackerDevice device = EyeTrackerDevice::NONE;
@@ -63,7 +63,13 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface) :
 				// Check whether procedures could be loaded
 				if (procConnect != NULL && _procFetchGazeSamples != NULL && _procIsTracking != NULL && _procCalibrate != NULL)
 				{
-					EyetrackerInfo info = procConnect();
+					EyetrackerGeometry geometry;
+					geometry.monitorWidth = 276;
+					geometry.monitorHeight = 155;
+					geometry.mountingAngle = 20;
+					geometry.relativeDistanceDepth = 18;
+					geometry.relativeDistanceHeight = -5;
+					EyetrackerInfo info = procConnect(geometry);
 					if (info.connected)
 					{
 						LogInfo("EyeInput: Connecting eye tracker successful.");
