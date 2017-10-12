@@ -48,14 +48,18 @@ namespace setup
 	static const bool	SUPER_CALIBRATION_AT_STARTUP = false | DEPLOYMENT;
 	static const float	LINK_CORRECTION_MAX_PIXEL_DISTANCE = 5.f;
 	static const int	TEXT_SELECTION_MARGIN = 4; // area which is selected before / after zoom coordinate in CEFPixels
+
+	// Gaze filtering
 	static const int	FILTER_GAZE_FIXATION_PIXEL_RADIUS = 20;
-	static const bool	EYEINPUT_DISTORT_GAZE = false;
-	static const float	EYEINPUT_DISTORT_GAZE_BIAS_X = 64.f; // pixels
-	static const float	EYEINPUT_DISTORT_GAZE_BIAS_Y = 32.f; // pixels
 	static const int	FILTER_MEMORY_SIZE = 1000; // how many samples are kept in memory of the filters
 	static const FilterKernel FILTER_KERNEL = FilterKernel::GAUSSIAN;
-	static const int	FILTER_WINDOW_SIZE = 60;
+	static const int	FILTER_WINDOW_SIZE = 30;
 	static const bool	FILTER_USE_OUTLIER_REMOVAL = true;
+
+	// Distortion
+	static const bool	EYEINPUT_DISTORT_GAZE = false && !DEPLOYMENT;
+	static const float	EYEINPUT_DISTORT_GAZE_BIAS_X = 64.f; // pixels
+	static const float	EYEINPUT_DISTORT_GAZE_BIAS_Y = 32.f; // pixels
 
 	// Experiments
 	static const std::string	LAB_STREAM_OUTPUT_NAME = "GazeTheWebOutput";

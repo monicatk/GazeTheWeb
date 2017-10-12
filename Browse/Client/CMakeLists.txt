@@ -348,6 +348,7 @@ if(${CLIENT_BUILD_OPEN_GAZE_PLUGIN})
 		MODULE
 		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
 		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerInfo.h
 		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
 		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
 		${EYETRACKER_PLUGIN_DIRECTORY}/OpenGaze/OpenGazeImpl.cpp
@@ -378,6 +379,7 @@ if(${CLIENT_BUILD_SMI_IVIEWX_PLUGIN})
 			MODULE
 			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerInfo.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
 			${EYETRACKER_PLUGIN_DIRECTORY}/SMIiViewX/SMIiViewXImpl.cpp
@@ -410,6 +412,7 @@ if(${CLIENT_BUILD_VI_MYGAZE_PLUGIN})
 			MODULE
 			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerInfo.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
 			${EYETRACKER_PLUGIN_DIRECTORY}/VImyGaze/VImyGazeImpl.cpp
@@ -441,6 +444,7 @@ if(${CLIENT_BUILD_TOBII_EYEX_PLUGIN})
 			MODULE
 			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerInfo.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
 			${EYETRACKER_PLUGIN_DIRECTORY}/TobiiEyeX/TobiiEyeXImpl.cpp

@@ -15,6 +15,7 @@
 #include "src/Input/Filters/Filter.h"
 #include "src/Input/Input.h"
 #include "plugins/Eyetracker/Interface/EyetrackerSample.h"
+#include "plugins/Eyetracker/Interface/EyetrackerInfo.h"
 #include <memory>
 #include <vector>
 #include <thread>
@@ -94,6 +95,9 @@ private:
 
 	// Remember whether connection has been established
 	bool _connected = false; // indicator whether thread was successfully finished
+
+	// Info about eye tracking device
+	EyetrackerInfo _info;
 	
 	// ###################################
 

@@ -142,19 +142,23 @@ bool InitializeGlobalInteractorSnapshot(TX_CONTEXTHANDLE hContext)
 	return success;
 }
 
-bool Connect()
+EyetrackerInfo Connect()
 {
+	EyetrackerInfo info;
+	info.connected = false;
+	info.samplerate = -1;
+
 	// Check for EyeX engine
 	TX_EYEXAVAILABILITY availability;
 	if (txGetEyeXAvailability(&availability) == TX_RESULT_OK)
 	{
 		if (availability == TX_EYEXAVAILABILITY_NOTAVAILABLE)
 		{
-			return false;
+			return info;
 		}
 		else if (availability == TX_EYEXAVAILABILITY_NOTRUNNING)
 		{
-			return false;
+			return info;
 		}
 	}
 
@@ -169,8 +173,15 @@ bool Connect()
 	success &= txRegisterEventHandler(Context, &EventHandlerTicket, HandleEvent, NULL) == TX_RESULT_OK; // register handler for events
 	success &= txEnableConnection(Context) == TX_RESULT_OK; // do connect to EyeX engine
 
+	// Info about eye tracker
+	if (success)
+	{
+		info.connected = true;
+		info.samplerate = 60;
+	}
+
 	// Return success
-	return success;
+	return info;
 }
 
 bool IsTracking()

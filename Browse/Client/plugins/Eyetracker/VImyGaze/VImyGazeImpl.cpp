@@ -11,6 +11,12 @@
 #include "myGazeAPI.h"
 #include <algorithm>
 
+#include <iostream>
+
+// TODO: 
+// - recalibrate single points when not successful
+// - setup geometry
+
 // Global variables
 static bool serverOwner = false;
 
@@ -39,13 +45,16 @@ int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 	return 1;
 }
 
-bool Connect()
+EyetrackerInfo Connect()
 {
-	// Initialize eyetracker
+	// Variables
+	EyetrackerInfo info;
+	info.connected = false;
+	info.samplerate = -1;
 	int ret_connect = 0;
 
-	// Connect to myGaze server
-	ret_connect = iV_Connect(); // TODO BUG: never works, but it does for minimal sample code :(
+	// Connect to running myGaze server
+	ret_connect = iV_Connect();
 
 	// If server not running, try to start it
 	if (ret_connect != RET_SUCCESS)
@@ -66,9 +75,16 @@ bool Connect()
 	// Set sample callback
 	if (ret_connect == RET_SUCCESS)
 	{
+		// Connection successful
+		info.connected = true;
+
+		// Enable low power pick up mode
+		std::cout << "POWER MODE: " << iV_EnableLowPowerPickUpMode() << std::endl;
+
 		// Get system info
 		SystemInfoStruct systemInfoData;
 		iV_GetSystemInfo(&systemInfoData); // not used right now
+		info.samplerate = systemInfoData.samplerate;
 
 		// Setup LabStreamingLayer
 		lsl::stream_info streamInfo(
@@ -93,7 +109,7 @@ bool Connect()
 	}
 
 	// Return success or failure
-	return (ret_connect == RET_SUCCESS);
+	return info;
 }
 
 bool IsTracking()
@@ -127,8 +143,21 @@ void FetchSamples(SampleQueue& rspSamples)
 
 bool Calibrate()
 {
+	CalibrationStruct calibrationStruct;
+	calibrationStruct.targetSize = 20;
+	
+	std::cout << "Setup Calibration: " << std::to_string(iV_SetupCalibration(&calibrationStruct)) << std::endl;
+
 	// Start calibration (setup does not work of licensing reasons)
-	return iV_Calibrate() == RET_SUCCESS;
+	bool success = iV_Calibrate() == RET_SUCCESS;
+
+	CalibrationPointQualityStruct left, right;
+	iV_GetCalibrationQuality(1, &left, &right);
+	std::cout << "Calibration Point 1: " << std::to_string(left.qualityIndex * 100) << "%, " << std::to_string(right.qualityIndex * 100) << "%" << std::endl;
+
+	iV_RecalibrateOnePoint(1);
+
+	return success;
 }
 
 void ContinueLabStream()
