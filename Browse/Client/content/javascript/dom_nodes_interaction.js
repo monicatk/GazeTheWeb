@@ -197,9 +197,21 @@ DOMVideo.prototype.setFullscreen = function(fullscreen)
 		button.onclick = function(e){
 			// this.style.pointerEvents = "none";
 			ConsolePrint("DOMVideo id="+scoped_id+": Fullscreen is set to true");
-			// Request fullscreen for given video
-			scoped_node.webkitRequestFullscreen();
 
+			console.log("Trying to get node to fullscreen: ", scoped_node);
+			
+			// Request fullscreen for given video
+			// YOUTUBE FIX
+			if(scoped_node.className === "video-stream html5-main-video" && scoped_node.parentElement 
+				&& scoped_node.parentElement.parentElement)
+			{
+				var container = scoped_node.parentElement.parentElement;
+				container.webkitRequestFullscreen();
+
+				console.log("Requested fullscreen for: ", container);
+			}
+			else
+				scoped_node.webkitRequestFullscreen();
 			this.style.position = "static";
 			this.id += "-finished";
 			this.className += "-finished";
@@ -245,6 +257,11 @@ DOMVideo.prototype.changeVolume = function (delta) {
     var value = this.node.volume;
     value = Math.min(Math.max(0.0, value + delta), 1.0);
     this.node.volume = value;
+}
+
+DOMVideo.prototype.showControls = function(val)
+{
+	console.log("DOMVideo.showControls has to be implemented! Called with ", arguments);
 }
 
 ConsolePrint("Successfully imported dom_nodes_interaction.js!");
