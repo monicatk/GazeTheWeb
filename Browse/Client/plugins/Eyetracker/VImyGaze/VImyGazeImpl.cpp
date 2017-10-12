@@ -79,11 +79,11 @@ EyetrackerInfo Connect()
 		info.connected = true;
 
 		// Enable low power pick up mode
-		std::cout << "POWER MODE: " << iV_EnableLowPowerPickUpMode() << std::endl;
+		iV_EnableLowPowerPickUpMode();
 
 		// Get system info
 		SystemInfoStruct systemInfoData;
-		iV_GetSystemInfo(&systemInfoData); // not used right now
+		iV_GetSystemInfo(&systemInfoData);
 		info.samplerate = systemInfoData.samplerate;
 
 		// Setup LabStreamingLayer
@@ -143,20 +143,27 @@ void FetchSamples(SampleQueue& rspSamples)
 
 bool Calibrate()
 {
-	CalibrationStruct calibrationStruct;
-	calibrationStruct.targetSize = 20;
-	
-	std::cout << "Setup Calibration: " << std::to_string(iV_SetupCalibration(&calibrationStruct)) << std::endl;
-
 	// Start calibration (setup does not work of licensing reasons)
 	bool success = iV_Calibrate() == RET_SUCCESS;
 
-	CalibrationPointQualityStruct left, right;
-	iV_GetCalibrationQuality(1, &left, &right);
-	std::cout << "Calibration Point 1: " << std::to_string(left.qualityIndex * 100) << "%, " << std::to_string(right.qualityIndex * 100) << "%" << std::endl;
+	// Check calibration points
+	for (int i = 1; i <= 5; i++)
+	{
+		CalibrationPointQualityStruct left, right;
+		iV_GetCalibrationQuality(i, &left, &right);
+		if (
+			(left.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
+			|| (right.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
+			|| left.qualityIndex < 0.5f
+			|| right.qualityIndex < 0.5f)
+		{
+			std::cout << "RecalibrationOnePoint: " << iV_RecalibrateOnePoint(i) << std::endl;
+		}
+		
+		std::cout << "Calibration Point " << std::to_string(i) << ": " << std::to_string(left.qualityIndex * 100) << "%, " << std::to_string(right.qualityIndex * 100) << "%" << std::endl;
+	}
 
-	iV_RecalibrateOnePoint(1);
-
+	// Return whether successful
 	return success;
 }
 
