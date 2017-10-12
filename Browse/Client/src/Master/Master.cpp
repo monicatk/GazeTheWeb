@@ -7,6 +7,7 @@
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
 #include "src/Singletons/FirebaseMailer.h"
+#include "src/Arguments.h"
 #include "submodules/glfw/include/GLFW/glfw3.h"
 #include "submodules/text-csv/include/text/csv/ostream.hpp"
 #include <functional>
@@ -216,6 +217,21 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
     // ### EYEGUI ###
 
+	// Decide on localization
+	std::string localizationFilepath = "";
+	switch (Argument::localization)
+	{
+	case Argument::Localization::English:
+		localizationFilepath = "localizations/English.leyegui";
+		break;
+	case Argument::Localization::Greek:
+		localizationFilepath = "localizations/Greek.leyegui";
+		break;
+	case Argument::Localization::Hebrew:
+		localizationFilepath = "localizations/Hebrew.leyegui";
+		break;
+	}
+
     // Set print callbacks
     std::function<void(std::string)> printGUICallback = [&](std::string message) { this->GUIPrintCallback(message); };
     eyegui::setErrorCallback(printGUICallback);
@@ -227,7 +243,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	guiBuilder.width = _width;
 	guiBuilder.height = _height;
 	guiBuilder.fontFilepath = "fonts/dejavu-sans/ttf/DejaVuSans.ttf";
-	guiBuilder.localizationFilepath = "localizations/English.leyegui";
+	guiBuilder.localizationFilepath = localizationFilepath;
 	guiBuilder.fontTallSize = 0.07f;
 
 	// Create splash screen GUI, render it one time and throw it away
@@ -334,9 +350,9 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
     // ### HOMEPAGE ###
 	// _upWeb->AddTab("https://developer.mozilla.org/en-US/docs/Web/CSS/overflow");
-	_upWeb->AddTab("https://www.w3schools.com/html/html5_video.asp");
+	// _upWeb->AddTab("http://html5-demos.appspot.com/static/fullscreen.html");
 	// _upWeb->AddTab(std::string(CONTENT_PATH) + "/websites/index.html");
-	// _upWeb->AddTab(_upSettings->GetHomepage());
+	_upWeb->AddTab(_upSettings->GetHomepage());
 
     // ### SUPER LAYOUT ###
 
@@ -351,13 +367,6 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// Button listener for super calibration (reusing the master button listener)
 	eyegui::registerButtonListener(_pSuperCalibrationLayout, "continue", _spMasterButtonListener);
 	eyegui::registerButtonListener(_pSuperCalibrationLayout, "recalibration", _spMasterButtonListener);
-
-    // Initialization
-    if(setup::PAUSED_AT_STARTUP)
-    {
-        eyegui::buttonDown(_pSuperLayout, "pause", true);
-    }
-    _pausedDimming.setValue(0);
 
 	// Add floating frame for notification
 	_notificationFrameIndex = eyegui::addFloatingFrameWithBrick(
@@ -378,7 +387,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     _cursorFrameIndex = eyegui::addFloatingFrameWithBrick(_pCursorLayout, "bricks/Cursor.beyegui", 0, 0, 0, 0, true, false); // will be moved and sized in loop
 
     // ### EYE INPUT ###
-	_upEyeInput = std::unique_ptr<EyeInput>(new EyeInput(this));
+	_upEyeInput = std::unique_ptr<EyeInput>(new EyeInput(this, _upSettings->GetEyetrackerGeometry()));
 
 	// ### VOICE INPUT ###
 	_upVoiceInput = std::unique_ptr<VoiceInput>(new VoiceInput(_pGUI));
@@ -394,25 +403,45 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
             geometryShaderSource,
             setup::BLUR_PERIPHERY ? blurFragmentShaderSource : simpleFragmentShaderSource));
 
-	// ### JavaScript to LSL ###
+	// ### FIREBASE MAILER ###
+
+	// Login
+	std::promise<std::string> idTokenPromise; auto idTokenFuture = idTokenPromise.get_future(); // future provides initial idToken
+	FirebaseMailer::Instance().PushBack_Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword(), &idTokenPromise);
+	LogInfo(idTokenFuture.get());
+
+	// Start index
+	std::promise<int> startPromise; auto startFuture = startPromise.get_future(); // future provides index
+	FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT, 1, &startPromise); // adds one to the count
+	_startIndex = startFuture.get() - 1; // is zero for both initial start and failure
+
+										 // Create record about start
+	nlohmann::json record = { { "date", GetDate() } };
+	FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_APPLICATION_START, record, std::to_string(_startIndex)); // send JSON to database
+
+	// ### JAVASCRIPT TO LAB STREAMING LAYER ###
 
 	// Registers a JavaScript callback function that pipes JS callbacks starting with "lsl:" to LabStreamingLayer
 	_pCefMediator->RegisterJavascriptCallback("lsl:", [this](std::string message) { LabStreamMailer::instance().Send(message); });
 
-	// ### JavaScript data transfer ###
+	// ### JAVASCRIPT TO THIS DATA TRANSFER ###
 
 	// Register callback
 	_pCefMediator->RegisterJavascriptCallback("data:", [this](std::string message)
 	{
 		std::string tag;
 		std::string id;
+		float x = -1;
+		float y = -1;
 		auto tokens = SplitBySeparator(message, ',');
 		if (tokens.size() > 0) { tag = tokens.at(0); }
 		if (tokens.size() > 1) { id = tokens.at(1); }
-		this->NotifyClick(tag, id);
+		if (tokens.size() > 2) { x = std::stof(tokens.at(2)); }
+		if (tokens.size() > 3) { y = std::stof(tokens.at(3)); }
+		this->NotifyClick(tag, id, x, y);
 	});
 
-	// ### LabStreamCallback ###
+	// ### LAB STREAM CALLBACK ###
 
 	// Create callback
 	_spLabStreamCallback = std::shared_ptr<LabStreamCallback>(new LabStreamCallback(
@@ -429,9 +458,20 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// Register callback
 	LabStreamMailer::instance().RegisterCallback(_spLabStreamCallback);
 
-	// ### FirebaseMailer ###
-	FirebaseMailer::Instance().PushBack_Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword());
-	FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_APPLICATION_STARTS, 1); // count application starts (would miss some when Firebase connection fails for some reason)
+	// ### INITIALIZATION ###
+
+	// Paused at startup
+	if (setup::PAUSED_AT_STARTUP)
+	{
+		eyegui::buttonDown(_pSuperLayout, "pause", true);
+	}
+	_pausedDimming.setValue(0);
+
+	// Show super calibration layout at startup
+	if (setup::SUPER_CALIBRATION_AT_STARTUP)
+	{
+		eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true);
+	}
 
     // ### OTHER ###
 
@@ -479,9 +519,10 @@ Master::~Master()
     glfwTerminate();
 }
 
-void Master::Run()
+bool Master::Run()
 {
     this->Loop();
+	return _shouldShutdownAtExit;
 }
 
 double Master::GetTime() const
@@ -489,7 +530,7 @@ double Master::GetTime() const
     return glfwGetTime();
 }
 
-void Master::Exit()
+void Master::Exit(bool shutdown)
 {
 	// Close all tabs
 	_upWeb->RemoveAllTabs();
@@ -497,11 +538,11 @@ void Master::Exit()
 	// Stop update loop
 	_exit = true;
 
-	// Let CEF do a last message loop to be able to clean up
-	_pCefMediator->DoMessageLoopWork();
+	// Should shutdown after exit
+	_shouldShutdownAtExit = shutdown;
 }
 
-void  Master::SetDataTransfer(bool dataTransfer)
+void Master::SetDataTransfer(bool dataTransfer)
 {
 	// Store value
 	_dataTransfer = dataTransfer;
@@ -588,9 +629,9 @@ void Master::SetStyleTreePropertyValue(std::string styleClass, eyegui::property:
 	eyegui::setStyleTreePropertyValue(_pGUI, styleClass, type, value);
 }
 
-void Master::NotifyClick(std::string tag, std::string id)
+void Master::NotifyClick(std::string tag, std::string id, float x, float y)
 {
-	_upWeb->NotifyClick(tag, id);
+	_upWeb->NotifyClick(tag, id, x, y);
 }
 
 void Master::PushNotification(std::u16string content, Type type, bool overridable)
@@ -641,7 +682,7 @@ void Master::Loop()
 		if (glfwWindowShouldClose(_pWindow))
 		{
 			Exit();
-			continue; // or break because _exit is set by Exit()
+			continue; // let it do one last loop
 		}
 
 		// Time per frame
@@ -1040,8 +1081,23 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				_pMaster->PushNotificationByKey("notification:calibration_failure", MasterNotificationInterface::Type::WARNING, false);
 			}
 
-			// Store event in database
-			FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_CALIBRATION_ATTEMPTS, 1);
+			// Store this recalibration in Firebase
+			std::string date = GetDate(); // current date
+			int startIndex = _pMaster->GetStartIndex(); // start index
+			_pMaster->PushBackAsyncJob(
+				[date, startIndex, success]() // copy of date, start index and success
+			{
+				// Create record
+				nlohmann::json record = { { "date", date }, { "startIndex", startIndex }, { "success", success } };
+
+				// Persist record
+				std::promise<int> promise; auto future = promise.get_future(); // future provides index
+				FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_RECALIBRATION_COUNT, 1, &promise); // adds one to the count
+				FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_RECALIBRATION, record, std::to_string(future.get() - 1)); // send JSON to database
+
+				// Return some value (not used)
+				return true;
+			});
 
 			// Hide layout after calibration
 			eyegui::setVisibilityOfLayout(_pMaster->_pSuperCalibrationLayout, false, false, true);

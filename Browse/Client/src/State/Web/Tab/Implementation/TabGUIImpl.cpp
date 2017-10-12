@@ -69,20 +69,36 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 	else
 	{
 		// ### Vide mode layout ###
-		if (id == "play")
+		if (id == "play_pause")
 		{
 			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
 			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 			{
-				iter->second->SetPlaying(true);
+				iter->second->TogglePlayPause();
 			}
 		}
-		else if (id == "pause")
+		else if (id == "volume_up")
 		{
 			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
 			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 			{
-				iter->second->SetPlaying(false);
+				iter->second->ChangeVolume(0.25f);
+			}
+		}
+		else if (id == "volume_down")
+		{
+			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
+			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+			{
+				iter->second->ChangeVolume(-0.25f);
+			}
+		}
+		else if (id == "mute")
+		{
+			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
+			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+			{
+				iter->second->ToggleMuted();
 			}
 		}
 		else if (id == "exit")
@@ -151,6 +167,17 @@ void Tab::TabOverlayButtonListener::up(eyegui::Layout* pLayout, std::string id)
 	// Search for id in map
 	auto iter = _pTab->_overlayButtonUpCallbacks.find(id);
 	if (iter != _pTab->_overlayButtonUpCallbacks.end())
+	{
+		// Execute callback
+		iter->second();
+	}
+}
+
+void Tab::TabOverlayButtonListener::selected(eyegui::Layout* pLayout, std::string id)
+{
+	// Search for id in map
+	auto iter = _pTab->_overlayButtonSelectedCallbacks.find(id);
+	if (iter != _pTab->_overlayButtonSelectedCallbacks.end())
 	{
 		// Execute callback
 		iter->second();

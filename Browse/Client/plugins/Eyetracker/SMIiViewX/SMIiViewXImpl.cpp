@@ -44,9 +44,12 @@ int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 	return 1;
 }
 
-bool Connect()
+EyetrackerInfo Connect(EyetrackerGeometry geometry)
 {
-	// Initialize eyetracker
+	// TODO: use provided geometry similar to myGaze plugin
+
+	// Variables
+	EyetrackerInfo info;
 	int ret_connect = 0;
 
 	// Connect to iViewX server
@@ -71,16 +74,20 @@ bool Connect()
 	// Set sample callback
 	if (ret_connect == RET_SUCCESS)
 	{
+		// Connection successful
+		info.connected = true;
+
 		// Get system info
 		SystemInfoStruct systemInfoData;
-		iV_GetSystemInfo(&systemInfoData); // not used right now
+		iV_GetSystemInfo(&systemInfoData);
+		info.samplerate = systemInfoData.samplerate;
 
 		// Define a callback function for receiving samples
 		iV_SetSampleCallback(SampleCallbackFunction);
 	}
 
-	// Return success or failure
-	return (ret_connect == RET_SUCCESS);
+	// Return info structure
+	return info;
 }
 
 bool IsTracking()

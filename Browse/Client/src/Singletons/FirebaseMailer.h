@@ -4,6 +4,7 @@
 //============================================================================
 // Singleton which receives and sends data to Firebase. The mailer manages
 // the command queue and the interface the connection to the Firebase.
+// Mailer access is threadsafe.
 
 #ifndef FIREBASEMAILER_H_
 #define FIREBASEMAILER_H_
@@ -18,9 +19,23 @@
 #include <future>
 
 // Available database keys
-enum class FirebaseIntegerKey	{ SOCIAL_RECORD_UNKNOWN_COUNT, SOCIAL_RECORD_FACEBOOK_COUNT, SOCIAL_RECORD_LINKEDIN_COUNT, SOCIAL_RECORD_YOUTUBE_COUNT, GENERAL_APPLICATION_STARTS, GENERAL_CALIBRATION_ATTEMPTS };
-enum class FirebaseStringKey	{ TEST_STRING };
-enum class FirebaseJSONKey		{ SOCIAL_RECORD_UNKNOWN, SOCIAL_RECORD_FACEBOOK, SOCIAL_RECORD_LINKEDIN, SOCIAL_RECORD_YOUTUBE };
+enum class FirebaseIntegerKey	{ 
+	SOCIAL_RECORD_UNKNOWN_COUNT,
+	SOCIAL_RECORD_FACEBOOK_COUNT,
+	SOCIAL_RECORD_LINKEDIN_COUNT,
+	SOCIAL_RECORD_YOUTUBE_COUNT,
+	GENERAL_APPLICATION_START_COUNT,
+	GENERAL_RECALIBRATION_COUNT };
+enum class FirebaseStringKey	{ 
+	TEST_STRING };
+enum class FirebaseJSONKey		{ 
+	SOCIAL_RECORD_UNKNOWN,
+	SOCIAL_RECORD_FACEBOOK,
+	SOCIAL_RECORD_LINKEDIN,
+	SOCIAL_RECORD_YOUTUBE,
+	GENERAL_APPLICATION_START,
+	GENERAL_RECALIBRATION
+};
 
 // Mapping from key to raw type
 template<typename Type> struct FirebaseValue;
@@ -42,10 +57,10 @@ template<> std::string FirebaseAddress<FirebaseIntegerKey>(FirebaseIntegerKey ke
 		return "social/linkedin/sessionCount";
 	case FirebaseIntegerKey::SOCIAL_RECORD_YOUTUBE_COUNT:
 		return "social/youtube/sessionCount";
-	case FirebaseIntegerKey::GENERAL_APPLICATION_STARTS:
-		return "general/starts";
-	case FirebaseIntegerKey::GENERAL_CALIBRATION_ATTEMPTS:
-		return "general/calibrations";
+	case FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT:
+		return "general/startCount";
+	case FirebaseIntegerKey::GENERAL_RECALIBRATION_COUNT:
+		return "general/recalibrationCount";
 	default: return "";
 	}
 };
@@ -70,6 +85,10 @@ template<> std::string FirebaseAddress<FirebaseJSONKey>(FirebaseJSONKey key)
 		return "social/linkedin";
 	case FirebaseJSONKey::SOCIAL_RECORD_YOUTUBE:
 		return "social/youtube";
+	case FirebaseJSONKey::GENERAL_APPLICATION_START:
+		return "general/starts";
+	case FirebaseJSONKey::GENERAL_RECALIBRATION:
+		return "general/recalibrations";
 	default: return "";
 	}
 };
@@ -91,7 +110,7 @@ public:
 	// Getter of static instance
 	static FirebaseMailer& Instance()
 	{
-		static FirebaseMailer _instance;
+		static FirebaseMailer _instance; // threadsafe through C++11 standard
 		return _instance;
 	}
 
@@ -105,7 +124,7 @@ public:
 	void Pause() { _paused = true; }
 
 	// Available commands
-	void PushBack_Login		(std::string email, std::string password);
+	void PushBack_Login		(std::string email, std::string password, std::promise<std::string>* pPromise = nullptr); // promise delivers initial idToken value
 	void PushBack_Transform	(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise = nullptr); // promise delivers future database value
 	void PushBack_Maximum	(FirebaseIntegerKey key, int value, std::promise<int>* pPromise = nullptr); // promise delivers future database value
 	void PushBack_Put		(FirebaseIntegerKey key, int value, std::string subpath = "");
@@ -115,15 +134,24 @@ public:
 	void PushBack_Get		(FirebaseStringKey key, std::promise<std::string>* pPromise);
 	void PushBack_Get		(FirebaseJSONKey key, std::promise<nlohmann::json>* pPromise);
 
+	// Get id token (is empty before login or at failure)
+	std::string GetIdToken() const;
+
 private:
+
+	// Forward declaration
+	class IdToken;
 
 	// ### Delegate running in a thread ###
 	class FirebaseInterface
 	{
 	public:
 
+		// Constructor
+		FirebaseInterface(IdToken* pIdToken) : _pIdToken(pIdToken) {}
+
 		// Log in. Return whether successful
-		bool Login(std::string email, std::string password);
+		bool Login(std::string email, std::string password, std::promise<std::string>* pPromise);
 
 		// Simple put functionality. Replaces existing value if available, no ETag used
 		template<typename T>
@@ -150,6 +178,9 @@ private:
 			nlohmann::json value;
 		};
 
+		// Login via set email and password
+		bool Login();
+
 		// Relogin via refresh token. Returns whether successful
 		bool Relogin();
 
@@ -168,9 +199,11 @@ private:
 		const std::string _URL = setup::FIREBASE_URL;
 
 		// Members
-		std::string _idToken = ""; // short living token for identification (indicator for being logged in!)
+		IdToken* _pIdToken = nullptr; // set at construction
 		std::string _refreshToken = ""; // long living token for refreshing itself and idToken
 		std::string _uid = "0"; // user identifier (initialized with something that indicates "broken")
+		std::string _email = ""; // taken from login attempt
+		std::string _password = ""; // taken from login attempt (guess this is bad design to store password, but simplies everything a lot)
 	};
 	// #################################
 
@@ -181,19 +214,38 @@ private:
 	void PushBackCommand(std::shared_ptr<Command> spCommand);
 
 	// Private copy / assignment constructors
-	FirebaseMailer();
+	FirebaseMailer(); // threadsafe as only called by Instance()
 	FirebaseMailer(const FirebaseMailer&) {}
 	FirebaseMailer& operator = (const FirebaseMailer &) { return *this; }
 
 	// Pause indicator (if true, avoids pushing to command queue)
-	bool _paused = false;
+	std::atomic<bool> _paused = false; // atomic since could be accessed from multiple async threads
+
+	// #### THREAD-RELATED MEMBERS ####
+
+	// Id token may be readable from outside, but only set within FirebaseInterface thread
+	class IdToken
+	{
+	public:
+		void Set(std::string value)	{ std::lock_guard<std::mutex> lock(_lock); _value = value; }
+		void Reset()				{ std::lock_guard<std::mutex> lock(_lock); _value = ""; }
+		std::string Get() const		{ std::lock_guard<std::mutex> lock(_lock); return _value; }
+		bool IsSet() const			{ std::lock_guard<std::mutex> lock(_lock); return !_value.empty(); }
+
+	private:
+		std::string _value = "";
+		mutable std::mutex _lock; // mutable as can be even changed in const methods
+	};
 
 	// Threading (thread defined in constructor of FirebaseMailer)
-	std::mutex _mutex; // mutex for access of _commandQueue (thread grabs all commands and works on them)
+	std::mutex _commandMutex; // mutex for access of _commandQueue (thread grabs all commands and works on them)
 	std::condition_variable _conditionVariable; // used to wake up thread at available work
 	std::deque<std::shared_ptr<Command> > _commandQueue; // shared function pointers that are executed sequentially within thread
 	std::unique_ptr<std::thread> _upThread; // the thread itself
-	bool _shouldStop = false; // written by this, read by thread
+	std::atomic<bool> _shouldStop = false; // written by this, read by thread
+	IdToken _idToken; // short living token for identification (indicator for being logged in!)
+
+	// ################################
 };
 
 #endif // FIREBASEMAILER_H_

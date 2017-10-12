@@ -325,6 +325,14 @@ if(CLIENT_DEPLOYMENT)
 		COMMAND ${CMAKE_COMMAND} -E copy_directory
 		${CLIENT_CONTENT_PATH}
 		$<TARGET_FILE_DIR:${CEF_TARGET}>/content)
+		
+	# Copy Windows tile styltijg
+	add_custom_command(
+	TARGET ${CEF_TARGET} PRE_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+			${CMAKE_CURRENT_LIST_DIR}/Client.VisualElementsManifest.xml
+			$<TARGET_FILE_DIR:${CEF_TARGET}>/Client.VisualElementsManifest.xml)
+		
 endif(CLIENT_DEPLOYMENT)
 
 ### EYETRACKER PLUGINS #########################################################
@@ -340,6 +348,8 @@ if(${CLIENT_BUILD_OPEN_GAZE_PLUGIN})
 		MODULE
 		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
 		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerInfo.h
+		${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerGeometry.h
 		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
 		${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
 		${EYETRACKER_PLUGIN_DIRECTORY}/OpenGaze/OpenGazeImpl.cpp
@@ -370,6 +380,8 @@ if(${CLIENT_BUILD_SMI_IVIEWX_PLUGIN})
 			MODULE
 			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerInfo.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerGeometry.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
 			${EYETRACKER_PLUGIN_DIRECTORY}/SMIiViewX/SMIiViewXImpl.cpp
@@ -402,6 +414,8 @@ if(${CLIENT_BUILD_VI_MYGAZE_PLUGIN})
 			MODULE
 			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerInfo.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerGeometry.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
 			${EYETRACKER_PLUGIN_DIRECTORY}/VImyGaze/VImyGazeImpl.cpp
@@ -433,6 +447,8 @@ if(${CLIENT_BUILD_TOBII_EYEX_PLUGIN})
 			MODULE
 			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/Eyetracker.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerSample.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerInfo.h
+			${EYETRACKER_PLUGIN_DIRECTORY}/Interface/EyetrackerGeometry.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.h
 			${EYETRACKER_PLUGIN_DIRECTORY}/Common/EyetrackerData.cpp
 			${EYETRACKER_PLUGIN_DIRECTORY}/TobiiEyeX/TobiiEyeXImpl.cpp

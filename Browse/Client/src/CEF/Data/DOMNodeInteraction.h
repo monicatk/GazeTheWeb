@@ -82,6 +82,13 @@ public:
 		AddToList(list, args...);
 	}
 
+	void SendExecuteFunctionMessage(std::string func_name)
+	{
+		CefRefPtr<CefListValue> params = CefListValue::Create();
+		CefRefPtr<CefProcessMessage> msg = SetupExecuteFunctionMessage(func_name, params);
+		SendProcessMessageToRenderer(msg);
+	}
+
 	// Given a JS function name and a list of parameters, a process message is send to JS, which executes given
 	// node's function with the provided parameters
 	template<typename T, typename... Args>
@@ -93,6 +100,7 @@ public:
 		CefRefPtr<CefProcessMessage> msg = SetupExecuteFunctionMessage(func_name, params);
 		SendProcessMessageToRenderer(msg);
 	}
+
 	// TODO: Is this function really neccessary?
 	//template<typename T>
 	//void SendExecuteFunctionMessage(std::string func_name, T param)
@@ -183,6 +191,9 @@ public:
 	void SetVolume(float volume) { SendExecuteFunctionMessage("setVolume", volume); }
 	void ShowControls(bool show = true) { SendExecuteFunctionMessage("showControls", show); }
 	void SetFullscreen(bool fullscreen = true) { SendExecuteFunctionMessage("setFullscreen", fullscreen); }
+	void ToggleMuted() { SendExecuteFunctionMessage("toggleMuted"); }
+	void TogglePlayPause() { SendExecuteFunctionMessage("togglePlayPause"); }
+	void ChangeVolume(float delta) { SendExecuteFunctionMessage("changeVolume", delta); }
 };
 
 

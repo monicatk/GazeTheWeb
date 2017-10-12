@@ -8,6 +8,7 @@
 #define SETTINGS_H_
 
 #include "src/State/State.h"
+#include "plugins/Eyetracker/Interface/EyetrackerGeometry.h"
 
 class Settings : public State
 {
@@ -44,6 +45,9 @@ public:
 	// Get Firebase Password
 	std::string GetFirebasePassword() const { return _globalSetup.firebasePassword; }
 
+	// Get eyetracker geometry
+	EyetrackerGeometry GetEyetrackerGeometry() const { return _globalSetup.eyetrackerGeometry; }
+
 	// Store homepage URL
 	void StoreHomepage(std::string URL) { _webSetup.homepage = URL; ApplySettings(true); }
 
@@ -73,6 +77,7 @@ private:
         virtual void hit(eyegui::Layout* pLayout, std::string id) {}
         virtual void down(eyegui::Layout* pLayout, std::string id);
         virtual void up(eyegui::Layout* pLayout, std::string id);
+		virtual void selected(eyegui::Layout* pLayout, std::string id) {}
 
     private:
 
@@ -92,6 +97,7 @@ private:
 		eyegui::KeyboardLayout keyboardLayout = eyegui::KeyboardLayout::US_ENGLISH;
 		std::string firebaseEmail = "";
 		std::string firebasePassword = "";
+		EyetrackerGeometry eyetrackerGeometry;
     };
 
 	// Setup of web settings

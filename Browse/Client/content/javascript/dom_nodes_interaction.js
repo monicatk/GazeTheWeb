@@ -143,14 +143,16 @@ DOMOverflowElement.prototype.scroll = function(gazeX, gazeY, fixedIds){
 
 DOMVideo.prototype.setPlaying = function(playing)
 {
-	if (!playing)
+    if (playing)
+    {
+        this.node.play();
+        ConsolePrint("DOMVideo id=" + this.getId() + ": Now playing.");
+    }
+    else
 	{
 		this.node.pause();
 		ConsolePrint("DOMVideo id="+this.getId()+": Now paused.");
-		return;
 	}
-	this.node.play();
-	ConsolePrint("DOMVideo id="+this.getId()+": Now playing.");
 }
 
 DOMVideo.prototype.setMuted = function(muted)
@@ -221,6 +223,28 @@ DOMVideo.prototype.setFullscreen = function(fullscreen)
 	else
 		document.webkitExitFullscreen();		
 	ConsolePrint("DOMVideo id="+this.getId()+": Fullscreen is set to "+fullscreen);
+}
+
+DOMVideo.prototype.toggleMuted = function () {
+    this.node.muted = !this.node.muted;
+    ConsolePrint("DOMVideo id=" + this.getId() + ": muted=" + this.node.muted);
+}
+
+DOMVideo.prototype.togglePlayPause = function () {
+    if (this.node.paused) {
+        this.node.play();
+        ConsolePrint("DOMVideo id=" + this.getId() + ": Now playing.");
+    }
+    else {
+        this.node.pause();
+        ConsolePrint("DOMVideo id=" + this.getId() + ": Now paused.");
+    }
+}
+
+DOMVideo.prototype.changeVolume = function (delta) {
+    var value = this.node.volume;
+    value = Math.min(Math.max(0.0, value + delta), 1.0);
+    this.node.volume = value;
 }
 
 ConsolePrint("Successfully imported dom_nodes_interaction.js!");

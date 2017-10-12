@@ -39,13 +39,14 @@ int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 	return 1;
 }
 
-bool Connect()
+EyetrackerInfo Connect(EyetrackerGeometry geometry)
 {
-	// Initialize eyetracker
+	// Variables
+	EyetrackerInfo info;
 	int ret_connect = 0;
 
-	// Connect to myGaze server
-	ret_connect = iV_Connect(); // TODO BUG: never works, but it does for minimal sample code :(
+	// Connect to running myGaze server
+	ret_connect = iV_Connect();
 
 	// If server not running, try to start it
 	if (ret_connect != RET_SUCCESS)
@@ -66,9 +67,28 @@ bool Connect()
 	// Set sample callback
 	if (ret_connect == RET_SUCCESS)
 	{
+		// Connection successful
+		info.connected = true;
+
+		// Set geometry
+		char buf[256] = "GazeTheWeb";
+		GeometryStruct REDgeometry;
+		REDgeometry.geometryType = GeometryType::myGazeGeometry;
+		REDgeometry.stimX = geometry.monitorWidth;
+		REDgeometry.stimY = geometry.monitorHeight;
+		REDgeometry.inclAngle = geometry.mountingAngle;
+		REDgeometry.stimDistHeight = geometry.relativeDistanceHeight;
+		REDgeometry.stimDistDepth = geometry.relativeDistanceDepth;
+		strcpy_s(REDgeometry.setupName, "GazeTheWeb");
+		info.geometrySetupSuccessful = RET_SUCCESS == iV_SetREDGeometry(&REDgeometry);
+
+		// Enable low power pick up mode
+		iV_EnableLowPowerPickUpMode();
+
 		// Get system info
 		SystemInfoStruct systemInfoData;
-		iV_GetSystemInfo(&systemInfoData); // not used right now
+		iV_GetSystemInfo(&systemInfoData);
+		info.samplerate = systemInfoData.samplerate;
 
 		// Setup LabStreamingLayer
 		lsl::stream_info streamInfo(
@@ -92,8 +112,8 @@ bool Connect()
 		iV_SetSampleCallback(SampleCallbackFunction);
 	}
 
-	// Return success or failure
-	return (ret_connect == RET_SUCCESS);
+	// Return info structure
+	return info;
 }
 
 bool IsTracking()
@@ -128,7 +148,31 @@ void FetchSamples(SampleQueue& rspSamples)
 bool Calibrate()
 {
 	// Start calibration (setup does not work of licensing reasons)
-	return iV_Calibrate() == RET_SUCCESS;
+	bool success = iV_Calibrate() == RET_SUCCESS;
+
+	// Check calibration points
+	for (int i = 1; i <= 5; i++)
+	{
+		for (int j = 0; j < 3; j++) // three attempts per point
+		{
+			CalibrationPointQualityStruct left, right;
+			iV_GetCalibrationQuality(i, &left, &right);
+			if (
+				(left.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
+				|| (right.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
+				|| (left.qualityIndex < 0.5f && right.qualityIndex < 0.5f))
+			{
+				iV_RecalibrateOnePoint(i);
+			}
+			else
+			{
+				break; // break the loop of this point
+			}
+		}
+	}
+
+	// Return whether successful
+	return success;
 }
 
 void ContinueLabStream()

@@ -3,7 +3,6 @@
 // Author: Daniel Mueller (muellerd@uni-koblenz.de)
 //============================================================================
 
-
 // Helper function for console output
 function ConsolePrint(msg)
 {

@@ -15,6 +15,8 @@
 #include "src/Input/Filters/Filter.h"
 #include "src/Input/Input.h"
 #include "plugins/Eyetracker/Interface/EyetrackerSample.h"
+#include "plugins/Eyetracker/Interface/EyetrackerInfo.h"
+#include "plugins/Eyetracker/Interface/EyetrackerGeometry.h"
 #include <memory>
 #include <vector>
 #include <thread>
@@ -34,7 +36,7 @@ class EyeInput
 public:
 
     // Constructor, starts thread to establish eye tracker connection. Callback called from a different thread!
-    EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface);
+    EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface, EyetrackerGeometry geometry);
 
     // Destructor
     virtual ~EyeInput();
@@ -90,10 +92,10 @@ private:
 
 	// Handle to pause lab stream
 	PAUSE_LAB_STREAM _procPauseLabStream = NULL;
-#endif
+#endif // _WIN32
 
-	// Remember whether connection has been established
-	bool _connected = false; // indicator whether thread was successfully finished
+	// Info about eye tracking device
+	EyetrackerInfo _info; // also indicator for successful connection
 	
 	// ###################################
 

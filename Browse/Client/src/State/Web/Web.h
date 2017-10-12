@@ -75,7 +75,7 @@ public:
 	void SetDataTransfer(bool active);
 
 	// Notify about click
-	void NotifyClick(std::string tag, std::string id);
+	void NotifyClick(std::string tag, std::string id, float x, float y);
 
     // #############
     // ### STATE ###
@@ -208,6 +208,7 @@ private:
         virtual void hit(eyegui::Layout* pLayout, std::string id) {}
         virtual void down(eyegui::Layout* pLayout, std::string id);
 		virtual void up(eyegui::Layout* pLayout, std::string id);
+		virtual void selected(eyegui::Layout* pLayout, std::string id) {}
 
     private:
 

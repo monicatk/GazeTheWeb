@@ -40,7 +40,7 @@ Settings::Settings(Master* pMaster) : State(pMaster)
 	eyegui::registerButtonListener(_pSettingsLayout, "close", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pSettingsLayout, "general", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pSettingsLayout, "info", _spSettingsButtonListener);
-	eyegui::registerButtonListener(_pSettingsLayout, "exit", _spSettingsButtonListener);
+	eyegui::registerButtonListener(_pSettingsLayout, "shutdown", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pGeneralLayout, "toggle_descriptions", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pGeneralLayout, "toggle_gaze_visualization", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pGeneralLayout, "back", _spSettingsButtonListener);
@@ -145,6 +145,15 @@ bool Settings::SaveSettings() const
 	pFirebase->SetAttribute("password", _globalSetup.firebasePassword.c_str());
 	pGlobal->InsertFirstChild(pFirebase);
 
+	// Eyetracker geometry
+	tinyxml2::XMLElement* pGeometry = doc.NewElement("eyetrackergeometry");
+	pGeometry->SetAttribute("monitorWidth", _globalSetup.eyetrackerGeometry.monitorWidth);
+	pGeometry->SetAttribute("monitorHeight", _globalSetup.eyetrackerGeometry.monitorHeight);
+	pGeometry->SetAttribute("mountingAngle", _globalSetup.eyetrackerGeometry.mountingAngle);
+	pGeometry->SetAttribute("relativeDistanceHeight", _globalSetup.eyetrackerGeometry.relativeDistanceHeight);
+	pGeometry->SetAttribute("relativeDistanceDepth", _globalSetup.eyetrackerGeometry.relativeDistanceDepth);
+	pGlobal->InsertFirstChild(pGeometry);
+
 	// Create environment for web setup
 	tinyxml2::XMLNode* pWeb = doc.NewElement("web");
 	pRoot->InsertAfterChild(pGlobal, pWeb);
@@ -238,6 +247,17 @@ bool Settings::LoadSettings()
 		_globalSetup.firebasePassword = pFirebase->Attribute("password");
 	}
 
+	// Eyetracker geometry
+	tinyxml2::XMLElement* pGeometry = pGlobal->FirstChildElement("eyetrackergeometry");
+	if (pGeometry != NULL)
+	{
+		_globalSetup.eyetrackerGeometry.monitorWidth = pGeometry->IntAttribute("monitorWidth");
+		_globalSetup.eyetrackerGeometry.monitorHeight = pGeometry->IntAttribute("monitorHeight");
+		_globalSetup.eyetrackerGeometry.mountingAngle = pGeometry->IntAttribute("mountingAngle");
+		_globalSetup.eyetrackerGeometry.relativeDistanceHeight = pGeometry->IntAttribute("relativeDistanceHeight");
+		_globalSetup.eyetrackerGeometry.relativeDistanceDepth = pGeometry->IntAttribute("relativeDistanceDepth");
+	}
+
 	// Fetch web setup
 	tinyxml2::XMLNode* pWeb = pGlobal->NextSibling();
 	if (pWeb == NULL) { return false; }
@@ -277,9 +297,9 @@ void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string
 		{
 			eyegui::setVisibilityOfLayout(_pSettings->_pInfoLayout, true, true, true);
 		}
-		else if (id == "exit")
+		else if (id == "shutdown")
 		{
-			_pSettings->_pMaster->Exit();
+			_pSettings->_pMaster->Exit(true);
 		}
 	}
 	else if (pLayout == _pSettings->_pGeneralLayout)

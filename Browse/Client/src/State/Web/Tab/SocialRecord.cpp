@@ -4,13 +4,12 @@
 //============================================================================
 
 #include "SocialRecord.h"
-#include <iomanip>
-#include <ctime>
+#include "src/Utils/Helper.h"
 #include <sstream>
 
 using json = nlohmann::json;
 
-SocialRecord::SocialRecord(std::string domain, SocialPlatform platform) : _domain(domain), _platform(platform) {}
+SocialRecord::SocialRecord(std::string domain, SocialPlatform platform, int startIndex) : _domain(domain), _platform(platform), _startIndex(startIndex) {}
 
 SocialRecord::~SocialRecord() {}
 
@@ -90,14 +89,14 @@ void SocialRecord::AddScrollingDelta(float delta)
 	if (_writeable) { _pages.back().scrollAmount += delta; }
 }
 
-void SocialRecord::AddClick(std::string tag, std::string id)
+void SocialRecord::AddClick(std::string tag, std::string id, float x, float y)
 {
-	if (_writeable) { _pages.back().clicks.push_back(Click(tag, id)); }
+	if (_writeable) { _pages.back().clicks.push_back(Click(tag, id, x, y, std::chrono::duration<double>(std::chrono::system_clock::now() - _startTime).count())); }
 }
 
-void SocialRecord::AddTextInput(std::string id, int charCount)
+void SocialRecord::AddTextInput(std::string id, int charCount, int charDistance, float x, float y, float duration)
 {
-	if (_writeable) { _pages.back().textInputs.push_back(TextInput(id, charCount)); }
+	if (_writeable) { _pages.back().textInputs.push_back(TextInput(id, charCount, charDistance, x, y, std::chrono::duration<double>(std::chrono::system_clock::now() - _startTime).count(), duration)); }
 }
 
 void SocialRecord::AddPage(std::string URL)
@@ -127,6 +126,7 @@ nlohmann::json SocialRecord::ToJSON() const
 		{ "durationInForeground", _totalDurationInForeground },
 		{ "durationUserActive", _totalDurationUserActive },
 		{ "pageCount", _pages.size() },
+		{ "startIndex" , _startIndex}
 	};
 
 	// Add pages to JSON structure
@@ -150,7 +150,9 @@ nlohmann::json SocialRecord::ToJSON() const
 			JSON["pages"].back()["clicks"].push_back(
 			{
 				{ "tag", rClick.tag },
-				{ "id", rClick.id }
+				{ "id", rClick.id },
+				{ "coord", std::to_string(rClick.x) + ", " + std::to_string(rClick.y) },
+				{ "time", rClick.time }
 			}
 			);
 		}
@@ -161,7 +163,11 @@ nlohmann::json SocialRecord::ToJSON() const
 			JSON["pages"].back()["textInputs"].push_back(
 			{
 				{ "id", rTextInput.id },
-				{ "charCount", rTextInput.charCount }
+				{ "charCount", rTextInput.charCount },
+				{ "charDistance", rTextInput.charDistance },
+				{ "coord", std::to_string(rTextInput.x) + ", " + std::to_string(rTextInput.y) },
+				{ "time", rTextInput.time },
+				{ "duration", rTextInput.duration }
 			}
 			);
 		}
@@ -169,15 +175,6 @@ nlohmann::json SocialRecord::ToJSON() const
 
 	// Return result
 	return JSON;
-}
-
-std::string SocialRecord::GetDate() const
-{
-	auto t = std::time(nullptr);
-	auto tm = *std::localtime(&t);
-	std::ostringstream oss;
-	oss << std::put_time(&tm, DATE_FORMAT.c_str());
-	return oss.str();
 }
 
 std::string SocialRecord::PrecedeZeros(const std::string& rInput, const int digitCount) const

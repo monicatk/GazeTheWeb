@@ -9,13 +9,34 @@
 #include "src/CEF/Handler.h"
 #include "src/CEF/Renderer.h"
 #include "src/CEF/DevToolsHandler.h"
+#include "src/Utils/Logger.h"
+#include "src/Arguments.h"
 #include "include/cef_browser.h"
 #include "include/cef_command_line.h"
 #include "include/wrapper/cef_helpers.h"
 #include <string>
 
 void MainCefApp::OnBeforeCommandLineProcessing(const CefString& process_type, CefRefPtr< CefCommandLine > command_line)
-{
+{	
+	// Parse custom arguments
+	std::vector<CefString> arguments;
+	command_line->GetArgv(arguments);
+	for (const auto& rString : arguments)
+	{
+		if (rString.compare("--localization=english") == 0)
+		{
+			Argument::localization = Argument::Localization::English;
+		}
+		else if (rString.compare("--localization=greek") == 0)
+		{
+			Argument::localization = Argument::Localization::Greek;
+		}
+		else if (rString.compare("--localization=hebrew") == 0)
+		{
+			Argument::localization = Argument::Localization::Hebrew;
+		} // no else!
+	}
+
 	// Enable WebGL part 2 (other is in CefMediator.cpp) (or not disable is better description)
 	if (!setup::ENABLE_WEBGL)
 	{

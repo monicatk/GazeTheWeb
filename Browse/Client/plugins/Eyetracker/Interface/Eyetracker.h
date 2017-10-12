@@ -14,6 +14,8 @@
 #endif  
 
 #include "plugins/Eyetracker/Interface/EyetrackerSample.h"
+#include "plugins/Eyetracker/Interface/EyetrackerInfo.h"
+#include "plugins/Eyetracker/Interface/EyetrackerGeometry.h"
 
 // Export C interface (resolved overloading etc)
 #ifdef __cplusplus
@@ -21,7 +23,7 @@ extern "C" {
 #endif
 
 	// Connect eyetracker, returns whether succesfull
-	DLL_API bool Connect();
+	DLL_API EyetrackerInfo Connect(EyetrackerGeometry geometry);
 
 	// Check whether eyetracker is working (regardless of user presence)
 	DLL_API bool IsTracking();

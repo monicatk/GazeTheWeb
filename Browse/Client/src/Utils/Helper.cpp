@@ -4,10 +4,12 @@
 //============================================================================
 
 #include "Helper.h"
+#include "src/Setup.h"
 #include <sstream>
 #include <iomanip>
 #include <cmath>
 #include <vector>
+#include <ctime>
 
 std::string RGBAToHexString(glm::vec4 color)
 {
@@ -202,4 +204,13 @@ std::vector<std::string> SplitBySeparator(std::string str, char separator)
 
 	// Return output
 	return output;
+}
+
+std::string GetDate()
+{
+	auto t = std::time(nullptr);
+	auto tm = *std::localtime(&t);
+	std::ostringstream oss;
+	oss << std::put_time(&tm, setup::DATE_FORMAT.c_str());
+	return oss.str();
 }

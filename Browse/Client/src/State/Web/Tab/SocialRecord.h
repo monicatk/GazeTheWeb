@@ -72,7 +72,7 @@ public:
 	}
 
 	// Constructor
-	SocialRecord(std::string domain, SocialPlatform platform);
+	SocialRecord(std::string domain, SocialPlatform platform, int startIndex);
 
 	// Virtual destructor
 	virtual ~SocialRecord();
@@ -96,10 +96,10 @@ public:
 	void AddScrollingDelta(float delta);
 
 	// Add click
-	void AddClick(std::string tag, std::string id);
+	void AddClick(std::string tag, std::string id, float x, float y);
 
 	// Add text input
-	void AddTextInput(std::string id, int charCount);
+	void AddTextInput(std::string id, int charCount, int charDistance, float x, float y, float duration);
 
 	// Add page
 	void AddPage(std::string URL);
@@ -119,22 +119,30 @@ private:
 	struct Click
 	{
 		// Constructor
-		Click(std::string tag, std::string id) : tag(tag), id(id) {}
+		Click(std::string tag, std::string id, float x, float y, double time) : tag(tag), id(id), x(x), y(y), time(time) {}
 
 		// Fields
 		const std::string tag;
 		const std::string id;
+		const float x;
+		const float y;
+		const double time;
 	};
 
 	// Struct for text input record
 	struct TextInput
 	{
 		// Constructor
-		TextInput(std::string id, int charCount) : id(id), charCount(charCount) {}
+		TextInput(std::string id, int charCount, int charDistance, float x, float y, double time, float duration) : id(id), charCount(charCount), charDistance(charDistance), x(x), y(y), time(time), duration(duration) {}
 
 		// Fields
 		const std::string id;
 		const int charCount = 0;
+		const int charDistance = 0;
+		const float x;
+		const float y;
+		const double time;
+		const float duration;
 	};
 
 	// Struct for page record
@@ -153,14 +161,10 @@ private:
 		std::vector<TextInput> textInputs;
 	};
 
-	// Get date
-	std::string GetDate() const;
-
 	// Get numbering with preceding zeros
 	std::string PrecedeZeros(const std::string& rInput, const int digitCount) const;
 
 	// Members
-	const std::string DATE_FORMAT = "%d-%m-%Y %H-%M-%S";
 	const SocialPlatform _platform = SocialPlatform::Unknown;
 	const std::string _domain;
 	bool _writeable = false;
@@ -172,7 +176,7 @@ private:
 	double _totalDurationInForeground = 0.0;
 	double _totalDurationUserActive = 0.0; // and tab in foreground
 	std::vector<Page> _pages; // should have at least one element and current one is at back
-	
+	int _startIndex = -1;
 };
 
 #endif // SOCIALRECORD_H_

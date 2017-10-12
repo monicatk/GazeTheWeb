@@ -40,8 +40,8 @@ public:
     // Destructor
     virtual ~Master();
 
-    // Run the master which updates CEF
-    void Run();
+    // Run the master which updates CEF. Returns whether computer should shut down
+    bool Run();
 
     // Getter for window width and height
     int GetWindowWidth() const { return _width; }
@@ -54,7 +54,7 @@ public:
 	bool IsPaused() const { return _paused; }
 
     // Exit
-    void Exit();
+    void Exit(bool shutdown = false);
 
     // Get id of dictionary
     unsigned int GetDictionary() const { return _dictonaryId; }
@@ -80,7 +80,7 @@ public:
 	// Get pointer to interface of custom transformation of eye input
 	std::weak_ptr<CustomTransformationInterface> GetCustomTransformationInterface();
 
-	// Push back async job
+	// Push back async job. Only provide threadsafe calls to the job!!!
 	void PushBackAsyncJob(std::function<bool()> job);
 
     // ### EYEGUI DELEGATION ###
@@ -105,7 +105,7 @@ public:
 	}
 
 	// Notify about click
-	void NotifyClick(std::string tag, std::string id);
+	void NotifyClick(std::string tag, std::string id, float x, float y);
 
 	// ### ACCESS BY SETTINGS ###
 
@@ -128,6 +128,9 @@ public:
 		// Tell it eyeGUI
 		eyegui::setKeyboardLayout(_pGUI, keyboardLayout);
 	}
+
+	// Get start index
+	int GetStartIndex() const { return _startIndex; }
 
 	// ### STORING OF SETTINGS ###
 
@@ -175,6 +178,7 @@ private:
         virtual void hit(eyegui::Layout* pLayout, std::string id) {}
         virtual void down(eyegui::Layout* pLayout, std::string id);
         virtual void up(eyegui::Layout* pLayout, std::string id);
+		virtual void selected(eyegui::Layout* pLayout, std::string id) {}
 
     private:
 
@@ -349,6 +353,12 @@ private:
 
 	// Asyncronous calls, e.g. persist Firebase entries
 	std::vector<std::future<bool> > _asyncJobs; // abuse async calls since it is easier to determine whether finished or not
+
+	// Start index (indicates how often user has started the application)
+	int _startIndex = -1;
+
+	// Indicator whether computer should shut down at exit
+	bool _shouldShutdownAtExit = false;
 };
 
 #endif // MASTER_H_

@@ -94,8 +94,8 @@ tab_overlay_panel : panel
 
 tab_debug : default
 {
-	BackgroundColor = 0x000000FF
-	FontColor = 0x00FF00FF
+	BackgroundColor = 0x00000060
+	FontColor = 0x00FF00A0
 }
 
 pause : default
@@ -104,17 +104,17 @@ pause : default
 	ButtonHitSound=sounds/GameAudio/PingBing.ogg
 }
 
-pause_background
+pause_background : default
 {
 	BackgroundColor = 0x00000000
 }
 
-super_calibration_background
+super_calibration_background: default
 {
 	BackgroundColor = 0x000000DD
 }
 
-recalibration
+recalibration : default
 {
 	Color = 0xD64400FF
 	ButtonThresholdIncreaseDuration = 3
@@ -132,7 +132,14 @@ notification : default
 	BackgroundColor = 0xFF6000FF
 }
 
-dangerous
+dangerous : default
 {
 	ButtonThresholdIncreaseDuration = 2
+}
+
+dashboard : default
+{
+	Color = 0x1e2021FF
+	ButtonThresholdIncreaseDuration = 2
+	ThresholdColor = 0xFFFFFFA0
 }
