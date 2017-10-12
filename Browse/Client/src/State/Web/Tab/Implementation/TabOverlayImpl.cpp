@@ -96,6 +96,7 @@ void Tab::UnregisterButtonListenerInOverlay(std::string id)
 {
 	_overlayButtonDownCallbacks.erase(id);
 	_overlayButtonUpCallbacks.erase(id);
+	_overlayButtonSelectedCallbacks.erase(id);
 }
 
 void Tab::ClassifyButton(std::string id, bool accept)
