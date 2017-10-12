@@ -145,6 +145,15 @@ bool Settings::SaveSettings() const
 	pFirebase->SetAttribute("password", _globalSetup.firebasePassword.c_str());
 	pGlobal->InsertFirstChild(pFirebase);
 
+	// Eyetracker geometry
+	tinyxml2::XMLElement* pGeometry = doc.NewElement("eyetrackergeometry");
+	pGeometry->SetAttribute("monitorWidth", _globalSetup.eyetrackerGeometry.monitorWidth);
+	pGeometry->SetAttribute("monitorHeight", _globalSetup.eyetrackerGeometry.monitorHeight);
+	pGeometry->SetAttribute("mountingAngle", _globalSetup.eyetrackerGeometry.mountingAngle);
+	pGeometry->SetAttribute("relativeDistanceHeight", _globalSetup.eyetrackerGeometry.relativeDistanceHeight);
+	pGeometry->SetAttribute("relativeDistanceDepth", _globalSetup.eyetrackerGeometry.relativeDistanceDepth);
+	pGlobal->InsertFirstChild(pGeometry);
+
 	// Create environment for web setup
 	tinyxml2::XMLNode* pWeb = doc.NewElement("web");
 	pRoot->InsertAfterChild(pGlobal, pWeb);
@@ -236,6 +245,17 @@ bool Settings::LoadSettings()
 	{
 		_globalSetup.firebaseEmail = pFirebase->Attribute("email");
 		_globalSetup.firebasePassword = pFirebase->Attribute("password");
+	}
+
+	// Eyetracker geometry
+	tinyxml2::XMLElement* pGeometry = pGlobal->FirstChildElement("eyetrackergeometry");
+	if (pGeometry != NULL)
+	{
+		_globalSetup.eyetrackerGeometry.monitorWidth = pGeometry->IntAttribute("monitorWidth");
+		_globalSetup.eyetrackerGeometry.monitorHeight = pGeometry->IntAttribute("monitorHeight");
+		_globalSetup.eyetrackerGeometry.mountingAngle = pGeometry->IntAttribute("mountingAngle");
+		_globalSetup.eyetrackerGeometry.relativeDistanceHeight = pGeometry->IntAttribute("relativeDistanceHeight");
+		_globalSetup.eyetrackerGeometry.relativeDistanceDepth = pGeometry->IntAttribute("relativeDistanceDepth");
 	}
 
 	// Fetch web setup

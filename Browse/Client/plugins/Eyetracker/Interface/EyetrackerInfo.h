@@ -10,8 +10,9 @@
 struct EyetrackerInfo
 {
 	// Fields
-	bool connected;
-	int samplerate;
+	bool connected = false;
+	int samplerate = -1;
+	bool geometrySetupSuccessful = false;
 };
 
 #endif EYETRACKERINFO_H_

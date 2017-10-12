@@ -387,7 +387,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
     _cursorFrameIndex = eyegui::addFloatingFrameWithBrick(_pCursorLayout, "bricks/Cursor.beyegui", 0, 0, 0, 0, true, false); // will be moved and sized in loop
 
     // ### EYE INPUT ###
-	_upEyeInput = std::unique_ptr<EyeInput>(new EyeInput(this));
+	_upEyeInput = std::unique_ptr<EyeInput>(new EyeInput(this, _upSettings->GetEyetrackerGeometry()));
 
 	// ### VOICE INPUT ###
 	_upVoiceInput = std::unique_ptr<VoiceInput>(new VoiceInput(_pGUI));

@@ -43,8 +43,6 @@ EyetrackerInfo Connect(EyetrackerGeometry geometry)
 {
 	// Variables
 	EyetrackerInfo info;
-	info.connected = false;
-	info.samplerate = -1;
 	int ret_connect = 0;
 
 	// Connect to running myGaze server
@@ -81,8 +79,8 @@ EyetrackerInfo Connect(EyetrackerGeometry geometry)
 		REDgeometry.inclAngle = geometry.mountingAngle;
 		REDgeometry.stimDistHeight = geometry.relativeDistanceHeight;
 		REDgeometry.stimDistDepth = geometry.relativeDistanceDepth;
-		strcpy(REDgeometry.setupName, "GazeTheWeb");
-		iV_SetREDGeometry(&REDgeometry);
+		strcpy_s(REDgeometry.setupName, "GazeTheWeb");
+		info.geometrySetupSuccessful = RET_SUCCESS == iV_SetREDGeometry(&REDgeometry);
 
 		// Enable low power pick up mode
 		iV_EnableLowPowerPickUpMode();

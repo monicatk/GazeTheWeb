@@ -145,8 +145,6 @@ bool InitializeGlobalInteractorSnapshot(TX_CONTEXTHANDLE hContext)
 EyetrackerInfo Connect(EyetrackerGeometry geometry)
 {
 	EyetrackerInfo info;
-	info.connected = false;
-	info.samplerate = -1;
 
 	// Check for EyeX engine
 	TX_EYEXAVAILABILITY availability;

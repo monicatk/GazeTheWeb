@@ -10,7 +10,7 @@
 #include <cmath>
 #include <functional>
 
-EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface) :
+EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface, EyetrackerGeometry geometry) :
 	_spFilter(std::shared_ptr<Filter>(
 		new WeightedAverageFilter(
 			setup::FILTER_KERNEL,
@@ -18,7 +18,7 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface) :
 			setup::FILTER_USE_OUTLIER_REMOVAL)))
 {
 	// Create thread for connection to eye tracker
-	_upConnectionThread = std::unique_ptr<std::thread>(new std::thread([this, _pMasterThreadsafeInterface]()
+	_upConnectionThread = std::unique_ptr<std::thread>(new std::thread([this, _pMasterThreadsafeInterface, geometry]()
 	{
 #ifdef _WIN32
 
@@ -63,20 +63,24 @@ EyeInput::EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface) :
 				// Check whether procedures could be loaded
 				if (procConnect != NULL && _procFetchGazeSamples != NULL && _procIsTracking != NULL && _procCalibrate != NULL)
 				{
+					/*
 					EyetrackerGeometry geometry;
 					geometry.monitorWidth = 276;
 					geometry.monitorHeight = 155;
 					geometry.mountingAngle = 20;
 					geometry.relativeDistanceDepth = 18;
 					geometry.relativeDistanceHeight = -5;
+					*/
 					EyetrackerInfo info = procConnect(geometry);
 					if (info.connected)
 					{
 						LogInfo("EyeInput: Connecting eye tracker successful.");
+						LogDebug("EyeInput: Eyetracker geometry setup feedback is ", info.geometrySetupSuccessful);
 
 						// Set member about connected to true
 						_connected = true; // only write access to _connected
 						_info = info;
+
 						return; // direct return from thread
 					}
 					else

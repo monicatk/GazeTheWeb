@@ -50,8 +50,6 @@ EyetrackerInfo Connect(EyetrackerGeometry geometry)
 
 	// Variables
 	EyetrackerInfo info;
-	info.connected = false;
-	info.samplerate = -1;
 	int ret_connect = 0;
 
 	// Connect to iViewX server

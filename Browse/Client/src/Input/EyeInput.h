@@ -36,7 +36,7 @@ class EyeInput
 public:
 
     // Constructor, starts thread to establish eye tracker connection. Callback called from a different thread!
-    EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface);
+    EyeInput(MasterThreadsafeInterface* _pMasterThreadsafeInterface, EyetrackerGeometry geometry);
 
     // Destructor
     virtual ~EyeInput();
