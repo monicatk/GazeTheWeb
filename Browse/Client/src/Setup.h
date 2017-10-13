@@ -55,6 +55,7 @@ namespace setup
 	static const FilterKernel FILTER_KERNEL = FilterKernel::GAUSSIAN;
 	static const int	FILTER_WINDOW_SIZE = 30;
 	static const bool	FILTER_USE_OUTLIER_REMOVAL = true;
+	static const bool	USE_EYEGUI_DRIFT_MAP = true && !DEMO_MODE;
 
 	// Distortion
 	static const bool	EYEINPUT_DISTORT_GAZE = false && !DEPLOYMENT;

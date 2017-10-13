@@ -258,7 +258,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	eyegui::terminateGUI(pSplashGUI);
 
     // Construct GUI
-	guiBuilder.useDriftMap = true;
+	guiBuilder.useDriftMap = setup::USE_EYEGUI_DRIFT_MAP;
     _pGUI = guiBuilder.construct(); // standard GUI object used everywhere
 	guiBuilder.useDriftMap = false;
     _pSuperGUI = guiBuilder.construct(); // GUI which is rendered on top of everything else
