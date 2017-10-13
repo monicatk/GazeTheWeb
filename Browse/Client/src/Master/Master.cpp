@@ -1071,14 +1071,27 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		else if (id == "recalibration")
 		{
 			// Perform calibration
-			bool success = _pMaster->_upEyeInput->Calibrate();
-			if (success)
+			bool success = false;
+			CalibrationResult result = _pMaster->_upEyeInput->Calibrate();
+			switch (result)
 			{
+			case OK:
 				_pMaster->PushNotificationByKey("notification:calibration_success", MasterNotificationInterface::Type::SUCCESS, false);
-			}
-			else
-			{
+				success = true;
+				break;
+			case BAD:
+
+				// TODO: provide hints how to improve calibration
+				_pMaster->PushNotificationByKey("notification:calibration_bad", MasterNotificationInterface::Type::WARNING, false);
+				success = true;
+
+				break;
+			case FAILED:
 				_pMaster->PushNotificationByKey("notification:calibration_failure", MasterNotificationInterface::Type::WARNING, false);
+				break;
+			case NOT_SUPPORTED:
+				_pMaster->PushNotificationByKey("notification:calibration_failure", MasterNotificationInterface::Type::WARNING, false);
+				break;
 			}
 
 			// Store this recalibration in Firebase

@@ -87,6 +87,7 @@ notification:eye_tracker_status:connected=Ο Eye tracker συνδέθηκε
 notification:eye_tracker_status:disconnected=Ο Eye tracker αποσυνδέθηκε
 notification:calibration_success=Ρύθμιση επιτυχής
 notification:calibration_failure=Η ρύθμιση απέτυχε
+notification:calibration_bad=TODO
 notification:data_transfer_continued=Επανενεργοποίηση μεταφ. δεδομένων
 notification:data_transfer_paused=Παύση μεταφ. δεδομένων
 super_calibration:continue=Συνέχεια

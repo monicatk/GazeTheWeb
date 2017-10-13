@@ -206,10 +206,10 @@ void FetchSamples(SampleQueue& rspSamples)
 	eyetracker_global::FetchSamples(rspSamples);
 }
 
-bool Calibrate()
+CalibrationResult Calibrate()
 {
 	// Not supported
-	return false;
+	return CalibrationResult::FAILED;
 }
 
 void ContinueLabStream()

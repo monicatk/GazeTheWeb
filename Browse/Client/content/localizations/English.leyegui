@@ -87,6 +87,7 @@ notification:eye_tracker_status:connected=Eye Tracking Driver Connected
 notification:eye_tracker_status:disconnected=Eye Tracking Driver Disconnected
 notification:calibration_success=Calibration Successful
 notification:calibration_failure=Calibration Failed
+notification:calibration_bad=Bad Calibration
 notification:data_transfer_continued=Data Transfer Continued
 notification:data_transfer_paused=Data Transfer Paused
 super_calibration:continue=Continue
