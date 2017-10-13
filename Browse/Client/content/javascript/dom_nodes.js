@@ -325,9 +325,6 @@ function DOMLink(node, cef_hidden=false)
     var id = window.domLinks.indexOf(this);
     DOMNode.call(this, node, id, 1, cef_hidden);
 
-    this.text = "";
-    this.url = "";
-
     // Search image which might be displayed instead of link text
     var imgs = node.getElementsByTagName("IMG");
     if(imgs.length > 0)
@@ -346,24 +343,12 @@ DOMLink.prototype.updateRects = function(){
 
 // DOMAttribute Text
 DOMLink.prototype.getText = function(){
-    return this.text;
-}
-DOMLink.prototype.setText = function(text){
-    var informCEF = (this.text !== text);
-    this.text = text;
-    if(informCEF)
-        SendAttributeChangesToCEF("Text", this);
+    return this.node.textContent;
 }
 
 // DOMAttribute Url
 DOMLink.prototype.getUrl = function(){
-    return this.url;
-}
-DOMLink.prototype.setUrl = function(url){
-    var informCEF = (this.url !== url);
-    this.url = url;
-    if(informCEF)
-        SendAttributeChangesToCEF("Url", this);
+    return this.node.href;
 }
 
 
