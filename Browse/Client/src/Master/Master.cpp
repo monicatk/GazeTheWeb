@@ -245,6 +245,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	guiBuilder.fontFilepath = "fonts/dejavu-sans/ttf/DejaVuSans.ttf";
 	guiBuilder.localizationFilepath = localizationFilepath;
 	guiBuilder.fontTallSize = 0.07f;
+	guiBuilder.useDriftMap = false;
 
 	// Create splash screen GUI, render it one time and throw it away
 	eyegui::GUI* pSplashGUI = guiBuilder.construct();
@@ -257,7 +258,9 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	eyegui::terminateGUI(pSplashGUI);
 
     // Construct GUI
+	guiBuilder.useDriftMap = true;
     _pGUI = guiBuilder.construct(); // standard GUI object used everywhere
+	guiBuilder.useDriftMap = false;
     _pSuperGUI = guiBuilder.construct(); // GUI which is rendered on top of everything else
     LogInfo("..done.");
 
@@ -991,7 +994,7 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
 			case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
-			case GLFW_KEY_C: { _upEyeInput->Calibrate();  break; }
+			case GLFW_KEY_C: { _upEyeInput->Calibrate();  eyegui::resetDriftMap(_pGUI); } // calibrate and reset drift map
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
 			case GLFW_KEY_6: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::MAGNIFICATION); break; }
 			case GLFW_KEY_7: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::FUTURE); break; }
@@ -1077,12 +1080,14 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			{
 			case OK:
 				_pMaster->PushNotificationByKey("notification:calibration_success", MasterNotificationInterface::Type::SUCCESS, false);
+				eyegui::resetDriftMap(_pMaster->_pGUI); // reset drift map of GUI
 				success = true;
 				break;
 			case BAD:
 
 				// TODO: provide hints how to improve calibration
 				_pMaster->PushNotificationByKey("notification:calibration_bad", MasterNotificationInterface::Type::WARNING, false);
+				eyegui::resetDriftMap(_pMaster->_pGUI); // reset drift map of GUI
 				success = true;
 
 				break;

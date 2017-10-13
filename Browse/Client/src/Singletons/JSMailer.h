@@ -40,7 +40,7 @@ private:
 	// Private copy / assignment constructors
 	JSMailer() {}
 	JSMailer(const JSMailer&) {}
-        JSMailer& operator = (const JSMailer &) { return *this; }
+    JSMailer& operator = (const JSMailer &) { return *this; }
 };
 
 #endif // JSMAILER_H_
