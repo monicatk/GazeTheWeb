@@ -739,7 +739,7 @@ std::vector<Tab::DOMLinkInfo> Tab::RetrieveDOMLinkInfos() const
 			std::string text = rLink.second->GetText();
 			if (!text.empty()) // there is some text
 			{
-				result.push_back(Tab::DOMLinkInfo(rLink.second->GetRects().at(0), text));
+				result.push_back(Tab::DOMLinkInfo(rLink.second->GetRects(), text));
 			}
 		}
 	}
