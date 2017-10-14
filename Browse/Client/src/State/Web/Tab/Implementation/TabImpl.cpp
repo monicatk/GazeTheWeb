@@ -692,6 +692,42 @@ void Tab::NotifyClick(std::string tag, std::string id, float x, float y)
 	}
 }
 
+void Tab::ScheduleTextInputTrigger(int id)
+{
+	if (!_pipelineActive) // TODO: would be better to ask whether trigger is active
+	{
+		auto iter = _textInputTriggers.find(id);
+		if (iter != _textInputTriggers.end())
+		{
+			iter->second->Schedule();
+		}
+	}
+}
+
+void Tab::ScheduleSelectFieldTrigger(int id)
+{
+	if (!_pipelineActive) // TODO: would be better to ask whether trigger is active
+	{
+		auto iter = _selectFieldTriggers.find(id);
+		if (iter != _selectFieldTriggers.end())
+		{
+			iter->second->Schedule();
+		}
+	}
+}
+
+void Tab::ScheduleVideoModeTrigger(int id)
+{
+	if (!_pipelineActive) // TODO: would be better to ask whether trigger is active
+	{
+		auto iter = _videoModeTriggers.find(id);
+		if (iter != _videoModeTriggers.end())
+		{
+			iter->second->Schedule();
+		}
+	}
+}
+
 void Tab::SetPipelineActivity(bool active)
 {
 	if (active)

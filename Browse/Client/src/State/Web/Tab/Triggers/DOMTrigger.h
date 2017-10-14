@@ -38,6 +38,9 @@ public:
     // Deactivate
     virtual void Deactivate();
 
+	// Trigger in next update
+	virtual void Schedule() { _scheduled = true; }
+
 	// Get rects of DOMNode
     std::vector<Rect> GetDOMRects() const { return _spNode->GetRects(); }
 
@@ -71,6 +74,9 @@ private:
 
     // Bool to remember that it was triggered
     bool _triggered = false;
+
+	// Scheduled triggering
+	bool _scheduled = false;
 
     // Visibility of overlay
     bool _visible = false;
@@ -193,8 +199,9 @@ bool DOMTrigger<T>::Update(float tpf, const std::shared_ptr<const TabInput> spIn
 	// #############
 
 	// Remember about being triggered
-	bool triggered = _triggered;
+	bool triggered = _triggered || _scheduled;
 	_triggered = false;
+	_scheduled = false; // also reset scheduled trigger
 
 	// Return true whether triggered
 	return triggered;
