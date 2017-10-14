@@ -115,6 +115,15 @@ public:
 	// Trigger video trigger
 	void ScheduleVideoModeTrigger(int id);
 
+	// Retrieve all text links, their id and rects
+	struct DOMLinkInfo
+	{
+		DOMLinkInfo(Rect rect, std::string content) : rect(rect), content(content) {}
+		Rect rect;
+		std::string content;
+	};
+	std::vector<DOMLinkInfo> RetrieveDOMLinkInfos() const;
+
     // #################################
     // ### TAB INTERACTIVE INTERFACE ###
     // #################################

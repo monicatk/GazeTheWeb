@@ -728,6 +728,24 @@ void Tab::ScheduleVideoModeTrigger(int id)
 	}
 }
 
+std::vector<Tab::DOMLinkInfo> Tab::RetrieveDOMLinkInfos() const
+{
+	std::vector<Tab::DOMLinkInfo> result;
+	result.reserve(_TextLinkMap.size());
+	for (const auto& rLink : _TextLinkMap)
+	{
+		if (!rLink.second->GetRects().empty()) // there is at least one rectangle
+		{
+			std::string text = rLink.second->GetText();
+			if (!text.empty()) // there is some text
+			{
+				result.push_back(Tab::DOMLinkInfo(rLink.second->GetRects().at(0), text));
+			}
+		}
+	}
+	return result;
+}
+
 void Tab::SetPipelineActivity(bool active)
 {
 	if (active)
