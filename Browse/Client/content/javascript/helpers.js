@@ -14,6 +14,8 @@ ConsolePrint("Starting to import helpers.js ...");
 function CefPoll()
 {
     UpdateDOMRects();
+
+    domVideos.forEach((n) => { SendAttributeChangesToCEF("Rects", n); });
 }
 
 if(ClientRectList.prototype.map === undefined)
@@ -255,7 +257,14 @@ function GetCorrespondingDOMOverflow(node){ return GetCorrespondingDOMObject(nod
 
 function RemoveDOMObject(type, id)
 {
-    console.log("RemoveDOMObject called with parameters type="+type+" and id="+id+"! Doesn't do anything at the moment. TODO!");
+    var domObj = GetDOMObject(type, id);
+    if(domObj)
+    {
+        // Delete object on C++ side
+       SetObjectAvailabilityForCEFto(domObj, false);
+       // and on JS side
+       delete domObj;
+    }
 }
 function RemoveDOMTextInput(id){ return RemoveDOMObject(0, id); }
 function RemoveDOMLink(id){ return RemoveDOMObject(1, id); }
@@ -479,12 +488,22 @@ function AttrRequest(domObj, attrStr, compare_with_js=true)
 function SetObjectAvailabilityForCEFto(domObj, val)
 {
     if(typeof(domObj.getType) !== "function")
+    {
+        console.log("Invalid call of SetObjectAvailabilityForCEFto! Aborting.");
         return;
-    
+    }
     if(val)
         ConsolePrint("DOM#add#"+domObj.getType()+"#"+domObj.getId()+"#");
     else
         ConsolePrint("DOM#rem#"+domObj.getType()+"#"+domObj.getId()+"#");
+}
+
+function CheckOverflowProperties(node)
+{
+    var cs = window.getComputedStyle(node, null);
+    console.log("overflow: ", cs.getPropertyValue("overflow"));
+    console.log("overflow-x: ", cs.getPropertyValue("overflow-x"));
+    console.log("overflow-y: ", cs.getPropertyValue("overflow-y"));
 }
 
 ConsolePrint("Successfully imported helpers.js!");

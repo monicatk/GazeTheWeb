@@ -325,9 +325,6 @@ function DOMLink(node, cef_hidden=false)
     var id = window.domLinks.indexOf(this);
     DOMNode.call(this, node, id, 1, cef_hidden);
 
-    this.text = "";
-    this.url = "";
-
     // Search image which might be displayed instead of link text
     var imgs = node.getElementsByTagName("IMG");
     if(imgs.length > 0)
@@ -346,24 +343,12 @@ DOMLink.prototype.updateRects = function(){
 
 // DOMAttribute Text
 DOMLink.prototype.getText = function(){
-    return this.text;
-}
-DOMLink.prototype.setText = function(text){
-    var informCEF = (this.text !== text);
-    this.text = text;
-    if(informCEF)
-        SendAttributeChangesToCEF("Text", this);
+    return this.node.textContent;
 }
 
 // DOMAttribute Url
 DOMLink.prototype.getUrl = function(){
-    return this.url;
-}
-DOMLink.prototype.setUrl = function(url){
-    var informCEF = (this.url !== url);
-    this.url = url;
-    if(informCEF)
-        SendAttributeChangesToCEF("Url", this);
+    return this.node.href;
 }
 
 
@@ -541,21 +526,15 @@ DOMOverflowElement.prototype.checkIfAutoOverflows = function(){
     if(this.hidden_auto_overflow === undefined)
         return;
 
-    this.setAutoOverflowHidden(
-        this.node.scrollHeight <= this.node.clientHeight 
-            && this.node.scrollWidth <= this.node.clientWidth
-    );
-}
+    var hidden = (this.node.scrollHeight <= this.node.clientHeight) && 
+                    (this.node.scrollWidth <= this.node.clientWidth);
 
-DOMOverflowElement.prototype.setAutoOverflowHidden = function(hidden){
     // Value doesn't change
     if(hidden === this.hidden_auto_overflow)
         return;
 
-    // Monitor if overall visibility changed when setting variable
+    // Monitor if overall visibility changes when setting variable
     var sum_hidden = this.getCefHidden();
-
-    var debug = this.hidden_auto_overflow;
 
     this.hidden_auto_overflow = hidden;
 
@@ -563,8 +542,12 @@ DOMOverflowElement.prototype.setAutoOverflowHidden = function(hidden){
     
     // Compare old and new value, when changes happened, react accordingly
     if(sum_hidden !== sum_hidden_updated)
-    {
-        SetObjectAvailabilityForCEFto(!sum_hidden_updated);
+    {   
+        // DEBUG
+        console.log("Overflow id: ", this.getId(), " now: ", !sum_hidden_updated, " -- ",
+                this.cef_hidden, this.hidden_overflow, this.hidden_auto_overflow);
+
+        SetObjectAvailabilityForCEFto(this, !sum_hidden_updated);
     }
 }
 

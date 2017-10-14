@@ -221,7 +221,7 @@ bool DOMTextInput::IPCSetText(CefRefPtr<CefListValue> data)
 	if (data == nullptr || data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_STRING)
 		return false;
 
-	SetText(data->GetString(0));
+	SetText(data->GetString(0).ToString());
 	return true;
 }
 
@@ -303,7 +303,7 @@ bool DOMLink::IPCSetText(CefRefPtr<CefListValue> data)
 	if (data == nullptr || data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_STRING)
 		return false;
 
-	SetText(data->GetString(0));
+	SetText(data->GetString(0).ToString());
 	return true;
 }
 
@@ -312,7 +312,7 @@ bool DOMLink::IPCSetUrl(CefRefPtr<CefListValue> data)
 	if (data == nullptr || data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_STRING)
 		return false;
 
-	SetUrl(data->GetString(0));
+	SetUrl(data->GetString(0).ToString());
 	return true;
 }
 
@@ -402,7 +402,7 @@ bool DOMSelectField::IPCSetOptions(CefRefPtr<CefListValue> data)
 			LogDebug("DOMSelectField: Invalid data type for option! Aborting.");
 			return false;
 		}
-		options.push_back(list->GetString(i));
+		options.push_back(list->GetString(i).ToString());
 	}
 
 	SetOptions(options);
