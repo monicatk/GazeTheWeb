@@ -118,9 +118,9 @@ public:
 	// Retrieve all text links, their id and rects
 	struct DOMLinkInfo
 	{
-		DOMLinkInfo(std::vector<Rect> rects, std::string content) : rects(rects), content(content) {}
+		DOMLinkInfo(std::vector<Rect> rects, std::string text) : rects(rects), text(text) {}
 		std::vector<Rect> rects;
-		std::string content;
+		std::string text;
 	};
 	std::vector<DOMLinkInfo> RetrieveDOMLinkInfos() const;
 
