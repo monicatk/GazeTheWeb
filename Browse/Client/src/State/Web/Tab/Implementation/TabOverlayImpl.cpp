@@ -54,6 +54,14 @@ void Tab::SetPositionOfFloatingFrameInOverlay(
 	eyegui::setPositionOfFloatingFrame(_pOverlayLayout, index, relativePositionX, relativePositionY);
 }
 
+void Tab::SetSizeOfFloatingFrameInOverlay(
+	int index,
+	float relativeWidth,
+	float relativeHeight)
+{
+	eyegui::setSizeOfFloatingFrame(_pOverlayLayout, index, relativeWidth, relativeHeight);
+}
+
 void Tab::SetVisibilityOfFloatingFrameInOverlay(int index, bool visible)
 {
 	// Reset when becoming visible

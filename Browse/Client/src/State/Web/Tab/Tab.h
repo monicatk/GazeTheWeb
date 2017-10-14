@@ -143,6 +143,12 @@ public:
         float relativePositionX,
         float relativePositionY);
 
+	// Size floating frame in overlay
+	virtual void SetSizeOfFloatingFrameInOverlay(
+		int index,
+		float relativeWidth,
+		float relativeHeight);
+
     // Set visibility of floating frame in overlay
     virtual void SetVisibilityOfFloatingFrameInOverlay(int index, bool visible);
 

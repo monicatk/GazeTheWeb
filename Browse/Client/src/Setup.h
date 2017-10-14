@@ -72,6 +72,7 @@ namespace setup
 	static const int			SOCIAL_RECORD_DIGIT_COUNT = 6;
 	static const bool			SOCIAL_RECORD_PERSIST_UNKNOWN = true;
 	static const std::string	DATE_FORMAT = "%d-%m-%Y %H-%M-%S";
+	static const bool			TAB_TRIGGER_SHOW_BADGE = true;
 
 	// Other
 	static const bool	ENABLE_WEBGL = false; // only on Windows
