@@ -136,7 +136,7 @@ else() # Linux
 	find_package(CURL REQUIRED)
 endif()
 include_directories(${CURL_INCLUDE_DIR}) 
-	
+file(GLOB BASE64 "${EXTERNALS_DIR}/base64/base64.cpp")
 ### SUBMODULES #################################################################
 
 # Set path to submodules
@@ -184,8 +184,8 @@ include_directories(${OPENGL_INCLUDE_DIR})
 set(ALL_CODE
 	${SOURCES}
 	${HEADERS}
-	${OGL})
-
+	${OGL}
+	${BASE64})
 # Logical target used to link the libcef library
 ADD_LOGICAL_TARGET("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
 

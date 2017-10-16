@@ -711,6 +711,14 @@ void Master::Loop()
 		// Update lab streaming layer mailer to get incoming messages
 		LabStreamMailer::instance().Update();
 
+		//VOICE COMMAND
+		if (voiceResult.action != VoiceAction::NO_ACTION)
+		{
+			_upWeb->actionsOfVoice(voiceResult);
+			voiceResult.action = VoiceAction::NO_ACTION;
+			voiceResult.keyworkds = "";
+		}
+
 		// Notification handling
 		if (_notificationTime <= 0 // time for the current notification is over
 			|| (_notificationOverridable && !_notificationStack.empty())) // go to next notification if current is overridable and stack not empty

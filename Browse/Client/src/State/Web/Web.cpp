@@ -1066,3 +1066,133 @@ void Web::DeletePageFromHistoryJob::Execute(Web * pCallee)
 	pCallee->_upHistoryManager->DeletePageByUrl(_page, _deleteOnlyFirst);
 }
 
+
+
+void Web::actionsOfVoice(VoiceResult voiceResult) {
+	switch (voiceResult.action)
+	{
+	case VoiceAction::NO_ACTION:
+		break;
+	case VoiceAction::SCROLL_UP:
+	{
+		int tabId = _currentTabId;
+		if (tabId >= 0)
+			_tabs.at(tabId)->EmulateMouseWheelScrolling(0, _tabs.at(tabId)->GetWindowHeight()); }
+	break;
+	case VoiceAction::SCROLL_DOWN:
+	{
+		int tabId = _currentTabId;
+		if (tabId >= 0)
+			_tabs.at(tabId)->EmulateMouseWheelScrolling(0, -_tabs.at(tabId)->GetWindowHeight()); }
+	break;
+	case VoiceAction::BOOKMARK:
+	{
+		int tabId = _currentTabId;
+		if (tabId >= 0)
+		{
+			// Add as bookmark
+			bool success = _upBookmarkManager->AddBookmark(_tabs.at(tabId)->GetURL());
+
+			// Display it on icon. Even if not successful, because that means it was already a bookmark
+			eyegui::setIconOfIconElement(_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_true.png");
+
+			// Display notification
+			if (success)
+			{
+				_pMaster->PushNotificationByKey("notification:bookmark_added_success", MasterNotificationInterface::Type::SUCCESS, false);
+			}
+			else
+			{
+				_pMaster->PushNotificationByKey("notification:bookmark_added_existing", MasterNotificationInterface::Type::NEUTRAL, false);
+			}
+		}}
+	break;
+	case VoiceAction::BACK:
+	{
+		int tabId = _currentTabId;
+		if (tabId >= 0)
+		{
+			_tabs.at(tabId)->GoBack();
+		}
+	}
+	break;
+	case VoiceAction::FORWARD:
+	{
+		int tabId = _currentTabId;
+		if (tabId >= 0)
+		{
+			_tabs.at(tabId)->GoForward();
+		}
+	}
+	break;
+	case VoiceAction::BOTTOM:
+	{
+		int tabId = _currentTabId;
+		if (tabId >= 0)
+			_tabs.at(tabId)->EmulateMouseWheelScrolling(0, -_tabs.at(tabId)->GetPageHeight());   }
+	break;
+	case VoiceAction::TOP:
+	{
+		int tabId = _currentTabId;
+		if (tabId >= 0)_tabs.at(tabId)->EmulateMouseWheelScrolling(0, _tabs.at(tabId)->GetPageHeight());  }
+	break;
+	case VoiceAction::RELOAD:
+	{
+		int tabId = _currentTabId;
+		if (tabId >= 0)
+			_tabs.at(tabId)->Reload(); }
+	break;
+	case VoiceAction::GO_TO: {
+		if (!voiceResult.keyworkds.empty())
+		{
+			//dictationOfVoice(voiceResult.keyworkds);
+			int tabId = _currentTabId;
+			std::u16string url16;
+			eyegui_helper::convertUTF8ToUTF16(voiceResult.keyworkds, url16);
+			url16 = u"Going to " + url16;
+			_pMaster->PushNotification(url16, MasterNotificationInterface::Type::NEUTRAL, false);
+			if (tabId >= 0)
+				_tabs.at(tabId)->OpenURL(voiceResult.keyworkds);
+		}
+	}
+							 break;
+	case VoiceAction::SEARCH: {
+		if (!voiceResult.keyworkds.empty())
+		{
+			dictationOfVoice(voiceResult.keyworkds);
+		}
+	}
+							  break;
+	case VoiceAction::VIDEO_INPUT: {
+		if (!voiceResult.keyworkds.empty())
+		{
+		}
+	}
+								   break;
+	case VoiceAction::TEXT_INPUT: {
+		if (!voiceResult.keyworkds.empty())
+		{
+		}
+	}
+								  break;
+	default:
+		break;
+	}
+}
+
+void Web::dictationOfVoice(std::string transcription) {
+
+	transcription = transcription;
+	std::u16string s16;
+	eyegui_helper::convertUTF8ToUTF16(transcription, s16);
+
+	std::string _overlayTextEditId = "text_input_action_text_edit";
+	std::string _overlayWordSuggestId = "text_input_action_word_suggest";
+	// Add content from keyboard
+	_tabs.at(_currentTabId)->AddContentAtCursorInTextEdit(_overlayTextEditId, s16);
+
+	// Refresh suggestions
+	_tabs.at(_currentTabId)->DisplaySuggestionsInWordSuggest(
+		_overlayWordSuggestId,
+		s16);
+}

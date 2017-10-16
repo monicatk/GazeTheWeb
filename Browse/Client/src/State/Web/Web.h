@@ -13,6 +13,7 @@
 #include "src/State/Web/Managers/HistoryManager.h"
 #include "src/State/Web/Screens/URLInput.h"
 #include "src/State/Web/Screens/History.h"
+#include "src/Input/VoiceInput.h"
 #include <map>
 #include <vector>
 #include <memory>
@@ -113,6 +114,10 @@ public:
 
     // Get own id in web. Returns -1 if not found
     virtual int GetIdOfTab(Tab const * pCaller) const;
+
+	virtual void actionsOfVoice(VoiceResult voiceResult);
+
+	virtual void dictationOfVoice(std::string transcript);
 
 private:
 
