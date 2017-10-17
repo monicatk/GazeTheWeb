@@ -348,6 +348,11 @@ DOMLink.prototype.getText = function(){
 
 // DOMAttribute Url
 DOMLink.prototype.getUrl = function(){
+    // NOTE: RenderProcessHandler (Attribute conversion) crashes if undefined is returned instead of
+    // empty string. But only in debug mode. Why?
+    if(this.node.href === undefined)
+        return "";
+
     return this.node.href;
 }
 
@@ -543,10 +548,6 @@ DOMOverflowElement.prototype.checkIfAutoOverflows = function(){
     // Compare old and new value, when changes happened, react accordingly
     if(sum_hidden !== sum_hidden_updated)
     {   
-        // DEBUG
-        console.log("Overflow id: ", this.getId(), " now: ", !sum_hidden_updated, " -- ",
-                this.cef_hidden, this.hidden_overflow, this.hidden_auto_overflow);
-
         SetObjectAvailabilityForCEFto(this, !sum_hidden_updated);
     }
 }
