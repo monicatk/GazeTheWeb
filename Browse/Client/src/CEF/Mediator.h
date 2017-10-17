@@ -91,10 +91,11 @@ public:
 
 
 	// ### FAVICON SETTING ###
-	void ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
 	void ResetFavicon(CefRefPtr<CefBrowser> browser);
+
 	// Get byte code from CefImage and send it to corresponding Tab
 	bool ForwardFaviconBytes(CefRefPtr<CefBrowser> browser, CefRefPtr<CefImage> img);
+
 	// Check if favicon was already loaded before new image is also loaded
 	bool IsFaviconAlreadyAvailable(CefRefPtr<CefBrowser> browser, CefString img_url);
 

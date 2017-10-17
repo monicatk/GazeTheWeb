@@ -259,10 +259,8 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 	}
 
     if (msgName == "ReceiveFavIconBytes")
-    {
-        _pMediator->ReceiveIPCMessageforFavIcon(browser, msg);
-		return true;
-    }
+ 		LogDebug("Handler: Received depricated ", msgName, " IPC message!");
+ 
     if (msgName == "ReceivePageResolution")
     {
         _pMediator->ReceivePageResolution(browser, msg);

@@ -455,11 +455,12 @@ function PrintPerformanceInformation()
 
 function SendFaviconURLtoCEF(url)
 {
-    console.log("Found favicon url: "+url);
+    console.log("Found favicon url: ", url);
     ConsolePrint("#FaviconURL#"+url+"#");
 }
 
-function AttrRequest(domObj, attrStr, compare_with_js=true)
+
+function CefAttrRequest(domObj, attrStr, compare_with_js=true)
 {
     if (domObj === undefined)
         return;
