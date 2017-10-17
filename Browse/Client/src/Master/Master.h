@@ -47,6 +47,8 @@ public:
     int GetWindowWidth() const { return _width; }
     int GetWindowHeight() const { return _height; }
 
+	VoiceResult voiceResult = VoiceResult{ VoiceAction::NO_ACTION,"" };
+
     // Get time provided by GLFW
     double GetTime() const;
 

@@ -22,6 +22,7 @@ std::map<std::string, VoiceAction> voiceActionMapping = {
 	{ "app", VoiceAction::SCROLL_UP },
 	{ "down", VoiceAction::SCROLL_DOWN },
 	{ "town", VoiceAction::SCROLL_DOWN },
+	{ "dumb", VoiceAction::SCROLL_DOWN },
 	{ "bookmark", VoiceAction::BOOKMARK },
 	{ "back", VoiceAction::BACK },
 	{ "top", VoiceAction::TOP },
@@ -33,16 +34,29 @@ std::map<std::string, VoiceAction> voiceActionMapping = {
 	{ "video input", VoiceAction::VIDEO_INPUT },
 	{ "go to", VoiceAction::GO_TO },
 	{ "search", VoiceAction::SEARCH },
-	{ "click", VoiceAction::CLICK }
+	{ "click", VoiceAction::CLICK },
+	{"increase",VoiceAction::INCREASE},
+	{ "decrease",VoiceAction::DECREASE },
+	{ "mute",VoiceAction::MUTE },
+	{ "unmute",VoiceAction::UNMUTE },
+	{ "play",VoiceAction::PLAY },
+	{ "stop",VoiceAction::STOP },
+	{ "jump",VoiceAction::JUMP },
+	{ "drum",VoiceAction::JUMP },
+	{ "new tab",VoiceAction::NEW_TAB }
+	//{ "",VoiceAction:: },
 
 };
 std::set<std::string> voiceActionKeys = {
 	"up","app",
-	"down" , "town",
-	"bookmark","back", "top",
+	"down" , "town","dumb",
+	"bookmark","back", "top","new tab",
 	"reload","bottom","button","forward",
 	"text input","video input",
-	"go to","search","click"
+	"go to","search","click",
+	"increase","decrease",
+	"mute","unmute",
+	"play","stop","jump","drum"
 };
 
 std::map<std::string, std::string> textToDigit = {

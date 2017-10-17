@@ -409,6 +409,24 @@ public:
 	// Coordinate system is WebViewPixel
 	virtual void Debug_DrawLine(glm::vec2 originCoordinate, glm::vec2 targetCoordinate, glm::vec3 color) const;
 
+	// ###############################
+	// ### TAB VIDEO CONTROL       ###
+	// ###############################
+	// increase the volumn of the video
+	virtual void IncreaseVideoVolume();
+	// decrease the volumn of the video
+	virtual void DecreaseVideoVolume();
+	// play the video
+	virtual void PlayVideo();
+	// stop the video
+	virtual void StopVideo();
+	// mute the video
+	virtual void MuteVideo();
+	// unmute the video
+	virtual void UnmuteVideo();
+	// jump to some seconds of the video
+	virtual void JumpToVideo(float seconds);
+
 private:
 
 	// Enumeration for icon state of tab
@@ -537,6 +555,8 @@ private:
 
 	// Unique name for favicon which is stored in eyeGUI
 	std::string GetFaviconIdentifier() const;
+	
+
 
 	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	// >>> Implemented in TabDebuggingImpl.cpp >>>

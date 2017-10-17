@@ -1008,3 +1008,62 @@ std::string Tab::GetFaviconIdentifier() const
 {
 	return "tab_info_" + std::to_string(_pWeb->GetIdOfTab(this));
 }
+
+// increase the volumn of the video
+void Tab::IncreaseVideoVolume()
+{
+	auto iter = _VideoMap.find(_videoModeId);
+	if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+	{
+		iter->second->ChangeVolume(0.25f);
+	}
+}
+
+// decrease the volumn of the video
+void Tab::DecreaseVideoVolume() {
+	auto iter = _VideoMap.find(_videoModeId);
+	if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+	{
+		iter->second->ChangeVolume(-0.25f);
+	}
+}
+// play the video
+void Tab::PlayVideo() {
+	auto iter = _VideoMap.find(_videoModeId);
+	if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+	{
+		iter->second->TogglePlayPause();
+	}
+}
+// stop the video
+void Tab::StopVideo() {
+	auto iter = _VideoMap.find(_videoModeId);
+	if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+	{
+		iter->second->TogglePlayPause();
+	}
+}
+// mute the video
+void Tab::MuteVideo() {
+	auto iter = _VideoMap.find(_videoModeId);
+	if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+	{
+		iter->second->ToggleMuted();
+	}
+}
+// unmute the video
+void Tab::UnmuteVideo() {
+	auto iter = _VideoMap.find(_videoModeId);
+	if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+	{
+		iter->second->ToggleMuted();
+	}
+}
+// jump to some seconds of the video
+void Tab::JumpToVideo(float seconds) {
+	auto iter = _VideoMap.find(_videoModeId);
+	if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+	{
+		iter->second->JumpToSecond(seconds);
+	}
+}

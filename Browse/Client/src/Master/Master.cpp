@@ -107,6 +107,10 @@ const std::string simpleFragmentShaderSource =
 
 Master::Master(Mediator* pCefMediator, std::string userDirectory)
 {
+
+	voiceResult.action = VoiceAction::NO_ACTION;
+	voiceResult.keyworkds = "";
+
     // Save members
     _pCefMediator = pCefMediator;
 	_userDirectory = userDirectory;
@@ -1013,7 +1017,7 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
 	{
 		switch (key)
 		{
-			case GLFW_KEY_SPACE: { auto voiceAction = _upVoiceInput->EndAndProcessAudioRecording(); LogInfo("Retrieved VoiceAction: ", static_cast<int>(voiceAction)); }
+			case GLFW_KEY_SPACE: { voiceResult = _upVoiceInput->EndAndProcessAudioRecording();  }
 		}
 	}
 }

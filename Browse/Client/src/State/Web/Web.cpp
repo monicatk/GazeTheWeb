@@ -18,8 +18,8 @@
 
 Web::Web(Master* pMaster, Mediator* pCefMediator, bool dataTransfer) : State(pMaster), _dataTransfer(dataTransfer)
 {
-    // Save member
-    _pCefMediator = pCefMediator;
+	// Save member
+	_pCefMediator = pCefMediator;
 
 	// Create bookmark manager
 	_upBookmarkManager = std::unique_ptr<BookmarkManager>(new BookmarkManager(pMaster->GetUserDirectory()));
@@ -33,24 +33,24 @@ Web::Web(Master* pMaster, Mediator* pCefMediator, bool dataTransfer) : State(pMa
 	// Create URL input
 	_upURLInput = std::unique_ptr<URLInput>(new URLInput(_pMaster, _upBookmarkManager.get()));
 
-    // Create own layout
-    _pWebLayout = _pMaster->AddLayout("layouts/Web.xeyegui", EYEGUI_WEB_LAYER, false);
-    _pTabOverviewLayout = _pMaster->AddLayout("layouts/WebTabOverview.xeyegui", EYEGUI_WEB_LAYER, false);
+	// Create own layout
+	_pWebLayout = _pMaster->AddLayout("layouts/Web.xeyegui", EYEGUI_WEB_LAYER, false);
+	_pTabOverviewLayout = _pMaster->AddLayout("layouts/WebTabOverview.xeyegui", EYEGUI_WEB_LAYER, false);
 
-    // Register listener which do not change over usage
-    _spWebButtonListener = std::shared_ptr<WebButtonListener>(new WebButtonListener(this));
-    eyegui::registerButtonListener(_pWebLayout, "tab_overview", _spWebButtonListener);
-    eyegui::registerButtonListener(_pWebLayout, "settings", _spWebButtonListener);
-    eyegui::registerButtonListener(_pWebLayout, "back", _spWebButtonListener);
-    eyegui::registerButtonListener(_pWebLayout, "forward", _spWebButtonListener);
+	// Register listener which do not change over usage
+	_spWebButtonListener = std::shared_ptr<WebButtonListener>(new WebButtonListener(this));
+	eyegui::registerButtonListener(_pWebLayout, "tab_overview", _spWebButtonListener);
+	eyegui::registerButtonListener(_pWebLayout, "settings", _spWebButtonListener);
+	eyegui::registerButtonListener(_pWebLayout, "back", _spWebButtonListener);
+	eyegui::registerButtonListener(_pWebLayout, "forward", _spWebButtonListener);
 	eyegui::registerButtonListener(_pWebLayout, "no_data_transfer", _spWebButtonListener);
-    eyegui::registerButtonListener(_pTabOverviewLayout, "close", _spWebButtonListener);
+	eyegui::registerButtonListener(_pTabOverviewLayout, "close", _spWebButtonListener);
 	eyegui::registerButtonListener(_pTabOverviewLayout, "history", _spWebButtonListener);
-    eyegui::registerButtonListener(_pTabOverviewLayout, "back", _spWebButtonListener);
-    eyegui::registerButtonListener(_pTabOverviewLayout, "forward", _spWebButtonListener);
-    eyegui::registerButtonListener(_pTabOverviewLayout, "close_tab", _spWebButtonListener);
-    eyegui::registerButtonListener(_pTabOverviewLayout, "reload_tab", _spWebButtonListener);
-    eyegui::registerButtonListener(_pTabOverviewLayout, "edit_url", _spWebButtonListener);
+	eyegui::registerButtonListener(_pTabOverviewLayout, "back", _spWebButtonListener);
+	eyegui::registerButtonListener(_pTabOverviewLayout, "forward", _spWebButtonListener);
+	eyegui::registerButtonListener(_pTabOverviewLayout, "close_tab", _spWebButtonListener);
+	eyegui::registerButtonListener(_pTabOverviewLayout, "reload_tab", _spWebButtonListener);
+	eyegui::registerButtonListener(_pTabOverviewLayout, "edit_url", _spWebButtonListener);
 	eyegui::registerButtonListener(_pTabOverviewLayout, "bookmark_tab", _spWebButtonListener);
 
 	// Regular expression for URL validation
@@ -67,128 +67,128 @@ Web::Web(Master* pMaster, Mediator* pCefMediator, bool dataTransfer) : State(pMa
 
 Web::~Web()
 {
-    // TODO: Delete layouts?
+	// TODO: Delete layouts?
 }
 
 int Web::AddTab(std::string URL, bool show)
 {
-    // Go over existing pairs and determine first free id
-    int id = 0;
-    for(; id < (int)_tabs.size(); id++)
-    {
-        // Go over all entries and try id
-        bool check = true;
-        for(const auto& tabId : _tabs)
-        {
-            if(tabId.first == id)
-            {
-                check = false;
-                break;
-            }
-        }
+	// Go over existing pairs and determine first free id
+	int id = 0;
+	for (; id < (int)_tabs.size(); id++)
+	{
+		// Go over all entries and try id
+		bool check = true;
+		for (const auto& tabId : _tabs)
+		{
+			if (tabId.first == id)
+			{
+				check = false;
+				break;
+			}
+		}
 
-        // Id is free, use it
-        if(check) { break; }
-    }
+		// Id is free, use it
+		if (check) { break; }
+	}
 
-    // Create tab
-    std::unique_ptr<Tab> upTab =
-        std::unique_ptr<Tab>(new Tab(_pMaster, _pCefMediator, this, URL, _dataTransfer));
+	// Create tab
+	std::unique_ptr<Tab> upTab =
+		std::unique_ptr<Tab>(new Tab(_pMaster, _pCefMediator, this, URL, _dataTransfer));
 
-    // Put tab in map
-    _tabs.emplace(id, std::move(upTab));
+	// Put tab in map
+	_tabs.emplace(id, std::move(upTab));
 
-    // Push back at order
-    _tabIdOrder.push_back(id);
+	// Push back at order
+	_tabIdOrder.push_back(id);
 
-    // Decide currently displayed tab
-    if(show || _currentTabId < 0)
-    {
-        // Switch to tab
-        SwitchToTab(id);
-    }
+	// Decide currently displayed tab
+	if (show || _currentTabId < 0)
+	{
+		// Switch to tab
+		SwitchToTab(id);
+	}
 
 	// Update icon of tab overview button
 	UpdateTabOverviewIcon();
 
-    // Retun id of tab
-    return id;
+	// Retun id of tab
+	return id;
 }
 
 int Web::AddTabAfter(Tab *other, std::string URL, bool show)
 {
-    // Find other tab
-    int otherId = -1;
-    int i = 0;
-    for(const auto& rPair : _tabs)
-    {
-        if(rPair.second.get() == other)
-        {
-            otherId = i;
-            break;
-        }
-        i++;
-    }
+	// Find other tab
+	int otherId = -1;
+	int i = 0;
+	for (const auto& rPair : _tabs)
+	{
+		if (rPair.second.get() == other)
+		{
+			otherId = i;
+			break;
+		}
+		i++;
+	}
 
-    // Add new tab
-    int id = AddTab(URL, show);
+	// Add new tab
+	int id = AddTab(URL, show);
 
-    // If the other tab exists, move created one after that
-    if(otherId >= 0)
-    {
-        // Find tab id of other in order
-        int otherOrderIndex = -1;
-        for(int j = 0; j < (int)_tabIdOrder.size(); j++) { if(_tabIdOrder.at(j) == otherId) { otherOrderIndex = j; } }
+	// If the other tab exists, move created one after that
+	if (otherId >= 0)
+	{
+		// Find tab id of other in order
+		int otherOrderIndex = -1;
+		for (int j = 0; j < (int)_tabIdOrder.size(); j++) { if (_tabIdOrder.at(j) == otherId) { otherOrderIndex = j; } }
 
-        // Find tab id of new in order
-        int orderIndex = -1;
-        for(int j = 0; j < (int)_tabIdOrder.size(); j++) { if(_tabIdOrder.at(j) == id) { orderIndex = j; } }
+		// Find tab id of new in order
+		int orderIndex = -1;
+		for (int j = 0; j < (int)_tabIdOrder.size(); j++) { if (_tabIdOrder.at(j) == id) { orderIndex = j; } }
 
-        // Create new order
-        auto newTabIdOrder = std::vector<int>();
-        newTabIdOrder.reserve(_tabIdOrder.size());
+		// Create new order
+		auto newTabIdOrder = std::vector<int>();
+		newTabIdOrder.reserve(_tabIdOrder.size());
 
-        if(otherOrderIndex >= 0 && orderIndex >= 0)
-        {
-            // Add all tabs including other to order
-            int oldIndex = 0;
-            for(int j = 0; j <= otherOrderIndex; j++)
-            {
-                int currentId = _tabIdOrder.at(j);
-                if(currentId != orderIndex)
-                {
-                    // Do not push back the new tab's id
-                    newTabIdOrder.push_back(currentId);
-                    oldIndex++;
-                }
-            }
+		if (otherOrderIndex >= 0 && orderIndex >= 0)
+		{
+			// Add all tabs including other to order
+			int oldIndex = 0;
+			for (int j = 0; j <= otherOrderIndex; j++)
+			{
+				int currentId = _tabIdOrder.at(j);
+				if (currentId != orderIndex)
+				{
+					// Do not push back the new tab's id
+					newTabIdOrder.push_back(currentId);
+					oldIndex++;
+				}
+			}
 
-            // Add new tab's id
-            newTabIdOrder.push_back(orderIndex);
+			// Add new tab's id
+			newTabIdOrder.push_back(orderIndex);
 
-            // Add tail
-            for(; oldIndex < (int)_tabIdOrder.size(); oldIndex++)
-            {
-                int currentId = _tabIdOrder.at(oldIndex);
-                if(currentId != orderIndex)
-                {
-                    // Do not push back the new tab's id
-                    newTabIdOrder.push_back(currentId);
-                }
-            }
+			// Add tail
+			for (; oldIndex < (int)_tabIdOrder.size(); oldIndex++)
+			{
+				int currentId = _tabIdOrder.at(oldIndex);
+				if (currentId != orderIndex)
+				{
+					// Do not push back the new tab's id
+					newTabIdOrder.push_back(currentId);
+				}
+			}
 
-            // Remember the vector
-            _tabIdOrder = newTabIdOrder;
-        }
-    }
+			// Remember the vector
+			_tabIdOrder = newTabIdOrder;
+		}
+	}
 
-    return id;
+	return id;
 }
 
 void Web::RemoveTab(int id)
 {
-    // Verify that id exists
-    auto iter = _tabs.find(id);
+	// Verify that id exists
+	auto iter = _tabs.find(id);
 	if (iter != _tabs.end())
 	{
 		// Remove from order vector
@@ -238,102 +238,102 @@ bool Web::SwitchToTab(int id)
 {
 	bool success = false;
 
-    // Simple case
-    if(id == _currentTabId)
-    {
-        // Success!
+	// Simple case
+	if (id == _currentTabId)
+	{
+		// Success!
 		success = true;
-    }
+	}
 
-    // Verify that id exists
-    auto iter = _tabs.find(id);
-    if(iter != _tabs.end())
-    {
-        // Deactivate old tab
-        if(_currentTabId >= 0 && _active)
-        {
-            // No check necessary
-            _tabs.at(_currentTabId)->Deactivate();
-        }
+	// Verify that id exists
+	auto iter = _tabs.find(id);
+	if (iter != _tabs.end())
+	{
+		// Deactivate old tab
+		if (_currentTabId >= 0 && _active)
+		{
+			// No check necessary
+			_tabs.at(_currentTabId)->Deactivate();
+		}
 
-        // Set new tab as current
-        _currentTabId = id;
+		// Set new tab as current
+		_currentTabId = id;
 
-        // Activate tab
-        if(_active)
-        {
-            _tabs.at(_currentTabId)->Activate();
-        }
+		// Activate tab
+		if (_active)
+		{
+			_tabs.at(_currentTabId)->Activate();
+		}
 
 		success = true;
-    }
+	}
 
 	// Tell Mediator and return
 	if (_currentTabId >= 0)
 	{
 		// Set active Tab in Mediator
-		_pCefMediator->SetActiveTab(_tabs.at(_currentTabId).get()); 
+		_pCefMediator->SetActiveTab(_tabs.at(_currentTabId).get());
 	}
-    return success;
+	return success;
 }
 
 bool Web::SwitchToTabByIndex(int index)
 {
-    if(index >= 0 && index < (int)_tabIdOrder.size())
-    {
-        return SwitchToTab(_tabIdOrder[index]);
-    }
-    return false;
+	if (index >= 0 && index < (int)_tabIdOrder.size())
+	{
+		return SwitchToTab(_tabIdOrder[index]);
+	}
+	return false;
 }
 
 bool Web::SwitchToNextTab()
 {
-    // Get index of current tab in order vector
-    int index = GetIndexOfTabInOrderVector(_currentTabId);
+	// Get index of current tab in order vector
+	int index = GetIndexOfTabInOrderVector(_currentTabId);
 
-    // Switch to next
-    if(index >= 0)
-    {
-        int nextIndex = index + 1;
-        if(nextIndex >= 0 && nextIndex < (int)_tabIdOrder.size())
-        {
-            return SwitchToTab(_tabIdOrder[nextIndex]);
-        }
-    }
+	// Switch to next
+	if (index >= 0)
+	{
+		int nextIndex = index + 1;
+		if (nextIndex >= 0 && nextIndex < (int)_tabIdOrder.size())
+		{
+			return SwitchToTab(_tabIdOrder[nextIndex]);
+		}
+	}
 
-    return false;
+	return false;
 }
 
 bool Web::SwitchToPreviousTab()
 {
-    // Get index of current tab in order vector
-    int index = GetIndexOfTabInOrderVector(_currentTabId);
+	// Get index of current tab in order vector
+	int index = GetIndexOfTabInOrderVector(_currentTabId);
 
-    // Switch to next
-    if(index >= 0)
-    {
-        int previousIndex = index - 1;
-        if(previousIndex >= 0 && previousIndex < (int)_tabIdOrder.size())
-        {
-            return SwitchToTab(_tabIdOrder[previousIndex]);
-        }
-    }
+	// Switch to next
+	if (index >= 0)
+	{
+		int previousIndex = index - 1;
+		if (previousIndex >= 0 && previousIndex < (int)_tabIdOrder.size())
+		{
+			return SwitchToTab(_tabIdOrder[previousIndex]);
+		}
+	}
 
-    return false;
+	return false;
 }
 
 bool Web::OpenURLInTab(int id, std::string URL)
 {
-    // Verify that id exists
-    auto iter = _tabs.find(id);
-    if (iter != _tabs.end())
-    {
-        // Set URL
-        iter->second->OpenURL(URL);
-        return true;
-    }
+	// Verify that id exists
+	auto iter = _tabs.find(id);
+	if (iter != _tabs.end())
+	{
+		// Set URL
+		iter->second->OpenURL(URL);
+		return true;
+	}
 
-    return false;
+	return false;
 }
 
 void Web::PushBackPointingEvaluationPipeline(PointingApproach approach)
@@ -346,7 +346,7 @@ void Web::PushBackPointingEvaluationPipeline(PointingApproach approach)
 
 void Web::SetWebPanelMode(WebPanelMode mode)
 {
-	switch(mode)
+	switch (mode)
 	{
 	case WebPanelMode::STANDARD:
 		_pMaster->SetStyleTreePropertyValue("web_panel", eyegui::property::Color::Color, "0x607d8bFF");
@@ -383,13 +383,13 @@ void Web::NotifyClick(std::string tag, std::string id, float x, float y)
 
 StateType Web::Update(float tpf, const std::shared_ptr<const Input> spInput)
 {
-    // Process jobs first
-    while(!_jobs.empty())
-    {
-        auto upJob = std::move(_jobs.back());
-        _jobs.pop_back();
-        upJob->Execute(this);
-    }
+	// Process jobs first
+	while (!_jobs.empty())
+	{
+		auto upJob = std::move(_jobs.back());
+		_jobs.pop_back();
+		upJob->Execute(this);
+	}
 
 	// History
 	if (_upHistory->IsActive())
@@ -422,16 +422,16 @@ StateType Web::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		}
 	}
 
-    // URL input
-    if (_upURLInput->IsActive())
-    {
-        // Update it and wait for finish of URL input
-        if (_upURLInput->Update())
-        {
-            // Get input and decide
-            std::string URL = _upURLInput->GetURL();
-            if (!URL.empty())
-            {
+	// URL input
+	if (_upURLInput->IsActive())
+	{
+		// Update it and wait for finish of URL input
+		if (_upURLInput->Update())
+		{
+			// Get input and decide
+			std::string URL = _upURLInput->GetURL();
+			if (!URL.empty())
+			{
 				// Validate URL
 				if (!ValidateURL(URL))
 				{
@@ -439,95 +439,95 @@ StateType Web::Update(float tpf, const std::shared_ptr<const Input> spInput)
 				}
 
 				// Fetch tab id from URL input object
-                int tabId = _upURLInput->GetCurrentTabId();
+				int tabId = _upURLInput->GetCurrentTabId();
 
-                // Check whether tab id is valid
-                auto iter = _tabs.find(tabId);
-                if (iter != _tabs.end())
-                {
-                    // Open URL in current tab
-                    _tabs.at(tabId)->OpenURL(URL);
-                }
-                else
-                {
-                    // Since there is no tab, create one (just fallback...)
-                    AddTab(URL, true);
-                }
-            }
+				// Check whether tab id is valid
+				auto iter = _tabs.find(tabId);
+				if (iter != _tabs.end())
+				{
+					// Open URL in current tab
+					_tabs.at(tabId)->OpenURL(URL);
+				}
+				else
+				{
+					// Since there is no tab, create one (just fallback...)
+					AddTab(URL, true);
+				}
+			}
 
-            // Input is done, deactivate it
-            _upURLInput->Deactivate();
-        }
-    }
+			// Input is done, deactivate it
+			_upURLInput->Deactivate();
+		}
+	}
 
-    // Only do it if there is some tab to update
-    if(_currentTabId >= 0 && _tabs.find(_currentTabId) != _tabs.end())
-    {
-        // Check whether tab can go back or forward and tell it eyeGUI
-        eyegui::setElementActivity(_pWebLayout, "back", _tabs.at(_currentTabId)->CanGoBack(), true);
-        eyegui::setElementActivity(_pWebLayout, "forward", _tabs.at(_currentTabId)->CanGoForward(), true);
+	// Only do it if there is some tab to update
+	if (_currentTabId >= 0 && _tabs.find(_currentTabId) != _tabs.end())
+	{
+		// Check whether tab can go back or forward and tell it eyeGUI
+		eyegui::setElementActivity(_pWebLayout, "back", _tabs.at(_currentTabId)->CanGoBack(), true);
+		eyegui::setElementActivity(_pWebLayout, "forward", _tabs.at(_currentTabId)->CanGoForward(), true);
 
-		
+
 		_tabs.at(_currentTabId)->Update(tpf, spInput);
-    }
+	}
 
-    // Decide what to do next
-    if (_goToSettings)
-    {
-        return StateType::SETTINGS;
-    }
-    else
-    {
-        return StateType::WEB;
-    }
+	// Decide what to do next
+	if (_goToSettings)
+	{
+		return StateType::SETTINGS;
+	}
+	else
+	{
+		return StateType::WEB;
+	}
 
 }
 
 void Web::Draw() const
 {
-    // Only do it if there is some tab to draw
-    if(_currentTabId >= 0)
-    {
-        _tabs.at(_currentTabId)->Draw();
-    }
+	// Only do it if there is some tab to draw
+	if (_currentTabId >= 0)
+	{
+		_tabs.at(_currentTabId)->Draw();
+	}
 }
 
 void Web::Activate()
 {
-    // Super
-    State::Activate();
+	// Super
+	State::Activate();
 
-    // Layout
-    eyegui::setVisibilityOfLayout(_pWebLayout, true, true, false);
+	// Layout
+	eyegui::setVisibilityOfLayout(_pWebLayout, true, true, false);
 
-    // Reset stuff
-    _goToSettings = false;
+	// Reset stuff
+	_goToSettings = false;
 
-    if(_currentTabId >= 0)
-    {
-        _tabs.at(_currentTabId)->Activate();
-    }
+	if (_currentTabId >= 0)
+	{
+		_tabs.at(_currentTabId)->Activate();
+	}
 }
 
 void Web::Deactivate()
 {
-    // Super
-    State::Deactivate();
+	// Super
+	State::Deactivate();
 
-    // Layout
-    eyegui::setVisibilityOfLayout(_pWebLayout, false, true, false);
+	// Layout
+	eyegui::setVisibilityOfLayout(_pWebLayout, false, true, false);
 
-    if(_currentTabId >= 0)
-    {
-        _tabs.at(_currentTabId)->Deactivate();
-    }
+	if (_currentTabId >= 0)
+	{
+		_tabs.at(_currentTabId)->Deactivate();
+	}
 
-    ShowTabOverview(false);
+	ShowTabOverview(false);
 }
 
 void Web::PushAddTabAfterJob(Tab* pCaller, std::string URL)
 {
-    _jobs.push_front(std::unique_ptr<TabJob>(new AddTabAfterJob(pCaller, URL, true)));
+	_jobs.push_front(std::unique_ptr<TabJob>(new AddTabAfterJob(pCaller, URL, true)));
 }
 
 void Web::PushAddPageToHistoryJob(Tab* pCaller, HistoryManager::Page page)
@@ -549,233 +549,233 @@ HistoryManager::Page Web::GetFrontHistoryEntry() const
 
 int Web::GetIdOfTab(Tab const * pCaller) const
 {
-    // Go through map and find tab
-    for(const auto& rPair : _tabs)
-    {
-        // Check whether tab is the same
-        if(rPair.second.get() == pCaller)
-        {
-            return rPair.first;
-        }
-    }
+	// Go through map and find tab
+	for (const auto& rPair : _tabs)
+	{
+		// Check whether tab is the same
+		if (rPair.second.get() == pCaller)
+		{
+			return rPair.first;
+		}
+	}
 
-    return -1;
+	return -1;
 }
 
 int Web::GetIndexOfTabInOrderVector(int id) const
 {
-    // Search tab in order
-    bool check = false;
-    int i = 0;
-    for(; i < (int)_tabIdOrder.size(); i++)
-    {
-        if(_tabIdOrder.at(i) == id)
-        {
-            check = true;
-            break;
-        }
-    }
+	// Search tab in order
+	bool check = false;
+	int i = 0;
+	for (; i < (int)_tabIdOrder.size(); i++)
+	{
+		if (_tabIdOrder.at(i) == id)
+		{
+			check = true;
+			break;
+		}
+	}
 
-    // Return result
-    if(check)
-    {
-        return i;
-    }
-    else
-    {
-        return -1;
-    }
+	// Return result
+	if (check)
+	{
+		return i;
+	}
+	else
+	{
+		return -1;
+	}
 }
 
 void Web::ShowTabOverview(bool show)
 {
-    if(show)
-    {
-        // Set visibility
-        eyegui::setVisibilityOfLayout(_pTabOverviewLayout, true, true, true);
+	if (show)
+	{
+		// Set visibility
+		eyegui::setVisibilityOfLayout(_pTabOverviewLayout, true, true, true);
 
-        // Update tab overview before displaying
-        UpdateTabOverview();
-    }
-    else
-    {
-        // Set visibility
-        eyegui::setVisibilityOfLayout(_pTabOverviewLayout, false, false, true);
-    }
+		// Update tab overview before displaying
+		UpdateTabOverview();
+	}
+	else
+	{
+		// Set visibility
+		eyegui::setVisibilityOfLayout(_pTabOverviewLayout, false, false, true);
+	}
 }
 
 void Web::UpdateTabOverview()
 {
-    // Reserve some variables
-    std::string brickId;
-    std::map<std::string, std::string> idMapper;
+	// Reserve some variables
+	std::string brickId;
+	std::map<std::string, std::string> idMapper;
 
-    // Collect open tabs on that page
-    int slotOffset = SLOTS_PER_TAB_OVERVIEW_PAGE * _tabOverviewPage;
-    int slotsOnPage = std::min((int)_tabs.size() - slotOffset, SLOTS_PER_TAB_OVERVIEW_PAGE);
+	// Collect open tabs on that page
+	int slotOffset = SLOTS_PER_TAB_OVERVIEW_PAGE * _tabOverviewPage;
+	int slotsOnPage = std::min((int)_tabs.size() - slotOffset, SLOTS_PER_TAB_OVERVIEW_PAGE);
 
-    // Iterate over slots in brick
-    for(int i = 0; i < slotsOnPage; i++)
-    {
-        // Index of tab
-        int indexOfTab = i + slotOffset;
+	// Iterate over slots in brick
+	for (int i = 0; i < slotsOnPage; i++)
+	{
+		// Index of tab
+		int indexOfTab = i + slotOffset;
 
-        // Get id of tab
-        int tabId = _tabIdOrder.at(indexOfTab);
+		// Get id of tab
+		int tabId = _tabIdOrder.at(indexOfTab);
 
-        // Brick id
-        brickId = "tab_" + std::to_string(i);
-        std::string buttonId = "tab_button_" + std::to_string(i);
-        std::string textblockId = "tab_textblock_" + std::to_string(i);
+		// Brick id
+		brickId = "tab_" + std::to_string(i);
+		std::string buttonId = "tab_button_" + std::to_string(i);
+		std::string textblockId = "tab_textblock_" + std::to_string(i);
 
-        // Id mapper
-        idMapper.clear();
-        idMapper.emplace("grid", brickId);
-        idMapper.emplace("button", buttonId);
-        idMapper.emplace("textblock", textblockId);
+		// Id mapper
+		idMapper.clear();
+		idMapper.emplace("grid", brickId);
+		idMapper.emplace("button", buttonId);
+		idMapper.emplace("textblock", textblockId);
 
-        // Put brick into layout
-        eyegui::replaceElementWithBrick(
-            _pTabOverviewLayout,
-            brickId,
-            "bricks/WebTabPreview.beyegui",
-            idMapper,
-            true);
+		// Put brick into layout
+		eyegui::replaceElementWithBrick(
+			_pTabOverviewLayout,
+			brickId,
+			"bricks/WebTabPreview.beyegui",
+			idMapper,
+			true);
 
-        // Register listener
-        eyegui::registerButtonListener(_pTabOverviewLayout, buttonId, _spWebButtonListener);
+		// Register listener
+		eyegui::registerButtonListener(_pTabOverviewLayout, buttonId, _spWebButtonListener);
 
-        // Tell textblock the URL (but shorter version)
-        std::string shortURL = ShortenURL(_tabs.at(tabId)->GetURL());
-        eyegui::setContentOfTextBlock(_pTabOverviewLayout, textblockId, shortURL);
+		// Tell textblock the URL (but shorter version)
+		std::string shortURL = ShortenURL(_tabs.at(tabId)->GetURL());
+		eyegui::setContentOfTextBlock(_pTabOverviewLayout, textblockId, shortURL);
 
-        // Set webpage rendering as icon of button
-        auto wpTexture = _tabs.at(tabId)->GetWebViewTexture();
-        if(auto spTexture = wpTexture.lock())
-        {
-            // Fetch pixel data of tab in higher mip map level
-            std::vector<unsigned char> tabPreviewData;
-            int tabPreviewWidth;
-            int tabPreviewHeight;
-            if (spTexture->GetPixelsFromMipMap(
-                WEB_TAB_OVERVIEW_MINI_PREVIEW_MIP_MAP_LEVEL,
-                tabPreviewWidth,
-                tabPreviewHeight,
-                tabPreviewData))
-            {
-                // Pipe it to eyeGUI
-                eyegui::setIconOfIconElement(
-                    _pTabOverviewLayout,
-                    buttonId,
-                    buttonId + "_preview",
-                    tabPreviewWidth,
-                    tabPreviewHeight,
-                    eyegui::ColorFormat::RGBA,
-                    tabPreviewData.data(),
-                    true);
-            }
-        }
+		// Set webpage rendering as icon of button
+		auto wpTexture = _tabs.at(tabId)->GetWebViewTexture();
+		if (auto spTexture = wpTexture.lock())
+		{
+			// Fetch pixel data of tab in higher mip map level
+			std::vector<unsigned char> tabPreviewData;
+			int tabPreviewWidth;
+			int tabPreviewHeight;
+			if (spTexture->GetPixelsFromMipMap(
+				WEB_TAB_OVERVIEW_MINI_PREVIEW_MIP_MAP_LEVEL,
+				tabPreviewWidth,
+				tabPreviewHeight,
+				tabPreviewData))
+			{
+				// Pipe it to eyeGUI
+				eyegui::setIconOfIconElement(
+					_pTabOverviewLayout,
+					buttonId,
+					buttonId + "_preview",
+					tabPreviewWidth,
+					tabPreviewHeight,
+					eyegui::ColorFormat::RGBA,
+					tabPreviewData.data(),
+					true);
+			}
+		}
 
 		// Styling
-        if (tabId == _currentTabId)
-        {
+		if (tabId == _currentTabId)
+		{
 			_pMaster->SetStyleTreePropertyValue("tab_preview_" + std::to_string(i), eyegui::property::Color::BackgroundColor, "0x50BAA6FF");
-        }
-        else
-        {
+		}
+		else
+		{
 			_pMaster->SetStyleTreePropertyValue("tab_preview_" + std::to_string(i), eyegui::property::Color::BackgroundColor, "0x607d8bFF");
-        }
-    }
+		}
+	}
 
-    // Fill the rest with empty blanks before adding new tab button (otherwise there would be two of them for a moment and id would conflict)
-    for (int i = slotsOnPage + 1; i < SLOTS_PER_TAB_OVERVIEW_PAGE; i++)
-    {
-        // Brick id
-        brickId = "tab_" + std::to_string(i);
+	// Fill the rest with empty blanks before adding new tab button (otherwise there would be two of them for a moment and id would conflict)
+	for (int i = slotsOnPage + 1; i < SLOTS_PER_TAB_OVERVIEW_PAGE; i++)
+	{
+		// Brick id
+		brickId = "tab_" + std::to_string(i);
 
-        // Id mapper
-        idMapper.clear();
-        idMapper.emplace("blank", brickId);
+		// Id mapper
+		idMapper.clear();
+		idMapper.emplace("blank", brickId);
 
-        // Put brick into layout
-        eyegui::replaceElementWithBrick(
-            _pTabOverviewLayout,
-            brickId,
-            "bricks/WebTabEmptyPreview.beyegui",
-            idMapper,
-            true);
-    }
+		// Put brick into layout
+		eyegui::replaceElementWithBrick(
+			_pTabOverviewLayout,
+			brickId,
+			"bricks/WebTabEmptyPreview.beyegui",
+			idMapper,
+			true);
+	}
 
-    // Add "new" button to last position if space left
-    if (slotsOnPage < SLOTS_PER_TAB_OVERVIEW_PAGE)
-    {
-        // Brick id
-        brickId = "tab_" + std::to_string(slotsOnPage);
+	// Add "new" button to last position if space left
+	if (slotsOnPage < SLOTS_PER_TAB_OVERVIEW_PAGE)
+	{
+		// Brick id
+		brickId = "tab_" + std::to_string(slotsOnPage);
 
-        // Id mapper
-        idMapper.clear();
-        idMapper.emplace("stack", brickId);
+		// Id mapper
+		idMapper.clear();
+		idMapper.emplace("stack", brickId);
 
-        // Put brick into layout
-        eyegui::replaceElementWithBrick(
-            _pTabOverviewLayout,
-            brickId,
-            "bricks/WebTabNew.beyegui",
-            idMapper,
-            true);
+		// Put brick into layout
+		eyegui::replaceElementWithBrick(
+			_pTabOverviewLayout,
+			brickId,
+			"bricks/WebTabNew.beyegui",
+			idMapper,
+			true);
 
-        // Register listener
-        eyegui::registerButtonListener(_pTabOverviewLayout, "new_tab", _spWebButtonListener);
-    }
+		// Register listener
+		eyegui::registerButtonListener(_pTabOverviewLayout, "new_tab", _spWebButtonListener);
+	}
 
-    // Get count of pages
-    int pageCount = CalculatePageCountOfTabOverview();
+	// Get count of pages
+	int pageCount = CalculatePageCountOfTabOverview();
 
-    // Set page count in textblock (no more in layout)
-    // eyegui::setContentOfTextBlock(_pTabOverviewLayout, "page_count", std::to_string(_tabOverviewPage + 1) + "/" + std::to_string(pageCount));
+	// Set page count in textblock (no more in layout)
+	// eyegui::setContentOfTextBlock(_pTabOverviewLayout, "page_count", std::to_string(_tabOverviewPage + 1) + "/" + std::to_string(pageCount));
 
-    // Activate or deactivate back and forward button
-    eyegui::setElementActivity(_pTabOverviewLayout, "back", _tabOverviewPage > 0, true);
-    eyegui::setElementActivity(_pTabOverviewLayout, "forward", _tabOverviewPage < (pageCount - 1), true);
+	// Activate or deactivate back and forward button
+	eyegui::setElementActivity(_pTabOverviewLayout, "back", _tabOverviewPage > 0, true);
+	eyegui::setElementActivity(_pTabOverviewLayout, "forward", _tabOverviewPage < (pageCount - 1), true);
 
-    // Current tab view
-    if (_currentTabId >= 0)
-    {
-        // Show URL
-        eyegui::setContentOfTextBlock(_pTabOverviewLayout, "url", _tabs.at(_currentTabId)->GetURL());
+	// Current tab view
+	if (_currentTabId >= 0)
+	{
+		// Show URL
+		eyegui::setContentOfTextBlock(_pTabOverviewLayout, "url", _tabs.at(_currentTabId)->GetURL());
 
-        // Show current tab's page
-        auto wpTexture = _tabs.at(_currentTabId)->GetWebViewTexture();
-        if (auto spTexture = wpTexture.lock())
-        {
-            // Fetch pixel data of tab in higher mip map level
-            std::vector<unsigned char> tabPreviewData;
-            int tabPreviewWidth;
-            int tabPreviewHeight;
-            if (spTexture->GetPixelsFromMipMap(
-                WEB_TAB_OVERVIEW_PREVIEW_MIP_MAP_LEVEL,
-                tabPreviewWidth,
-                tabPreviewHeight,
-                tabPreviewData))
-            {
-                // Pipe it to eyeGUI
-                eyegui::setImageOfPicture(
-                    _pTabOverviewLayout,
-                    "preview",
-                    "current_tab_preview",
-                    tabPreviewWidth,
-                    tabPreviewHeight,
-                    eyegui::ColorFormat::RGBA,
-                    tabPreviewData.data(),
-                    true);
-            }
-        }
+		// Show current tab's page
+		auto wpTexture = _tabs.at(_currentTabId)->GetWebViewTexture();
+		if (auto spTexture = wpTexture.lock())
+		{
+			// Fetch pixel data of tab in higher mip map level
+			std::vector<unsigned char> tabPreviewData;
+			int tabPreviewWidth;
+			int tabPreviewHeight;
+			if (spTexture->GetPixelsFromMipMap(
+				WEB_TAB_OVERVIEW_PREVIEW_MIP_MAP_LEVEL,
+				tabPreviewWidth,
+				tabPreviewHeight,
+				tabPreviewData))
+			{
+				// Pipe it to eyeGUI
+				eyegui::setImageOfPicture(
+					_pTabOverviewLayout,
+					"preview",
+					"current_tab_preview",
+					tabPreviewWidth,
+					tabPreviewHeight,
+					eyegui::ColorFormat::RGBA,
+					tabPreviewData.data(),
+					true);
+			}
+		}
 
-        // Activate buttons
-        eyegui::setElementActivity(_pTabOverviewLayout, "edit_url", true, true);
+		// Activate buttons
+		eyegui::setElementActivity(_pTabOverviewLayout, "edit_url", true, true);
 		eyegui::setElementActivity(_pTabOverviewLayout, "bookmark_tab", true, true);
-        eyegui::setElementActivity(_pTabOverviewLayout, "reload_tab", true, true);
-        eyegui::setElementActivity(_pTabOverviewLayout, "close_tab", true, true);
+		eyegui::setElementActivity(_pTabOverviewLayout, "reload_tab", true, true);
+		eyegui::setElementActivity(_pTabOverviewLayout, "close_tab", true, true);
 
 		// Set icon of bookmark button
 		if (_upBookmarkManager->IsBookmark(_tabs.at(_currentTabId)->GetURL()))
@@ -786,29 +786,29 @@ void Web::UpdateTabOverview()
 		{
 			eyegui::setIconOfIconElement(_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_false.png");
 		}
-    }
-    else
-    {
-        // Show no URL
-        eyegui::setContentOfTextBlock(_pTabOverviewLayout, "url", " ");
+	}
+	else
+	{
+		// Show no URL
+		eyegui::setContentOfTextBlock(_pTabOverviewLayout, "url", " ");
 
-        // Show placeholder in preview
+		// Show placeholder in preview
 		eyegui::replaceElementWithBrick(_pTabOverviewLayout, "preview", "bricks/Nothing.beyegui", true);
 
 		// Reset icon of bookmark tab button
 		eyegui::setIconOfIconElement(_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_false.png");
 
-        // Deactivate buttons
+		// Deactivate buttons
 		eyegui::setElementActivity(_pTabOverviewLayout, "edit_url", false, true);
 		eyegui::setElementActivity(_pTabOverviewLayout, "bookmark_tab", false, true);
-        eyegui::setElementActivity(_pTabOverviewLayout, "reload_tab", false, true);
-        eyegui::setElementActivity(_pTabOverviewLayout, "close_tab", false, true);
-    }
+		eyegui::setElementActivity(_pTabOverviewLayout, "reload_tab", false, true);
+		eyegui::setElementActivity(_pTabOverviewLayout, "close_tab", false, true);
+	}
 }
 
 int Web::CalculatePageCountOfTabOverview() const
 {
-    return ((int)_tabs.size() / SLOTS_PER_TAB_OVERVIEW_PAGE) + 1;
+	return ((int)_tabs.size() / SLOTS_PER_TAB_OVERVIEW_PAGE) + 1;
 }
 
 void Web::UpdateTabOverviewIcon()
@@ -850,20 +850,20 @@ bool Web::ValidateURL(const std::string& rURL) const
 		valid |= std::regex_match(rURL, *(_upFILEregex.get()));
 	}
 	catch (...) { valid = true; } // in case of failed validation, assume it is a file since it seems to be complicated
-	
+
 	// Return result
 	return valid;
 }
 
 Web::TabJob::TabJob(Tab* pCaller)
 {
-    _pCaller = pCaller;
+	_pCaller = pCaller;
 }
 
 void Web::AddTabAfterJob::Execute(Web* pCallee)
 {
 	// Add tab after caller
-    pCallee->AddTabAfter(_pCaller, _URL, _show);
+	pCallee->AddTabAfter(_pCaller, _URL, _show);
 
 	// Flash tab overview button to indicate, that new tab was created by application
 	eyegui::flash(pCallee->_pWebLayout, "tab_overview");
@@ -1060,7 +1060,7 @@ void Web::WebButtonListener::up(eyegui::Layout* pLayout, std::string id)
 
 void Web::DeletePageFromHistoryJob::Execute(Web * pCallee)
 {
-	LogDebug("Web: DeletePageFromHistoryJob called for url=", _page.URL,", title=", _page.title);
+	LogDebug("Web: DeletePageFromHistoryJob called for url=", _page.URL, ", title=", _page.title);
 
 	// Add page to history
 	pCallee->_upHistoryManager->DeletePageByUrl(_page, _deleteOnlyFirst);
@@ -1073,6 +1073,11 @@ void Web::actionsOfVoice(VoiceResult voiceResult) {
 	{
 	case VoiceAction::NO_ACTION:
 		break;
+
+		// ###############################
+		// ### TAB       CONTROL       ###
+		// ###############################
+
 	case VoiceAction::SCROLL_UP:
 	{
 		int tabId = _currentTabId;
@@ -1129,19 +1134,37 @@ void Web::actionsOfVoice(VoiceResult voiceResult) {
 	{
 		int tabId = _currentTabId;
 		if (tabId >= 0)
-			_tabs.at(tabId)->EmulateMouseWheelScrolling(0, -_tabs.at(tabId)->GetPageHeight());   }
+			_tabs.at(tabId)->EmulateMouseWheelScrolling(0, -_tabs.at(tabId)->GetWindowHeight());   }
 	break;
 	case VoiceAction::TOP:
 	{
 		int tabId = _currentTabId;
-		if (tabId >= 0)_tabs.at(tabId)->EmulateMouseWheelScrolling(0, _tabs.at(tabId)->GetPageHeight());  }
+		if (tabId >= 0)_tabs.at(tabId)->EmulateMouseWheelScrolling(0, _tabs.at(tabId)->GetWindowHeight());  }
 	break;
 	case VoiceAction::RELOAD:
 	{
 		int tabId = _currentTabId;
 		if (tabId >= 0)
-			_tabs.at(tabId)->Reload(); }
-	break;
+			_tabs.at(tabId)->Reload(); 
+	}break;
+	case VoiceAction::NEW_TAB:
+	{
+		// Add tab
+		int tabId = AddTab(BLANK_PAGE_URL, true);
+
+		// Close tab overview
+		ShowTabOverview(false);
+
+		// Open URLInput to type in URL which should be loaded in new tab
+		_upURLInput->Activate(tabId);
+
+		JSMailer::instance().Send("new_tab");
+		LabStreamMailer::instance().Send("Open new tab"); 
+	}break;
+
+	// ###############################
+	// ### INPUT     CONTROL       ###
+	// ###############################
 	case VoiceAction::GO_TO: {
 		if (!voiceResult.keyworkds.empty())
 		{
@@ -1153,28 +1176,95 @@ void Web::actionsOfVoice(VoiceResult voiceResult) {
 			_pMaster->PushNotification(url16, MasterNotificationInterface::Type::NEUTRAL, false);
 			if (tabId >= 0)
 				_tabs.at(tabId)->OpenURL(voiceResult.keyworkds);
-		}
-	}
-							 break;
+		}}break;
 	case VoiceAction::SEARCH: {
 		if (!voiceResult.keyworkds.empty())
-		{
-			dictationOfVoice(voiceResult.keyworkds);
-		}
-	}
-							  break;
-	case VoiceAction::VIDEO_INPUT: {
-		if (!voiceResult.keyworkds.empty())
-		{
-		}
-	}
-								   break;
+			dictationOfVoice(voiceResult.keyworkds); 
+	}break;
 	case VoiceAction::TEXT_INPUT: {
 		if (!voiceResult.keyworkds.empty())
+			try
 		{
+			int index = std::stoi(voiceResult.keyworkds);
+			int tabId = _currentTabId;
+			if (tabId >= 0)
+				_tabs.at(tabId)->ScheduleTextInputTrigger(index - 1);
 		}
-	}
-								  break;
+		catch (const char *exception) {
+			_pMaster->PushNotification(u"The number is not valid", MasterNotificationInterface::Type::WARNING, false);
+		}} break;
+
+
+			// ###############################
+			// ### CLICK     CONTROL       ###
+			// ###############################
+
+	case VoiceAction::CLICK: {}break;
+
+		// ###############################
+		// ### TAB VIDEO CONTROL       ###
+		// ###############################
+	case VoiceAction::VIDEO_INPUT: {
+		if (!voiceResult.keyworkds.empty())
+			try
+		{
+			int index = std::stoi(voiceResult.keyworkds);
+			int tabId = _currentTabId;
+			if (tabId >= 0)
+				_tabs.at(tabId)->ScheduleVideoModeTrigger(index - 1);
+		}
+		catch (const char *exception) {
+			_pMaster->PushNotification(u"The number is not valid", MasterNotificationInterface::Type::WARNING, false);
+		}} break;
+	case VoiceAction::INCREASE: {
+		int tabId = _currentTabId;
+		if (tabId >= 0)
+			_tabs.at(tabId)->IncreaseVideoVolume();
+	}	break;
+	case VoiceAction::DECREASE: {
+		int tabId = _currentTabId;
+		if (tabId >= 0)
+			_tabs.at(tabId)->DecreaseVideoVolume();
+	}	break;
+	case VoiceAction::PLAY: {
+		int tabId = _currentTabId;
+		if (tabId >= 0)
+			_tabs.at(tabId)->PlayVideo();
+	}	break;
+	case VoiceAction::STOP: {
+		int tabId = _currentTabId;
+		if (tabId >= 0)
+			_tabs.at(tabId)->StopVideo();
+	}	break;
+	case VoiceAction::MUTE: {
+		int tabId = _currentTabId;
+		if (tabId >= 0)
+			_tabs.at(tabId)->MuteVideo();
+	}	break;
+	case VoiceAction::UNMUTE: {
+		int tabId = _currentTabId;
+		if (tabId >= 0)
+			_tabs.at(tabId)->UnmuteVideo();
+	}	break;
+	case VoiceAction::JUMP: {
+		if (!voiceResult.keyworkds.empty())
+			try
+		{
+			float seconds = std::stof(voiceResult.keyworkds);
+			int tabId = _currentTabId;
+			if (tabId >= 0)
+				_tabs.at(tabId)->JumpToVideo(seconds);
+		}
+		catch (const char *exception) {
+			_pMaster->PushNotification(u"The time is not valid", MasterNotificationInterface::Type::WARNING, false);
+		}}break;
+
+							   /*	case VoiceAction::: {
+									   int tabId = _currentTabId;
+									   if (tabId >= 0)
+										   _tabs.at(tabId)->;
+								   }	break;
+							   */
 	default:
 		break;
 	}
@@ -1185,12 +1275,14 @@ void Web::dictationOfVoice(std::string transcription) {
 	transcription = transcription;
 	std::u16string s16;
 	eyegui_helper::convertUTF8ToUTF16(transcription, s16);
+	//TODO:: 
+	_tabs.at(_currentTabId)->SetContentOfTextBlock("text_block", s16);
 
 	std::string _overlayTextEditId = "text_input_action_text_edit";
 	std::string _overlayWordSuggestId = "text_input_action_word_suggest";
 	// Add content from keyboard
 	_tabs.at(_currentTabId)->AddContentAtCursorInTextEdit(_overlayTextEditId, s16);
-
+	
 	// Refresh suggestions
 	_tabs.at(_currentTabId)->DisplaySuggestionsInWordSuggest(
 		_overlayWordSuggestId,
