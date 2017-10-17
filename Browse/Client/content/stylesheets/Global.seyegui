@@ -132,7 +132,7 @@ notification : default
 	BackgroundColor = 0xFF6000FF
 }
 
-dangerous : default
+dangerous
 {
 	ButtonThresholdIncreaseDuration = 2
 }
