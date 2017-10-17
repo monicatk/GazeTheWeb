@@ -116,10 +116,10 @@ void FetchSamples(SampleQueue& rspSamples)
 	eyetracker_global::FetchSamples(rspSamples);
 }
 
-bool Calibrate()
+CalibrationResult Calibrate()
 {
 	// Start calibration
-	return iV_Calibrate() == RET_SUCCESS;
+	return iV_Calibrate() == RET_SUCCESS ? CalibrationResult::OK : CalibrationResult::FAILED;
 }
 
 void ContinueLabStream()

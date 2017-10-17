@@ -33,6 +33,9 @@ public:
     // Deactivate
     virtual void Deactivate() = 0;
 
+	// Trigger in next update
+	virtual void Schedule() = 0;
+
 protected:
 
     // Pointer to tab interface

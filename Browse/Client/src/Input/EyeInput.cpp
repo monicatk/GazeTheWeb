@@ -385,16 +385,16 @@ std::shared_ptr<Input> EyeInput::Update(
 	return spInput;
 }
 
-bool EyeInput::Calibrate()
+CalibrationResult EyeInput::Calibrate()
 {
-	bool success = false;
+	CalibrationResult result = CalibrationResult::NOT_SUPPORTED;
 #ifdef _WIN32
 	if (_info.connected && _procCalibrate != NULL)
 	{
-		success = _procCalibrate();
+		result = _procCalibrate();
 	}
 #endif // _WIN32
-	return success;
+	return result;
 }
 
 bool EyeInput::SamplesReceived() const

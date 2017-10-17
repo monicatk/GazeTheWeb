@@ -692,6 +692,60 @@ void Tab::NotifyClick(std::string tag, std::string id, float x, float y)
 	}
 }
 
+void Tab::ScheduleTextInputTrigger(int id)
+{
+	if (!_pipelineActive) // TODO: would be better to ask whether trigger is active
+	{
+		auto iter = _textInputTriggers.find(id);
+		if (iter != _textInputTriggers.end())
+		{
+			iter->second->Schedule();
+		}
+	}
+}
+
+void Tab::ScheduleSelectFieldTrigger(int id)
+{
+	if (!_pipelineActive) // TODO: would be better to ask whether trigger is active
+	{
+		auto iter = _selectFieldTriggers.find(id);
+		if (iter != _selectFieldTriggers.end())
+		{
+			iter->second->Schedule();
+		}
+	}
+}
+
+void Tab::ScheduleVideoModeTrigger(int id)
+{
+	if (!_pipelineActive) // TODO: would be better to ask whether trigger is active
+	{
+		auto iter = _videoModeTriggers.find(id);
+		if (iter != _videoModeTriggers.end())
+		{
+			iter->second->Schedule();
+		}
+	}
+}
+
+std::vector<Tab::DOMLinkInfo> Tab::RetrieveDOMLinkInfos() const
+{
+	std::vector<Tab::DOMLinkInfo> result;
+	result.reserve(_TextLinkMap.size());
+	for (const auto& rLink : _TextLinkMap)
+	{
+		if (!rLink.second->GetRects().empty()) // there is at least one rectangle
+		{
+			std::string text = rLink.second->GetText();
+			if (!text.empty()) // there is some text
+			{
+				result.push_back(Tab::DOMLinkInfo(rLink.second->GetRects(), text));
+			}
+		}
+	}
+	return result;
+}
+
 void Tab::SetPipelineActivity(bool active)
 {
 	if (active)

@@ -13,6 +13,7 @@
 
 // Global variables
 static bool serverOwner = false;
+static const int RECALIBRATION_ATTEMPTS = 3;
 
 int __stdcall SampleCallbackFunction(SampleStruct sampleData)
 {
@@ -145,34 +146,56 @@ void FetchSamples(SampleQueue& rspSamples)
 	eyetracker_global::FetchSamples(rspSamples);
 }
 
-bool Calibrate()
+CalibrationResult Calibrate()
 {
-	// Start calibration (setup does not work of licensing reasons)
-	bool success = iV_Calibrate() == RET_SUCCESS;
+	// Start calibration
+	CalibrationResult result = iV_Calibrate() == RET_SUCCESS ? CalibrationResult::OK : CalibrationResult::FAILED;
 
 	// Check calibration points
-	for (int i = 1; i <= 5; i++)
+	if (result == CalibrationResult::OK) // refine result
 	{
-		for (int j = 0; j < 3; j++) // three attempts per point
+		for (int i = 1; i <= 5; i++) // go over calibration points
 		{
-			CalibrationPointQualityStruct left, right;
-			iV_GetCalibrationQuality(i, &left, &right);
-			if (
-				(left.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
-				|| (right.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
-				|| (left.qualityIndex < 0.5f && right.qualityIndex < 0.5f))
+			int count = 0;
+			while(true)
 			{
-				iV_RecalibrateOnePoint(i);
-			}
-			else
-			{
-				break; // break the loop of this point
+				// Check calibration quality of this calibration point
+				CalibrationPointQualityStruct left, right;
+				iV_GetCalibrationQuality(i, &left, &right);
+				bool badCalibration =
+					(left.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
+					|| (right.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
+					|| (left.qualityIndex < 0.5f && right.qualityIndex < 0.5f);
+
+				// Check count of attempts
+				if (count >= RECALIBRATION_ATTEMPTS)
+				{
+					// At bad calibration of this calibration point, set calibration result to bad
+					if (badCalibration)
+					{
+						result = CalibrationResult::BAD;
+					}
+					break;
+				}
+
+				// Decide how to proceed
+				if (badCalibration) // bad calibration
+				{
+					iV_RecalibrateOnePoint(i);
+				}
+				else // good calibration
+				{
+					break; // break the loop of this point
+				}
+
+				// Increase count of attempts
+				count++;
 			}
 		}
 	}
 
 	// Return whether successful
-	return success;
+	return result;
 }
 
 void ContinueLabStream()

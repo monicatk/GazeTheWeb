@@ -87,6 +87,7 @@ notification:eye_tracker_status:connected=מחובר Eye Tracking Driver
 notification:eye_tracker_status:disconnected=מנותק Eye Tracking Driver
 notification:calibration_success=כיול מוצלח
 notification:calibration_failure=כיול נכשל
+notification:calibration_bad=TODO
 notification:data_transfer_continued=העברת נתונים הופעלה
 notification:data_transfer_paused=העברת נתונים הושהתה
 super_calibration:continue=המשך

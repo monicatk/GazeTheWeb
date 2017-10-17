@@ -15,4 +15,8 @@ struct EyetrackerInfo
 	bool geometrySetupSuccessful = false;
 };
 
+
+// Enumeration about calibration
+enum CalibrationResult { NOT_SUPPORTED, OK, BAD, FAILED };
+
 #endif EYETRACKERINFO_H_

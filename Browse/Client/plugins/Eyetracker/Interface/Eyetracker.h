@@ -35,7 +35,7 @@ extern "C" {
 	DLL_API void FetchSamples(SampleQueue& rspSamples);
 
 	// Perform calibration, returns whether succesfull
-	DLL_API bool Calibrate();
+	DLL_API CalibrationResult Calibrate();
 
 	// Continue lab streaming layer streaming
 	DLL_API void ContinueLabStream();

@@ -40,7 +40,7 @@ namespace setup
 	static const bool	CONNECT_OPEN_GAZE = false;
 	static const bool	CONNECT_SMI_IVIEWX = false;
 	static const bool	CONNECT_VI_MYGAZE = true | DEPLOYMENT;
-	static const bool	CONNECT_TOBII_EYEX = false;
+	static const bool	CONNECT_TOBII_EYEX = true;
 	static const float	DURATION_BEFORE_INPUT = 1.f; // wait one second before accepting input
 	static const float	MAX_AGE_OF_USED_GAZE = 0.25f; // only accept gaze as input that is not older than one second (TODO: this is not used by filter but by master to determine when to stop taking gaze input as serious)
 	static const float	DURATION_BEFORE_SUPER_CALIBRATION = 3.f; // duration until recalibration is offered after receiving no gaze samples
@@ -55,6 +55,7 @@ namespace setup
 	static const FilterKernel FILTER_KERNEL = FilterKernel::GAUSSIAN;
 	static const int	FILTER_WINDOW_SIZE = 30;
 	static const bool	FILTER_USE_OUTLIER_REMOVAL = true;
+	static const bool	USE_EYEGUI_DRIFT_MAP = true && !DEMO_MODE;
 
 	// Distortion
 	static const bool	EYEINPUT_DISTORT_GAZE = false && !DEPLOYMENT;
@@ -71,6 +72,7 @@ namespace setup
 	static const int			SOCIAL_RECORD_DIGIT_COUNT = 6;
 	static const bool			SOCIAL_RECORD_PERSIST_UNKNOWN = true;
 	static const std::string	DATE_FORMAT = "%d-%m-%Y %H-%M-%S";
+	static const bool			TAB_TRIGGER_SHOW_BADGE = true;
 
 	// Other
 	static const bool	ENABLE_WEBGL = false; // only on Windows
