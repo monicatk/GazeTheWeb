@@ -60,7 +60,7 @@ std::set<std::string> voiceActionKeys = {
 };
 
 std::map<std::string, std::string> textToDigit = {
-	{ "one","1"},{"juan","1"}, { "two","2" },{ "to","2" },
+	{"zero","0"}, { "one","1"},{"juan","1"}, { "two","2" },{ "to","2" },
 	{ "three","3" },{ "four","4" },	{ "for","4" },
 	{ "five","5" },{ "six","6" },{ "sex","6" },
 	{ "seven","7" },{ "eight","8" },{ "att","8" },
@@ -69,7 +69,7 @@ std::map<std::string, std::string> textToDigit = {
 	
 };
 std::set<std::string> textToDigitKeyKeys = {
-	"one","two","three","four","five","six","seven","eight","nine","ten",
+	"zero","one","two","three","four","five","six","seven","eight","nine","ten",
 	"juan","to","for","att","sex","tan"
 };
 

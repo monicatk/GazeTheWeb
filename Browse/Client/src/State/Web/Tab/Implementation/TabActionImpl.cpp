@@ -178,3 +178,8 @@ void Tab::NotifyTextInput(std::string id, int charCount, int charDistance, float
 		_spSocialRecord->AddTextInput(id, charCount, charDistance, x, y, duration);
 	}
 }
+
+void Tab::KeyboardActionIsActive(bool active)
+{
+	_keyboardActive = active;
+}

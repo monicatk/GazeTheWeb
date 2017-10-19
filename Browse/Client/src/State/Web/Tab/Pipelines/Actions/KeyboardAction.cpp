@@ -497,12 +497,18 @@ void KeyboardAction::Activate()
 
 	// Put text into preview
 	_pTab->AddContentAtCursorInTextEdit(_overlayTextEditId, text); // TODO: set content would be better here
+
+	// Tell tab about me
+	_pTab->KeyboardActionIsActive(true);
 }
 
 void KeyboardAction::Deactivate()
 {
 	// Set visibility of floating frame
     _pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayFrameIndex, false);
+
+	// Tell tab about me
+	_pTab->KeyboardActionIsActive(false);
 }
 
 void KeyboardAction::Abort()

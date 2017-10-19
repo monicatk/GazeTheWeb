@@ -320,6 +320,9 @@ public:
 	// Set WebViewParameters for WebView
 	virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }
 
+	// Tell tab that keyboard action is active
+	virtual void KeyboardActionIsActive(bool active);
+
     // #########################
     // ### TAB CEF INTERFACE ###
     // #########################
@@ -426,6 +429,8 @@ public:
 	virtual void UnmuteVideo();
 	// jump to some seconds of the video
 	virtual void JumpToVideo(float seconds);
+
+	double getPageHeight() const { return _pageHeight; }
 
 private:
 
@@ -718,6 +723,9 @@ private:
 
 	// Id of DOMVideo in map that is currently shown in video mode
 	int _videoModeId = -1; // -1 is indicator that currently no video mode active
+
+	// Marker whether a keyboard is currently active
+	bool _keyboardActive = false;
 };
 
 #endif // TAB_H_

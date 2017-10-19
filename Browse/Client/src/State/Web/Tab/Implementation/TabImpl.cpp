@@ -827,7 +827,7 @@ void Tab::ExitVideoMode()
 		}
 
 		// Reset id
-		_videoModeId = -1; // indicating that video mode is off
+		//_videoModeId = -1; // indicating that video mode is off
 
 		// Set visibility of layout
 		eyegui::setVisibilityOfLayout(_pVideoModeLayout, false, false, true);

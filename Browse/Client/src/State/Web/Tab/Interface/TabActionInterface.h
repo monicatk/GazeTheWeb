@@ -72,10 +72,14 @@ public:
     void Reset()
     {
         SetWebViewParameters(WebViewParameters());
+		KeyboardActionIsActive(false);
     }
 
     // Set WebViewParameters for web view
     virtual void SetWebViewParameters(WebViewParameters parameters) = 0;
+
+	// Tell tab that keyboard action is active
+	virtual void KeyboardActionIsActive(bool active) = 0;
 
 protected:
 

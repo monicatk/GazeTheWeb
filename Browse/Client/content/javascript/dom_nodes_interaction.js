@@ -265,3 +265,9 @@ DOMVideo.prototype.showControls = function(val)
 }
 
 ConsolePrint("Successfully imported dom_nodes_interaction.js!");
+
+DOMVideo.prototype.changeVolume = function () {
+    var videoList = window.domVideos;
+
+    return 
+}

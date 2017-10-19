@@ -1082,13 +1082,13 @@ void Web::actionsOfVoice(VoiceResult voiceResult) {
 	{
 		int tabId = _currentTabId;
 		if (tabId >= 0)
-			_tabs.at(tabId)->EmulateMouseWheelScrolling(0, _tabs.at(tabId)->GetWindowHeight()); }
+			_tabs.at(tabId)->EmulateMouseWheelScrolling(0, _tabs.at(tabId)->getPageHeight()); }
 	break;
 	case VoiceAction::SCROLL_DOWN:
 	{
 		int tabId = _currentTabId;
 		if (tabId >= 0)
-			_tabs.at(tabId)->EmulateMouseWheelScrolling(0, -_tabs.at(tabId)->GetWindowHeight()); }
+			_tabs.at(tabId)->EmulateMouseWheelScrolling(0, -_tabs.at(tabId)->getPageHeight()); }
 	break;
 	case VoiceAction::BOOKMARK:
 	{

@@ -884,6 +884,8 @@ void Master::Loop()
 		// Disable depth test for drawing
 		glDisable(GL_DEPTH_TEST);
 
+		spInput->
+
         // Update current state and draw it (one should use here pointer instead of switch case)
         StateType nextState = StateType::WEB;
         switch (_currentState)
