@@ -250,7 +250,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// Create splash screen GUI, render it one time and throw it away
 	eyegui::GUI* pSplashGUI = guiBuilder.construct();
 	eyegui::loadStyleSheet(pSplashGUI, "stylesheets/Global.seyegui"); // load styling
-	eyegui::addLayout(pSplashGUI, "layouts/Splash.xeyegui"); // TODO: fill version string
+	eyegui::addLayout(pSplashGUI, "layouts/Splash.xeyegui");
 	eyegui::updateGUI(pSplashGUI, 1.f, eyegui::Input()); // update GUI one time for resizing
 	eyegui::drawGUI(pSplashGUI);
 	glfwSwapBuffers(_pWindow);

@@ -25,7 +25,7 @@
 										<!-- <boxbutton icon="icons/GazeMouse.png" desckey="tab:gaze_mouse" id="gaze_mouse" switch="true"/> -->
 										<!-- <boxbutton icon="icons/Circle.png" id="test_button"/> -->
 		  						</stack>
-		  						<textblock props="FontColor=0x707070FF" content="" id="version_info" style="default_noback" relativescale="3%" alignment="center" verticalalignment="center" fontsize="small"/>
+		  						<textblock props="FontColor=0x707070FF" id="version_info" style="default_noback" relativescale="3%" alignment="center" verticalalignment="center" fontsize="small"/>
   							</stack>
     					</column>
     				</row>
