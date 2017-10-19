@@ -422,7 +422,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT, 1, &startPromise); // adds one to the count
 	_startIndex = startFuture.get() - 1; // is zero for both initial start and failure
 
-										 // Create record about start
+	// Create record about start
 	nlohmann::json record = { { "date", GetDate() } };
 	FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_APPLICATION_START, record, std::to_string(_startIndex)); // send JSON to database
 
@@ -1013,6 +1013,38 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
 			case GLFW_KEY_6: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::MAGNIFICATION); break; }
 			case GLFW_KEY_7: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::FUTURE); break; }
 			case GLFW_KEY_SPACE: { _upVoiceInput->StartAudioRecording(); break; }
+			case GLFW_KEY_M: {
+
+				// Store grid in Firebase
+				eyegui::DriftGrid grid = eyegui::getCurrentDriftMap(_pGUI);
+				std::vector<float> driftX; driftX.reserve(grid.RES_X + 1);
+				std::vector<float> driftY; driftY.reserve(grid.RES_Y + 1);
+				for (int x = 0; x <= grid.RES_X; x++)
+				{
+					for (int y = 0; y <= grid.RES_Y; y++)
+					{
+						driftX.push_back(grid.verts[x][y].first);
+						driftY.push_back(grid.verts[x][y].second);
+					}
+				}
+				nlohmann::json gridJSON =
+				{
+					{ "resX", grid.RES_X },
+					{ "resY", grid.RES_Y },
+					{ "driftX", driftX },
+					{ "driftY", driftY }
+				};
+				PushBackAsyncJob(
+					[gridJSON]() // provide copy of data
+				{
+					std::promise<int> promise; auto future = promise.get_future(); // future provides index
+					FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_DRIFT_GRID_COUNT, 1, &promise); // adds one to the count
+					FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_DRIFT_GRID, gridJSON, std::to_string(future.get())); // send JSON to database
+					return true; // give the future some value
+				});
+
+				break;
+			}
         }
     }
 	else if (action == GLFW_RELEASE)

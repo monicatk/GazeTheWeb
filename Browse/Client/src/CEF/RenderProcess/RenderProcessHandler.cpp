@@ -300,6 +300,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 			if (!objGetter->IsFunction())
 			{
 				IPCLog(browser, "Renderer: Could not find JS object getter function '" + js_obj_getter_name + "'.");
+				context->Exit();
 				return true;
 			}
 
@@ -322,6 +323,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 					args->SetList(args_count++, listValue);
 				}
 			}
+
 			if (args->GetSize() <= 2)
 			{
 				LogDebug(browser, "Renderer: ERROR processing " + js_obj_getter_name + "(" + std::to_string(id) + ")!");

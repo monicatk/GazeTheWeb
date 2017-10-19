@@ -43,6 +43,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	if (requestString.compare(0, 12, "#FaviconURL#") == 0)
 	{
 		auto split = SplitBySeparator(requestString, '#');
+
 		if (split.size() > 1)
 		{
 			// Currently, all finished image downloads trigger set up as favicon image in Tab

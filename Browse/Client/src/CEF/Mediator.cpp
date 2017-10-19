@@ -164,59 +164,6 @@ void Mediator::EmulateMouseWheelScrolling(TabCEFInterface * pTab, double deltaX,
     }
 }
 
-void Mediator::ReceiveIPCMessageforFavIcon(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
-{
-    const std::string& msgName = msg->GetName().ToString();
-
-    if (msgName == "ReceiveFavIconBytes")
-    {
-		LogDebug("Mediator: Received Favicon Bytes...");
-
-        CefRefPtr<CefListValue> args = msg->GetArgumentList();
-        int index = 0;
-        if(TabCEFInterface* pTab = GetTab(browser))
-        {
-            const int width = args->GetInt(index++);
-            const int height = args->GetInt(index++);
-
-            if (width <= 0 || height <= 0)
-            {
-                LogDebug("Mediator: Failure. Received favicon width or height less than zero!");
-
-                if (TabCEFInterface* pInnerTab = GetTab(browser))
-                {
-                    // Inform Tab anyway
-                    pInnerTab->ReceiveFaviconBytes(nullptr, width, height);
-                }
-            }
-            else
-            {
-                LogDebug("Mediator: Success. Copying favicon bytes to Tab... (w= ", width, ", h=", height,")");
-
-                // Extract width, height and byte information
-                std::unique_ptr<std::vector<unsigned char> > upData = std::unique_ptr<std::vector<unsigned char> >(new std::vector<unsigned char>);
-                for (int i = 0; i < height*width; i++)
-                {
-                    int four_bytes = args->GetInt(index++);
-
-                    for (int j = 3; j >= 0; j--)
-                    {
-                        // Read byte for each channel (RGBA) from 4 byte integer value
-                        upData->push_back((four_bytes >> (j*8)) & 0xFF);
-                    }
-                }
-
-                // Pipe extracted information to Tab
-                pTab->ReceiveFaviconBytes(std::move(upData), width, height);
-
-                // Save new favicon URL in Tab
-                //pTab->SetFavIconURL(iconUrl);	// TODO: With favicon callback, saving favicon URL in Tab really neccessary? I don't think so.
-            }
-
-        }
-    }
-}
-
 void Mediator::ResetFavicon(CefRefPtr<CefBrowser> browser)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
@@ -457,15 +404,16 @@ bool Mediator::ForwardFaviconBytes(CefRefPtr<CefBrowser> browser, CefRefPtr<CefI
 			LogInfo("Mediator: Favicon CefImage conversion failed due to byte stream being empty.");
 			return true;
 		}
-		
-		auto upData = std::unique_ptr< std::vector<unsigned char> >(new std::vector<unsigned char>());
-		upData->resize(byte_size / sizeof(unsigned char));
-
 		if (width * height * sizeof(unsigned char) > byte_size)
 		{
-			LogInfo("Mediator: Something went wrong when retrieving images resolution. Aborting...");
+			LogInfo("Mediator: Something went wrong when retrieving image's resolution. Aborting...");
 			return true;
 		}
+
+		// Write image bytes to unique_ptr
+		auto upData = std::unique_ptr< std::vector<unsigned char> >(new std::vector<unsigned char>());
+		upData->resize(byte_size / sizeof(unsigned char));
+		binary_value->GetData(static_cast<void*>(upData->data()), byte_size, 0);
 
 		pTab->ReceiveFaviconBytes(std::move(upData), width, height);
 		return true;
