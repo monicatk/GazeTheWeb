@@ -330,7 +330,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
         // STANDARD GUI IS VISIBLE
 
         // Gaze mouse
-        if(_gazeMouse && !(_pMaster->IsPaused()))
+        if(_gazeMouse && spInput->windowFocused && !_pMaster->IsPaused())
         {
             EmulateMouseCursor(spTabInput->webViewPixelGazeX, spTabInput->webViewPixelGazeY);
         }

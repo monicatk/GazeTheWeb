@@ -779,10 +779,12 @@ void Master::Loop()
         glfwGetCursorPos(_pWindow, &currentMouseX, &currentMouseY);
 
 		// Update eye input
+		int focused = glfwGetWindowAttrib(_pWindow, GLFW_FOCUSED);
 		int windowX = 0;
 		int windowY = 0;
 		glfwGetWindowPos(_pWindow, &windowX, &windowY);
 		auto spInput = _upEyeInput->Update(
+			focused > 0,
 			tpf,
 			currentMouseX,
 			currentMouseY,
@@ -829,8 +831,7 @@ void Master::Loop()
             RGBAToHexString(glm::vec4(0, 0, 0, MASTER_PAUSE_ALPHA * _pausedDimming.getValue())));
 
 		// Check whether input is desired
-		int focused = glfwGetWindowAttrib(_pWindow, GLFW_FOCUSED);
-		if ((focused <= 0) // window not focused
+		if ((!spInput->windowFocused) // window not focused
 			|| (_timeUntilInput > 0) // do not use input, yet
 			|| (!spInput->gazeEmulated && spInput->gazeAge > setup::MAX_AGE_OF_USED_GAZE)) // do not use gaze that is too old
 		{
