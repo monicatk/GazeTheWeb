@@ -356,6 +356,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// _upWeb->AddTab("http://html5-demos.appspot.com/static/fullscreen.html");
 	// _upWeb->AddTab(std::string(CONTENT_PATH) + "/websites/index.html");
 	_upWeb->AddTab(_upSettings->GetHomepage());
+	_upWeb->AddTab("http://augreal.mklab.iti.gr/mamem/testing/", false);
 
     // ### SUPER LAYOUT ###
 

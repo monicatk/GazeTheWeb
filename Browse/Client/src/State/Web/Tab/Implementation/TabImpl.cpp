@@ -330,7 +330,9 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
         // STANDARD GUI IS VISIBLE
 
         // Gaze mouse
-        if(_gazeMouse && spInput->windowFocused && !_pMaster->IsPaused())
+        if(
+			(_gazeMouse && spInput->windowFocused && !_pMaster->IsPaused())
+			|| ShortenURL(_url) == "augreal.mklab.iti.gr") // hack for MAMEM training and dashboard page to get gaze through mouse coordinate
         {
             EmulateMouseCursor(spTabInput->webViewPixelGazeX, spTabInput->webViewPixelGazeY);
         }
