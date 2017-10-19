@@ -1010,9 +1010,8 @@ std::string Tab::GetFaviconIdentifier() const
 }
 
 // increase the volumn of the video
-void Tab::IncreaseVideoVolume()
-{
-	auto iter = _VideoMap.find(_videoModeId);
+void Tab::IncreaseVideoVolume(int videoModeId) {
+	auto iter = _VideoMap.find(videoModeId);
 	if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 	{
 		iter->second->ChangeVolume(0.25f);
@@ -1020,50 +1019,58 @@ void Tab::IncreaseVideoVolume()
 }
 
 // decrease the volumn of the video
-void Tab::DecreaseVideoVolume() {
-	auto iter = _VideoMap.find(_videoModeId);
+void Tab::DecreaseVideoVolume(int videoModeId) {
+	auto iter = _VideoMap.find(videoModeId);
 	if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 	{
 		iter->second->ChangeVolume(-0.25f);
 	}
 }
 // play the video
-void Tab::PlayVideo() {
-	auto iter = _VideoMap.find(_videoModeId);
+void Tab::PlayVideo(int videoModeId) {
+	auto iter = _VideoMap.find(videoModeId);
 	if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 	{
 		iter->second->TogglePlayPause();
 	}
 }
 // stop the video
-void Tab::StopVideo() {
-	auto iter = _VideoMap.find(_videoModeId);
+void Tab::StopVideo(int videoModeId) {
+	auto iter = _VideoMap.find(videoModeId);
 	if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 	{
 		iter->second->TogglePlayPause();
 	}
 }
 // mute the video
-void Tab::MuteVideo() {
-	auto iter = _VideoMap.find(_videoModeId);
+void Tab::MuteVideo(int videoModeId) {
+	auto iter = _VideoMap.find(videoModeId);
 	if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 	{
 		iter->second->ToggleMuted();
 	}
 }
 // unmute the video
-void Tab::UnmuteVideo() {
-	auto iter = _VideoMap.find(_videoModeId);
+void Tab::UnmuteVideo(int videoModeId) {
+	auto iter = _VideoMap.find(videoModeId);
 	if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 	{
 		iter->second->ToggleMuted();
 	}
 }
 // jump to some seconds of the video
-void Tab::JumpToVideo(float seconds) {
-	auto iter = _VideoMap.find(_videoModeId);
+void Tab::JumpToVideo(float seconds, int videoModeId) {
+	auto iter = _VideoMap.find(videoModeId);
 	if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 	{
 		iter->second->JumpToSecond(seconds);
+	}
+}
+
+int Tab::ReturnVideoId() {
+	auto iter = _VideoMap.find(_videoModeId);
+	if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+	{
+		return  _videoModeId;
 	}
 }

@@ -416,21 +416,27 @@ public:
 	// ### TAB VIDEO CONTROL       ###
 	// ###############################
 	// increase the volumn of the video
-	virtual void IncreaseVideoVolume();
+	virtual void IncreaseVideoVolume(int videoModeId);
 	// decrease the volumn of the video
-	virtual void DecreaseVideoVolume();
+	virtual void DecreaseVideoVolume(int videoModeId);
 	// play the video
-	virtual void PlayVideo();
+	virtual void PlayVideo(int videoModeId);
 	// stop the video
-	virtual void StopVideo();
+	virtual void StopVideo(int videoModeId);
 	// mute the video
-	virtual void MuteVideo();
+	virtual void MuteVideo(int videoModeId);
 	// unmute the video
-	virtual void UnmuteVideo();
+	virtual void UnmuteVideo(int videoModeId);
 	// jump to some seconds of the video
-	virtual void JumpToVideo(float seconds);
+	virtual void JumpToVideo(float seconds, int videoModeId);
+
+	int ReturnVideoId();
+
+	int getVideoId() const { return _videoModeId; }
 
 	double getPageHeight() const { return _pageHeight; }
+
+	bool getKeyboardActive() const { return _keyboardActive; }
 
 private:
 
@@ -560,6 +566,8 @@ private:
 
 	// Unique name for favicon which is stored in eyeGUI
 	std::string GetFaviconIdentifier() const;
+
+	
 	
 
 

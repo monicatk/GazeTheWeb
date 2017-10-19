@@ -1149,6 +1149,17 @@ void Web::actionsOfVoice(VoiceResult voiceResult) {
 	}break;
 	case VoiceAction::NEW_TAB:
 	{
+		if (!voiceResult.keyworkds.empty()) {
+				int tabId = AddTab(voiceResult.keyworkds, true);
+				if (tabId >= 0)
+					_tabs.at(tabId)->OpenURL(voiceResult.keyworkds);
+				std::u16string url16;
+			eyegui_helper::convertUTF8ToUTF16(voiceResult.keyworkds, url16);
+			url16 = u"Going to " + url16;
+			_pMaster->PushNotification(url16, MasterNotificationInterface::Type::NEUTRAL, false);
+			
+		}
+		else{
 		// Add tab
 		int tabId = AddTab(BLANK_PAGE_URL, true);
 
@@ -1159,7 +1170,7 @@ void Web::actionsOfVoice(VoiceResult voiceResult) {
 		_upURLInput->Activate(tabId);
 
 		JSMailer::instance().Send("new_tab");
-		LabStreamMailer::instance().Send("Open new tab"); 
+		LabStreamMailer::instance().Send("Open new tab"); }
 	}break;
 
 	// ###############################
@@ -1218,33 +1229,39 @@ void Web::actionsOfVoice(VoiceResult voiceResult) {
 		}} break;
 	case VoiceAction::INCREASE: {
 		int tabId = _currentTabId;
+		int videoId = _tabs.at(tabId)->getVideoId();
 		if (tabId >= 0)
-			_tabs.at(tabId)->IncreaseVideoVolume();
+			_tabs.at(tabId)->IncreaseVideoVolume(videoId);
 	}	break;
 	case VoiceAction::DECREASE: {
 		int tabId = _currentTabId;
+		int videoId = _tabs.at(tabId)->getVideoId();
 		if (tabId >= 0)
-			_tabs.at(tabId)->DecreaseVideoVolume();
+			_tabs.at(tabId)->DecreaseVideoVolume(videoId);
 	}	break;
 	case VoiceAction::PLAY: {
 		int tabId = _currentTabId;
+		int videoId = _tabs.at(tabId)->getVideoId();
 		if (tabId >= 0)
-			_tabs.at(tabId)->PlayVideo();
+			_tabs.at(tabId)->PlayVideo(videoId);
 	}	break;
 	case VoiceAction::STOP: {
 		int tabId = _currentTabId;
+		int videoId = _tabs.at(tabId)->getVideoId();
 		if (tabId >= 0)
-			_tabs.at(tabId)->StopVideo();
+			_tabs.at(tabId)->StopVideo(videoId);
 	}	break;
 	case VoiceAction::MUTE: {
 		int tabId = _currentTabId;
+		int videoId = _tabs.at(tabId)->getVideoId();
 		if (tabId >= 0)
-			_tabs.at(tabId)->MuteVideo();
+			_tabs.at(tabId)->MuteVideo(videoId);
 	}	break;
 	case VoiceAction::UNMUTE: {
 		int tabId = _currentTabId;
+		int videoId = _tabs.at(tabId)->getVideoId();
 		if (tabId >= 0)
-			_tabs.at(tabId)->UnmuteVideo();
+			_tabs.at(tabId)->UnmuteVideo(videoId);
 	}	break;
 	case VoiceAction::JUMP: {
 		if (!voiceResult.keyworkds.empty())
@@ -1252,8 +1269,9 @@ void Web::actionsOfVoice(VoiceResult voiceResult) {
 		{
 			float seconds = std::stof(voiceResult.keyworkds);
 			int tabId = _currentTabId;
+			int videoId = _tabs.at(tabId)->getVideoId();
 			if (tabId >= 0)
-				_tabs.at(tabId)->JumpToVideo(seconds);
+				_tabs.at(tabId)->JumpToVideo(seconds, videoId);
 		}
 		catch (const char *exception) {
 			_pMaster->PushNotification(u"The time is not valid", MasterNotificationInterface::Type::WARNING, false);
