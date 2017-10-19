@@ -86,6 +86,9 @@ EyetrackerInfo Connect(EyetrackerGeometry geometry)
 		// Enable low power pick up mode
 		iV_EnableLowPowerPickUpMode();
 
+		// Set tracking (not licensed)
+		// iV_SetTrackingParameter(ET_PARAM_EYE_BOTH, ET_PARAM_SMARTBINOCULAR, 0);
+
 		// Get system info
 		SystemInfoStruct systemInfoData;
 		iV_GetSystemInfo(&systemInfoData);
