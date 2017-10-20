@@ -1259,9 +1259,13 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 		float finalLinkY = 0.0;
 		int tabId = _currentTabId;
 		if (tabId >= 0) {
+			//LogInfo("scrollingOffset Y:", _tabs.at(tabId)->getScrollingOffsetY(), " ,X:", _tabs.at(tabId)->getScrollingOffsetX());
+			//LogInfo("web Y:", _tabs.at(tabId)->GetWebViewY(), " ,X:", _tabs.at(tabId)->GetWebViewX());
+			//LogInfo("Window Height:", _tabs.at(tabId)->GetWindowHeight(), " , width:", _tabs.at(tabId)->GetWindowWidth());
+			//LogInfo("Web Height:", _tabs.at(tabId)->GetWebViewHeight(), " , width:", _tabs.at(tabId)->GetWebViewWidth());
 			float gazeYOffset = input->gazeY + _tabs.at(tabId)->getScrollingOffsetY();
-			float gazeXOffset = input->gazeX;
-			std::vector<Tab::DOMLinkInfo> domLinkList = _tabs.at(tabId)->RetrieveDOMLinkInfos();
+			float gazeXOffset = input->gazeX - _tabs.at(tabId)->GetWebViewX();
+			LogInfo("gaze offset X:", gazeXOffset, " ,Y:", gazeYOffset);std::vector<Tab::DOMLinkInfo> domLinkList = _tabs.at(tabId)->RetrieveDOMLinkInfos();
 			int levDisMax = 20;
 			float shortestDis = 100.f;
 			for (Tab::DOMLinkInfo link : domLinkList) {
@@ -1285,7 +1289,9 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 							float dx = glm::max(glm::abs(gazeXOffset - rect.Center().x) - (rect.Width() / 2.f), 0.f);
 							float dy = glm::max(glm::abs(gazeYOffset - rect.Center().y) - (rect.Height() / 2.f), 0.f);
 							float distance = glm::sqrt((dx * dx) + (dy * dy));
-							if (shortestDis > distance) {
+							if (distance<100.f)
+							LogInfo(link.text,  ":", distance, "  ,x:", rect.Center().x, " ,y:", rect.Center().y);
+								if (shortestDis > distance) {
 								finalLinkY = rect.Center().y;
 								finalLinkX = rect.Center().x;
 								shortestDis = distance;
@@ -1293,7 +1299,7 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 						}
 					}
 				}			
-			_tabs.at(tabId)->EmulateLeftMouseButtonClick(finalLinkX, finalLinkY - _tabs.at(tabId)->getScrollingOffsetY());
+			_tabs.at(tabId)->EmulateLeftMouseButtonClick(finalLinkX, finalLinkY);
 		}
 	}break;
 
@@ -1316,35 +1322,35 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 		int tabId = _currentTabId;
 		int videoId = _tabs.at(tabId)->getVideoId();
 		LogInfo("video id ", videoId);
-		if (tabId >= 0)
+		if (tabId >= 0 && videoId >= 0)
 			_tabs.at(tabId)->IncreaseVideoVolume(videoId);
 	}	break;
 	case VoiceAction::DECREASE: {
 		int tabId = _currentTabId;
 		int videoId = _tabs.at(tabId)->getVideoId();
 		LogInfo("video id ", videoId);
-		if (tabId >= 0)
+		if (tabId >= 0 && videoId >= 0)
 			_tabs.at(tabId)->DecreaseVideoVolume(videoId);
 	}	break;
 	case VoiceAction::PLAY: {
 		int tabId = _currentTabId;
 		int videoId = _tabs.at(tabId)->getVideoId();
 		LogInfo("video id ", videoId);
-		if (tabId >= 0)
+		if (tabId >= 0 && videoId >= 0)
 			_tabs.at(tabId)->PlayVideo(videoId);
 	}	break;
 	case VoiceAction::STOP: {
 		int tabId = _currentTabId;
 		int videoId = _tabs.at(tabId)->getVideoId();
 		LogInfo("video id ", videoId);
-		if (tabId >= 0)
+		if (tabId >= 0 && videoId >= 0)
 			_tabs.at(tabId)->StopVideo(videoId);
 	}	break;
 	case VoiceAction::MUTE: {
 		int tabId = _currentTabId;
 		int videoId = _tabs.at(tabId)->getVideoId();
 		LogInfo("video id ", videoId);
-		if (tabId >= 0)
+		if (tabId >= 0 && videoId >= 0)
 			_tabs.at(tabId)->MuteVideo(videoId);
 	}	break;
 	case VoiceAction::UNMUTE: {
@@ -1362,7 +1368,7 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 			int tabId = _currentTabId;
 			int videoId = _tabs.at(tabId)->getVideoId();
 			LogInfo("video id ", videoId);
-			if (tabId >= 0)
+			if (tabId >= 0 && videoId >= 0)
 				_tabs.at(tabId)->JumpToVideo(seconds, videoId);
 		}
 		catch (const char *exception) {

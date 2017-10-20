@@ -431,16 +431,15 @@ public:
 	// jump to some seconds of the video
 	virtual void JumpToVideo(float seconds, int videoModeId);
 
-	int ReturnVideoId();
-
-	int getVideoId() const { return _videoModeId; }
+	int getVideoId() const { return _lastVideoId; }
 
 	double getPageHeight() const { return _pageHeight; }
 
 	bool getKeyboardActive() const { return _keyboardActive; }
 
-	int getScrollingOffsetY() const { return _scrollingOffsetY; }
+	float getScrollingOffsetY() const { return _scrollingOffsetY; }
 
+	float getScrollingOffsetX() const { return _scrollingOffsetX; }
 private:
 
 	// Enumeration for icon state of tab
@@ -734,7 +733,8 @@ private:
 
 	// Id of DOMVideo in map that is currently shown in video mode
 	int _videoModeId = -1; // -1 is indicator that currently no video mode active
-
+	//last video id
+	int _lastVideoId=0;
 	// Marker whether a keyboard is currently active
 	bool _keyboardActive = false;
 };

@@ -206,6 +206,7 @@ void Tab::AddDOMVideo(CefRefPtr<CefBrowser> browser, int id)
 	// Add node to ID->node map
 	_VideoMap.emplace(id, spNode);
 
+	_lastVideoId = id;
 	// Create DOMTrigger
 	std::unique_ptr<VideoModeTrigger> upDOMTrigger = std::unique_ptr<VideoModeTrigger>(new VideoModeTrigger(this, _triggers, spNode,
 		[&](int id)

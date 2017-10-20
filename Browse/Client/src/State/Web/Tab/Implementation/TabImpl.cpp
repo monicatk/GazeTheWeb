@@ -1066,11 +1066,3 @@ void Tab::JumpToVideo(float seconds, int videoModeId) {
 		iter->second->JumpToSecond(seconds);
 	}
 }
-
-int Tab::ReturnVideoId() {
-	auto iter = _VideoMap.find(_videoModeId);
-	if (iter != _VideoMap.end()) // search for DOMVideo corresponding to videoModeId
-	{
-		return  _videoModeId;
-	}
-}
