@@ -115,6 +115,8 @@ public:
     // Get own id in web. Returns -1 if not found
     virtual int GetIdOfTab(Tab const * pCaller) const;
 
+	size_t uiLevenshteinDistance(const std::string & s1, const std::string & s2);
+
 	virtual void actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input);
 
 	virtual void dictationOfVoice(std::string transcript);

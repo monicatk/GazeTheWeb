@@ -1067,6 +1067,48 @@ void Web::DeletePageFromHistoryJob::Execute(Web * pCallee)
 }
 
 
+// levenshtein distance
+size_t Web::uiLevenshteinDistance(const std::string &s1, const std::string &s2)
+{
+	const size_t m(s1.size());
+	const size_t n(s2.size());
+
+	if (m == 0) return n;
+	if (n == 0) return m;
+
+	size_t *costs = new size_t[n + 1];
+
+	for (size_t k = 0; k <= n; k++) costs[k] = k;
+
+	size_t i = 0;
+	for (std::string::const_iterator it1 = s1.begin(); it1 != s1.end(); ++it1, ++i)
+	{
+		costs[0] = i + 1;
+		size_t corner = i;
+
+		size_t j = 0;
+		for (std::string::const_iterator it2 = s2.begin(); it2 != s2.end(); ++it2, ++j)
+		{
+			size_t upper = costs[j + 1];
+			if (*it1 == *it2)
+			{
+				costs[j + 1] = corner;
+			}
+			else
+			{
+				size_t t(upper < corner ? upper : corner);
+				costs[j + 1] = (costs[j] < t ? costs[j] : t) + 1;
+			}
+
+			corner = upper;
+		}
+	}
+
+	size_t result = costs[n];
+	delete[] costs;
+
+	return result;
+}
 
 void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) {
 	switch (voiceResult.action)
@@ -1225,19 +1267,21 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 			for (Tab::DOMLinkInfo link : domLinkList) {
 				std::vector<Rect> rectList = link.rects;
 				for (Rect rect : rectList) {
-					// gaze must be within (threshold  + the area of link )
-					if ((glm::abs(rect.top - gazeYOffset) < thresholdY || glm::abs(rect.bottom - gazeYOffset) < thresholdY) &&
-						(glm::abs(rect.right - gazeXOffset) < thresholdX || glm::abs(rect.left - gazeXOffset) < thresholdX)) {
-						//get the lev distance between text of link and transcription
-						if (!voiceResult.keyworkds.empty()){
-						int levDis = uiLevenshteinDistance(voiceResult.keyworkds, link.text);
-						if (levDis < levDisMax) {
-							finalLinkY = rect.Center().y;
-							finalLinkX = rect.Center().x;
-							levDisMax = levDis;
-						}}
+					//get the lev distance between text of link and transcription
+					if (!voiceResult.keyworkds.empty()) 
+						// gaze must be within (threshold  + the area of link )
+						if ((glm::abs(rect.top - gazeYOffset) < thresholdY || glm::abs(rect.bottom - gazeYOffset) < thresholdY) &&
+							(glm::abs(rect.right - gazeXOffset) < thresholdX || glm::abs(rect.left - gazeXOffset) < thresholdX)) {
+
+							int levDis = uiLevenshteinDistance(voiceResult.keyworkds, link.text);
+							if (levDis < levDisMax) {
+								finalLinkY = rect.Center().y;
+								finalLinkX = rect.Center().x;
+								levDisMax = levDis;
+							}
+						}
 						//get the distance of link and gaze
-						else {
+					if(levDisMax ==20) {
 							float dx = glm::max(glm::abs(gazeXOffset - rect.Center().x) - (rect.Width() / 2.f), 0.f);
 							float dy = glm::max(glm::abs(gazeYOffset - rect.Center().y) - (rect.Height() / 2.f), 0.f);
 							float distance = glm::sqrt((dx * dx) + (dy * dy));
@@ -1248,13 +1292,10 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 							}
 						}
 					}
-				}
-			}
+				}			
 			_tabs.at(tabId)->EmulateLeftMouseButtonClick(finalLinkX, finalLinkY - _tabs.at(tabId)->getScrollingOffsetY());
-
 		}
-		
-		}break;
+	}break;
 
 		// ###############################
 		// ### TAB VIDEO CONTROL       ###
@@ -1337,7 +1378,7 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 	default:
 		break;
 	}
-	}
+}
 
 
 void Web::dictationOfVoice(std::string transcription) {
@@ -1352,52 +1393,11 @@ void Web::dictationOfVoice(std::string transcription) {
 	std::string _overlayWordSuggestId = "text_input_action_word_suggest";
 	// Add content from keyboard
 	_tabs.at(_currentTabId)->AddContentAtCursorInTextEdit(_overlayTextEditId, s16);
-	
+
 	// Refresh suggestions
 	_tabs.at(_currentTabId)->DisplaySuggestionsInWordSuggest(
 		_overlayWordSuggestId,
 		s16);
 }
 
-// levenshtein distance
-size_t uiLevenshteinDistance(const std::string &s1, const std::string &s2)
-{
-	const size_t m(s1.size());
-	const size_t n(s2.size());
 
-	if (m == 0) return n;
-	if (n == 0) return m;
-
-	size_t *costs = new size_t[n + 1];
-
-	for (size_t k = 0; k <= n; k++) costs[k] = k;
-
-	size_t i = 0;
-	for (std::string::const_iterator it1 = s1.begin(); it1 != s1.end(); ++it1, ++i)
-	{
-		costs[0] = i + 1;
-		size_t corner = i;
-
-		size_t j = 0;
-		for (std::string::const_iterator it2 = s2.begin(); it2 != s2.end(); ++it2, ++j)
-		{
-			size_t upper = costs[j + 1];
-			if (*it1 == *it2)
-			{
-				costs[j + 1] = corner;
-			}
-			else
-			{
-				size_t t(upper < corner ? upper : corner);
-				costs[j + 1] = (costs[j] < t ? costs[j] : t) + 1;
-			}
-
-			corner = upper;
-		}
-	}
-
-	size_t result = costs[n];
-	delete[] costs;
-
-	return result;
-}
