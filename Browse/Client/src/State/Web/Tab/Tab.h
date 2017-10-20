@@ -427,6 +427,7 @@ public:
 	virtual void MuteVideo(int videoModeId);
 	// unmute the video
 	virtual void UnmuteVideo(int videoModeId);
+
 	// jump to some seconds of the video
 	virtual void JumpToVideo(float seconds, int videoModeId);
 
@@ -437,6 +438,8 @@ public:
 	double getPageHeight() const { return _pageHeight; }
 
 	bool getKeyboardActive() const { return _keyboardActive; }
+
+	int getScrollingOffsetY() const { return _scrollingOffsetY; }
 
 private:
 

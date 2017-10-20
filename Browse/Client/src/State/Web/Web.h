@@ -115,7 +115,7 @@ public:
     // Get own id in web. Returns -1 if not found
     virtual int GetIdOfTab(Tab const * pCaller) const;
 
-	virtual void actionsOfVoice(VoiceResult voiceResult);
+	virtual void actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input);
 
 	virtual void dictationOfVoice(std::string transcript);
 

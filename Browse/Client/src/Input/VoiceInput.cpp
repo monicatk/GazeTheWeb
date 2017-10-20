@@ -22,6 +22,7 @@ std::map<std::string, VoiceAction> voiceActionMapping = {
 	{ "app", VoiceAction::SCROLL_UP },
 	{ "down", VoiceAction::SCROLL_DOWN },
 	{ "town", VoiceAction::SCROLL_DOWN },
+	{ "dawn", VoiceAction::SCROLL_DOWN },
 	{ "dumb", VoiceAction::SCROLL_DOWN },
 	{ "bookmark", VoiceAction::BOOKMARK },
 	{ "back", VoiceAction::BACK },
@@ -30,8 +31,8 @@ std::map<std::string, VoiceAction> voiceActionMapping = {
 	{ "button", VoiceAction::BOTTOM },
 	{ "reload", VoiceAction::RELOAD },
 	{ "forward", VoiceAction::FORWARD },
-	{ "text input", VoiceAction::TEXT_INPUT },
-	{ "video input", VoiceAction::VIDEO_INPUT },
+	{ "text", VoiceAction::TEXT_INPUT },
+	{ "video", VoiceAction::VIDEO_INPUT },
 	{ "go to", VoiceAction::GO_TO },
 	{ "search", VoiceAction::SEARCH },
 	{ "click", VoiceAction::CLICK },
@@ -40,23 +41,26 @@ std::map<std::string, VoiceAction> voiceActionMapping = {
 	{ "mute",VoiceAction::MUTE },
 	{ "unmute",VoiceAction::UNMUTE },
 	{ "play",VoiceAction::PLAY },
-	{ "stop",VoiceAction::STOP },
+	//{ "stop",VoiceAction::STOP },
 	{ "jump",VoiceAction::JUMP },
 	{ "drum",VoiceAction::JUMP },
-	{ "new tab",VoiceAction::NEW_TAB }
+	{ "new tab",VoiceAction::NEW_TAB },
+	{ "neutab",VoiceAction::NEW_TAB },
+	{ "neo tap",VoiceAction::NEW_TAB }
+	
 	//{ "",VoiceAction:: },
 
 };
 std::set<std::string> voiceActionKeys = {
 	"up","app",
-	"down" , "town","dumb",
-	"bookmark","back", "top","new tab",
+	"down" , "town","dumb","dawn","drum",
+	"bookmark","back", "top","new tab","neo tap","neutab",
 	"reload","bottom","button","forward",
-	"text input","video input",
+	"text","video",
 	"go to","search","click",
 	"increase","decrease",
 	"mute","unmute",
-	"play","stop","jump","drum"
+	"play","jump"
 };
 
 std::map<std::string, std::string> textToDigit = {
@@ -73,45 +77,46 @@ std::set<std::string> textToDigitKeyKeys = {
 	"juan","to","for","att","sex","tan"
 };
 
-std::string findPrefixAndParameters(VoiceAction action, std::string transcript) {
-	if (action==VoiceAction::GO_TO)
+//deal with para
+std::string findPrefixAndParameters(VoiceAction action, std::vector<std::string> transcript, int paraIndex) {
+	if (action==VoiceAction::GO_TO || action == VoiceAction::NEW_TAB)
 	// command GO TO
 	{
 		std::string urlString = "";
-		//command starts
-		int posS = transcript.find("go to") + 6;
-		//url end
-		if (!transcript.substr(posS).empty()) {
-			urlString = transcript.substr(posS);
+		if (!transcript[paraIndex].empty()) {
+			urlString = transcript[paraIndex];
 			size_t found = urlString.find('.');
 			if (found == std::string::npos) {
-				urlString = transcript.substr(posS) + ".com";
+				urlString = transcript[paraIndex] + ".com";
 			}
-		}//bool valid = std::regex_match(urlString, *(_upURLregex.get()));
+		}
 		return urlString;
 	}
 	//command SEARCH
-	if (action == VoiceAction::SEARCH) {
-		size_t pos = transcript.find("search") + 7;
-		return transcript.substr(pos);
+	if (action == VoiceAction::SEARCH || action == VoiceAction::CLICK) {
+		if (!transcript[paraIndex].empty()) {
+			std::string searchText = "";
+			for (int i = paraIndex; i < transcript.size();i++) { searchText += transcript[i]; };
+			return searchText;
+		}
 	}
 
-	if (action == VoiceAction::TEXT_INPUT || action == VoiceAction::VIDEO_INPUT) {
-		std::string num = "";
-		size_t last_index = transcript.find_last_not_of("0123456789");
-		num = transcript.substr(last_index + 1);
-		if (num.empty()) {
-			for (std::string key : textToDigitKeyKeys) {
-				std::size_t found = transcript.find(key);
-				if (found != std::string::npos)
-					num += textToDigit[key];
+	if (action == VoiceAction::TEXT_INPUT || action == VoiceAction::VIDEO_INPUT || action == VoiceAction::JUMP) {
+		if (!transcript[paraIndex].empty()) {
+			std::string num = "";
+			size_t last_index = transcript[paraIndex].find_last_not_of("0123456789");
+			num = transcript[paraIndex].substr(last_index + 1);
+			if (num.empty()) {
+				for (std::string key : textToDigitKeyKeys) {
+					std::size_t found = transcript[paraIndex].find(key);
+					if (found != std::string::npos)
+						num += textToDigit[key];
+				}
 			}
+			return num;
 		}
-		return num;
 	}
-	if (action == VoiceAction::CLICK) {
-		//return transcript.substr(pos);
-	}
+
 	return "";
 }
 
@@ -130,6 +135,8 @@ bool VoiceInput::StartAudioRecording()
 	LogInfo("VoiceInput: Start listening");
 	return eyegui::startAudioRecording(_pGUI);
 }
+
+// levenshtein distance
 size_t uiLevenshteinDistance(const std::string &s1, const std::string &s2)
 {
 	const size_t m(s1.size());
@@ -172,6 +179,20 @@ size_t uiLevenshteinDistance(const std::string &s1, const std::string &s2)
 	return result;
 }
 
+//split a string
+template<typename Out>
+void split(const std::string &s, char delim, Out result) {
+	std::stringstream ss(s);
+	std::string item;
+	while (std::getline(ss, item, delim)) {
+		*(result++) = item;
+	}
+}
+std::vector<std::string> split(const std::string &s, char delim) {
+	std::vector<std::string> elems;
+	split(s, delim, std::back_inserter(elems));
+	return elems;
+}
 
 size_t WriteCallbackVoice(void *contents, size_t size, size_t nmemb, void *userp)
 {
@@ -312,6 +333,7 @@ VoiceResult VoiceInput::EndAndProcessAudioRecording()
 			{ "config",{
 				{ "encoding","LINEAR16" },
 				{ "sampleRateHertz" , 44100 },
+				{"maxAlternatives", 1},
 				{ "languageCode" , "en-US" }
 			} },
 			{ "audio",{ { "content",encodedAudio } } }
@@ -339,32 +361,38 @@ VoiceResult VoiceInput::EndAndProcessAudioRecording()
 			else {
 				auto confidence = result["confidence"].get<float>();
 				auto transcript = result["transcript"].get<std::string>();
-				std::string transcriptKeywords = transcript;
-				//max length of voice commands
-				int maxLength = transcript.length() > 13 ? 13 : transcript.length();
-
 				std::transform(transcript.begin(), transcript.end(), transcript.begin(), ::tolower);
 				LogInfo("VoiceInput: voice script: ", transcript);
 				// 4. Parse answer and return action
-				int levDis = transcript.length();
+
 				std::string voiceCommand = "";
+				int voicePara = 0;
+				std::vector<std::string> keySplitList;
+				std::vector<std::string> tranSplitList=split(transcript, ' ');
+				int tranSplitListLen = tranSplitList.size();
 				if (!transcript.empty()) {				
 					 for (std::string key : voiceActionKeys) {
-						// size_t found = transcript.find(key,0, key.size());
-						 std::string substring = transcript.substr(0, key.size());
-						 int levCom = uiLevenshteinDistance(transcript.substr(0, maxLength - 1), key);
-						// if (found != std::string::npos || levCom<2)
-						 if (substring == key|| levCom<2)
-						{
-							voiceCommand = key;
-							LogInfo("VoiceInput: voice distance between transcript ( ", transcript, " ) and ( ", key, " ) is ", levDis);
-						}
+						 //lev distance of key with transciption
+						 int levCom = 0;
+						 keySplitList= split(key, ' ');
+						 int keySplitListLen = keySplitList.size();					
+						 for (int i = 0; i < keySplitListLen;i++) {
+							 if(i<tranSplitListLen){
+							 levCom += uiLevenshteinDistance(tranSplitList[i], keySplitList[i]);
+							 if (tranSplitList[i] == keySplitList[i] || levCom ==0|| (levCom<2 && levCom!=key.size()))
+							 {
+								 voiceCommand = key;
+								 voicePara = i+1;
+								 LogInfo("VoiceInput: voice distance between transcript ( ", tranSplitList[i], " ) and ( ", keySplitList[i], " ) is ", levCom);
+							 }
+						 } }			
+						 // min leven disctance						
 					}
 				}
 				if (!voiceCommand.empty())
 				{
 					voiceResult.action = voiceActionMapping[voiceCommand];
-					voiceResult.keyworkds = findPrefixAndParameters(voiceResult.action, transcriptKeywords);
+					voiceResult.keyworkds = findPrefixAndParameters(voiceResult.action, tranSplitList, voicePara);
 					return voiceResult;
 				}
 				else LogInfo("VoiceInput: sorry there is no such command: ", transcript);

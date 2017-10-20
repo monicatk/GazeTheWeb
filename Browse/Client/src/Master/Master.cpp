@@ -715,14 +715,6 @@ void Master::Loop()
 		// Update lab streaming layer mailer to get incoming messages
 		LabStreamMailer::instance().Update();
 
-		//VOICE COMMAND
-		if (voiceResult.action != VoiceAction::NO_ACTION)
-		{
-			_upWeb->actionsOfVoice(voiceResult);
-			voiceResult.action = VoiceAction::NO_ACTION;
-			voiceResult.keyworkds = "";
-		}
-
 		// Notification handling
 		if (_notificationTime <= 0 // time for the current notification is over
 			|| (_notificationOverridable && !_notificationStack.empty())) // go to next notification if current is overridable and stack not empty
@@ -884,8 +876,13 @@ void Master::Loop()
 		// Disable depth test for drawing
 		glDisable(GL_DEPTH_TEST);
 
-		//spInput->
-
+		//VOICE COMMAND
+		if (voiceResult.action != VoiceAction::NO_ACTION)
+		{
+			_upWeb->actionsOfVoice(voiceResult, spInput);
+			voiceResult.action = VoiceAction::NO_ACTION;
+			voiceResult.keyworkds = "";
+		}
         // Update current state and draw it (one should use here pointer instead of switch case)
         StateType nextState = StateType::WEB;
         switch (_currentState)

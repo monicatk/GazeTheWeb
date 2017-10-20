@@ -1068,7 +1068,7 @@ void Web::DeletePageFromHistoryJob::Execute(Web * pCallee)
 
 
 
-void Web::actionsOfVoice(VoiceResult voiceResult) {
+void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) {
 	switch (voiceResult.action)
 	{
 	case VoiceAction::NO_ACTION:
@@ -1134,43 +1134,43 @@ void Web::actionsOfVoice(VoiceResult voiceResult) {
 	{
 		int tabId = _currentTabId;
 		if (tabId >= 0)
-			_tabs.at(tabId)->EmulateMouseWheelScrolling(0, -_tabs.at(tabId)->GetWindowHeight());   }
+			_tabs.at(tabId)->EmulateMouseWheelScrolling(0, -_tabs.at(tabId)->getPageHeight());   }
 	break;
 	case VoiceAction::TOP:
 	{
 		int tabId = _currentTabId;
-		if (tabId >= 0)_tabs.at(tabId)->EmulateMouseWheelScrolling(0, _tabs.at(tabId)->GetWindowHeight());  }
+		if (tabId >= 0)_tabs.at(tabId)->EmulateMouseWheelScrolling(0, _tabs.at(tabId)->getPageHeight());  }
 	break;
 	case VoiceAction::RELOAD:
 	{
 		int tabId = _currentTabId;
 		if (tabId >= 0)
-			_tabs.at(tabId)->Reload(); 
+			_tabs.at(tabId)->Reload();
 	}break;
 	case VoiceAction::NEW_TAB:
 	{
 		if (!voiceResult.keyworkds.empty()) {
-				int tabId = AddTab(voiceResult.keyworkds, true);
-				if (tabId >= 0)
-					_tabs.at(tabId)->OpenURL(voiceResult.keyworkds);
-				std::u16string url16;
+			std::u16string url16;
 			eyegui_helper::convertUTF8ToUTF16(voiceResult.keyworkds, url16);
 			url16 = u"Going to " + url16;
 			_pMaster->PushNotification(url16, MasterNotificationInterface::Type::NEUTRAL, false);
-			
+			int tabId = AddTab(voiceResult.keyworkds, true);
+			if (tabId >= 0)
+				_tabs.at(tabId)->OpenURL(voiceResult.keyworkds);
 		}
-		else{
-		// Add tab
-		int tabId = AddTab(BLANK_PAGE_URL, true);
+		else {
+			// Add tab
+			int tabId = AddTab(BLANK_PAGE_URL, true);
 
-		// Close tab overview
-		ShowTabOverview(false);
+			// Close tab overview
+			ShowTabOverview(false);
 
-		// Open URLInput to type in URL which should be loaded in new tab
-		_upURLInput->Activate(tabId);
+			// Open URLInput to type in URL which should be loaded in new tab
+			_upURLInput->Activate(tabId);
 
-		JSMailer::instance().Send("new_tab");
-		LabStreamMailer::instance().Send("Open new tab"); }
+			JSMailer::instance().Send("new_tab");
+			LabStreamMailer::instance().Send("Open new tab");
+		}
 	}break;
 
 	// ###############################
@@ -1190,7 +1190,7 @@ void Web::actionsOfVoice(VoiceResult voiceResult) {
 		}}break;
 	case VoiceAction::SEARCH: {
 		if (!voiceResult.keyworkds.empty())
-			dictationOfVoice(voiceResult.keyworkds); 
+			dictationOfVoice(voiceResult.keyworkds);
 	}break;
 	case VoiceAction::TEXT_INPUT: {
 		if (!voiceResult.keyworkds.empty())
@@ -1206,11 +1206,55 @@ void Web::actionsOfVoice(VoiceResult voiceResult) {
 		}} break;
 
 
-			// ###############################
-			// ### CLICK     CONTROL       ###
-			// ###############################
+		// ###############################
+		// ### CLICK     CONTROL       ###
+		// ###############################
 
-	case VoiceAction::CLICK: {}break;
+	case VoiceAction::CLICK: {
+		float thresholdY = 10.0;
+		float thresholdX = 5.0;
+		float finalLinkX = 0.0;
+		float finalLinkY = 0.0;
+		int tabId = _currentTabId;
+		if (tabId >= 0) {
+			float gazeYOffset = input->gazeY + _tabs.at(tabId)->getScrollingOffsetY();
+			float gazeXOffset = input->gazeX;
+			std::vector<Tab::DOMLinkInfo> domLinkList = _tabs.at(tabId)->RetrieveDOMLinkInfos();
+			int levDisMax = 20;
+			float shortestDis = 10.f;
+			for (Tab::DOMLinkInfo link : domLinkList) {
+				std::vector<Rect> rectList = link.rects;
+				for (Rect rect : rectList) {
+					// gaze must be within (threshold  + the area of link )
+					if ((glm::abs(rect.top - gazeYOffset) < thresholdY || glm::abs(rect.bottom - gazeYOffset) < thresholdY) &&
+						(glm::abs(rect.right - gazeXOffset) < thresholdX || glm::abs(rect.left - gazeXOffset) < thresholdX)) {
+						//get the lev distance between text of link and transcription
+						if (!voiceResult.keyworkds.empty()){
+						int levDis = uiLevenshteinDistance(voiceResult.keyworkds, link.text);
+						if (levDis < levDisMax) {
+							finalLinkY = rect.Center().y;
+							finalLinkX = rect.Center().x;
+							levDisMax = levDis;
+						}}
+						//get the distance of link and gaze
+						else {
+							float dx = glm::max(glm::abs(gazeXOffset - rect.Center().x) - (rect.Width() / 2.f), 0.f);
+							float dy = glm::max(glm::abs(gazeYOffset - rect.Center().y) - (rect.Height() / 2.f), 0.f);
+							float distance = glm::sqrt((dx * dx) + (dy * dy));
+							if (shortestDis > distance) {
+								finalLinkY = rect.Center().y;
+								finalLinkX = rect.Center().x;
+								shortestDis = distance;
+							}
+						}
+					}
+				}
+			}
+			_tabs.at(tabId)->EmulateLeftMouseButtonClick(finalLinkX, finalLinkY - _tabs.at(tabId)->getScrollingOffsetY());
+
+		}
+		
+		}break;
 
 		// ###############################
 		// ### TAB VIDEO CONTROL       ###
@@ -1230,36 +1274,42 @@ void Web::actionsOfVoice(VoiceResult voiceResult) {
 	case VoiceAction::INCREASE: {
 		int tabId = _currentTabId;
 		int videoId = _tabs.at(tabId)->getVideoId();
+		LogInfo("video id ", videoId);
 		if (tabId >= 0)
 			_tabs.at(tabId)->IncreaseVideoVolume(videoId);
 	}	break;
 	case VoiceAction::DECREASE: {
 		int tabId = _currentTabId;
 		int videoId = _tabs.at(tabId)->getVideoId();
+		LogInfo("video id ", videoId);
 		if (tabId >= 0)
 			_tabs.at(tabId)->DecreaseVideoVolume(videoId);
 	}	break;
 	case VoiceAction::PLAY: {
 		int tabId = _currentTabId;
 		int videoId = _tabs.at(tabId)->getVideoId();
+		LogInfo("video id ", videoId);
 		if (tabId >= 0)
 			_tabs.at(tabId)->PlayVideo(videoId);
 	}	break;
 	case VoiceAction::STOP: {
 		int tabId = _currentTabId;
 		int videoId = _tabs.at(tabId)->getVideoId();
+		LogInfo("video id ", videoId);
 		if (tabId >= 0)
 			_tabs.at(tabId)->StopVideo(videoId);
 	}	break;
 	case VoiceAction::MUTE: {
 		int tabId = _currentTabId;
 		int videoId = _tabs.at(tabId)->getVideoId();
+		LogInfo("video id ", videoId);
 		if (tabId >= 0)
 			_tabs.at(tabId)->MuteVideo(videoId);
 	}	break;
 	case VoiceAction::UNMUTE: {
 		int tabId = _currentTabId;
 		int videoId = _tabs.at(tabId)->getVideoId();
+		LogInfo("video id ", videoId);
 		if (tabId >= 0)
 			_tabs.at(tabId)->UnmuteVideo(videoId);
 	}	break;
@@ -1267,9 +1317,10 @@ void Web::actionsOfVoice(VoiceResult voiceResult) {
 		if (!voiceResult.keyworkds.empty())
 			try
 		{
-			float seconds = std::stof(voiceResult.keyworkds);
+			int seconds = std::stoi(voiceResult.keyworkds);
 			int tabId = _currentTabId;
 			int videoId = _tabs.at(tabId)->getVideoId();
+			LogInfo("video id ", videoId);
 			if (tabId >= 0)
 				_tabs.at(tabId)->JumpToVideo(seconds, videoId);
 		}
@@ -1277,16 +1328,17 @@ void Web::actionsOfVoice(VoiceResult voiceResult) {
 			_pMaster->PushNotification(u"The time is not valid", MasterNotificationInterface::Type::WARNING, false);
 		}}break;
 
-							   /*	case VoiceAction::: {
-									   int tabId = _currentTabId;
-									   if (tabId >= 0)
-										   _tabs.at(tabId)->;
-								   }	break;
-							   */
+		/*	case VoiceAction::: {
+				int tabId = _currentTabId;
+				if (tabId >= 0)
+					_tabs.at(tabId)->;
+			}	break;
+		*/
 	default:
 		break;
 	}
-}
+	}
+
 
 void Web::dictationOfVoice(std::string transcription) {
 
@@ -1305,4 +1357,47 @@ void Web::dictationOfVoice(std::string transcription) {
 	_tabs.at(_currentTabId)->DisplaySuggestionsInWordSuggest(
 		_overlayWordSuggestId,
 		s16);
+}
+
+// levenshtein distance
+size_t uiLevenshteinDistance(const std::string &s1, const std::string &s2)
+{
+	const size_t m(s1.size());
+	const size_t n(s2.size());
+
+	if (m == 0) return n;
+	if (n == 0) return m;
+
+	size_t *costs = new size_t[n + 1];
+
+	for (size_t k = 0; k <= n; k++) costs[k] = k;
+
+	size_t i = 0;
+	for (std::string::const_iterator it1 = s1.begin(); it1 != s1.end(); ++it1, ++i)
+	{
+		costs[0] = i + 1;
+		size_t corner = i;
+
+		size_t j = 0;
+		for (std::string::const_iterator it2 = s2.begin(); it2 != s2.end(); ++it2, ++j)
+		{
+			size_t upper = costs[j + 1];
+			if (*it1 == *it2)
+			{
+				costs[j + 1] = corner;
+			}
+			else
+			{
+				size_t t(upper < corner ? upper : corner);
+				costs[j + 1] = (costs[j] < t ? costs[j] : t) + 1;
+			}
+
+			corner = upper;
+		}
+	}
+
+	size_t result = costs[n];
+	delete[] costs;
+
+	return result;
 }
