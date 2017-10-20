@@ -1263,7 +1263,7 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 			float gazeXOffset = input->gazeX;
 			std::vector<Tab::DOMLinkInfo> domLinkList = _tabs.at(tabId)->RetrieveDOMLinkInfos();
 			int levDisMax = 20;
-			float shortestDis = 10.f;
+			float shortestDis = 100.f;
 			for (Tab::DOMLinkInfo link : domLinkList) {
 				std::vector<Rect> rectList = link.rects;
 				for (Rect rect : rectList) {
