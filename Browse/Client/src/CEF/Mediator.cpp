@@ -449,14 +449,11 @@ double Mediator::GetZoomLevel(CefRefPtr<CefBrowser> browser)
     return NAN;
 }
 
-void Mediator::ReceivePageResolution(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)
+void Mediator::ReceivePageResolution(CefRefPtr<CefBrowser> browser, double width, double height)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
-    {
-        CefRefPtr<CefListValue> args = msg->GetArgumentList();
-		double pageWidth = args->GetDouble(0);
-		double pageHeight = args->GetDouble(1);
-        pTab->SetPageResolution(pageWidth, pageHeight);
+	{
+        pTab->SetPageResolution(width, height);
     }
 }
 

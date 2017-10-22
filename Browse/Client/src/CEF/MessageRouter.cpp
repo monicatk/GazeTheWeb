@@ -34,15 +34,31 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	bool persistent,
 	CefRefPtr<Callback> callback)
 {
-	const std::string requestString = request.ToString();
-	//LogDebug("MsgRouter: ", requestString);
+	const std::string& requestStr = request.ToString();
+	std::vector<std::string> split_request = SplitBySeparator(requestStr, '#');
+
+	if (split_request.size() == 3 && split_request[0].compare("resolution") == 0)
+	{
+		try
+		{
+			const double& width = std::stod(split_request[1]);
+			const double& height = std::stod(split_request[2]);
+			_pMediator->ReceivePageResolution(browser, width, height);
+		}
+		catch (const std::exception& e)
+		{
+			LogInfo("MsgRouter: Received wrongly typed page resolution information!");
+		}
+		return true;
+	}
+
 
 	// ###############
 	// ### Favicon ###
 	// ###############
-	if (requestString.compare(0, 12, "#FaviconURL#") == 0)
+	if (requestStr.compare(0, 12, "#FaviconURL#") == 0)
 	{
-		auto split = SplitBySeparator(requestString, '#');
+		auto split = SplitBySeparator(requestStr, '#');
 
 		if (split.size() > 1)
 		{
@@ -52,7 +68,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		return true;
 	}
 
-	if (requestString == "faviconBytesReady")
+	if (requestStr == "faviconBytesReady")
 	{
 		// Logging
 		LogDebug("MessageRouter: Received 'faviconBytesReady' callback from Javascript");
@@ -71,10 +87,10 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	// ######################
 
 	// Text selection callback, asynchronously called when CefMediator::EndTextSelection finishes
-	if (requestString.compare(0, 8, "#select#") == 0)
+	if (requestStr.compare(0, 8, "#select#") == 0)
 	{
 		// Split result
-		auto split = SplitBySeparator(requestString, '#');
+		auto split = SplitBySeparator(requestStr, '#');
 
 		// Check whether result is empty
 		if (split.size() > 1)
@@ -99,9 +115,9 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	// #####################
 
 	// Fixed element callbacks
-	if (requestString.compare(0, 9, "#fixElem#") == 0)
+	if (requestStr.compare(0, 9, "#fixElem#") == 0)
 	{
-		std::vector<std::string> data = SplitBySeparator(requestString, '#');
+		std::vector<std::string> data = SplitBySeparator(requestStr, '#');
 		const std::string& op = data[1];
 
 		if (data.size() > 2)
@@ -157,11 +173,11 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	// Example: DOM#upd#7#1337#0#0.9;0.7;0.5;0.7#
 
 	// Debug extension: Request C++ sided DOM attribute information
-	if (requestString.compare(0, 10, "DOMAttrReq") == 0)
+	if (requestStr.compare(0, 10, "DOMAttrReq") == 0)
 	{
 		LogInfo("DOMAttrReq: Received.");
 
-		std::vector<std::string> data = SplitBySeparator(requestString, '#');
+		std::vector<std::string> data = SplitBySeparator(requestStr, '#');
 		if (data.size() > 3)
 		{
 			const std::string& typeStr = data[1];
@@ -202,9 +218,9 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		return true;
 	}
 
-	if (requestString.compare(0, 3, "DOM") == 0)
+	if (requestStr.compare(0, 3, "DOM") == 0)
 	{
-		std::vector<std::string> data = SplitBySeparator(requestString, '#');
+		std::vector<std::string> data = SplitBySeparator(requestStr, '#');
 
 		if (data.size() > 3)
 		{
@@ -322,7 +338,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				}
 				else
 				{
-					LogDebug("MsgRouter: Expected more data in DOMObject update:\n", requestString, "\nAborting update.");
+					LogDebug("MsgRouter: Expected more data in DOMObject update:\n", requestStr, "\nAborting update.");
 				}
 			}
 
@@ -335,7 +351,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	}
 
 	// If request is unknown & couldn't be handled, assume it to be a ConsolePrint call in JS and log it
-	LogInfo("Javascript: ", requestString);
+	LogInfo("Javascript: ", requestStr);
 
 	return false;
 }

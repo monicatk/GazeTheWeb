@@ -125,11 +125,22 @@ Element.prototype.appendChild = function(child){
 	// appendChild extension: Check if root is already part of DOM tree
 	var previous_root = this.getRootNode();
 
+	
+	if(this.nodeType === 11)
+		console.log("Appending child to document fragment (idx: "+document_fragments.indexOf(this)+")")
+	if(child.nodeType === 11)
+		console.log("Appending document fragment to parent (idx: "+document_fragments.indexOf(this)+")")
+	if(arguments[0].nodeType === 11)
+		console.log("!!! Appending document fragment to parent (idx: "+document_fragments.indexOf(this)+")")
+		
+
+	// DEBUG
 	if(arguments[0].first_root === undefined)
 	{
 		arguments[0].first_root = previous_root;
-		debug_nodes.push(arguments[0]);
+		// debug_nodes.push(arguments[0]);
 	}
+
 	// /* ### SUBTREE IS NOT PART OF GLOBAL DOM TREE ### */
 	// // Register subtree roots, whose children have to be checked outside of MutationObserver
 	// if(subtreeRoot !== document) 
@@ -177,12 +188,12 @@ Element.prototype.appendChild = function(child){
 	var skip_nodes = [];
 	if(was_document_fragment)
 	{
-		for(var i = 0, n = child.childNodes.length; i < n; i++)
-			skip_nodes.push(child.childNodes[i]);
+		console.log("Document fragment (idx: "+document_fragments.indexOf(child)+") gets appended to ", this);		
+		skip_nodes.concat(child.childNodes);
 	}
 
 	// Execute real appendChild
-    var return_value = originalAppendChild.apply(this, arguments); // Doesn't work with child, why?? Where does arguments come from?
+    var return_value = originalAppendChild.apply(this, arguments);
 
 	/* ### ANALYZE APPENDED SUBTREE AFTER DOCUMENT FRAGMENT DISPERSES ### */
 	// if(child.nodeType === 11 && child.getRootNode().nodeType !== 11) //  && subtreeRoot !== document)
@@ -209,20 +220,16 @@ Element.prototype.appendChild = function(child){
 };
 
 var document_fragments = [];
-// TODO: Still necessary?
+
 Document.prototype.createDocumentFragment = function() {
 	var fragment = new DocumentFragment();
 
-	// // TODO: childList in config not needed? Or later for children, added to DOM, relevant?
-	// if(window.observer !== undefined)
-	// {
-	// 	var config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: false, attributeOldValue: true};
-	// 	window.observer.observe(fragment, config);
-	// }
-	// else
-	// 	console.log("Custom createDocumentFragment: MutationObserver doesn't seem to have been set up properly.");
-
+	// DEBUG
+	console.log("Document fragment got created, access with index "+document_fragments.length+" in array document fragments.");
 	document_fragments.push(fragment);
+
+	window.observer.observe(fragment, window.observer_config);
+
 	return fragment;
 };
 
@@ -472,7 +479,8 @@ function MutationObserverInit()
 	ConsolePrint('Initializing Mutation Observer ... ');
 
 	window.observer = new MutationObserver(
-		function(mutations) {
+		function(mutations) 
+		{
 		  	mutations.forEach(
 		  		function(mutation)
 		  		{
@@ -761,7 +769,10 @@ function MutationObserverInit()
 		  		} // END forEach mutation
 
 
-		 	);    
+			 );    
+			 
+			 // Empty records
+			 window.observer.takeRecords();
 		}
 	);
 
@@ -779,10 +790,10 @@ function MutationObserverInit()
 	ConsolePrint('Trying to start observing... ');
 		
 	// Konfiguration des Observers: alles melden - Änderungen an Daten, Kindelementen und Attributen
-	var config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: false, attributeOldValue: true};
+	window.observer_config = { attributes: true, childList: true, characterData: true, subtree: true, characterDataOldValue: false, attributeOldValue: true};
 
 	// eigentliche Observierung starten und Zielnode und Konfiguration übergeben
-	window.observer.observe(window.document, config);
+	window.observer.observe(window.document, observer_config);
 
 	ConsolePrint('MutationObserver was told what to observe.');
 
