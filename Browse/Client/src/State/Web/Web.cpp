@@ -1299,7 +1299,7 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 						}
 					}
 				}			
-			_tabs.at(tabId)->EmulateLeftMouseButtonClick(finalLinkX, finalLinkY);
+			_tabs.at(tabId)->EmulateLeftMouseButtonClick(finalLinkX, finalLinkY- _tabs.at(tabId)->getScrollingOffsetY());
 		}
 	}break;
 
