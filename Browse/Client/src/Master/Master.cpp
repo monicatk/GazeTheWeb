@@ -810,8 +810,8 @@ void Master::Loop()
 			eyegui::playSound(_pGUI, "sounds/GameAudio/FlourishSpacey-1.ogg");
 		}
 
-        // Update cursor with original mouse input
-        eyegui::setVisibilityOfLayout(_pCursorLayout, spInput->gazeEmulated, false, true);
+        // Update cursor with original mouse inputspInput->gazeEmulated
+        eyegui::setVisibilityOfLayout(_pCursorLayout, true , false, false);
         float halfRelativeMouseCursorSize = MOUSE_CURSOR_RELATIVE_SIZE / 2.f;
         eyegui::setPositionOfFloatingFrame(
             _pCursorLayout,
