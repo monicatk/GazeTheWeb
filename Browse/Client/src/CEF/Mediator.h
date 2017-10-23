@@ -106,7 +106,7 @@ public:
     // Called by Handler OnLoadStart
     double GetZoomLevel(CefRefPtr<CefBrowser> browser);
 
-    void ReceivePageResolution(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
+	void ReceivePageResolution(CefRefPtr<CefBrowser> browser, double width, double height);
 
     // Called when Tab realizes that it might reach end of page while scrolling
     void GetPageResolution(TabCEFInterface* pTab);

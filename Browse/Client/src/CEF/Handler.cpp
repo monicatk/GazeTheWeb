@@ -261,11 +261,7 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
     if (msgName == "ReceiveFavIconBytes")
  		LogDebug("Handler: Received depricated ", msgName, " IPC message!");
  
-    if (msgName == "ReceivePageResolution")
-    {
-        _pMediator->ReceivePageResolution(browser, msg);
-		return true;
-    }
+
     if (msgName == "ReceiveFixedElements")
     {
         _pMediator->ReceiveFixedElements(browser, msg);
@@ -502,24 +498,9 @@ void Handler::SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged
 
 void Handler::UpdatePageResolution(CefRefPtr<CefBrowser> browser)
 {
-	// TODO: Return these values by calling a function (in Renderer Process), get rid of these window variables
-
-    // Javascript code for receiving the current page width & height
-	const std::string getPageResolution = "\
-            if(document.documentElement && document.body !== null && document.body !== undefined)\
-			{\
-			window._pageWidth = document.body.scrollWidth;\
-            window._pageHeight = document.body.scrollHeight;\
-			}\
-			else\
-				console.log('Handler::UpdatePageResolution: Could not access document.documentElement or document.body!');\
-            ";
-
-    browser->GetMainFrame()->ExecuteJavaScript(getPageResolution, browser->GetMainFrame()->GetURL(), 0);
-
-    // Tell renderer process to get V8 values, where page sizes were written to
-    CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("GetPageResolution");
-    browser->SendProcessMessage(PID_RENDERER, msg);
+	// Execute Javascript function which will send page resolution to MessageRouter
+	browser->GetMainFrame()->ExecuteJavaScript(
+		"if(typeof(CefGetPageResolution) === 'function'){ CefGetPageResolution(); }", browser->GetMainFrame()->GetURL(), 0);
 }
 
 void Handler::IPCLogRenderer(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)

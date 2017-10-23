@@ -11,11 +11,32 @@ function ConsolePrint(msg)
 
 ConsolePrint("Starting to import helpers.js ...");
 
+
+// TODO: Move CEF callable functions to separate js-file
 function CefPoll()
 {
     UpdateDOMRects();
 
     domVideos.forEach((n) => { SendAttributeChangesToCEF("Rects", n); });
+}
+
+var gtwPageHeight = 0.0;
+var gtwPageWidth = 0.0;
+/**
+ * Triggered by ExecuteJavascript call in Handler
+ */
+function CefGetPageResolution()
+{
+    if(gtwPageHeight !== document.body.scrollHeight || gtwPageWidth !== document.body.scrollWidth)
+    {
+        gtwPageHeight = document.body.scrollHeight;
+        gtwPageWidth = document.body.scrollWidth;
+
+        // Bug fix for dynamically added nodes in updating timelines or search result lists
+        ForEveryChild(document.documentElement, AnalyzeNode);
+    
+        ConsolePrint("#resolution#"+gtwPageWidth+"#"+gtwPageHeight+"#");
+    }
 }
 
 if(ClientRectList.prototype.map === undefined)
