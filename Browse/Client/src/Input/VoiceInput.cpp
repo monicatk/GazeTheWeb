@@ -268,7 +268,6 @@ void wavfile_close(FILE *file)
 	fclose(file);
 }
 
-
 VoiceResult VoiceInput::EndAndProcessAudioRecording()
 {
 	VoiceResult voiceResult(VoiceAction::NO_ACTION, "");
@@ -285,7 +284,6 @@ VoiceResult VoiceInput::EndAndProcessAudioRecording()
 
 		LogInfo("VoiceInput: Start processing");
 
-		// TODO for Voice Input
 		// 1. Store Audio locally as .wav (for example in system' TEMP folder)
 		//    See this link for "how to save as wave": http://www.cplusplus.com/forum/beginner/166954/
 
@@ -355,6 +353,9 @@ VoiceResult VoiceInput::EndAndProcessAudioRecording()
 
 		// Parse answer to JSON object and extract id token
 		auto jsonAnswer = json::parse(answerBodyBuffer);
+/*
+		const std::string test ="{\"results\": [{\"alternatives\": [{\"transcript\": \"jump 10\",\"confidence\" : 0.80277747}]}]}";
+		auto jsonAnswer = json::parse(test);*/
 		if (!jsonAnswer.empty()) {
 			auto result = jsonAnswer["results"][0]["alternatives"][0];
 			if (result.empty())
