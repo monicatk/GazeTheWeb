@@ -274,7 +274,7 @@ VoiceResult VoiceInput::EndAndProcessAudioRecording()
 	// End recording and retrieve audio
 	eyegui::endAudioRecording(_pGUI);
 	auto spAudio = eyegui::retrieveAudioRecord(_pGUI);
-	LogInfo("VoiceInput: End listening");
+	LogInfo("VoiceInput: ------- End listening ------");
 
 	// If some audio was retrieved, proceed
 	if (spAudio != nullptr)
@@ -364,7 +364,7 @@ VoiceResult VoiceInput::EndAndProcessAudioRecording()
 				auto confidence = result["confidence"].get<float>();
 				auto transcript = result["transcript"].get<std::string>();
 				std::transform(transcript.begin(), transcript.end(), transcript.begin(), ::tolower);
-				LogInfo("VoiceInput: voice script: ", transcript);
+				LogInfo("VoiceInput: ------------------voice script: ", transcript);
 				// 4. Parse answer and return action
 
 				std::string voiceCommand = "";

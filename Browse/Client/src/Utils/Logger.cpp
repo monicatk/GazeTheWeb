@@ -24,7 +24,7 @@ std::shared_ptr<spdlog::logger> Log()
         sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_mt>());
         sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>(LogPath + LOG_FILE_NAME + ".txt", LOG_FILE_MAX_SIZE, LOG_FILE_COUNT));
         GlobalLog = std::make_shared<spdlog::logger>("global_log", begin(sinks), end(sinks));
-        GlobalLog->set_pattern("[%D-%T] %l: %v");
+        GlobalLog->set_pattern("[%D-%T.%e] %l: %v");
 
 		// Set logging level
 		if (setup::DEBUG_MODE)
