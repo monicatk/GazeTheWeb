@@ -880,6 +880,7 @@ void Master::Loop()
 		if (voiceResult.action != VoiceAction::NO_ACTION)
 		{
 			LogInfo("eye coordinates X:", spInput->gazeX, " ,Y:", spInput->gazeY);
+			LogInfo("------voice action starts-------- ");
 			_upWeb->actionsOfVoice(voiceResult, spInput);
 			voiceResult.action = VoiceAction::NO_ACTION;
 			voiceResult.keyworkds = "";
