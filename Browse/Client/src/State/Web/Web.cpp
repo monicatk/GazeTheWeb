@@ -1119,7 +1119,10 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 		// ###############################
 		// ### TAB       CONTROL       ###
 		// ###############################
-
+	case VoiceAction::QUIT:
+	{
+		_pMaster->Exit(false); }
+	break;
 	case VoiceAction::SCROLL_UP:
 	{
 		int tabId = _currentTabId;
