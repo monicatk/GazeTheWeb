@@ -106,6 +106,7 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			_pTab->ExitVideoMode();
 		}
 	}
+	LogInfo("------ button ", id, " down finished-----");
 }
 
 void Tab::TabButtonListener::up(eyegui::Layout* pLayout, std::string id)
