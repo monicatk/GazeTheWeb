@@ -1197,8 +1197,7 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 			url16 = u"Going to " + url16;
 			_pMaster->PushNotification(url16, MasterNotificationInterface::Type::NEUTRAL, false);
 			int tabId = AddTab(voiceResult.keyworkds, true);
-			if (tabId >= 0)
-				_tabs.at(tabId)->OpenURL(voiceResult.keyworkds);
+
 		}
 		else {
 			// Add tab

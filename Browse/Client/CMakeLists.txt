@@ -372,7 +372,7 @@ if(${CLIENT_BUILD_SMI_IVIEWX_PLUGIN})
 	
 		# SMI iViewX SDK
 		include_directories("${CLIENT_SMI_IVIEWX_SDK_PATH}/include")
-		set(SMI_IVIEWX_SDK_LIBRARIES "${CLIENT_SMI_IVIEWX_SDK_PATH}/iViewXAPI.lib")
+		set(SMI_IVIEWX_SDK_LIBRARIES "${CLIENT_SMI_IVIEWX_SDK_PATH}/lib/iViewXAPI.lib")
 
 		# Plugin project
 		add_library(
