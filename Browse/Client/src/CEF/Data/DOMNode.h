@@ -137,6 +137,8 @@ public:
 	// Custom getter
 	std::string GetText() const { return _text; }
 	bool IsPasswordField() const { return _isPassword; }
+	std::string GetHTMLId() const { return _htmlId; }
+	std::string GetHTMLClass() const { return _htmlClass; }
 
 private:
 
