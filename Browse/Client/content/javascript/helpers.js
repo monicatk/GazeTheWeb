@@ -15,7 +15,16 @@ ConsolePrint("Starting to import helpers.js ...");
 // TODO: Move CEF callable functions to separate js-file
 function CefPoll()
 {
+    console.log("CefPoll triggerd.");
+
     UpdateDOMRects();
+
+    for(var node in appended_nodes)
+    {
+        AnalyzeNode(node);
+        appended_nodes.delete(node);
+        console.log("CefPoll: Analyzed missing node", node);
+    }
 
     domVideos.forEach((n) => { SendAttributeChangesToCEF("Rects", n); });
 }
@@ -23,10 +32,14 @@ function CefPoll()
 var gtwPageHeight = 0.0;
 var gtwPageWidth = 0.0;
 /**
- * Triggered by ExecuteJavascript call in Handler
+ * Triggered by ExecuteJavascript call in Handler, whenever page resolution might have changed.
+ * If it did, send changes to MessageRouter
  */
 function CefGetPageResolution()
 {
+    if(!document || !document.body)
+        return;
+
     if(gtwPageHeight !== document.body.scrollHeight || gtwPageWidth !== document.body.scrollWidth)
     {
         gtwPageHeight = document.body.scrollHeight;

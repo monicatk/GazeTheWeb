@@ -20,9 +20,10 @@ document.onreadystatechange = function()
 	console.log("document.readyState == "+document.readyState);
 	ConsolePrint("document.readyState == "+document.readyState);
 
-	if (document.readyState === "complete")
-		ForEveryChild(document.documentElement, AnalyzeNode);
-		
+	// BUGFIX
+	// if (document.readyState === "complete")
+	// 	ForEveryChild(document.documentElement, AnalyzeNode);
+
 	// domOverflowElements.forEach(
 	// 	(o) => { o.checkIfOverflown(); }
 	// );
@@ -119,69 +120,30 @@ document.addEventListener('transitionend', function(event){
 var docFrags = [];
 var debug_nodes = [];
 
+var appended_nodes = new Set();
 /* Modify appendChild in order to get notifications when this function is called */
 var originalAppendChild = Element.prototype.appendChild;
 Element.prototype.appendChild = function(child){
 	// appendChild extension: Check if root is already part of DOM tree
 	var previous_root = this.getRootNode();
 
+	// BUGFIX
+	// Check which nodes where appended and which will trigger childList mutation, some won't.
+	// Current approach: Analyze those in CefPoll function
+	appended_nodes.add(appended_nodes); 
 	
-	if(this.nodeType === 11)
-		console.log("Appending child to document fragment (idx: "+document_fragments.indexOf(this)+")")
-	if(child.nodeType === 11)
-		console.log("Appending document fragment to parent (idx: "+document_fragments.indexOf(this)+")")
-	if(arguments[0].nodeType === 11)
-		console.log("!!! Appending document fragment to parent (idx: "+document_fragments.indexOf(this)+")")
-		
-
 	// DEBUG
-	if(arguments[0].first_root === undefined)
-	{
-		arguments[0].first_root = previous_root;
-		// debug_nodes.push(arguments[0]);
-	}
-
-	// /* ### SUBTREE IS NOT PART OF GLOBAL DOM TREE ### */
-	// // Register subtree roots, whose children have to be checked outside of MutationObserver
-	// if(subtreeRoot !== document) 
-	// {
-	// 	/* ### NODE GETS APPENDED TO DOCUMENT FRAGMENT PARENT ### */
-	// 	// When DocumentFragments get appended to DOM, they "lose" all their children and only their children are added to DOM
-	// 	if(subtreeRoot.nodeType == 11) // 11 == DocumentFragment
-	// 	{
-	// 		// console.log(child, " was appended to a document fragment parent");
-	// 		// Mark all 1st generation child nodes of DocumentFragments as subtree roots
-	// 		window.appendedSubtreeRoots.add(child);
-	// 		for(var i = 0, n = subtreeRoot.childNodes.length; i < n; i++)
-	// 		{
-	// 			window.appendedSubtreeRoots.add(subtreeRoot.childNodes[i]);
-	// 		}
-	// 	}
-	// 	/* ### ROOT IS NO DOCUMENT FRAGMENT, BUT ALSO NOT YET PART OF GLOBAL DOM TREE ### */
-	// 	else 
-	// 	{
-	// 		// console.log(child, " was appended to a subtree ", subtreeRoot," where root isn't a document fragment & not global DOM tree");	
-	// 		// Add subtree root to Set of subtree roots
-	// 		window.appendedSubtreeRoots.add(subtreeRoot);	
-
-	// 		// Remove children of this subtree root from subtree root set --> prevent double-checking of branches
-	// 		ForEveryChild(subtreeRoot, (n) => {window.appendedSubtreeRoots.delete(n); });
-	// 	} 
-	// }
-
-	// /* ### DOCUMENT FRAGMENT GETS APPENDED TO GLOBAL DOM TREE */
-	// // DocumentFragment as parent: children disappear when fragment is appended to DOM tree
+	// if(this.nodeType === 11)
+	// 	console.log("Appending child to document fragment (idx: "+document_fragments.indexOf(this)+")")
 	// if(child.nodeType === 11)
+	// 	console.log("Appending document fragment to parent (idx: "+document_fragments.indexOf(this)+")")
+	// if(arguments[0].nodeType === 11)
+	// 	console.log("!!! Appending document fragment to parent (idx: "+document_fragments.indexOf(this)+")")
+		
+	// if(arguments[0].first_root === undefined)
 	// {
-	// 	// console.log("Appending document fragment to parent ", this);
-	// 	for(var i = 0, n = child.childNodes.length; i < n; i++)
-	// 	{
-	// 		ForEveryChild(child.childNodes[i], 
-	// 			(childNode) => { window.appendedSubtreeRoots.delete(childNode); }
-	// 		);
-
-	// 		window.appendedSubtreeRoots.add(child.childNodes[i]);
-	// 	}
+	// 	arguments[0].first_root = previous_root;
+	// 	// debug_nodes.push(arguments[0]);
 	// }
 
 	var was_document_fragment = (child.nodeType === 11);
@@ -517,14 +479,19 @@ function MutationObserverInit()
 								node.childNodes.forEach((child) => {
 									// Extend node by given attribute
 									if(typeof(child.setAttribute) === "function")
+									{
 										child.setAttribute("childFixedId", id);
+									}
 								});
 								
 								// Update fixObj in DOMObject
 								var fixObj = GetFixedElementById(id);
 								var domObj = GetCorrespondingDOMObject(node);
 								if(domObj !== undefined)
+								{
 									domObj.setFixObj(fixObj);	// fixObj may be undefined
+									domObj.updateRects();
+								}
 							}
 
 							if(attr === "scrollWidth" || attr === "scrollHeight")
@@ -666,6 +633,10 @@ function MutationObserverInit()
 							if(node === undefined)
 								return;
 
+							// Child was appended AND triggers childlist mutation, as expected!
+							// Fix for those, which don't: Analyze them with CefPoll
+							appended_nodes.delete(node);
+
 							// // Never executed!
 							// if(node.nodeType === 11)
 							// {
@@ -682,9 +653,7 @@ function MutationObserverInit()
 							// }
 
 							// DEBUG
-							if(node.className === "scroll-wrapper scrollbar-inner")
-								console.log("Target node added to dom tree!");
-							
+							// console.log("childList mutation: ", node);							
 							
 							// Set children (and their subtree) to fixed, if parent is also fixed
 							if(parent !== undefined && parent.nodeType === 1 && node.nodeType === 1)

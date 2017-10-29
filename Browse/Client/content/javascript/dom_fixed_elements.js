@@ -125,7 +125,16 @@ FixedElement.prototype.updateRects = function(){
                 // ... or overflow element, which would cover children anyway outside of rect
                 var hiding = ["hidden", "scroll", "auto"]
                 if(hiding.indexOf(cs.getPropertyValue("overflow")) !== -1)
+                {
+                    // ... but keep updating child rects, if registered DOMObject!
+                    ForEveryChild(node, (child) => {
+                        var domObj = GetCorrespondingDOMObject(child);
+                        if(domObj !== undefined)
+                            domObj.updateRects();
+                    });
+                    // ... then, abort.
                     return true;
+                }
                 return false;
             } 
             else 
