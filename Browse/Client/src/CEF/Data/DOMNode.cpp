@@ -16,6 +16,7 @@
  / // / /_/ / /|_/ /    / _ \/ _  / -_|_-<
 /____/\____/_/  /_/_/|_/\___/\_,_/\__/___/
 */
+// TODO: Move descriptions to DOMAttribute.cpp?
 const std::vector<DOMAttribute> DOMNode::_description = {
 	Rects, FixedId, OverflowId, OccBitmask
 };
@@ -159,7 +160,7 @@ bool DOMNode::IPCSetOccBitmask(CefRefPtr<CefListValue> data)
                                             /_/ 
 */
 const std::vector<DOMAttribute> DOMTextInput::_description = {
-	Text, IsPassword
+	Text, IsPassword, HTMLId, HTMLClass
 };
 
 int DOMTextInput::Initialize(CefRefPtr<CefProcessMessage> msg)
@@ -231,6 +232,24 @@ bool DOMTextInput::IPCSetPassword(CefRefPtr<CefListValue> data)
 		return false;
 
 	SetPassword(data->GetBool(0));
+	return true;
+}
+
+bool DOMTextInput::IPCSetHTMLId(CefRefPtr<CefListValue> data)
+{
+	if (data == nullptr || data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_STRING)
+		return false;
+
+	SetHTMLId(data->GetString(0).ToString());
+	return true;
+}
+
+bool DOMTextInput::IPCSetHTMLClass(CefRefPtr<CefListValue> data)
+{
+	if (data == nullptr || data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_STRING)
+		return false;
+
+	SetHTMLClass(data->GetString(0).ToString());
 	return true;
 }
 

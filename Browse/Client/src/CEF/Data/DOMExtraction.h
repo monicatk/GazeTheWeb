@@ -42,7 +42,9 @@ namespace V8ToCefListValue
 		{ DOMAttribute::Options,			"getOptions" },
 		{ DOMAttribute::MaxScrolling,		"getMaxScrolling"},
 		{ DOMAttribute::CurrentScrolling,	"getCurrentScrolling"},
-		{ DOMAttribute::OccBitmask,			"getOccBitmask"}
+		{ DOMAttribute::OccBitmask,			"getOccBitmask"},
+		{ DOMAttribute::HTMLId,				"getHTMLId" },
+		{ DOMAttribute::HTMLClass,			"getHTMLClass" }
 	// TODO: Getter in Javascript are uniformly named, so this map is kind of superfluous now ;)
 
 	};
@@ -58,7 +60,9 @@ namespace V8ToCefListValue
 		{ DOMAttribute::Options,			&ListOfStrings },
 		{ DOMAttribute::MaxScrolling,		&ListOfIntegers },
 		{ DOMAttribute::CurrentScrolling,	&ListOfIntegers },
-		{ DOMAttribute::OccBitmask,			&ListOfBools }
+		{ DOMAttribute::OccBitmask,			&ListOfBools },
+		{ DOMAttribute::HTMLId,				&String },
+		{ DOMAttribute::HTMLClass,			&String }
 	
 	};
 

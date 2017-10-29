@@ -307,6 +307,12 @@ DOMTextInput.prototype.getIsPassword = function(){
     return (this.node.type === "password");
 }
 
+DOMTextInput.prototype.getHTMLId = function(){
+    return this.node.id;
+}
+DOMTextInput.prototype.getHTMLClass = function(){
+    return this.node.className;
+}
 
 /*
    ___  ____  __  _____   _      __      

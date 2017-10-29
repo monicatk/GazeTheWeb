@@ -24,7 +24,9 @@ enum DOMAttribute {
 	Options,
 	MaxScrolling, 
 	CurrentScrolling,
-	OccBitmask
+	OccBitmask,
+	HTMLId,
+	HTMLClass
 };
 
 // Helper for debug output

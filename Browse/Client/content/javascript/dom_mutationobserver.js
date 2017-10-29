@@ -560,9 +560,21 @@ function MutationObserverInit()
 
 							}
 
+
+							if(attr == "id")
+							{
+								var domObj = GetCorrespondingDOMObject(node);
+								if(domObj !== undefined)
+									SendAttributeChangesToCEF("HTMLId", domObj);
+							}
+
 						
 							if(attr == 'class')
-							{
+							{	
+								var domObj = GetCorrespondingDOMObject(node);
+								if(domObj !== undefined)
+									SendAttributeChangesToCEF("HTMLClass", domObj);
+							
 								// Node might get fixed or un-fixed if class changes
 								if(typeof(node.getAttribute) === "function" && 
 									window.getComputedStyle(node, null).getPropertyValue("position") === "fixed")
@@ -572,7 +584,7 @@ function MutationObserverInit()
 								// TODO: Remove corresponding fixed element if node gets unfixed
 
 								// Update (if existant) DOM object's rects if node's class changed
-								var domObj = GetCorrespondingDOMObject(node);
+								// var domObj = GetCorrespondingDOMObject(node);
 								if(domObj !== undefined)
 									domObj.updateRects();
 

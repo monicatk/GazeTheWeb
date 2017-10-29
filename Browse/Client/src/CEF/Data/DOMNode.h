@@ -145,14 +145,21 @@ private:
 	// Setter
 	void SetText(std::string text) { _text = text; }
 	void SetPassword(bool isPwd) { _isPassword = isPwd; }
+	void SetHTMLId(std::string htmlId) { _htmlId = htmlId; }
+	void SetHTMLClass(std::string htmlClass) { _htmlClass = htmlClass; }
 
 	bool IPCSetText(CefRefPtr<CefListValue> data);
 	bool IPCSetPassword(CefRefPtr<CefListValue> data);
+	bool IPCSetHTMLId(CefRefPtr<CefListValue> data);
+	bool IPCSetHTMLClass(CefRefPtr<CefListValue> data);
+
 
 	// Members
 	static const std::vector<DOMAttribute> _description;
 	std::string _text = "";
 	bool _isPassword = false;
+	std::string _htmlId = "";
+	std::string _htmlClass = "";
 };
 
 /*

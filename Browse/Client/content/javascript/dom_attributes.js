@@ -83,6 +83,8 @@ window.attrStrToEncodingFunc.set("Options", listReturn);
 window.attrStrToEncodingFunc.set("MaxScrolling", listReturn);
 window.attrStrToEncodingFunc.set("CurrentScrolling", listReturn);
 window.attrStrToEncodingFunc.set("OccBitmask", bitmaskReturn);
+window.attrStrToEncodingFunc.set("HTMLId", simpleReturn);
+window.attrStrToEncodingFunc.set("HTMLClass", simpleReturn);
 
 function FetchAndEncodeAttribute(domObj, attrStr)
 {
