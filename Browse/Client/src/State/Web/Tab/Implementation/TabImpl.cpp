@@ -32,7 +32,6 @@ Tab::Tab(
 	_pVideoModeLayout = _pMaster->AddLayout("layouts/TabVideoMode.xeyegui", EYEGUI_TAB_LAYER, false);
 	_pPipelineAbortLayout = _pMaster->AddLayout("layouts/TabPipelineAbort.xeyegui", EYEGUI_TAB_LAYER, false);
     _pDebugLayout = _pMaster->AddLayout("layouts/TabDebug.xeyegui", EYEGUI_TAB_LAYER, false);
-	
 
 	// Create scroll up and down floating frames in special overlay layout which always on top of standard overlay
 	_scrollUpProgressFrameIndex = eyegui::addFloatingFrameWithBrick(
@@ -106,6 +105,9 @@ Tab::Tab(
 
 	// Prepare debugging overlay
 	InitDebuggingOverlay();
+
+	// Fill version string
+	eyegui::setContentOfTextBlock(_pPanelLayout, "version_info", "Version " + std::to_string(CLIENT_VERSION));
 }
 
 Tab::~Tab()
@@ -330,7 +332,9 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
         // STANDARD GUI IS VISIBLE
 
         // Gaze mouse
-        if(_gazeMouse && !(_pMaster->IsPaused()))
+        if(
+			(_gazeMouse && spInput->windowFocused && !_pMaster->IsPaused())
+			|| ShortenURL(_url) == "augreal.mklab.iti.gr") // hack for MAMEM training and dashboard page to get gaze through mouse coordinate
         {
             EmulateMouseCursor(spTabInput->webViewPixelGazeX, spTabInput->webViewPixelGazeY);
         }

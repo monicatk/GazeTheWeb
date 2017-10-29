@@ -43,6 +43,7 @@ public:
 
     // Update method fills Input struct and returns it
 	std::shared_ptr<Input> Update(
+		bool windowFocused,
 		float tpf,
 		double mouseX,
 		double mouseY,

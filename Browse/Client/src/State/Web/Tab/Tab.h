@@ -609,7 +609,7 @@ private:
     float _autoScrollingValue = 0; // [-1..1]
 
     // Gaze mouse
-    bool _gazeMouse = true;
+    bool _gazeMouse = false;
 
     // Level of zooming
     double _zoomLevel = 1;

@@ -250,7 +250,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// Create splash screen GUI, render it one time and throw it away
 	eyegui::GUI* pSplashGUI = guiBuilder.construct();
 	eyegui::loadStyleSheet(pSplashGUI, "stylesheets/Global.seyegui"); // load styling
-	eyegui::addLayout(pSplashGUI, "layouts/Splash.xeyegui"); // TODO: fill version string
+	eyegui::addLayout(pSplashGUI, "layouts/Splash.xeyegui");
 	eyegui::updateGUI(pSplashGUI, 1.f, eyegui::Input()); // update GUI one time for resizing
 	eyegui::drawGUI(pSplashGUI);
 	glfwSwapBuffers(_pWindow);
@@ -356,6 +356,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// _upWeb->AddTab("http://html5-demos.appspot.com/static/fullscreen.html");
 	// _upWeb->AddTab(std::string(CONTENT_PATH) + "/websites/index.html");
 	_upWeb->AddTab(_upSettings->GetHomepage());
+	_upWeb->AddTab("http://augreal.mklab.iti.gr/mamem/testing/", false);
 
     // ### SUPER LAYOUT ###
 
@@ -418,7 +419,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT, 1, &startPromise); // adds one to the count
 	_startIndex = startFuture.get() - 1; // is zero for both initial start and failure
 
-										 // Create record about start
+	// Create record about start
 	nlohmann::json record = { { "date", GetDate() } };
 	FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_APPLICATION_START, record, std::to_string(_startIndex)); // send JSON to database
 
@@ -779,10 +780,12 @@ void Master::Loop()
         glfwGetCursorPos(_pWindow, &currentMouseX, &currentMouseY);
 
 		// Update eye input
+		int focused = glfwGetWindowAttrib(_pWindow, GLFW_FOCUSED);
 		int windowX = 0;
 		int windowY = 0;
 		glfwGetWindowPos(_pWindow, &windowX, &windowY);
 		auto spInput = _upEyeInput->Update(
+			focused > 0,
 			tpf,
 			currentMouseX,
 			currentMouseY,
@@ -829,8 +832,7 @@ void Master::Loop()
             RGBAToHexString(glm::vec4(0, 0, 0, MASTER_PAUSE_ALPHA * _pausedDimming.getValue())));
 
 		// Check whether input is desired
-		int focused = glfwGetWindowAttrib(_pWindow, GLFW_FOCUSED);
-		if ((focused <= 0) // window not focused
+		if ((!spInput->windowFocused) // window not focused
 			|| (_timeUntilInput > 0) // do not use input, yet
 			|| (!spInput->gazeEmulated && spInput->gazeAge > setup::MAX_AGE_OF_USED_GAZE)) // do not use gaze that is too old
 		{
@@ -999,6 +1001,38 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
 			case GLFW_KEY_6: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::MAGNIFICATION); break; }
 			case GLFW_KEY_7: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::FUTURE); break; }
 			case GLFW_KEY_SPACE: { _upVoiceInput->StartAudioRecording(); break; }
+			case GLFW_KEY_M: {
+
+				// Store grid in Firebase
+				eyegui::DriftGrid grid = eyegui::getCurrentDriftMap(_pGUI);
+				std::vector<float> driftX; driftX.reserve(grid.RES_X + 1);
+				std::vector<float> driftY; driftY.reserve(grid.RES_Y + 1);
+				for (int x = 0; x <= grid.RES_X; x++)
+				{
+					for (int y = 0; y <= grid.RES_Y; y++)
+					{
+						driftX.push_back(grid.verts[x][y].first);
+						driftY.push_back(grid.verts[x][y].second);
+					}
+				}
+				nlohmann::json gridJSON =
+				{
+					{ "resX", grid.RES_X },
+					{ "resY", grid.RES_Y },
+					{ "driftX", driftX },
+					{ "driftY", driftY }
+				};
+				PushBackAsyncJob(
+					[gridJSON]() // provide copy of data
+				{
+					std::promise<int> promise; auto future = promise.get_future(); // future provides index
+					FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_DRIFT_GRID_COUNT, 1, &promise); // adds one to the count
+					FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_DRIFT_GRID, gridJSON, std::to_string(future.get())); // send JSON to database
+					return true; // give the future some value
+				});
+
+				break;
+			}
         }
     }
 	else if (action == GLFW_RELEASE)

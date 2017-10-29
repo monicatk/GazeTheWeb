@@ -196,6 +196,7 @@ EyeInput::~EyeInput()
 }
 
 std::shared_ptr<Input> EyeInput::Update(
+	bool windowFocused,
 	float tpf,
 	double mouseX,
 	double mouseY,
@@ -371,6 +372,7 @@ std::shared_ptr<Input> EyeInput::Update(
 
 	// Create input structure to return
 	std::shared_ptr<Input> spInput = std::make_shared<Input>(
+		windowFocused,
 		filteredGazeX, // gazeX,
 		filteredGazeY, // gazeY,
 		rawGazeX, // rawGazeX
