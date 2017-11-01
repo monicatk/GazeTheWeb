@@ -144,6 +144,9 @@ public:
 	// Get id token (is empty before login or at failure)
 	std::string GetIdToken() const;
 
+	// Simple event persisting. Returns index where value is stored
+	int Event(FirebaseIntegerKey countKey, FirebaseJSONKey valueKey);
+
 private:
 
 	// Forward declaration
