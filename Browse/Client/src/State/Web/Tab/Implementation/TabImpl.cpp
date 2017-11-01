@@ -690,10 +690,11 @@ void Tab::SetDataTransfer(bool active)
 
 void Tab::NotifyClick(std::string tag, std::string id, float x, float y)
 {
-	if (_spSocialRecord != nullptr)
+	if (_userTriggeredClick && _spSocialRecord != nullptr)
 	{
 		_spSocialRecord->AddClick(tag, id, x, y);
 	}
+	_userTriggeredClick = false; // ok click went from here to CEF and back from JavaScript to here, reset this bool
 }
 
 void Tab::ScheduleTextInputTrigger(int id)

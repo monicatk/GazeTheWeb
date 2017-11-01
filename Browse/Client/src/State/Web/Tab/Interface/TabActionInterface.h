@@ -25,7 +25,7 @@ public:
     virtual void PushBackPipeline(std::unique_ptr<Pipeline> upPipeline) = 0;
 
     // Emulate click in tab. Optionally converts WebViewPixel position to CEFpixel position before calling CEF method
-    virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true, bool isWebViewPixelCoordinate = true) = 0;
+    virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true, bool isWebViewPixelCoordinate = true, bool userTriggered = false) = 0;
 
 	// Emulate mouse cursor in tab. Optionally converts WebViewPixel position to CEFpixel position before calling CEF method. Optional offset in rendered pixels
 	virtual void EmulateMouseCursor(double x, double y, bool leftButtonPressed = false, bool isWebViewPixelCoordinate = true, double xOffset = 0, double yOffset = 0) = 0;

@@ -24,7 +24,7 @@ void Tab::PushBackPipeline(std::unique_ptr<Pipeline> upPipeline)
 	}
 }
 
-void Tab::EmulateLeftMouseButtonClick(double x, double y, bool visualize, bool isWebViewPixelCoordinate)
+void Tab::EmulateLeftMouseButtonClick(double x, double y, bool visualize, bool isWebViewPixelCoordinate, bool userTriggered)
 {
 	// Add some visualization for the user at screen position
 	if (visualize)
@@ -46,6 +46,9 @@ void Tab::EmulateLeftMouseButtonClick(double x, double y, bool visualize, bool i
 	}
 
 	LabStreamMailer::instance().Send("Click performed");
+
+	// Store information whether this click was triggered by the user
+	_userTriggeredClick = userTriggered;
 
 	// Tell mediator about the click
 	_pCefMediator->EmulateLeftMouseButtonClick(this, x, y);

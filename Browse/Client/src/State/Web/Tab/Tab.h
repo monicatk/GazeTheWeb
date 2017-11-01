@@ -276,7 +276,7 @@ public:
     virtual void PushBackPipeline(std::unique_ptr<Pipeline> upPipeline);
 
 	// Emulate click in tab. Optionally converts WebViewPixel position to CEFpixel position before calling CEF method
-	virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true, bool isWebViewPixelCoordinate = true);
+	virtual void EmulateLeftMouseButtonClick(double x, double y, bool visualize = true, bool isWebViewPixelCoordinate = true, bool userTriggered = false);
 
 	// Emulate mouse cursor in tab. Optionally converts WebViewPixel position to CEFpixel position before calling CEF method. Optional offset in rendered pixels
 	virtual void EmulateMouseCursor(double x, double y, bool leftButtonPressed = false, bool isWebViewPixelCoordinate = true, double xOffset = 0, double yOffset = 0) ;
@@ -698,6 +698,9 @@ private:
 
 	// Id of DOMVideo in map that is currently shown in video mode
 	int _videoModeId = -1; // -1 is indicator that currently no video mode active
+
+	// Marker for next received click to be triggered by user (used for social records)
+	bool _userTriggeredClick = false;
 };
 
 #endif // TAB_H_
