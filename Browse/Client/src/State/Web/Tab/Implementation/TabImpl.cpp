@@ -528,7 +528,8 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 
 				// Update social record
 				_spSocialRecord->AddTimeInForeground(tpf); // this update is only called when in foreground
-				if (userActive) { _spSocialRecord->AddTimeActiveUser(tpf); }// add on duration while user is active
+				if (userActive) { _spSocialRecord->AddTimeActiveUser(tpf); } // add on duration while user is active
+				if (spInput->gazeEmulated) { _spSocialRecord->AddTimeEmulatedInput(tpf); }
 				_spSocialRecord->AddScrollingDelta(glm::abs(_scrollingOffsetY - _prevScrolling));
 
 				// Prepare next update

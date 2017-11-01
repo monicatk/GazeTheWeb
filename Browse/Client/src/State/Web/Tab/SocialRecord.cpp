@@ -84,6 +84,11 @@ void SocialRecord::AddTimeActiveUser(float time)
 	if (_writeable) { _totalDurationUserActive += time; _pages.back().durationUserActive += time; }
 }
 
+void SocialRecord::AddTimeEmulatedInput(float time)
+{
+	if (_writeable) { _totalDurationEmulatedInput += time; _pages.back().durationEmulatedInput += time; }
+}
+
 void SocialRecord::AddScrollingDelta(float delta)
 {
 	if (_writeable) { _pages.back().scrollAmount += delta; }
@@ -125,6 +130,7 @@ nlohmann::json SocialRecord::ToJSON() const
 		{ "duration", std::chrono::duration<float>(_endTime-_startTime).count() },
 		{ "durationInForeground", _totalDurationInForeground },
 		{ "durationUserActive", _totalDurationUserActive },
+		{ "durationEmulatedInput", _totalDurationEmulatedInput },
 		{ "pageCount", _pages.size() },
 		{ "startIndex" , _startIndex}
 	};
@@ -139,6 +145,7 @@ nlohmann::json SocialRecord::ToJSON() const
 			{ "duration", rPage.duration },
 			{ "durationInForeground",  rPage.durationInForeground },
 			{ "durationUserActive",  rPage.durationUserActive },
+			{ "durationEmulatedInput", rPage.durationEmulatedInput },
 			{ "scrollAmount",  rPage.scrollAmount },
 			{ "clickCount",  rPage.clicks.size() },
 			{ "textInputCount",  rPage.textInputs.size() }

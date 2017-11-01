@@ -92,6 +92,9 @@ public:
 	// Add time in foreground and user is active
 	void AddTimeActiveUser(float time);
 
+	// Add time in foreground and user uses emulation by mouse
+	void AddTimeEmulatedInput(float time);
+
 	// Add scrolling delta
 	void AddScrollingDelta(float delta);
 
@@ -156,7 +159,8 @@ private:
 		const std::string URL;
 		double duration = 0.0;
 		double durationInForeground = 0.0;
-		double durationUserActive = 0.0; // and tab in foreground
+		double durationUserActive = 0.0; // and tab in foreground, input either by eye tracker and gaze detected or mouse
+		double durationEmulatedInput = 0.0; // duration of emulated input while in foreground
 		double scrollAmount = 0.0;
 		std::vector<Click> clicks;
 		std::vector<TextInput> textInputs;
@@ -176,6 +180,7 @@ private:
 	std::string _endDate;
 	double _totalDurationInForeground = 0.0;
 	double _totalDurationUserActive = 0.0; // and tab in foreground
+	double _totalDurationEmulatedInput = 0.0;
 	std::vector<Page> _pages; // should have at least one element and current one is at back
 	int _startIndex = -1;
 };
