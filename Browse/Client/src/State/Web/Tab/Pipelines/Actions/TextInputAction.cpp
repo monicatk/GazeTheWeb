@@ -60,7 +60,8 @@ bool TextInputAction::Update(float tpf, const std::shared_ptr<const TabInput> sp
 
 		float duration = -1.f;
 		GetInputValue("duration", duration);
-		_pTab->NotifyTextInput("", text.length(), distance, x, y, duration); // todo fetch id
+		
+		_pTab->NotifyTextInput(_spNode->GetHTMLClass(), _spNode->GetHTMLId(), text.length(), distance, x, y, duration); // todo fetch id
 	}
 
     // Action is done

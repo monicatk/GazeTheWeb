@@ -94,9 +94,9 @@ void SocialRecord::AddClick(std::string tag, std::string id, float x, float y)
 	if (_writeable) { _pages.back().clicks.push_back(Click(tag, id, x, y, std::chrono::duration<double>(std::chrono::system_clock::now() - _startTime).count())); }
 }
 
-void SocialRecord::AddTextInput(std::string id, int charCount, int charDistance, float x, float y, float duration)
+void SocialRecord::AddTextInput(std::string tag, std::string id, int charCount, int charDistance, float x, float y, float duration)
 {
-	if (_writeable) { _pages.back().textInputs.push_back(TextInput(id, charCount, charDistance, x, y, std::chrono::duration<double>(std::chrono::system_clock::now() - _startTime).count(), duration)); }
+	if (_writeable) { _pages.back().textInputs.push_back(TextInput(tag, id, charCount, charDistance, x, y, std::chrono::duration<double>(std::chrono::system_clock::now() - _startTime).count(), duration)); }
 }
 
 void SocialRecord::AddPage(std::string URL)
@@ -162,6 +162,7 @@ nlohmann::json SocialRecord::ToJSON() const
 		{
 			JSON["pages"].back()["textInputs"].push_back(
 			{
+				{ "tag", rTextInput.tag },
 				{ "id", rTextInput.id },
 				{ "charCount", rTextInput.charCount },
 				{ "charDistance", rTextInput.charDistance },

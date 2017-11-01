@@ -315,7 +315,7 @@ public:
 	virtual std::weak_ptr<CustomTransformationInterface> GetCustomTransformationInterface() const;
 
 	// Notify about text input
-	virtual void NotifyTextInput(std::string id, int charCount, int charDistance, float x, float y, float duration);
+	virtual void NotifyTextInput(std::string tag, std::string id, int charCount, int charDistance, float x, float y, float duration);
 
 	// Set WebViewParameters for WebView
 	virtual void SetWebViewParameters(WebViewParameters parameters) { _webViewParameters = parameters; }
