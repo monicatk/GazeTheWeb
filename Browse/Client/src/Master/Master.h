@@ -12,6 +12,7 @@
 #include "src/Master/MasterNotificationInterface.h"
 #include "src/Master/MasterThreadsafeInterface.h"
 #include "src/Singletons/LabStreamMailer.h"
+#include "src/Singletons/FirebaseMailer.h"
 #include "src/CEF/Mediator.h"
 #include "src/State/Web/Web.h"
 #include "src/State/Settings/Settings.h"
@@ -82,6 +83,7 @@ public:
 
 	// Push back async job. Only provide threadsafe calls to the job!!!
 	void PushBackAsyncJob(std::function<bool()> job);
+	void SimplePushBackAsyncJob(FirebaseIntegerKey countKey, FirebaseJSONKey recordKey, nlohmann::json record = nlohmann::json()); // automatically adds start index and date
 
     // ### EYEGUI DELEGATION ###
 

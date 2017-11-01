@@ -6,7 +6,6 @@
 #include "Master.h"
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
-#include "src/Singletons/FirebaseMailer.h"
 #include "src/Arguments.h"
 #include "submodules/glfw/include/GLFW/glfw3.h"
 #include "submodules/text-csv/include/text/csv/ostream.hpp"
@@ -596,6 +595,26 @@ void Master::PushBackAsyncJob(std::function<bool()> job)
 		job));
 }
 
+void Master::SimplePushBackAsyncJob(FirebaseIntegerKey countKey, FirebaseJSONKey recordKey, nlohmann::json record)
+{
+	// Add data to record
+	record.emplace("startIndex", FirebaseMailer::Instance().GetStartIndex()); // start index
+	record.emplace("date", GetDate()); // date
+
+	// Push back the job
+	PushBackAsyncJob(
+		[countKey, recordKey, record]() // copy of date, start index and success
+	{
+		// Persist record
+		std::promise<int> promise; auto future = promise.get_future(); // future provides index
+		FirebaseMailer::Instance().PushBack_Transform(countKey, 1, &promise); // adds one to the count
+		FirebaseMailer::Instance().PushBack_Put(recordKey, record, std::to_string(future.get() - 1)); // send JSON to database
+
+		// Return some value (not used)
+		return true;
+	});
+}
+
 eyegui::Layout* Master::AddLayout(std::string filepath, int layer, bool visible)
 {
     // Add layout
@@ -1125,22 +1144,8 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			}
 
 			// Store this recalibration in Firebase
-			std::string date = GetDate(); // current date
-			int startIndex = FirebaseMailer::Instance().GetStartIndex(); // start index
-			_pMaster->PushBackAsyncJob(
-				[date, startIndex, success]() // copy of date, start index and success
-			{
-				// Create record
-				nlohmann::json record = { { "date", date }, { "startIndex", startIndex }, { "success", success } };
-
-				// Persist record
-				std::promise<int> promise; auto future = promise.get_future(); // future provides index
-				FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_RECALIBRATION_COUNT, 1, &promise); // adds one to the count
-				FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_RECALIBRATION, record, std::to_string(future.get() - 1)); // send JSON to database
-
-				// Return some value (not used)
-				return true;
-			});
+			nlohmann::json record = { { "success", success } };
+			_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_RECALIBRATION_COUNT, FirebaseJSONKey::GENERAL_RECALIBRATION, record);
 
 			// Hide layout after calibration
 			eyegui::setVisibilityOfLayout(_pMaster->_pSuperCalibrationLayout, false, false, true);
