@@ -195,6 +195,7 @@ void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		else if (id == "complete")
 		{
 			_pURLInput->_finished = true;
+			_pURLInput->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_URL_INPUT_COUNT, FirebaseJSONKey::GENERAL_URL_INPUT);
 			LabStreamMailer::instance().Send("URL input done");
 		}
 	}
@@ -221,6 +222,7 @@ void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				eyegui_helper::convertUTF8ToUTF16(URL, URL16);
 				_pURLInput->_collectedURL = URL16;
 				_pURLInput->_finished = true;
+				_pURLInput->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_BOOKMARK_USAGE_COUNT, FirebaseJSONKey::GENERAL_BOOKMARK_USAGE);
 				LabStreamMailer::instance().Send("Open bookmark: " + URL);
 			}
 

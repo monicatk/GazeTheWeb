@@ -1107,6 +1107,7 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
     {
         _pMaster->_paused = true;
         eyegui::setDescriptionVisibility(_pMaster->_pGUI, eyegui::DescriptionVisibility::VISIBLE);
+		_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_PAUSE_COUNT, FirebaseJSONKey::GENERAL_PAUSE);
     }
 	else if (pLayout == _pMaster->_pSuperCalibrationLayout)
 	{
@@ -1159,6 +1160,7 @@ void Master::MasterButtonListener::up(eyegui::Layout* pLayout, std::string id)
     {
         _pMaster->_paused = false;
         eyegui::setDescriptionVisibility(_pMaster->_pGUI, eyegui::DescriptionVisibility::ON_PENETRATION); // TODO look up in Settings for set value
+		_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_UNPAUSE_COUNT, FirebaseJSONKey::GENERAL_UNPAUSE);
     }
 }
 

@@ -27,17 +27,21 @@ enum class FirebaseIntegerKey	{
 	GENERAL_APPLICATION_START_COUNT,
 	GENERAL_RECALIBRATION_COUNT,
 	GENERAL_DRIFT_GRID_COUNT,
-
-	// TODO
 	GENERAL_URL_INPUT_COUNT,
 	GENERAL_BOOKMARK_USAGE_COUNT,
+	GENERAL_BOOKMARKING_ADDING_COUNT,
+	GENERAL_TAB_RELOADING_COUNT,
+	GENERAL_TAB_CLOSING_COUNT,
 	GENERAL_TAB_CREATION_COUNT,
 	GENERAL_TAB_SWITCHING_COUNT,
-	GENERAL_PAUSING_COUNT,
-	GENERAL_DATA_TRANSFER_COUNT,
+	GENERAL_GO_BACK_USAGE_COUNT,
+	GENERAL_GO_FORWARD_USAGE_COUNT,
+	GENERAL_PAUSE_COUNT,
+	GENERAL_UNPAUSE_COUNT,
+
+	// TODO
 	GENERAL_DASHBOARD_USAGE_COUNT,
-	GENERAL_GO_BACK_COUNT,
-	GENERAL_GO_FORWARD_COUNT
+	
 };
 enum class FirebaseStringKey	{ 
 	TEST_STRING };
@@ -49,17 +53,21 @@ enum class FirebaseJSONKey		{
 	GENERAL_APPLICATION_START,
 	GENERAL_RECALIBRATION,
 	GENERAL_DRIFT_GRID,
-
-	// TODO
 	GENERAL_URL_INPUT,
 	GENERAL_BOOKMARK_USAGE,
+	GENERAL_BOOKMARKING_ADDING,
+	GENERAL_TAB_RELOADING,
+	GENERAL_TAB_CLOSING,
 	GENERAL_TAB_CREATION,
 	GENERAL_TAB_SWITCHING,
-	GENERAL_PAUSING,
-	GENERAL_DATA_TRANSFER,
+	GENERAL_GO_BACK_USAGE,
+	GENERAL_GO_FORWARD_USAGE,
+	GENERAL_PAUSE,
+	GENERAL_UNPAUSE,
+
+	// TODO
 	GENERAL_DASHBOARD_USAGE,
-	GENERAL_GO_BACK,
-	GENERAL_GO_FORWARD
+	
 };
 
 // Mapping from key to raw type
@@ -88,6 +96,30 @@ template<> std::string FirebaseAddress<FirebaseIntegerKey>(FirebaseIntegerKey ke
 		return "general/recalibrationCount";
 	case FirebaseIntegerKey::GENERAL_DRIFT_GRID_COUNT:
 		return "general/driftGridCount";
+	case FirebaseIntegerKey::GENERAL_URL_INPUT_COUNT:
+		return "general/urlInputCount";
+	case FirebaseIntegerKey::GENERAL_BOOKMARK_USAGE_COUNT:
+		return "general/bookmarkUsageCount";
+	case FirebaseIntegerKey::GENERAL_BOOKMARKING_ADDING_COUNT:
+		return "general/bookmarkAddingCount";
+	case FirebaseIntegerKey::GENERAL_TAB_RELOADING_COUNT:
+		return "general/tabReloadingCount";
+	case FirebaseIntegerKey::GENERAL_TAB_CLOSING_COUNT:
+		return "general/tabClosingCount";
+	case FirebaseIntegerKey::GENERAL_TAB_CREATION_COUNT:
+		return "general/tabCreationCount";
+	case FirebaseIntegerKey::GENERAL_TAB_SWITCHING_COUNT:
+		return "general/tabSwitchingCount";
+	case FirebaseIntegerKey::GENERAL_GO_BACK_USAGE_COUNT:
+		return "general/goBackUsageCount";
+	case FirebaseIntegerKey::GENERAL_GO_FORWARD_USAGE_COUNT:
+		return "general/goForwardUsageCount";
+	case FirebaseIntegerKey::GENERAL_PAUSE_COUNT:
+		return "general/pauseCount";
+	case FirebaseIntegerKey::GENERAL_UNPAUSE_COUNT:
+		return "general/unpauseCount";
+	case FirebaseIntegerKey::GENERAL_DASHBOARD_USAGE_COUNT:
+		return "general/dashboardUsageCount";
 	default: return "";
 	}
 };
@@ -118,6 +150,30 @@ template<> std::string FirebaseAddress<FirebaseJSONKey>(FirebaseJSONKey key)
 		return "general/recalibrations";
 	case FirebaseJSONKey::GENERAL_DRIFT_GRID:
 		return "general/driftGrids";
+	case FirebaseJSONKey::GENERAL_URL_INPUT:
+		return "general/urlInput";
+	case FirebaseJSONKey::GENERAL_BOOKMARK_USAGE:
+		return "general/bookmarkUsage";
+	case FirebaseJSONKey::GENERAL_BOOKMARKING_ADDING:
+		return "general/bookmarkAdding";
+	case FirebaseJSONKey::GENERAL_TAB_RELOADING:
+		return "general/tabReloading";
+	case FirebaseJSONKey::GENERAL_TAB_CLOSING:
+		return "general/tabClosing";
+	case FirebaseJSONKey::GENERAL_TAB_CREATION:
+		return "general/tabCreation";
+	case FirebaseJSONKey::GENERAL_TAB_SWITCHING:
+		return "general/tabSwitching";
+	case FirebaseJSONKey::GENERAL_GO_BACK_USAGE:
+		return "general/goBackUsage";
+	case FirebaseJSONKey::GENERAL_GO_FORWARD_USAGE:
+		return "general/goForwardUsage";
+	case FirebaseJSONKey::GENERAL_PAUSE:
+		return "general/pause";
+	case FirebaseJSONKey::GENERAL_UNPAUSE:
+		return "general/unpause";
+	case FirebaseJSONKey::GENERAL_DASHBOARD_USAGE:
+		return "general/dashboardUsage";
 	default: return "";
 	}
 };

@@ -897,6 +897,7 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			if (tabId >= 0)
 			{
 				_pWeb->_tabs[tabId]->GoBack();
+				_pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_GO_BACK_USAGE_COUNT, FirebaseJSONKey::GENERAL_GO_BACK_USAGE);
 			}
 			LabStreamMailer::instance().Send("Go back");
 		}
@@ -906,6 +907,7 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			if (tabId >= 0)
 			{
 				_pWeb->_tabs[tabId]->GoForward();
+				_pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_GO_FORWARD_USAGE_COUNT, FirebaseJSONKey::GENERAL_GO_FORWARD_USAGE);
 			}
 			LabStreamMailer::instance().Send("Go forward");
 		}
@@ -956,6 +958,8 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				{
 					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_existing", MasterNotificationInterface::Type::NEUTRAL, false);
 				}
+
+				if (success) { _pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_BOOKMARKING_ADDING_COUNT, FirebaseJSONKey::GENERAL_BOOKMARKING_ADDING); }
 			}
 
 			JSMailer::instance().Send("bookmark_add");
@@ -969,6 +973,7 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				_pWeb->ShowTabOverview(false);
 			}
 			LabStreamMailer::instance().Send("Reload tab");
+			_pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_TAB_RELOADING_COUNT, FirebaseJSONKey::GENERAL_TAB_RELOADING);
 		}
 		else if (id == "close_tab")
 		{
@@ -978,6 +983,7 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				_pWeb->UpdateTabOverview();
 			}
 			LabStreamMailer::instance().Send("Close tab");
+			_pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_TAB_CLOSING_COUNT, FirebaseJSONKey::GENERAL_TAB_CLOSING);
 		}
 		else if (id == "back")
 		{
@@ -1006,10 +1012,13 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 
 			JSMailer::instance().Send("new_tab");
 			LabStreamMailer::instance().Send("Open new tab");
+			_pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_TAB_CREATION_COUNT, FirebaseJSONKey::GENERAL_TAB_CREATION);
 		}
 		else if (id == "tab_button_0")
 		{
-			if (_pWeb->SwitchToTabByIndex(0 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
+			int index = 0 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE);
+			if(_pWeb->_tabIdOrder[index] != _pWeb->_currentTabId) {_pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_TAB_SWITCHING_COUNT, FirebaseJSONKey::GENERAL_TAB_SWITCHING); }
+			if (_pWeb->SwitchToTabByIndex(index))
 			{
 				_pWeb->ShowTabOverview(false);
 				JSMailer::instance().Send("tab0");
@@ -1017,28 +1026,36 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		}
 		else if (id == "tab_button_1")
 		{
-			if (_pWeb->SwitchToTabByIndex(1 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
+			int index = 1 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE);
+			if (_pWeb->_tabIdOrder[index] != _pWeb->_currentTabId) { _pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_TAB_SWITCHING_COUNT, FirebaseJSONKey::GENERAL_TAB_SWITCHING); }
+			if (_pWeb->SwitchToTabByIndex(index))
 			{
 				_pWeb->ShowTabOverview(false);
 			}
 		}
 		else if (id == "tab_button_2")
 		{
-			if (_pWeb->SwitchToTabByIndex(2 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
+			int index = 2 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE);
+			if (_pWeb->_tabIdOrder[index] != _pWeb->_currentTabId) { _pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_TAB_SWITCHING_COUNT, FirebaseJSONKey::GENERAL_TAB_SWITCHING); }
+			if (_pWeb->SwitchToTabByIndex(index))
 			{
 				_pWeb->ShowTabOverview(false);
 			}
 		}
 		else if (id == "tab_button_3")
 		{
-			if (_pWeb->SwitchToTabByIndex(3 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
+			int index = 3 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE);
+			if (_pWeb->_tabIdOrder[index] != _pWeb->_currentTabId) { _pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_TAB_SWITCHING_COUNT, FirebaseJSONKey::GENERAL_TAB_SWITCHING); }
+			if (_pWeb->SwitchToTabByIndex(index))
 			{
 				_pWeb->ShowTabOverview(false);
 			}
 		}
 		else if (id == "tab_button_4")
 		{
-			if (_pWeb->SwitchToTabByIndex(4 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
+			int index = 4 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE);
+			if (_pWeb->_tabIdOrder[index] != _pWeb->_currentTabId) { _pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_TAB_SWITCHING_COUNT, FirebaseJSONKey::GENERAL_TAB_SWITCHING); }
+			if (_pWeb->SwitchToTabByIndex(index))
 			{
 				_pWeb->ShowTabOverview(false);
 			}
