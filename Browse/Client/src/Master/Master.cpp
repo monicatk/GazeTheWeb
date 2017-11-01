@@ -409,14 +409,11 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
 	// ### FIREBASE MAILER ###
 
-	// Login
+	// Login (waits until complete)
 	std::promise<std::string> idTokenPromise; auto idTokenFuture = idTokenPromise.get_future(); // future provides initial idToken
 	FirebaseMailer::Instance().PushBack_Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword(), &idTokenPromise);
 	LogInfo(idTokenFuture.get());
 
-	// Start index
-	_startIndex = FirebaseMailer::Instance().Event(FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT, FirebaseJSONKey::GENERAL_APPLICATION_START);
-	
 	// ### JAVASCRIPT TO LAB STREAMING LAYER ###
 
 	// Registers a JavaScript callback function that pipes JS callbacks starting with "lsl:" to LabStreamingLayer
@@ -1129,7 +1126,7 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
 
 			// Store this recalibration in Firebase
 			std::string date = GetDate(); // current date
-			int startIndex = _pMaster->GetStartIndex(); // start index
+			int startIndex = FirebaseMailer::Instance().GetStartIndex(); // start index
 			_pMaster->PushBackAsyncJob(
 				[date, startIndex, success]() // copy of date, start index and success
 			{

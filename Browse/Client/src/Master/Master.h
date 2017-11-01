@@ -129,9 +129,6 @@ public:
 		eyegui::setKeyboardLayout(_pGUI, keyboardLayout);
 	}
 
-	// Get start index
-	int GetStartIndex() const { return _startIndex; }
-
 	// ### STORING OF SETTINGS ###
 
 	// Store homepage URL in settings
@@ -353,9 +350,6 @@ private:
 
 	// Asyncronous calls, e.g. persist Firebase entries
 	std::vector<std::future<bool> > _asyncJobs; // abuse async calls since it is easier to determine whether finished or not
-
-	// Start index (indicates how often user has started the application)
-	int _startIndex = -1;
 
 	// Indicator whether computer should shut down at exit
 	bool _shouldShutdownAtExit = false;

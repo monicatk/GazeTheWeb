@@ -860,7 +860,7 @@ void Tab::StartSocialRecord(std::string URL, SocialPlatform platform)
 		}
 
 		// Start new record
-		_spSocialRecord = std::shared_ptr<SocialRecord>(new SocialRecord(SocialRecord::ExtractDomain(URL), platform, _pMaster->GetStartIndex()));
+		_spSocialRecord = std::shared_ptr<SocialRecord>(new SocialRecord(SocialRecord::ExtractDomain(URL), platform, FirebaseMailer::Instance().GetStartIndex()));
 		_spSocialRecord->StartAndAddPage(URL);
 	}
 }

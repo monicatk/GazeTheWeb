@@ -142,7 +142,7 @@ public:
 	void Pause() { _paused = true; }
 
 	// Available commands
-	void PushBack_Login		(std::string email, std::string password, std::promise<std::string>* pPromise = nullptr); // promise delivers initial idToken value
+	void PushBack_Login		(std::string email, std::string password, std::promise<std::string>* pPromise = nullptr); // promise delivers initial idToken value and sets internal start index
 	void PushBack_Transform	(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise = nullptr); // promise delivers future database value
 	void PushBack_Maximum	(FirebaseIntegerKey key, int value, std::promise<int>* pPromise = nullptr); // promise delivers future database value
 	void PushBack_Put		(FirebaseIntegerKey key, int value, std::string subpath = "");
@@ -155,8 +155,8 @@ public:
 	// Get id token (is empty before login or at failure)
 	std::string GetIdToken() const;
 
-	// Simple event persisting. Returns index where value is stored
-	int Event(FirebaseIntegerKey countKey, FirebaseJSONKey valueKey, nlohmann::json value = nlohmann::json());
+	// Get start index
+	int GetStartIndex() const;
 
 private:
 
@@ -169,7 +169,7 @@ private:
 	public:
 
 		// Constructor
-		FirebaseInterface(IdToken* pIdToken) : _pIdToken(pIdToken) {}
+		FirebaseInterface(IdToken* pIdToken, std::atomic<int>* pStartIndex) : _pIdToken(pIdToken), _pStartIndex(pStartIndex) {}
 
 		// Log in. Return whether successful
 		bool Login(std::string email, std::string password, std::promise<std::string>* pPromise);
@@ -221,6 +221,7 @@ private:
 
 		// Members
 		IdToken* _pIdToken = nullptr; // set at construction
+		std::atomic<int>* _pStartIndex = nullptr; // set at construction
 		std::string _refreshToken = ""; // long living token for refreshing itself and idToken
 		std::string _uid = "0"; // user identifier (initialized with something that indicates "broken")
 		std::string _email = ""; // taken from login attempt
@@ -241,6 +242,9 @@ private:
 
 	// Pause indicator (if true, avoids pushing to command queue)
 	std::atomic<bool> _paused = false; // atomic since could be accessed from multiple async threads
+
+	// Start index of application run
+	std::atomic<int> _startIndex = -1;
 
 	// #### THREAD-RELATED MEMBERS ####
 

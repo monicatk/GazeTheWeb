@@ -93,6 +93,17 @@ bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string pas
 	// Perform actual login
 	bool success = Login();
 
+	// If success, retrieve start index
+	if (success)
+	{
+		std::promise<int> promise; auto future = promise.get_future(); // future provides index
+		Transform(FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT, 1, &promise); // adds one to the count
+		int index = future.get() - 1;
+		nlohmann::json value = { { "date", GetDate() } }; // add date
+		Put(FirebaseJSONKey::GENERAL_APPLICATION_START, value, std::to_string(index)); // send JSON to database
+		*_pStartIndex = index;
+	}
+
 	// Fullfill the promise
 	pPromise->set_value(_pIdToken->Get());
 
@@ -642,11 +653,12 @@ FirebaseMailer::FirebaseMailer()
 	auto* pConditionVariable = &_conditionVariable;
 	auto* pCommandQueue = &_commandQueue;
 	auto* pIdToken = &_idToken;
+	auto* pStartIndex = &_startIndex;
 	auto const * pShouldStop = &_shouldStop; // read-only
-	_upThread = std::unique_ptr<std::thread>(new std::thread([pMutex, pConditionVariable, pCommandQueue, pIdToken, pShouldStop]() // pass copies of pointers to members
+	_upThread = std::unique_ptr<std::thread>(new std::thread([pMutex, pConditionVariable, pCommandQueue, pIdToken, pStartIndex, pShouldStop]() // pass copies of pointers to members
 	{
 		// Create interface to firebase
-		FirebaseInterface interface(pIdToken); // object of inner class
+		FirebaseInterface interface(pIdToken, pStartIndex); // object of inner class
 
 		// Local command queue where command are moved from mailer thread to this thread
 		std::deque<std::shared_ptr<Command> > localCommandQueue;
@@ -774,12 +786,7 @@ std::string FirebaseMailer::GetIdToken() const
 	return _idToken.Get();
 }
 
-int FirebaseMailer::Event(FirebaseIntegerKey countKey, FirebaseJSONKey valueKey, nlohmann::json value)
+int FirebaseMailer::GetStartIndex() const
 {
-	std::promise<int> promise; auto future = promise.get_future(); // future provides index
-	FirebaseMailer::Instance().PushBack_Transform(countKey, 1, &promise); // adds one to the count
-	int index = future.get() - 1;
-	value.emplace("date", GetDate()); // add date
-	FirebaseMailer::Instance().PushBack_Put(valueKey, value, std::to_string(index)); // send JSON to database
-	return index;
+	return _startIndex;
 }
