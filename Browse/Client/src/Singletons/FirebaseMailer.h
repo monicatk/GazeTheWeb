@@ -37,7 +37,18 @@ enum class FirebaseJSONKey		{
 	SOCIAL_RECORD_YOUTUBE,
 	GENERAL_APPLICATION_START,
 	GENERAL_RECALIBRATION,
-	GENERAL_DRIFT_GRID
+	GENERAL_DRIFT_GRID,
+
+	// TODO
+	GENERAL_URL_INPUT,
+	GENERAL_BOOKMARK_USAGE,
+	GENERAL_TAB_CREATION,
+	GENERAL_TAB_SWITCHING,
+	GENERAL_PAUSING,
+	GENERAL_DATA_TRANSFER,
+	GENERAL_DASHBOARD_USAGE,
+	GENERAL_GO_BACK,
+	GENERAL_GO_FORWARD
 };
 
 // Mapping from key to raw type
@@ -145,7 +156,7 @@ public:
 	std::string GetIdToken() const;
 
 	// Simple event persisting. Returns index where value is stored
-	int Event(FirebaseIntegerKey countKey, FirebaseJSONKey valueKey);
+	int Event(FirebaseIntegerKey countKey, FirebaseJSONKey valueKey, nlohmann::json value = nlohmann::json());
 
 private:
 

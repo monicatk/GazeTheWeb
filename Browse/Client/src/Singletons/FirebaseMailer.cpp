@@ -774,12 +774,12 @@ std::string FirebaseMailer::GetIdToken() const
 	return _idToken.Get();
 }
 
-int FirebaseMailer::Event(FirebaseIntegerKey countKey, FirebaseJSONKey valueKey)
+int FirebaseMailer::Event(FirebaseIntegerKey countKey, FirebaseJSONKey valueKey, nlohmann::json value)
 {
 	std::promise<int> promise; auto future = promise.get_future(); // future provides index
 	FirebaseMailer::Instance().PushBack_Transform(countKey, 1, &promise); // adds one to the count
 	int index = future.get() - 1;
-	nlohmann::json record = { { "date", GetDate() } }; // log date of event
-	FirebaseMailer::Instance().PushBack_Put(valueKey, record, std::to_string(index)); // send JSON to database
+	value.emplace("date", GetDate()); // add date
+	FirebaseMailer::Instance().PushBack_Put(valueKey, value, std::to_string(index)); // send JSON to database
 	return index;
 }
