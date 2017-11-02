@@ -195,6 +195,8 @@ bool DOMTextInput::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 	switch (attr) {
 		case DOMAttribute::Text:			return IPCSetText(data);
 		case DOMAttribute::IsPassword:		return IPCSetPassword(data);
+		case DOMAttribute::HTMLId:			return IPCSetHTMLId(data);
+		case DOMAttribute::HTMLClass:		return IPCSetHTMLClass(data);
 	}
 	return super::Update(attr, data);
 }
