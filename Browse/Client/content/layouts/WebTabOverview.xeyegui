@@ -25,7 +25,9 @@
 										</row>
 										<row size="80%">
 											<column size="100%">
-													<picture id="preview" alignment="zoomed" border="10%"/>
+													<stack props="BackgroundColor=0xFFFFFFFF" showbackground="true" border="10%">
+														<picture id="preview" alignment="zoomed"/>
+													</stack>
 											</column>
 										</row>
 									</grid>
