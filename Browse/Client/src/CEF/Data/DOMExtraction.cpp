@@ -100,7 +100,6 @@ const CefRefPtr<CefListValue> V8ToCefListValue::Integer(CefRefPtr<CefV8Value> at
 {
 
 	CefRefPtr<CefListValue> wrapper = CefListValue::Create();
-	// TODO: Doesn't really catch null?
 	if (attrData->IsNull() || attrData->IsUndefined() || !attrData->IsInt()) // TODO: Check everywhere for null and undefined!
 		wrapper->SetInt(0, -1);
 	else
