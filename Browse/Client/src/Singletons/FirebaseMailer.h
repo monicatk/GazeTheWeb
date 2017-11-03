@@ -206,16 +206,16 @@ public:
 	// Pause mailer
 	void Pause() { _paused = true; }
 
-	// Available commands
-	void PushBack_Login		(std::string email, std::string password, std::promise<std::string>* pPromise = nullptr); // promise delivers initial idToken value and sets internal start index
-	void PushBack_Transform	(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise = nullptr); // promise delivers future database value
-	void PushBack_Maximum	(FirebaseIntegerKey key, int value, std::promise<int>* pPromise = nullptr); // promise delivers future database value
-	void PushBack_Put		(FirebaseIntegerKey key, int value, std::string subpath = "");
-	void PushBack_Put		(FirebaseStringKey key, std::string value, std::string subpath = "");
-	void PushBack_Put		(FirebaseJSONKey key, nlohmann::json value, std::string subpath = "");
-	void PushBack_Get		(FirebaseIntegerKey key, std::promise<int>* pPromise);
-	void PushBack_Get		(FirebaseStringKey key, std::promise<std::string>* pPromise);
-	void PushBack_Get		(FirebaseJSONKey key, std::promise<nlohmann::json>* pPromise);
+	// Available commands. Returns whether successful. If not, do not wait for the promise to be fulfilled!
+	bool PushBack_Login		(std::string email, std::string password, std::promise<std::string>* pPromise = nullptr); // promise delivers initial idToken value and sets internal start index
+	bool PushBack_Transform	(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise = nullptr); // promise delivers future database value
+	bool PushBack_Maximum	(FirebaseIntegerKey key, int value, std::promise<int>* pPromise = nullptr); // promise delivers future database value
+	bool PushBack_Put		(FirebaseIntegerKey key, int value, std::string subpath = "");
+	bool PushBack_Put		(FirebaseStringKey key, std::string value, std::string subpath = "");
+	bool PushBack_Put		(FirebaseJSONKey key, nlohmann::json value, std::string subpath = "");
+	bool PushBack_Get		(FirebaseIntegerKey key, std::promise<int>* pPromise);
+	bool PushBack_Get		(FirebaseStringKey key, std::promise<std::string>* pPromise);
+	bool PushBack_Get		(FirebaseJSONKey key, std::promise<nlohmann::json>* pPromise);
 
 	// Get id token (is empty before login or at failure)
 	std::string GetIdToken() const;
@@ -298,7 +298,7 @@ private:
 	typedef const std::function<void(FirebaseInterface&)> Command;
 
 	// Method that actually pushes back command (considers whether paused etc.)
-	void PushBackCommand(std::shared_ptr<Command> spCommand);
+	bool PushBackCommand(std::shared_ptr<Command> spCommand);
 
 	// Private copy / assignment constructors
 	FirebaseMailer(); // threadsafe as only called by Instance()

@@ -410,8 +410,8 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
 	// Login (waits until complete)
 	std::promise<std::string> idTokenPromise; auto idTokenFuture = idTokenPromise.get_future(); // future provides initial idToken
-	FirebaseMailer::Instance().PushBack_Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword(), &idTokenPromise);
-	LogInfo(idTokenFuture.get());
+	bool pushedBack = FirebaseMailer::Instance().PushBack_Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword(), &idTokenPromise);
+	if (pushedBack) { LogInfo(idTokenFuture.get()); };
 
 	// ### JAVASCRIPT TO LAB STREAMING LAYER ###
 
@@ -607,8 +607,8 @@ void Master::SimplePushBackAsyncJob(FirebaseIntegerKey countKey, FirebaseJSONKey
 	{
 		// Persist record
 		std::promise<int> promise; auto future = promise.get_future(); // future provides index
-		FirebaseMailer::Instance().PushBack_Transform(countKey, 1, &promise); // adds one to the count
-		FirebaseMailer::Instance().PushBack_Put(recordKey, record, std::to_string(future.get() - 1)); // send JSON to database
+		bool pushedBack = FirebaseMailer::Instance().PushBack_Transform(countKey, 1, &promise); // adds one to the count
+		if (pushedBack) { pushedBack = FirebaseMailer::Instance().PushBack_Put(recordKey, record, std::to_string(future.get() - 1)); } // send JSON to database
 
 		// Return some value (not used)
 		return true;
@@ -1037,8 +1037,8 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
 					[gridJSON]() // provide copy of data
 				{
 					std::promise<int> promise; auto future = promise.get_future(); // future provides index
-					FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_DRIFT_GRID_COUNT, 1, &promise); // adds one to the count
-					FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_DRIFT_GRID, gridJSON, std::to_string(future.get())); // send JSON to database
+					bool pushedBack = FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_DRIFT_GRID_COUNT, 1, &promise); // adds one to the count
+					if (pushedBack) { FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_DRIFT_GRID, gridJSON, std::to_string(future.get())); } // send JSON to database
 					return true; // give the future some value
 				});
 

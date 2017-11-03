@@ -70,8 +70,8 @@ void SocialRecord::Persist()
 
 	// Persist
 	std::promise<int> sessionPromise; auto sessionFuture = sessionPromise.get_future(); // prepare to get value
-	FirebaseMailer::Instance().PushBack_Transform(countKey, 1, &sessionPromise); // adds one to the count
-	FirebaseMailer::Instance().PushBack_Put(recordKey, record, "sessions/" + std::to_string(sessionFuture.get() - 1)); // send JSON to database
+	bool pushedBack = FirebaseMailer::Instance().PushBack_Transform(countKey, 1, &sessionPromise); // adds one to the count
+	if (pushedBack) { FirebaseMailer::Instance().PushBack_Put(recordKey, record, "sessions/" + std::to_string(sessionFuture.get() - 1)); } // send JSON to database
 }
 
 void SocialRecord::AddTimeInForeground(float time)
