@@ -55,7 +55,7 @@ namespace setup
 	static const FilterKernel FILTER_KERNEL = FilterKernel::GAUSSIAN;
 	static const int	FILTER_WINDOW_SIZE = 30;
 	static const bool	FILTER_USE_OUTLIER_REMOVAL = true;
-	static const bool	USE_EYEGUI_DRIFT_MAP = true && !DEMO_MODE;
+	static const bool	USE_EYEGUI_DRIFT_MAP = !DEMO_MODE;
 
 	// Distortion
 	static const bool	EYEINPUT_DISTORT_GAZE = false && !DEPLOYMENT;
@@ -66,13 +66,16 @@ namespace setup
 	static const std::string	LAB_STREAM_OUTPUT_NAME = "GazeTheWebOutput";
 	static const std::string	LAB_STREAM_OUTPUT_SOURCE_ID = std::to_string(CLIENT_VERSION); // use client version as source id
 	static const std::string	LAB_STREAM_INPUT_NAME = LAB_STREAM_OUTPUT_NAME; //  "GazeTheWebInput"; // may be set to same value as LAB_STREAM_OUTPUT_NAME to receive own events for debugging purposes
-	static const bool			LOG_INTERACTIONS = false;
+	static const bool			LOG_INTERACTIONS = false; // on eyeGUI level, deprecated
+	static const bool			TAB_TRIGGER_SHOW_BADGE = false;
+
+	// Firebase
+	static const bool			FIREBASE_MAILING = !DEMO_MODE; // on/off switch for sending data to Firebase
 	static const std::string	FIREBASE_API_KEY = "AIzaSyBMa9gSXsoDo27S7P959QZYf3rJBGDGEIA"; // API key for our Firebase
 	static const std::string	FIREBASE_URL = "https://mamem-phase2-fall17.firebaseio.com"; // URL of our Firebase
 	static const int			SOCIAL_RECORD_DIGIT_COUNT = 6;
 	static const bool			SOCIAL_RECORD_PERSIST_UNKNOWN = true;
 	static const std::string	DATE_FORMAT = "%d-%m-%Y %H-%M-%S";
-	static const bool			TAB_TRIGGER_SHOW_BADGE = true;
 
 	// Other
 	static const bool	ENABLE_WEBGL = false; // only on Windows

@@ -772,7 +772,7 @@ void FirebaseMailer::PushBack_Get(FirebaseJSONKey key, std::promise<json>* pProm
 
 void FirebaseMailer::PushBackCommand(std::shared_ptr<Command> spCommand)
 {
-	if (!_paused) // only push back the command if not paused
+	if (setup::FIREBASE_MAILING && !_paused) // only push back the command if logging activated and not paused
 	{
 		std::lock_guard<std::mutex> lock(_commandMutex);
 		_commandQueue.push_back(spCommand); // push back command to queue

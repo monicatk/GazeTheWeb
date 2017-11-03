@@ -41,7 +41,6 @@ enum class FirebaseIntegerKey	{
 
 	// TODO
 	GENERAL_DASHBOARD_USAGE_COUNT,
-	
 };
 enum class FirebaseStringKey	{ 
 	TEST_STRING };
@@ -67,7 +66,6 @@ enum class FirebaseJSONKey		{
 
 	// TODO
 	GENERAL_DASHBOARD_USAGE,
-	
 };
 
 // Mapping from key to raw type
@@ -222,7 +220,7 @@ public:
 	// Get id token (is empty before login or at failure)
 	std::string GetIdToken() const;
 
-	// Get start index
+	// Get start index (is -1 one at failure)
 	int GetStartIndex() const;
 
 private:
