@@ -96,7 +96,8 @@ public:
 	void AddTimeEmulatedInput(float time);
 
 	// Add scrolling delta
-	void AddScrollingDelta(float delta);
+	void AddManualScrollingDelta(float delta);
+	void AddAutomaticScrollingDelta(float delta);
 
 	// Add click
 	void AddClick(std::string tag, std::string id, float x, float y);
@@ -161,7 +162,8 @@ private:
 		double durationInForeground = 0.0;
 		double durationUserActive = 0.0; // and tab in foreground, input either by eye tracker and gaze detected or mouse
 		double durationEmulatedInput = 0.0; // duration of emulated input while in foreground
-		double scrollAmount = 0.0;
+		double manualScrollAmount = 0.0;
+		double automaticScrollAmount = 0.0;
 		std::vector<Click> clicks;
 		std::vector<TextInput> textInputs;
 	};

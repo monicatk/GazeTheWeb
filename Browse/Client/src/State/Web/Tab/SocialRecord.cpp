@@ -89,9 +89,14 @@ void SocialRecord::AddTimeEmulatedInput(float time)
 	if (_writeable) { _totalDurationEmulatedInput += time; _pages.back().durationEmulatedInput += time; }
 }
 
-void SocialRecord::AddScrollingDelta(float delta)
+void SocialRecord::AddManualScrollingDelta(float delta)
 {
-	if (_writeable) { _pages.back().scrollAmount += delta; }
+	if (_writeable) { _pages.back().manualScrollAmount += delta; }
+}
+
+void SocialRecord::AddAutomaticScrollingDelta(float delta)
+{
+	if (_writeable) { _pages.back().automaticScrollAmount += delta; }
 }
 
 void SocialRecord::AddClick(std::string tag, std::string id, float x, float y)
@@ -146,7 +151,8 @@ nlohmann::json SocialRecord::ToJSON() const
 			{ "durationInForeground",  rPage.durationInForeground },
 			{ "durationUserActive",  rPage.durationUserActive },
 			{ "durationEmulatedInput", rPage.durationEmulatedInput },
-			{ "scrollAmount",  rPage.scrollAmount },
+			{ "manualScrollAmount",  rPage.manualScrollAmount },
+			{ "automaticScrollAmount",  rPage.automaticScrollAmount },
 			{ "clickCount",  rPage.clicks.size() },
 			{ "textInputCount",  rPage.textInputs.size() }
 		});

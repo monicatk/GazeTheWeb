@@ -530,7 +530,14 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 				_spSocialRecord->AddTimeInForeground(tpf); // this update is only called when in foreground
 				if (userActive) { _spSocialRecord->AddTimeActiveUser(tpf); } // add on duration while user is active
 				if (spInput->gazeEmulated) { _spSocialRecord->AddTimeEmulatedInput(tpf); }
-				_spSocialRecord->AddScrollingDelta(glm::abs(_scrollingOffsetY - _prevScrolling));
+				if (_autoScrolling) // automatic scrolling
+				{
+					_spSocialRecord->AddAutomaticScrollingDelta(glm::abs(_scrollingOffsetY - _prevScrolling));
+				}
+				else // manual scrolling
+				{
+					_spSocialRecord->AddManualScrollingDelta(glm::abs(_scrollingOffsetY - _prevScrolling));
+				}
 
 				// Prepare next update
 				_prevScrolling = _scrollingOffsetY; // scrolling delta helper
