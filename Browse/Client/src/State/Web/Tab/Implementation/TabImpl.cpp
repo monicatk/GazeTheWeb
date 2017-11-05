@@ -352,21 +352,19 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		eyegui::setInputUsageOfLayout(_pPipelineAbortLayout, false);
 
 		// Manual scrolling
-		bool showScrollUp = false;
-		bool showScrollDown = false;
-		if (!_autoScrolling)
-		{
-			// Scroll up
-			if (_scrollingOffsetY > 0)
-			{
-				showScrollUp = true;
-			}
+		bool canScrollUp = false;
+		bool canScrollDown = false;
 
-			// Scroll down
-			if ((_pageHeight - 1) > (_scrollingOffsetY + _upWebView->GetResolutionY()))
-			{
-				showScrollDown = true;
-			}
+		// Scroll up
+		if (_scrollingOffsetY > 0)
+		{
+			canScrollUp = true;
+		}
+
+		// Scroll down
+		if ((_pageHeight - 1) > (_scrollingOffsetY + _upWebView->GetResolutionY()))
+		{
+			canScrollDown = true;
 		}
 
 		// Set progress of scrolling
@@ -382,13 +380,13 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		eyegui::setProgress(_pScrollingOverlayLayout, "scroll_down_progress", progressDown);
 
 		// Set visibility of scroll elements
-		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpProgressFrameIndex, showScrollUp, false, true);
-		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownProgressFrameIndex, showScrollDown, false, true);
-		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpSensorFrameIndex, showScrollUp, false, true);
-		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownSensorFrameIndex, showScrollDown, false, true);
+		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpProgressFrameIndex, !_autoScrolling && canScrollUp, false, true);
+		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownProgressFrameIndex, !_autoScrolling && canScrollDown, false, true);
+		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpSensorFrameIndex, !_autoScrolling && canScrollUp, false, true);
+		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownSensorFrameIndex, !_autoScrolling && canScrollDown, false, true);
 
 		// Set activity of scroll to top button
-		eyegui::setElementActivity(_pPanelLayout, "scroll_to_top", showScrollUp, true);
+		eyegui::setElementActivity(_pPanelLayout, "scroll_to_top", canScrollUp, true);
 
 		// Check, that gaze is not upon a fixed element
 		bool gazeUponFixed = false;
