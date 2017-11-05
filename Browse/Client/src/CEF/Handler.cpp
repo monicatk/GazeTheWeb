@@ -474,7 +474,7 @@ void Handler::ReplyJSDialog(CefRefPtr<CefBrowser> browser, bool clicked_ok, std:
 
 void Handler::ResetMainFramesScrolling(CefRefPtr<CefBrowser> browser)
 {
-    const std::string resetScrolling = "document.body.scrollTop=0; document.body.scrollLeft=0;";
+    const std::string resetScrolling = "window.scrollTo(0, 0);";
     browser->GetMainFrame()->ExecuteJavaScript(resetScrolling, browser->GetMainFrame()->GetURL(), 0);
 }
 

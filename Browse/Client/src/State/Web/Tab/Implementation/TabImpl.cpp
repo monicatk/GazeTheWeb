@@ -356,7 +356,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		bool canScrollDown = false;
 
 		// Scroll up
-		if (_scrollingOffsetY > 0)
+		if (_scrollingOffsetY > 1) // should be zero but this fixes the issue that scroll to top is still active after usage
 		{
 			canScrollUp = true;
 		}
