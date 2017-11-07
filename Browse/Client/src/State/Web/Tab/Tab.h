@@ -387,6 +387,8 @@ public:
     // Set Tab's title text
 	virtual void SetTitle(std::string title);
 
+	virtual void SetMetaKeywords(std::string content);
+
     // Add new Tab after that one
 	virtual void AddTabAfter(std::string URL) { _pWeb->PushAddTabAfterJob(this, URL); }
 
@@ -664,6 +666,9 @@ private:
 
     // Title of current website
     std::string _title;
+
+	// Current site's meta keywords
+	std::string _metaKeywords;
 
 	// Used for current loading status
 	std::set<int64> _loadingFrames;

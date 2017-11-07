@@ -6,7 +6,18 @@
 // Helper function for console output
 function ConsolePrint(msg)
 {
-	window.cefQuery({ request: (""+msg), persistent : false, onSuccess : (response) => {}, onFailure : (error_code, error_message) => {} });
+    window.cefQuery({ 
+        request: ("" + msg), 
+        persistent : false, 
+        onSuccess : (response) => {}, 
+        onFailure : (error_code, error_message) => {} 
+    });
+}
+
+// TODO: Differentiate between different message types
+function SendToMsgRouter(msg)
+{
+    ConsolePrint(msg);
 }
 
 ConsolePrint("Starting to import helpers.js ...");

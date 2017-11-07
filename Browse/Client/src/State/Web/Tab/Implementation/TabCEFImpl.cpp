@@ -310,17 +310,6 @@ void Tab::RemoveDOMVideo(int id)
 
 void Tab::SetScrollingOffset(double x, double y)
 {
-	// Update page size information when nearly reached end of page size (in case of endless scrollable sites like e.g. Fb.com)
-	// (but don't do it if scrolling offset hasn't changed)
-	/*
-	auto webViewPositionAndSize = CalculateWebViewPositionAndSize();
-	if ((x != _scrollingOffsetX && abs(_pageWidth - webViewPositionAndSize.width - x) < 50)
-	|| (y != _scrollingOffsetY && abs(_pageHeight - webViewPositionAndSize.height - y) < 50))
-	{
-	_pCefMediator->GetPageResolution(this);
-	}
-	*/
-
 	_scrollingOffsetX = x;
 	_scrollingOffsetY = y;
 }
@@ -330,9 +319,9 @@ void Tab::SetPageResolution(double width, double height)
 	if (width != _pageWidth || height != _pageHeight)
 	{
 		LogInfo("Tab: Page size (w: ", _pageWidth, ", h: ", _pageHeight, ") changed to (w: ", width, ", h: ", height, ").");
+		_pageWidth = width;
+		_pageHeight = height;
 	}
-	_pageWidth = width;
-	_pageHeight = height;
 }
 
 void Tab::AddFixedElementsCoordinates(int id, std::vector<Rect> elements)
@@ -447,4 +436,9 @@ void Tab::SetLoadingStatus(bool isLoading, bool isMainFrame)
 void Tab::RequestJSDialog(JavaScriptDialogType type, std::string message)
 {
 	this->PushBackPipeline(std::unique_ptr<Pipeline>(new JSDialogPipeline(this, type, message)));
+}
+
+void Tab::SetMetaKeywords(std::string content)
+{
+	_metaKeywords = content;
 }

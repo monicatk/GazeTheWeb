@@ -101,6 +101,8 @@ public:
 
 
 
+	bool SetMetaKeywords(CefRefPtr<CefBrowser> browser, std::string content);
+
     // External zoom level request
     void SetZoomLevel(TabCEFInterface* pTab);
     // Called by Handler OnLoadStart

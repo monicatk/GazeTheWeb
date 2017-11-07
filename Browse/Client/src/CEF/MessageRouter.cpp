@@ -48,8 +48,21 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		catch (const std::exception& e)
 		{
 			LogInfo("MsgRouter: Received wrongly typed page resolution information!");
+			LogInfo("Caught exception: ", e.what());
 		}
 		return true;
+	}
+
+	// Receive META data
+	if (split_request.size() == 3 && split_request[0].compare("meta") == 0)
+	{
+		if (split_request[1].compare("keywords") == 0)
+		{
+			_pMediator->SetMetaKeywords(browser, split_request[2]);
+			callback->Success("Received meta keywords");
+			return true;
+		}
+		return false;
 	}
 
 
