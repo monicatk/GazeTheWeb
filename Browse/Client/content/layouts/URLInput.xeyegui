@@ -36,7 +36,7 @@
 					</row>
 					<row size="50%">
 						<column size="100%">
-							<keyboard id="keyboard" instantpress="true" layout="US_ENGLISH"/>
+							<keyboard id="keyboard" instantpress="true"/>
 						</column>
 					</row>
 					<row size="15%">
