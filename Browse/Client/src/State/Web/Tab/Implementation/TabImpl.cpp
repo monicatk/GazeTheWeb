@@ -510,7 +510,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 			}
 			else // recording of platform continues
 			{
-				_spSocialRecord->AddPage(_url); // seems that a subpage was opened
+				_spSocialRecord->AddPage(_url, _metaKeywords); // seems that a subpage was opened
 			}
 
 			// Update previous URL
@@ -866,7 +866,7 @@ void Tab::StartSocialRecord(std::string URL, SocialPlatform platform)
 
 		// Start new record
 		_spSocialRecord = std::shared_ptr<SocialRecord>(new SocialRecord(SocialRecord::ExtractDomain(URL), platform, FirebaseMailer::Instance().GetStartIndex()));
-		_spSocialRecord->StartAndAddPage(URL);
+		_spSocialRecord->StartAndAddPage(URL, _metaKeywords);
 	}
 }
 

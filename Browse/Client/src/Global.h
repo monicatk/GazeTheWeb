@@ -60,7 +60,10 @@ static const float NOTIFICATION_HEIGHT = 0.06f;
 static const float NOTIFICATION_DISPLAY_DURATION = 5.f;
 static const float CLICK_VISUALIZATION_DURATION = 0.75f;
 static const float CLICK_VISUALIZATION_RELATIVE_SIZE = 0.4f;
-static const std::string SEARCH_PREFIX = "duckduckgo.com?q="; // TODO: move to some kind of config or let the user choose
+static const std::string SEARCH_PREFIX = "duckduckgo.com?q=";
+static const std::string SEARCH_POSTFIX_ENGLISH = "&k1=-1&kp=-2&kl=us-en";
+static const std::string SEARCH_POSTFIX_GREEK = "&k1=-1&kp=-2&kl=gr-el";
+static const std::string SEARCH_POSTFIX_HEBREW = "&k1=-1&kp=-2&kl=il-he";
 static const glm::vec4 NOTIFICATION_NEUTRAL_COLOR = glm::vec4(0.2f, 0.2f, 0.2f, 0.75f);
 static const glm::vec4 NOTIFICATION_SUCCESS_COLOR = glm::vec4(0.15f, 1.0f, 0.0f, 0.75f);
 static const glm::vec4 NOTIFICATION_WARNING_COLOR = glm::vec4(1.0f, 0.15f, 0.0f, 0.75f);
