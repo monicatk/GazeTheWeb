@@ -195,7 +195,8 @@ void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		else if (id == "complete")
 		{
 			_pURLInput->_finished = true;
-			_pURLInput->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_URL_INPUT_COUNT, FirebaseJSONKey::GENERAL_URL_INPUT);
+			nlohmann::json record = { { "charCount", _pURLInput->_collectedURL.length() } };
+			_pURLInput->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_URL_INPUT_COUNT, FirebaseJSONKey::GENERAL_URL_INPUT, record);
 			LabStreamMailer::instance().Send("URL input done");
 		}
 	}
