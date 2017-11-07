@@ -29,7 +29,8 @@ enum class FirebaseIntegerKey	{
 	GENERAL_DRIFT_GRID_COUNT,
 	GENERAL_URL_INPUT_COUNT,
 	GENERAL_BOOKMARK_USAGE_COUNT,
-	GENERAL_BOOKMARKING_ADDING_COUNT,
+	GENERAL_BOOKMARK_ADDING_COUNT,
+	GENERAL_BOOKMARK_REMOVAL_COUNT,
 	GENERAL_TAB_RELOADING_COUNT,
 	GENERAL_TAB_CLOSING_COUNT,
 	GENERAL_TAB_CREATION_COUNT,
@@ -54,7 +55,8 @@ enum class FirebaseJSONKey		{
 	GENERAL_DRIFT_GRID,
 	GENERAL_URL_INPUT,
 	GENERAL_BOOKMARK_USAGE,
-	GENERAL_BOOKMARKING_ADDING,
+	GENERAL_BOOKMARK_ADDING,
+	GENERAL_BOOKMARK_REMOVAL,
 	GENERAL_TAB_RELOADING,
 	GENERAL_TAB_CLOSING,
 	GENERAL_TAB_CREATION,
@@ -98,8 +100,10 @@ template<> std::string FirebaseAddress<FirebaseIntegerKey>(FirebaseIntegerKey ke
 		return "general/urlInputCount";
 	case FirebaseIntegerKey::GENERAL_BOOKMARK_USAGE_COUNT:
 		return "general/bookmarkUsageCount";
-	case FirebaseIntegerKey::GENERAL_BOOKMARKING_ADDING_COUNT:
+	case FirebaseIntegerKey::GENERAL_BOOKMARK_ADDING_COUNT:
 		return "general/bookmarkAddingCount";
+	case FirebaseIntegerKey::GENERAL_BOOKMARK_REMOVAL_COUNT:
+		return "general/bookmarkRemovalCount";
 	case FirebaseIntegerKey::GENERAL_TAB_RELOADING_COUNT:
 		return "general/tabReloadingCount";
 	case FirebaseIntegerKey::GENERAL_TAB_CLOSING_COUNT:
@@ -152,8 +156,10 @@ template<> std::string FirebaseAddress<FirebaseJSONKey>(FirebaseJSONKey key)
 		return "general/urlInput";
 	case FirebaseJSONKey::GENERAL_BOOKMARK_USAGE:
 		return "general/bookmarkUsage";
-	case FirebaseJSONKey::GENERAL_BOOKMARKING_ADDING:
+	case FirebaseJSONKey::GENERAL_BOOKMARK_ADDING:
 		return "general/bookmarkAdding";
+	case FirebaseJSONKey::GENERAL_BOOKMARK_REMOVAL:
+		return "general/bookmarkRemoval";
 	case FirebaseJSONKey::GENERAL_TAB_RELOADING:
 		return "general/tabReloading";
 	case FirebaseJSONKey::GENERAL_TAB_CLOSING:

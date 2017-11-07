@@ -31,6 +31,7 @@ url_input:complete=אישור
 url_input:bookmarks=מועדפים
 url_input_bookmarks:back=אחורה
 url_input_bookmarks:select=אישור
+url_input_bookmarks:remove=Remove
 url_input_bookmarks:title=מועדפים
 url_input:space=רווח
 url_input:title=Enter URL or Search Query

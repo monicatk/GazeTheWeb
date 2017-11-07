@@ -31,6 +31,7 @@ url_input:complete=Ok
 url_input:bookmarks=Bookmarks
 url_input_bookmarks:back=Back
 url_input_bookmarks:select=Ok
+url_input_bookmarks:remove=Remove
 url_input_bookmarks:title=Bookmarks
 url_input:space=Space
 url_input:title=Enter URL or Search Query

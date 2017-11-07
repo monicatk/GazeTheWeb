@@ -972,7 +972,7 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_existing", MasterNotificationInterface::Type::NEUTRAL, false);
 				}
 
-				if (success) { _pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_BOOKMARKING_ADDING_COUNT, FirebaseJSONKey::GENERAL_BOOKMARKING_ADDING); }
+				if (success) { _pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_BOOKMARK_ADDING_COUNT, FirebaseJSONKey::GENERAL_BOOKMARK_ADDING); }
 			}
 
 			JSMailer::instance().Send("bookmark_add");

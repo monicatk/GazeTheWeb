@@ -11,7 +11,7 @@
 // Include singleton for mailing to JavaScript
 #include "src/Singletons/JSMailer.h"
 
-URLInput::URLInput(Master* pMaster, BookmarkManager const * pBookmarkManager)
+URLInput::URLInput(Master* pMaster, BookmarkManager* pBookmarkManager)
 {
     // Fill members
     _pMaster = pMaster;
@@ -79,9 +79,6 @@ void URLInput::Activate(int tabId)
 
         // Remember activation
         _active = true;
-
-		// Get current bookmarks
-		_bookmarks = _pBookmarkManager->GetSortedBookmarks();
     }
 }
 
@@ -107,6 +104,9 @@ std::string URLInput::GetURL() const
 
 void URLInput::ShowBookmarks()
 {
+	// Get current bookmarks
+	_bookmarks = _pBookmarkManager->GetSortedBookmarks();
+
 	// Prepare adding of bricks
 	std::string brickId;
 	std::map<std::string, std::string> idMapper;
@@ -138,11 +138,15 @@ void URLInput::ShowBookmarks()
 		// Bookmark selection id
 		std::string selectId = "select_" + std::to_string(i);
 
+		// Bookmark remove id
+		std::string removeId = "remove_" + std::to_string(i);
+
 		// Id mapper
 		idMapper.clear();
 		idMapper.emplace("grid", brickId);
 		idMapper.emplace("url", URLId);
 		idMapper.emplace("select", selectId);
+		idMapper.emplace("remove", removeId);
 
 		// Add brick to stack, which was added by flow brick
 		eyegui::addBrickToStack(
@@ -154,7 +158,8 @@ void URLInput::ShowBookmarks()
 		// Set content of displayed URL
 		eyegui::setContentOfTextBlock(_pBookmarksLayout, URLId, _bookmarks.at(i));
 
-		// Register button listener for select buttons
+		// Register button listener for remove and select button
+		eyegui::registerButtonListener(_pBookmarksLayout, removeId, _spURLButtonListener);
 		eyegui::registerButtonListener(_pBookmarksLayout, selectId, _spURLButtonListener);
 	}
 
@@ -288,18 +293,35 @@ void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			// Split id by underscore
 			std::string delimiter = "_";
 			size_t pos = 0;
-
-			// Check for keyword "select"
-			if (((pos = id.find(delimiter)) != std::string::npos) && id.substr(0, pos) == "select")
+			if ((pos = id.find(delimiter)) != std::string::npos)
 			{
-				// Extract number of bookmark which should be used
-				std::string URL = _pURLInput->_bookmarks.at((int)(StringToFloat(id.substr(pos + 1, id.length() - 1))));
-				std::u16string URL16;
-				eyegui_helper::convertUTF8ToUTF16(URL, URL16);
-				_pURLInput->_collectedURL = URL16;
-				_pURLInput->_finished = true;
-				_pURLInput->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_BOOKMARK_USAGE_COUNT, FirebaseJSONKey::GENERAL_BOOKMARK_USAGE);
-				LabStreamMailer::instance().Send("Open bookmark: " + URL);
+				// Check for keyword "remove"
+				if (id.substr(0, pos) == "remove")
+				{
+					// Extract URL of chosen bookmark from local cache
+					std::string URL = _pURLInput->_bookmarks.at((int)(StringToFloat(id.substr(pos + 1, id.length() - 1))));
+
+					// Remove bookmark from manager
+					_pURLInput->_pBookmarkManager->RemoveBookmark(URL); // remove the bookmark
+
+					// Log this
+					_pURLInput->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_BOOKMARK_REMOVAL_COUNT, FirebaseJSONKey::GENERAL_BOOKMARK_REMOVAL);
+					LabStreamMailer::instance().Send("Remove bookmark: " + URL);
+
+					// Show bookmarks again, after removal
+					_pURLInput->ShowBookmarks();
+				}
+				else if (id.substr(0, pos) == "select") // "select"
+				{
+					// Extract number of bookmark which should be used
+					std::string URL = _pURLInput->_bookmarks.at((int)(StringToFloat(id.substr(pos + 1, id.length() - 1))));
+					std::u16string URL16;
+					eyegui_helper::convertUTF8ToUTF16(URL, URL16);
+					_pURLInput->_collectedURL = URL16;
+					_pURLInput->_finished = true;
+					_pURLInput->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_BOOKMARK_USAGE_COUNT, FirebaseJSONKey::GENERAL_BOOKMARK_USAGE);
+					LabStreamMailer::instance().Send("Open bookmark: " + URL);
+				}
 			}
 
 			JSMailer::instance().Send("open_bookmark");

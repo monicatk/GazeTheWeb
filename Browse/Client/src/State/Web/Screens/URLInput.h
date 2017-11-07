@@ -20,7 +20,7 @@ class URLInput
 public:
 
     // Constructor
-    URLInput(Master* pMaster, BookmarkManager const * pBookmarkManager);
+    URLInput(Master* pMaster, BookmarkManager* pBookmarkManager);
 
     // Destructor
     virtual ~URLInput();
@@ -91,7 +91,7 @@ private:
     Master* _pMaster;
 
 	// Pointer to bookmark manager
-	BookmarkManager const * _pBookmarkManager;
+	BookmarkManager* _pBookmarkManager;
 
     // Pointer to layouts
     eyegui::Layout* _pLayout;
