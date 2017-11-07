@@ -956,8 +956,11 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			int currentTab = _pWeb->_currentTabId;
 			if (currentTab >= 0)
 			{
+				// URL
+				std::string URL = _pWeb->_tabs.at(currentTab)->GetURL();
+
 				// Add as bookmark
-				bool success = _pWeb->_upBookmarkManager->AddBookmark(_pWeb->_tabs.at(currentTab)->GetURL());
+				bool success = _pWeb->_upBookmarkManager->AddBookmark(URL);
 
 				// Display it on icon. Even if not successful, because that means it was already a bookmark
 				eyegui::setIconOfIconElement(_pWeb->_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_true.png");
@@ -972,7 +975,11 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_existing", MasterNotificationInterface::Type::NEUTRAL, false);
 				}
 
-				if (success) { _pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_BOOKMARK_ADDING_COUNT, FirebaseJSONKey::GENERAL_BOOKMARK_ADDING); }
+				if (success)
+				{
+					nlohmann::json record = { { "url", URL } };
+					_pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_BOOKMARK_ADDING_COUNT, FirebaseJSONKey::GENERAL_BOOKMARK_ADDING, record);
+				}
 			}
 
 			JSMailer::instance().Send("bookmark_add");

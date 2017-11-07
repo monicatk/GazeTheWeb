@@ -304,8 +304,9 @@ void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
 					// Remove bookmark from manager
 					_pURLInput->_pBookmarkManager->RemoveBookmark(URL); // remove the bookmark
 
-					// Log this
-					_pURLInput->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_BOOKMARK_REMOVAL_COUNT, FirebaseJSONKey::GENERAL_BOOKMARK_REMOVAL);
+					// Log it
+					nlohmann::json record = { { "url", URL } };
+					_pURLInput->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_BOOKMARK_REMOVAL_COUNT, FirebaseJSONKey::GENERAL_BOOKMARK_REMOVAL, record);
 					LabStreamMailer::instance().Send("Remove bookmark: " + URL);
 
 					// Show bookmarks again, after removal
@@ -319,7 +320,8 @@ void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
 					eyegui_helper::convertUTF8ToUTF16(URL, URL16);
 					_pURLInput->_collectedURL = URL16;
 					_pURLInput->_finished = true;
-					_pURLInput->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_BOOKMARK_USAGE_COUNT, FirebaseJSONKey::GENERAL_BOOKMARK_USAGE);
+					nlohmann::json record = { { "url", URL } };
+					_pURLInput->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_BOOKMARK_USAGE_COUNT, FirebaseJSONKey::GENERAL_BOOKMARK_USAGE, record);
 					LabStreamMailer::instance().Send("Open bookmark: " + URL);
 				}
 			}
