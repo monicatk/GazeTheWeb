@@ -150,7 +150,9 @@ Element.prototype.appendChild = function(child){
 	var skip_nodes = [];
 	if(was_document_fragment)
 	{
-		console.log("Document fragment (idx: "+document_fragments.indexOf(child)+") gets appended to ", this);		
+		// DEBUG
+		//console.log("Document fragment (idx: "+document_fragments.indexOf(child)+") gets appended to ", this);		
+		
 		skip_nodes.concat(child.childNodes);
 	}
 
@@ -187,7 +189,8 @@ Document.prototype.createDocumentFragment = function() {
 	var fragment = new DocumentFragment();
 
 	// DEBUG
-	console.log("Document fragment got created, access with index "+document_fragments.length+" in array document fragments.");
+	// console.log("Document fragment got created, access with index "+document_fragments.length+" in array document fragments.");
+
 	document_fragments.push(fragment);
 
 	window.observer.observe(fragment, window.observer_config);
@@ -339,7 +342,7 @@ function AnalyzeNode(node)
 			CreateDOMTextInput(node);
 		}
 
-		// NEW: Buttons
+		// Buttons
 		if(node.tagName == 'DIV' && node.getAttribute('role') == 'button')
 		{
 			CreateDOMLink(node);
@@ -374,7 +377,7 @@ function AnalyzeNode(node)
 		var rect = node.getBoundingClientRect();
 
 		// Detect scrollable elements inside of webpage
-		if((node.tagName === "DIV" || node.tagName === "P") && rect.width > 0 && rect.height > 0)
+		if((node.tagName === "DIV" || node.tagName === "P"))// && rect.width > 0 && rect.height > 0)
 		{
 			var overflow = computedStyle.getPropertyValue("overflow");
 			var valid_overflow = ["scroll", "auto", "hidden"];
@@ -382,20 +385,12 @@ function AnalyzeNode(node)
 			{
 				CreateDOMOverflowElement(node);
 			}
-			// else if (overflow === "auto")
-			// {
-			// 	// TODO: Element size might change over time! Keep node as potential overflow in mind?
-			// 	// OR add it anyway and only scroll if height and scroll height aren't the same?
-			// 	if(node.scrollHeight !== rect.height || node.scrollWidth !== rect.width)
-			// 	{
-			// 		CreateDOMOverflowElement(node);
-			// 	}
-			// }
 			else
 			{
 				var overflowX = computedStyle.getPropertyValue("overflow-x");
 				var overflowY = computedStyle.getPropertyValue("overflow-y");
-				if(overflowX === "auto" || overflowX === "scroll" || overflowY === "auto" || overflowY === "scroll")
+				if(valid_overflow.indexOf(overflowX) !== -1 || valid_overflow.indexOf(overflowY) !== -1)
+				//if(overflowX === "auto" || overflowX === "scroll" || overflowY === "auto" || overflowY === "scroll")
 				{
 					CreateDOMOverflowElement(node);
 				}
@@ -517,15 +512,7 @@ function MutationObserverInit()
 								{
 									for(var i = 0, n = node.childNodes.length; i < n; i++)
 									{			
-										var child = node.childNodes[i];	
-
-										if(child === undefined || typeof(child.setAttribute) !== "function")
-											continue;
-
-										if(id !== null)
-											child.setAttribute("overflowId", id);
-										else
-											child.removeAttribute("overflowid");	// TODO: Search for hierachically higher overflows!
+										SetOverflowId(node.childNodes[i], id);
 									}
 								}
 						}
@@ -684,22 +671,20 @@ function MutationObserverInit()
 							}
 
 							// If parent is contained in overflow element, then child will also be
-							if(parent !== undefined && typeof(parent.getAttribute) === "function" 
-								&& typeof(node.setAttribute) === "function")
+							if(parent !== undefined && typeof(parent.getAttribute) === "function") 
 							{
-								var domObj = GetCorrespondingDOMObject(parent);
+								var parentDomObj = GetCorrespondingDOMObject(parent);
+								
 								// If parent is overflow element, use its id instead
-								if(domObj !== undefined && domObj.Class === "DOMOverflowElement")
-									node.setAttribute("overflowid", domObj.getId());
+								if(parentDomObj !== undefined && parentDomObj.Class === "DOMOverflowElement")
+									var overflowId = parentDomObj.getId();
 								else
-								{
 									var overflowId = parent.getAttribute("overflowid");
-									if(overflowId !== null)
-										node.setAttribute("overflowid", overflowId);
-							
-								}
-							}
+								
+								SetOverflowId(node, overflowId);
 
+							}
+						
 			  				AnalyzeNode(node);
 						}); // END of forEach
 

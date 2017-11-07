@@ -463,9 +463,8 @@ function DOMOverflowElement(node, cef_hidden=false)
     for(var i = 0, n = node.childNodes.length; i < n; i++)
     {
         var child = node.childNodes[i];
-        if(child === undefined || typeof(child.setAttribute) !== "function")
-            continue;
-        child.setAttribute("overflowId", id);
+
+        SetOverflowId(child, id);
     }
 
 }

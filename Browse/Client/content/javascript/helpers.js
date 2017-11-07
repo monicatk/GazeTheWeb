@@ -541,4 +541,31 @@ function CheckOverflowProperties(node)
     console.log("overflow-y: ", cs.getPropertyValue("overflow-y"));
 }
 
+// ComputedStyle (cs) is optional, because already present in some parts of the code where this function is called
+function SetOverflowId(node, id, cs)
+{
+    if(node === undefined || typeof(node.setAttribute) !== "function") // Assume, that removeAttribute is also present when setAttribute is
+        return;
+
+    // Remove overflowId
+    if(id === null)
+    {
+	    // TODO: Search for hierachically higher overflows!
+        node.removeAttribute("overflowid");
+        return;
+    }
+
+    // Get ComputedStyle, if not already provided in function call
+    if(!cs)
+        cs = window.getComputedStyle(node, null);
+
+    if(typeof(cs.getPropertyValue) !== "function")
+        return;
+
+    var css_position = cs.getPropertyValue("position");
+    // Absolutely positioned children don't get clipped on overflow parents
+    if(css_position !== "absolute")
+        node.setAttribute("overflowId", id);
+}
+
 ConsolePrint("Successfully imported helpers.js!");

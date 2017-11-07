@@ -371,9 +371,17 @@ bool CallbackMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		// Remove prefix
 		std::string message = requestString.substr(_prefix.size());
 
-		// Call callback
-		_callbackFunction(message);
-		callback->Success("success"); // tell JavaScript about success
+		try
+		{
+			// Call callback
+			_callbackFunction(message);
+			callback->Success("success"); // tell JavaScript about success
+		}
+		catch (const std::exception& e)
+		{
+			LogInfo("CallbackMsgHandler: Exception occured!\n", e.what());
+			callback->Failure(0, e.what());
+		}
 		return true;
 	}
 
