@@ -9,12 +9,12 @@
 			</column>
 			<column size="90%">
 				<grid>
-					<row size="10%">
+					<row size="5%">
 						<column size="100%">
 							<blank/>
 						</column>
 					</row>
-					<row size="20%">
+					<row size="25%">
 						<column size="100">
 							<grid showbackground="true" style="default">
 								<row size="100">
@@ -34,9 +34,22 @@
 							</grid>
 						</column>
 					</row>
-					<row size="70%">>
+					<row size="55%">
 						<column size="100%">
 							<keyboard id="keyboard" instantpress="true" layout="US_ENGLISH"/>
+						</column>
+					</row>
+					<row size="15%">
+						<column size="100%">
+							<stack orientation="horizontal" separator="0.1" style="url_input_domain">
+								<boxbutton icon="icons/domain_com.png" id="com"/>
+								<boxbutton icon="icons/domain_org.png" id="org"/>
+								<boxbutton icon="icons/domain_net.png" id="net"/>
+								<boxbutton icon="icons/domain_eu.png" id="eu"/>
+								<boxbutton icon="icons/domain_gr.png" id="gr"/>
+								<boxbutton icon="icons/domain_co_il.png" id="co_il"/>
+								<boxbutton icon="icons/domain_de.png" id="de"/>
+							</stack>
 						</column>
 					</row>
 				</grid>

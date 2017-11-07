@@ -29,6 +29,13 @@ URLInput::URLInput(Master* pMaster, BookmarkManager const * pBookmarkManager)
 	eyegui::registerButtonListener(_pLayout, "bookmarks", _spURLButtonListener);
     eyegui::registerButtonListener(_pLayout, "delete", _spURLButtonListener);
     eyegui::registerButtonListener(_pLayout, "complete", _spURLButtonListener);
+	eyegui::registerButtonListener(_pLayout, "com", _spURLButtonListener);
+	eyegui::registerButtonListener(_pLayout, "org", _spURLButtonListener);
+	eyegui::registerButtonListener(_pLayout, "net", _spURLButtonListener);
+	eyegui::registerButtonListener(_pLayout, "eu", _spURLButtonListener);
+	eyegui::registerButtonListener(_pLayout, "gr", _spURLButtonListener);
+	eyegui::registerButtonListener(_pLayout, "co_il", _spURLButtonListener);
+	eyegui::registerButtonListener(_pLayout, "de", _spURLButtonListener);
 	eyegui::registerButtonListener(_pBookmarksLayout, "back", _spURLButtonListener);
 }
 
@@ -187,9 +194,7 @@ void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				_pURLInput->_collectedURL.pop_back();
 
 				// Tell preview about it
-				eyegui::setContentOfTextBlock(_pURLInput->_pLayout, "text_block", _pURLInput->_collectedURL);
-
-				// TODO: Displaying does not work for empty string aka last letter deleted
+				eyegui::setContentOfTextBlock(_pURLInput->_pLayout, "text_block", _pURLInput->_collectedURL + u"|");
 			}
 		}
 		else if (id == "complete")
@@ -198,6 +203,41 @@ void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			nlohmann::json record = { { "charCount", _pURLInput->_collectedURL.length() } };
 			_pURLInput->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_URL_INPUT_COUNT, FirebaseJSONKey::GENERAL_URL_INPUT, record);
 			LabStreamMailer::instance().Send("URL input done");
+		}
+		else if (id == "com")
+		{
+			_pURLInput->_collectedURL += u".com";
+			eyegui::setContentOfTextBlock(_pURLInput->_pLayout, "text_block", _pURLInput->_collectedURL + u"|");
+		}
+		else if (id == "org")
+		{
+			_pURLInput->_collectedURL += u".org";
+			eyegui::setContentOfTextBlock(_pURLInput->_pLayout, "text_block", _pURLInput->_collectedURL + u"|");
+		}
+		else if (id == "net")
+		{
+			_pURLInput->_collectedURL += u".net";
+			eyegui::setContentOfTextBlock(_pURLInput->_pLayout, "text_block", _pURLInput->_collectedURL + u"|");
+		}
+		else if (id == "eu")
+		{
+			_pURLInput->_collectedURL += u".eu";
+			eyegui::setContentOfTextBlock(_pURLInput->_pLayout, "text_block", _pURLInput->_collectedURL + u"|");
+		}
+		else if (id == "gr")
+		{
+			_pURLInput->_collectedURL += u".gr";
+			eyegui::setContentOfTextBlock(_pURLInput->_pLayout, "text_block", _pURLInput->_collectedURL + u"|");
+		}
+		else if (id == "co_il")
+		{
+			_pURLInput->_collectedURL += u".co.il";
+			eyegui::setContentOfTextBlock(_pURLInput->_pLayout, "text_block", _pURLInput->_collectedURL + u"|");
+		}
+		else if (id == "de")
+		{
+			_pURLInput->_collectedURL += u".de";
+			eyegui::setContentOfTextBlock(_pURLInput->_pLayout, "text_block", _pURLInput->_collectedURL + u"|");
 		}
 	}
 	else
