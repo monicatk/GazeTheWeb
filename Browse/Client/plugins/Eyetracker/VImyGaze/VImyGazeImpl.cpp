@@ -149,13 +149,13 @@ void FetchSamples(SampleQueue& rspSamples)
 	eyetracker_global::FetchSamples(rspSamples);
 }
 
-CalibrationResult Calibrate()
+CalibrationResult Calibrate(CalibrationInfo& rspInfo)
 {
 	// Start calibration
-	CalibrationResult result = iV_Calibrate() == RET_SUCCESS ? CalibrationResult::OK : CalibrationResult::FAILED;
+	CalibrationResult result = iV_Calibrate() == RET_SUCCESS ? CALIBRATION_OK : CALIBRATION_FAILED;
 
 	// Check calibration points
-	if (result == CalibrationResult::OK) // refine result
+	if (result == CALIBRATION_OK) // refine result
 	{
 		for (int i = 1; i <= 5; i++) // go over calibration points
 		{
@@ -176,7 +176,7 @@ CalibrationResult Calibrate()
 					// At bad calibration of this calibration point, set calibration result to bad
 					if (badCalibration)
 					{
-						result = CalibrationResult::BAD;
+						result = CALIBRATION_BAD;
 					}
 					break;
 				}
@@ -193,6 +193,17 @@ CalibrationResult Calibrate()
 
 				// Increase count of attempts
 				count++;
+			}
+		}
+
+		// Go over all points to provide user with info
+		rspInfo->clear();
+		for (int i = 1; i <= 5; i++) // go over calibration points
+		{
+			CalibrationPointStruct point;
+			if (RET_SUCCESS == iV_GetCalibrationPoint(i, &point))
+			{
+				rspInfo->push_back(CalibrationPoint(point.positionX, point.positionY, CALIBRATION_POINT_OK));
 			}
 		}
 	}

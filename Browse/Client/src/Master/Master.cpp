@@ -361,6 +361,8 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
     // Load layouts (deleted at eyeGUI termination)
     _pSuperLayout = eyegui::addLayout(_pSuperGUI, "layouts/Super.xeyegui", EYEGUI_SUPER_LAYER, true);
+
+	// Load super calibration layout
 	_pSuperCalibrationLayout = eyegui::addLayout(_pSuperGUI, "layouts/SuperCalibration.xeyegui", EYEGUI_SUPER_LAYER, false); // adding on top of super layout but still beneath cursor
 
     // Button listener for pause
@@ -464,7 +466,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// Show super calibration layout at startup
 	if (setup::SUPER_CALIBRATION_AT_STARTUP)
 	{
-		eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true);
+		ShowSuperCalibrationLayout();
 	}
 
     // ### OTHER ###
@@ -517,6 +519,20 @@ bool Master::Run()
 {
     this->Loop();
 	return _shouldShutdownAtExit;
+}
+
+int Master::GetScreenWidth() const
+{
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+	return mode->width;
+}
+
+int Master::GetScreenHeight() const
+{
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+	return mode->height;
 }
 
 double Master::GetTime() const
@@ -812,11 +828,8 @@ void Master::Loop()
 			&& spInput->gazeAge > setup::DURATION_BEFORE_SUPER_CALIBRATION // also only when for given time no samples received
 			&& _upEyeInput->SamplesReceived()) // and it should not performed when there were no samples so far
 		{
-			// Display layout to recalibrate
-			eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true);
-
-			// Notify user via sound
-			eyegui::playSound(_pGUI, "sounds/GameAudio/FlourishSpacey-1.ogg");
+			// Show super calibration layout
+			ShowSuperCalibrationLayout();
 		}
 
         // Update cursor with original mouse input
@@ -996,6 +1009,15 @@ void Master::UpdateAsyncJobs(bool wait)
 	}
 }
 
+void Master::ShowSuperCalibrationLayout()
+{
+	// Display layout to recalibrate
+	eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true);
+
+	// Notify user via sound
+	eyegui::playSound(_pGUI, "sounds/GameAudio/FlourishSpacey-1.ogg");
+}
+
 void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
 {
     if (action == GLFW_PRESS)
@@ -1006,8 +1028,7 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
 			case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
-			case GLFW_KEY_C: { _upEyeInput->Calibrate();  eyegui::resetDriftMap(_pGUI); break;  } // calibrate and reset drift map
-			case GLFW_KEY_R: { eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true); break; } // just show the super calibration layout
+			case GLFW_KEY_R: { ShowSuperCalibrationLayout(); break; } // just show the super calibration layout
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
 			case GLFW_KEY_6: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::MAGNIFICATION); break; }
 			case GLFW_KEY_7: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::FUTURE); break; }
@@ -1121,26 +1142,25 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		{
 			// Perform calibration
 			bool success = false;
-			CalibrationResult result = _pMaster->_upEyeInput->Calibrate();
+			CalibrationInfo calibrationInfo;
+			CalibrationResult result = _pMaster->_upEyeInput->Calibrate(calibrationInfo);
 			switch (result)
 			{
-			case OK:
+			case CALIBRATION_OK:
 				_pMaster->PushNotificationByKey("notification:calibration_success", MasterNotificationInterface::Type::SUCCESS, false);
 				eyegui::resetDriftMap(_pMaster->_pGUI); // reset drift map of GUI
 				success = true;
 				break;
-			case BAD:
-
+			case CALIBRATION_BAD:
 				// TODO: provide hints how to improve calibration
 				_pMaster->PushNotificationByKey("notification:calibration_bad", MasterNotificationInterface::Type::WARNING, false);
 				eyegui::resetDriftMap(_pMaster->_pGUI); // reset drift map of GUI
 				success = true;
-
 				break;
-			case FAILED:
+			case CALIBRATION_FAILED:
 				_pMaster->PushNotificationByKey("notification:calibration_failure", MasterNotificationInterface::Type::WARNING, false);
 				break;
-			case NOT_SUPPORTED:
+			case CALIBRATION_NOT_SUPPORTED:
 				_pMaster->PushNotificationByKey("notification:calibration_failure", MasterNotificationInterface::Type::WARNING, false);
 				break;
 			}
@@ -1149,8 +1169,33 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			nlohmann::json record = { { "success", success } };
 			_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_RECALIBRATION_COUNT, FirebaseJSONKey::GENERAL_RECALIBRATION, record);
 
-			// Hide layout after calibration
-			eyegui::setVisibilityOfLayout(_pMaster->_pSuperCalibrationLayout, false, false, true);
+			/*
+
+			// Remove points of last calibration
+			for (const auto& index : _pMaster->_lastCalibrationPointsFrameIndices)
+			{
+				eyegui::removeFloatingFrame(_pMaster->_pSuperCalibrationLayout, index, false);
+			}
+			_pMaster->_lastCalibrationPointsFrameIndices.clear();
+
+			// Show points of this calibration
+			const float calibrationDisplayX = 0.1f;
+			const float calibrationDisplayY = 0.1f;
+			const float calibrationDisplayWidth = 0.25f;
+			const float calibrationDisplayHeight = 0.25f;
+			const float calibrationPointSize = 0.1f;
+			for (const auto& rPoint : calibrationInfo.points)
+			{
+				// TODO: this has assumption that calibration is fullscreen on primary display
+				LogInfo("############### CALIBRATION POINT: ", rPoint.positionX, ", ", rPoint.positionY);
+				float relPointX = (float) rPoint.positionX / _pMaster->GetScreenWidth();
+				float relPointY = (float) rPoint.positionY / _pMaster->GetScreenHeight();
+				float x = calibrationDisplayX + (relPointX / calibrationDisplayWidth);
+				float y = calibrationDisplayY + (relPointY / calibrationDisplayHeight);
+				_lastCalibrationPointsFrameIndices.push_back(eyegui::addFloatingFrameWithBrick(_pMaster->_pSuperCalibrationLayout, "bricks/CalibrationDisplayGoodPoint.beyegui", calibrationDisplayX, calibrationDisplayY, calibrationPointSize, calibrationPointSize, true, false));
+			}
+
+			*/
 		}
 	}
 }

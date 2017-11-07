@@ -2,11 +2,21 @@
 <layout style="default slow_animation">
 	<grid showbackground="true" style="super_calibration_background" consumeinput="true">
 		<row size="100%">
-			<column size="20%">
-				<circlebutton id="continue" border="30%" icon="icons/Cross.png" desckey="super_calibration:continue"/>
+			<column size="40%">
+				<grid>
+					<row size="50%">
+						<column size="100%">
+						</column>
+					</row>
+					<row size="50%">
+						<column size="100%">
+							<circlebutton id="continue" border="50%" icon="icons/Cross.png" desckey="super_calibration:continue"/>
+						</column>
+					</row>
+				</grid>
 			</column>
-			<column size="80%">
-				<circlebutton id="recalibration" style="recalibration" border="30%" icon="icons/Recalibration.png" desckey="super_calibration:recalibration"/>
+			<column size="60%">
+				<circlebutton id="recalibration" style="recalibration" border="20%" icon="icons/Recalibration.png" desckey="super_calibration:recalibration"/>
 			</column>
 		</row>
 	</grid>
