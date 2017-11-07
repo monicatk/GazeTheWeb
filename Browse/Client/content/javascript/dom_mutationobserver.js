@@ -20,6 +20,19 @@ document.onreadystatechange = function()
 	console.log("document.readyState == "+document.readyState);
 	ConsolePrint("document.readyState == "+document.readyState);
 
+	if(document.readyState === "complete")
+	{
+		var keywords = document.querySelector("meta[name='keywords']");
+		if(keywords && keywords.content)
+		{
+			SendToMsgRouter("#meta#keywords#"+keywords.content+"#");
+		}
+		else
+		{
+			SendToMsgRouter("#meta#keywords##");
+		}
+	}
+
 	// BUGFIX
 	// if (document.readyState === "complete")
 	// 	ForEveryChild(document.documentElement, AnalyzeNode);
@@ -551,7 +564,7 @@ function MutationObserverInit()
 							if(attr == "id")
 							{
 								var domObj = GetCorrespondingDOMObject(node);
-								if(domObj !== undefined)
+								if(domObj !== undefined && domObj.Class === "DOMTextInput")
 									SendAttributeChangesToCEF("HTMLId", domObj);
 							}
 
@@ -559,7 +572,7 @@ function MutationObserverInit()
 							if(attr == 'class')
 							{	
 								var domObj = GetCorrespondingDOMObject(node);
-								if(domObj !== undefined)
+								if(domObj !== undefined && domObj.Class === "DOMTextInput")
 									SendAttributeChangesToCEF("HTMLClass", domObj);
 							
 								// Node might get fixed or un-fixed if class changes

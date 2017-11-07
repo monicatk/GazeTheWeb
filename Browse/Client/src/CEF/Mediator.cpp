@@ -432,6 +432,15 @@ bool Mediator::IsFaviconAlreadyAvailable(CefRefPtr<CefBrowser> browser, CefStrin
 	return true;
 }
 
+bool Mediator::SetMetaKeywords(CefRefPtr<CefBrowser> browser, std::string content)
+{
+	if (auto pTab = GetTab(browser))
+	{
+		pTab->SetMetaKeywords(content);
+	}
+	return false;
+}
+
 void Mediator::SetZoomLevel(TabCEFInterface * pTab)
 {
     if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
