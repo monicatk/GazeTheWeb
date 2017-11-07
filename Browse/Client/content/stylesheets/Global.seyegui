@@ -23,11 +23,6 @@ default_noback : default
 	BackgroundColor = 0x00000000
 }
 
-url_input_domain : default
-{
-	Color = 0x505659FF
-}
-
 slow_animation
 {
 	AnimationDuration = 0.4

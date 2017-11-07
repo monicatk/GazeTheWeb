@@ -10,6 +10,7 @@
 #include "src/Utils/Helper.h"
 #include "src/Utils/Texture.h"
 #include "src/Utils/MakeUnique.h"
+#include "src/Arguments.h"
 #include <algorithm>
 
 
@@ -435,7 +436,19 @@ StateType Web::Update(float tpf, const std::shared_ptr<const Input> spInput)
 				// Validate URL
 				if (!ValidateURL(URL))
 				{
-					URL = SEARCH_PREFIX + URL;
+					// Seems to be no url, so input it as search term
+					switch (Argument::localization)
+					{
+					case Argument::Localization::English:
+						URL = SEARCH_PREFIX + URL + SEARCH_POSTFIX_ENGLISH;
+						break;
+					case Argument::Localization::Greek:
+						URL = SEARCH_PREFIX + URL + SEARCH_POSTFIX_GREEK;
+						break;
+					case Argument::Localization::Hebrew:
+						URL = SEARCH_PREFIX + URL + SEARCH_POSTFIX_HEBREW;
+						break;
+					}					
 				}
 
 				// Fetch tab id from URL input object

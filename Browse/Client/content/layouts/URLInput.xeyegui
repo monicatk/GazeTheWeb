@@ -9,9 +9,9 @@
 			</column>
 			<column size="90%">
 				<grid>
-					<row size="5%">
+					<row size="10%">
 						<column size="100%">
-							<blank/>
+							<textblock id="title" key="url_input:title" alignment="center" verticalalignment="center" fontsize="medium"/>
 						</column>
 					</row>
 					<row size="25%">
@@ -25,7 +25,7 @@
 										<circlebutton id="delete" desckey="url_input:delete" icon="icons/DeleteCharacter.png" border="10%"/>
 									</column>
 									<column size="64%">
-										<textblock id="text_block" alignment="center" verticalalignment="center" fontsize="tall"/>
+										<textblock id="url_display" alignment="center" verticalalignment="center" fontsize="tall"/>
 									</column>
 									<column size="12%">
 										<circlebutton id="complete" desckey="url_input:complete" icon="icons/Select.png" border="10%"/>
@@ -34,18 +34,19 @@
 							</grid>
 						</column>
 					</row>
-					<row size="55%">
+					<row size="50%">
 						<column size="100%">
 							<keyboard id="keyboard" instantpress="true" layout="US_ENGLISH"/>
 						</column>
 					</row>
 					<row size="15%">
 						<column size="100%">
-							<stack orientation="horizontal" separator="0.1" style="url_input_domain">
+							<stack orientation="horizontal" separator="0.1">
 								<boxbutton icon="icons/domain_com.png" id="com"/>
 								<boxbutton icon="icons/domain_org.png" id="org"/>
 								<boxbutton icon="icons/domain_net.png" id="net"/>
-								<boxbutton icon="icons/domain_eu.png" id="eu"/>
+								<!--<boxbutton icon="icons/domain_eu.png" id="eu"/>-->
+								<boxbutton icon="icons/Space.png" desckey="url_input:space" id="space"/>
 								<boxbutton icon="icons/domain_gr.png" id="gr"/>
 								<boxbutton icon="icons/domain_co_il.png" id="co_il"/>
 								<boxbutton icon="icons/domain_de.png" id="de"/>
