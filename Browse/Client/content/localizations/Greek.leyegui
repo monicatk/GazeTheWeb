@@ -85,6 +85,7 @@ action_select_option:select=ΟΚ
 pause:pause=Παύση
 notification:bookmark_added_success=Ο σελιδοδείκτης προστέθηκε
 notification:bookmark_added_existing=Ο σελιδοδείκτης υπάρχει ήδη
+notification:bookmark_removed=Bookmark Removed
 notification:copied_to_clipboard=Αντιγράφηκε
 notification:eye_tracker_status:trying_to_connect=Σύνδεση με τον Eye tracker...
 notification:eye_tracker_status:connected_open_gaze=Open Gaze API Συνδέθηκε

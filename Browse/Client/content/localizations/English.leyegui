@@ -85,6 +85,7 @@ action_select_option:select=Ok
 pause:pause=Pause
 notification:bookmark_added_success=Successfully Added Bookmark
 notification:bookmark_added_existing=Bookmark Already Existed
+notification:bookmark_removed=Bookmark Removed
 notification:copied_to_clipboard=Copied To Clipboard
 notification:eye_tracker_status:trying_to_connect=Connecting Eye Tracking driver...
 notification:eye_tracker_status:connected_open_gaze=Open Gaze API Connected

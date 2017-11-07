@@ -85,6 +85,7 @@ action_select_option:select=אישור
 pause:pause=השהה
 notification:bookmark_added_success=סימניה מועדפת הוספה בהצלחה
 notification:bookmark_added_existing=סימניה מועדפת כבר קיימת
+notification:bookmark_removed=Bookmark Removed
 notification:copied_to_clipboard=הועתק ללוח
 notification:eye_tracker_status:trying_to_connect=...מחבר דרייבר של מעקב תנועות עיניים 
 notification:eye_tracker_status:connected_open_gaze=מחובר Open Gaze API

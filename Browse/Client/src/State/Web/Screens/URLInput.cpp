@@ -309,8 +309,9 @@ void URLInput::URLButtonListener::down(eyegui::Layout* pLayout, std::string id)
 					_pURLInput->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_BOOKMARK_REMOVAL_COUNT, FirebaseJSONKey::GENERAL_BOOKMARK_REMOVAL, record);
 					LabStreamMailer::instance().Send("Remove bookmark: " + URL);
 
-					// Show bookmarks again, after removal
-					_pURLInput->ShowBookmarks();
+					// Reset screen and notify user
+					eyegui::setVisibilityOfLayout(_pURLInput->_pBookmarksLayout, false, false, true);
+					_pURLInput->_pMaster->PushNotificationByKey("notification:bookmark_removed", MasterNotificationInterface::Type::SUCCESS, false);
 				}
 				else if (id.substr(0, pos) == "select") // "select"
 				{
