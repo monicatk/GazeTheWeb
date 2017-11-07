@@ -13,7 +13,7 @@ SocialRecord::SocialRecord(std::string domain, SocialPlatform platform, int star
 
 SocialRecord::~SocialRecord() {}
 
-void SocialRecord::StartAndAddPage(std::string URL)
+void SocialRecord::StartAndAddPage(std::string URL, std::string keywords)
 {
 	if (_startDate.empty()) // only allow once
 	{
@@ -27,7 +27,7 @@ void SocialRecord::StartAndAddPage(std::string URL)
 		_writeable = true;
 
 		// Add page
-		AddPage(URL); // otherwise page vector would be empty and any attempt of updating would throw exception
+		AddPage(URL, keywords); // otherwise page vector would be empty and any attempt of updating would throw exception
 	}
 }
 
@@ -109,7 +109,7 @@ void SocialRecord::AddTextInput(std::string tag, std::string id, int charCount, 
 	if (_writeable) { _pages.back().textInputs.push_back(TextInput(tag, id, charCount, charDistance, x, y, std::chrono::duration<double>(std::chrono::system_clock::now() - _startTime).count(), duration)); }
 }
 
-void SocialRecord::AddPage(std::string URL)
+void SocialRecord::AddPage(std::string URL, std::string keywords)
 {
 	if (_writeable)
 	{
@@ -121,7 +121,7 @@ void SocialRecord::AddPage(std::string URL)
 		_lastAddPage = std::chrono::system_clock::now(); // store time of adding the page
 
 		// Add new page
-		_pages.push_back(Page(URL));
+		_pages.push_back(Page(URL, keywords));
 	}
 }
 
@@ -147,6 +147,7 @@ nlohmann::json SocialRecord::ToJSON() const
 		JSON["pages"].push_back(
 		{
 			{ "url",  rPage.URL },
+			{ "keywords",  rPage.keywords },
 			{ "duration", rPage.duration },
 			{ "durationInForeground",  rPage.durationInForeground },
 			{ "durationUserActive",  rPage.durationUserActive },

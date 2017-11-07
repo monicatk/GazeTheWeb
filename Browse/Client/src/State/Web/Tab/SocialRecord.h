@@ -78,7 +78,7 @@ public:
 	virtual ~SocialRecord();
 
 	// Start record
-	void StartAndAddPage(std::string URL);
+	void StartAndAddPage(std::string URL, std::string keywords);
 
 	// End record
 	void End();
@@ -106,7 +106,7 @@ public:
 	void AddTextInput(std::string tag, std::string id, int charCount, int charDistance, float x, float y, float duration);
 
 	// Add page
-	void AddPage(std::string URL);
+	void AddPage(std::string URL, std::string keywords);
 
 	// Convert to JSON for storing in database
 	nlohmann::json ToJSON() const;
@@ -154,10 +154,11 @@ private:
 	struct Page
 	{
 		// Constructor
-		Page(std::string URL) : URL(URL) {}
+		Page(std::string URL, std::string keywords) : URL(URL), keywords(keywords) {}
 
 		// Fields
 		const std::string URL;
+		const std::string keywords;
 		double duration = 0.0;
 		double durationInForeground = 0.0;
 		double durationUserActive = 0.0; // and tab in foreground, input either by eye tracker and gaze detected or mouse
