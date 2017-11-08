@@ -101,6 +101,7 @@ notification:data_transfer_continued=Data Transfer Continued
 notification:data_transfer_paused=Data Transfer Paused
 super_calibration:continue=Continue
 super_calibration:recalibration=Recalibrate
+super_calibration:message=No calibration performed
 video_mode:play_pause=Play / Pause
 video_mode:volume_up=Volume Up
 video_mode:volume_down=Volume Down

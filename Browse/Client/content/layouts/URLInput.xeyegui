@@ -58,7 +58,6 @@
 										<boxbutton icon="icons/LayoutGreeceGreek.png" id="layout_greece_greek" desckey="url_input:layout_greece_greek"/>
 									</stack>
 								</dropbutton>
-								<blank relativescale="5%"/>
 							</stack>
 						</column>
 					</row>

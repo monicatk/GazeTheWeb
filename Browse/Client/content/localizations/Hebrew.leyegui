@@ -101,6 +101,7 @@ notification:data_transfer_continued=העברת נתונים הופעלה
 notification:data_transfer_paused=העברת נתונים הושהתה
 super_calibration:continue=המשך
 super_calibration:recalibration=כיול מחדש
+super_calibration:message=No calibration performed
 video_mode:play_pause=הפעל\השהה
 video_mode:volume_up=הגבר עוצמת קול
 video_mode:volume_down=הנמך עוצמת קול

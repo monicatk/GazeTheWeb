@@ -1169,8 +1169,6 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			nlohmann::json record = { { "success", success } };
 			_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_RECALIBRATION_COUNT, FirebaseJSONKey::GENERAL_RECALIBRATION, record);
 
-			/*
-
 			// Remove points of last calibration
 			for (const auto& index : _pMaster->_lastCalibrationPointsFrameIndices)
 			{
@@ -1178,24 +1176,34 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			}
 			_pMaster->_lastCalibrationPointsFrameIndices.clear();
 
-			// Show points of this calibration
-			const float calibrationDisplayX = 0.1f;
-			const float calibrationDisplayY = 0.1f;
-			const float calibrationDisplayWidth = 0.25f;
-			const float calibrationDisplayHeight = 0.25f;
-			const float calibrationPointSize = 0.1f;
-			for (const auto& rPoint : calibrationInfo.points)
+			// Decide what to display
+			if (spCalibrationInfo->empty())
 			{
-				// TODO: this has assumption that calibration is fullscreen on primary display
-				LogInfo("############### CALIBRATION POINT: ", rPoint.positionX, ", ", rPoint.positionY);
-				float relPointX = (float) rPoint.positionX / _pMaster->GetScreenWidth();
-				float relPointY = (float) rPoint.positionY / _pMaster->GetScreenHeight();
-				float x = calibrationDisplayX + (relPointX / calibrationDisplayWidth);
-				float y = calibrationDisplayY + (relPointY / calibrationDisplayHeight);
-				_lastCalibrationPointsFrameIndices.push_back(eyegui::addFloatingFrameWithBrick(_pMaster->_pSuperCalibrationLayout, "bricks/CalibrationDisplayGoodPoint.beyegui", calibrationDisplayX, calibrationDisplayY, calibrationPointSize, calibrationPointSize, true, false));
+				// Show message
+				eyegui::setContentOfTextBlock(_pMaster->_pSuperCalibrationLayout, "calibration_message", eyegui::fetchLocalization(_pMaster->_pSuperGUI, "calibration_message"));
 			}
+			else
+			{
+				// Hide message
+				eyegui::setContentOfTextBlock(_pMaster->_pSuperCalibrationLayout, "calibration_message", "");
 
-			*/
+				// Show points of this calibration
+				const float calibrationDisplayX = 0.1f;
+				const float calibrationDisplayY = 0.1f;
+				const float calibrationDisplayWidth = 0.25f;
+				const float calibrationDisplayHeight = 0.25f;
+				const float calibrationPointSize = 0.1f;
+				for (const auto& rPoint : *spCalibrationInfo.get())
+				{
+					// TODO: this has assumption that calibration is fullscreen on primary display
+					LogInfo("############### CALIBRATION POINT: ", rPoint.positionX, ", ", rPoint.positionY);
+					float relPointX = (float)rPoint.positionX / _pMaster->GetScreenWidth();
+					float relPointY = (float)rPoint.positionY / _pMaster->GetScreenHeight();
+					float x = calibrationDisplayX + (relPointX / calibrationDisplayWidth);
+					float y = calibrationDisplayY + (relPointY / calibrationDisplayHeight);
+					_pMaster->_lastCalibrationPointsFrameIndices.push_back(eyegui::addFloatingFrameWithBrick(_pMaster->_pSuperCalibrationLayout, "bricks/CalibrationDisplayOkPoint.beyegui", x, y, calibrationPointSize, calibrationPointSize, true, false));
+				}
+			}
 		}
 	}
 }
