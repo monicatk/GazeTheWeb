@@ -387,7 +387,7 @@ std::shared_ptr<Input> EyeInput::Update(
 	return spInput;
 }
 
-CalibrationResult EyeInput::Calibrate(CalibrationInfo& rspCalibrationInfo)
+CalibrationResult EyeInput::Calibrate(std::shared_ptr<CalibrationInfo>& rspCalibrationInfo)
 {
 	CalibrationResult result = CALIBRATION_NOT_SUPPORTED;
 #ifdef _WIN32

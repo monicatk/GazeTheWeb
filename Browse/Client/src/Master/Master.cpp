@@ -1142,8 +1142,8 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		{
 			// Perform calibration
 			bool success = false;
-			CalibrationInfo calibrationInfo;
-			CalibrationResult result = _pMaster->_upEyeInput->Calibrate(calibrationInfo);
+			std::shared_ptr<CalibrationInfo> spCalibrationInfo = std::make_shared<CalibrationInfo>();
+			CalibrationResult result = _pMaster->_upEyeInput->Calibrate(spCalibrationInfo);
 			switch (result)
 			{
 			case CALIBRATION_OK:

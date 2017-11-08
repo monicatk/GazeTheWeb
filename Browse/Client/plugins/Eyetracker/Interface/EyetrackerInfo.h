@@ -33,6 +33,6 @@ struct CalibrationPoint
 };
 
 // Vector with calibration info
-typedef std::shared_ptr<std::vector<CalibrationPoint> > CalibrationInfo;
+typedef std::vector<CalibrationPoint> CalibrationInfo;
 
 #endif EYETRACKERINFO_H_

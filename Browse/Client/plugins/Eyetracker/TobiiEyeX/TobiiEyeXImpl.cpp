@@ -206,7 +206,7 @@ void FetchSamples(SampleQueue& rspSamples)
 	eyetracker_global::FetchSamples(rspSamples);
 }
 
-CalibrationResult Calibrate(CalibrationInfo& rspInfo)
+CalibrationResult Calibrate(std::shared_ptr<CalibrationInfo>& rspInfo)
 {
 	// Not supported
 	return CALIBRATION_NOT_SUPPORTED;
