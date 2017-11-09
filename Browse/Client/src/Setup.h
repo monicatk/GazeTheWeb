@@ -68,6 +68,7 @@ namespace setup
 	static const std::string	LAB_STREAM_INPUT_NAME = LAB_STREAM_OUTPUT_NAME; //  "GazeTheWebInput"; // may be set to same value as LAB_STREAM_OUTPUT_NAME to receive own events for debugging purposes
 	static const bool			LOG_INTERACTIONS = false; // on eyeGUI level, deprecated
 	static const bool			TAB_TRIGGER_SHOW_BADGE = false;
+	static const std::string	DASHBOARD_URL = "https://augreal.mklab.iti.gr/mamem/gtw-home"; // without slash at the end
 
 	// Firebase
 	static const bool			FIREBASE_MAILING = !DEMO_MODE; // on/off switch for sending data to Firebase

@@ -46,7 +46,8 @@ private:
 	// List of filtered pages which will not be added to history
 	const std::vector<std::string> _filterURLs
 	{
-		"about:blank"
+		"about:blank",
+		setup::DASHBOARD_URL
 	};
 
 	// Load history from hard disk. Returns whether successful

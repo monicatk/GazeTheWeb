@@ -258,10 +258,10 @@ bool HistoryManager::LoadHistory()
 
 bool HistoryManager::FilterPage(Page page) const
 {
-	// Go over filter list and test for equality
+	// Go over filter list and test for substring
 	for (const std::string& rURL : _filterURLs)
 	{
-		if (rURL == page.URL)
+		if (page.URL.find(rURL) != std::string::npos)
 		{
 			// URL is filtered
 			return true;
