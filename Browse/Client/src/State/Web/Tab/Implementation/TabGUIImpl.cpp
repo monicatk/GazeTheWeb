@@ -39,7 +39,7 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		else if (id == "dashboard")
 		{
 			auto parameters = _pTab->_pMaster->GetDashboardParameters();
-			std::string URL("http://augreal.mklab.iti.gr/mamem/gtw-home/?");
+			std::string URL("https://augreal.mklab.iti.gr/mamem/gtw-home/?");
 			URL += "email=" + parameters.email + "&";
 			URL += "password=" + parameters.password + "&";
 			URL += "api_key=" + parameters.APIKey + "&";
