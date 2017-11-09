@@ -72,7 +72,7 @@ namespace setup
 	// Firebase
 	static const bool			FIREBASE_MAILING = !DEMO_MODE; // on/off switch for sending data to Firebase
 	static const std::string	FIREBASE_API_KEY = "AIzaSyBMa9gSXsoDo27S7P959QZYf3rJBGDGEIA"; // API key for our Firebase
-	static const std::string	FIREBASE_URL = "https://mamem-phase2-fall17.firebaseio.com"; // URL of our Firebase
+	static const std::string	FIREBASE_PROJECT_ID = "mamem-phase2-fall17"; // Project Id of our Firebase
 	static const int			SOCIAL_RECORD_DIGIT_COUNT = 6;
 	static const bool			SOCIAL_RECORD_PERSIST_UNKNOWN = true;
 	static const std::string	DATE_FORMAT = "%d-%m-%Y %H-%M-%S";

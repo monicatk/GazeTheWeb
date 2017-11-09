@@ -288,7 +288,7 @@ private:
 
 		// Constants
 		const std::string _API_KEY = setup::FIREBASE_API_KEY;
-		const std::string _URL = setup::FIREBASE_URL;
+		const std::string _URL = "https://" + setup::FIREBASE_PROJECT_ID + ".firebaseio.com";
 
 		// Members
 		IdToken* _pIdToken = nullptr; // set at construction

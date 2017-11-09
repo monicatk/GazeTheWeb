@@ -10,6 +10,7 @@
 #include "src/State/Web/Tab/Pipelines/TextSelectionPipeline.h"
 #include "src/CEF/Mediator.h"
 #include "src/Utils/MakeUnique.h"
+#include "src/Master/Master.h"
 
 void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 {
@@ -34,6 +35,16 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 
 			// Trigger zooming in CefMediator
 			_pTab->_pCefMediator->SetZoomLevel(_pTab);
+		}
+		else if (id == "dashboard")
+		{
+			auto parameters = _pTab->_pMaster->GetDashboardParameters();
+			std::string URL("http://augreal.mklab.iti.gr/mamem/gtw-home/?");
+			URL += "email=" + parameters.email + "&";
+			URL += "password=" + parameters.password + "&";
+			URL += "api_key=" + parameters.APIKey + "&";
+			URL += "project_id=" + parameters.projectId;
+			_pTab->OpenURL(URL);
 		}
 		/*
         else if (id == "gaze_mouse")

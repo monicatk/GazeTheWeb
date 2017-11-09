@@ -82,6 +82,7 @@ Tab::Tab(
     eyegui::registerButtonListener(_pPanelLayout, "selection", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPanelLayout, "zoom", _spTabButtonListener);
 	// eyegui::registerButtonListener(_pPanelLayout, "test_button", _spTabButtonListener); // TODO: only for testing new features
+	eyegui::registerButtonListener(_pPanelLayout, "dashboard", _spTabButtonListener);
 	eyegui::registerButtonListener(_pVideoModeLayout, "play_pause", _spTabButtonListener);
 	eyegui::registerButtonListener(_pVideoModeLayout, "volume_up", _spTabButtonListener);
 	eyegui::registerButtonListener(_pVideoModeLayout, "volume_down", _spTabButtonListener);
