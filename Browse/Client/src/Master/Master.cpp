@@ -1188,22 +1188,38 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				eyegui::setContentOfTextBlock(_pMaster->_pSuperCalibrationLayout, "calibration_message", "");
 
 				// Show points of this calibration
-				const float calibrationDisplayX = 0.1f;
-				const float calibrationDisplayY = 0.2f;
-				const float calibrationDisplayWidth = 0.3f;
-				const float calibrationDisplayHeight = 0.3f;
+				const float calibrationDisplayX = 0.075f;
+				const float calibrationDisplayY = 0.175f;
+				const float calibrationDisplayWidth = 0.35f;
+				const float calibrationDisplayHeight = 0.35f;
 				const float calibrationPointSize = 0.1f;
 				for (const auto& rPoint : *spCalibrationInfo.get())
 				{
-					// TODO: this has assumption that calibration is fullscreen on primary display
-					LogInfo("############### CALIBRATION POINT: ", rPoint.positionX, ", ", rPoint.positionY);
+					// Decide on point visualization
+					std::string brickFilepath = "bricks/CalibrationDisplayOkPoint.beyegui";
+					switch (rPoint.result)
+					{
+					case CALIBRATION_POINT_OK:
+						brickFilepath = "bricks/CalibrationDisplayOkPoint.beyegui";
+						break;
+					case CALIBRATION_POINT_BAD:
+						brickFilepath = "bricks/CalibrationDisplayBadPoint.beyegui";
+						break;
+					case CALIBRATION_POINT_FAILED:
+						brickFilepath = "bricks/CalibrationDisplayFailedPoint.beyegui";
+						break;
+					}
+
+					// Decide on position TODO: this has assumption that calibration is fullscreen on primary display
 					float relPointX = (float)rPoint.positionX / _pMaster->GetScreenWidth();
 					float relPointY = (float)rPoint.positionY / _pMaster->GetScreenHeight();
 					float x = calibrationDisplayX + (relPointX * calibrationDisplayWidth);
 					x -= calibrationPointSize / 2.f;
 					float y = calibrationDisplayY + (relPointY * calibrationDisplayHeight);
 					y -= calibrationPointSize / 2.f;
-					_pMaster->_lastCalibrationPointsFrameIndices.push_back(eyegui::addFloatingFrameWithBrick(_pMaster->_pSuperCalibrationLayout, "bricks/CalibrationDisplayOkPoint.beyegui", x, y, calibrationPointSize, calibrationPointSize, true, false));
+
+					// Add point visualization
+					_pMaster->_lastCalibrationPointsFrameIndices.push_back(eyegui::addFloatingFrameWithBrick(_pMaster->_pSuperCalibrationLayout, brickFilepath, x, y, calibrationPointSize, calibrationPointSize, true, false));
 				}
 			}
 		}

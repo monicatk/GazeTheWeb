@@ -5,12 +5,14 @@
 			<column size="50%">
 				<grid>
 					<row size="10%">
-						<column size="100%"/>
+						<column size="100%">
+							<textblock key="super_calibration:display_title" alignment="center" verticalalignment="bottom" fontsize="medium" border="5%" props="BackgroundColor=0x00000000"/>
+						</column>
 					</row>
 					<row size="50%">
 						<column size="100%">
-							<stack showbackground="true" border="20%" style="calibration_display_border">
-								<textblock key="super_calibration:message" id="calibration_message" alignment="center" verticalalignment="center" fontsize="medium" border="3%" style="calibration_display_background"/>
+							<stack showbackground="true" border="10%" style="calibration_display_border">
+								<textblock key="super_calibration:display_message" id="calibration_message" alignment="center" verticalalignment="center" fontsize="medium" border="3%" style="calibration_display_background"/>
 							</stack>
 						</column>
 					</row>

@@ -200,10 +200,31 @@ CalibrationResult Calibrate(std::shared_ptr<CalibrationInfo>& rspInfo)
 		std::shared_ptr<CalibrationInfo> spCalibrationInfo = std::make_shared<CalibrationInfo>();
 		for (int i = 1; i <= 5; i++) // go over calibration points
 		{
+			// Retrieve calibration point
 			CalibrationPointStruct point;
 			if (RET_SUCCESS == iV_GetCalibrationPoint(i, &point))
 			{
-				spCalibrationInfo->push_back(CalibrationPoint(point.positionX, point.positionY, CALIBRATION_POINT_OK));
+				// Check calibration quality of this calibration point
+				CalibrationPointQualityStruct left, right;
+				iV_GetCalibrationQuality(i, &left, &right);
+
+				// Check for quality
+				if (((left.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
+					&& (right.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed))
+					|| (left.qualityIndex <= 0.0f && right.qualityIndex <= 0.0f)) // failure
+				{
+					spCalibrationInfo->push_back(CalibrationPoint(point.positionX, point.positionY, CALIBRATION_POINT_FAILED));
+				}
+				else if ((left.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
+					|| (right.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
+					|| (left.qualityIndex < 0.5f && right.qualityIndex < 0.5f)) // bad
+				{
+					spCalibrationInfo->push_back(CalibrationPoint(point.positionX, point.positionY, CALIBRATION_POINT_BAD));
+				}
+				else // ok
+				{
+					spCalibrationInfo->push_back(CalibrationPoint(point.positionX, point.positionY, CALIBRATION_POINT_OK));
+				}
 			}
 		}
 		rspInfo = spCalibrationInfo;
