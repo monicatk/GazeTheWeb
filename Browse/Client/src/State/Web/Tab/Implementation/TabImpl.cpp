@@ -483,7 +483,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		// ############################
 		
 		// Check for URL change and whether to start new social record
-		if (_url != BLANK_PAGE_URL && _prevURL != _url)
+		if (_prevURL != _url)
 		{
 			// Classify URL, which platform was entered?
 			auto platform = SocialRecord::ClassifyURL(_url);
@@ -863,6 +863,14 @@ void Tab::StartSocialRecord(std::string URL, SocialPlatform platform)
 		if (_spSocialRecord != nullptr)
 		{
 			EndSocialRecord(); // makes social record null
+		}
+
+		// Filter certain URLs so no social record is created
+		if (
+			URL.find(BLANK_PAGE_URL) != std::string::npos
+			|| URL.find(setup::DASHBOARD_URL) != std::string::npos)
+		{
+			return; // without starting a new social record
 		}
 
 		// Start new record

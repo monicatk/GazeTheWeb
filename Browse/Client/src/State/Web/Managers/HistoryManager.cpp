@@ -10,6 +10,12 @@
 #include "submodules/eyeGUI/externals/TinyXML2/tinyxml2.h"
 #include <iterator>
 
+const std::vector<std::string> HistoryManager::_filterURLs
+{
+	"about:blank",
+	setup::DASHBOARD_URL
+};
+
 HistoryManager::HistoryManager(std::string userDirectory)
 {
 	// Fill members
