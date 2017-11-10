@@ -23,7 +23,7 @@ Tab::Tab(
 	_pMaster = pMaster;
 	_pCefMediator = pCefMediator;
 	_pWeb = pWeb;
-	_url = url;
+	 _url = url;
 
 	// Create layouts for Tab (overlay at first, because behind other layouts)
 	_pOverlayLayout = _pMaster->AddLayout("layouts/Overlay.xeyegui", EYEGUI_TAB_LAYER, false);
@@ -485,6 +485,8 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		// Check for URL change and whether to start new social record
 		if (_prevURL != _url)
 		{
+			LogInfo("########### URL CHANGE: ", _url);
+
 			// Classify URL, which platform was entered?
 			auto platform = SocialRecord::ClassifyURL(_url);
 
@@ -867,7 +869,8 @@ void Tab::StartSocialRecord(std::string URL, SocialPlatform platform)
 
 		// Filter certain URLs so no social record is created
 		if (
-			URL.find(BLANK_PAGE_URL) != std::string::npos
+			URL.empty()
+			|| URL.find(BLANK_PAGE_URL) != std::string::npos
 			|| URL.find(setup::DASHBOARD_URL) != std::string::npos)
 		{
 			return; // without starting a new social record

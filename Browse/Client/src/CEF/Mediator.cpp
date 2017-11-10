@@ -12,6 +12,7 @@
 #include "src/State/Web/Tab/Interface/TabCEFInterface.h"
 #include "src/CEF/Data/DOMNode.h"
 #include "src/Utils/Logger.h"
+#include "src/Global.h"
 #include "include/cef_app.h"
 #include "include/wrapper/cef_helpers.h"
 
@@ -49,23 +50,19 @@ void Mediator::RegisterTab(TabCEFInterface* pTab)
 
     _pendingTab = pTab;
 
+	// Decide on url
+	std::string URL = pTab->GetURL();
+	if (URL.empty()) { URL = BLANK_PAGE_URL; }
+
     LogDebug("Mediator: Creating new CefBrowser at Tab registration.");
     // Create new CefBrowser with given information
     CefRefPtr<CefBrowser> browser = CefBrowserHost::CreateBrowserSync(
-        window_info, _handler.get(), "about:blank", browser_settings, NULL);
+        window_info, _handler.get(), URL, browser_settings, NULL);
 
     // Fill maps with correlating Tab and CefBrowsre
     _browsers.emplace(pTab, browser);
     _tabs.emplace(browser->GetIdentifier(), pTab);
     _pendingTab = NULL;
-
-	RefreshTab(pTab);
-
-	// TODO: MutationObserver observes wrong document object if browser is created by CreateBrowserSync with an URL,
-	// thus no mutations will be recognized on startup
-	// We are currently preventing this by creating the browser with "about:blank" and calling RefreshTab afterwards
-	// in order to load the 'real' URL. Then, MutationObserver observes the 'right' document
-	// But why does this scenario exist? Might be interesting to investigate in the future ;)
 }
 
 void Mediator::UnregisterTab(TabCEFInterface* pTab)

@@ -39,6 +39,7 @@ public:
     virtual ~Web();
 
     // Add tab and return id of it
+	int AddTab(bool show = true);
     int AddTab(std::string URL, bool show = true);
 
     // Add tab after another

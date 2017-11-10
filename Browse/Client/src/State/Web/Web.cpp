@@ -71,6 +71,11 @@ Web::~Web()
     // TODO: Delete layouts?
 }
 
+int Web::AddTab(bool show)
+{
+	return AddTab("", show);
+}
+
 int Web::AddTab(std::string URL, bool show)
 {
     // Go over existing pairs and determine first free id
@@ -1022,7 +1027,7 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		else if (id == "new_tab")
 		{
 			// Add tab
-			int tabId = _pWeb->AddTab(BLANK_PAGE_URL, true);
+			int tabId = _pWeb->AddTab(true);
 
 			// Close tab overview
 			_pWeb->ShowTabOverview(false);
