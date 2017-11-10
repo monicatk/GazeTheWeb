@@ -23,7 +23,7 @@ Tab::Tab(
 	_pMaster = pMaster;
 	_pCefMediator = pCefMediator;
 	_pWeb = pWeb;
-	 _url = url;
+	_url = url;
 
 	// Create layouts for Tab (overlay at first, because behind other layouts)
 	_pOverlayLayout = _pMaster->AddLayout("layouts/Overlay.xeyegui", EYEGUI_TAB_LAYER, false);
