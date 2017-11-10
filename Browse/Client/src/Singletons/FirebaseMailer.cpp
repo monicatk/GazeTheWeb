@@ -779,7 +779,10 @@ bool FirebaseMailer::PushBackCommand(std::shared_ptr<Command> spCommand)
 		_conditionVariable.notify_all(); // notify thread about new data
 		return true;
 	}
-	return false; // command was not added to the queue
+	else
+	{
+		return false; // command was not added to the queue
+	}
 }
 
 std::string FirebaseMailer::GetIdToken() const

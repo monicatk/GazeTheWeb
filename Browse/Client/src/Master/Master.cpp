@@ -983,7 +983,8 @@ void Master::Loop()
 void Master::UpdateAsyncJobs(bool wait)
 {
 	// Check asynchronous jobs
-	for (int i = _asyncJobs.size() - 1; i >= 0; i--) // do it from the back
+	int startIndex = _asyncJobs.size() - 1;
+	for (int i = startIndex; i >= 0; i--) // do it from the back
 	{
 		// Retrieve whether asynchronous call is done
 		bool remove = false;

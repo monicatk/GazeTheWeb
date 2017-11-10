@@ -68,7 +68,7 @@ Web::Web(Master* pMaster, Mediator* pCefMediator, bool dataTransfer) : State(pMa
 
 Web::~Web()
 {
-    // TODO: Delete layouts?
+	_tabs.clear(); // just to be sure when this is called
 }
 
 int Web::AddTab(bool show)
