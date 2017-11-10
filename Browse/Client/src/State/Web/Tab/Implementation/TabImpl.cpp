@@ -30,6 +30,7 @@ Tab::Tab(
 	_pScrollingOverlayLayout = _pMaster->AddLayout("layouts/Overlay.xeyegui", EYEGUI_TAB_LAYER, false);
 	_pPanelLayout = _pMaster->AddLayout("layouts/Tab.xeyegui", EYEGUI_TAB_LAYER, false);
 	_pVideoModeLayout = _pMaster->AddLayout("layouts/TabVideoMode.xeyegui", EYEGUI_TAB_LAYER, false);
+	_pVideoModePauseOverlayLayout = _pMaster->AddLayout("layouts/TabVideoModePauseOverlay.xeyegui", EYEGUI_TAB_LAYER, false);
 	_pPipelineAbortLayout = _pMaster->AddLayout("layouts/TabPipelineAbort.xeyegui", EYEGUI_TAB_LAYER, false);
     _pDebugLayout = _pMaster->AddLayout("layouts/TabDebug.xeyegui", EYEGUI_TAB_LAYER, false);
 
@@ -83,7 +84,8 @@ Tab::Tab(
 	eyegui::registerButtonListener(_pPanelLayout, "zoom", _spTabButtonListener);
 	// eyegui::registerButtonListener(_pPanelLayout, "test_button", _spTabButtonListener); // TODO: only for testing new features
 	eyegui::registerButtonListener(_pPanelLayout, "dashboard", _spTabButtonListener);
-	eyegui::registerButtonListener(_pVideoModeLayout, "play_pause", _spTabButtonListener);
+	eyegui::registerButtonListener(_pVideoModeLayout, "play", _spTabButtonListener);
+	eyegui::registerButtonListener(_pVideoModeLayout, "pause", _spTabButtonListener);
 	eyegui::registerButtonListener(_pVideoModeLayout, "volume_up", _spTabButtonListener);
 	eyegui::registerButtonListener(_pVideoModeLayout, "volume_down", _spTabButtonListener);
 	eyegui::registerButtonListener(_pVideoModeLayout, "mute", _spTabButtonListener);
@@ -812,6 +814,9 @@ void Tab::EnterVideoMode(int id)
 			// Set visibility of layout
 			eyegui::setVisibilityOfLayout(_pVideoModeLayout, true, true, true);
 
+			// Set visibility of pause overlay layout (just blend out, do not ask for current state)
+			eyegui::setVisibilityOfLayout(_pVideoModePauseOverlayLayout, false, false, false);
+
 			// Deactivate all triggers
 			for (auto pTrigger : _triggers)
 			{
@@ -843,6 +848,9 @@ void Tab::ExitVideoMode()
 
 		// Set visibility of layout
 		eyegui::setVisibilityOfLayout(_pVideoModeLayout, false, false, true);
+
+		// Set visibility of pause overlay layout (just blend out, do not ask for current state)
+		eyegui::setVisibilityOfLayout(_pVideoModePauseOverlayLayout, false, false, true);
 
 		// Activate all triggers
 		for (auto pTrigger : _triggers)

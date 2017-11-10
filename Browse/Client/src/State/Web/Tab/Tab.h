@@ -587,6 +587,7 @@ private:
     // Layouts
     eyegui::Layout* _pPanelLayout;
 	eyegui::Layout* _pVideoModeLayout;
+	eyegui::Layout* _pVideoModePauseOverlayLayout;
     eyegui::Layout* _pPipelineAbortLayout;
     eyegui::Layout* _pOverlayLayout;
     eyegui::Layout* _pScrollingOverlayLayout;

@@ -80,12 +80,20 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 	else
 	{
 		// ### Vide mode layout ###
-		if (id == "play_pause")
+		if (id == "play")
 		{
 			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
 			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 			{
-				iter->second->TogglePlayPause();
+				iter->second->SetPlaying(true);
+			}
+		}
+		else if (id == "pause")
+		{
+			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
+			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+			{
+				iter->second->SetPlaying(false);
 			}
 		}
 		else if (id == "volume_up")
@@ -93,7 +101,8 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
 			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 			{
-				iter->second->ChangeVolume(0.25f);
+				// iter->second->ChangeVolume(0.25f);
+				iter->second->SkipSeconds(30);
 			}
 		}
 		else if (id == "volume_down")
@@ -101,7 +110,8 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
 			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 			{
-				iter->second->ChangeVolume(-0.25f);
+				// iter->second->ChangeVolume(-0.25f);
+				iter->second->SkipSeconds(-10);
 			}
 		}
 		else if (id == "mute")

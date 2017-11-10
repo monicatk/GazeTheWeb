@@ -171,8 +171,13 @@ DOMVideo.prototype.jumpToSecond = function(sec)
 {
 	this.node.currentTime = sec;
 	ConsolePrint("DOMVideo id="+this.getId()+": Now playing from second "+sec);
-
 }
+
+DOMVideo.prototype.skipSeconds = function (sec) {
+    this.node.currentTime += sec;
+    ConsolePrint("DOMVideo id=" + this.getId() + ": Now playing from second " + sec);
+}
+
 DOMVideo.prototype.setFullscreen = function(fullscreen)
 {
 	if(fullscreen)
