@@ -542,9 +542,6 @@ double Master::GetTime() const
 
 void Master::Exit(bool shutdown)
 {
-	// Close all tabs
-	_upWeb->RemoveAllTabs();
-
 	// Stop update loop
 	_exit = true;
 
@@ -712,7 +709,7 @@ void Master::Loop()
 		if (glfwWindowShouldClose(_pWindow))
 		{
 			Exit();
-			continue; // let it do one last loop
+			continue;
 		}
 
 		// Time per frame
