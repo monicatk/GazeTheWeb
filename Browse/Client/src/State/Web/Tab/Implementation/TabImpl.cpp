@@ -485,8 +485,6 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		// Check for URL change and whether to start new social record
 		if (_prevURL != _url)
 		{
-			LogInfo("########### URL CHANGE: ", _url);
-
 			// Classify URL, which platform was entered?
 			auto platform = SocialRecord::ClassifyURL(_url);
 
