@@ -100,176 +100,184 @@ template<> struct FirebaseValue<FirebaseIntegerKey>	{ typedef int type; };
 template<> struct FirebaseValue<FirebaseStringKey>	{ typedef std::string type; };
 template<> struct FirebaseValue<FirebaseJSONKey>	{ typedef nlohmann::json type; };
 
-// Mapping from key to address
-template<typename T> static std::string FirebaseAddress(T key);
-template<> std::string FirebaseAddress<FirebaseIntegerKey>(FirebaseIntegerKey key)
-{
-	switch (key)
-	{
-
-	// Page activity
-	case FirebaseIntegerKey::PAGE_ACTIVITY_UNKNOWN_COUNT:
-		return "pageActivity/_unknown/sessionCount";
-	case FirebaseIntegerKey::PAGE_ACTIVITY_NEWS_COUNT:
-		return "pageActivity/news/sessionCount";
-	case FirebaseIntegerKey::PAGE_ACTIVITY_SHOPPING_COUNT:
-		return "pageActivity/shopping/sessionCount";
-	case FirebaseIntegerKey::PAGE_ACTIVITY_EMAIL_COUNT:
-		return "pageActivity/email/sessionCount";
-	case FirebaseIntegerKey::PAGE_ACTIVITY_WIKIPEDIA_COUNT:
-		return "pageActivity/wikipedia/sessionCount";
-	case FirebaseIntegerKey::PAGE_ACTIVITY_FACEBOOK_COUNT:
-		return "pageActivity/facebook/sessionCount";
-	case FirebaseIntegerKey::PAGE_ACTIVITY_LINKEDIN_COUNT:
-		return "pageActivity/linkedin/sessionCount";
-	case FirebaseIntegerKey::PAGE_ACTIVITY_YOUTUBE_COUNT:
-		return "pageActivity/youtube/sessionCount";
-	case FirebaseIntegerKey::PAGE_ACTIVITY_INSTAGRAM_COUNT:
-		return "pageActivity/instagram/sessionCount";
-	case FirebaseIntegerKey::PAGE_ACTIVITY_TWITTER_COUNT:
-		return "pageActivity/twitter/sessionCount";
-	case FirebaseIntegerKey::PAGE_ACTIVITY_GOOGLE_COUNT:
-		return "pageActivity/google/sessionCount";
-	case FirebaseIntegerKey::PAGE_ACTIVITY_YAHOO_COUNT:
-		return "pageActivity/yahoo/sessionCount";
-	case FirebaseIntegerKey::PAGE_ACTIVITY_OK_COUNT:
-		return "pageActivity/ok/sessionCount";
-	case FirebaseIntegerKey::PAGE_ACTIVITY_VK_COUNT:
-		return "pageActivity/vk/sessionCount";
-	case FirebaseIntegerKey::PAGE_ACTIVITY_WHATSAPP_COUNT:
-		return "pageActivity/whatsapp/sessionCount";
-
-	// General
-	case FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT:
-		return "general/start/count";
-	case FirebaseIntegerKey::GENERAL_RECALIBRATION_COUNT:
-		return "general/recalibration/count";
-	case FirebaseIntegerKey::GENERAL_DRIFT_GRID_COUNT:
-		return "general/driftGrid/count";
-	case FirebaseIntegerKey::GENERAL_URL_INPUT_COUNT:
-		return "general/urlInput/count";
-	case FirebaseIntegerKey::GENERAL_BOOKMARK_USAGE_COUNT:
-		return "general/bookmarkUsage/count";
-	case FirebaseIntegerKey::GENERAL_BOOKMARK_ADDING_COUNT:
-		return "general/bookmarkAdding/count";
-	case FirebaseIntegerKey::GENERAL_BOOKMARK_REMOVAL_COUNT:
-		return "general/bookmarkRemoval/count";
-	case FirebaseIntegerKey::GENERAL_HISTORY_USAGE_COUNT:
-		return "general/historyUsage/count";
-	case FirebaseIntegerKey::GENERAL_TAB_RELOADING_COUNT:
-		return "general/tabReloading/count";
-	case FirebaseIntegerKey::GENERAL_TAB_CLOSING_COUNT:
-		return "general/tabClosing/count";
-	case FirebaseIntegerKey::GENERAL_TAB_CREATION_COUNT:
-		return "general/tabCreation/count";
-	case FirebaseIntegerKey::GENERAL_TAB_SWITCHING_COUNT:
-		return "general/tabSwitching/count";
-	case FirebaseIntegerKey::GENERAL_GO_BACK_USAGE_COUNT:
-		return "general/goBackUsage/count";
-	case FirebaseIntegerKey::GENERAL_GO_FORWARD_USAGE_COUNT:
-		return "general/goForwardUsage/count";
-	case FirebaseIntegerKey::GENERAL_PAUSE_COUNT:
-		return "general/pause/count";
-	case FirebaseIntegerKey::GENERAL_UNPAUSE_COUNT:
-		return "general/unpause/count";
-	case FirebaseIntegerKey::GENERAL_DASHBOARD_USAGE_COUNT:
-		return "general/dashboardUsage/count";
-	default: return "";
-	}
-};
-template<> std::string FirebaseAddress<FirebaseStringKey>(FirebaseStringKey key)
-{
-	switch (key)
-	{
-	case FirebaseStringKey::TEST_STRING:
-		return "testString";
-	default: return "";
-	}
-};
-template<> std::string FirebaseAddress<FirebaseJSONKey>(FirebaseJSONKey key)
-{
-	switch (key)
-	{
-	
-	// Page activity
-	case FirebaseJSONKey::PAGE_ACTIVITY_UNKNOWN:
-		return "pageActivity/_unknown";
-	case FirebaseJSONKey::PAGE_ACTIVITY_NEWS:
-		return "pageActivity/news";
-	case FirebaseJSONKey::PAGE_ACTIVITY_SHOPPING:
-		return "pageActivity/shopping";
-	case FirebaseJSONKey::PAGE_ACTIVITY_EMAIL:
-		return "pageActivity/email";
-	case FirebaseJSONKey::PAGE_ACTIVITY_WIKIPEDIA:
-		return "pageActivity/wikipedia";
-	case FirebaseJSONKey::PAGE_ACTIVITY_FACEBOOK:
-		return "pageActivity/facebook";
-	case FirebaseJSONKey::PAGE_ACTIVITY_LINKEDIN:
-		return "pageActivity/linkedin";
-	case FirebaseJSONKey::PAGE_ACTIVITY_YOUTUBE:
-		return "pageActivity/youtube";
-	case FirebaseJSONKey::PAGE_ACTIVITY_INSTAGRAM:
-		return "pageActivity/instagram";
-	case FirebaseJSONKey::PAGE_ACTIVITY_TWITTER:
-		return "pageActivity/twitter";
-	case FirebaseJSONKey::PAGE_ACTIVITY_GOOGLE:
-		return "pageActivity/google";
-	case FirebaseJSONKey::PAGE_ACTIVITY_YAHOO:
-		return "pageActivity/yahoo";
-	case FirebaseJSONKey::PAGE_ACTIVITY_OK:
-		return "pageActivity/ok";
-	case FirebaseJSONKey::PAGE_ACTIVITY_VK:
-		return "pageActivity/vk";
-	case FirebaseJSONKey::PAGE_ACTIVITY_WHATSAPP:
-		return "pageActivity/whatsapp";
-
-	// General
-	case FirebaseJSONKey::GENERAL_APPLICATION_START:
-		return "general/start";
-	case FirebaseJSONKey::GENERAL_RECALIBRATION:
-		return "general/recalibration";
-	case FirebaseJSONKey::GENERAL_DRIFT_GRID:
-		return "general/driftGrid";
-	case FirebaseJSONKey::GENERAL_URL_INPUT:
-		return "general/urlInput";
-	case FirebaseJSONKey::GENERAL_BOOKMARK_USAGE:
-		return "general/bookmarkUsage";
-	case FirebaseJSONKey::GENERAL_BOOKMARK_ADDING:
-		return "general/bookmarkAdding";
-	case FirebaseJSONKey::GENERAL_BOOKMARK_REMOVAL:
-		return "general/bookmarkRemoval";
-	case FirebaseJSONKey::GENERAL_HISTORY_USAGE:
-		return "general/historyUsage";
-	case FirebaseJSONKey::GENERAL_TAB_RELOADING:
-		return "general/tabReloading";
-	case FirebaseJSONKey::GENERAL_TAB_CLOSING:
-		return "general/tabClosing";
-	case FirebaseJSONKey::GENERAL_TAB_CREATION:
-		return "general/tabCreation";
-	case FirebaseJSONKey::GENERAL_TAB_SWITCHING:
-		return "general/tabSwitching";
-	case FirebaseJSONKey::GENERAL_GO_BACK_USAGE:
-		return "general/goBackUsage";
-	case FirebaseJSONKey::GENERAL_GO_FORWARD_USAGE:
-		return "general/goForwardUsage";
-	case FirebaseJSONKey::GENERAL_PAUSE:
-		return "general/pause";
-	case FirebaseJSONKey::GENERAL_UNPAUSE:
-		return "general/unpause";
-	case FirebaseJSONKey::GENERAL_DASHBOARD_USAGE:
-		return "general/dashboardUsage";
-	default: return "";
-	}
-};
 
 // Firebase mailer class
 class FirebaseMailer
 {
 private:
 
+	// Mapping from key to address
+	template<typename T>
+	static std::string FirebaseAddress(T key)
+	{	
+		return "";
+	}
+	template<>
+	static std::string FirebaseAddress<FirebaseIntegerKey>(FirebaseIntegerKey key)
+	{
+		switch (key)
+		{
+
+		// Page activity
+		case FirebaseIntegerKey::PAGE_ACTIVITY_UNKNOWN_COUNT:
+			return "pageActivity/_unknown/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_NEWS_COUNT:
+			return "pageActivity/news/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_SHOPPING_COUNT:
+			return "pageActivity/shopping/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_EMAIL_COUNT:
+			return "pageActivity/email/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_WIKIPEDIA_COUNT:
+			return "pageActivity/wikipedia/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_FACEBOOK_COUNT:
+			return "pageActivity/facebook/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_LINKEDIN_COUNT:
+			return "pageActivity/linkedin/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_YOUTUBE_COUNT:
+			return "pageActivity/youtube/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_INSTAGRAM_COUNT:
+			return "pageActivity/instagram/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_TWITTER_COUNT:
+			return "pageActivity/twitter/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_GOOGLE_COUNT:
+			return "pageActivity/google/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_YAHOO_COUNT:
+			return "pageActivity/yahoo/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_OK_COUNT:
+			return "pageActivity/ok/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_VK_COUNT:
+			return "pageActivity/vk/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_WHATSAPP_COUNT:
+			return "pageActivity/whatsapp/sessionCount";
+
+		// General
+		case FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT:
+			return "general/start/count";
+		case FirebaseIntegerKey::GENERAL_RECALIBRATION_COUNT:
+			return "general/recalibration/count";
+		case FirebaseIntegerKey::GENERAL_DRIFT_GRID_COUNT:
+			return "general/driftGrid/count";
+		case FirebaseIntegerKey::GENERAL_URL_INPUT_COUNT:
+			return "general/urlInput/count";
+		case FirebaseIntegerKey::GENERAL_BOOKMARK_USAGE_COUNT:
+			return "general/bookmarkUsage/count";
+		case FirebaseIntegerKey::GENERAL_BOOKMARK_ADDING_COUNT:
+			return "general/bookmarkAdding/count";
+		case FirebaseIntegerKey::GENERAL_BOOKMARK_REMOVAL_COUNT:
+			return "general/bookmarkRemoval/count";
+		case FirebaseIntegerKey::GENERAL_HISTORY_USAGE_COUNT:
+			return "general/historyUsage/count";
+		case FirebaseIntegerKey::GENERAL_TAB_RELOADING_COUNT:
+			return "general/tabReloading/count";
+		case FirebaseIntegerKey::GENERAL_TAB_CLOSING_COUNT:
+			return "general/tabClosing/count";
+		case FirebaseIntegerKey::GENERAL_TAB_CREATION_COUNT:
+			return "general/tabCreation/count";
+		case FirebaseIntegerKey::GENERAL_TAB_SWITCHING_COUNT:
+			return "general/tabSwitching/count";
+		case FirebaseIntegerKey::GENERAL_GO_BACK_USAGE_COUNT:
+			return "general/goBackUsage/count";
+		case FirebaseIntegerKey::GENERAL_GO_FORWARD_USAGE_COUNT:
+			return "general/goForwardUsage/count";
+		case FirebaseIntegerKey::GENERAL_PAUSE_COUNT:
+			return "general/pause/count";
+		case FirebaseIntegerKey::GENERAL_UNPAUSE_COUNT:
+			return "general/unpause/count";
+		case FirebaseIntegerKey::GENERAL_DASHBOARD_USAGE_COUNT:
+			return "general/dashboardUsage/count";
+		default: return "";
+		}
+	};
+	template<>
+	static std::string FirebaseAddress<FirebaseStringKey>(FirebaseStringKey key)
+	{
+		switch (key)
+		{
+		case FirebaseStringKey::TEST_STRING:
+			return "testString";
+		default: return "";
+		}
+	};
+	template<>
+	static std::string FirebaseAddress<FirebaseJSONKey>(FirebaseJSONKey key)
+	{
+		switch (key)
+		{
+
+		// Page activity
+		case FirebaseJSONKey::PAGE_ACTIVITY_UNKNOWN:
+			return "pageActivity/_unknown";
+		case FirebaseJSONKey::PAGE_ACTIVITY_NEWS:
+			return "pageActivity/news";
+		case FirebaseJSONKey::PAGE_ACTIVITY_SHOPPING:
+			return "pageActivity/shopping";
+		case FirebaseJSONKey::PAGE_ACTIVITY_EMAIL:
+			return "pageActivity/email";
+		case FirebaseJSONKey::PAGE_ACTIVITY_WIKIPEDIA:
+			return "pageActivity/wikipedia";
+		case FirebaseJSONKey::PAGE_ACTIVITY_FACEBOOK:
+			return "pageActivity/facebook";
+		case FirebaseJSONKey::PAGE_ACTIVITY_LINKEDIN:
+			return "pageActivity/linkedin";
+		case FirebaseJSONKey::PAGE_ACTIVITY_YOUTUBE:
+			return "pageActivity/youtube";
+		case FirebaseJSONKey::PAGE_ACTIVITY_INSTAGRAM:
+			return "pageActivity/instagram";
+		case FirebaseJSONKey::PAGE_ACTIVITY_TWITTER:
+			return "pageActivity/twitter";
+		case FirebaseJSONKey::PAGE_ACTIVITY_GOOGLE:
+			return "pageActivity/google";
+		case FirebaseJSONKey::PAGE_ACTIVITY_YAHOO:
+			return "pageActivity/yahoo";
+		case FirebaseJSONKey::PAGE_ACTIVITY_OK:
+			return "pageActivity/ok";
+		case FirebaseJSONKey::PAGE_ACTIVITY_VK:
+			return "pageActivity/vk";
+		case FirebaseJSONKey::PAGE_ACTIVITY_WHATSAPP:
+			return "pageActivity/whatsapp";
+
+		// General
+		case FirebaseJSONKey::GENERAL_APPLICATION_START:
+			return "general/start";
+		case FirebaseJSONKey::GENERAL_RECALIBRATION:
+			return "general/recalibration";
+		case FirebaseJSONKey::GENERAL_DRIFT_GRID:
+			return "general/driftGrid";
+		case FirebaseJSONKey::GENERAL_URL_INPUT:
+			return "general/urlInput";
+		case FirebaseJSONKey::GENERAL_BOOKMARK_USAGE:
+			return "general/bookmarkUsage";
+		case FirebaseJSONKey::GENERAL_BOOKMARK_ADDING:
+			return "general/bookmarkAdding";
+		case FirebaseJSONKey::GENERAL_BOOKMARK_REMOVAL:
+			return "general/bookmarkRemoval";
+		case FirebaseJSONKey::GENERAL_HISTORY_USAGE:
+			return "general/historyUsage";
+		case FirebaseJSONKey::GENERAL_TAB_RELOADING:
+			return "general/tabReloading";
+		case FirebaseJSONKey::GENERAL_TAB_CLOSING:
+			return "general/tabClosing";
+		case FirebaseJSONKey::GENERAL_TAB_CREATION:
+			return "general/tabCreation";
+		case FirebaseJSONKey::GENERAL_TAB_SWITCHING:
+			return "general/tabSwitching";
+		case FirebaseJSONKey::GENERAL_GO_BACK_USAGE:
+			return "general/goBackUsage";
+		case FirebaseJSONKey::GENERAL_GO_FORWARD_USAGE:
+			return "general/goForwardUsage";
+		case FirebaseJSONKey::GENERAL_PAUSE:
+			return "general/pause";
+		case FirebaseJSONKey::GENERAL_UNPAUSE:
+			return "general/unpause";
+		case FirebaseJSONKey::GENERAL_DASHBOARD_USAGE:
+			return "general/dashboardUsage";
+		default: return "";
+		}
+	};
+
 	// Address creation
 	template<typename T>
-	static const std::string BuildFirebaseKey(T key, std::string uid)
+	static std::string BuildFirebaseKey(T key, std::string uid)
 	{
 		return "users/" + uid + "/" + FirebaseAddress<T>(key);
 	}
