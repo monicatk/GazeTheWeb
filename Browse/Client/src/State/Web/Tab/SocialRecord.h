@@ -30,10 +30,10 @@ static const std::map < SocialPlatform, std::vector<std::string> > SocialIdentif
 // Mapping from platform to database keys (pair of count and record key)
 static const std::map <SocialPlatform, std::pair<FirebaseIntegerKey, FirebaseJSONKey> > SocialFirebaseKeys =
 {
-	{ SocialPlatform::Unknown,	std::make_pair(FirebaseIntegerKey::SOCIAL_RECORD_UNKNOWN_COUNT,		FirebaseJSONKey::SOCIAL_RECORD_UNKNOWN) },
-	{ SocialPlatform::Facebook,	std::make_pair(FirebaseIntegerKey::SOCIAL_RECORD_FACEBOOK_COUNT,	FirebaseJSONKey::SOCIAL_RECORD_FACEBOOK) },
-	{ SocialPlatform::Linkedin,	std::make_pair(FirebaseIntegerKey::SOCIAL_RECORD_LINKEDIN_COUNT,	FirebaseJSONKey::SOCIAL_RECORD_LINKEDIN) },
-	{ SocialPlatform::YouTube,	std::make_pair(FirebaseIntegerKey::SOCIAL_RECORD_YOUTUBE_COUNT,		FirebaseJSONKey::SOCIAL_RECORD_YOUTUBE) },
+	{ SocialPlatform::Unknown,	std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_UNKNOWN_COUNT,	FirebaseJSONKey::PAGE_ACTIVITY_UNKNOWN) },
+	{ SocialPlatform::Facebook,	std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_FACEBOOK_COUNT,FirebaseJSONKey::PAGE_ACTIVITY_FACEBOOK) },
+	{ SocialPlatform::Linkedin,	std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_LINKEDIN_COUNT,FirebaseJSONKey::PAGE_ACTIVITY_LINKEDIN) },
+	{ SocialPlatform::YouTube,	std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_YOUTUBE_COUNT,	FirebaseJSONKey::PAGE_ACTIVITY_YOUTUBE) },
 };
 
 // Class of social record

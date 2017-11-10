@@ -20,10 +20,10 @@
 
 // Available database keys
 enum class FirebaseIntegerKey	{ 
-	SOCIAL_RECORD_UNKNOWN_COUNT,
-	SOCIAL_RECORD_FACEBOOK_COUNT,
-	SOCIAL_RECORD_LINKEDIN_COUNT,
-	SOCIAL_RECORD_YOUTUBE_COUNT,
+	PAGE_ACTIVITY_UNKNOWN_COUNT,
+	PAGE_ACTIVITY_FACEBOOK_COUNT,
+	PAGE_ACTIVITY_LINKEDIN_COUNT,
+	PAGE_ACTIVITY_YOUTUBE_COUNT,
 	GENERAL_APPLICATION_START_COUNT,
 	GENERAL_RECALIBRATION_COUNT,
 	GENERAL_DRIFT_GRID_COUNT,
@@ -46,10 +46,10 @@ enum class FirebaseIntegerKey	{
 enum class FirebaseStringKey	{ 
 	TEST_STRING };
 enum class FirebaseJSONKey		{ 
-	SOCIAL_RECORD_UNKNOWN,
-	SOCIAL_RECORD_FACEBOOK,
-	SOCIAL_RECORD_LINKEDIN,
-	SOCIAL_RECORD_YOUTUBE,
+	PAGE_ACTIVITY_UNKNOWN,
+	PAGE_ACTIVITY_FACEBOOK,
+	PAGE_ACTIVITY_LINKEDIN,
+	PAGE_ACTIVITY_YOUTUBE,
 	GENERAL_APPLICATION_START,
 	GENERAL_RECALIBRATION,
 	GENERAL_DRIFT_GRID,
@@ -82,14 +82,14 @@ template<> std::string FirebaseAddress<FirebaseIntegerKey>(FirebaseIntegerKey ke
 {
 	switch (key)
 	{
-	case FirebaseIntegerKey::SOCIAL_RECORD_UNKNOWN_COUNT:
-		return "social/_unknown/sessionCount";
-	case FirebaseIntegerKey::SOCIAL_RECORD_FACEBOOK_COUNT:
-		return "social/facebook/sessionCount";
-	case FirebaseIntegerKey::SOCIAL_RECORD_LINKEDIN_COUNT:
-		return "social/linkedin/sessionCount";
-	case FirebaseIntegerKey::SOCIAL_RECORD_YOUTUBE_COUNT:
-		return "social/youtube/sessionCount";
+	case FirebaseIntegerKey::PAGE_ACTIVITY_UNKNOWN_COUNT:
+		return "pageActivity/_unknown/sessionCount";
+	case FirebaseIntegerKey::PAGE_ACTIVITY_FACEBOOK_COUNT:
+		return "pageActivity/facebook/sessionCount";
+	case FirebaseIntegerKey::PAGE_ACTIVITY_LINKEDIN_COUNT:
+		return "pageActivity/linkedin/sessionCount";
+	case FirebaseIntegerKey::PAGE_ACTIVITY_YOUTUBE_COUNT:
+		return "pageActivity/youtube/sessionCount";
 	case FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT:
 		return "general/startCount";
 	case FirebaseIntegerKey::GENERAL_RECALIBRATION_COUNT:
@@ -138,14 +138,14 @@ template<> std::string FirebaseAddress<FirebaseJSONKey>(FirebaseJSONKey key)
 {
 	switch (key)
 	{
-	case FirebaseJSONKey::SOCIAL_RECORD_UNKNOWN:
-		return "social/_unknown";
-	case FirebaseJSONKey::SOCIAL_RECORD_FACEBOOK:
-		return "social/facebook";
-	case FirebaseJSONKey::SOCIAL_RECORD_LINKEDIN:
-		return "social/linkedin";
-	case FirebaseJSONKey::SOCIAL_RECORD_YOUTUBE:
-		return "social/youtube";
+	case FirebaseJSONKey::PAGE_ACTIVITY_UNKNOWN:
+		return "pageActivity/_unknown";
+	case FirebaseJSONKey::PAGE_ACTIVITY_FACEBOOK:
+		return "pageActivity/facebook";
+	case FirebaseJSONKey::PAGE_ACTIVITY_LINKEDIN:
+		return "pageActivity/linkedin";
+	case FirebaseJSONKey::PAGE_ACTIVITY_YOUTUBE:
+		return "pageActivity/youtube";
 	case FirebaseJSONKey::GENERAL_APPLICATION_START:
 		return "general/starts";
 	case FirebaseJSONKey::GENERAL_RECALIBRATION:
