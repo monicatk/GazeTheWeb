@@ -618,7 +618,7 @@ void Tab::Deactivate()
 	AbortAndClearPipelines();
 
 	// Exit video mode
-	ExitVideoMode();
+	ExitVideoMode(true);
 
 	// Remember being not active
 	_active = false;
@@ -831,7 +831,7 @@ void Tab::EnterVideoMode(int id)
 	}
 }
 
-void Tab::ExitVideoMode()
+void Tab::ExitVideoMode(bool immediately)
 {
 	if (_videoModeId >= 0)
 	{
@@ -849,10 +849,10 @@ void Tab::ExitVideoMode()
 		_videoModeId = -1; // indicating that video mode is off
 
 		// Set visibility of layout
-		eyegui::setVisibilityOfLayout(_pVideoModeLayout, false, false, true);
+		eyegui::setVisibilityOfLayout(_pVideoModeLayout, false, false, !immediately);
 
 		// Set visibility of pause overlay layout (just blend out, do not ask for current state)
-		eyegui::setVisibilityOfLayout(_pVideoModePauseOverlayLayout, false, false, true);
+		eyegui::setVisibilityOfLayout(_pVideoModePauseOverlayLayout, false, false, !immediately);
 
 		// Activate all triggers
 		for (auto pTrigger : _triggers)
@@ -861,7 +861,7 @@ void Tab::ExitVideoMode()
 		}
 
 		// Activate scrolling overlay
-		eyegui::setVisibilityOfLayout(_pScrollingOverlayLayout, true, true, true);
+		eyegui::setVisibilityOfLayout(_pScrollingOverlayLayout, true, true, !immediately);
 	}
 }
 

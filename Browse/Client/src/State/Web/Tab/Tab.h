@@ -523,7 +523,7 @@ private:
 	void EnterVideoMode(int id); // id of video node
 
 	// Exit video mode
-	void ExitVideoMode();
+	void ExitVideoMode(bool immediately = false);
 
 	// Start social record
 	void StartSocialRecord(std::string URL, SocialPlatform platform);
