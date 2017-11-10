@@ -21,9 +21,20 @@
 // Available database keys
 enum class FirebaseIntegerKey	{ 
 	PAGE_ACTIVITY_UNKNOWN_COUNT,
+	PAGE_ACTIVITY_NEWS_COUNT,
+	PAGE_ACTIVITY_SHOPPING_COUNT,
+	PAGE_ACTIVITY_EMAIL_COUNT,
+	PAGE_ACTIVITY_WIKIPEDIA_COUNT,
 	PAGE_ACTIVITY_FACEBOOK_COUNT,
 	PAGE_ACTIVITY_LINKEDIN_COUNT,
 	PAGE_ACTIVITY_YOUTUBE_COUNT,
+	PAGE_ACTIVITY_INSTAGRAM_COUNT,
+	PAGE_ACTIVITY_TWITTER_COUNT,
+	PAGE_ACTIVITY_GOOGLE_COUNT,
+	PAGE_ACTIVITY_YAHOO_COUNT,
+	PAGE_ACTIVITY_OK_COUNT,
+	PAGE_ACTIVITY_VK_COUNT,
+	PAGE_ACTIVITY_WHATSAPP_COUNT,
 	GENERAL_APPLICATION_START_COUNT,
 	GENERAL_RECALIBRATION_COUNT,
 	GENERAL_DRIFT_GRID_COUNT,
@@ -47,9 +58,20 @@ enum class FirebaseStringKey	{
 	TEST_STRING };
 enum class FirebaseJSONKey		{ 
 	PAGE_ACTIVITY_UNKNOWN,
+	PAGE_ACTIVITY_NEWS,
+	PAGE_ACTIVITY_SHOPPING,
+	PAGE_ACTIVITY_EMAIL,
+	PAGE_ACTIVITY_WIKIPEDIA,
 	PAGE_ACTIVITY_FACEBOOK,
 	PAGE_ACTIVITY_LINKEDIN,
 	PAGE_ACTIVITY_YOUTUBE,
+	PAGE_ACTIVITY_INSTAGRAM,
+	PAGE_ACTIVITY_TWITTER,
+	PAGE_ACTIVITY_GOOGLE,
+	PAGE_ACTIVITY_YAHOO,
+	PAGE_ACTIVITY_OK,
+	PAGE_ACTIVITY_VK,
+	PAGE_ACTIVITY_WHATSAPP,
 	GENERAL_APPLICATION_START,
 	GENERAL_RECALIBRATION,
 	GENERAL_DRIFT_GRID,
@@ -82,14 +104,40 @@ template<> std::string FirebaseAddress<FirebaseIntegerKey>(FirebaseIntegerKey ke
 {
 	switch (key)
 	{
+
+	// Page activity
 	case FirebaseIntegerKey::PAGE_ACTIVITY_UNKNOWN_COUNT:
 		return "pageActivity/_unknown/sessionCount";
+	case FirebaseIntegerKey::PAGE_ACTIVITY_NEWS_COUNT:
+		return "pageActivity/news/sessionCount";
+	case FirebaseIntegerKey::PAGE_ACTIVITY_SHOPPING_COUNT:
+		return "pageActivity/shopping/sessionCount";
+	case FirebaseIntegerKey::PAGE_ACTIVITY_EMAIL_COUNT:
+		return "pageActivity/email/sessionCount";
+	case FirebaseIntegerKey::PAGE_ACTIVITY_WIKIPEDIA_COUNT:
+		return "pageActivity/wikipedia/sessionCount";
 	case FirebaseIntegerKey::PAGE_ACTIVITY_FACEBOOK_COUNT:
 		return "pageActivity/facebook/sessionCount";
 	case FirebaseIntegerKey::PAGE_ACTIVITY_LINKEDIN_COUNT:
 		return "pageActivity/linkedin/sessionCount";
 	case FirebaseIntegerKey::PAGE_ACTIVITY_YOUTUBE_COUNT:
 		return "pageActivity/youtube/sessionCount";
+	case FirebaseIntegerKey::PAGE_ACTIVITY_INSTAGRAM_COUNT:
+		return "pageActivity/instagram/sessionCount";
+	case FirebaseIntegerKey::PAGE_ACTIVITY_TWITTER_COUNT:
+		return "pageActivity/twitter/sessionCount";
+	case FirebaseIntegerKey::PAGE_ACTIVITY_GOOGLE_COUNT:
+		return "pageActivity/google/sessionCount";
+	case FirebaseIntegerKey::PAGE_ACTIVITY_YAHOO_COUNT:
+		return "pageActivity/yahoo/sessionCount";
+	case FirebaseIntegerKey::PAGE_ACTIVITY_OK_COUNT:
+		return "pageActivity/ok/sessionCount";
+	case FirebaseIntegerKey::PAGE_ACTIVITY_VK_COUNT:
+		return "pageActivity/vk/sessionCount";
+	case FirebaseIntegerKey::PAGE_ACTIVITY_WHATSAPP_COUNT:
+		return "pageActivity/whatsapp/sessionCount";
+
+	// General
 	case FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT:
 		return "general/startCount";
 	case FirebaseIntegerKey::GENERAL_RECALIBRATION_COUNT:
@@ -138,14 +186,40 @@ template<> std::string FirebaseAddress<FirebaseJSONKey>(FirebaseJSONKey key)
 {
 	switch (key)
 	{
+	
+	// Page activity
 	case FirebaseJSONKey::PAGE_ACTIVITY_UNKNOWN:
 		return "pageActivity/_unknown";
+	case FirebaseJSONKey::PAGE_ACTIVITY_NEWS:
+		return "pageActivity/news";
+	case FirebaseJSONKey::PAGE_ACTIVITY_SHOPPING:
+		return "pageActivity/shopping";
+	case FirebaseJSONKey::PAGE_ACTIVITY_EMAIL:
+		return "pageActivity/email";
+	case FirebaseJSONKey::PAGE_ACTIVITY_WIKIPEDIA:
+		return "pageActivity/wikipedia";
 	case FirebaseJSONKey::PAGE_ACTIVITY_FACEBOOK:
 		return "pageActivity/facebook";
 	case FirebaseJSONKey::PAGE_ACTIVITY_LINKEDIN:
 		return "pageActivity/linkedin";
 	case FirebaseJSONKey::PAGE_ACTIVITY_YOUTUBE:
 		return "pageActivity/youtube";
+	case FirebaseJSONKey::PAGE_ACTIVITY_INSTAGRAM:
+		return "pageActivity/instagram";
+	case FirebaseJSONKey::PAGE_ACTIVITY_TWITTER:
+		return "pageActivity/twitter";
+	case FirebaseJSONKey::PAGE_ACTIVITY_GOOGLE:
+		return "pageActivity/google";
+	case FirebaseJSONKey::PAGE_ACTIVITY_YAHOO:
+		return "pageActivity/yahoo";
+	case FirebaseJSONKey::PAGE_ACTIVITY_OK:
+		return "pageActivity/ok";
+	case FirebaseJSONKey::PAGE_ACTIVITY_VK:
+		return "pageActivity/vk";
+	case FirebaseJSONKey::PAGE_ACTIVITY_WHATSAPP:
+		return "pageActivity/whatsapp";
+
+		// General
 	case FirebaseJSONKey::GENERAL_APPLICATION_START:
 		return "general/starts";
 	case FirebaseJSONKey::GENERAL_RECALIBRATION:
