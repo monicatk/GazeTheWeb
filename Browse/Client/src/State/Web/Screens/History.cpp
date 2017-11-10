@@ -155,6 +155,8 @@ void History::HistoryButtonListener::down(eyegui::Layout* pLayout, std::string i
 			eyegui_helper::convertUTF8ToUTF16(URL, URL16);
 			_pHistory->_collectedURL = URL16;
 			_pHistory->_finished = true;
+			nlohmann::json record = { { "url", URL } };
+			_pHistory->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_HISTORY_USAGE_COUNT, FirebaseJSONKey::GENERAL_HISTORY_USAGE, record);
 		}
 	}
 }
