@@ -692,7 +692,7 @@ FirebaseMailer::FirebaseMailer()
 		localCommandQueue = std::move(*pCommandQueue); // move content of command queue to local one
 		pCommandQueue->clear(); // clear original queue
 
-		// Work on commands
+		// Work on these last commands
 		for (const auto& rCommand : localCommandQueue)
 		{
 			(*rCommand.get())(interface);
