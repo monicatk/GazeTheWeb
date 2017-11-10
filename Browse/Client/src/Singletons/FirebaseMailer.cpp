@@ -686,6 +686,17 @@ FirebaseMailer::FirebaseMailer()
 				(*rCommand.get())(interface);
 			}
 		}
+
+		// Collect last commands before shutdown
+		std::unique_lock<std::mutex> lock(*pMutex);
+		localCommandQueue = std::move(*pCommandQueue); // move content of command queue to local one
+		pCommandQueue->clear(); // clear original queue
+
+		// Work on commands
+		for (const auto& rCommand : localCommandQueue)
+		{
+			(*rCommand.get())(interface);
+		}
 	}));
 }
 

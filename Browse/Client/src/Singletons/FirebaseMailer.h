@@ -292,7 +292,11 @@ public:
 	}
 
 	// Destructor
-	~FirebaseMailer() { _shouldStop = true; _conditionVariable.notify_all(); _upThread->join(); } // tell thread to stop
+	~FirebaseMailer() {
+		_shouldStop = true;
+		_conditionVariable.notify_all();
+		_upThread->join();
+	} // tell thread to stop
 
 	// Continue mailer
 	void Continue() { _paused = false; }
