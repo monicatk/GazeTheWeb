@@ -77,7 +77,7 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			_pTab->AbortAndClearPipelines();
 		}
 	}
-	else
+	else if (pLayout == _pTab->_pVideoModeLayout)
 	{
 		// ### Vide mode layout ###
 		if (id == "play")
@@ -86,6 +86,7 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 			{
 				iter->second->SetPlaying(true);
+				eyegui::setVisibilityOfLayout(_pTab->_pVideoModePauseOverlayLayout, false, false, true); // hide pause overlay
 			}
 		}
 		else if (id == "pause")
@@ -94,6 +95,7 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 			{
 				iter->second->SetPlaying(false);
+				eyegui::setVisibilityOfLayout(_pTab->_pVideoModePauseOverlayLayout, true, true, true); // show pause overlay
 			}
 		}
 		else if (id == "volume_up")
@@ -101,8 +103,7 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
 			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 			{
-				// iter->second->ChangeVolume(0.25f);
-				iter->second->SkipSeconds(30);
+				iter->second->ChangeVolume(0.25f);
 			}
 		}
 		else if (id == "volume_down")
@@ -110,8 +111,7 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
 			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 			{
-				// iter->second->ChangeVolume(-0.25f);
-				iter->second->SkipSeconds(-10);
+				iter->second->ChangeVolume(-0.25f);
 			}
 		}
 		else if (id == "mute")
@@ -125,6 +125,26 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		else if (id == "exit")
 		{
 			_pTab->ExitVideoMode();
+		}
+	}
+	else
+	{
+		// ### Vide mode pause overlay layout ###
+		if (id == "skip-10")
+		{
+			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
+			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+			{
+				iter->second->SkipSeconds(-10);
+			}
+		}
+		if (id == "skip+30")
+		{
+			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
+			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+			{
+				iter->second->SkipSeconds(30);
+			}
 		}
 	}
 }

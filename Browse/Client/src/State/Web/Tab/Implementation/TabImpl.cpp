@@ -90,6 +90,8 @@ Tab::Tab(
 	eyegui::registerButtonListener(_pVideoModeLayout, "volume_down", _spTabButtonListener);
 	eyegui::registerButtonListener(_pVideoModeLayout, "mute", _spTabButtonListener);
 	eyegui::registerButtonListener(_pVideoModeLayout, "exit", _spTabButtonListener);
+	eyegui::registerButtonListener(_pVideoModePauseOverlayLayout, "skip-10", _spTabButtonListener);
+	eyegui::registerButtonListener(_pVideoModePauseOverlayLayout, "skip+30", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPipelineAbortLayout, "abort", _spTabButtonListener);
 	eyegui::registerSensorListener(_pScrollingOverlayLayout, "scroll_up_sensor", _spTabSensorListener);
 	eyegui::registerSensorListener(_pScrollingOverlayLayout, "scroll_down_sensor", _spTabSensorListener);
