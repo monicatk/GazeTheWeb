@@ -141,39 +141,39 @@ template<> std::string FirebaseAddress<FirebaseIntegerKey>(FirebaseIntegerKey ke
 
 	// General
 	case FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT:
-		return "general/startCount";
+		return "general/start/count";
 	case FirebaseIntegerKey::GENERAL_RECALIBRATION_COUNT:
-		return "general/recalibrationCount";
+		return "general/recalibration/count";
 	case FirebaseIntegerKey::GENERAL_DRIFT_GRID_COUNT:
-		return "general/driftGridCount";
+		return "general/driftGrid/count";
 	case FirebaseIntegerKey::GENERAL_URL_INPUT_COUNT:
-		return "general/urlInputCount";
+		return "general/urlInput/count";
 	case FirebaseIntegerKey::GENERAL_BOOKMARK_USAGE_COUNT:
-		return "general/bookmarkUsageCount";
+		return "general/bookmarkUsage/count";
 	case FirebaseIntegerKey::GENERAL_BOOKMARK_ADDING_COUNT:
-		return "general/bookmarkAddingCount";
+		return "general/bookmarkAdding/count";
 	case FirebaseIntegerKey::GENERAL_BOOKMARK_REMOVAL_COUNT:
-		return "general/bookmarkRemovalCount";
+		return "general/bookmarkRemoval/count";
 	case FirebaseIntegerKey::GENERAL_HISTORY_USAGE_COUNT:
-		return "general/historyUsageCount";
+		return "general/historyUsage/count";
 	case FirebaseIntegerKey::GENERAL_TAB_RELOADING_COUNT:
-		return "general/tabReloadingCount";
+		return "general/tabReloading/count";
 	case FirebaseIntegerKey::GENERAL_TAB_CLOSING_COUNT:
-		return "general/tabClosingCount";
+		return "general/tabClosing/count";
 	case FirebaseIntegerKey::GENERAL_TAB_CREATION_COUNT:
-		return "general/tabCreationCount";
+		return "general/tabCreation/count";
 	case FirebaseIntegerKey::GENERAL_TAB_SWITCHING_COUNT:
-		return "general/tabSwitchingCount";
+		return "general/tabSwitching/count";
 	case FirebaseIntegerKey::GENERAL_GO_BACK_USAGE_COUNT:
-		return "general/goBackUsageCount";
+		return "general/goBackUsage/count";
 	case FirebaseIntegerKey::GENERAL_GO_FORWARD_USAGE_COUNT:
-		return "general/goForwardUsageCount";
+		return "general/goForwardUsage/count";
 	case FirebaseIntegerKey::GENERAL_PAUSE_COUNT:
-		return "general/pauseCount";
+		return "general/pause/count";
 	case FirebaseIntegerKey::GENERAL_UNPAUSE_COUNT:
-		return "general/unpauseCount";
+		return "general/unpause/count";
 	case FirebaseIntegerKey::GENERAL_DASHBOARD_USAGE_COUNT:
-		return "general/dashboardUsageCount";
+		return "general/dashboardUsage/count";
 	default: return "";
 	}
 };
@@ -223,13 +223,13 @@ template<> std::string FirebaseAddress<FirebaseJSONKey>(FirebaseJSONKey key)
 	case FirebaseJSONKey::PAGE_ACTIVITY_WHATSAPP:
 		return "pageActivity/whatsapp";
 
-		// General
+	// General
 	case FirebaseJSONKey::GENERAL_APPLICATION_START:
-		return "general/starts";
+		return "general/start";
 	case FirebaseJSONKey::GENERAL_RECALIBRATION:
-		return "general/recalibrations";
+		return "general/recalibration";
 	case FirebaseJSONKey::GENERAL_DRIFT_GRID:
-		return "general/driftGrids";
+		return "general/driftGrid";
 	case FirebaseJSONKey::GENERAL_URL_INPUT:
 		return "general/urlInput";
 	case FirebaseJSONKey::GENERAL_BOOKMARK_USAGE:
