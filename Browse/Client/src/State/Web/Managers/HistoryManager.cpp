@@ -48,7 +48,7 @@ std::shared_ptr<HistoryManager::Page> HistoryManager::AddPage(std::string URL, s
 	// Add to deque storing pages
 	_spPages->push_front(spPage);
 
-	// Save page in history
+	// Save page in history file
 	SavePageInHistory(true, spPage->GetId(), spPage->GetURL(), spPage->GetTitle());
 
 	// Return shared pointer to page, so caller can change attributes

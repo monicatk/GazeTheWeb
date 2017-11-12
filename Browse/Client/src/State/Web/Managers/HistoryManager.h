@@ -3,7 +3,8 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Manager of history.
-// TODO: Id is not necessary for loaded entries
+// TODO: Id is not necessary for loaded entries, they are only used for pages
+// that are still active and which title might change.
 
 #ifndef HISTORYMANAGER_H_
 #define HISTORYMANAGER_H_
@@ -26,7 +27,7 @@ public:
 	// Destructor
 	virtual ~HistoryManager();
 
-	// Add page and returns preliminary entry, which can be changed by the callee. Might return nullptr if URL is filtered
+	// Add page and returns preliminary entry, which can be changed by the caller. Might return nullptr if URL is filtered
 	std::shared_ptr<Page> AddPage(std::string URL, std::string title);
 
 	// Get history
@@ -76,7 +77,7 @@ public:
 	private:
 
 		// Members
-		int _id;
+		int _id; // unique identifier of history entry
 		HistoryManager* _pHistoryManager;
 		std::string _URL;
 		std::string _title;
