@@ -25,6 +25,13 @@ Tab::Tab(
 	_pWeb = pWeb;
 	_url = url;
 
+	// Initial history entry (also done in TabCEFImpl for every URL set)
+	if (_dataTransfer)
+	{
+		// Add history entry for new url with current title, will be updated asap
+		_spHistoryPage = _pWeb->AddPageToHistory(_url, _title);
+	}
+
 	// Create layouts for Tab (overlay at first, because behind other layouts)
 	_pOverlayLayout = _pMaster->AddLayout("layouts/Overlay.xeyegui", EYEGUI_TAB_LAYER, false);
 	_pScrollingOverlayLayout = _pMaster->AddLayout("layouts/Overlay.xeyegui", EYEGUI_TAB_LAYER, false);
@@ -627,7 +634,7 @@ void Tab::Deactivate()
 void Tab::OpenURL(std::string URL)
 {
 	// Set URL
-	_url = URL;
+	SetURL(URL);
 
 	// Abort any pipeline execution
 	AbortAndClearPipelines();
@@ -696,6 +703,9 @@ void Tab::SetDataTransfer(bool active)
 	{
 		// Abort current social record
 		_spSocialRecord = nullptr;
+
+		// Abort current history entry
+		_spHistoryPage = nullptr;
 	}
 }
 

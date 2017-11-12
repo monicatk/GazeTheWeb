@@ -548,23 +548,6 @@ void Web::PushAddTabAfterJob(Tab* pCaller, std::string URL)
     _jobs.push_front(std::unique_ptr<TabJob>(new AddTabAfterJob(pCaller, URL, true)));
 }
 
-void Web::PushAddPageToHistoryJob(Tab* pCaller, HistoryManager::Page page)
-{
-	LogDebug("Web: PushAddPageToHistoryJob called for url=", page.URL, ", title=", page.title);
-
-	_jobs.push_front(std::unique_ptr<TabJob>(new AddPageToHistoryJob(pCaller, page)));
-}
-
-void Web::PushDeletePageFromHistoryJob(Tab* pCaller, HistoryManager::Page page, bool deleteOnlyFirst)
-{
-	_jobs.push_front(std::unique_ptr<TabJob>(new DeletePageFromHistoryJob(pCaller, page, deleteOnlyFirst)));
-}
-
-HistoryManager::Page Web::GetFrontHistoryEntry() const
-{
-	return _upHistoryManager->GetFrontEntry();
-}
-
 int Web::GetIdOfTab(Tab const * pCaller) const
 {
     // Go through map and find tab
@@ -578,6 +561,11 @@ int Web::GetIdOfTab(Tab const * pCaller) const
     }
 
     return -1;
+}
+
+std::shared_ptr<HistoryManager::Page> Web::AddPageToHistory(std::string URL, std::string title)
+{
+	return _upHistoryManager->AddPage(URL, title);
 }
 
 int Web::GetIndexOfTabInOrderVector(int id) const
@@ -887,12 +875,6 @@ void Web::AddTabAfterJob::Execute(Web* pCallee)
 	eyegui::flash(pCallee->_pWebLayout, "tab_overview");
 }
 
-void Web::AddPageToHistoryJob::Execute(Web* pCallee)
-{
-	// Add page to history
-	pCallee->_upHistoryManager->AddPage(_page);
-}
-
 void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 {
 	if (pLayout == _pWeb->_pWebLayout)
@@ -1099,12 +1081,3 @@ void Web::WebButtonListener::up(eyegui::Layout* pLayout, std::string id)
 		}
 	}
 }
-
-void Web::DeletePageFromHistoryJob::Execute(Web * pCallee)
-{
-	LogDebug("Web: DeletePageFromHistoryJob called for url=", _page.URL,", title=", _page.title);
-
-	// Add page to history
-	pCallee->_upHistoryManager->DeletePageByUrl(_page, _deleteOnlyFirst);
-}
-

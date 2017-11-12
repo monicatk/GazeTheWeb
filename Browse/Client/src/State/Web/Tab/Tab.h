@@ -707,6 +707,9 @@ private:
 
 	// Marker for next received click to be triggered by user (used for social records)
 	bool _userTriggeredClick = false;
+
+	// Current history entry
+	std::shared_ptr<HistoryManager::Page> _spHistoryPage = nullptr;
 };
 
 #endif // TAB_H_

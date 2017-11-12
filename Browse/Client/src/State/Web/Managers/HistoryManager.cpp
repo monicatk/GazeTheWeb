@@ -16,10 +16,13 @@ const std::vector<std::string> HistoryManager::_filterURLs
 	setup::DASHBOARD_URL
 };
 
+int HistoryManager::Page::_idCount = 0; // initialize counter
+
 HistoryManager::HistoryManager(std::string userDirectory)
 {
 	// Fill members
 	_fullpathHistory = userDirectory + HISTORY_FILE;
+	_spPages = std::make_shared<std::deque<std::shared_ptr<Page> > >();
 
 	// Load existing history
 	if (!LoadHistory()) { LogInfo("HistoryManager: No history file found or parsing error"); }
@@ -30,20 +33,35 @@ HistoryManager::~HistoryManager()
 	// Nothing to do
 }
 
-void HistoryManager::AddPage(Page page)
+std::shared_ptr<HistoryManager::Page> HistoryManager::AddPage(std::string URL, std::string title)
 {
 	// Filter page
-	if (FilterPage(page))
+	if (FilterPage(URL))
 	{
 		// Page should not be added to history
-		return;
+		return nullptr;
 	}
 
-	LogDebug("HistoryManager: Pushing page url=", page.URL, " title=", page.title, " to front...");
+	// Create page
+	auto spPage = std::make_shared<Page>(URL, title, [this](std::shared_ptr<const Page> spPage) { this->SavePageInHistory(false, spPage); });
 
 	// Add to deque storing pages
-	_pages.push_front(page);
+	_spPages->push_front(spPage);
 
+	// Save page in history
+	SavePageInHistory(true, spPage);
+
+	// Return shared pointer to page, so caller can change attributes
+	return spPage;
+}
+
+std::shared_ptr<const std::deque<std::shared_ptr<HistoryManager::Page> > > HistoryManager::GetHistory() const
+{
+	return _spPages;
+}
+
+bool HistoryManager::SavePageInHistory(bool initialStoring, std::shared_ptr<const HistoryManager::Page> spPage)
+{
 	// Try to open XML file
 	tinyxml2::XMLDocument doc;
 	tinyxml2::XMLError result = doc.LoadFile(_fullpathHistory.c_str());
@@ -63,12 +81,12 @@ void HistoryManager::AddPage(Page page)
 		if (result != tinyxml2::XMLError::XML_SUCCESS)
 		{
 			LogInfo("HistoryManager: Failed to create history file");
-			return;
+			return false;
 		}
 	}
 	else
 	{
-        // Fetch root node when file exists
+		// Fetch root node when file exists
 		pRoot = doc.FirstChild();
 	}
 
@@ -76,26 +94,50 @@ void HistoryManager::AddPage(Page page)
 	if (pRoot == NULL)
 	{
 		LogInfo("HistoryManager: Failed to add page to history");
-		return;
+		return false;
 	}
 
-	// Create element for page
-	tinyxml2::XMLElement* pElement = doc.NewElement("page");
-	pElement->SetAttribute("url", page.URL.c_str());
-	pElement->SetAttribute("title", page.title.c_str());
+	// Check whether this is the initial storing or an update
+	if (initialStoring)
+	{
+		// Create element for page
+		tinyxml2::XMLElement* pElement = doc.NewElement("page");
+		pElement->SetAttribute("url", spPage->GetURL().c_str());
+		pElement->SetAttribute("title", spPage->GetTitle().c_str());
+		pElement->SetAttribute("id", spPage->GetId()); // this is used to identify the entry for later changes
 
-	// Append to top of XML file
-	pRoot->InsertFirstChild(pElement);
-
+		// Append to top of XML file
+		pRoot->InsertFirstChild(pElement);
+	}
+	else
+	{
+		// Find the element by URL and id
+		tinyxml2::XMLElement* pElement = pRoot->FirstChildElement("page");
+		while (pElement != NULL)
+		{
+			// Check for both URL and id
+			if (pElement->Attribute("url") == spPage->GetURL() && pElement->IntAttribute("id") == spPage->GetId())
+			{
+				// Update title
+				pElement->SetAttribute("title", spPage->GetTitle().c_str());
+				break;
+			}
+			else // continue search
+			{
+				pElement = pElement->NextSiblingElement("page");
+			}
+		}
+	}
+	
 	// Check length of vector and delete history if too many pages have been saved
-	int pagesSize = (int)_pages.size();
-    if (pagesSize > (int)setup::HISTORY_MAX_PAGE_COUNT)
+	int pagesSize = (int)_spPages->size();
+	if (pagesSize > (int)setup::HISTORY_MAX_PAGE_COUNT)
 	{
 		// Count of pages that should be deleted
 		int deleteCount = pagesSize - setup::HISTORY_MAX_PAGE_COUNT;
 
 		// Delete older ones from vector
-		_pages.erase(_pages.end() - deleteCount, _pages.end());
+		_spPages->erase(_spPages->end() - deleteCount, _spPages->end());
 
 		// Delete older ones from XML file
 		for (int i = 0; i < deleteCount; i++)
@@ -112,106 +154,16 @@ void HistoryManager::AddPage(Page page)
 	if (result != tinyxml2::XMLError::XML_SUCCESS)
 	{
 		LogInfo("HistoryManager: Failed to save history file");
-	}
-}
-
-HistoryManager::Page HistoryManager::GetFrontEntry() const
-{
-	if (_pages.size() == 0)
-	{
-		return Page();
-	}
-	return _pages[0];
-}
-
-bool HistoryManager::DeletePageByUrl(HistoryManager::Page page, bool deleteOnlyFirst)
-{
-	// Try to open XML file
-	tinyxml2::XMLDocument doc;
-	tinyxml2::XMLError result = doc.LoadFile(_fullpathHistory.c_str());
-
-	// Exit on failure
-	tinyxml2::XMLNode* pRoot = NULL;
-	if (result != tinyxml2::XMLError::XML_SUCCESS)
-		return false;
-
-	// Fetch root
-	pRoot = doc.FirstChild();
-
-	// Check whether root exists
-	if (pRoot == NULL)
-	{
-		LogInfo("HistoryManager: Failed to delete front history entry.");
 		return false;
 	}
 
-	// Search each node (except the first, current page) in history pages list in xml file
-	auto entry = pRoot->FirstChildElement("page");
-	/*if(entry)
-		entry = entry->NextSiblingElement("page");
-*/
-	std::deque<unsigned int> removed_idx;
-	unsigned int count = 0;
-	while (entry != NULL)
-	{
-		// If url matches entry, remove entry and keep index in mind to also delete it locally
-		if (entry->Attribute("url") == page.URL)
-		{
-			pRoot->DeleteChild(entry);
-			removed_idx.push_front(count);
-		}
-
-		// Escape when first entry is checked
-		if (deleteOnlyFirst)
-			break;
-
-		// Go to next entry
-		count++;
-		entry = entry->NextSiblingElement("page");
-	}
-
-	// Remove entries locally, deque used for proper deletion order
-	for (auto idx : removed_idx)
-		_pages.erase(_pages.begin() + idx);
-
-	// Try to save file
-	result = doc.SaveFile(_fullpathHistory.c_str());
-
-	// Log at failure
-	if (result != tinyxml2::XMLError::XML_SUCCESS)
-	{
-		LogInfo("HistoryManager: Failed to save history file");
-	}
 	return true;
-}
-
-std::deque<HistoryManager::Page> HistoryManager::GetHistory() const
-{
-	return _pages;
-}
-
-std::deque<HistoryManager::Page> HistoryManager::GetHistory(int count) const
-{
-	// When count is negative or zero
-	if (count <= 0)
-	{
-		return std::deque<HistoryManager::Page>();
-	}
-
-	// Count is limited by size of page deque
-    if (count > (int)_pages.size())
-	{
-		count = _pages.size();
-	}
-
-	// Return sublist of pages
-	return std::deque<HistoryManager::Page>(_pages.begin(), _pages.begin() + count);
 }
 
 bool HistoryManager::LoadHistory()
 {
     // Clean local history copy
-	_pages.clear();
+	_spPages->clear();
 
 	// Open document
 	tinyxml2::XMLDocument doc;
@@ -232,7 +184,9 @@ bool HistoryManager::LoadHistory()
 	do
 	{
 		// Preparation
-		Page page;
+		std::string URL;
+		std::string title;
+		int id = -1;
 		bool pageError = false;
 
 		// Query URL string from attribute
@@ -240,7 +194,7 @@ bool HistoryManager::LoadHistory()
 		pURL = pElement->Attribute("url");
 		if ((pageError |= (pURL == NULL)) == false)
 		{
-			page.URL = pURL;
+			URL = pURL;
 		}
 
 		// Query title string from attribute
@@ -248,26 +202,30 @@ bool HistoryManager::LoadHistory()
 		pTitle = pElement->Attribute("title");
 		if ((pageError |= (pTitle == NULL)) == false)
 		{
-			page.title = pTitle;
+			title = pTitle;
 		}
+
+		// Query identifier from attribute (actually not necessary as entry is complete)
+		id = pElement->IntAttribute("id");
 
 		// Add page only when no error occured
 		if (!pageError)
 		{
-			_pages.push_back(page);
+			_spPages->push_back(std::make_shared<Page>(URL, title, [](std::shared_ptr<const Page> spPage){ })); // empty save callback
 		}
+
 	} while ((pElement = pElement->NextSiblingElement("page")) != NULL);
 
 	// When you came to here no real errors occured
 	return true;
 }
 
-bool HistoryManager::FilterPage(Page page) const
+bool HistoryManager::FilterPage(std::string URL) const
 {
 	// Go over filter list and test for substring
 	for (const std::string& rURL : _filterURLs)
 	{
-		if (page.URL.find(rURL) != std::string::npos)
+		if (URL.find(rURL) != std::string::npos)
 		{
 			// URL is filtered
 			return true;

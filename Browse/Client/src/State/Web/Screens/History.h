@@ -88,9 +88,6 @@ private:
 
 	// Id of current tab
 	int _currentTabId = -1;
-
-	// Hold copy of pages in order to access their URL at interaction
-	std::deque<HistoryManager::Page> _pages;
 };
 
 #endif // HISTORY_H_
