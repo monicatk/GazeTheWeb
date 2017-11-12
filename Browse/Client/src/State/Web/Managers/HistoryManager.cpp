@@ -186,7 +186,6 @@ bool HistoryManager::LoadHistory()
 		// Preparation
 		std::string URL;
 		std::string title;
-		int id = -1;
 		bool pageError = false;
 
 		// Query URL string from attribute
