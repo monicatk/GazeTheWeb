@@ -43,13 +43,13 @@ std::shared_ptr<HistoryManager::Page> HistoryManager::AddPage(std::string URL, s
 	}
 
 	// Create page
-	auto spPage = std::make_shared<Page>(URL, title, [this](std::shared_ptr<const Page> spPage) { this->SavePageInHistory(false, spPage); });
+	auto spPage = std::make_shared<Page>(this, URL, title);
 
 	// Add to deque storing pages
 	_spPages->push_front(spPage);
 
 	// Save page in history
-	SavePageInHistory(true, spPage);
+	SavePageInHistory(true, spPage->GetId(), spPage->GetURL(), spPage->GetTitle());
 
 	// Return shared pointer to page, so caller can change attributes
 	return spPage;
@@ -60,7 +60,7 @@ std::shared_ptr<const std::deque<std::shared_ptr<HistoryManager::Page> > > Histo
 	return _spPages;
 }
 
-bool HistoryManager::SavePageInHistory(bool initialStoring, std::shared_ptr<const HistoryManager::Page> spPage)
+bool HistoryManager::SavePageInHistory(bool initialStoring, int id, std::string URL, std::string title)
 {
 	// Try to open XML file
 	tinyxml2::XMLDocument doc;
@@ -102,9 +102,9 @@ bool HistoryManager::SavePageInHistory(bool initialStoring, std::shared_ptr<cons
 	{
 		// Create element for page
 		tinyxml2::XMLElement* pElement = doc.NewElement("page");
-		pElement->SetAttribute("url", spPage->GetURL().c_str());
-		pElement->SetAttribute("title", spPage->GetTitle().c_str());
-		pElement->SetAttribute("id", spPage->GetId()); // this is used to identify the entry for later changes
+		pElement->SetAttribute("url", URL.c_str());
+		pElement->SetAttribute("title", title.c_str());
+		pElement->SetAttribute("id", id); // this is used to identify the entry for later changes
 
 		// Append to top of XML file
 		pRoot->InsertFirstChild(pElement);
@@ -116,10 +116,10 @@ bool HistoryManager::SavePageInHistory(bool initialStoring, std::shared_ptr<cons
 		while (pElement != NULL)
 		{
 			// Check for both URL and id
-			if (pElement->Attribute("url") == spPage->GetURL() && pElement->IntAttribute("id") == spPage->GetId())
+			if (pElement->Attribute("url") == URL && pElement->IntAttribute("id") == id)
 			{
 				// Update title
-				pElement->SetAttribute("title", spPage->GetTitle().c_str());
+				pElement->SetAttribute("title", title.c_str());
 				break;
 			}
 			else // continue search
@@ -205,13 +205,10 @@ bool HistoryManager::LoadHistory()
 			title = pTitle;
 		}
 
-		// Query identifier from attribute (actually not necessary as entry is complete)
-		id = pElement->IntAttribute("id");
-
 		// Add page only when no error occured
 		if (!pageError)
 		{
-			_spPages->push_back(std::make_shared<Page>(URL, title, [](std::shared_ptr<const Page> spPage){ })); // empty save callback
+			_spPages->push_back(std::make_shared<Page>(this, URL, title));
 		}
 
 	} while ((pElement = pElement->NextSiblingElement("page")) != NULL);

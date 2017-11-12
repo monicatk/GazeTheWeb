@@ -3,6 +3,7 @@
 // Author: Raphael Menges (raphaelmenges@uni-koblenz.de)
 //============================================================================
 // Manager of history.
+// TODO: Id is not necessary for loaded entries
 
 #ifndef HISTORYMANAGER_H_
 #define HISTORYMANAGER_H_
@@ -17,31 +18,7 @@ class HistoryManager
 {
 public:
 
-	class Page : std::enable_shared_from_this<Page>
-	{
-	public:
-
-		// Constructor
-		Page(std::string URL, std::string title, std::function<void(std::shared_ptr<const Page>)> saveCallback)
-			: _id(_idCount++), _URL(URL), _title(title), _saveCallback(saveCallback) {}
-
-		// Set title
-		void SetTitle(std::string title) { _title = title; } // _saveCallback(this->shared_from_this()); }
-
-		// Read attributes
-		int GetId() const { return _id; }
-		std::string GetURL() const { return _URL; }
-		std::string GetTitle() const { return _title; }
-
-	private:
-
-		// Members
-		int _id;
-		std::string _URL;
-		std::string _title;
-		std::function<void(std::shared_ptr<const Page>)> _saveCallback;
-		static int _idCount;
-	};
+	class Page; // forward declaration
 
 	// Constructor
 	HistoryManager(std::string userDirectory);
@@ -57,11 +34,14 @@ public:
 
 private:
 
+	// Friend class
+	friend class Page;
+
 	// List of filtered pages which will not be added to history
 	static const std::vector<std::string> _filterURLs;
 
 	// Save history to hard disk. Returns whether successful
-	bool SavePageInHistory(bool initialStoring, std::shared_ptr<const HistoryManager::Page> spPage);
+	bool SavePageInHistory(bool initialStoring, int id, std::string URL, std::string title);
 
 	// Load history from hard disk. Returns whether successful
 	bool LoadHistory();
@@ -74,6 +54,34 @@ private:
 
 	// Fullpath to history file
 	std::string _fullpathHistory;
+
+public:
+
+	class Page
+	{
+	public:
+
+		// Constructor
+		Page(HistoryManager* pHistoryManager, std::string URL, std::string title)
+			: _id(_idCount++), _pHistoryManager(pHistoryManager), _URL(URL), _title(title) {}
+
+		// Set title
+		void SetTitle(std::string title) { _title = title; _pHistoryManager->SavePageInHistory(false, _id, _URL, _title); }
+
+		// Read attributes
+		int GetId() const { return _id; }
+		std::string GetURL() const { return _URL; }
+		std::string GetTitle() const { return _title; }
+
+	private:
+
+		// Members
+		int _id;
+		HistoryManager* _pHistoryManager;
+		std::string _URL;
+		std::string _title;
+		static int _idCount;
+	};
 };
 
 #endif // HISTORYMANAGER_H_
