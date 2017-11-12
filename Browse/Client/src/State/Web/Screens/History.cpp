@@ -152,7 +152,7 @@ void History::HistoryButtonListener::down(eyegui::Layout* pLayout, std::string i
 		// Check for keyword "select"
 		if (((pos = id.find(delimiter)) != std::string::npos) && id.substr(0, pos) == "select")
 		{
-			// Extract number of page which should be used
+			// Get URL of selected history entry
 			auto spPages = _pHistory->_pHistoryManager->GetHistory();
 			std::string URL = spPages->at((int)(StringToFloat(id.substr(pos + 1, id.length() - 1))))->GetURL();
 			std::u16string URL16;

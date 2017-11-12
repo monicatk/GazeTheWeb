@@ -26,7 +26,7 @@ public:
 			: _id(_idCount++), _URL(URL), _title(title), _saveCallback(saveCallback) {}
 
 		// Set title
-		void SetTitle(std::string title) { _title = title; _saveCallback(this->shared_from_this()); }
+		void SetTitle(std::string title) { _title = title; } // _saveCallback(this->shared_from_this()); }
 
 		// Read attributes
 		int GetId() const { return _id; }

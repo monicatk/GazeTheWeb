@@ -563,7 +563,7 @@ void Master::SetDataTransfer(bool dataTransfer)
 		// FirebaseMailer
 		FirebaseMailer::Instance().Continue();
 
-		// Tabs (doing social records etc.)
+		// Tabs (doing social records, history, etc.)
 		_upWeb->SetDataTransfer(true);
 
 		// Visualization
@@ -583,7 +583,7 @@ void Master::SetDataTransfer(bool dataTransfer)
 		// FirebaseMailer
 		FirebaseMailer::Instance().Pause();
 
-		// Tabs (doing no social records etc.)
+		// Tabs (doing no social records, history, etc.)
 		_upWeb->SetDataTransfer(false);
 
 		// Visualization

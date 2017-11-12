@@ -23,14 +23,7 @@ Tab::Tab(
 	_pMaster = pMaster;
 	_pCefMediator = pCefMediator;
 	_pWeb = pWeb;
-	_url = url;
-
-	// Initial history entry (also done in TabCEFImpl for every URL set)
-	if (_dataTransfer)
-	{
-		// Add history entry for new url with current title, will be updated asap
-		_spHistoryPage = _pWeb->AddPageToHistory(_url, _title);
-	}
+	// URL etc. is set by meditator
 
 	// Create layouts for Tab (overlay at first, because behind other layouts)
 	_pOverlayLayout = _pMaster->AddLayout("layouts/Overlay.xeyegui", EYEGUI_TAB_LAYER, false);
@@ -113,7 +106,7 @@ Tab::Tab(
     _upWebView = std::unique_ptr<WebView>(new WebView(webViewInGUI.x, webViewInGUI.y, webViewInGUI.width, webViewInGUI.height));
 
 	// Register itself and painted texture in mediator to receive DOMNodes
-	_pCefMediator->RegisterTab(this);
+	_pCefMediator->RegisterTab(this, url);
 
 	// Prepare debugging overlay
 	InitDebuggingOverlay();
@@ -633,17 +626,14 @@ void Tab::Deactivate()
 
 void Tab::OpenURL(std::string URL)
 {
-	// Set URL
-	SetURL(URL);
+	// Tell CEF to load a new URL (sets later URL and title here)
+	_pCefMediator->LoadURLInTab(this, URL);
 
 	// Abort any pipeline execution
 	AbortAndClearPipelines();
 
 	// Exit video mode
 	ExitVideoMode();
-
-	// Tell CEF to refresh this tab (which will fetch the URL and load it)
-	_pCefMediator->RefreshTab(this);
 
 	// Reset scrolling
 	_scrollingOffsetX = 0.0;

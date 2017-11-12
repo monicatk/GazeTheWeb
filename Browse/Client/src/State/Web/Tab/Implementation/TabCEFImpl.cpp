@@ -27,11 +27,18 @@ void Tab::GetWebRenderResolution(int& rWidth, int& rHeight) const
 
 void Tab::SetURL(std::string URL)
 {
-	if (URL != _url)
-	{
-		_url = URL;
-		LabStreamMailer::instance().Send("Loading URL: " + _url);
+	// Set URL
+	_url = URL;
 
+	// Reset title
+	_title = "";
+
+	// Tell lab stream layer
+	LabStreamMailer::instance().Send("Loading URL: " + _url);
+
+	// Check whether current history page entry contains same URL. If not, create new one
+	if (_spHistoryPage == nullptr || _spHistoryPage->GetURL() != _url)
+	{
 		if (_dataTransfer)
 		{
 			// Add history entry for new url with current title, will be updated asap

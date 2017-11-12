@@ -22,7 +22,7 @@ void Mediator::SetMaster(MasterNotificationInterface* pMaster)
 	_pMaster = pMaster;
 }
 
-void Mediator::RegisterTab(TabCEFInterface* pTab)
+void Mediator::RegisterTab(TabCEFInterface* pTab, std::string URL)
 {
     CEF_REQUIRE_UI_THREAD();
 
@@ -51,7 +51,6 @@ void Mediator::RegisterTab(TabCEFInterface* pTab)
     _pendingTab = pTab;
 
 	// Decide on url
-	std::string URL = pTab->GetURL();
 	if (URL.empty()) { URL = BLANK_PAGE_URL; }
 
     LogDebug("Mediator: Creating new CefBrowser at Tab registration.");
@@ -80,12 +79,12 @@ void Mediator::UnregisterTab(TabCEFInterface* pTab)
     }
 }
 
-void Mediator::RefreshTab(TabCEFInterface * pTab)
+void Mediator::LoadURLInTab(TabCEFInterface * pTab, std::string URL)
 {
     if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
     {
         // Get Tab object and load Tab's URL in CefBrowser
-        _handler->LoadPage(_browsers.at(pTab), pTab->GetURL());
+        _handler->LoadPage(_browsers.at(pTab), URL);
     }
 }
 
@@ -519,6 +518,7 @@ void Mediator::OnTabTitleChange(CefRefPtr<CefBrowser> browser, std::string title
 {
 	if (TabCEFInterface* pTab = GetTab(browser))
 	{
+		pTab->SetURL(browser->GetMainFrame()->GetURL()); // guarantees that URL is set before the title
 		pTab->SetTitle(title);
 	}
 }
