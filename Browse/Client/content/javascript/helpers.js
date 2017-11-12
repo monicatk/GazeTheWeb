@@ -579,4 +579,17 @@ function SetOverflowId(node, id, cs)
         node.setAttribute("overflowId", id);
 }
 
+// Returns corresponding DOMObject if any exists
+function SetOverflowObjectViaId(node, id)
+{
+    var domObj = GetCorrespondingDOMObject(node);
+    if(domObj !== undefined)
+    {
+        // id of null or -1 will reset overflow object in domObj
+        domObj.setOverflowViaId(id);
+        return domObj;
+    }
+    return undefined;
+}
+
 ConsolePrint("Successfully imported helpers.js!");

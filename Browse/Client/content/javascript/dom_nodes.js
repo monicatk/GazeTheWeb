@@ -42,18 +42,12 @@ function DOMNode(node, id, type, cef_hidden=false)
     this.bitmask = [0];
     // MutationObserver will handle setting up the following references, if necessary
     this.fixObj = undefined;
-    this.overflow = undefined;
+    this.overflow = undefined;  // TODO: Rename to overflowObj for consistency?
 
-    // Initial setup of fixObj
-    this.setFixObj(  GetFixedElementById( this.node.getAttribute("fixedId") )  );
-    if(this.fixObj === undefined)
-        this.setFixObj(  GetFixedElementById( this.node.getAttribute("childFixedId") )  );
+    // Initial setup of fixObj & overflow objects
+    this.fixObj = GetFixedElementById(node.getAttribute("fixedId")) || GetFixedElementById(node.getAttribute("childFixedId"));
+    this.overflow = GetDOMOverflowElement(node.getAttribute("overflowid"));
 
-
-    // Initial setup of overflow, if already set in node
-    var overflowId = node.getAttribute("overflowid");
-    if(overflowId !== null)
-        this.setOverflow(GetDOMOverflowElement(overflowId));
 
     this.cppReady = false; // TODO: Queueing calls, when node isn't ready yet?
 

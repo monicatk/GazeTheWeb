@@ -510,16 +510,11 @@ function MutationObserverInit()
 							if(attr == "overflowid")
 							{
 								var id = node.getAttribute("overflowid");
-								var domObj = GetCorrespondingDOMObject(node);
-								var skip_subtree = false;
-								if(domObj !== undefined)
-								{
-									// id of null or -1 will reset overflow object in domObj
-									domObj.setOverflowViaId(id);
-
-									if(domObj.Class === "DOMOverflowElement")
-										skip_subtree = true;
-								}
+								var domObj = SetOverflowObjectViaId(id);
+								if(domObj === undefined)
+									var skip_subtree = false;
+								else 
+									var skip_subtree = (domObj.Class === "DOMOverflowElement");
 
 								if(!skip_subtree)
 								{
