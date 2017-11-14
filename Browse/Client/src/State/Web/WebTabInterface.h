@@ -22,19 +22,11 @@ public:
 	// Add tab after that tab
     virtual void PushAddTabAfterJob(Tab* pCaller, std::string URL) = 0;
 
-	// Add page to history job
-	virtual void PushAddPageToHistoryJob(Tab* pCaller, HistoryManager::Page page) = 0;
-
-	// Add delete page from history job
-	virtual void PushDeletePageFromHistoryJob(Tab* pCaller, 
-		HistoryManager::Page page, 
-		bool delete_only_first = false) = 0;
-
-	// Review front history entry
-	virtual HistoryManager::Page GetFrontHistoryEntry() const = 0;
-
     // Get own id in web. Returns -1 if not found
     virtual int GetIdOfTab(Tab const * pCaller) const = 0;
+
+	// Add history entry
+	virtual std::shared_ptr<HistoryManager::Page> AddPageToHistory(std::string URL, std::string title) = 0;
 };
 
 #endif // WEBTABINTERFACE_H_

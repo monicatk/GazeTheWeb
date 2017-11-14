@@ -686,6 +686,17 @@ FirebaseMailer::FirebaseMailer()
 				(*rCommand.get())(interface);
 			}
 		}
+
+		// Collect last commands before shutdown
+		std::unique_lock<std::mutex> lock(*pMutex);
+		localCommandQueue = std::move(*pCommandQueue); // move content of command queue to local one
+		pCommandQueue->clear(); // clear original queue
+
+		// Work on these last commands
+		for (const auto& rCommand : localCommandQueue)
+		{
+			(*rCommand.get())(interface);
+		}
 	}));
 }
 
@@ -779,7 +790,10 @@ bool FirebaseMailer::PushBackCommand(std::shared_ptr<Command> spCommand)
 		_conditionVariable.notify_all(); // notify thread about new data
 		return true;
 	}
-	return false; // command was not added to the queue
+	else
+	{
+		return false; // command was not added to the queue
+	}
 }
 
 std::string FirebaseMailer::GetIdToken() const

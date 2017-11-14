@@ -15,8 +15,8 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="Pause.svg"
-   inkscape:export-filename="C:\Users\Raphael\Git\GazeTheWeb\Browse\Client\content\icons\Pause.png"
+   sodipodi:docname="Play.svg"
+   inkscape:export-filename="C:\Users\Raphael\Git\GazeTheWeb\Browse\Client\content\icons\Play.png"
    inkscape:export-xdpi="97.535995"
    inkscape:export-ydpi="97.535995">
   <defs
@@ -29,8 +29,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4142136"
-     inkscape:cx="-62.469649"
-     inkscape:cy="230.74267"
+     inkscape:cx="100.16491"
+     inkscape:cy="184.78073"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -76,16 +76,11 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-698.03155)">
-    <g
-       id="layer1-5"
-       inkscape:label="Layer 1"
-       transform="matrix(1.2,0,0,1.2,-35.433068,-175.03938)"
-       style="fill:#f2f2f2;fill-opacity:1">
-      <path
-         inkscape:connector-curvature="0"
-         id="rect4135"
-         d="m 107.16535,775.19689 c -5.54,0 -9.999996,4.46 -9.999996,10 l 0,180 c 0,5.54 4.459996,10 9.999996,10 l 40,0 c 5.54,0 10,-4.46 10,-10 l 0,-180 c 0,-5.54 -4.46,-10 -10,-10 l -40,0 z m 100,0 c -5.54,0 -10,4.46 -10,10 l 0,180 c 0,5.54 4.46,10 10,10 l 40,0 c 5.54,0 10,-4.46 10,-10 l 0,-180 c 0,-5.54 -4.46,-10 -10,-10 l -40,0 z"
-         style="opacity:1;fill:#f2f2f2;fill-opacity:1;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
-    </g>
+    <path
+       style="opacity:1;fill:#f2f2f2;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:4.38505936;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 94.461488,992.36224 c 1.955051,-0.004 3.871641,-0.59259 5.544122,-1.70222 57.0771,-37.66374 170.60696,-115.46443 170.60696,-115.46443 0,0 -113.52988,-77.79809 -170.60696,-115.46183 -1.672481,-1.10963 -3.589071,-1.69823 -5.544122,-1.70222 -5.934235,0 -10.743345,11.7774 -10.743345,11.7774 l 0,210.7759 c 0,0 4.80911,11.7774 10.743345,11.7774 z"
+       id="path3335"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccc" />
   </g>
 </svg>

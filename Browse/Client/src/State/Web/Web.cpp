@@ -68,7 +68,12 @@ Web::Web(Master* pMaster, Mediator* pCefMediator, bool dataTransfer) : State(pMa
 
 Web::~Web()
 {
-    // TODO: Delete layouts?
+	_tabs.clear(); // just to be sure when this is called
+}
+
+int Web::AddTab(bool show)
+{
+	return AddTab("", show);
 }
 
 int Web::AddTab(std::string URL, bool show)
@@ -543,23 +548,6 @@ void Web::PushAddTabAfterJob(Tab* pCaller, std::string URL)
     _jobs.push_front(std::unique_ptr<TabJob>(new AddTabAfterJob(pCaller, URL, true)));
 }
 
-void Web::PushAddPageToHistoryJob(Tab* pCaller, HistoryManager::Page page)
-{
-	LogDebug("Web: PushAddPageToHistoryJob called for url=", page.URL, ", title=", page.title);
-
-	_jobs.push_front(std::unique_ptr<TabJob>(new AddPageToHistoryJob(pCaller, page)));
-}
-
-void Web::PushDeletePageFromHistoryJob(Tab* pCaller, HistoryManager::Page page, bool deleteOnlyFirst)
-{
-	_jobs.push_front(std::unique_ptr<TabJob>(new DeletePageFromHistoryJob(pCaller, page, deleteOnlyFirst)));
-}
-
-HistoryManager::Page Web::GetFrontHistoryEntry() const
-{
-	return _upHistoryManager->GetFrontEntry();
-}
-
 int Web::GetIdOfTab(Tab const * pCaller) const
 {
     // Go through map and find tab
@@ -573,6 +561,11 @@ int Web::GetIdOfTab(Tab const * pCaller) const
     }
 
     return -1;
+}
+
+std::shared_ptr<HistoryManager::Page> Web::AddPageToHistory(std::string URL, std::string title)
+{
+	return _upHistoryManager->AddPage(URL, title);
 }
 
 int Web::GetIndexOfTabInOrderVector(int id) const
@@ -882,12 +875,6 @@ void Web::AddTabAfterJob::Execute(Web* pCallee)
 	eyegui::flash(pCallee->_pWebLayout, "tab_overview");
 }
 
-void Web::AddPageToHistoryJob::Execute(Web* pCallee)
-{
-	// Add page to history
-	pCallee->_upHistoryManager->AddPage(_page);
-}
-
 void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 {
 	if (pLayout == _pWeb->_pWebLayout)
@@ -956,8 +943,11 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			int currentTab = _pWeb->_currentTabId;
 			if (currentTab >= 0)
 			{
+				// URL
+				std::string URL = _pWeb->_tabs.at(currentTab)->GetURL();
+
 				// Add as bookmark
-				bool success = _pWeb->_upBookmarkManager->AddBookmark(_pWeb->_tabs.at(currentTab)->GetURL());
+				bool success = _pWeb->_upBookmarkManager->AddBookmark(URL);
 
 				// Display it on icon. Even if not successful, because that means it was already a bookmark
 				eyegui::setIconOfIconElement(_pWeb->_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_true.png");
@@ -972,7 +962,11 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_existing", MasterNotificationInterface::Type::NEUTRAL, false);
 				}
 
-				if (success) { _pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_BOOKMARKING_ADDING_COUNT, FirebaseJSONKey::GENERAL_BOOKMARKING_ADDING); }
+				if (success)
+				{
+					nlohmann::json record = { { "url", URL } };
+					_pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_BOOKMARK_ADDING_COUNT, FirebaseJSONKey::GENERAL_BOOKMARK_ADDING, record);
+				}
 			}
 
 			JSMailer::instance().Send("bookmark_add");
@@ -1015,7 +1009,7 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		else if (id == "new_tab")
 		{
 			// Add tab
-			int tabId = _pWeb->AddTab(BLANK_PAGE_URL, true);
+			int tabId = _pWeb->AddTab(true);
 
 			// Close tab overview
 			_pWeb->ShowTabOverview(false);
@@ -1087,12 +1081,3 @@ void Web::WebButtonListener::up(eyegui::Layout* pLayout, std::string id)
 		}
 	}
 }
-
-void Web::DeletePageFromHistoryJob::Execute(Web * pCallee)
-{
-	LogDebug("Web: DeletePageFromHistoryJob called for url=", _page.URL,", title=", _page.title);
-
-	// Add page to history
-	pCallee->_upHistoryManager->DeletePageByUrl(_page, _deleteOnlyFirst);
-}
-

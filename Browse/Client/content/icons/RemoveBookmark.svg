@@ -15,8 +15,8 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="Pause.svg"
-   inkscape:export-filename="C:\Users\Raphael\Git\GazeTheWeb\Browse\Client\content\icons\Pause.png"
+   sodipodi:docname="RemoveBookmark.svg"
+   inkscape:export-filename="C:\Users\Raphael\Git\GazeTheWeb\Browse\Client\content\icons\RemoveBookmark.png"
    inkscape:export-xdpi="97.535995"
    inkscape:export-ydpi="97.535995">
   <defs
@@ -28,33 +28,34 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4142136"
-     inkscape:cx="-62.469649"
-     inkscape:cy="230.74267"
+     inkscape:zoom="1.4"
+     inkscape:cx="45.183891"
+     inkscape:cy="201.74072"
      inkscape:document-units="px"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g4148"
      showgrid="true"
      units="cm"
      inkscape:snap-bbox="true"
      inkscape:bbox-paths="true"
-     inkscape:snap-page="true"
+     inkscape:snap-page="false"
      inkscape:bbox-nodes="true"
      inkscape:snap-bbox-edge-midpoints="true"
      inkscape:snap-bbox-midpoints="true"
-     inkscape:window-width="1600"
-     inkscape:window-height="847"
-     inkscape:window-x="572"
-     inkscape:window-y="1432"
+     inkscape:window-width="2560"
+     inkscape:window-height="1387"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
      inkscape:window-maximized="1"
      inkscape:snap-object-midpoints="true"
      inkscape:snap-center="true"
      inkscape:snap-to-guides="false"
-     inkscape:object-paths="true"
-     inkscape:snap-intersection-paths="true"
+     inkscape:object-paths="false"
+     inkscape:snap-intersection-paths="false"
      inkscape:object-nodes="true"
-     inkscape:snap-smooth-nodes="true"
-     inkscape:snap-midpoints="true"
-     inkscape:snap-grids="true">
+     inkscape:snap-smooth-nodes="false"
+     inkscape:snap-midpoints="false"
+     inkscape:snap-grids="true"
+     showguides="false">
     <inkscape:grid
        type="xygrid"
        id="grid4686" />
@@ -67,7 +68,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -77,15 +78,35 @@
      id="layer1"
      transform="translate(0,-698.03155)">
     <g
-       id="layer1-5"
-       inkscape:label="Layer 1"
-       transform="matrix(1.2,0,0,1.2,-35.433068,-175.03938)"
-       style="fill:#f2f2f2;fill-opacity:1">
-      <path
-         inkscape:connector-curvature="0"
-         id="rect4135"
-         d="m 107.16535,775.19689 c -5.54,0 -9.999996,4.46 -9.999996,10 l 0,180 c 0,5.54 4.459996,10 9.999996,10 l 40,0 c 5.54,0 10,-4.46 10,-10 l 0,-180 c 0,-5.54 -4.46,-10 -10,-10 l -40,0 z m 100,0 c -5.54,0 -10,4.46 -10,10 l 0,180 c 0,5.54 4.46,10 10,10 l 40,0 c 5.54,0 10,-4.46 10,-10 l 0,-180 c 0,-5.54 -4.46,-10 -10,-10 l -40,0 z"
-         style="opacity:1;fill:#f2f2f2;fill-opacity:1;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+       id="g4148"
+       transform="matrix(1.3333333,0,0,1.3333333,-69.501306,-327.95274)">
+      <rect
+         ry="0"
+         rx="0"
+         y="877.0437"
+         x="128.03329"
+         height="101.27415"
+         width="113.93343"
+         id="rect4137"
+         style="opacity:1;fill:#f2f2f2;fill-opacity:1;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <rect
+         style="opacity:1;fill:#f2f2f2;fill-opacity:1;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect4139"
+         width="139.25195"
+         height="25.318537"
+         x="115.37403"
+         y="839.06586"
+         rx="0"
+         ry="0" />
+      <rect
+         ry="0"
+         rx="0"
+         y="826.40662"
+         x="166.01109"
+         height="12.659268"
+         width="37.977806"
+         id="rect4141"
+         style="opacity:1;fill:#f2f2f2;fill-opacity:1;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     </g>
   </g>
 </svg>

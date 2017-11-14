@@ -149,13 +149,13 @@ void FetchSamples(SampleQueue& rspSamples)
 	eyetracker_global::FetchSamples(rspSamples);
 }
 
-CalibrationResult Calibrate()
+CalibrationResult Calibrate(std::shared_ptr<CalibrationInfo>& rspInfo)
 {
 	// Start calibration
-	CalibrationResult result = iV_Calibrate() == RET_SUCCESS ? CalibrationResult::OK : CalibrationResult::FAILED;
+	CalibrationResult result = iV_Calibrate() == RET_SUCCESS ? CALIBRATION_OK : CALIBRATION_FAILED;
 
 	// Check calibration points
-	if (result == CalibrationResult::OK) // refine result
+	if (result == CALIBRATION_OK) // refine result
 	{
 		for (int i = 1; i <= 5; i++) // go over calibration points
 		{
@@ -176,7 +176,7 @@ CalibrationResult Calibrate()
 					// At bad calibration of this calibration point, set calibration result to bad
 					if (badCalibration)
 					{
-						result = CalibrationResult::BAD;
+						result = CALIBRATION_BAD;
 					}
 					break;
 				}
@@ -195,6 +195,39 @@ CalibrationResult Calibrate()
 				count++;
 			}
 		}
+
+		// Go over all points to provide user with info
+		std::shared_ptr<CalibrationInfo> spCalibrationInfo = std::make_shared<CalibrationInfo>();
+		for (int i = 1; i <= 5; i++) // go over calibration points
+		{
+			// Retrieve calibration point
+			CalibrationPointStruct point;
+			if (RET_SUCCESS == iV_GetCalibrationPoint(i, &point))
+			{
+				// Check calibration quality of this calibration point
+				CalibrationPointQualityStruct left, right;
+				iV_GetCalibrationQuality(i, &left, &right);
+
+				// Check for quality
+				if (((left.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
+					&& (right.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed))
+					|| (left.qualityIndex <= 0.0f && right.qualityIndex <= 0.0f)) // failure
+				{
+					spCalibrationInfo->push_back(CalibrationPoint(point.positionX, point.positionY, CALIBRATION_POINT_FAILED));
+				}
+				else if ((left.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
+					|| (right.usageStatus != CalibrationPointUsageStatusEnum::calibrationPointUsed)
+					|| (left.qualityIndex < 0.5f && right.qualityIndex < 0.5f)) // bad
+				{
+					spCalibrationInfo->push_back(CalibrationPoint(point.positionX, point.positionY, CALIBRATION_POINT_BAD));
+				}
+				else // ok
+				{
+					spCalibrationInfo->push_back(CalibrationPoint(point.positionX, point.positionY, CALIBRATION_POINT_OK));
+				}
+			}
+		}
+		rspInfo = spCalibrationInfo;
 	}
 
 	// Return whether successful

@@ -44,9 +44,9 @@ public:
 	void SetMaster(MasterNotificationInterface* pMaster);
 
     // Receive tab specific commands
-    void RegisterTab(TabCEFInterface* pTab);
+    void RegisterTab(TabCEFInterface* pTab, std::string URL);
     void UnregisterTab(TabCEFInterface* pClosing);
-    void RefreshTab(TabCEFInterface* pTab);	// Daniel: "This name is weird.. have been searching for method to load URL and this is the answer? :D
+    void LoadURLInTab(TabCEFInterface* pTab, std::string URL);
     void ReloadTab(TabCEFInterface* pTab);
     void GoBack(TabCEFInterface* pTab);
     void GoForward(TabCEFInterface* pTab);

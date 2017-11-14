@@ -26,7 +26,7 @@
 #include <windows.h>
 typedef void(__cdecl *FETCH_SAMPLES)(SampleQueue&);
 typedef bool(__cdecl *IS_TRACKING)();
-typedef CalibrationResult(__cdecl *CALIBRATE)();
+typedef CalibrationResult(__cdecl *CALIBRATE)(std::shared_ptr<CalibrationInfo>&);
 typedef void(__cdecl *CONTINUE_LAB_STREAM)();
 typedef void(__cdecl *PAUSE_LAB_STREAM)();
 #endif
@@ -53,7 +53,7 @@ public:
 		int windowHeight);
 
 	// Calibrate the eye tracking device, returns result
-	CalibrationResult Calibrate();
+	CalibrationResult Calibrate(std::shared_ptr<CalibrationInfo>& rspCalibrationInfo);
 
 	// Delegation of filter. Indicated whether age of input does say something...
 	bool SamplesReceived() const;

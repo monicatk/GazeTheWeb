@@ -523,7 +523,7 @@ private:
 	void EnterVideoMode(int id); // id of video node
 
 	// Exit video mode
-	void ExitVideoMode();
+	void ExitVideoMode(bool immediately = false);
 
 	// Start social record
 	void StartSocialRecord(std::string URL, SocialPlatform platform);
@@ -587,6 +587,7 @@ private:
     // Layouts
     eyegui::Layout* _pPanelLayout;
 	eyegui::Layout* _pVideoModeLayout;
+	eyegui::Layout* _pVideoModePauseOverlayLayout;
     eyegui::Layout* _pPipelineAbortLayout;
     eyegui::Layout* _pOverlayLayout;
     eyegui::Layout* _pScrollingOverlayLayout;
@@ -706,6 +707,9 @@ private:
 
 	// Marker for next received click to be triggered by user (used for social records)
 	bool _userTriggeredClick = false;
+
+	// Current history entry
+	std::shared_ptr<HistoryManager::Page> _spHistoryPage = nullptr;
 };
 
 #endif // TAB_H_

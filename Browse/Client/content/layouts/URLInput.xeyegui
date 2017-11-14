@@ -14,7 +14,7 @@
 							<textblock id="title" key="url_input:title" alignment="center" verticalalignment="center" fontsize="medium"/>
 						</column>
 					</row>
-					<row size="25%">
+					<row size="22.5%">
 						<column size="100">
 							<grid showbackground="true" style="default">
 								<row size="100">
@@ -34,12 +34,12 @@
 							</grid>
 						</column>
 					</row>
-					<row size="50%">
+					<row size="55%">
 						<column size="100%">
 							<keyboard id="keyboard" instantpress="true"/>
 						</column>
 					</row>
-					<row size="15%">
+					<row size="12.5%">
 						<column size="100%">
 							<stack orientation="horizontal" separator="0.1">
 								<boxbutton icon="icons/domain_com.png" id="com"/>
@@ -58,7 +58,6 @@
 										<boxbutton icon="icons/LayoutGreeceGreek.png" id="layout_greece_greek" desckey="url_input:layout_greece_greek"/>
 									</stack>
 								</dropbutton>
-								<blank relativescale="5%"/>
 							</stack>
 						</column>
 					</row>

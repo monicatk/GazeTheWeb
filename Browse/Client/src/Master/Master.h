@@ -48,6 +48,10 @@ public:
     int GetWindowWidth() const { return _width; }
     int GetWindowHeight() const { return _height; }
 
+	// Getter for screen width and height
+	int GetScreenWidth() const;
+	int GetScreenHeight() const;
+
     // Get time provided by GLFW
     double GetTime() const;
 
@@ -80,6 +84,21 @@ public:
 
 	// Get pointer to interface of custom transformation of eye input
 	std::weak_ptr<CustomTransformationInterface> GetCustomTransformationInterface();
+
+	// Get parameters to log into dashboard
+	struct DashboardParameters
+	{
+		DashboardParameters(std::string email, std::string password, std::string APIKey, std::string projectId) :
+			email(email), password(password), APIKey(APIKey), projectId(projectId) {}
+		std::string email;
+		std::string password;
+		std::string APIKey;
+		std::string projectId;
+	};
+	DashboardParameters GetDashboardParameters() const
+	{
+		return DashboardParameters(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword(), setup::FIREBASE_API_KEY, setup::FIREBASE_PROJECT_ID);
+	}
 
 	// Push back async job. Only provide threadsafe calls to the job!!!
 	void PushBackAsyncJob(std::function<bool()> job);
@@ -248,6 +267,9 @@ private:
 	// Update async jobs
 	void UpdateAsyncJobs(bool wait); // wait indicates that it should block the thread until all async jobs are finished
 
+	// Show super calibration layout
+	void ShowSuperCalibrationLayout();
+
     // Callbacks
     void GLFWKeyCallback(int key, int scancode, int action, int mods);
     void GLFWMouseButtonCallback(int button, int action, int mods);
@@ -355,6 +377,9 @@ private:
 
 	// Indicator whether computer should shut down at exit
 	bool _shouldShutdownAtExit = false;
+
+	// Last calibration points
+	std::vector<int> _lastCalibrationPointsFrameIndices;
 };
 
 #endif // MASTER_H_
