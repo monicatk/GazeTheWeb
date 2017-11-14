@@ -506,11 +506,12 @@ function MutationObserverInit()
 								console.log("### Detected changes in attr "+attr+" ###");
 
 							// ### OVERFLOW HIERARCHY HANDLING ###
-							// Set childrens' overflowIds when node gets tagged as part of overflow subtree 
+							// node's overflowid attribute was set (changed): Set childrens' overflowIds when node gets tagged as part of overflow subtree 
 							if(attr == "overflowid")
 							{
+								console.log(attr, "changed for ", node);
 								var id = node.getAttribute("overflowid");
-								var domObj = SetOverflowObjectViaId(id);
+								var domObj = SetOverflowObjectViaId(node, id);
 								if(domObj === undefined)
 									var skip_subtree = false;
 								else 

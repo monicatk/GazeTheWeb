@@ -555,6 +555,7 @@ function CheckOverflowProperties(node)
 // ComputedStyle (cs) is optional, because already present in some parts of the code where this function is called
 function SetOverflowId(node, id, cs)
 {
+    console.log("SetOverflowId called with id ", id, " for ", node);
     if(node === undefined || typeof(node.setAttribute) !== "function") // Assume, that removeAttribute is also present when setAttribute is
         return;
 
@@ -582,9 +583,17 @@ function SetOverflowId(node, id, cs)
 // Returns corresponding DOMObject if any exists
 function SetOverflowObjectViaId(node, id)
 {
+    if(id === undefined)
+        console.log("SetOverflowObjectViaId: Second argument 'id' is undefined!");
+
+    console.log("SetOverflowObjectViaId called with id ",id, " for ", node);
     var domObj = GetCorrespondingDOMObject(node);
     if(domObj !== undefined)
     {
+        // DEBUG
+        //if(domObj.getType() === 3)
+        console.log("Setting overflow to id: ", id, " for ", domObj);
+
         // id of null or -1 will reset overflow object in domObj
         domObj.setOverflowViaId(id);
         return domObj;
