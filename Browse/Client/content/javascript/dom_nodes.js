@@ -133,7 +133,6 @@ DOMNode.prototype.updateRects = function(altNode){
 
     var adjustedRects = this.getAdjustedClientRects(altNode);
 
-    this.updateOccBitmask(altNode);
 
     if(!EqualClientRectsData(this.rects, adjustedRects))
     {
@@ -141,6 +140,9 @@ DOMNode.prototype.updateRects = function(altNode){
 
         SendAttributeChangesToCEF("Rects", this);
         UpdateRectUpdateTimer(t0);
+        
+        this.updateOccBitmask(altNode);
+        
         return true; // Rects changed and were updated
     }
     UpdateRectUpdateTimer(t0);
@@ -153,14 +155,21 @@ DOMNode.prototype.updateOccBitmask = function(altNode){
     if(this.rects.length > 0)
     {
         var r = this.rects[0];
+        r[0] = Math.ceil(r[0])+1;
+        r[1] = Math.ceil(r[1])+1;
+        r[2] = Math.floor(r[2])-1;
+        r[3] = Math.floor(r[3])-1;
+        // r = r.map((n) => { return Math.floor(n)-1; })
         // rect corners
-        var pts = [[r[1],r[0]], [r[3],r[0]], [r[3],r[2]-0.0001], [r[1],r[2]-0.0001]]; // Note: Seems infinitely small amount to high
+        var pts = [[r[1],r[0]], [r[3],r[0]], [r[3],r[2]], [r[1],r[2]]]; // Note: Seems infinitely small amount to high
         pts.forEach( (pt) => { // pt[0] == x, pt[1] == y
             // Rect point in currently shown part of website?
-            if(pt[0] < window.scrollX || pt[0] > window.scrollX + window.innerWidth ||
-                pt[1] < window.scrollY || pt[1] > window.scrollY + window.innerHeight)
-                    bm.push(0);
-            else
+            // if(pt[0] < window.scrollX || pt[0] > window.scrollX + window.innerWidth ||
+                // pt[1] < window.scrollY || pt[1] > window.scrollY + window.innerHeight)
+                    // bm.push(0);
+            // else
+            // NOTE: OccBitmask is updated less frequently than scrolling may happen!
+            if(true)
             {
                 var topNode = document.elementFromPoint(pt[0],pt[1]);
                 // TODO: Quick fix
@@ -175,15 +184,21 @@ DOMNode.prototype.updateOccBitmask = function(altNode){
     else
         bm = [0];
     
-    var changed = false;
+    var changed = (bm.length !== this.bitmask.length);
     for(var i = 0, n = bm.length; i < n && !changed; i++)
         changed = (bm[i] != this.bitmask[i]);
 
     if (changed)
     {
+        // DEBUG
+        console.log(this.getId()+": OccBitmask changed: ", this.bitmask, " --> "+bm+" | cppReady? "+this.cppReady);
+
         this.bitmask = bm;
         SendAttributeChangesToCEF("OccBitmask", this);
     }
+    // DEBUG
+    else
+        console.log(this.getId()+": OccBitmask didn't change ... "+this.bitmask+" === "+bm+" | cppReady? "+this.cppReady);
 
     UpdateBitmaskTimer(t1);
 }
@@ -240,18 +255,6 @@ DOMNode.prototype.setOverflowViaId = function(id){
     // Fetch overflow object and set attribute with it
     var obj = GetDOMOverflowElement(id);
     this.setOverflow(obj);
-}
-
-// TODO: What was this good for? oO
-DOMNode.prototype.setDOMAttribute = function(str){
-    console.log("DOMNode.setDOMAttribute called. Why?");
-    switch(str){
-        case "fixed":
-            return this.setFixed;
-        case "overflow":
-            return this.setOverflow;
-    }
-    return undefined;
 }
 
 

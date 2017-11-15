@@ -154,19 +154,25 @@ void Tab::DrawDebuggingOverlay() const
 			for (const auto rRect : rDOMTextLink->GetRects())
 			{
 				renderRect(rRect, (rDOMTextLink->IsFixed()));
-				//bool visible = false;
-				//for (bool b : rDOMTextLink->GetOccBitmask())
-				//{
-				//	visible |= b;
-				//	if (b)
-				//		break;
-				//}
-				//if (visible)
-				//	renderRect(
-				//		rRect,
-				//		(rDOMTextLink->IsFixed())
-				//	);
-				//else
+				bool visible = false;
+				for (bool b : rDOMTextLink->GetOccBitmask())
+				{
+					visible |= b;
+					if (b)
+						break;
+				}
+				if (visible)
+					renderRect(
+						rRect,
+						(rDOMTextLink->IsFixed())
+					);
+				else
+				{
+					_upDebugLineQuad->GetShader()->UpdateValue("color", glm::vec3(0.2, 0.2, 0.2));
+					renderRect(rRect, rDOMTextLink->IsFixed());
+					_upDebugLineQuad->GetShader()->UpdateValue("color", DOM_TEXT_LINKS_DEBUG_COLOR);
+				}
+				// else
 				//	LogInfo("TabDebuggingImpl: Hiding DOMTextLink with id=", rDOMTextLink->GetId());
 			}
 		}

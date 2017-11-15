@@ -20,6 +20,15 @@ document.onreadystatechange = function()
 	console.log("document.readyState == "+document.readyState);
 	ConsolePrint("document.readyState == "+document.readyState);
 
+	// TODO: First change of OccBitmask isn't recognized by CEF!
+	if(document.readyState === "loading" || document.readyState === "complete")
+	{
+		window.domNodes.forEach((list) => {
+			// Force send message about attribute changes
+			list.forEach((o) => { SendAttributeChangesToCEF("OccBitmask", o); });
+		});
+	}
+
 	if(document.readyState === "complete")
 	{
 		var keywords = document.querySelector("meta[name='keywords']");

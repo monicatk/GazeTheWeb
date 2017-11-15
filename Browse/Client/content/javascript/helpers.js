@@ -38,6 +38,11 @@ function CefPoll()
     }
 
     domVideos.forEach((n) => { SendAttributeChangesToCEF("Rects", n); });
+
+    window.domNodes.forEach((list) => {
+    // Force send message about attribute changes
+        list.forEach((o) => { SendAttributeChangesToCEF("OccBitmask", o); });
+    });
 }
 
 var gtwPageHeight = 0.0;
