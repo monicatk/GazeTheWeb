@@ -518,7 +518,7 @@ function MutationObserverInit()
 							// node's overflowid attribute was set (changed): Set childrens' overflowIds when node gets tagged as part of overflow subtree 
 							if(attr == "overflowid")
 							{
-								console.log(attr, "changed for ", node);
+								// console.log(attr, "changed for ", node);
 								var id = node.getAttribute("overflowid");
 								var domObj = SetOverflowObjectViaId(node, id);
 								if(domObj === undefined)

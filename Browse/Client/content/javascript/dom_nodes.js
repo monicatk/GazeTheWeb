@@ -191,14 +191,14 @@ DOMNode.prototype.updateOccBitmask = function(altNode){
     if (changed)
     {
         // DEBUG
-        console.log(this.getId()+": OccBitmask changed: ", this.bitmask, " --> "+bm+" | cppReady? "+this.cppReady);
+        // console.log(this.getId()+": OccBitmask changed: ", this.bitmask, " --> "+bm+" | cppReady? "+this.cppReady);
 
         this.bitmask = bm;
         SendAttributeChangesToCEF("OccBitmask", this);
     }
     // DEBUG
     else
-        console.log(this.getId()+": OccBitmask didn't change ... "+this.bitmask+" === "+bm+" | cppReady? "+this.cppReady);
+        // console.log(this.getId()+": OccBitmask didn't change ... "+this.bitmask+" === "+bm+" | cppReady? "+this.cppReady);
 
     UpdateBitmaskTimer(t1);
 }
