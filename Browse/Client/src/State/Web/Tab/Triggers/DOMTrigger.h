@@ -161,9 +161,10 @@ DOMTrigger<T>::~DOMTrigger()
 template <class T>
 bool DOMTrigger<T>::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
-	// Decide visibility (TODO: no visibility variable in DOMNode anymore?)
+	// Decide visibility
 	bool visible =
-		!_spNode->GetRects().empty() // DOM node has rects
+		!_spNode->IsOccluded() // node is not occluded
+		&& !_spNode->GetRects().empty() // DOM node has rects
 		&& _spNode->GetRects().front().Width() != 0 && _spNode->GetRects().front().Height() != 0; // At least the first rect is bigger than zero
 	if (_visible != visible)
 	{

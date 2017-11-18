@@ -154,13 +154,7 @@ void Tab::DrawDebuggingOverlay() const
 			for (const auto rRect : rDOMTextLink->GetRects())
 			{
 				renderRect(rRect, (rDOMTextLink->IsFixed()));
-				bool visible = false;
-				for (bool b : rDOMTextLink->GetOccBitmask())
-				{
-					visible |= b;
-					if (b)
-						break;
-				}
+				bool visible = !rDOMTextLink->IsOccluded();
 				if (visible)
 					renderRect(
 						rRect,

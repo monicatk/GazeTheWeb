@@ -229,14 +229,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 			continue;
 
 		// Check whether link is visible
-		const auto bitmask = rIdNodePair.second->GetOccBitmask();
-		bool visible = true;
-		/*
-		for (const auto& bit : bitmask)
-		{
-			visible &= bit;
-		}
-		*/
+		bool visible = !rIdNodePair.second->IsOccluded();
 
 		// Only highlight if visible
 		if (visible)

@@ -81,7 +81,7 @@ bool DOMNode::PrintAttribute(DOMAttribute attr)
 	case OverflowId: { acc << "\t" << std::to_string(GetOverflowId()) << std::endl; break; }
 	case OccBitmask: {
 		acc << "\t";
-		for (auto bit : GetOccBitmask())
+		for (const auto& bit : _occBitmask)
 			acc << std::to_string(static_cast<int>(bit));
 		acc << std::endl;
 		break;
