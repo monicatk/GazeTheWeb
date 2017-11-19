@@ -154,7 +154,9 @@ DOMNode.prototype.updateOccBitmask = function(altNode){
     var bm = [];
     if(this.rects.length > 0)
     {
-        var r = this.rects[0];
+        // Cut with possible overflows hidding node partially
+        var r = this.getRects()[0];
+        
         r[0] = Math.ceil(r[0])+1;
         r[1] = Math.ceil(r[1])+1;
         r[2] = Math.floor(r[2])-1;
