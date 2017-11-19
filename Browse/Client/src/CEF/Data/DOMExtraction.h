@@ -76,6 +76,7 @@ namespace V8ToCefListValue
 
 namespace StringToCefListValue
 {
+
 	// Nested lists
 	const CefRefPtr<CefListValue> NestedListOfDoubles(std::string attrData);
 
@@ -88,6 +89,10 @@ namespace StringToCefListValue
 	const CefRefPtr<CefListValue> Boolean(std::string attrData);
 	const CefRefPtr<CefListValue> Integer(std::string attrData);
 	const CefRefPtr<CefListValue> String(std::string attrData);
+	
+	// Other
+	const CefRefPtr<CefListValue> Bitmask(std::string attrData);
+
 
 	// Mapping from attribute to datatype
 	const std::map<const DOMAttribute, const std::function<CefRefPtr<CefListValue>(std::string)> > AttrConversion =
@@ -101,7 +106,7 @@ namespace StringToCefListValue
 		{DOMAttribute::Options,				&ListOfStrings},
 		{DOMAttribute::MaxScrolling,		&ListOfIntegers},
 		{DOMAttribute::CurrentScrolling,	&ListOfIntegers},
-		{DOMAttribute::OccBitmask,			&ListOfBools}	
+		{DOMAttribute::OccBitmask,			&Bitmask}	
 	};
 
 	// Extract attribute data

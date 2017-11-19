@@ -76,7 +76,14 @@ private:
 	void SetRects(std::vector<Rect> rects) { _rects = rects; }
 	void SetFixedId(int fixedId) { _fixedId = fixedId; }
 	void SetOverflowId(int overflowId) { _overflowId = overflowId; }
-	void SetOccBitmask(std::vector<bool> bitmask) { _occBitmask = bitmask; _occluded = true; for (const auto& rOcc : _occBitmask) { _occluded &= rOcc;} }
+	void SetOccBitmask(std::vector<bool> bitmask) { 
+		_occBitmask = bitmask; 
+		_occluded = true; 
+		for (const auto rOcc : _occBitmask) 
+		{ 
+			_occluded &= rOcc;
+		}
+	}
 
 	bool IPCSetRects(CefRefPtr<CefListValue> data);
 	bool IPCSetFixedId(CefRefPtr<CefListValue> data);

@@ -326,8 +326,6 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					const DOMAttribute& attr = (DOMAttribute) std::stoi(data[4]);
 					const std::string& attrData = data[5];
 
-					if (attrData == "OccBitmask")
-						LogInfo("### UPDATING OCCBITMASK ###");
 
 					// Perform node update
 					bool success = false;

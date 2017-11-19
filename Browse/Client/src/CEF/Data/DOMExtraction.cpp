@@ -234,6 +234,19 @@ const CefRefPtr<CefListValue> StringToCefListValue::ListOfBools(std::string attr
 	return wrapper;
 }
 
+const CefRefPtr<CefListValue> StringToCefListValue::Bitmask(std::string attrData)
+{
+	CefRefPtr<CefListValue> wrapper = CefListValue::Create();
+	CefRefPtr<CefListValue> extracted_data = CefListValue::Create();
+
+	for (size_t i = 0; i < attrData.length(); i++)
+	{
+		extracted_data->SetBool(i, (attrData[i] == '1'));
+	}
+	wrapper->SetList(0, extracted_data);
+	return wrapper;
+}
+
 const CefRefPtr<CefListValue> StringToCefListValue::Boolean(std::string attrData)
 {
 	CefRefPtr<CefListValue> wrapper = CefListValue::Create();
@@ -266,3 +279,4 @@ const CefRefPtr<CefListValue> StringToCefListValue::ExtractAttributeData(DOMAttr
 
 	return AttrConversion.at(attr)(attrData);
 }
+
