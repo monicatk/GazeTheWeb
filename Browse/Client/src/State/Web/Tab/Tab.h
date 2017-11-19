@@ -124,6 +124,15 @@ public:
 	};
 	std::vector<DOMLinkInfo> RetrieveDOMLinkInfos() const;
 
+	// Getter for URL
+	std::string GetURL() const { return _url; }
+
+	// Getter for title
+	std::string GetTitle() const { return _title; }
+
+	// Get color accent
+	glm::vec4 GetColorAccent() const { return _targetColorAccent; }
+
     // #################################
     // ### TAB INTERACTIVE INTERFACE ###
     // #################################
@@ -371,9 +380,6 @@ public:
 
     // Receive callbacks from CefMediator upon scrolling offset changes
     virtual void SetScrollingOffset(double x, double y);
-
-    // Getter for URL
-    virtual std::string GetURL() const { return _url; }
 
     // Getter for current zoom level of corresponding browser
     virtual double GetZoomLevel() const { return _zoomLevel; }

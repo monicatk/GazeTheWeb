@@ -747,8 +747,30 @@ void Web::UpdateTabOverview()
     // Current tab view
     if (_currentTabId >= 0)
     {
-        // Show URL
+        // Show URL and title
         eyegui::setContentOfTextBlock(_pTabOverviewLayout, "url", _tabs.at(_currentTabId)->GetURL());
+		eyegui::setContentOfTextBlock(_pTabOverviewLayout, "title", _tabs.at(_currentTabId)->GetTitle());
+
+		// Set color of title
+		auto colorAccent = _tabs.at(_currentTabId)->GetColorAccent();
+		_pMaster->SetStyleTreePropertyValue(
+			"tab_overview_page_title",
+			eyegui::property::Color::BackgroundColor,
+			RGBAToHexString(colorAccent)
+		);
+
+		// Set color of title font
+		float grey = 0.333f * colorAccent.r + 0.333f * colorAccent.g + 0.333f * colorAccent.b;
+		glm::vec4 fontColor(0, 0, 0, 1);
+		if (grey <= 0.4) // if background is too dark, make font bright
+		{
+			fontColor = glm::vec4(1, 1, 1, 1);
+		}
+		_pMaster->SetStyleTreePropertyValue(
+			"tab_overview_page_title",
+			eyegui::property::Color::FontColor,
+			RGBAToHexString(fontColor)
+		);
 
         // Show current tab's page
         auto wpTexture = _tabs.at(_currentTabId)->GetWebViewTexture();

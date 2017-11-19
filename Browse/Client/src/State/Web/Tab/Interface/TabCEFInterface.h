@@ -74,9 +74,6 @@ public:
     // Receive callbacks from CefMediator upon scrolling offset changes
     virtual void SetScrollingOffset(double x, double y) = 0;
 
-    // Getter for URL
-    virtual std::string GetURL() const = 0;
-
     // Getter for current zoom level of corresponding browser
     virtual double GetZoomLevel() const = 0;
 
@@ -95,8 +92,6 @@ public:
 
 	// Receive current loading status of each frame
 	virtual void SetLoadingStatus(bool isLoading, bool isMainFrame) = 0;
-
-
 
 	// Tell about JavaScript dialog
 	virtual void RequestJSDialog(JavaScriptDialogType type, std::string message) = 0;
