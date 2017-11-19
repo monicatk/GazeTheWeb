@@ -49,6 +49,18 @@ bright_panel : default
 	BackgroundColor = 0x50BAA6FF
 }
 
+standard_text : default
+{
+	BackgroundColor = 0xFFFFFFFF
+	FontColor = 0x000000FF
+}
+
+tab_overview_page_title: default
+{
+	BackgroundColor = 0xFFFFFFFF
+	FontColor = 0x000000FF
+}
+
 // Placeholders for tab overview
 tab_preview_0 : default
 {
