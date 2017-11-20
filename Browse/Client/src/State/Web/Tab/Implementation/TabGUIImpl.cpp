@@ -103,6 +103,7 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
 			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 			{
+				iter->second->SetMuted(false);
 				iter->second->ChangeVolume(0.25f);
 			}
 		}
@@ -111,6 +112,7 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
 			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 			{
+				iter->second->SetMuted(false);
 				iter->second->ChangeVolume(-0.25f);
 			}
 		}
