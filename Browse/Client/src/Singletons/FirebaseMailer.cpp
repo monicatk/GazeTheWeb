@@ -99,7 +99,10 @@ bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string pas
 		std::promise<int> promise; auto future = promise.get_future(); // future provides index
 		Transform(FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT, 1, &promise); // adds one to the count
 		int index = future.get() - 1;
-		nlohmann::json record = { { "date", GetDate() } }; // add date
+		nlohmann::json record = {
+			{ "date", GetDate() }, // add date
+			{ "timestamp", GetTimestamp() } // add timestamp
+		};
 		Put(FirebaseJSONKey::GENERAL_APPLICATION_START, record, std::to_string(index)); // send JSON to database
 		*_pStartIndex = index;
 	}

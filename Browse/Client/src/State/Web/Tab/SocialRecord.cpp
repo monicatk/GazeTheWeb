@@ -20,6 +20,9 @@ void SocialRecord::StartAndAddPage(std::string URL, std::string keywords)
 		// Store start date
 		_startDate = GetDate();
 
+		// Store start timestamp
+		_startTimestamp = GetTimestamp();
+
 		// Store start time for duration estimation
 		_startTime = std::chrono::system_clock::now();
 
@@ -43,6 +46,9 @@ void SocialRecord::End()
 
 		// Store end date
 		_endDate = GetDate();
+
+		// Store end timestamp
+		_endTimestamp = GetTimestamp();
 
 		// Store end time for duration estimation
 		_endTime = std::chrono::system_clock::now();
@@ -132,6 +138,8 @@ nlohmann::json SocialRecord::ToJSON() const
 		{ "domain", GetDomain() },
 		{ "startDate", _startDate },
 		{ "endDate", _endDate },
+		{ "startTimestamp", _startTimestamp },
+		{ "endTimestamp", _endTimestamp },
 		{ "duration", std::chrono::duration<float>(_endTime-_startTime).count() },
 		{ "durationInForeground", _totalDurationInForeground },
 		{ "durationUserActive", _totalDurationUserActive },

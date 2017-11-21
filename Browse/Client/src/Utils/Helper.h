@@ -29,4 +29,7 @@ std::vector<std::string> SplitBySeparator(std::string str, char separator);
 // Simple getter of date
 std::string GetDate();
 
+// Simple getter of timestamp
+std::string GetTimestamp();
+
 #endif // HELPER_H_

@@ -207,6 +207,8 @@ private:
 	std::chrono::time_point<std::chrono::system_clock> _lastAddPage; // used for calculating duration of page
 	std::string _startDate;
 	std::string _endDate;
+	std::string _startTimestamp;
+	std::string _endTimestamp;
 	double _totalDurationInForeground = 0.0;
 	double _totalDurationUserActive = 0.0; // and tab in foreground
 	double _totalDurationEmulatedInput = 0.0;

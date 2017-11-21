@@ -612,7 +612,8 @@ void Master::SimplePushBackAsyncJob(FirebaseIntegerKey countKey, FirebaseJSONKey
 {
 	// Add data to record
 	record.emplace("startIndex", FirebaseMailer::Instance().GetStartIndex()); // start index
-	record.emplace("date", GetDate()); // date
+	record.emplace("date", GetDate()); // add date
+	record.emplace("timestamp", GetTimestamp()); // add timestamp
 
 	// Push back the job
 	PushBackAsyncJob(
