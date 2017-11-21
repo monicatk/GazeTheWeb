@@ -149,19 +149,23 @@ DOMNode.prototype.updateRects = function(altNode){
     return false; // No update needed, no changes
 }
 
-DOMNode.prototype.updateOccBitmask = function(altNode){
+DOMNode.prototype.updateOccBitmask = function(altNode, debug){
     var t1 = performance.now();
     var bm = [];
     if(this.rects.length > 0)
     {
         // Cut with possible overflows hidding node partially
-        var r = this.getRects()[0];
-        
-        r[0] = Math.ceil(r[0])+1;
-        r[1] = Math.ceil(r[1])+1;
-        r[2] = Math.floor(r[2])-1;
-        r[3] = Math.floor(r[3])-1;
-        // r = r.map((n) => { return Math.floor(n)-1; })
+        var r = Object.assign({}, this.getRects()[0]); // deepcopy array, otherwise, coordinates will be changed by the following
+
+        if(debug)
+            console.log("scroll X: ", window.scrollX, ", Y: ", window.scrollY, "\nrects before: ", r);
+        var not_fixed = Number(!Boolean(this.fixObj));
+        r[0] = Math.ceil(r[0])+1 - window.scrollY * not_fixed;
+        r[1] = Math.ceil(r[1])+1 - window.scrollX * not_fixed;
+        r[2] = Math.floor(r[2])-1 - window.scrollY * not_fixed;
+        r[3] = Math.floor(r[3])-1 - window.scrollX * not_fixed;
+        if(debug)
+            console.log("Used coordinates:", r);
         // rect corners
         var pts = [[r[1],r[0]], [r[3],r[0]], [r[3],r[2]], [r[1],r[2]]]; // Note: Seems infinitely small amount to high
         pts.forEach( (pt) => { // pt[0] == x, pt[1] == y
@@ -173,9 +177,17 @@ DOMNode.prototype.updateOccBitmask = function(altNode){
             // NOTE: OccBitmask is updated less frequently than scrolling may happen!
             if(true)
             {
-                var topNode = document.elementFromPoint(pt[0],pt[1]);
+                var topNode = document.elementFromPoint(pt[0], pt[1]);
+                if(debug)
+                {
+                    console.log(this.getType(), this.getId(), ": (", pt[0], ",", pt[1],
+                        ") => ", topNode);
+                    console.log(document.elementsFromPoint(pt[0], pt[1]));//.slice(0,3));
+                }
                 // TODO: Quick fix
                 if (topNode === null)
+                    bm.push(0);
+                else if(this.node.tagName === "A" && topNode.parentElement === this.node)
                     bm.push(0);
                 else
                     bm.push(Number(topNode !== (altNode || this.node)));

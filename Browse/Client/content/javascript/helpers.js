@@ -26,7 +26,8 @@ ConsolePrint("Starting to import helpers.js ...");
 // TODO: Move CEF callable functions to separate js-file
 function CefPoll()
 {
-    console.log("CefPoll triggerd.");
+    console.log("CefPoll triggerd...");
+    var t_start = performance.now();
 
     UpdateDOMRects();
 
@@ -41,8 +42,13 @@ function CefPoll()
 
     window.domNodes.forEach((list) => {
     // Force send message about attribute changes
-        list.forEach((o) => { SendAttributeChangesToCEF("OccBitmask", o); });
+        list.forEach((o) => { 
+            SendAttributeChangesToCEF("OccBitmask", o);
+            SendAttributeChangesToCEF("Rects", o); // For language list on wikipedia.org main page, for example
+        });
     });
+
+    console.log("Took ", performance.now() - t_start, "ms.");
 }
 
 var gtwPageHeight = 0.0;

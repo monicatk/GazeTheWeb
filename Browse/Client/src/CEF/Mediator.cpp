@@ -508,6 +508,16 @@ void Mediator::RemoveFixedElement(CefRefPtr<CefBrowser> browser, int id)
 
 void Mediator::Poll(TabCEFInterface* pTab)
 {
+	if (pTab == NULL)
+	{
+		LogInfo("Mediator: Polling every tab...");
+		for (const auto& pair: _browsers)
+		{
+			pair.second->GetMainFrame()->ExecuteJavaScript("CefPoll();", "CefPolling", 0);
+		}
+		return;
+	}
+
 	if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
 		browser->GetMainFrame()->ExecuteJavaScript("CefPoll();", "CefPolling", 0);
