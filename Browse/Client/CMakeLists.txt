@@ -406,7 +406,7 @@ if(${CLIENT_BUILD_VI_MYGAZE_PLUGIN})
 	
 		# Visual Interaction myGaze SDK
 		include_directories("${CLIENT_VI_MYGAZE_SDK_PATH}/include")
-		set(VI_MYGAZE_SDK_LIBRARIES "${CLIENT_VI_MYGAZE_SDK_PATH}/myGazeAPI.lib")
+		set(VI_MYGAZE_SDK_LIBRARIES "${CLIENT_VI_MYGAZE_SDK_PATH}/lib/myGazeAPI.lib")
 
 		# Plugin project
 		add_library(

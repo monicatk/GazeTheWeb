@@ -151,6 +151,20 @@ void FetchSamples(SampleQueue& rspSamples)
 
 CalibrationResult Calibrate(std::shared_ptr<CalibrationInfo>& rspInfo)
 {
+	// Setup calibration
+	CalibrationStruct calibrationData;
+	calibrationData.method = 5;
+	calibrationData.speed = 0;
+	calibrationData.displayDevice = 0;
+	calibrationData.targetShape = 3;
+	calibrationData.foregroundBrightness = 242;
+	calibrationData.backgroundBrightness = 33;
+	calibrationData.autoAccept = 2;
+	calibrationData.targetSize = 35;
+	calibrationData.visualization = 1;
+	strcpy(calibrationData.targetFilename, "");
+	iV_SetupCalibration(&calibrationData);
+
 	// Start calibration
 	CalibrationResult result = iV_Calibrate() == RET_SUCCESS ? CALIBRATION_OK : CALIBRATION_FAILED;
 
