@@ -156,7 +156,7 @@ CalibrationResult Calibrate(std::shared_ptr<CalibrationInfo>& rspInfo)
 	calibrationData.method = 5;
 	calibrationData.speed = 0;
 	calibrationData.displayDevice = 0;
-	calibrationData.targetShape = 3;
+	calibrationData.targetShape = 2;
 	calibrationData.foregroundBrightness = 242;
 	calibrationData.backgroundBrightness = 33;
 	calibrationData.autoAccept = 2;
