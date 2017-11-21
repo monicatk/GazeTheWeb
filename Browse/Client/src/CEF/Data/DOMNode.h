@@ -83,9 +83,6 @@ private:
 		{ 
 			_occluded &= rOcc;
 		}
-
-		// TODO REMOVE
-		_occluded = false;
 	}
 
 	bool IPCSetRects(CefRefPtr<CefListValue> data);
