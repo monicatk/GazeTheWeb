@@ -42,11 +42,12 @@ std::map<std::string, VoiceAction> voiceActionMapping = {
 	{ "mute",VoiceAction::MUTE },
 	{ "unmute",VoiceAction::UNMUTE },
 	{ "play",VoiceAction::PLAY },
-	//{ "stop",VoiceAction::STOP },
+	{ "crypt",VoiceAction::QUIT },
 	{ "jump",VoiceAction::JUMP },
 	{ "drum",VoiceAction::JUMP },
 	{ "quit",VoiceAction::QUIT },
 	{ "new tab",VoiceAction::NEW_TAB },
+	{ "utep",VoiceAction::NEW_TAB },
 	{ "neutab",VoiceAction::NEW_TAB },
 	{ "neo tap",VoiceAction::NEW_TAB }
 	
@@ -56,13 +57,13 @@ std::map<std::string, VoiceAction> voiceActionMapping = {
 std::set<std::string> voiceActionKeys = {
 	"up","app",
 	"down" , "town","dumb","dawn","drum",
-	"bookmark","back", "top","new tab","neo tap","neutab",
+	"bookmark","back", "top","new tab","neo tap","neutab","utep",
 	"reload","bottom","button","forward",
 	"text","video",
 	"go to","search","click","clique",
 	"increase","decrease",
 	"mute","unmute",
-	"play","jump","quit"
+	"play","jump","quit","crypt"
 };
 
 std::map<std::string, std::string> textToDigit = {
