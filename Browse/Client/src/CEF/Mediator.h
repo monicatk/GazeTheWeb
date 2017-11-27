@@ -116,7 +116,9 @@ public:
     void ReceiveFixedElements(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
     void RemoveFixedElement(CefRefPtr<CefBrowser> browser, int id);
 
-	void Poll(TabCEFInterface* pTab = NULL);
+	// If numPartitions != 0, divide polled elements into numPartitions splits and update split with 
+	// updatePartition as array index (starting with 0!)
+	void Poll(TabCEFInterface* pTab = NULL, unsigned int numPartitions=0, unsigned int updatePartition=0);
 
 	// Update Tab's title when title change callback is received
 	void OnTabTitleChange(CefRefPtr<CefBrowser> browser, std::string title);

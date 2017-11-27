@@ -506,21 +506,23 @@ void Mediator::RemoveFixedElement(CefRefPtr<CefBrowser> browser, int id)
     }
 }
 
-void Mediator::Poll(TabCEFInterface* pTab)
+void Mediator::Poll(TabCEFInterface* pTab, unsigned int numPartitions, unsigned int updatePartition)
 {
+	const std::string& polling_code = (numPartitions == 0) ? "CefPoll();" : 
+		"CefPoll(" + std::to_string(numPartitions) + "," + std::to_string(updatePartition) + ");";
 	if (pTab == NULL)
 	{
 		LogInfo("Mediator: Polling every tab...");
 		for (const auto& pair: _browsers)
 		{
-			pair.second->GetMainFrame()->ExecuteJavaScript("CefPoll();", "CefPolling", 0);
+			pair.second->GetMainFrame()->ExecuteJavaScript(polling_code, "CefPolling", 0);
 		}
 		return;
 	}
 
 	if (CefRefPtr<CefBrowser> browser = GetBrowser(pTab))
 	{
-		browser->GetMainFrame()->ExecuteJavaScript("CefPoll();", "CefPolling", 0);
+		browser->GetMainFrame()->ExecuteJavaScript(polling_code, "CefPolling", 0);
 	}	
 }
 

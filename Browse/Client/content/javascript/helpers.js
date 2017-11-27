@@ -24,12 +24,16 @@ ConsolePrint("Starting to import helpers.js ...");
 
 
 // TODO: Move CEF callable functions to separate js-file
-function CefPoll()
+function CefPoll(num_partitions, update_partition)
 {
+    var partitioned = (num_partitions !== undefined && update_partition !== undefined);
+    
     console.log("CefPoll triggerd...");
+    if(partitioned)
+        console.log("Polling "+update_partition+". of "+num_partitions+" partitions.");
     var t_start = performance.now();
 
-    UpdateDOMRects();
+    // UpdateDOMRects();
 
     for(var node in appended_nodes)
     {
@@ -38,13 +42,30 @@ function CefPoll()
         console.log("CefPoll: Analyzed missing node", node);
     }
 
+    // Partitions shouldn't matter for expected small amounts of video nodes
     domVideos.forEach((n) => { SendAttributeChangesToCEF("Rects", n); });
 
     window.domNodes.forEach((list) => {
-    // Force send message about attribute changes
-        list.forEach((o) => { 
-            SendAttributeChangesToCEF("OccBitmask", o);
-            SendAttributeChangesToCEF("Rects", o); // For language list on wikipedia.org main page, for example
+        if(partitioned)
+        {
+            var partition_size = Math.floor(list.length / num_partitions); 
+            var first =  partition_size * update_partition;
+            // Last partition is 1 element bigger if odd number of elements in list
+            var last = (num_partitions-1 === update_partition) ? list.length-1 : first + partition_size; 
+        }
+        // If partition_size == 0, because list length is too short, don't partition and update all
+        var this_partitioned = (partitioned && partition_size > 0);
+
+        // Force send message about attribute changes
+        list.forEach((o, idx) => { 
+            if(!this_partitioned || (idx >= first && idx <= last) )
+            {
+                if(typeof(o.updateRects()) === "function")
+                    o.updateRects();
+
+                SendAttributeChangesToCEF("OccBitmask", o);
+                SendAttributeChangesToCEF("Rects", o); // For language list on wikipedia.org main page, for example
+            } 
         });
     });
 
@@ -206,7 +227,7 @@ function DeleteFixedElement(fixId)
 }
 
 var debug_updateDOMRects_count = 0;
-function UpdateDOMRects(why)
+function UpdateDOMRects(num_partitions)
 {
 
     // console.log("UpdateDOMRects called because "+why+", "+(++debug_updateDOMRects_count)+" times until now");
