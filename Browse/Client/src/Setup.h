@@ -84,7 +84,8 @@ namespace setup
 	static const float	WEB_VIEW_RESOLUTION_SCALE = 1.f;
 	static const unsigned int	HISTORY_MAX_PAGE_COUNT = 100; // maximal length of history
 	static const bool	USE_DOM_NODE_POLLING = !DEBUG_MODE;
-	static const float	DOM_POLLING_FREQUENCY = 0.25f; // times per second
+	static const float	DOM_POLLING_FREQUENCY = 1.0f; // times per second
+	static const int	DOM_POLLING_PARTITION_NUMBER = 8;
 }
 
 #endif // SETUP_H_

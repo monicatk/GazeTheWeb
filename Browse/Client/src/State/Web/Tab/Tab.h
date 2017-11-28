@@ -716,6 +716,9 @@ private:
 
 	// Current history entry
 	std::shared_ptr<HistoryManager::Page> _spHistoryPage = nullptr;
+
+	// Polling partition index
+	int _pollingPartitionIndex = 0;
 };
 
 #endif // TAB_H_

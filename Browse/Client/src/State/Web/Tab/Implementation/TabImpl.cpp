@@ -144,8 +144,13 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 	{
 		if (_timeUntilPolling <= 0.f)
 		{
-			_pCefMediator->Poll(this); // TODO: maybe only start after completely loaded
-			_timeUntilPolling = 1.f / setup::DOM_POLLING_FREQUENCY;
+			_pCefMediator->Poll(this, setup::DOM_POLLING_PARTITION_NUMBER, _pollingPartitionIndex); // TODO: maybe only start after completely loaded
+			_timeUntilPolling = 1.f / setup::DOM_POLLING_FREQUENCY; // update time until polling
+			++_pollingPartitionIndex; // update polling partition index
+			if (_pollingPartitionIndex >= setup::DOM_POLLING_PARTITION_NUMBER)
+			{
+				_pollingPartitionIndex = 0;
+			}
 		}
 		else
 		{
