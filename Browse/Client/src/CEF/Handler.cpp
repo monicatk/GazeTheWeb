@@ -6,7 +6,6 @@
 
 #include "src/CEF/Handler.h"
 #include "src/CEF/Mediator.h"
-#include "src/CEF/RequestHandler.h"
 #include "src/Utils/Logger.h"
 #include "src/Singletons/JSMailer.h"
 #include "include/base/cef_bind.h"

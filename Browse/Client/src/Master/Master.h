@@ -150,6 +150,9 @@ public:
 		eyegui::setKeyboardLayout(_pGUI, keyboardLayout);
 	}
 
+	// Decide whether to block ads
+	void BlockAds(bool blockAds) { _pCefMediator->BlockAds(blockAds); }
+
 	// ### STORING OF SETTINGS ###
 
 	// Store homepage URL in settings

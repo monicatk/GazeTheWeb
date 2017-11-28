@@ -29,25 +29,29 @@ Settings::Settings(Master* pMaster) : State(pMaster)
 	// Create layouts
 	_pSettingsLayout = _pMaster->AddLayout("layouts/Settings.xeyegui", EYEGUI_SETTINGS_LAYER, false);
 	_pGeneralLayout = _pMaster->AddLayout("layouts/SettingsGeneral.xeyegui", EYEGUI_SETTINGS_LAYER, false);
+	_pAdBlockingLayout = _pMaster->AddLayout("layouts/SettingsAdBlocking.xeyegui", EYEGUI_SETTINGS_LAYER, false);
 	_pInfoLayout = _pMaster->AddLayout("layouts/SettingsInfo.xeyegui", EYEGUI_SETTINGS_LAYER, false);
 
     // Set state of switches before registering listerners to avoid unnecessary saving
     if(_globalSetup.showDescriptions) { eyegui::buttonDown(_pGeneralLayout, "toggle_descriptions", true); }
     if(_globalSetup.showGazeVisualization) { eyegui::buttonDown(_pGeneralLayout, "toggle_gaze_visualization", true); }
+	if(_globalSetup.adBlocking) { eyegui::buttonDown(_pGeneralLayout, "toggle_ad_blocking", true); };
 
 	// Button listener
 	_spSettingsButtonListener = std::shared_ptr<SettingsButtonListener>(new SettingsButtonListener(this));
 	eyegui::registerButtonListener(_pSettingsLayout, "close", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pSettingsLayout, "general", _spSettingsButtonListener);
+	eyegui::registerButtonListener(_pSettingsLayout, "ad_blocking", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pSettingsLayout, "info", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pSettingsLayout, "shutdown", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pGeneralLayout, "toggle_descriptions", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pGeneralLayout, "toggle_gaze_visualization", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pGeneralLayout, "back", _spSettingsButtonListener);
+	eyegui::registerButtonListener(_pAdBlockingLayout, "toggle_ad_blocking", _spSettingsButtonListener);
+	eyegui::registerButtonListener(_pAdBlockingLayout, "back", _spSettingsButtonListener);
 	eyegui::registerButtonListener(_pInfoLayout, "back", _spSettingsButtonListener);
 
 	// Deactivate buttons which are not used, yet
-	eyegui::setElementActivity(_pSettingsLayout, "privacy", false, false);
 	eyegui::setElementActivity(_pSettingsLayout, "input", false, false);
 }
 
@@ -118,6 +122,11 @@ bool Settings::SaveSettings() const
 	pGazeVisualization->SetAttribute("visible", _globalSetup.showGazeVisualization ? "true" : "false");
 	pGlobal->InsertAfterChild(pDescriptions, pGazeVisualization);
 
+	// Ad blocking
+	tinyxml2::XMLElement* pAdBlocking = doc.NewElement("adblocking");
+	pAdBlocking->SetAttribute("block", _globalSetup.adBlocking ? "true" : "false");
+	pGlobal->InsertAfterChild(pGazeVisualization, pAdBlocking);
+
 	// Keyboard layout
 	tinyxml2::XMLElement* pKeyboardLayout = doc.NewElement("keyboardlayout");
 	std::string layout;
@@ -137,7 +146,7 @@ bool Settings::SaveSettings() const
 		break;
 	}
 	pKeyboardLayout->SetAttribute("layout", layout.c_str());
-	pGlobal->InsertAfterChild(pGazeVisualization, pKeyboardLayout);
+	pGlobal->InsertAfterChild(pAdBlocking, pKeyboardLayout);
 
 	// Firebase email and password
 	tinyxml2::XMLElement* pFirebase = doc.NewElement("firebase");
@@ -176,6 +185,7 @@ void Settings::ApplySettings(bool save)
 	_pMaster->SetShowDescriptions(_globalSetup.showDescriptions);
 	_pMaster->SetGazeVisualization(_globalSetup.showGazeVisualization);
 	_pMaster->SetKeyboardLayout(_globalSetup.keyboardLayout);
+	_pMaster->BlockAds(_globalSetup.adBlocking);
 
 	// Save it
 	if (save)
@@ -214,6 +224,13 @@ bool Settings::LoadSettings()
 	if (pGazeVisualization != NULL)
 	{
 		_globalSetup.showGazeVisualization = pGazeVisualization->BoolAttribute("visible");
+	}
+
+	// Ad blocking
+	tinyxml2::XMLElement* pAdBlocking = pGlobal->FirstChildElement("adblocking");
+	if (pAdBlocking != NULL)
+	{
+		_globalSetup.adBlocking = pGazeVisualization->BoolAttribute("block");
 	}
 
 	// Keyboard layout
@@ -293,6 +310,10 @@ void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string
 			eyegui::setVisibilityOfLayout(_pSettings->_pGeneralLayout, true, true, true);
 			JSMailer::instance().Send("general");
 		}
+		else if (id == "ad_blocking")
+		{
+			eyegui::setVisibilityOfLayout(_pSettings->_pAdBlockingLayout, true, true, true);
+		}
 		else if (id == "info")
 		{
 			eyegui::setVisibilityOfLayout(_pSettings->_pInfoLayout, true, true, true);
@@ -323,6 +344,19 @@ void Settings::SettingsButtonListener::down(eyegui::Layout* pLayout, std::string
 			JSMailer::instance().Send("gaze_on");
 		}
 	}
+	else if (pLayout == _pSettings->_pAdBlockingLayout)
+	{
+		// ### Ad blocking layout ###
+		if (id == "back")
+		{
+			_pSettings->ApplySettings(true);
+			eyegui::setVisibilityOfLayout(_pSettings->_pAdBlockingLayout, false, false, true);
+		}
+		else if (id == "toggle_ad_blocking")
+		{
+			_pSettings->_globalSetup.adBlocking = true;
+		}
+	}
 	else if (pLayout == _pSettings->_pInfoLayout)
 	{
 		// ### Information layout ###
@@ -348,4 +382,12 @@ void Settings::SettingsButtonListener::up(eyegui::Layout* pLayout, std::string i
 			JSMailer::instance().Send("gaze_off");
         }
     }
+	else if (pLayout == _pSettings->_pAdBlockingLayout)
+	{
+		// ### Ad blocking layout ###
+		if (id == "toggle_ad_blocking")
+		{
+			_pSettings->_globalSetup.adBlocking = false;
+		}
+	}
 }

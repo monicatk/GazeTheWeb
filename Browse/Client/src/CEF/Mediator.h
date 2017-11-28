@@ -181,6 +181,9 @@ public:
 	std::string GetClipboardText() const; // should be called by tab
 	void ClearClipboardText(); // should be called by mediator before asking Javascript to extract selected string from page
 
+	// Decide whether to block ads
+	void BlockAds(bool blockAds) { _handler->BlockAds(blockAds); }
+
 protected:
 
     // Members
