@@ -25,7 +25,7 @@
 									</row>
 									<row size="20%">
 										<column size="100%">
-											<textblock style="default_noback" alignment="center" verticalalignment="top" fontsize="medium" content="Toggle Ad Blocking"/>
+											<textblock style="default_noback" alignment="center" verticalalignment="top" fontsize="medium" key="settings:toggle_ad_blocking"/>
 										</column>
 									</row>
 								</grid>
