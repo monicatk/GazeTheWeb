@@ -136,6 +136,7 @@ private:
     friend class DOMOverflowElementInteraction;
     friend class DOMSelectFieldInteraction;
 	friend class DOMVideoInteraction;
+	friend class DOMCheckboxInteraction;
 
 };
 
@@ -195,6 +196,14 @@ public:
 	void ToggleMuted() { SendExecuteFunctionMessage("toggleMuted"); }
 	void TogglePlayPause() { SendExecuteFunctionMessage("togglePlayPause"); }
 	void ChangeVolume(float delta) { SendExecuteFunctionMessage("changeVolume", delta); }
+};
+
+class DOMCheckboxInteraction : public virtual DOMJavascriptCommunication
+{
+public:
+	DOMCheckboxInteraction() {}
+
+	void SetChecked(bool state) { SendExecuteFunctionMessage("setChecked", state); }
 };
 
 

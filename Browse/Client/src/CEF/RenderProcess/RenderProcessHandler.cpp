@@ -275,7 +275,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 				context->Exit();
 				return true;
 			}
-
+			
 			// Call object getter and save returned object
 			CefRefPtr<CefV8Value> domObj = objGetter->ExecuteFunction(context->GetGlobal(), { CefV8Value::CreateInt(id) });
 
@@ -295,7 +295,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 					args->SetList(args_count++, listValue);
 				}
 			}
-
+			
 			if (args->GetSize() <= 2)
 			{
 				LogDebug(browser, "Renderer: ERROR processing " + js_obj_getter_name + "(" + std::to_string(id) + ")!");

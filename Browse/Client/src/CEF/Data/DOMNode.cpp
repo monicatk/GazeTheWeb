@@ -11,10 +11,12 @@
 #include <sstream>
 
 /*
-   ___  ____  __  ____  __        __      
-  / _ \/ __ \/  |/  / |/ /__  ___/ /__ ___
- / // / /_/ / /|_/ /    / _ \/ _  / -_|_-<
-/____/\____/_/  /_/_/|_/\___/\_,_/\__/___/
+    ____  ____  __  ____   __          __   
+   / __ \/ __ \/  |/  / | / /___  ____/ /__ 
+  / / / / / / / /|_/ /  |/ / __ \/ __  / _ \
+ / /_/ / /_/ / /  / / /|  / /_/ / /_/ /  __/
+/_____/\____/_/  /_/_/ |_/\____/\__,_/\___/ 
+                   
 */
 // TODO: Move descriptions to DOMAttribute.cpp?
 const std::vector<DOMAttribute> DOMNode::_description = {
@@ -153,11 +155,12 @@ bool DOMNode::IPCSetOccBitmask(CefRefPtr<CefListValue> data)
 }
 
 /*
-   ___  ____  __  _________        __  ____               __    
-  / _ \/ __ \/  |/  /_  __/____ __/ /_/  _/__  ___  __ __/ /____
- / // / /_/ / /|_/ / / / / -_) \ / __// // _ \/ _ \/ // / __(_-<
-/____/\____/_/  /_/ /_/  \__/_\_\\__/___/_//_/ .__/\_,_/\__/___/
-                                            /_/ 
+    ____  ____  __  _________          __  ____                  __ 
+   / __ \/ __ \/  |/  /_  __/__  _  __/ /_/  _/___  ____  __  __/ /_
+  / / / / / / / /|_/ / / / / _ \| |/_/ __// // __ \/ __ \/ / / / __/
+ / /_/ / /_/ / /  / / / / /  __/>  </ /__/ // / / / /_/ / /_/ / /_  
+/_____/\____/_/  /_/ /_/  \___/_/|_|\__/___/_/ /_/ .___/\__,_/\__/  
+                                                /_/                 
 */
 const std::vector<DOMAttribute> DOMTextInput::_description = {
 	Text, IsPassword, HTMLId, HTMLClass
@@ -256,10 +259,12 @@ bool DOMTextInput::IPCSetHTMLClass(CefRefPtr<CefListValue> data)
 }
 
 /*
-   ___  ____  __  _____   _      __      
-  / _ \/ __ \/  |/  / /  (_)__  / /__ ___
- / // / /_/ / /|_/ / /__/ / _ \/  '_/(_-<
-/____/\____/_/  /_/____/_/_//_/_/\_\/___/
+    ____  ____  __  _____    _       __  
+   / __ \/ __ \/  |/  / /   (_)___  / /__
+  / / / / / / / /|_/ / /   / / __ \/ //_/
+ / /_/ / /_/ / /  / / /___/ / / / / ,<   
+/_____/\____/_/  /_/_____/_/_/ /_/_/|_|  
+ 
 */
 const std::vector<DOMAttribute> DOMLink::_description = {
 	Text, Url
@@ -339,11 +344,11 @@ bool DOMLink::IPCSetUrl(CefRefPtr<CefListValue> data)
 
 /*
     ____  ____  __  ________      __          __  _______      __    __
-   / __ \/ __ \/  |/  / ___/___  / /__  _____/ /_/ ____(_)__  / /___/ /____
-  / / / / / / / /|_/ /\__ \/ _ \/ / _ \/ ___/ __/ /_  / / _ \/ / __  / ___/
- / /_/ / /_/ / /  / /___/ /  __/ /  __/ /__/ /_/ __/ / /  __/ / /_/ (__  )
-/_____/\____/_/  /_//____/\___/_/\___/\___/\__/_/   /_/\___/_/\__,_/____/
-
+   / __ \/ __ \/  |/  / ___/___  / /__  _____/ /_/ ____(_)__  / /___/ /
+  / / / / / / / /|_/ /\__ \/ _ \/ / _ \/ ___/ __/ /_  / / _ \/ / __  / 
+ / /_/ / /_/ / /  / /___/ /  __/ /  __/ /__/ /_/ __/ / /  __/ / /_/ /  
+/_____/\____/_/  /_//____/\___/_/\___/\___/\__/_/   /_/\___/_/\__,_/   
+                                                                     
 */
 
 const std::vector<DOMAttribute> DOMSelectField::_description = {
@@ -431,11 +436,12 @@ bool DOMSelectField::IPCSetOptions(CefRefPtr<CefListValue> data)
 }
 
 /*
-    ____  ____  __  _______                  ______              ________                          __
-   / __ \/ __ \/  |/  / __ \_   _____  _____/ __/ /___ _      __/ ____/ /__  ____ ___  ___  ____  / /______
-  / / / / / / / /|_/ / / / / | / / _ \/ ___/ /_/ / __ \ | /| / / __/ / / _ \/ __ `__ \/ _ \/ __ \/ __/ ___/
- / /_/ / /_/ / /  / / /_/ /| |/ /  __/ /  / __/ / /_/ / |/ |/ / /___/ /  __/ / / / / /  __/ / / / /_(__  )
-/_____/\____/_/  /_/\____/ |___/\___/_/  /_/ /_/\____/|__/|__/_____/_/\___/_/ /_/ /_/\___/_/ /_/\__/____/
+    ____  ____  __  _______                  ______              ________                          __ 
+   / __ \/ __ \/  |/  / __ \_   _____  _____/ __/ /___ _      __/ ____/ /__  ____ ___  ___  ____  / /_
+  / / / / / / / /|_/ / / / / | / / _ \/ ___/ /_/ / __ \ | /| / / __/ / / _ \/ __ `__ \/ _ \/ __ \/ __/
+ / /_/ / /_/ / /  / / /_/ /| |/ /  __/ /  / __/ / /_/ / |/ |/ / /___/ /  __/ / / / / /  __/ / / / /_  
+/_____/\____/_/  /_/\____/ |___/\___/_/  /_/ /_/\____/|__/|__/_____/_/\___/_/ /_/ /_/\___/_/ /_/\__/  
+                                                                                                    
 */
 
 const std::vector<DOMAttribute> DOMOverflowElement::_description = {
@@ -571,6 +577,12 @@ void DOM::GetJSRepresentation(
 		obj_getter_name = DOMVideo::GetJSObjectGetter();
 		return;
 	}
+	if (nodeType == "CheckboxData")
+	{
+		DOMCheckbox::GetDescription(&description);
+		obj_getter_name = DOMCheckbox::GetJSObjectGetter();
+		return;
+	}
 }
 
 /*
@@ -623,4 +635,80 @@ bool DOMVideo::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
 bool DOMVideo::PrintAttribute(DOMAttribute attr)
 {
 	return super::PrintAttribute(attr);
+}
+
+/*
+    ____  ____  __  ___________              __   __              
+   / __ \/ __ \/  |/  / ____/ /_  ___  _____/ /__/ /_  ____  _  __
+  / / / / / / / /|_/ / /   / __ \/ _ \/ ___/ //_/ __ \/ __ \| |/_/
+ / /_/ / /_/ / /  / / /___/ / / /  __/ /__/ ,< / /_/ / /_/ />  <  
+/_____/\____/_/  /_/\____/_/ /_/\___/\___/_/|_/_.___/\____/_/|_|  
+ 
+*/
+
+const std::vector<DOMAttribute> DOMCheckbox::_description = { CheckedState };
+
+int DOMCheckbox::Initialize(CefRefPtr<CefProcessMessage> msg)
+{
+	// First list element to start interpretation as this class's attributes
+	int pivot = super::Initialize(msg);
+
+	const auto args = msg->GetArgumentList();
+	// Check if there are enough arguments in msg to initialize each attribute
+	if ((int)_description.size() > (int)args->GetSize() - pivot)
+	{
+		LogError("DOMCheckbox: On initialization: Object description and message size do not match!");
+	}
+	else
+	{
+		for (unsigned int i = 0; i < _description.size(); i++)
+		{
+			CefRefPtr<CefListValue> data = args->GetList(pivot + i);
+
+			if (!Update(_description[i], data))
+			{
+				LogError("DOMCheckbox: Failed to assign value of type ", data->GetType(0),
+					" to attribute ", DOMAttrToString(_description[i]), "!");
+			}
+		}
+	}
+
+
+	return _description.size() + pivot;
+}
+
+bool DOMCheckbox::Update(DOMAttribute attr, CefRefPtr<CefListValue> data)
+{
+	switch (attr) {
+	case CheckedState: { return IPCSetCheckedState(data); }
+	}
+	return super::Update(attr, data);
+}
+
+bool DOMCheckbox::IPCSetCheckedState(CefRefPtr<CefListValue> data)
+{
+	if (data == nullptr || data->GetSize() < 1 || data->GetValue(0)->GetType() != CefValueType::VTYPE_BOOL)
+		return false;
+
+	SetCheckedState(data->GetBool(0));
+	return true;
+}
+
+bool DOMCheckbox::PrintAttribute(DOMAttribute attr)
+{
+	if (std::find(_description.begin(), _description.end(), attr) == _description.end())
+	{
+		return super::PrintAttribute(attr);
+	}
+
+	std::ostringstream acc;
+	acc << "DOMAttrReq: " << DOMAttrToString(attr) << std::endl;
+	switch (attr) {
+	case CheckedState: {
+		acc << "\t" << GetCheckedState() << std::endl;
+		break;
+	}
+	}
+	LogInfo(acc.str());
+	return true;
 }

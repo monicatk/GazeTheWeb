@@ -269,4 +269,12 @@ DOMVideo.prototype.showControls = function(val)
 	console.log("DOMVideo.showControls has to be implemented! Called with ", arguments);
 }
 
+
+
+DOMCheckbox.prototype.setChecked = function(state)
+{
+	this.node.checked = state;
+	console.log("DOMCheckbox, "+this.getId()+": Setting to checked to '"+checked+"'.");
+}
+
 ConsolePrint("Successfully imported dom_nodes_interaction.js!");

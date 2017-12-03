@@ -321,6 +321,16 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 			}
 			return true;
 		}
+		// TODO: Refactor this.
+		if (type == "Checkbox")
+		{
+			const auto& wpNode = _pMediator->GetDOMCheckbox(browser, id);
+			if (const auto& node = wpNode.lock())
+			{
+				node->Initialize(msg);
+			}
+			return true;
+		}
 	}
 
     return _msgRouter->OnProcessMessageReceived(browser, source_process, msg);

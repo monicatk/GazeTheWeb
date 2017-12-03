@@ -251,7 +251,6 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			// ADDING DOMNODE
 			if (op.compare("add") == 0) // adding of DOM node
 			{
-
 				// Create blank node object in corresponding Tab object
 				switch (type)
 				{
@@ -260,24 +259,20 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					case(2): {_pMediator->AddDOMSelectField(browser, id); break; }
 					case(3): {_pMediator->AddDOMOverflowElement(browser, id); break; }
 					case(4): {_pMediator->AddDOMVideo(browser, id); break; }
+					case(5): {_pMediator->AddDOMCheckbox(browser, id); break; }
 					default: {
 						LogError("MsgRouter: Adding DOMNode - Unknown type of DOMNode! type=", type);
 					}
 				}
 
 				// TODO: This could be done in DOMExtraction
-				std::string ipcName = "";
-				switch (type) {
-				case(0) : ipcName = "TextInput"; break;
-				case(1) : ipcName = "Link"; break;
-				case(2) : ipcName = "SelectField"; break;
-				case(3) : ipcName = "OverflowElement"; break;
-				case(4) : ipcName = "Video"; break;
-				default: {
+				std::vector<std::string> names = { "TextInput", "Link", "SelectField", "OverflowElement", "Video", "Checkbox" };
+				if (type >= names.size() || type < 0)
+				{
 					LogError("MsgRouter: - ERROR: Unknown numeric DOM node type value: ", type);
 					return true;
 				}
-				}
+				std::string& ipcName = names[type];
 
 				// Instruct Renderer Process to initialize empty DOM Nodes with data
 				// TODO: Move this to DOM node constructor?
@@ -298,6 +293,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					case(2): {_pMediator->RemoveDOMSelectField(browser, id); break; }
 					case(3) : {_pMediator->RemoveDOMOverflowElement(browser, id); break; }
 					case(4): {_pMediator->RemoveDOMVideo(browser, id); break; }
+					case(5): {_pMediator->RemoveDOMCheckbox(browser, id); break; }
 					default: {
 						LogError("MsgRouter: Removing DOMNode - Unknown type of DOMNode! type=", type);
 					}
@@ -313,8 +309,9 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					case(0): {target = _pMediator->GetDOMTextInput(browser, id); break; }
 					case(1): {target = _pMediator->GetDOMLink(browser, id); break; }
 					case(2): {target = _pMediator->GetDOMSelectField(browser, id); break; }
-					case(3) : {target = _pMediator->GetDOMOverflowElement(browser, id); break; }
+					case(3): {target = _pMediator->GetDOMOverflowElement(browser, id); break; }
 					case(4): {target = _pMediator->GetDOMVideo(browser, id); break; }
+					case(5): {target = _pMediator->GetDOMCheckbox(browser, id); break; }
 					default: {
 						LogError("MsgRouter: Updating DOMNode - Unknown type of DOMNode! type=", type);
 					}

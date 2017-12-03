@@ -11,10 +11,12 @@
 ConsolePrint("Starting to import dom_nodes.js ...");
 
 /*
-   ___  ____  __  ____  __        __      
-  / _ \/ __ \/  |/  / |/ /__  ___/ /__ ___
- / // / /_/ / /|_/ /    / _ \/ _  / -_|_-<
-/____/\____/_/  /_/_/|_/\___/\_,_/\__/___/
+    ____  ____  __  ____   __          __   
+   / __ \/ __ \/  |/  / | / /___  ____/ /__ 
+  / / / / / / / /|_/ /  |/ / __ \/ __  / _ \
+ / /_/ / /_/ / /  / / /|  / /_/ / /_/ /  __/
+/_____/\____/_/  /_/_/ |_/\____/\__,_/\___/ 
+                                            
 */
 // Contains lists to all kinds of DOMNode derivates, position defined by numeric node type
 window.domNodes = [];
@@ -273,11 +275,12 @@ DOMNode.prototype.setOverflowViaId = function(id){
 
 
 /*
-   ___  ____  __  _________        __  ____               __    
-  / _ \/ __ \/  |/  /_  __/____ __/ /_/  _/__  ___  __ __/ /____
- / // / /_/ / /|_/ / / / / -_) \ / __// // _ \/ _ \/ // / __(_-<
-/____/\____/_/  /_/ /_/  \__/_\_\\__/___/_//_/ .__/\_,_/\__/___/
-                                            /_/ 
+    ____  ____  __  _________          __  ____                  __ 
+   / __ \/ __ \/  |/  /_  __/__  _  __/ /_/  _/___  ____  __  __/ /_
+  / / / / / / / /|_/ / / / / _ \| |/_/ __// // __ \/ __ \/ / / / __/
+ / /_/ / /_/ / /  / / / / /  __/>  </ /__/ // / / / /_/ / /_/ / /_  
+/_____/\____/_/  /_/ /_/  \___/_/|_|\__/___/_/ /_/ .___/\__,_/\__/  
+                                                /_/                 
 */
 window.domTextInputs = [];
 if(window.domNodes[0] !== undefined)
@@ -326,10 +329,12 @@ DOMTextInput.prototype.getHTMLClass = function(){
 }
 
 /*
-   ___  ____  __  _____   _      __      
-  / _ \/ __ \/  |/  / /  (_)__  / /__ ___
- / // / /_/ / /|_/ / /__/ / _ \/  '_/(_-<
-/____/\____/_/  /_/____/_/_//_/_/\_\/___/
+    ____  ____  __  _____    _       __  
+   / __ \/ __ \/  |/  / /   (_)___  / /__
+  / / / / / / / /|_/ / /   / / __ \/ //_/
+ / /_/ / /_/ / /  / / /___/ / / / / ,<   
+/_____/\____/_/  /_/_____/_/_/ /_/_/|_|  
+ 
 */
 window.domLinks = [];
 if(window.domNodes[1] !== undefined)
@@ -375,10 +380,12 @@ DOMLink.prototype.getUrl = function(){
 
 
 /*
-   __________   _______________  ______________   ___  ____
-  / __/ __/ /  / __/ ___/_  __/ / __/  _/ __/ /  / _ \/ __/
- _\ \/ _// /__/ _// /__  / /   / _/_/ // _// /__/ // /\ \  
-/___/___/____/___/\___/ /_/   /_/ /___/___/____/____/___/
+    ____  ____  __  ________      __          __  _______      __    __
+   / __ \/ __ \/  |/  / ___/___  / /__  _____/ /_/ ____(_)__  / /___/ /
+  / / / / / / / /|_/ /\__ \/ _ \/ / _ \/ ___/ __/ /_  / / _ \/ / __  / 
+ / /_/ / /_/ / /  / /___/ /  __/ /  __/ /__/ /_/ __/ / /  __/ / /_/ /  
+/_____/\____/_/  /_//____/\___/_/\___/\___/\__/_/   /_/\___/_/\__,_/   
+                                                                     
 */
 window.domSelectFields = []
 if(window.domNodes[2] !== undefined)
@@ -417,10 +424,12 @@ DOMSelectField.prototype.getSelectionIdx = function(){
 
 
 /*
-  ____               _____           ______                   __    
- / __ \_  _____ ____/ _/ /__ _    __/ __/ /__ __ _  ___ ___  / /____
-/ /_/ / |/ / -_) __/ _/ / _ \ |/|/ / _// / -_)  ' \/ -_) _ \/ __(_-<
-\____/|___/\__/_/ /_//_/\___/__,__/___/_/\__/_/_/_/\__/_//_/\__/___/
+    ____  ____  __  _______                  ______              ________                          __ 
+   / __ \/ __ \/  |/  / __ \_   _____  _____/ __/ /___ _      __/ ____/ /__  ____ ___  ___  ____  / /_
+  / / / / / / / /|_/ / / / / | / / _ \/ ___/ /_/ / __ \ | /| / / __/ / / _ \/ __ `__ \/ _ \/ __ \/ __/
+ / /_/ / /_/ / /  / / /_/ /| |/ /  __/ /  / __/ / /_/ / |/ |/ / /___/ /  __/ / / / / /  __/ / / / /_  
+/_____/\____/_/  /_/\____/ |___/\___/_/  /_/ /_/\____/|__/|__/_____/_/\___/_/ /_/ /_/\___/_/ /_/\__/  
+                                                                                                    
 */
 window.domOverflowElements = []
 if(window.domNodes[3] !== undefined)
@@ -638,6 +647,7 @@ DOMOverflowElement.prototype.setHiddenOverflow = function(val)
   / / / / / / / /|_/ /| | / / / __  / _ \/ __ \
  / /_/ / /_/ / /  / / | |/ / / /_/ /  __/ /_/ /
 /_____/\____/_/  /_/  |___/_/\__,_/\___/\____/ 
+
 */
 window.domVideos = []
 if(window.domNodes[4] !== undefined)
@@ -652,13 +662,45 @@ function DOMVideo(node, cef_hidden=false)
     DOMNode.call(this, node, id, 4, cef_hidden);
 
     /* Currently now attributes, only interaction */
-    console.log("DOMVideo node successfully created.");
+    console.log("DOMVideo node #"+id+" successfully created.");
 }
 DOMVideo.prototype = Object.create(DOMNode.prototype);
 DOMVideo.prototype.constructor = DOMOverflowElement;
 DOMVideo.prototype.Class = "DOMVideo";  // Override base class identifier for this derivated class
 
 
+/*
+    ____  ____  __  ___________              __   __              
+   / __ \/ __ \/  |/  / ____/ /_  ___  _____/ /__/ /_  ____  _  __
+  / / / / / / / /|_/ / /   / __ \/ _ \/ ___/ //_/ __ \/ __ \| |/_/
+ / /_/ / /_/ / /  / / /___/ / / /  __/ /__/ ,< / /_/ / /_/ />  <  
+/_____/\____/_/  /_/\____/_/ /_/\___/\___/_/|_/_.___/\____/_/|_|  
+ 
+*/
+window.domCheckboxes = [];
+if(window.domNodes[5] !== undefined)
+    console.log("Warning! DOMNode list slot 5 already in use!");
+window.domNodes[5] = window.domCheckboxes;
 
+function DOMCheckbox(node, cef_hidden=false)
+{
+    // // DEBUG
+    // console.log("Prevented creation of DOMCheckbox object!");
+    // return; 
+
+    window.domCheckboxes.push(this);
+    var id = window.domCheckboxes.indexOf(this);
+
+    DOMNode.call(this, node, id, 5, cef_hidden);
+
+}
+DOMCheckbox.prototype = Object.create(DOMNode.prototype);
+DOMCheckbox.prototype.constructor = DOMCheckbox;
+DOMCheckbox.prototype.Class = "DOMCheckbox";
+
+DOMCheckbox.prototype.getCheckedState = function()
+{
+    return this.node.checked;
+}
 
 ConsolePrint("Successfully imported dom_nodes.js!");

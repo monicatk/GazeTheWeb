@@ -357,6 +357,11 @@ function AnalyzeNode(node)
 				// TODO: CreateDOMButton!
 				CreateDOMLink(node);
 			}
+
+			if(node.type === "checkbox")
+			{
+				CreateDOMCheckbox(node);
+			}
 		}
 		// textareas or DIVs, who are treated as text fields
 		if(node.tagName == 'TEXTAREA' || (node.tagName == 'DIV' && node.getAttribute('role') == 'textbox'))

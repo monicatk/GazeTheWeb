@@ -232,7 +232,7 @@ void Tab::DrawDebuggingOverlay() const
 		}
 
 		// ### DOM VIDEO ELEMENTS ### 
-		_upDebugLineQuad->GetShader()->UpdateValue("color", glm::vec3(0.f / 255.f, 255.f / 255.f, 255.f / 255.f));
+		_upDebugLineQuad->GetShader()->UpdateValue("color", glm::vec3(255.f / 255.f, 255.f / 255.f, 60.f / 255.f));
 
 		for (const auto& rIdNodePair : _VideoMap)
 		{
@@ -242,6 +242,21 @@ void Tab::DrawDebuggingOverlay() const
 				renderRect(
 					rect,
 					(rVideoNode->IsFixed())
+				);
+			}
+		}
+
+		// ### DOM CHECKBOX ELEMENTS ### 
+		_upDebugLineQuad->GetShader()->UpdateValue("color", glm::vec3(120.f / 255.f, 0.f / 255.f, 255.f / 255.f));
+
+		for (const auto& rIdNodePair : _CheckboxMap)
+		{
+			const auto& rCheckboxNode = rIdNodePair.second;
+			for (const auto& rect : rCheckboxNode->GetRects())
+			{
+				renderRect(
+					rect,
+					(rCheckboxNode->IsFixed())
 				);
 			}
 		}

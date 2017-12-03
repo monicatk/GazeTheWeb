@@ -227,6 +227,14 @@ void Tab::AddDOMVideo(CefRefPtr<CefBrowser> browser, int id)
 	_videoModeTriggers.emplace(id, std::move(upDOMTrigger));
 }
 
+void Tab::AddDOMCheckbox(CefRefPtr<CefBrowser> browser, int id)
+{
+	_CheckboxMap.emplace(id, std::make_shared<DOMCheckbox>(
+		id,
+		SendRenderMessage));
+}
+
+
 std::weak_ptr<DOMTextInput> Tab::GetDOMTextInput(int id)
 {
 	return (_TextInputMap.find(id) != _TextInputMap.end()) ? _TextInputMap.at(id) : std::weak_ptr<DOMTextInput>();
@@ -252,6 +260,12 @@ std::weak_ptr<DOMVideo> Tab::GetDOMVideo(int id)
 	return (_VideoMap.find(id) != _VideoMap.end()) ? _VideoMap.at(id) : std::weak_ptr<DOMVideo>();
 }
 
+std::weak_ptr<DOMCheckbox> Tab::GetDOMCheckbox(int id)
+{
+	return (_CheckboxMap.find(id) != _CheckboxMap.end()) ? _CheckboxMap.at(id) : std::weak_ptr<DOMCheckbox>();
+}
+
+
 void Tab::ClearDOMNodes()
 {
 	// Deactivate all triggers
@@ -270,6 +284,7 @@ void Tab::ClearDOMNodes()
 	_TextInputMap.clear();
 	_SelectFieldMap.clear();
 	_VideoMap.clear();
+	_CheckboxMap.clear();
 
 	// Clear fixed elements
 	_fixedElements.clear();
@@ -311,6 +326,13 @@ void Tab::RemoveDOMVideo(int id)
 	if (_videoModeTriggers.find(id) != _videoModeTriggers.end()) { _videoModeTriggers.erase(id); }
 	if (_VideoMap.find(id) != _VideoMap.end()) { _VideoMap.erase(id); }
 }
+
+void Tab::RemoveDOMCheckbox(int id)
+{
+	if (_CheckboxMap.find(id) != _CheckboxMap.end()) { _CheckboxMap.erase(id); }
+}
+
+
 
 void Tab::SetScrollingOffset(double x, double y)
 {

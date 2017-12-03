@@ -208,6 +208,15 @@ void Mediator::AddDOMVideo(CefRefPtr<CefBrowser> browser, int id)
 	}
 }
 
+void Mediator::AddDOMCheckbox(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		pTab->AddDOMCheckbox(browser, id);
+	}
+}
+
+
 void Mediator::ClearDOMNodes(CefRefPtr<CefBrowser> browser)
 {
     if (TabCEFInterface* pTab = GetTab(browser))
@@ -240,6 +249,14 @@ void Mediator::RemoveDOMSelectField(CefRefPtr<CefBrowser> browser, int id)
 	if (auto pTab = GetTab(browser))
 	{
 		pTab->RemoveDOMSelectField(id);
+	}
+}
+
+void Mediator::RemoveDOMCheckbox(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (auto pTab = GetTab(browser))
+	{
+		pTab->RemoveDOMCheckbox(id);
 	}
 }
 
@@ -328,6 +345,15 @@ std::weak_ptr<DOMVideo> Mediator::GetDOMVideo(CefRefPtr<CefBrowser> browser, int
 		return pTab->GetDOMVideo(id);
 	}
 	return std::weak_ptr<DOMVideo>();
+}
+
+std::weak_ptr<DOMCheckbox> Mediator::GetDOMCheckbox(CefRefPtr<CefBrowser> browser, int id)
+{
+	if (TabCEFInterface* pTab = GetTab(browser))
+	{
+		return pTab->GetDOMCheckbox(id);
+	}
+	return std::weak_ptr<DOMCheckbox>();
 }
 
 void Mediator::RemoveDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id)

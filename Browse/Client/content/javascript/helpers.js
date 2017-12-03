@@ -275,6 +275,7 @@ function CreateDOMLink(node){ CreateDOMObject(node, 1); }
 function CreateDOMSelectField(node) { CreateDOMObject(node, 2); }
 function CreateDOMOverflowElement(node) { CreateDOMObject(node, 3); }
 function CreateDOMVideo(node){ CreateDOMObject(node, 4); }
+function CreateDOMCheckbox(node){ CreateDOMObject(node, 5); }
 
 function CreateDOMObject(node, type)
 {
@@ -288,6 +289,7 @@ function CreateDOMObject(node, type)
         case 2: return new DOMSelectField(node);
         case 3: return new DOMOverflowElement(node);
         case 4: return new DOMVideo(node);
+        case 5: return new DOMCheckbox(node);
         default: {
             console.log("Warning: Unknown DOM node type: "+type);
             return undefined;
@@ -313,6 +315,7 @@ function GetDOMLink(id){ return GetDOMObject(1, id);}
 function GetDOMSelectField(id){ return GetDOMObject(2, id); }
 function GetDOMOverflowElement(id){ return GetDOMObject(3, id); }
 function GetDOMVideo(id){ return GetDOMObject(4, id); }
+function GetDOMCheckbox(id){ return GetDOMObject(5, id); }
 
 function GetCorrespondingDOMObject(node, expected_type)
 {
@@ -347,7 +350,7 @@ function RemoveDOMTextInput(id){ return RemoveDOMObject(0, id); }
 function RemoveDOMLink(id){ return RemoveDOMObject(1, id); }
 function RemoveDOMSelectField(id){ return RemoveDOMObject(2, id); }
 function RemoveDOMOverflowElement(id){ return RemoveDOMObject(3, id); }
-
+// TODO: Missing node types.
 
 /**
  * Usage example: Determine what parts of a node's rect are visible when inside an overflowing element

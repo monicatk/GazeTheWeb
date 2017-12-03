@@ -147,7 +147,8 @@ const CefRefPtr<CefListValue> V8ToCefListValue::ExtractAttributeData(DOMAttribut
 	// Check if getter function is valid
 	if (getter->IsUndefined() || getter->IsNull() || !getter->IsFunction())
 	{
-		_Log("V8ToCefListValue conversion: Could not access getter function for DOMAttribute " + std::to_string((int)attr) + " in Javascript object.", browser);
+		_Log("V8ToCefListValue conversion: Could not access getter function '"+AttrGetter.at(attr)+
+			"' for DOMAttribute " + std::to_string((int)attr) + " in Javascript object.", browser);
 		return CefRefPtr<CefListValue>();
 	}
 

@@ -44,7 +44,8 @@ namespace V8ToCefListValue
 		{ DOMAttribute::CurrentScrolling,	"getCurrentScrolling"},
 		{ DOMAttribute::OccBitmask,			"getOccBitmask"},
 		{ DOMAttribute::HTMLId,				"getHTMLId" },
-		{ DOMAttribute::HTMLClass,			"getHTMLClass" }
+		{ DOMAttribute::HTMLClass,			"getHTMLClass" },
+		{ DOMAttribute::CheckedState,		"getCheckedState" }
 	// TODO: Getter in Javascript are uniformly named, so this map is kind of superfluous now ;)
 
 	};
@@ -62,7 +63,8 @@ namespace V8ToCefListValue
 		{ DOMAttribute::CurrentScrolling,	&ListOfIntegers },
 		{ DOMAttribute::OccBitmask,			&ListOfBools },
 		{ DOMAttribute::HTMLId,				&String },
-		{ DOMAttribute::HTMLClass,			&String }
+		{ DOMAttribute::HTMLClass,			&String },
+		{DOMAttribute::CheckedState,		&Boolean }
 	
 	};
 
@@ -106,7 +108,8 @@ namespace StringToCefListValue
 		{DOMAttribute::Options,				&ListOfStrings},
 		{DOMAttribute::MaxScrolling,		&ListOfIntegers},
 		{DOMAttribute::CurrentScrolling,	&ListOfIntegers},
-		{DOMAttribute::OccBitmask,			&Bitmask}	
+		{DOMAttribute::OccBitmask,			&Bitmask},
+		{DOMAttribute::CheckedState,		&Boolean}
 	};
 
 	// Extract attribute data
