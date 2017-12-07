@@ -101,7 +101,8 @@ bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string pas
 		int index = future.get() - 1;
 		nlohmann::json record = {
 			{ "date", GetDate() }, // add date
-			{ "timestamp", GetTimestamp() } // add timestamp
+			{ "timestamp", GetTimestamp() }, // add timestamp
+			{ "version", std::to_string(CLIENT_VERSION) } // add version
 		};
 		Put(FirebaseJSONKey::GENERAL_APPLICATION_START, record, std::to_string(index)); // send JSON to database
 		*_pStartIndex = index;
