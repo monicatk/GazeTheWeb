@@ -27,7 +27,7 @@
 const std::string serverURL = "https://userpages.uni-koblenz.de/~raphaelmenges/gtw-update";
 const std::string tmpZipName = "gtw_new_version.zip";
 const std::string tmpUnzipDirName = "gtw_new_version";
-const std::string gtwPath = "C:/Users/Raphael/Desktop/gtw"; // path to GazeTheWeb-Browse folder TODO: replace later with relative path like "../Browse"
+const std::string gtwPath = "./Browse"; // path to GazeTheWeb-Browse folder, relative from bat file that calls the updater
 const long long exitSleepMS = 2000;
 
 // Callback for CURL to retrieve zip name
