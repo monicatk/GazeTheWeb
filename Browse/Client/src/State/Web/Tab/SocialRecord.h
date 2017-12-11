@@ -13,27 +13,53 @@
 #include <string>
 #include <chrono>
 
-// List of social platforms
+// List of social platforms (mind the order)
 enum class SocialPlatform
 {
-	Unknown, Facebook, Linkedin, YouTube
+	Unknown, News, Shopping, Email, Wikipedia, Facebook, Linkedin, YouTube, Instagram, Twitter, Google, Yahoo, Ok, Vk, Whatsapp // Email does not include GMail!
 };
 
-// List of identifying domain parts for social platforms
+// List of identifying domain parts for social platforms (mind the order)
 static const std::map < SocialPlatform, std::vector<std::string> > SocialIdentifiers =
 {
-	{ SocialPlatform::Facebook,{ "facebook.com" } },
-	{ SocialPlatform::Linkedin,{ "linkedin.com" } },
-	{ SocialPlatform::YouTube,{ "youtube.com", "youtu.be" } }
+	{ SocialPlatform::News,		{ "reddit.com", "msn.com", "protothema.gr", "sport24.gr", "gazzetta.gr", "newsit.gr", "iefimerida.gr", "news247.gr",
+								  "newsbomb.gr", "ynet.co.il", "walla.co.il", "mako.co.il", "sport5.co.il", "haaretz.co.il", "globes.co.il", "one.co.il",
+								  "calcalist.co.il", "tapuz.co.il"}},
+	{ SocialPlatform::Shopping,	{ "ebay.com", "amazon.com", "amazon.de", "skroutz.gr", "car.gr", "xe.gr", "mawdoo3.com", "aliexpress.com", "yad2.co.il",
+								  "zap.co.il", "next.co.il", "ksp.co.il"} },
+	{ SocialPlatform::Email,	{ "mail.ru", "live.com", "mail.google.com", "mail.yahoo.com" } },
+	{ SocialPlatform::Wikipedia,{ "wikipedia.org" } },
+	{ SocialPlatform::Facebook,	{ "facebook.com" } },
+	{ SocialPlatform::Linkedin,	{ "linkedin.com" } },
+	{ SocialPlatform::YouTube,	{ "youtube.com", "youtu.be" } },
+	{ SocialPlatform::Instagram,{ "instagram.com" } },
+	{ SocialPlatform::Twitter,	{ "twitter.com" } },
+	{ SocialPlatform::Google,	{ "google.com", "goog.le", "google.de", "google.gr", "google.co.il", "google.ps", "google.ru" } },
+	{ SocialPlatform::Yahoo,	{ "yahoo.com" } },
+	{ SocialPlatform::Ok,		{ "ok.ru" } },
+	{ SocialPlatform::Vk,		{ "vk.com" } },
+	{ SocialPlatform::Whatsapp, { "whatsapp.com" } }
+	
 };
 
 // Mapping from platform to database keys (pair of count and record key)
 static const std::map <SocialPlatform, std::pair<FirebaseIntegerKey, FirebaseJSONKey> > SocialFirebaseKeys =
 {
-	{ SocialPlatform::Unknown,	std::make_pair(FirebaseIntegerKey::SOCIAL_RECORD_UNKNOWN_COUNT,		FirebaseJSONKey::SOCIAL_RECORD_UNKNOWN) },
-	{ SocialPlatform::Facebook,	std::make_pair(FirebaseIntegerKey::SOCIAL_RECORD_FACEBOOK_COUNT,	FirebaseJSONKey::SOCIAL_RECORD_FACEBOOK) },
-	{ SocialPlatform::Linkedin,	std::make_pair(FirebaseIntegerKey::SOCIAL_RECORD_LINKEDIN_COUNT,	FirebaseJSONKey::SOCIAL_RECORD_LINKEDIN) },
-	{ SocialPlatform::YouTube,	std::make_pair(FirebaseIntegerKey::SOCIAL_RECORD_YOUTUBE_COUNT,		FirebaseJSONKey::SOCIAL_RECORD_YOUTUBE) },
+	{ SocialPlatform::Unknown,	std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_UNKNOWN_COUNT,		FirebaseJSONKey::PAGE_ACTIVITY_UNKNOWN) },
+	{ SocialPlatform::News,		std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_NEWS_COUNT,		FirebaseJSONKey::PAGE_ACTIVITY_NEWS) },
+	{ SocialPlatform::Shopping,	std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_SHOPPING_COUNT,	FirebaseJSONKey::PAGE_ACTIVITY_SHOPPING) },
+	{ SocialPlatform::Email,	std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_EMAIL_COUNT,		FirebaseJSONKey::PAGE_ACTIVITY_EMAIL) },
+	{ SocialPlatform::Wikipedia,std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_WIKIPEDIA_COUNT,	FirebaseJSONKey::PAGE_ACTIVITY_WIKIPEDIA) },
+	{ SocialPlatform::Facebook,	std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_FACEBOOK_COUNT,	FirebaseJSONKey::PAGE_ACTIVITY_FACEBOOK) },
+	{ SocialPlatform::Linkedin,	std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_LINKEDIN_COUNT,	FirebaseJSONKey::PAGE_ACTIVITY_LINKEDIN) },
+	{ SocialPlatform::YouTube,	std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_YOUTUBE_COUNT,		FirebaseJSONKey::PAGE_ACTIVITY_YOUTUBE) },
+	{ SocialPlatform::Instagram,std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_INSTAGRAM_COUNT,	FirebaseJSONKey::PAGE_ACTIVITY_INSTAGRAM) },
+	{ SocialPlatform::Twitter,	std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_TWITTER_COUNT,		FirebaseJSONKey::PAGE_ACTIVITY_TWITTER) },
+	{ SocialPlatform::Google,	std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_GOOGLE_COUNT,		FirebaseJSONKey::PAGE_ACTIVITY_GOOGLE) },
+	{ SocialPlatform::Yahoo,	std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_YAHOO_COUNT,		FirebaseJSONKey::PAGE_ACTIVITY_YAHOO) },
+	{ SocialPlatform::Ok,		std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_OK_COUNT,			FirebaseJSONKey::PAGE_ACTIVITY_OK) },
+	{ SocialPlatform::Vk,		std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_VK_COUNT,			FirebaseJSONKey::PAGE_ACTIVITY_VK) },
+	{ SocialPlatform::Whatsapp,	std::make_pair(FirebaseIntegerKey::PAGE_ACTIVITY_WHATSAPP_COUNT,	FirebaseJSONKey::PAGE_ACTIVITY_WHATSAPP) },
 };
 
 // Class of social record
@@ -78,7 +104,7 @@ public:
 	virtual ~SocialRecord();
 
 	// Start record
-	void StartAndAddPage(std::string URL);
+	void StartAndAddPage(std::string URL, std::string keywords);
 
 	// End record
 	void End();
@@ -92,17 +118,21 @@ public:
 	// Add time in foreground and user is active
 	void AddTimeActiveUser(float time);
 
+	// Add time in foreground and user uses emulation by mouse
+	void AddTimeEmulatedInput(float time);
+
 	// Add scrolling delta
-	void AddScrollingDelta(float delta);
+	void AddManualScrollingDelta(float delta);
+	void AddAutomaticScrollingDelta(float delta);
 
 	// Add click
 	void AddClick(std::string tag, std::string id, float x, float y);
 
 	// Add text input
-	void AddTextInput(std::string id, int charCount, int charDistance, float x, float y, float duration);
+	void AddTextInput(std::string tag, std::string id, int charCount, int charDistance, float x, float y, float duration);
 
 	// Add page
-	void AddPage(std::string URL);
+	void AddPage(std::string URL, std::string keywords);
 
 	// Convert to JSON for storing in database
 	nlohmann::json ToJSON() const;
@@ -133,9 +163,10 @@ private:
 	struct TextInput
 	{
 		// Constructor
-		TextInput(std::string id, int charCount, int charDistance, float x, float y, double time, float duration) : id(id), charCount(charCount), charDistance(charDistance), x(x), y(y), time(time), duration(duration) {}
+		TextInput(std::string tag, std::string id, int charCount, int charDistance, float x, float y, double time, float duration) : tag(tag), id(id), charCount(charCount), charDistance(charDistance), x(x), y(y), time(time), duration(duration) {}
 
 		// Fields
+		const std::string tag;
 		const std::string id;
 		const int charCount = 0;
 		const int charDistance = 0;
@@ -149,14 +180,17 @@ private:
 	struct Page
 	{
 		// Constructor
-		Page(std::string URL) : URL(URL) {}
+		Page(std::string URL, std::string keywords) : URL(URL), keywords(keywords) {}
 
 		// Fields
 		const std::string URL;
+		const std::string keywords;
 		double duration = 0.0;
 		double durationInForeground = 0.0;
-		double durationUserActive = 0.0; // and tab in foreground
-		double scrollAmount = 0.0;
+		double durationUserActive = 0.0; // and tab in foreground, input either by eye tracker and gaze detected or mouse
+		double durationEmulatedInput = 0.0; // duration of emulated input while in foreground
+		double manualScrollAmount = 0.0;
+		double automaticScrollAmount = 0.0;
 		std::vector<Click> clicks;
 		std::vector<TextInput> textInputs;
 	};
@@ -173,8 +207,11 @@ private:
 	std::chrono::time_point<std::chrono::system_clock> _lastAddPage; // used for calculating duration of page
 	std::string _startDate;
 	std::string _endDate;
+	std::string _startTimestamp;
+	std::string _endTimestamp;
 	double _totalDurationInForeground = 0.0;
 	double _totalDurationUserActive = 0.0; // and tab in foreground
+	double _totalDurationEmulatedInput = 0.0;
 	std::vector<Page> _pages; // should have at least one element and current one is at back
 	int _startIndex = -1;
 };

@@ -83,6 +83,9 @@ window.attrStrToEncodingFunc.set("Options", listReturn);
 window.attrStrToEncodingFunc.set("MaxScrolling", listReturn);
 window.attrStrToEncodingFunc.set("CurrentScrolling", listReturn);
 window.attrStrToEncodingFunc.set("OccBitmask", bitmaskReturn);
+window.attrStrToEncodingFunc.set("HTMLId", simpleReturn);
+window.attrStrToEncodingFunc.set("HTMLClass", simpleReturn);
+window.attrStrToEncodingFunc.set("Checked", simpleReturn);
 
 function FetchAndEncodeAttribute(domObj, attrStr)
 {
@@ -96,7 +99,7 @@ function FetchAndEncodeAttribute(domObj, attrStr)
     // Definition: Each getter should be called getAttrStr for simplicity
     if(typeof(domObj["get"+attrStr]) !== "function")
     {
-        console.log("Error in FetchAndEncodeAttribute: Could not find function 'get"+attrStr+"' in given DOM object!");
+        console.log("Error in FetchAndEncodeAttribute: Could not find function 'get"+attrStr+"' in given DOM object!", domObj);
         return undefined;     
     }
 

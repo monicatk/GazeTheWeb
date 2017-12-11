@@ -27,18 +27,22 @@ void Tab::GetWebRenderResolution(int& rWidth, int& rHeight) const
 
 void Tab::SetURL(std::string URL)
 {
-	if (URL != _url)
-	{
-		_url = URL;
-		LabStreamMailer::instance().Send("Loading URL: " + _url);
+	// Set URL
+	_url = URL;
 
+	// Reset title
+	_title = "";
+
+	// Tell lab stream layer
+	LabStreamMailer::instance().Send("Loading URL: " + _url);
+
+	// Check whether current history page entry contains same URL. If not, create new one
+	if (_spHistoryPage == nullptr || _spHistoryPage->GetURL() != _url)
+	{
 		if (_dataTransfer)
 		{
 			// Add history entry for new url with current title, will be updated asap
-			HistoryManager::Page page;
-			page.URL = _url;
-			page.title = _title;
-			_pWeb->PushAddPageToHistoryJob(this, page);
+			_spHistoryPage = _pWeb->AddPageToHistory(_url, _title);
 		}
 	}
 }
@@ -224,6 +228,14 @@ void Tab::AddDOMVideo(CefRefPtr<CefBrowser> browser, int id)
 	_videoModeTriggers.emplace(id, std::move(upDOMTrigger));
 }
 
+void Tab::AddDOMCheckbox(CefRefPtr<CefBrowser> browser, int id)
+{
+	_CheckboxMap.emplace(id, std::make_shared<DOMCheckbox>(
+		id,
+		SendRenderMessage));
+}
+
+
 std::weak_ptr<DOMTextInput> Tab::GetDOMTextInput(int id)
 {
 	return (_TextInputMap.find(id) != _TextInputMap.end()) ? _TextInputMap.at(id) : std::weak_ptr<DOMTextInput>();
@@ -249,6 +261,12 @@ std::weak_ptr<DOMVideo> Tab::GetDOMVideo(int id)
 	return (_VideoMap.find(id) != _VideoMap.end()) ? _VideoMap.at(id) : std::weak_ptr<DOMVideo>();
 }
 
+std::weak_ptr<DOMCheckbox> Tab::GetDOMCheckbox(int id)
+{
+	return (_CheckboxMap.find(id) != _CheckboxMap.end()) ? _CheckboxMap.at(id) : std::weak_ptr<DOMCheckbox>();
+}
+
+
 void Tab::ClearDOMNodes()
 {
 	// Deactivate all triggers
@@ -267,6 +285,7 @@ void Tab::ClearDOMNodes()
 	_TextInputMap.clear();
 	_SelectFieldMap.clear();
 	_VideoMap.clear();
+	_CheckboxMap.clear();
 
 	// Clear fixed elements
 	_fixedElements.clear();
@@ -309,19 +328,15 @@ void Tab::RemoveDOMVideo(int id)
 	if (_VideoMap.find(id) != _VideoMap.end()) { _VideoMap.erase(id); }
 }
 
+void Tab::RemoveDOMCheckbox(int id)
+{
+	if (_CheckboxMap.find(id) != _CheckboxMap.end()) { _CheckboxMap.erase(id); }
+}
+
+
+
 void Tab::SetScrollingOffset(double x, double y)
 {
-	// Update page size information when nearly reached end of page size (in case of endless scrollable sites like e.g. Fb.com)
-	// (but don't do it if scrolling offset hasn't changed)
-	/*
-	auto webViewPositionAndSize = CalculateWebViewPositionAndSize();
-	if ((x != _scrollingOffsetX && abs(_pageWidth - webViewPositionAndSize.width - x) < 50)
-	|| (y != _scrollingOffsetY && abs(_pageHeight - webViewPositionAndSize.height - y) < 50))
-	{
-	_pCefMediator->GetPageResolution(this);
-	}
-	*/
-
 	_scrollingOffsetX = x;
 	_scrollingOffsetY = y;
 }
@@ -331,9 +346,9 @@ void Tab::SetPageResolution(double width, double height)
 	if (width != _pageWidth || height != _pageHeight)
 	{
 		LogInfo("Tab: Page size (w: ", _pageWidth, ", h: ", _pageHeight, ") changed to (w: ", width, ", h: ", height, ").");
+		_pageWidth = width;
+		_pageHeight = height;
 	}
-	_pageWidth = width;
-	_pageHeight = height;
 }
 
 void Tab::AddFixedElementsCoordinates(int id, std::vector<Rect> elements)
@@ -364,51 +379,10 @@ void Tab::RemoveFixedElement(int id)
 
 void Tab::SetTitle(std::string title)
 {
-	// TODO: does not work if mutliple tabs are chaning the history
-
-	// Fetch last history entry
-	auto frontEntry = _pWeb->GetFrontHistoryEntry();
-
-	// Tab received new title
-	if (title != _title)
+	_title = title;
+	if (_spHistoryPage != nullptr)
 	{
-		LogDebug("Tab: Set title to ", title, " - previous title=", _title);
-
-		_title = title;
-
-		LogDebug("Tab: last entry url=", frontEntry.URL, " title=", frontEntry.title, "\n -- now: title=", title, " url=", _url);
-
-		if (_dataTransfer)
-		{
-			// New title and different URLs is clearly a new history entry
-			if (frontEntry.URL != _url)
-			{
-				HistoryManager::Page page;
-				page.URL = _url;
-				page.title = title;
-				_pWeb->PushAddPageToHistoryJob(this, page);
-			}
-			// Newly set title, same URL as last history entry and different titles lead to conclusion,
-			// that previously added history entry might be wrong
-			else if (frontEntry.title != title)
-			{
-				// Delete front entry with identical URL from history (also XML)
-				_pWeb->PushDeletePageFromHistoryJob(this, frontEntry, true);
-
-				// TODO: Create PushUpdateHistoryEntry and avoid concurrent creation and trying to delete same item!
-				// Comparison before deletion is currently done to early!
-
-				frontEntry.title = title;
-
-				// Add updated entry to history
-				_pWeb->PushAddPageToHistoryJob(this, frontEntry);
-			}
-		}
-	}
-	else if(frontEntry.URL != _url)
-	{
-		// Delete wrong previous entry where title and url shouldn't match
-		_pWeb->PushDeletePageFromHistoryJob(this, frontEntry, true);
+		_spHistoryPage->SetTitle(_title);
 	}
 }
 
@@ -448,4 +422,9 @@ void Tab::SetLoadingStatus(bool isLoading, bool isMainFrame)
 void Tab::RequestJSDialog(JavaScriptDialogType type, std::string message)
 {
 	this->PushBackPipeline(std::unique_ptr<Pipeline>(new JSDialogPipeline(this, type, message)));
+}
+
+void Tab::SetMetaKeywords(std::string content)
+{
+	_metaKeywords = content;
 }

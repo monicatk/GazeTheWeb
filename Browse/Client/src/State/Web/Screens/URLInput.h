@@ -20,7 +20,7 @@ class URLInput
 public:
 
     // Constructor
-    URLInput(Master* pMaster, BookmarkManager const * pBookmarkManager);
+    URLInput(Master* pMaster, BookmarkManager* pBookmarkManager);
 
     // Destructor
     virtual ~URLInput();
@@ -75,7 +75,7 @@ private:
 		URLButtonListener(URLInput* pURLInput) { _pURLInput = pURLInput; }
 		virtual void hit(eyegui::Layout* pLayout, std::string id) {}
 		virtual void down(eyegui::Layout* pLayout, std::string id);
-		virtual void up(eyegui::Layout* pLayout, std::string id) {}
+		virtual void up(eyegui::Layout* pLayout, std::string id);
 		virtual void selected(eyegui::Layout* pLayout, std::string id) {}
 
     private:
@@ -91,7 +91,7 @@ private:
     Master* _pMaster;
 
 	// Pointer to bookmark manager
-	BookmarkManager const * _pBookmarkManager;
+	BookmarkManager* _pBookmarkManager;
 
     // Pointer to layouts
     eyegui::Layout* _pLayout;

@@ -156,7 +156,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 		{
 			CefRefPtr<CefV8Value> window = context->GetGlobal();
 			CefRefPtr<CefV8Value> logMediator = window->GetValue("loggingMediator");
-			if (logMediator->IsObject())
+			if (logMediator->IsObject() && logMediator->GetValue("log")->IsFunction())
 			{
 				logMediator->GetValue("log")->ExecuteFunction(logMediator, { log });
 			}
@@ -165,34 +165,6 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 		}
 	}
 
-
-    if (msgName == "GetPageResolution")
-    {
-        CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
-
-        if (context->Enter())
-        {
-            CefRefPtr<CefV8Value> global = context->GetGlobal();
-
-			if (global->GetValue("_pageWidth")->IsDouble() && global->GetValue("_pageHeight")->IsDouble())
-			{
-				double pageWidth = global->GetValue("_pageWidth")->GetDoubleValue();
-				double pageHeight = global->GetValue("_pageHeight")->GetDoubleValue();
-
-				msg = CefProcessMessage::Create("ReceivePageResolution");
-				msg->GetArgumentList()->SetDouble(0, pageWidth);
-				msg->GetArgumentList()->SetDouble(1, pageHeight);
-				browser->SendProcessMessage(PID_BROWSER, msg);
-			}
-			else
-			{
-				IPCLogDebug(browser, "Failed to read page width and/or height, expected double value, got something different. Aborting.");
-			}
-            
-            context->Exit();
-        }
-        return true;
-    }
 
     // EXPERIMENTAL: Handle request of fixed elements' coordinates
     if (msgName == "FetchFixedElements")
@@ -303,7 +275,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 				context->Exit();
 				return true;
 			}
-
+			
 			// Call object getter and save returned object
 			CefRefPtr<CefV8Value> domObj = objGetter->ExecuteFunction(context->GetGlobal(), { CefV8Value::CreateInt(id) });
 
@@ -323,7 +295,7 @@ bool RenderProcessHandler::OnProcessMessageReceived(
 					args->SetList(args_count++, listValue);
 				}
 			}
-
+			
 			if (args->GetSize() <= 2)
 			{
 				LogDebug(browser, "Renderer: ERROR processing " + js_obj_getter_name + "(" + std::to_string(id) + ")!");

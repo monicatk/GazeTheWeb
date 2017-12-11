@@ -6,6 +6,7 @@
 #include "FirebaseMailer.h"
 #include "src/Utils/glmWrapper.h"
 #include "src/Utils/Logger.h"
+#include "src/Utils/Helper.h"
 #include "externals/curl/include/curl/curl.h"
 #include <sstream>
 #include <chrono>
@@ -91,6 +92,21 @@ bool FirebaseMailer::FirebaseInterface::Login(std::string email, std::string pas
 
 	// Perform actual login
 	bool success = Login();
+
+	// If success, retrieve start index
+	if (success)
+	{
+		std::promise<int> promise; auto future = promise.get_future(); // future provides index
+		Transform(FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT, 1, &promise); // adds one to the count
+		int index = future.get() - 1;
+		nlohmann::json record = {
+			{ "date", GetDate() }, // add date
+			{ "timestamp", GetTimestamp() }, // add timestamp
+			{ "version", std::to_string(CLIENT_VERSION) } // add version
+		};
+		Put(FirebaseJSONKey::GENERAL_APPLICATION_START, record, std::to_string(index)); // send JSON to database
+		*_pStartIndex = index;
+	}
 
 	// Fullfill the promise
 	pPromise->set_value(_pIdToken->Get());
@@ -641,11 +657,12 @@ FirebaseMailer::FirebaseMailer()
 	auto* pConditionVariable = &_conditionVariable;
 	auto* pCommandQueue = &_commandQueue;
 	auto* pIdToken = &_idToken;
+	auto* pStartIndex = &_startIndex;
 	auto const * pShouldStop = &_shouldStop; // read-only
-	_upThread = std::unique_ptr<std::thread>(new std::thread([pMutex, pConditionVariable, pCommandQueue, pIdToken, pShouldStop]() // pass copies of pointers to members
+	_upThread = std::unique_ptr<std::thread>(new std::thread([pMutex, pConditionVariable, pCommandQueue, pIdToken, pStartIndex, pShouldStop]() // pass copies of pointers to members
 	{
 		// Create interface to firebase
-		FirebaseInterface interface(pIdToken); // object of inner class
+		FirebaseInterface interface(pIdToken, pStartIndex); // object of inner class
 
 		// Local command queue where command are moved from mailer thread to this thread
 		std::deque<std::shared_ptr<Command> > localCommandQueue;
@@ -673,97 +690,113 @@ FirebaseMailer::FirebaseMailer()
 				(*rCommand.get())(interface);
 			}
 		}
+
+		// Collect last commands before shutdown
+		std::unique_lock<std::mutex> lock(*pMutex);
+		localCommandQueue = std::move(*pCommandQueue); // move content of command queue to local one
+		pCommandQueue->clear(); // clear original queue
+
+		// Work on these last commands
+		for (const auto& rCommand : localCommandQueue)
+		{
+			(*rCommand.get())(interface);
+		}
 	}));
 }
 
-void FirebaseMailer::PushBack_Login(std::string email, std::string password, std::promise<std::string>* pPromise)
+bool FirebaseMailer::PushBack_Login(std::string email, std::string password, std::promise<std::string>* pPromise)
 {
 	// Add command to queue, take parameters as copy
-	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
+	return PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
-		rInterface.Login(email, password, pPromise);
+		return rInterface.Login(email, password, pPromise);
 	})));
 }
 
-void FirebaseMailer::PushBack_Transform(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise)
+bool FirebaseMailer::PushBack_Transform(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise)
 {
 	// Add command to queue, take parameters as copy
-	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
+	return PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
 		rInterface.Transform(key, delta, pPromise);
 	})));
 }
 
-void FirebaseMailer::PushBack_Maximum(FirebaseIntegerKey key, int value, std::promise<int>* pPromise)
+bool FirebaseMailer::PushBack_Maximum(FirebaseIntegerKey key, int value, std::promise<int>* pPromise)
 {
 	// Add command to queue, take parameters as copy
-	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
+	return PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
 		rInterface.Maximum(key, value, pPromise);
 	})));
 }
 
-void FirebaseMailer::PushBack_Put(FirebaseIntegerKey key, int value, std::string subpath)
+bool FirebaseMailer::PushBack_Put(FirebaseIntegerKey key, int value, std::string subpath)
 {
 	// Add command to queue, take parameters as copy
-	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
+	return PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
 		rInterface.Put(key, value, subpath);
 	})));
 }
 
-void FirebaseMailer::PushBack_Put(FirebaseStringKey key, std::string value, std::string subpath)
+bool FirebaseMailer::PushBack_Put(FirebaseStringKey key, std::string value, std::string subpath)
 {
 	// Add command to queue, take parameters as copy
-	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
+	return PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
 		rInterface.Put(key, value, subpath);
 	})));
 }
 
-void FirebaseMailer::PushBack_Put(FirebaseJSONKey key, json value, std::string subpath)
+bool FirebaseMailer::PushBack_Put(FirebaseJSONKey key, json value, std::string subpath)
 {
 	// Add command to queue, take parameters as copy
-	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
+	return PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
 		rInterface.Put(key, value, subpath);
 	})));
 }
 
-void FirebaseMailer::PushBack_Get(FirebaseIntegerKey key, std::promise<int>* pPromise)
+bool FirebaseMailer::PushBack_Get(FirebaseIntegerKey key, std::promise<int>* pPromise)
 {
 	// Add command to queue, take parameters as copy
-	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
+	return PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
 		rInterface.Get(key, pPromise);
 	})));
 }
 
-void FirebaseMailer::PushBack_Get(FirebaseStringKey key, std::promise<std::string>* pPromise)
+bool FirebaseMailer::PushBack_Get(FirebaseStringKey key, std::promise<std::string>* pPromise)
 {
 	// Add command to queue, take parameters as copy
-	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
+	return PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
 		rInterface.Get(key, pPromise);
 	})));
 }
 
-void FirebaseMailer::PushBack_Get(FirebaseJSONKey key, std::promise<json>* pPromise)
+bool FirebaseMailer::PushBack_Get(FirebaseJSONKey key, std::promise<json>* pPromise)
 {
 	// Add command to queue, take parameters as copy
-	PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
+	return PushBackCommand(std::shared_ptr<Command>(new Command([=](FirebaseInterface& rInterface)
 	{
 		rInterface.Get(key, pPromise);
 	})));
 }
 
-void FirebaseMailer::PushBackCommand(std::shared_ptr<Command> spCommand)
+bool FirebaseMailer::PushBackCommand(std::shared_ptr<Command> spCommand)
 {
-	if (!_paused) // only push back the command if not paused
+	if (setup::FIREBASE_MAILING && !_paused) // only push back the command if logging activated and not paused
 	{
 		std::lock_guard<std::mutex> lock(_commandMutex);
 		_commandQueue.push_back(spCommand); // push back command to queue
 		_conditionVariable.notify_all(); // notify thread about new data
+		return true;
+	}
+	else
+	{
+		return false; // command was not added to the queue
 	}
 }
 
@@ -771,4 +804,9 @@ std::string FirebaseMailer::GetIdToken() const
 {
 	// Only read in FirebaseMailer, do not set!
 	return _idToken.Get();
+}
+
+int FirebaseMailer::GetStartIndex() const
+{
+	return _startIndex;
 }

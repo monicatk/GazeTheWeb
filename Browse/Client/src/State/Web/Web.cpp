@@ -10,6 +10,7 @@
 #include "src/Utils/Helper.h"
 #include "src/Utils/Texture.h"
 #include "src/Utils/MakeUnique.h"
+#include "src/Arguments.h"
 #include <algorithm>
 
 
@@ -67,7 +68,14 @@ Web::Web(Master* pMaster, Mediator* pCefMediator, bool dataTransfer) : State(pMa
 
 Web::~Web()
 {
-	// TODO: Delete layouts?
+
+	_tabs.clear(); // just to be sure when this is called
+}
+
+int Web::AddTab(bool show)
+{
+	return AddTab("", show);
+
 }
 
 int Web::AddTab(std::string URL, bool show)
@@ -435,7 +443,19 @@ StateType Web::Update(float tpf, const std::shared_ptr<const Input> spInput)
 				// Validate URL
 				if (!ValidateURL(URL))
 				{
-					URL = SEARCH_PREFIX + URL;
+					// Seems to be no url, so input it as search term
+					switch (Argument::localization)
+					{
+					case Argument::Localization::English:
+						URL = SEARCH_PREFIX + URL + SEARCH_POSTFIX_ENGLISH;
+						break;
+					case Argument::Localization::Greek:
+						URL = SEARCH_PREFIX + URL + SEARCH_POSTFIX_GREEK;
+						break;
+					case Argument::Localization::Hebrew:
+						URL = SEARCH_PREFIX + URL + SEARCH_POSTFIX_HEBREW;
+						break;
+					}					
 				}
 
 				// Fetch tab id from URL input object
@@ -530,23 +550,6 @@ void Web::PushAddTabAfterJob(Tab* pCaller, std::string URL)
 	_jobs.push_front(std::unique_ptr<TabJob>(new AddTabAfterJob(pCaller, URL, true)));
 }
 
-void Web::PushAddPageToHistoryJob(Tab* pCaller, HistoryManager::Page page)
-{
-	LogDebug("Web: PushAddPageToHistoryJob called for url=", page.URL, ", title=", page.title);
-
-	_jobs.push_front(std::unique_ptr<TabJob>(new AddPageToHistoryJob(pCaller, page)));
-}
-
-void Web::PushDeletePageFromHistoryJob(Tab* pCaller, HistoryManager::Page page, bool deleteOnlyFirst)
-{
-	_jobs.push_front(std::unique_ptr<TabJob>(new DeletePageFromHistoryJob(pCaller, page, deleteOnlyFirst)));
-}
-
-HistoryManager::Page Web::GetFrontHistoryEntry() const
-{
-	return _upHistoryManager->GetFrontEntry();
-}
-
 int Web::GetIdOfTab(Tab const * pCaller) const
 {
 	// Go through map and find tab
@@ -560,6 +563,11 @@ int Web::GetIdOfTab(Tab const * pCaller) const
 	}
 
 	return -1;
+}
+
+std::shared_ptr<HistoryManager::Page> Web::AddPageToHistory(std::string URL, std::string title)
+{
+	return _upHistoryManager->AddPage(URL, title);
 }
 
 int Web::GetIndexOfTabInOrderVector(int id) const
@@ -684,95 +692,117 @@ void Web::UpdateTabOverview()
 		else
 		{
 			_pMaster->SetStyleTreePropertyValue("tab_preview_" + std::to_string(i), eyegui::property::Color::BackgroundColor, "0x607d8bFF");
-		}
-	}
+        }
+    }
 
-	// Fill the rest with empty blanks before adding new tab button (otherwise there would be two of them for a moment and id would conflict)
-	for (int i = slotsOnPage + 1; i < SLOTS_PER_TAB_OVERVIEW_PAGE; i++)
-	{
-		// Brick id
-		brickId = "tab_" + std::to_string(i);
+    // Fill the rest with empty blanks before adding new tab button (otherwise there would be two of them for a moment and id would conflict)
+    for (int i = slotsOnPage + 1; i < SLOTS_PER_TAB_OVERVIEW_PAGE; i++)
+    {
+        // Brick id
+        brickId = "tab_" + std::to_string(i);
 
-		// Id mapper
-		idMapper.clear();
-		idMapper.emplace("blank", brickId);
+        // Id mapper
+        idMapper.clear();
+        idMapper.emplace("blank", brickId);
 
-		// Put brick into layout
-		eyegui::replaceElementWithBrick(
-			_pTabOverviewLayout,
-			brickId,
-			"bricks/WebTabEmptyPreview.beyegui",
-			idMapper,
-			true);
-	}
+        // Put brick into layout
+        eyegui::replaceElementWithBrick(
+            _pTabOverviewLayout,
+            brickId,
+            "bricks/WebTabEmptyPreview.beyegui",
+            idMapper,
+            true);
+    }
 
-	// Add "new" button to last position if space left
-	if (slotsOnPage < SLOTS_PER_TAB_OVERVIEW_PAGE)
-	{
-		// Brick id
-		brickId = "tab_" + std::to_string(slotsOnPage);
+    // Add "new" button to last position if space left
+    if (slotsOnPage < SLOTS_PER_TAB_OVERVIEW_PAGE)
+    {
+        // Brick id
+        brickId = "tab_" + std::to_string(slotsOnPage);
 
-		// Id mapper
-		idMapper.clear();
-		idMapper.emplace("stack", brickId);
+        // Id mapper
+        idMapper.clear();
+        idMapper.emplace("stack", brickId);
 
-		// Put brick into layout
-		eyegui::replaceElementWithBrick(
-			_pTabOverviewLayout,
-			brickId,
-			"bricks/WebTabNew.beyegui",
-			idMapper,
-			true);
+        // Put brick into layout
+        eyegui::replaceElementWithBrick(
+            _pTabOverviewLayout,
+            brickId,
+            "bricks/WebTabNew.beyegui",
+            idMapper,
+            true);
 
-		// Register listener
-		eyegui::registerButtonListener(_pTabOverviewLayout, "new_tab", _spWebButtonListener);
-	}
+        // Register listener
+        eyegui::registerButtonListener(_pTabOverviewLayout, "new_tab", _spWebButtonListener);
+    }
 
-	// Get count of pages
-	int pageCount = CalculatePageCountOfTabOverview();
+    // Get count of pages
+    int pageCount = CalculatePageCountOfTabOverview();
 
-	// Set page count in textblock (no more in layout)
-	// eyegui::setContentOfTextBlock(_pTabOverviewLayout, "page_count", std::to_string(_tabOverviewPage + 1) + "/" + std::to_string(pageCount));
+    // Set page count in textblock (no more in layout)
+    // eyegui::setContentOfTextBlock(_pTabOverviewLayout, "page_count", std::to_string(_tabOverviewPage + 1) + "/" + std::to_string(pageCount));
 
-	// Activate or deactivate back and forward button
-	eyegui::setElementActivity(_pTabOverviewLayout, "back", _tabOverviewPage > 0, true);
-	eyegui::setElementActivity(_pTabOverviewLayout, "forward", _tabOverviewPage < (pageCount - 1), true);
+    // Activate or deactivate back and forward button
+    eyegui::setElementActivity(_pTabOverviewLayout, "back", _tabOverviewPage > 0, true);
+    eyegui::setElementActivity(_pTabOverviewLayout, "forward", _tabOverviewPage < (pageCount - 1), true);
 
-	// Current tab view
-	if (_currentTabId >= 0)
-	{
-		// Show URL
-		eyegui::setContentOfTextBlock(_pTabOverviewLayout, "url", _tabs.at(_currentTabId)->GetURL());
+    // Current tab view
+    if (_currentTabId >= 0)
+    {
+        // Show URL and title
+        eyegui::setContentOfTextBlock(_pTabOverviewLayout, "url", _tabs.at(_currentTabId)->GetURL());
+		eyegui::setContentOfTextBlock(_pTabOverviewLayout, "title", _tabs.at(_currentTabId)->GetTitle());
 
-		// Show current tab's page
-		auto wpTexture = _tabs.at(_currentTabId)->GetWebViewTexture();
-		if (auto spTexture = wpTexture.lock())
+		// Set color of title
+		auto colorAccent = _tabs.at(_currentTabId)->GetColorAccent();
+		_pMaster->SetStyleTreePropertyValue(
+			"tab_overview_page_title",
+			eyegui::property::Color::BackgroundColor,
+			RGBAToHexString(colorAccent)
+		);
+
+		// Set color of title font
+		float grey = 0.333f * colorAccent.r + 0.333f * colorAccent.g + 0.333f * colorAccent.b;
+		glm::vec4 fontColor(0, 0, 0, 1);
+		if (grey <= 0.4) // if background is too dark, make font bright
 		{
-			// Fetch pixel data of tab in higher mip map level
-			std::vector<unsigned char> tabPreviewData;
-			int tabPreviewWidth;
-			int tabPreviewHeight;
-			if (spTexture->GetPixelsFromMipMap(
-				WEB_TAB_OVERVIEW_PREVIEW_MIP_MAP_LEVEL,
-				tabPreviewWidth,
-				tabPreviewHeight,
-				tabPreviewData))
-			{
-				// Pipe it to eyeGUI
-				eyegui::setImageOfPicture(
-					_pTabOverviewLayout,
-					"preview",
-					"current_tab_preview",
-					tabPreviewWidth,
-					tabPreviewHeight,
-					eyegui::ColorFormat::RGBA,
-					tabPreviewData.data(),
-					true);
-			}
+			fontColor = glm::vec4(1, 1, 1, 1);
 		}
+		_pMaster->SetStyleTreePropertyValue(
+			"tab_overview_page_title",
+			eyegui::property::Color::FontColor,
+			RGBAToHexString(fontColor)
+		);
 
-		// Activate buttons
-		eyegui::setElementActivity(_pTabOverviewLayout, "edit_url", true, true);
+        // Show current tab's page
+        auto wpTexture = _tabs.at(_currentTabId)->GetWebViewTexture();
+        if (auto spTexture = wpTexture.lock())
+        {
+            // Fetch pixel data of tab in higher mip map level
+            std::vector<unsigned char> tabPreviewData;
+            int tabPreviewWidth;
+            int tabPreviewHeight;
+            if (spTexture->GetPixelsFromMipMap(
+                WEB_TAB_OVERVIEW_PREVIEW_MIP_MAP_LEVEL,
+                tabPreviewWidth,
+                tabPreviewHeight,
+                tabPreviewData))
+            {
+                // Pipe it to eyeGUI
+                eyegui::setImageOfPicture(
+                    _pTabOverviewLayout,
+                    "preview",
+                    "current_tab_preview",
+                    tabPreviewWidth,
+                    tabPreviewHeight,
+                    eyegui::ColorFormat::RGBA,
+                    tabPreviewData.data(),
+                    true);
+            }
+        }
+
+        // Activate buttons
+        eyegui::setElementActivity(_pTabOverviewLayout, "edit_url", true, true);
 		eyegui::setElementActivity(_pTabOverviewLayout, "bookmark_tab", true, true);
 		eyegui::setElementActivity(_pTabOverviewLayout, "reload_tab", true, true);
 		eyegui::setElementActivity(_pTabOverviewLayout, "close_tab", true, true);
@@ -869,12 +899,6 @@ void Web::AddTabAfterJob::Execute(Web* pCallee)
 	eyegui::flash(pCallee->_pWebLayout, "tab_overview");
 }
 
-void Web::AddPageToHistoryJob::Execute(Web* pCallee)
-{
-	// Add page to history
-	pCallee->_upHistoryManager->AddPage(_page);
-}
-
 void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 {
 	if (pLayout == _pWeb->_pWebLayout)
@@ -897,6 +921,7 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			if (tabId >= 0)
 			{
 				_pWeb->_tabs[tabId]->GoBack();
+				_pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_GO_BACK_USAGE_COUNT, FirebaseJSONKey::GENERAL_GO_BACK_USAGE);
 			}
 			LabStreamMailer::instance().Send("Go back");
 		}
@@ -906,6 +931,7 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			if (tabId >= 0)
 			{
 				_pWeb->_tabs[tabId]->GoForward();
+				_pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_GO_FORWARD_USAGE_COUNT, FirebaseJSONKey::GENERAL_GO_FORWARD_USAGE);
 			}
 			LabStreamMailer::instance().Send("Go forward");
 		}
@@ -941,8 +967,11 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			int currentTab = _pWeb->_currentTabId;
 			if (currentTab >= 0)
 			{
+				// URL
+				std::string URL = _pWeb->_tabs.at(currentTab)->GetURL();
+
 				// Add as bookmark
-				bool success = _pWeb->_upBookmarkManager->AddBookmark(_pWeb->_tabs.at(currentTab)->GetURL());
+				bool success = _pWeb->_upBookmarkManager->AddBookmark(URL);
 
 				// Display it on icon. Even if not successful, because that means it was already a bookmark
 				eyegui::setIconOfIconElement(_pWeb->_pTabOverviewLayout, "bookmark_tab", "icons/BookmarkTab_true.png");
@@ -955,6 +984,12 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				else
 				{
 					_pWeb->_pMaster->PushNotificationByKey("notification:bookmark_added_existing", MasterNotificationInterface::Type::NEUTRAL, false);
+				}
+
+				if (success)
+				{
+					nlohmann::json record = { { "url", URL } };
+					_pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_BOOKMARK_ADDING_COUNT, FirebaseJSONKey::GENERAL_BOOKMARK_ADDING, record);
 				}
 			}
 
@@ -969,6 +1004,7 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				_pWeb->ShowTabOverview(false);
 			}
 			LabStreamMailer::instance().Send("Reload tab");
+			_pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_TAB_RELOADING_COUNT, FirebaseJSONKey::GENERAL_TAB_RELOADING);
 		}
 		else if (id == "close_tab")
 		{
@@ -978,6 +1014,7 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 				_pWeb->UpdateTabOverview();
 			}
 			LabStreamMailer::instance().Send("Close tab");
+			_pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_TAB_CLOSING_COUNT, FirebaseJSONKey::GENERAL_TAB_CLOSING);
 		}
 		else if (id == "back")
 		{
@@ -996,7 +1033,7 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		else if (id == "new_tab")
 		{
 			// Add tab
-			int tabId = _pWeb->AddTab(BLANK_PAGE_URL, true);
+			int tabId = _pWeb->AddTab(true);
 
 			// Close tab overview
 			_pWeb->ShowTabOverview(false);
@@ -1006,10 +1043,13 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 
 			JSMailer::instance().Send("new_tab");
 			LabStreamMailer::instance().Send("Open new tab");
+			_pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_TAB_CREATION_COUNT, FirebaseJSONKey::GENERAL_TAB_CREATION);
 		}
 		else if (id == "tab_button_0")
 		{
-			if (_pWeb->SwitchToTabByIndex(0 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
+			int index = 0 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE);
+			if(_pWeb->_tabIdOrder[index] != _pWeb->_currentTabId) {_pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_TAB_SWITCHING_COUNT, FirebaseJSONKey::GENERAL_TAB_SWITCHING); }
+			if (_pWeb->SwitchToTabByIndex(index))
 			{
 				_pWeb->ShowTabOverview(false);
 				JSMailer::instance().Send("tab0");
@@ -1017,28 +1057,36 @@ void Web::WebButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		}
 		else if (id == "tab_button_1")
 		{
-			if (_pWeb->SwitchToTabByIndex(1 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
+			int index = 1 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE);
+			if (_pWeb->_tabIdOrder[index] != _pWeb->_currentTabId) { _pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_TAB_SWITCHING_COUNT, FirebaseJSONKey::GENERAL_TAB_SWITCHING); }
+			if (_pWeb->SwitchToTabByIndex(index))
 			{
 				_pWeb->ShowTabOverview(false);
 			}
 		}
 		else if (id == "tab_button_2")
 		{
-			if (_pWeb->SwitchToTabByIndex(2 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
+			int index = 2 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE);
+			if (_pWeb->_tabIdOrder[index] != _pWeb->_currentTabId) { _pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_TAB_SWITCHING_COUNT, FirebaseJSONKey::GENERAL_TAB_SWITCHING); }
+			if (_pWeb->SwitchToTabByIndex(index))
 			{
 				_pWeb->ShowTabOverview(false);
 			}
 		}
 		else if (id == "tab_button_3")
 		{
-			if (_pWeb->SwitchToTabByIndex(3 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
+			int index = 3 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE);
+			if (_pWeb->_tabIdOrder[index] != _pWeb->_currentTabId) { _pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_TAB_SWITCHING_COUNT, FirebaseJSONKey::GENERAL_TAB_SWITCHING); }
+			if (_pWeb->SwitchToTabByIndex(index))
 			{
 				_pWeb->ShowTabOverview(false);
 			}
 		}
 		else if (id == "tab_button_4")
 		{
-			if (_pWeb->SwitchToTabByIndex(4 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE)))
+			int index = 4 + (_pWeb->_tabOverviewPage * SLOTS_PER_TAB_OVERVIEW_PAGE);
+			if (_pWeb->_tabIdOrder[index] != _pWeb->_currentTabId) { _pWeb->_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_TAB_SWITCHING_COUNT, FirebaseJSONKey::GENERAL_TAB_SWITCHING); }
+			if (_pWeb->SwitchToTabByIndex(index))
 			{
 				_pWeb->ShowTabOverview(false);
 			}
@@ -1056,14 +1104,6 @@ void Web::WebButtonListener::up(eyegui::Layout* pLayout, std::string id)
 			_pWeb->_pMaster->SetDataTransfer(true);
 		}
 	}
-}
-
-void Web::DeletePageFromHistoryJob::Execute(Web * pCallee)
-{
-	LogDebug("Web: DeletePageFromHistoryJob called for url=", _page.URL, ", title=", _page.title);
-
-	// Add page to history
-	pCallee->_upHistoryManager->DeletePageByUrl(_page, _deleteOnlyFirst);
 }
 
 
@@ -1407,5 +1447,4 @@ void Web::dictationOfVoice(std::string transcription) {
 		_overlayWordSuggestId,
 		s16);
 }
-
 

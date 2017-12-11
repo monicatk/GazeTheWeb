@@ -6,7 +6,6 @@
 
 #include "src/CEF/Handler.h"
 #include "src/CEF/Mediator.h"
-#include "src/CEF/RequestHandler.h"
 #include "src/Utils/Logger.h"
 #include "src/Singletons/JSMailer.h"
 #include "include/base/cef_bind.h"
@@ -261,11 +260,7 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
     if (msgName == "ReceiveFavIconBytes")
  		LogDebug("Handler: Received depricated ", msgName, " IPC message!");
  
-    if (msgName == "ReceivePageResolution")
-    {
-        _pMediator->ReceivePageResolution(browser, msg);
-		return true;
-    }
+
     if (msgName == "ReceiveFixedElements")
     {
         _pMediator->ReceiveFixedElements(browser, msg);
@@ -320,6 +315,16 @@ bool Handler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 		if (type == "OverflowElement")
 		{
 			const auto& wpNode = _pMediator->GetDOMOverflowElement(browser, id);
+			if (const auto& node = wpNode.lock())
+			{
+				node->Initialize(msg);
+			}
+			return true;
+		}
+		// TODO: Refactor this.
+		if (type == "Checkbox")
+		{
+			const auto& wpNode = _pMediator->GetDOMCheckbox(browser, id);
 			if (const auto& node = wpNode.lock())
 			{
 				node->Initialize(msg);
@@ -478,7 +483,7 @@ void Handler::ReplyJSDialog(CefRefPtr<CefBrowser> browser, bool clicked_ok, std:
 
 void Handler::ResetMainFramesScrolling(CefRefPtr<CefBrowser> browser)
 {
-    const std::string resetScrolling = "document.body.scrollTop=0; document.body.scrollLeft=0;";
+    const std::string resetScrolling = "window.scrollTo(0, 0);";
     browser->GetMainFrame()->ExecuteJavaScript(resetScrolling, browser->GetMainFrame()->GetURL(), 0);
 }
 
@@ -502,24 +507,9 @@ void Handler::SetZoomLevel(CefRefPtr<CefBrowser> browser, bool definitelyChanged
 
 void Handler::UpdatePageResolution(CefRefPtr<CefBrowser> browser)
 {
-	// TODO: Return these values by calling a function (in Renderer Process), get rid of these window variables
-
-    // Javascript code for receiving the current page width & height
-	const std::string getPageResolution = "\
-            if(document.documentElement && document.body !== null && document.body !== undefined)\
-			{\
-			window._pageWidth = document.body.scrollWidth;\
-            window._pageHeight = document.body.scrollHeight;\
-			}\
-			else\
-				console.log('Handler::UpdatePageResolution: Could not access document.documentElement or document.body!');\
-            ";
-
-    browser->GetMainFrame()->ExecuteJavaScript(getPageResolution, browser->GetMainFrame()->GetURL(), 0);
-
-    // Tell renderer process to get V8 values, where page sizes were written to
-    CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("GetPageResolution");
-    browser->SendProcessMessage(PID_RENDERER, msg);
+	// Execute Javascript function which will send page resolution to MessageRouter
+	browser->GetMainFrame()->ExecuteJavaScript(
+		"if(typeof(CefGetPageResolution) === 'function'){ CefGetPageResolution(); }", browser->GetMainFrame()->GetURL(), 0);
 }
 
 void Handler::IPCLogRenderer(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg)

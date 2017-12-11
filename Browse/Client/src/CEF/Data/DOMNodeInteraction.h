@@ -136,6 +136,7 @@ private:
     friend class DOMOverflowElementInteraction;
     friend class DOMSelectFieldInteraction;
 	friend class DOMVideoInteraction;
+	friend class DOMCheckboxInteraction;
 
 };
 
@@ -185,7 +186,8 @@ public:
 	DOMVideoInteraction() {}
 
 	// Send IPC message to JS in order to execute JS function
-	void JumpToSecond(float sec = 0.f) { SendExecuteFunctionMessage("jumptToSecond", sec); }
+	void JumpToSecond(float sec = 0.f) { SendExecuteFunctionMessage("jumpToSecond", sec); }
+	void SkipSeconds(float sec = 0.f) { SendExecuteFunctionMessage("skipSeconds", sec); }
 	void SetPlaying(bool playing = true) { SendExecuteFunctionMessage("setPlaying", playing); }
 	void SetMuted(bool muted = true) { SendExecuteFunctionMessage("setMuted", muted); }
 	void SetVolume(float volume) { SendExecuteFunctionMessage("setVolume", volume); }
@@ -194,6 +196,14 @@ public:
 	void ToggleMuted() { SendExecuteFunctionMessage("toggleMuted"); }
 	void TogglePlayPause() { SendExecuteFunctionMessage("togglePlayPause"); }
 	void ChangeVolume(float delta) { SendExecuteFunctionMessage("changeVolume", delta); }
+};
+
+class DOMCheckboxInteraction : public virtual DOMJavascriptCommunication
+{
+public:
+	DOMCheckboxInteraction() {}
+
+	void SetChecked(bool state) { SendExecuteFunctionMessage("setChecked", state); }
 };
 
 

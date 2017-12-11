@@ -55,7 +55,11 @@ namespace setup
 	static const FilterKernel FILTER_KERNEL = FilterKernel::GAUSSIAN;
 	static const int	FILTER_WINDOW_SIZE = 30;
 	static const bool	FILTER_USE_OUTLIER_REMOVAL = true;
+<<<<<<< HEAD
 	static const bool	USE_EYEGUI_DRIFT_MAP = false && !DEMO_MODE;
+=======
+	static const bool	USE_EYEGUI_DRIFT_MAP = !DEMO_MODE;
+>>>>>>> upstream/master
 
 	// Distortion
 	static const bool	EYEINPUT_DISTORT_GAZE = false && !DEPLOYMENT;
@@ -66,13 +70,17 @@ namespace setup
 	static const std::string	LAB_STREAM_OUTPUT_NAME = "GazeTheWebOutput";
 	static const std::string	LAB_STREAM_OUTPUT_SOURCE_ID = std::to_string(CLIENT_VERSION); // use client version as source id
 	static const std::string	LAB_STREAM_INPUT_NAME = LAB_STREAM_OUTPUT_NAME; //  "GazeTheWebInput"; // may be set to same value as LAB_STREAM_OUTPUT_NAME to receive own events for debugging purposes
-	static const bool			LOG_INTERACTIONS = false;
+	static const bool			LOG_INTERACTIONS = false; // on eyeGUI level, deprecated
+	static const bool			TAB_TRIGGER_SHOW_BADGE = false;
+	static const std::string	DASHBOARD_URL = "https://augreal.mklab.iti.gr/mamem/gtw-home"; // without slash at the end
+
+	// Firebase
+	static const bool			FIREBASE_MAILING = !DEMO_MODE; // on/off switch for sending data to Firebase
 	static const std::string	FIREBASE_API_KEY = "AIzaSyBMa9gSXsoDo27S7P959QZYf3rJBGDGEIA"; // API key for our Firebase
-	static const std::string	FIREBASE_URL = "https://mamem-phase2-fall17.firebaseio.com"; // URL of our Firebase
+	static const std::string	FIREBASE_PROJECT_ID = "mamem-phase2-fall17"; // Project Id of our Firebase
 	static const int			SOCIAL_RECORD_DIGIT_COUNT = 6;
 	static const bool			SOCIAL_RECORD_PERSIST_UNKNOWN = true;
 	static const std::string	DATE_FORMAT = "%d-%m-%Y %H-%M-%S";
-	static const bool			TAB_TRIGGER_SHOW_BADGE = true;
 
 	// Other
 	static const bool	ENABLE_WEBGL = false; // only on Windows
@@ -80,7 +88,8 @@ namespace setup
 	static const float	WEB_VIEW_RESOLUTION_SCALE = 1.f;
 	static const unsigned int	HISTORY_MAX_PAGE_COUNT = 100; // maximal length of history
 	static const bool	USE_DOM_NODE_POLLING = !DEBUG_MODE;
-	static const float	DOM_POLLING_FREQUENCY = 0.25f; // times per second
+	static const float	DOM_POLLING_FREQUENCY = 1.0f; // times per second
+	static const int	DOM_POLLING_PARTITION_NUMBER = 8;
 }
 
 #endif // SETUP_H_

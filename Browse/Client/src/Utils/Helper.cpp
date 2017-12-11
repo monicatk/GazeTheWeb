@@ -214,3 +214,9 @@ std::string GetDate()
 	oss << std::put_time(&tm, setup::DATE_FORMAT.c_str());
 	return oss.str();
 }
+
+
+std::string GetTimestamp()
+{
+	return std::to_string(std::time(nullptr));
+}

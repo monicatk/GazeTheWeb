@@ -10,6 +10,7 @@
 #include "src/State/Web/Tab/Pipelines/TextSelectionPipeline.h"
 #include "src/CEF/Mediator.h"
 #include "src/Utils/MakeUnique.h"
+#include "src/Master/Master.h"
 
 void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 {
@@ -34,6 +35,16 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 
 			// Trigger zooming in CefMediator
 			_pTab->_pCefMediator->SetZoomLevel(_pTab);
+		}
+		else if (id == "dashboard")
+		{
+			auto parameters = _pTab->_pMaster->GetDashboardParameters();
+			std::string URL(setup::DASHBOARD_URL + "/?");
+			URL += "email=" + parameters.email + "&";
+			URL += "password=" + parameters.password + "&";
+			URL += "api_key=" + parameters.APIKey + "&";
+			URL += "project_id=" + parameters.projectId;
+			_pTab->OpenURL(URL);
 		}
 		/*
         else if (id == "gaze_mouse")
@@ -66,15 +77,25 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			_pTab->AbortAndClearPipelines();
 		}
 	}
-	else
+	else if (pLayout == _pTab->_pVideoModeLayout)
 	{
 		// ### Vide mode layout ###
-		if (id == "play_pause")
+		if (id == "play")
 		{
 			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
 			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 			{
-				iter->second->TogglePlayPause();
+				iter->second->SetPlaying(true);
+				eyegui::setVisibilityOfLayout(_pTab->_pVideoModePauseOverlayLayout, false, false, true); // hide pause overlay
+			}
+		}
+		else if (id == "pause")
+		{
+			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
+			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+			{
+				iter->second->SetPlaying(false);
+				eyegui::setVisibilityOfLayout(_pTab->_pVideoModePauseOverlayLayout, true, true, true); // show pause overlay
 			}
 		}
 		else if (id == "volume_up")
@@ -82,6 +103,7 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
 			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 			{
+				iter->second->SetMuted(false);
 				iter->second->ChangeVolume(0.25f);
 			}
 		}
@@ -90,6 +112,7 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
 			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
 			{
+				iter->second->SetMuted(false);
 				iter->second->ChangeVolume(-0.25f);
 			}
 		}
@@ -106,7 +129,30 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			_pTab->ExitVideoMode();
 		}
 	}
+<<<<<<< HEAD
 	LogInfo("------ button ", id, " down finished-----");
+=======
+	else
+	{
+		// ### Vide mode pause overlay layout ###
+		if (id == "skip-10")
+		{
+			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
+			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+			{
+				iter->second->SkipSeconds(-10);
+			}
+		}
+		if (id == "skip+30")
+		{
+			auto iter = _pTab->_VideoMap.find(_pTab->_videoModeId);
+			if (iter != _pTab->_VideoMap.end()) // search for DOMVideo corresponding to videoModeId
+			{
+				iter->second->SkipSeconds(30);
+			}
+		}
+	}
+>>>>>>> upstream/master
 }
 
 void Tab::TabButtonListener::up(eyegui::Layout* pLayout, std::string id)

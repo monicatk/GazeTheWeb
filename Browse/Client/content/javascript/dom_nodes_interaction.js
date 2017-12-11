@@ -171,8 +171,13 @@ DOMVideo.prototype.jumpToSecond = function(sec)
 {
 	this.node.currentTime = sec;
 	ConsolePrint("DOMVideo id="+this.getId()+": Now playing from second "+sec);
-
 }
+
+DOMVideo.prototype.skipSeconds = function (sec) {
+    this.node.currentTime += sec;
+    ConsolePrint("DOMVideo id=" + this.getId() + ": Now playing from second " + sec);
+}
+
 DOMVideo.prototype.setFullscreen = function(fullscreen)
 {
 	if(fullscreen)
@@ -262,6 +267,13 @@ DOMVideo.prototype.changeVolume = function (delta) {
 DOMVideo.prototype.showControls = function(val)
 {
 	console.log("DOMVideo.showControls has to be implemented! Called with ", arguments);
+}
+
+
+DOMCheckbox.prototype.setChecked = function(state)
+{
+	this.node.checked = state;
+	console.log("DOMCheckbox, "+this.getId()+": Setting to checked to '"+checked+"'.");
 }
 
 ConsolePrint("Successfully imported dom_nodes_interaction.js!");

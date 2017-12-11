@@ -43,9 +43,6 @@ bool TextInputAction::Update(float tpf, const std::shared_ptr<const TabInput> sp
 		originalText.begin(), originalText.end(),
 		text8.begin(), text8.end());	
 
-	// Input text
-	_spInteractionNode->InputText(text8, submit > 0); // TODO: Call LSL Logging?
-
 	// Tell tab about for social record
 	if (!_isPasswordField) // only if no password field
 	{
@@ -60,8 +57,12 @@ bool TextInputAction::Update(float tpf, const std::shared_ptr<const TabInput> sp
 
 		float duration = -1.f;
 		GetInputValue("duration", duration);
-		_pTab->NotifyTextInput("", text.length(), distance, x, y, duration); // todo fetch id
+		
+		_pTab->NotifyTextInput(_spNode->GetHTMLClass(), _spNode->GetHTMLId(), text.length(), distance, x, y, duration);
 	}
+
+	// Input text
+	_spInteractionNode->InputText(text8, submit > 0); // TODO: Call LSL Logging?
 
     // Action is done
     return true;

@@ -49,6 +49,18 @@ bright_panel : default
 	BackgroundColor = 0x50BAA6FF
 }
 
+standard_text : default
+{
+	BackgroundColor = 0xFFFFFFFF
+	FontColor = 0x000000FF
+}
+
+tab_overview_page_title: default
+{
+	BackgroundColor = 0xFFFFFFFF
+	FontColor = 0x000000FF
+}
+
 // Placeholders for tab overview
 tab_preview_0 : default
 {
@@ -119,6 +131,16 @@ recalibration : default
 	Color = 0xD64400FF
 	ButtonThresholdIncreaseDuration = 3
 	ButtonThresholdDecreaseDuration = 5
+}
+
+calibration_display_border : default
+{
+	BackgroundColor = 0x607d8bFF
+}
+
+calibration_display_background : default
+{
+	BackgroundColor = 0x393E40FF
 }
 
 invisible_but_icon : default

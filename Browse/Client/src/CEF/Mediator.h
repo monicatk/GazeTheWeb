@@ -33,6 +33,7 @@ class DOMTextInput;
 class DOMLink;
 class DOMSelectField;
 class DOMVideo;
+class DOMCheckbox;
 
 typedef int BrowserID;
 
@@ -44,9 +45,9 @@ public:
 	void SetMaster(MasterNotificationInterface* pMaster);
 
     // Receive tab specific commands
-    void RegisterTab(TabCEFInterface* pTab);
+    void RegisterTab(TabCEFInterface* pTab, std::string URL);
     void UnregisterTab(TabCEFInterface* pClosing);
-    void RefreshTab(TabCEFInterface* pTab);	// Daniel: "This name is weird.. have been searching for method to load URL and this is the answer? :D
+    void LoadURLInTab(TabCEFInterface* pTab, std::string URL);
     void ReloadTab(TabCEFInterface* pTab);
     void GoBack(TabCEFInterface* pTab);
     void GoForward(TabCEFInterface* pTab);
@@ -101,12 +102,14 @@ public:
 
 
 
+	bool SetMetaKeywords(CefRefPtr<CefBrowser> browser, std::string content);
+
     // External zoom level request
     void SetZoomLevel(TabCEFInterface* pTab);
     // Called by Handler OnLoadStart
     double GetZoomLevel(CefRefPtr<CefBrowser> browser);
 
-    void ReceivePageResolution(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
+	void ReceivePageResolution(CefRefPtr<CefBrowser> browser, double width, double height);
 
     // Called when Tab realizes that it might reach end of page while scrolling
     void GetPageResolution(TabCEFInterface* pTab);
@@ -114,7 +117,9 @@ public:
     void ReceiveFixedElements(CefRefPtr<CefBrowser> browser, CefRefPtr<CefProcessMessage> msg);
     void RemoveFixedElement(CefRefPtr<CefBrowser> browser, int id);
 
-	void Poll(TabCEFInterface* pTab);
+	// If numPartitions != 0, divide polled elements into numPartitions splits and update split with 
+	// updatePartition as array index (starting with 0!)
+	void Poll(TabCEFInterface* pTab = NULL, unsigned int numPartitions=0, unsigned int updatePartition=0);
 
 	// Update Tab's title when title change callback is received
 	void OnTabTitleChange(CefRefPtr<CefBrowser> browser, std::string title);
@@ -133,6 +138,7 @@ public:
 	void AddDOMSelectField(CefRefPtr<CefBrowser> browser, int id);
 	void AddDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id);
 	void AddDOMVideo(CefRefPtr<CefBrowser> browser, int id);
+	void AddDOMCheckbox(CefRefPtr<CefBrowser> browser, int id);
 	
 	void ClearDOMNodes(CefRefPtr<CefBrowser> browser);
 
@@ -141,7 +147,8 @@ public:
 	void RemoveDOMSelectField(CefRefPtr<CefBrowser> browser, int id);
 	void RemoveDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id);
 	void RemoveDOMVideo(CefRefPtr<CefBrowser> browser, int id);
-	
+	void RemoveDOMCheckbox(CefRefPtr<CefBrowser> browser, int id);
+
 
 	// Receive weak_ptr, only perform Initialize(objMsg) and Update(attr) operations
 	std::weak_ptr<DOMTextInput> GetDOMTextInput(CefRefPtr<CefBrowser> browser, int id);
@@ -149,6 +156,7 @@ public:
 	std::weak_ptr<DOMSelectField> GetDOMSelectField(CefRefPtr<CefBrowser> browser, int id);
 	std::weak_ptr<DOMOverflowElement> GetDOMOverflowElement(CefRefPtr<CefBrowser> browser, int id);
 	std::weak_ptr<DOMVideo> GetDOMVideo(CefRefPtr<CefBrowser> browser, int id);
+	std::weak_ptr<DOMCheckbox> GetDOMCheckbox(CefRefPtr<CefBrowser> browser, int id);
 
 	// DOM node objects can directly send interaction messages to Renderer
 	bool SendProcessMessageToRenderer(CefRefPtr<CefProcessMessage> msg, TabCEFInterface* pTab);
@@ -176,6 +184,9 @@ public:
 	void SetClipboardText(std::string text); // should be called by browser msg router
 	std::string GetClipboardText() const; // should be called by tab
 	void ClearClipboardText(); // should be called by mediator before asking Javascript to extract selected string from page
+
+	// Decide whether to block ads
+	void BlockAds(bool blockAds) { _handler->BlockAds(blockAds); }
 
 protected:
 

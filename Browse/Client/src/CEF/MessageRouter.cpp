@@ -34,15 +34,44 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	bool persistent,
 	CefRefPtr<Callback> callback)
 {
-	const std::string requestString = request.ToString();
-	//LogDebug("MsgRouter: ", requestString);
+	const std::string& requestStr = request.ToString();
+	std::vector<std::string> split_request = SplitBySeparator(requestStr, '#');
+
+	if (split_request.size() == 3 && split_request[0].compare("resolution") == 0)
+	{
+		try
+		{
+			const double& width = std::stod(split_request[1]);
+			const double& height = std::stod(split_request[2]);
+			_pMediator->ReceivePageResolution(browser, width, height);
+		}
+		catch (const std::exception& e)
+		{
+			LogInfo("MsgRouter: Received wrongly typed page resolution information!");
+			LogInfo("Caught exception: ", e.what());
+		}
+		return true;
+	}
+
+	// Receive META data
+	if (split_request.size() == 3 && split_request[0].compare("meta") == 0)
+	{
+		if (split_request[1].compare("keywords") == 0)
+		{
+			_pMediator->SetMetaKeywords(browser, split_request[2]);
+			callback->Success("Received meta keywords");
+			return true;
+		}
+		return false;
+	}
+
 
 	// ###############
 	// ### Favicon ###
 	// ###############
-	if (requestString.compare(0, 12, "#FaviconURL#") == 0)
+	if (requestStr.compare(0, 12, "#FaviconURL#") == 0)
 	{
-		auto split = SplitBySeparator(requestString, '#');
+		auto split = SplitBySeparator(requestStr, '#');
 
 		if (split.size() > 1)
 		{
@@ -52,7 +81,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		return true;
 	}
 
-	if (requestString == "faviconBytesReady")
+	if (requestStr == "faviconBytesReady")
 	{
 		// Logging
 		LogDebug("MessageRouter: Received 'faviconBytesReady' callback from Javascript");
@@ -71,10 +100,10 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	// ######################
 
 	// Text selection callback, asynchronously called when CefMediator::EndTextSelection finishes
-	if (requestString.compare(0, 8, "#select#") == 0)
+	if (requestStr.compare(0, 8, "#select#") == 0)
 	{
 		// Split result
-		auto split = SplitBySeparator(requestString, '#');
+		auto split = SplitBySeparator(requestStr, '#');
 
 		// Check whether result is empty
 		if (split.size() > 1)
@@ -99,9 +128,9 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	// #####################
 
 	// Fixed element callbacks
-	if (requestString.compare(0, 9, "#fixElem#") == 0)
+	if (requestStr.compare(0, 9, "#fixElem#") == 0)
 	{
-		std::vector<std::string> data = SplitBySeparator(requestString, '#');
+		std::vector<std::string> data = SplitBySeparator(requestStr, '#');
 		const std::string& op = data[1];
 
 		if (data.size() > 2)
@@ -157,11 +186,11 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	// Example: DOM#upd#7#1337#0#0.9;0.7;0.5;0.7#
 
 	// Debug extension: Request C++ sided DOM attribute information
-	if (requestString.compare(0, 10, "DOMAttrReq") == 0)
+	if (requestStr.compare(0, 10, "DOMAttrReq") == 0)
 	{
 		LogInfo("DOMAttrReq: Received.");
 
-		std::vector<std::string> data = SplitBySeparator(requestString, '#');
+		std::vector<std::string> data = SplitBySeparator(requestStr, '#');
 		if (data.size() > 3)
 		{
 			const std::string& typeStr = data[1];
@@ -202,9 +231,9 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		return true;
 	}
 
-	if (requestString.compare(0, 3, "DOM") == 0)
+	if (requestStr.compare(0, 3, "DOM") == 0)
 	{
-		std::vector<std::string> data = SplitBySeparator(requestString, '#');
+		std::vector<std::string> data = SplitBySeparator(requestStr, '#');
 
 		if (data.size() > 3)
 		{
@@ -222,7 +251,6 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 			// ADDING DOMNODE
 			if (op.compare("add") == 0) // adding of DOM node
 			{
-
 				// Create blank node object in corresponding Tab object
 				switch (type)
 				{
@@ -231,24 +259,20 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					case(2): {_pMediator->AddDOMSelectField(browser, id); break; }
 					case(3): {_pMediator->AddDOMOverflowElement(browser, id); break; }
 					case(4): {_pMediator->AddDOMVideo(browser, id); break; }
+					case(5): {_pMediator->AddDOMCheckbox(browser, id); break; }
 					default: {
 						LogError("MsgRouter: Adding DOMNode - Unknown type of DOMNode! type=", type);
 					}
 				}
 
 				// TODO: This could be done in DOMExtraction
-				std::string ipcName = "";
-				switch (type) {
-				case(0) : ipcName = "TextInput"; break;
-				case(1) : ipcName = "Link"; break;
-				case(2) : ipcName = "SelectField"; break;
-				case(3) : ipcName = "OverflowElement"; break;
-				case(4) : ipcName = "Video"; break;
-				default: {
+				std::vector<std::string> names = { "TextInput", "Link", "SelectField", "OverflowElement", "Video", "Checkbox" };
+				if (type >= names.size() || type < 0)
+				{
 					LogError("MsgRouter: - ERROR: Unknown numeric DOM node type value: ", type);
 					return true;
 				}
-				}
+				std::string& ipcName = names[type];
 
 				// Instruct Renderer Process to initialize empty DOM Nodes with data
 				// TODO: Move this to DOM node constructor?
@@ -269,6 +293,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					case(2): {_pMediator->RemoveDOMSelectField(browser, id); break; }
 					case(3) : {_pMediator->RemoveDOMOverflowElement(browser, id); break; }
 					case(4): {_pMediator->RemoveDOMVideo(browser, id); break; }
+					case(5): {_pMediator->RemoveDOMCheckbox(browser, id); break; }
 					default: {
 						LogError("MsgRouter: Removing DOMNode - Unknown type of DOMNode! type=", type);
 					}
@@ -284,8 +309,9 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					case(0): {target = _pMediator->GetDOMTextInput(browser, id); break; }
 					case(1): {target = _pMediator->GetDOMLink(browser, id); break; }
 					case(2): {target = _pMediator->GetDOMSelectField(browser, id); break; }
-					case(3) : {target = _pMediator->GetDOMOverflowElement(browser, id); break; }
+					case(3): {target = _pMediator->GetDOMOverflowElement(browser, id); break; }
 					case(4): {target = _pMediator->GetDOMVideo(browser, id); break; }
+					case(5): {target = _pMediator->GetDOMCheckbox(browser, id); break; }
 					default: {
 						LogError("MsgRouter: Updating DOMNode - Unknown type of DOMNode! type=", type);
 					}
@@ -296,6 +322,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 					// See DOMAttribute.h enum DOMAttribute for numeric interpretation
 					const DOMAttribute& attr = (DOMAttribute) std::stoi(data[4]);
 					const std::string& attrData = data[5];
+
 
 					// Perform node update
 					bool success = false;
@@ -322,7 +349,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 				}
 				else
 				{
-					LogDebug("MsgRouter: Expected more data in DOMObject update:\n", requestString, "\nAborting update.");
+					LogDebug("MsgRouter: Expected more data in DOMObject update:\n", requestStr, "\nAborting update.");
 				}
 			}
 
@@ -335,7 +362,7 @@ bool DefaultMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 	}
 
 	// If request is unknown & couldn't be handled, assume it to be a ConsolePrint call in JS and log it
-	LogInfo("Javascript: ", requestString);
+	LogInfo("Javascript: ", requestStr);
 
 	return false;
 }
@@ -355,9 +382,17 @@ bool CallbackMsgHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 		// Remove prefix
 		std::string message = requestString.substr(_prefix.size());
 
-		// Call callback
-		_callbackFunction(message);
-		callback->Success("success"); // tell JavaScript about success
+		try
+		{
+			// Call callback
+			_callbackFunction(message);
+			callback->Success("success"); // tell JavaScript about success
+		}
+		catch (const std::exception& e)
+		{
+			LogInfo("CallbackMsgHandler: Exception occured!\n", e.what());
+			callback->Failure(0, e.what());
+		}
 		return true;
 	}
 

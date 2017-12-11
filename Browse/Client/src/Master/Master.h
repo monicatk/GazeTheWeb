@@ -12,6 +12,7 @@
 #include "src/Master/MasterNotificationInterface.h"
 #include "src/Master/MasterThreadsafeInterface.h"
 #include "src/Singletons/LabStreamMailer.h"
+#include "src/Singletons/FirebaseMailer.h"
 #include "src/CEF/Mediator.h"
 #include "src/State/Web/Web.h"
 #include "src/State/Settings/Settings.h"
@@ -47,7 +48,13 @@ public:
     int GetWindowWidth() const { return _width; }
     int GetWindowHeight() const { return _height; }
 
+<<<<<<< HEAD
 	VoiceResult voiceResult = VoiceResult{ VoiceAction::NO_ACTION,"" };
+=======
+	// Getter for screen width and height
+	int GetScreenWidth() const;
+	int GetScreenHeight() const;
+>>>>>>> upstream/master
 
     // Get time provided by GLFW
     double GetTime() const;
@@ -82,8 +89,24 @@ public:
 	// Get pointer to interface of custom transformation of eye input
 	std::weak_ptr<CustomTransformationInterface> GetCustomTransformationInterface();
 
+	// Get parameters to log into dashboard
+	struct DashboardParameters
+	{
+		DashboardParameters(std::string email, std::string password, std::string APIKey, std::string projectId) :
+			email(email), password(password), APIKey(APIKey), projectId(projectId) {}
+		std::string email;
+		std::string password;
+		std::string APIKey;
+		std::string projectId;
+	};
+	DashboardParameters GetDashboardParameters() const
+	{
+		return DashboardParameters(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword(), setup::FIREBASE_API_KEY, setup::FIREBASE_PROJECT_ID);
+	}
+
 	// Push back async job. Only provide threadsafe calls to the job!!!
 	void PushBackAsyncJob(std::function<bool()> job);
+	void SimplePushBackAsyncJob(FirebaseIntegerKey countKey, FirebaseJSONKey recordKey, nlohmann::json record = nlohmann::json()); // automatically adds start index and date
 
     // ### EYEGUI DELEGATION ###
 
@@ -131,8 +154,8 @@ public:
 		eyegui::setKeyboardLayout(_pGUI, keyboardLayout);
 	}
 
-	// Get start index
-	int GetStartIndex() const { return _startIndex; }
+	// Decide whether to block ads
+	void BlockAds(bool blockAds) { _pCefMediator->BlockAds(blockAds); }
 
 	// ### STORING OF SETTINGS ###
 
@@ -251,6 +274,9 @@ private:
 	// Update async jobs
 	void UpdateAsyncJobs(bool wait); // wait indicates that it should block the thread until all async jobs are finished
 
+	// Show super calibration layout
+	void ShowSuperCalibrationLayout();
+
     // Callbacks
     void GLFWKeyCallback(int key, int scancode, int action, int mods);
     void GLFWMouseButtonCallback(int button, int action, int mods);
@@ -356,11 +382,11 @@ private:
 	// Asyncronous calls, e.g. persist Firebase entries
 	std::vector<std::future<bool> > _asyncJobs; // abuse async calls since it is easier to determine whether finished or not
 
-	// Start index (indicates how often user has started the application)
-	int _startIndex = -1;
-
 	// Indicator whether computer should shut down at exit
 	bool _shouldShutdownAtExit = false;
+
+	// Last calibration points
+	std::vector<int> _lastCalibrationPointsFrameIndices;
 };
 
 #endif // MASTER_H_

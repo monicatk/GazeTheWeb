@@ -20,24 +20,78 @@
 
 // Available database keys
 enum class FirebaseIntegerKey	{ 
-	SOCIAL_RECORD_UNKNOWN_COUNT,
-	SOCIAL_RECORD_FACEBOOK_COUNT,
-	SOCIAL_RECORD_LINKEDIN_COUNT,
-	SOCIAL_RECORD_YOUTUBE_COUNT,
+	PAGE_ACTIVITY_UNKNOWN_COUNT,
+	PAGE_ACTIVITY_NEWS_COUNT,
+	PAGE_ACTIVITY_SHOPPING_COUNT,
+	PAGE_ACTIVITY_EMAIL_COUNT,
+	PAGE_ACTIVITY_WIKIPEDIA_COUNT,
+	PAGE_ACTIVITY_FACEBOOK_COUNT,
+	PAGE_ACTIVITY_LINKEDIN_COUNT,
+	PAGE_ACTIVITY_YOUTUBE_COUNT,
+	PAGE_ACTIVITY_INSTAGRAM_COUNT,
+	PAGE_ACTIVITY_TWITTER_COUNT,
+	PAGE_ACTIVITY_GOOGLE_COUNT,
+	PAGE_ACTIVITY_YAHOO_COUNT,
+	PAGE_ACTIVITY_OK_COUNT,
+	PAGE_ACTIVITY_VK_COUNT,
+	PAGE_ACTIVITY_WHATSAPP_COUNT,
 	GENERAL_APPLICATION_START_COUNT,
 	GENERAL_RECALIBRATION_COUNT,
-	GENERAL_DRIFT_GRID_COUNT
+	GENERAL_DRIFT_GRID_COUNT,
+	GENERAL_URL_INPUT_COUNT,
+	GENERAL_BOOKMARK_USAGE_COUNT,
+	GENERAL_BOOKMARK_ADDING_COUNT,
+	GENERAL_BOOKMARK_REMOVAL_COUNT,
+	GENERAL_HISTORY_USAGE_COUNT,
+	GENERAL_TAB_RELOADING_COUNT,
+	GENERAL_TAB_CLOSING_COUNT,
+	GENERAL_TAB_CREATION_COUNT,
+	GENERAL_TAB_SWITCHING_COUNT,
+	GENERAL_GO_BACK_USAGE_COUNT,
+	GENERAL_GO_FORWARD_USAGE_COUNT,
+	GENERAL_PAUSE_COUNT,
+	GENERAL_UNPAUSE_COUNT,
+
+	// TODO
+	GENERAL_DASHBOARD_USAGE_COUNT,
 };
 enum class FirebaseStringKey	{ 
 	TEST_STRING };
 enum class FirebaseJSONKey		{ 
-	SOCIAL_RECORD_UNKNOWN,
-	SOCIAL_RECORD_FACEBOOK,
-	SOCIAL_RECORD_LINKEDIN,
-	SOCIAL_RECORD_YOUTUBE,
+	PAGE_ACTIVITY_UNKNOWN,
+	PAGE_ACTIVITY_NEWS,
+	PAGE_ACTIVITY_SHOPPING,
+	PAGE_ACTIVITY_EMAIL,
+	PAGE_ACTIVITY_WIKIPEDIA,
+	PAGE_ACTIVITY_FACEBOOK,
+	PAGE_ACTIVITY_LINKEDIN,
+	PAGE_ACTIVITY_YOUTUBE,
+	PAGE_ACTIVITY_INSTAGRAM,
+	PAGE_ACTIVITY_TWITTER,
+	PAGE_ACTIVITY_GOOGLE,
+	PAGE_ACTIVITY_YAHOO,
+	PAGE_ACTIVITY_OK,
+	PAGE_ACTIVITY_VK,
+	PAGE_ACTIVITY_WHATSAPP,
 	GENERAL_APPLICATION_START,
 	GENERAL_RECALIBRATION,
-	GENERAL_DRIFT_GRID
+	GENERAL_DRIFT_GRID,
+	GENERAL_URL_INPUT,
+	GENERAL_BOOKMARK_USAGE,
+	GENERAL_BOOKMARK_ADDING,
+	GENERAL_BOOKMARK_REMOVAL,
+	GENERAL_HISTORY_USAGE,
+	GENERAL_TAB_RELOADING,
+	GENERAL_TAB_CLOSING,
+	GENERAL_TAB_CREATION,
+	GENERAL_TAB_SWITCHING,
+	GENERAL_GO_BACK_USAGE,
+	GENERAL_GO_FORWARD_USAGE,
+	GENERAL_PAUSE,
+	GENERAL_UNPAUSE,
+
+	// TODO
+	GENERAL_DASHBOARD_USAGE,
 };
 
 // Mapping from key to raw type
@@ -46,68 +100,184 @@ template<> struct FirebaseValue<FirebaseIntegerKey>	{ typedef int type; };
 template<> struct FirebaseValue<FirebaseStringKey>	{ typedef std::string type; };
 template<> struct FirebaseValue<FirebaseJSONKey>	{ typedef nlohmann::json type; };
 
-// Mapping from key to address
-template<typename T> static std::string FirebaseAddress(T key);
-template<> std::string FirebaseAddress<FirebaseIntegerKey>(FirebaseIntegerKey key)
-{
-	switch (key)
-	{
-	case FirebaseIntegerKey::SOCIAL_RECORD_UNKNOWN_COUNT:
-		return "social/_unknown/sessionCount";
-	case FirebaseIntegerKey::SOCIAL_RECORD_FACEBOOK_COUNT:
-		return "social/facebook/sessionCount";
-	case FirebaseIntegerKey::SOCIAL_RECORD_LINKEDIN_COUNT:
-		return "social/linkedin/sessionCount";
-	case FirebaseIntegerKey::SOCIAL_RECORD_YOUTUBE_COUNT:
-		return "social/youtube/sessionCount";
-	case FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT:
-		return "general/startCount";
-	case FirebaseIntegerKey::GENERAL_RECALIBRATION_COUNT:
-		return "general/recalibrationCount";
-	case FirebaseIntegerKey::GENERAL_DRIFT_GRID_COUNT:
-		return "general/driftGridCount";
-	default: return "";
-	}
-};
-template<> std::string FirebaseAddress<FirebaseStringKey>(FirebaseStringKey key)
-{
-	switch (key)
-	{
-	case FirebaseStringKey::TEST_STRING:
-		return "testString";
-	default: return "";
-	}
-};
-template<> std::string FirebaseAddress<FirebaseJSONKey>(FirebaseJSONKey key)
-{
-	switch (key)
-	{
-	case FirebaseJSONKey::SOCIAL_RECORD_UNKNOWN:
-		return "social/_unknown";
-	case FirebaseJSONKey::SOCIAL_RECORD_FACEBOOK:
-		return "social/facebook";
-	case FirebaseJSONKey::SOCIAL_RECORD_LINKEDIN:
-		return "social/linkedin";
-	case FirebaseJSONKey::SOCIAL_RECORD_YOUTUBE:
-		return "social/youtube";
-	case FirebaseJSONKey::GENERAL_APPLICATION_START:
-		return "general/starts";
-	case FirebaseJSONKey::GENERAL_RECALIBRATION:
-		return "general/recalibrations";
-	case FirebaseJSONKey::GENERAL_DRIFT_GRID:
-		return "general/driftGrids";
-	default: return "";
-	}
-};
 
 // Firebase mailer class
 class FirebaseMailer
 {
 private:
 
+	// Mapping from key to address
+	template<typename T>
+	static std::string FirebaseAddress(T key)
+	{	
+		return "";
+	}
+	template<>
+	static std::string FirebaseAddress<FirebaseIntegerKey>(FirebaseIntegerKey key)
+	{
+		switch (key)
+		{
+
+		// Page activity
+		case FirebaseIntegerKey::PAGE_ACTIVITY_UNKNOWN_COUNT:
+			return "pageActivity/_unknown/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_NEWS_COUNT:
+			return "pageActivity/news/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_SHOPPING_COUNT:
+			return "pageActivity/shopping/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_EMAIL_COUNT:
+			return "pageActivity/email/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_WIKIPEDIA_COUNT:
+			return "pageActivity/wikipedia/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_FACEBOOK_COUNT:
+			return "pageActivity/facebook/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_LINKEDIN_COUNT:
+			return "pageActivity/linkedin/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_YOUTUBE_COUNT:
+			return "pageActivity/youtube/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_INSTAGRAM_COUNT:
+			return "pageActivity/instagram/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_TWITTER_COUNT:
+			return "pageActivity/twitter/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_GOOGLE_COUNT:
+			return "pageActivity/google/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_YAHOO_COUNT:
+			return "pageActivity/yahoo/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_OK_COUNT:
+			return "pageActivity/ok/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_VK_COUNT:
+			return "pageActivity/vk/sessionCount";
+		case FirebaseIntegerKey::PAGE_ACTIVITY_WHATSAPP_COUNT:
+			return "pageActivity/whatsapp/sessionCount";
+
+		// General
+		case FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT:
+			return "general/start/count";
+		case FirebaseIntegerKey::GENERAL_RECALIBRATION_COUNT:
+			return "general/recalibration/count";
+		case FirebaseIntegerKey::GENERAL_DRIFT_GRID_COUNT:
+			return "general/driftGrid/count";
+		case FirebaseIntegerKey::GENERAL_URL_INPUT_COUNT:
+			return "general/urlInput/count";
+		case FirebaseIntegerKey::GENERAL_BOOKMARK_USAGE_COUNT:
+			return "general/bookmarkUsage/count";
+		case FirebaseIntegerKey::GENERAL_BOOKMARK_ADDING_COUNT:
+			return "general/bookmarkAdding/count";
+		case FirebaseIntegerKey::GENERAL_BOOKMARK_REMOVAL_COUNT:
+			return "general/bookmarkRemoval/count";
+		case FirebaseIntegerKey::GENERAL_HISTORY_USAGE_COUNT:
+			return "general/historyUsage/count";
+		case FirebaseIntegerKey::GENERAL_TAB_RELOADING_COUNT:
+			return "general/tabReloading/count";
+		case FirebaseIntegerKey::GENERAL_TAB_CLOSING_COUNT:
+			return "general/tabClosing/count";
+		case FirebaseIntegerKey::GENERAL_TAB_CREATION_COUNT:
+			return "general/tabCreation/count";
+		case FirebaseIntegerKey::GENERAL_TAB_SWITCHING_COUNT:
+			return "general/tabSwitching/count";
+		case FirebaseIntegerKey::GENERAL_GO_BACK_USAGE_COUNT:
+			return "general/goBackUsage/count";
+		case FirebaseIntegerKey::GENERAL_GO_FORWARD_USAGE_COUNT:
+			return "general/goForwardUsage/count";
+		case FirebaseIntegerKey::GENERAL_PAUSE_COUNT:
+			return "general/pause/count";
+		case FirebaseIntegerKey::GENERAL_UNPAUSE_COUNT:
+			return "general/unpause/count";
+		case FirebaseIntegerKey::GENERAL_DASHBOARD_USAGE_COUNT:
+			return "general/dashboardUsage/count";
+		default: return "";
+		}
+	};
+	template<>
+	static std::string FirebaseAddress<FirebaseStringKey>(FirebaseStringKey key)
+	{
+		switch (key)
+		{
+		case FirebaseStringKey::TEST_STRING:
+			return "testString";
+		default: return "";
+		}
+	};
+	template<>
+	static std::string FirebaseAddress<FirebaseJSONKey>(FirebaseJSONKey key)
+	{
+		switch (key)
+		{
+
+		// Page activity
+		case FirebaseJSONKey::PAGE_ACTIVITY_UNKNOWN:
+			return "pageActivity/_unknown";
+		case FirebaseJSONKey::PAGE_ACTIVITY_NEWS:
+			return "pageActivity/news";
+		case FirebaseJSONKey::PAGE_ACTIVITY_SHOPPING:
+			return "pageActivity/shopping";
+		case FirebaseJSONKey::PAGE_ACTIVITY_EMAIL:
+			return "pageActivity/email";
+		case FirebaseJSONKey::PAGE_ACTIVITY_WIKIPEDIA:
+			return "pageActivity/wikipedia";
+		case FirebaseJSONKey::PAGE_ACTIVITY_FACEBOOK:
+			return "pageActivity/facebook";
+		case FirebaseJSONKey::PAGE_ACTIVITY_LINKEDIN:
+			return "pageActivity/linkedin";
+		case FirebaseJSONKey::PAGE_ACTIVITY_YOUTUBE:
+			return "pageActivity/youtube";
+		case FirebaseJSONKey::PAGE_ACTIVITY_INSTAGRAM:
+			return "pageActivity/instagram";
+		case FirebaseJSONKey::PAGE_ACTIVITY_TWITTER:
+			return "pageActivity/twitter";
+		case FirebaseJSONKey::PAGE_ACTIVITY_GOOGLE:
+			return "pageActivity/google";
+		case FirebaseJSONKey::PAGE_ACTIVITY_YAHOO:
+			return "pageActivity/yahoo";
+		case FirebaseJSONKey::PAGE_ACTIVITY_OK:
+			return "pageActivity/ok";
+		case FirebaseJSONKey::PAGE_ACTIVITY_VK:
+			return "pageActivity/vk";
+		case FirebaseJSONKey::PAGE_ACTIVITY_WHATSAPP:
+			return "pageActivity/whatsapp";
+
+		// General
+		case FirebaseJSONKey::GENERAL_APPLICATION_START:
+			return "general/start";
+		case FirebaseJSONKey::GENERAL_RECALIBRATION:
+			return "general/recalibration";
+		case FirebaseJSONKey::GENERAL_DRIFT_GRID:
+			return "general/driftGrid";
+		case FirebaseJSONKey::GENERAL_URL_INPUT:
+			return "general/urlInput";
+		case FirebaseJSONKey::GENERAL_BOOKMARK_USAGE:
+			return "general/bookmarkUsage";
+		case FirebaseJSONKey::GENERAL_BOOKMARK_ADDING:
+			return "general/bookmarkAdding";
+		case FirebaseJSONKey::GENERAL_BOOKMARK_REMOVAL:
+			return "general/bookmarkRemoval";
+		case FirebaseJSONKey::GENERAL_HISTORY_USAGE:
+			return "general/historyUsage";
+		case FirebaseJSONKey::GENERAL_TAB_RELOADING:
+			return "general/tabReloading";
+		case FirebaseJSONKey::GENERAL_TAB_CLOSING:
+			return "general/tabClosing";
+		case FirebaseJSONKey::GENERAL_TAB_CREATION:
+			return "general/tabCreation";
+		case FirebaseJSONKey::GENERAL_TAB_SWITCHING:
+			return "general/tabSwitching";
+		case FirebaseJSONKey::GENERAL_GO_BACK_USAGE:
+			return "general/goBackUsage";
+		case FirebaseJSONKey::GENERAL_GO_FORWARD_USAGE:
+			return "general/goForwardUsage";
+		case FirebaseJSONKey::GENERAL_PAUSE:
+			return "general/pause";
+		case FirebaseJSONKey::GENERAL_UNPAUSE:
+			return "general/unpause";
+		case FirebaseJSONKey::GENERAL_DASHBOARD_USAGE:
+			return "general/dashboardUsage";
+		default: return "";
+		}
+	};
+
 	// Address creation
 	template<typename T>
-	static const std::string BuildFirebaseKey(T key, std::string uid)
+	static std::string BuildFirebaseKey(T key, std::string uid)
 	{
 		return "users/" + uid + "/" + FirebaseAddress<T>(key);
 	}
@@ -122,7 +292,11 @@ public:
 	}
 
 	// Destructor
-	~FirebaseMailer() { _shouldStop = true; _conditionVariable.notify_all(); _upThread->join(); } // tell thread to stop
+	~FirebaseMailer() {
+		_shouldStop = true;
+		_conditionVariable.notify_all();
+		_upThread->join();
+	} // tell thread to stop
 
 	// Continue mailer
 	void Continue() { _paused = false; }
@@ -130,19 +304,22 @@ public:
 	// Pause mailer
 	void Pause() { _paused = true; }
 
-	// Available commands
-	void PushBack_Login		(std::string email, std::string password, std::promise<std::string>* pPromise = nullptr); // promise delivers initial idToken value
-	void PushBack_Transform	(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise = nullptr); // promise delivers future database value
-	void PushBack_Maximum	(FirebaseIntegerKey key, int value, std::promise<int>* pPromise = nullptr); // promise delivers future database value
-	void PushBack_Put		(FirebaseIntegerKey key, int value, std::string subpath = "");
-	void PushBack_Put		(FirebaseStringKey key, std::string value, std::string subpath = "");
-	void PushBack_Put		(FirebaseJSONKey key, nlohmann::json value, std::string subpath = "");
-	void PushBack_Get		(FirebaseIntegerKey key, std::promise<int>* pPromise);
-	void PushBack_Get		(FirebaseStringKey key, std::promise<std::string>* pPromise);
-	void PushBack_Get		(FirebaseJSONKey key, std::promise<nlohmann::json>* pPromise);
+	// Available commands. Returns whether successful. If not, do not wait for the promise to be fulfilled!
+	bool PushBack_Login		(std::string email, std::string password, std::promise<std::string>* pPromise = nullptr); // promise delivers initial idToken value and sets internal start index
+	bool PushBack_Transform	(FirebaseIntegerKey key, int delta, std::promise<int>* pPromise = nullptr); // promise delivers future database value
+	bool PushBack_Maximum	(FirebaseIntegerKey key, int value, std::promise<int>* pPromise = nullptr); // promise delivers future database value
+	bool PushBack_Put		(FirebaseIntegerKey key, int value, std::string subpath = "");
+	bool PushBack_Put		(FirebaseStringKey key, std::string value, std::string subpath = "");
+	bool PushBack_Put		(FirebaseJSONKey key, nlohmann::json value, std::string subpath = "");
+	bool PushBack_Get		(FirebaseIntegerKey key, std::promise<int>* pPromise);
+	bool PushBack_Get		(FirebaseStringKey key, std::promise<std::string>* pPromise);
+	bool PushBack_Get		(FirebaseJSONKey key, std::promise<nlohmann::json>* pPromise);
 
 	// Get id token (is empty before login or at failure)
 	std::string GetIdToken() const;
+
+	// Get start index (is -1 one at failure)
+	int GetStartIndex() const;
 
 private:
 
@@ -155,7 +332,7 @@ private:
 	public:
 
 		// Constructor
-		FirebaseInterface(IdToken* pIdToken) : _pIdToken(pIdToken) {}
+		FirebaseInterface(IdToken* pIdToken, std::atomic<int>* pStartIndex) : _pIdToken(pIdToken), _pStartIndex(pStartIndex) {}
 
 		// Log in. Return whether successful
 		bool Login(std::string email, std::string password, std::promise<std::string>* pPromise);
@@ -203,10 +380,11 @@ private:
 
 		// Constants
 		const std::string _API_KEY = setup::FIREBASE_API_KEY;
-		const std::string _URL = setup::FIREBASE_URL;
+		const std::string _URL = "https://" + setup::FIREBASE_PROJECT_ID + ".firebaseio.com";
 
 		// Members
 		IdToken* _pIdToken = nullptr; // set at construction
+		std::atomic<int>* _pStartIndex = nullptr; // set at construction
 		std::string _refreshToken = ""; // long living token for refreshing itself and idToken
 		std::string _uid = "0"; // user identifier (initialized with something that indicates "broken")
 		std::string _email = ""; // taken from login attempt
@@ -218,7 +396,7 @@ private:
 	typedef const std::function<void(FirebaseInterface&)> Command;
 
 	// Method that actually pushes back command (considers whether paused etc.)
-	void PushBackCommand(std::shared_ptr<Command> spCommand);
+	bool PushBackCommand(std::shared_ptr<Command> spCommand);
 
 	// Private copy / assignment constructors
 	FirebaseMailer(); // threadsafe as only called by Instance()
@@ -227,6 +405,9 @@ private:
 
 	// Pause indicator (if true, avoids pushing to command queue)
 	std::atomic<bool> _paused = false; // atomic since could be accessed from multiple async threads
+
+	// Start index of application run
+	std::atomic<int> _startIndex = -1;
 
 	// #### THREAD-RELATED MEMBERS ####
 

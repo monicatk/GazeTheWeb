@@ -6,16 +6,93 @@
 // Helper function for console output
 function ConsolePrint(msg)
 {
-	window.cefQuery({ request: (""+msg), persistent : false, onSuccess : (response) => {}, onFailure : (error_code, error_message) => {} });
+    window.cefQuery({ 
+        request: ("" + msg), 
+        persistent : false, 
+        onSuccess : (response) => {}, 
+        onFailure : (error_code, error_message) => {} 
+    });
+}
+
+// TODO: Differentiate between different message types
+function SendToMsgRouter(msg)
+{
+    ConsolePrint(msg);
 }
 
 ConsolePrint("Starting to import helpers.js ...");
 
-function CefPoll()
-{
-    UpdateDOMRects();
 
+// TODO: Move CEF callable functions to separate js-file
+function CefPoll(num_partitions, update_partition)
+{
+    var partitioned = (num_partitions !== undefined && update_partition !== undefined);
+    
+    console.log("CefPoll triggerd...");
+    if(partitioned)
+        console.log("Polling "+update_partition+". of "+num_partitions+" partitions.");
+    var t_start = performance.now();
+
+    // UpdateDOMRects();
+
+    for(var node in appended_nodes)
+    {
+        AnalyzeNode(node);
+        appended_nodes.delete(node);
+        console.log("CefPoll: Analyzed missing node", node);
+    }
+
+    // Partitions shouldn't matter for expected small amounts of video nodes
     domVideos.forEach((n) => { SendAttributeChangesToCEF("Rects", n); });
+
+    window.domNodes.forEach((list) => {
+        if(partitioned)
+        {
+            var partition_size = Math.floor(list.length / num_partitions); 
+            var first =  partition_size * update_partition;
+            // Last partition is 1 element bigger if odd number of elements in list
+            var last = (num_partitions-1 === update_partition) ? list.length-1 : first + partition_size; 
+        }
+        // If partition_size == 0, because list length is too short, don't partition and update all
+        var this_partitioned = (partitioned && partition_size > 0);
+
+        // Force send message about attribute changes
+        list.forEach((o, idx) => { 
+            if(!this_partitioned || (idx >= first && idx <= last) )
+            {
+                if(typeof(o.updateRects()) === "function")
+                    o.updateRects();
+
+                SendAttributeChangesToCEF("OccBitmask", o);
+                SendAttributeChangesToCEF("Rects", o); // For language list on wikipedia.org main page, for example
+            } 
+        });
+    });
+
+    console.log("Took ", performance.now() - t_start, "ms.");
+}
+
+var gtwPageHeight = 0.0;
+var gtwPageWidth = 0.0;
+/**
+ * Triggered by ExecuteJavascript call in Handler, whenever page resolution might have changed.
+ * If it did, send changes to MessageRouter
+ */
+function CefGetPageResolution()
+{
+    if(!document || !document.body)
+        return;
+
+    if(gtwPageHeight !== document.body.scrollHeight || gtwPageWidth !== document.body.scrollWidth)
+    {
+        gtwPageHeight = document.body.scrollHeight;
+        gtwPageWidth = document.body.scrollWidth;
+
+        // Bug fix for dynamically added nodes in updating timelines or search result lists
+        ForEveryChild(document.documentElement, AnalyzeNode);
+    
+        ConsolePrint("#resolution#"+gtwPageWidth+"#"+gtwPageHeight+"#");
+    }
 }
 
 if(ClientRectList.prototype.map === undefined)
@@ -150,7 +227,7 @@ function DeleteFixedElement(fixId)
 }
 
 var debug_updateDOMRects_count = 0;
-function UpdateDOMRects(why)
+function UpdateDOMRects(num_partitions)
 {
 
     // console.log("UpdateDOMRects called because "+why+", "+(++debug_updateDOMRects_count)+" times until now");
@@ -198,6 +275,7 @@ function CreateDOMLink(node){ CreateDOMObject(node, 1); }
 function CreateDOMSelectField(node) { CreateDOMObject(node, 2); }
 function CreateDOMOverflowElement(node) { CreateDOMObject(node, 3); }
 function CreateDOMVideo(node){ CreateDOMObject(node, 4); }
+function CreateDOMCheckbox(node){ CreateDOMObject(node, 5); }
 
 function CreateDOMObject(node, type)
 {
@@ -211,6 +289,7 @@ function CreateDOMObject(node, type)
         case 2: return new DOMSelectField(node);
         case 3: return new DOMOverflowElement(node);
         case 4: return new DOMVideo(node);
+        case 5: return new DOMCheckbox(node);
         default: {
             console.log("Warning: Unknown DOM node type: "+type);
             return undefined;
@@ -236,6 +315,7 @@ function GetDOMLink(id){ return GetDOMObject(1, id);}
 function GetDOMSelectField(id){ return GetDOMObject(2, id); }
 function GetDOMOverflowElement(id){ return GetDOMObject(3, id); }
 function GetDOMVideo(id){ return GetDOMObject(4, id); }
+function GetDOMCheckbox(id){ return GetDOMObject(5, id); }
 
 function GetCorrespondingDOMObject(node, expected_type)
 {
@@ -270,7 +350,7 @@ function RemoveDOMTextInput(id){ return RemoveDOMObject(0, id); }
 function RemoveDOMLink(id){ return RemoveDOMObject(1, id); }
 function RemoveDOMSelectField(id){ return RemoveDOMObject(2, id); }
 function RemoveDOMOverflowElement(id){ return RemoveDOMObject(3, id); }
-
+// TODO: Missing node types.
 
 /**
  * Usage example: Determine what parts of a node's rect are visible when inside an overflowing element
@@ -505,6 +585,55 @@ function CheckOverflowProperties(node)
     console.log("overflow: ", cs.getPropertyValue("overflow"));
     console.log("overflow-x: ", cs.getPropertyValue("overflow-x"));
     console.log("overflow-y: ", cs.getPropertyValue("overflow-y"));
+}
+
+// ComputedStyle (cs) is optional, because already present in some parts of the code where this function is called
+function SetOverflowId(node, id, cs)
+{
+    // console.log("SetOverflowId called with id ", id, " for ", node);
+    if(node === undefined || typeof(node.setAttribute) !== "function") // Assume, that removeAttribute is also present when setAttribute is
+        return;
+
+    // Remove overflowId
+    if(id === null)
+    {
+	    // TODO: Search for hierachically higher overflows!
+        node.removeAttribute("overflowid");
+        return;
+    }
+
+    // Get ComputedStyle, if not already provided in function call
+    if(!cs)
+        cs = window.getComputedStyle(node, null);
+
+    if(typeof(cs.getPropertyValue) !== "function")
+        return;
+
+    var css_position = cs.getPropertyValue("position");
+    // Absolutely positioned children don't get clipped on overflow parents
+    if(css_position !== "absolute")
+        node.setAttribute("overflowId", id);
+}
+
+// Returns corresponding DOMObject if any exists
+function SetOverflowObjectViaId(node, id)
+{
+    if(id === undefined)
+        console.log("SetOverflowObjectViaId: Second argument 'id' is undefined!");
+
+    // console.log("SetOverflowObjectViaId called with id ",id, " for ", node);
+    var domObj = GetCorrespondingDOMObject(node);
+    if(domObj !== undefined)
+    {
+        // DEBUG
+        //if(domObj.getType() === 3)
+        // console.log("Setting overflow to id: ", id, " for ", domObj);
+
+        // id of null or -1 will reset overflow object in domObj
+        domObj.setOverflowViaId(id);
+        return domObj;
+    }
+    return undefined;
 }
 
 ConsolePrint("Successfully imported helpers.js!");

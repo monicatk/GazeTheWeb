@@ -11,10 +11,12 @@
 ConsolePrint("Starting to import dom_nodes.js ...");
 
 /*
-   ___  ____  __  ____  __        __      
-  / _ \/ __ \/  |/  / |/ /__  ___/ /__ ___
- / // / /_/ / /|_/ /    / _ \/ _  / -_|_-<
-/____/\____/_/  /_/_/|_/\___/\_,_/\__/___/
+    ____  ____  __  ____   __          __   
+   / __ \/ __ \/  |/  / | / /___  ____/ /__ 
+  / / / / / / / /|_/ /  |/ / __ \/ __  / _ \
+ / /_/ / /_/ / /  / / /|  / /_/ / /_/ /  __/
+/_____/\____/_/  /_/_/ |_/\____/\__,_/\___/ 
+                                            
 */
 // Contains lists to all kinds of DOMNode derivates, position defined by numeric node type
 window.domNodes = [];
@@ -42,18 +44,12 @@ function DOMNode(node, id, type, cef_hidden=false)
     this.bitmask = [0];
     // MutationObserver will handle setting up the following references, if necessary
     this.fixObj = undefined;
-    this.overflow = undefined;
+    this.overflow = undefined;  // TODO: Rename to overflowObj for consistency?
 
-    // Initial setup of fixObj
-    this.setFixObj(  GetFixedElementById( this.node.getAttribute("fixedId") )  );
-    if(this.fixObj === undefined)
-        this.setFixObj(  GetFixedElementById( this.node.getAttribute("childFixedId") )  );
+    // Initial setup of fixObj & overflow objects
+    this.fixObj = GetFixedElementById(node.getAttribute("fixedId")) || GetFixedElementById(node.getAttribute("childFixedId"));
+    this.overflow = GetDOMOverflowElement(node.getAttribute("overflowid"));
 
-
-    // Initial setup of overflow, if already set in node
-    var overflowId = node.getAttribute("overflowid");
-    if(overflowId !== null)
-        this.setOverflow(GetDOMOverflowElement(overflowId));
 
     this.cppReady = false; // TODO: Queueing calls, when node isn't ready yet?
 
@@ -139,7 +135,6 @@ DOMNode.prototype.updateRects = function(altNode){
 
     var adjustedRects = this.getAdjustedClientRects(altNode);
 
-    this.updateOccBitmask(altNode);
 
     if(!EqualClientRectsData(this.rects, adjustedRects))
     {
@@ -147,33 +142,57 @@ DOMNode.prototype.updateRects = function(altNode){
 
         SendAttributeChangesToCEF("Rects", this);
         UpdateRectUpdateTimer(t0);
+        
+        this.updateOccBitmask(altNode);
+        
         return true; // Rects changed and were updated
     }
     UpdateRectUpdateTimer(t0);
     return false; // No update needed, no changes
 }
 
-DOMNode.prototype.updateOccBitmask = function(altNode){
+DOMNode.prototype.updateOccBitmask = function(altNode, debug){
     var t1 = performance.now();
     var bm = [];
     if(this.rects.length > 0)
     {
-        var r = this.rects[0];
+        // Cut with possible overflows hidding node partially
+        var r = Object.assign({}, this.getRects()[0]); // deepcopy array, otherwise, coordinates will be changed by the following
+
+        if(debug)
+            console.log("scroll X: ", window.scrollX, ", Y: ", window.scrollY, "\nrects before: ", r);
+        var not_fixed = Number(!Boolean(this.fixObj));
+        r[0] = Math.ceil(r[0])+1 - window.scrollY * not_fixed;
+        r[1] = Math.ceil(r[1])+1 - window.scrollX * not_fixed;
+        r[2] = Math.floor(r[2])-1 - window.scrollY * not_fixed;
+        r[3] = Math.floor(r[3])-1 - window.scrollX * not_fixed;
+        if(debug)
+            console.log("Used coordinates:", r);
         // rect corners
-        var pts = [[r[1],r[0]], [r[3],r[0]], [r[3],r[2]-0.0001], [r[1],r[2]-0.0001]]; // Note: Seems infinitely small amount to high
+        var pts = [[r[1],r[0]], [r[3],r[0]], [r[3],r[2]], [r[1],r[2]]]; // Note: Seems infinitely small amount to high
         pts.forEach( (pt) => { // pt[0] == x, pt[1] == y
             // Rect point in currently shown part of website?
-            if(pt[0] < window.scrollX || pt[0] > window.scrollX + window.innerWidth ||
-                pt[1] < window.scrollY || pt[1] > window.scrollY + window.innerHeight)
-                    bm.push(0);
-            else
+            // if(pt[0] < window.scrollX || pt[0] > window.scrollX + window.innerWidth ||
+                // pt[1] < window.scrollY || pt[1] > window.scrollY + window.innerHeight)
+                    // bm.push(0);
+            // else
+            // NOTE: OccBitmask is updated less frequently than scrolling may happen!
+            if(true)
             {
-                var topNode = document.elementFromPoint(pt[0],pt[1]);
+                var topNode = document.elementFromPoint(pt[0], pt[1]);
+                if(debug)
+                {
+                    console.log(this.getType(), this.getId(), ": (", pt[0], ",", pt[1],
+                        ") => ", topNode);
+                    console.log(document.elementsFromPoint(pt[0], pt[1]));//.slice(0,3));
+                }
                 // TODO: Quick fix
                 if (topNode === null)
-                    bm.push(1);
+                    bm.push(0);
+                else if(this.node.tagName === "A" && topNode.parentElement === this.node)
+                    bm.push(0);
                 else
-                    bm.push(Number(topNode === (altNode || this.node)));
+                    bm.push(Number(topNode !== (altNode || this.node)));
             }
         });
 
@@ -181,15 +200,21 @@ DOMNode.prototype.updateOccBitmask = function(altNode){
     else
         bm = [0];
     
-    var changed = false;
+    var changed = (bm.length !== this.bitmask.length);
     for(var i = 0, n = bm.length; i < n && !changed; i++)
         changed = (bm[i] != this.bitmask[i]);
 
     if (changed)
     {
+        // DEBUG
+        // console.log(this.getId()+": OccBitmask changed: ", this.bitmask, " --> "+bm+" | cppReady? "+this.cppReady);
+
         this.bitmask = bm;
         SendAttributeChangesToCEF("OccBitmask", this);
     }
+    // DEBUG
+    else
+        // console.log(this.getId()+": OccBitmask didn't change ... "+this.bitmask+" === "+bm+" | cppReady? "+this.cppReady);
 
     UpdateBitmaskTimer(t1);
 }
@@ -248,25 +273,14 @@ DOMNode.prototype.setOverflowViaId = function(id){
     this.setOverflow(obj);
 }
 
-// TODO: What was this good for? oO
-DOMNode.prototype.setDOMAttribute = function(str){
-    console.log("DOMNode.setDOMAttribute called. Why?");
-    switch(str){
-        case "fixed":
-            return this.setFixed;
-        case "overflow":
-            return this.setOverflow;
-    }
-    return undefined;
-}
-
 
 /*
-   ___  ____  __  _________        __  ____               __    
-  / _ \/ __ \/  |/  /_  __/____ __/ /_/  _/__  ___  __ __/ /____
- / // / /_/ / /|_/ / / / / -_) \ / __// // _ \/ _ \/ // / __(_-<
-/____/\____/_/  /_/ /_/  \__/_\_\\__/___/_//_/ .__/\_,_/\__/___/
-                                            /_/ 
+    ____  ____  __  _________          __  ____                  __ 
+   / __ \/ __ \/  |/  /_  __/__  _  __/ /_/  _/___  ____  __  __/ /_
+  / / / / / / / /|_/ / / / / _ \| |/_/ __// // __ \/ __ \/ / / / __/
+ / /_/ / /_/ / /  / / / / /  __/>  </ /__/ // / / / /_/ / /_/ / /_  
+/_____/\____/_/  /_/ /_/  \___/_/|_|\__/___/_/ /_/ .___/\__,_/\__/  
+                                                /_/                 
 */
 window.domTextInputs = [];
 if(window.domNodes[0] !== undefined)
@@ -307,12 +321,20 @@ DOMTextInput.prototype.getIsPassword = function(){
     return (this.node.type === "password");
 }
 
+DOMTextInput.prototype.getHTMLId = function(){
+    return this.node.id;
+}
+DOMTextInput.prototype.getHTMLClass = function(){
+    return this.node.className;
+}
 
 /*
-   ___  ____  __  _____   _      __      
-  / _ \/ __ \/  |/  / /  (_)__  / /__ ___
- / // / /_/ / /|_/ / /__/ / _ \/  '_/(_-<
-/____/\____/_/  /_/____/_/_//_/_/\_\/___/
+    ____  ____  __  _____    _       __  
+   / __ \/ __ \/  |/  / /   (_)___  / /__
+  / / / / / / / /|_/ / /   / / __ \/ //_/
+ / /_/ / /_/ / /  / / /___/ / / / / ,<   
+/_____/\____/_/  /_/_____/_/_/ /_/_/|_|  
+ 
 */
 window.domLinks = [];
 if(window.domNodes[1] !== undefined)
@@ -358,10 +380,12 @@ DOMLink.prototype.getUrl = function(){
 
 
 /*
-   __________   _______________  ______________   ___  ____
-  / __/ __/ /  / __/ ___/_  __/ / __/  _/ __/ /  / _ \/ __/
- _\ \/ _// /__/ _// /__  / /   / _/_/ // _// /__/ // /\ \  
-/___/___/____/___/\___/ /_/   /_/ /___/___/____/____/___/
+    ____  ____  __  ________      __          __  _______      __    __
+   / __ \/ __ \/  |/  / ___/___  / /__  _____/ /_/ ____(_)__  / /___/ /
+  / / / / / / / /|_/ /\__ \/ _ \/ / _ \/ ___/ __/ /_  / / _ \/ / __  / 
+ / /_/ / /_/ / /  / /___/ /  __/ /  __/ /__/ /_/ __/ / /  __/ / /_/ /  
+/_____/\____/_/  /_//____/\___/_/\___/\___/\__/_/   /_/\___/_/\__,_/   
+                                                                     
 */
 window.domSelectFields = []
 if(window.domNodes[2] !== undefined)
@@ -400,10 +424,12 @@ DOMSelectField.prototype.getSelectionIdx = function(){
 
 
 /*
-  ____               _____           ______                   __    
- / __ \_  _____ ____/ _/ /__ _    __/ __/ /__ __ _  ___ ___  / /____
-/ /_/ / |/ / -_) __/ _/ / _ \ |/|/ / _// / -_)  ' \/ -_) _ \/ __(_-<
-\____/|___/\__/_/ /_//_/\___/__,__/___/_/\__/_/_/_/\__/_//_/\__/___/
+    ____  ____  __  _______                  ______              ________                          __ 
+   / __ \/ __ \/  |/  / __ \_   _____  _____/ __/ /___ _      __/ ____/ /__  ____ ___  ___  ____  / /_
+  / / / / / / / /|_/ / / / / | / / _ \/ ___/ /_/ / __ \ | /| / / __/ / / _ \/ __ `__ \/ _ \/ __ \/ __/
+ / /_/ / /_/ / /  / / /_/ /| |/ /  __/ /  / __/ / /_/ / |/ |/ / /___/ /  __/ / / / / /  __/ / / / /_  
+/_____/\____/_/  /_/\____/ |___/\___/_/  /_/ /_/\____/|__/|__/_____/_/\___/_/ /_/ /_/\___/_/ /_/\__/  
+                                                                                                    
 */
 window.domOverflowElements = []
 if(window.domNodes[3] !== undefined)
@@ -457,9 +483,8 @@ function DOMOverflowElement(node, cef_hidden=false)
     for(var i = 0, n = node.childNodes.length; i < n; i++)
     {
         var child = node.childNodes[i];
-        if(child === undefined || typeof(child.setAttribute) !== "function")
-            continue;
-        child.setAttribute("overflowId", id);
+
+        SetOverflowId(child, id);
     }
 
 }
@@ -622,6 +647,7 @@ DOMOverflowElement.prototype.setHiddenOverflow = function(val)
   / / / / / / / /|_/ /| | / / / __  / _ \/ __ \
  / /_/ / /_/ / /  / / | |/ / / /_/ /  __/ /_/ /
 /_____/\____/_/  /_/  |___/_/\__,_/\___/\____/ 
+
 */
 window.domVideos = []
 if(window.domNodes[4] !== undefined)
@@ -636,13 +662,45 @@ function DOMVideo(node, cef_hidden=false)
     DOMNode.call(this, node, id, 4, cef_hidden);
 
     /* Currently now attributes, only interaction */
-    console.log("DOMVideo node successfully created.");
+    console.log("DOMVideo node #"+id+" successfully created.");
 }
 DOMVideo.prototype = Object.create(DOMNode.prototype);
 DOMVideo.prototype.constructor = DOMOverflowElement;
 DOMVideo.prototype.Class = "DOMVideo";  // Override base class identifier for this derivated class
 
 
+/*
+    ____  ____  __  ___________              __   __              
+   / __ \/ __ \/  |/  / ____/ /_  ___  _____/ /__/ /_  ____  _  __
+  / / / / / / / /|_/ / /   / __ \/ _ \/ ___/ //_/ __ \/ __ \| |/_/
+ / /_/ / /_/ / /  / / /___/ / / /  __/ /__/ ,< / /_/ / /_/ />  <  
+/_____/\____/_/  /_/\____/_/ /_/\___/\___/_/|_/_.___/\____/_/|_|  
+ 
+*/
+window.domCheckboxes = [];
+if(window.domNodes[5] !== undefined)
+    console.log("Warning! DOMNode list slot 5 already in use!");
+window.domNodes[5] = window.domCheckboxes;
 
+function DOMCheckbox(node, cef_hidden=false)
+{
+    // // DEBUG
+    // console.log("Prevented creation of DOMCheckbox object!");
+    // return; 
+
+    window.domCheckboxes.push(this);
+    var id = window.domCheckboxes.indexOf(this);
+
+    DOMNode.call(this, node, id, 5, cef_hidden);
+
+}
+DOMCheckbox.prototype = Object.create(DOMNode.prototype);
+DOMCheckbox.prototype.constructor = DOMCheckbox;
+DOMCheckbox.prototype.Class = "DOMCheckbox";
+
+DOMCheckbox.prototype.getCheckedState = function()
+{
+    return this.node.checked;
+}
 
 ConsolePrint("Successfully imported dom_nodes.js!");

@@ -94,6 +94,7 @@ private:
 
         bool showDescriptions = true;
         bool showGazeVisualization = false;
+		bool adBlocking = true;
 		eyegui::KeyboardLayout keyboardLayout = eyegui::KeyboardLayout::US_ENGLISH;
 		std::string firebaseEmail = "";
 		std::string firebasePassword = "";
@@ -111,6 +112,7 @@ private:
     // Layouts
     eyegui::Layout* _pSettingsLayout;
     eyegui::Layout* _pGeneralLayout;
+	eyegui::Layout* _pAdBlockingLayout;
     eyegui::Layout* _pInfoLayout;
 
     // Bool to remember whether to switch to Web in next frame

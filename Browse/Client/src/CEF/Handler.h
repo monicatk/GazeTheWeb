@@ -12,6 +12,7 @@
 #include "include/cef_client.h"
 #include "src/CEF/MessageRouter.h"
 #include "src/CEF/ImageDownload.h"
+#include "src/CEF/RequestHandler.h"
 #include <list>
 #include <set>
 
@@ -154,6 +155,9 @@ public:
 	// HandlerImageDownload interface methods
 	bool ForwardFaviconBytes(CefRefPtr<CefBrowser> browser, CefRefPtr<CefImage> img);
 
+	// Decide whether to block ads
+	void BlockAds(bool blockAds) { _requestHandler->BlockAds(blockAds); }
+
 private:
 
     /* METHODS */
@@ -179,7 +183,7 @@ private:
 	CefRefPtr<MessageRouter> _msgRouter;
 
 	// Used for adblocking
-	CefRefPtr<CefRequestHandler> _requestHandler;
+	CefRefPtr<RequestHandler> _requestHandler;
 
     // JavaScript code as Strings
     const std::string _js_remove_css_scrollbar = GetJSCode(REMOVE_CSS_SCROLLBAR);

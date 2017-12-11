@@ -54,8 +54,8 @@ bool LinkNavigationAction::Update(float tpf, const std::shared_ptr<const TabInpu
         }
     }
 
-    // Emulate left mouse button click
-    _pTab->EmulateLeftMouseButtonClick(CEFPixelX, CEFPixelY, visualize > 0, false); // coordinate already in CEFPixel space
+    // Emulate left mouse button click (TODO: assumption that this was actively triggered by a user)
+    _pTab->EmulateLeftMouseButtonClick(CEFPixelX, CEFPixelY, visualize > 0, false, true); // coordinate already in CEFPixel space
 
 	// Play click sound
 	_pTab->PlaySound("sounds/GameAudio/ClickBasic.ogg");

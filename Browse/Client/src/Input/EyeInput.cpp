@@ -196,6 +196,7 @@ EyeInput::~EyeInput()
 }
 
 std::shared_ptr<Input> EyeInput::Update(
+	bool windowFocused,
 	float tpf,
 	double mouseX,
 	double mouseY,
@@ -371,6 +372,7 @@ std::shared_ptr<Input> EyeInput::Update(
 
 	// Create input structure to return
 	std::shared_ptr<Input> spInput = std::make_shared<Input>(
+		windowFocused,
 		filteredGazeX, // gazeX,
 		filteredGazeY, // gazeY,
 		rawGazeX, // rawGazeX
@@ -385,13 +387,13 @@ std::shared_ptr<Input> EyeInput::Update(
 	return spInput;
 }
 
-CalibrationResult EyeInput::Calibrate()
+CalibrationResult EyeInput::Calibrate(std::shared_ptr<CalibrationInfo>& rspCalibrationInfo)
 {
-	CalibrationResult result = CalibrationResult::NOT_SUPPORTED;
+	CalibrationResult result = CALIBRATION_NOT_SUPPORTED;
 #ifdef _WIN32
 	if (_info.connected && _procCalibrate != NULL)
 	{
-		result = _procCalibrate();
+		result = _procCalibrate(rspCalibrationInfo);
 	}
 #endif // _WIN32
 	return result;

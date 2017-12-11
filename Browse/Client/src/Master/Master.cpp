@@ -6,7 +6,6 @@
 #include "Master.h"
 #include "src/Utils/Helper.h"
 #include "src/Utils/Logger.h"
-#include "src/Singletons/FirebaseMailer.h"
 #include "src/Arguments.h"
 #include "submodules/glfw/include/GLFW/glfw3.h"
 #include "submodules/text-csv/include/text/csv/ostream.hpp"
@@ -254,7 +253,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// Create splash screen GUI, render it one time and throw it away
 	eyegui::GUI* pSplashGUI = guiBuilder.construct();
 	eyegui::loadStyleSheet(pSplashGUI, "stylesheets/Global.seyegui"); // load styling
-	eyegui::addLayout(pSplashGUI, "layouts/Splash.xeyegui"); // TODO: fill version string
+	eyegui::addLayout(pSplashGUI, "layouts/Splash.xeyegui");
 	eyegui::updateGUI(pSplashGUI, 1.f, eyegui::Input()); // update GUI one time for resizing
 	eyegui::drawGUI(pSplashGUI);
 	glfwSwapBuffers(_pWindow);
@@ -360,11 +359,14 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// _upWeb->AddTab("http://html5-demos.appspot.com/static/fullscreen.html");
 	// _upWeb->AddTab(std::string(CONTENT_PATH) + "/websites/index.html");
 	_upWeb->AddTab(_upSettings->GetHomepage());
+	_upWeb->AddTab("http://augreal.mklab.iti.gr/mamem/testing/", false);
 
     // ### SUPER LAYOUT ###
 
     // Load layouts (deleted at eyeGUI termination)
     _pSuperLayout = eyegui::addLayout(_pSuperGUI, "layouts/Super.xeyegui", EYEGUI_SUPER_LAYER, true);
+
+	// Load super calibration layout
 	_pSuperCalibrationLayout = eyegui::addLayout(_pSuperGUI, "layouts/SuperCalibration.xeyegui", EYEGUI_SUPER_LAYER, false); // adding on top of super layout but still beneath cursor
 
     // Button listener for pause
@@ -412,19 +414,10 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 
 	// ### FIREBASE MAILER ###
 
-	// Login
+	// Login (waits until complete)
 	std::promise<std::string> idTokenPromise; auto idTokenFuture = idTokenPromise.get_future(); // future provides initial idToken
-	FirebaseMailer::Instance().PushBack_Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword(), &idTokenPromise);
-	LogInfo(idTokenFuture.get());
-
-	// Start index
-	std::promise<int> startPromise; auto startFuture = startPromise.get_future(); // future provides index
-	FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_APPLICATION_START_COUNT, 1, &startPromise); // adds one to the count
-	_startIndex = startFuture.get() - 1; // is zero for both initial start and failure
-
-	// Create record about start
-	nlohmann::json record = { { "date", GetDate() } };
-	FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_APPLICATION_START, record, std::to_string(_startIndex)); // send JSON to database
+	bool pushedBack = FirebaseMailer::Instance().PushBack_Login(_upSettings->GetFirebaseEmail(), _upSettings->GetFirebasePassword(), &idTokenPromise);
+	if (pushedBack) { LogInfo(idTokenFuture.get()); };
 
 	// ### JAVASCRIPT TO LAB STREAMING LAYER ###
 
@@ -477,7 +470,7 @@ Master::Master(Mediator* pCefMediator, std::string userDirectory)
 	// Show super calibration layout at startup
 	if (setup::SUPER_CALIBRATION_AT_STARTUP)
 	{
-		eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true);
+		ShowSuperCalibrationLayout();
 	}
 
     // ### OTHER ###
@@ -532,6 +525,20 @@ bool Master::Run()
 	return _shouldShutdownAtExit;
 }
 
+int Master::GetScreenWidth() const
+{
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+	return mode->width;
+}
+
+int Master::GetScreenHeight() const
+{
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+	return mode->height;
+}
+
 double Master::GetTime() const
 {
     return glfwGetTime();
@@ -539,9 +546,6 @@ double Master::GetTime() const
 
 void Master::Exit(bool shutdown)
 {
-	// Close all tabs
-	_upWeb->RemoveAllTabs();
-
 	// Stop update loop
 	_exit = true;
 
@@ -563,7 +567,7 @@ void Master::SetDataTransfer(bool dataTransfer)
 		// FirebaseMailer
 		FirebaseMailer::Instance().Continue();
 
-		// Tabs (doing social records etc.)
+		// Tabs (doing social records, history, etc.)
 		_upWeb->SetDataTransfer(true);
 
 		// Visualization
@@ -583,7 +587,7 @@ void Master::SetDataTransfer(bool dataTransfer)
 		// FirebaseMailer
 		FirebaseMailer::Instance().Pause();
 
-		// Tabs (doing no social records etc.)
+		// Tabs (doing no social records, history, etc.)
 		_upWeb->SetDataTransfer(false);
 
 		// Visualization
@@ -606,6 +610,27 @@ void Master::PushBackAsyncJob(std::function<bool()> job)
 	_asyncJobs.push_back(std::async(
 		std::launch::async, // do it asynchronously
 		job));
+}
+
+void Master::SimplePushBackAsyncJob(FirebaseIntegerKey countKey, FirebaseJSONKey recordKey, nlohmann::json record)
+{
+	// Add data to record
+	record.emplace("startIndex", FirebaseMailer::Instance().GetStartIndex()); // start index
+	record.emplace("date", GetDate()); // add date
+	record.emplace("timestamp", GetTimestamp()); // add timestamp
+
+	// Push back the job
+	PushBackAsyncJob(
+		[countKey, recordKey, record]() // copy of date, start index and success
+	{
+		// Persist record
+		std::promise<int> promise; auto future = promise.get_future(); // future provides index
+		bool pushedBack = FirebaseMailer::Instance().PushBack_Transform(countKey, 1, &promise); // adds one to the count
+		if (pushedBack) { pushedBack = FirebaseMailer::Instance().PushBack_Put(recordKey, record, std::to_string(future.get() - 1)); } // send JSON to database
+
+		// Return some value (not used)
+		return true;
+	});
 }
 
 eyegui::Layout* Master::AddLayout(std::string filepath, int layer, bool visible)
@@ -689,7 +714,7 @@ void Master::Loop()
 		if (glfwWindowShouldClose(_pWindow))
 		{
 			Exit();
-			continue; // let it do one last loop
+			continue;
 		}
 
 		// Time per frame
@@ -783,10 +808,12 @@ void Master::Loop()
         glfwGetCursorPos(_pWindow, &currentMouseX, &currentMouseY);
 
 		// Update eye input
+		int focused = glfwGetWindowAttrib(_pWindow, GLFW_FOCUSED);
 		int windowX = 0;
 		int windowY = 0;
 		glfwGetWindowPos(_pWindow, &windowX, &windowY);
 		auto spInput = _upEyeInput->Update(
+			focused > 0,
 			tpf,
 			currentMouseX,
 			currentMouseY,
@@ -803,11 +830,8 @@ void Master::Loop()
 			&& spInput->gazeAge > setup::DURATION_BEFORE_SUPER_CALIBRATION // also only when for given time no samples received
 			&& _upEyeInput->SamplesReceived()) // and it should not performed when there were no samples so far
 		{
-			// Display layout to recalibrate
-			eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true);
-
-			// Notify user via sound
-			eyegui::playSound(_pGUI, "sounds/GameAudio/FlourishSpacey-1.ogg");
+			// Show super calibration layout
+			ShowSuperCalibrationLayout();
 		}
 
         // Update cursor with original mouse input
@@ -833,8 +857,7 @@ void Master::Loop()
             RGBAToHexString(glm::vec4(0, 0, 0, MASTER_PAUSE_ALPHA * _pausedDimming.getValue())));
 
 		// Check whether input is desired
-		int focused = glfwGetWindowAttrib(_pWindow, GLFW_FOCUSED);
-		if ((focused <= 0) // window not focused
+		if ((!spInput->windowFocused) // window not focused
 			|| (_timeUntilInput > 0) // do not use input, yet
 			|| (!spInput->gazeEmulated && spInput->gazeAge > setup::MAX_AGE_OF_USED_GAZE)) // do not use gaze that is too old
 		{
@@ -971,7 +994,8 @@ void Master::Loop()
 void Master::UpdateAsyncJobs(bool wait)
 {
 	// Check asynchronous jobs
-	for (int i = _asyncJobs.size() - 1; i >= 0; i--) // do it from the back
+	int startIndex = _asyncJobs.size() - 1;
+	for (int i = startIndex; i >= 0; i--) // do it from the back
 	{
 		// Retrieve whether asynchronous call is done
 		bool remove = false;
@@ -997,6 +1021,15 @@ void Master::UpdateAsyncJobs(bool wait)
 	}
 }
 
+void Master::ShowSuperCalibrationLayout()
+{
+	// Display layout to recalibrate
+	eyegui::setVisibilityOfLayout(_pSuperCalibrationLayout, true, true, true);
+
+	// Notify user via sound
+	eyegui::playSound(_pGUI, "sounds/GameAudio/FlourishSpacey-1.ogg");
+}
+
 void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
 {
     if (action == GLFW_PRESS)
@@ -1007,10 +1040,11 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
             case GLFW_KEY_TAB:  { eyegui::hitButton(_pSuperLayout, "pause"); break; }
             case GLFW_KEY_ENTER: { _enterKeyPressed = true; break; }
 			case GLFW_KEY_S: { LabStreamMailer::instance().Send("42"); break; } // TODO: testing
-			case GLFW_KEY_C: { _upEyeInput->Calibrate();  eyegui::resetDriftMap(_pGUI); break;  } // calibrate and reset drift map
+			case GLFW_KEY_R: { ShowSuperCalibrationLayout(); break; } // just show the super calibration layout
 			case GLFW_KEY_0: { _pCefMediator->ShowDevTools(); break; }
 			case GLFW_KEY_6: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::MAGNIFICATION); break; }
 			case GLFW_KEY_7: { _upWeb->PushBackPointingEvaluationPipeline(PointingApproach::FUTURE); break; }
+			case GLFW_KEY_9: { _pCefMediator->Poll(); break; } // poll everything
 			case GLFW_KEY_SPACE: { _upVoiceInput->StartAudioRecording(); break; }
 			case GLFW_KEY_M: {
 
@@ -1037,8 +1071,8 @@ void Master::GLFWKeyCallback(int key, int scancode, int action, int mods)
 					[gridJSON]() // provide copy of data
 				{
 					std::promise<int> promise; auto future = promise.get_future(); // future provides index
-					FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_DRIFT_GRID_COUNT, 1, &promise); // adds one to the count
-					FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_DRIFT_GRID, gridJSON, std::to_string(future.get())); // send JSON to database
+					bool pushedBack = FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_DRIFT_GRID_COUNT, 1, &promise); // adds one to the count
+					if (pushedBack) { FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_DRIFT_GRID, gridJSON, std::to_string(future.get())); } // send JSON to database
 					return true; // give the future some value
 				});
 
@@ -1108,6 +1142,7 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
     {
         _pMaster->_paused = true;
         eyegui::setDescriptionVisibility(_pMaster->_pGUI, eyegui::DescriptionVisibility::VISIBLE);
+		_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_PAUSE_COUNT, FirebaseJSONKey::GENERAL_PAUSE);
     }
 	else if (pLayout == _pMaster->_pSuperCalibrationLayout)
 	{
@@ -1120,50 +1155,86 @@ void Master::MasterButtonListener::down(eyegui::Layout* pLayout, std::string id)
 		{
 			// Perform calibration
 			bool success = false;
-			CalibrationResult result = _pMaster->_upEyeInput->Calibrate();
+			std::shared_ptr<CalibrationInfo> spCalibrationInfo = std::make_shared<CalibrationInfo>();
+			CalibrationResult result = _pMaster->_upEyeInput->Calibrate(spCalibrationInfo);
 			switch (result)
 			{
-			case OK:
+			case CALIBRATION_OK:
 				_pMaster->PushNotificationByKey("notification:calibration_success", MasterNotificationInterface::Type::SUCCESS, false);
 				eyegui::resetDriftMap(_pMaster->_pGUI); // reset drift map of GUI
 				success = true;
 				break;
-			case BAD:
-
+			case CALIBRATION_BAD:
 				// TODO: provide hints how to improve calibration
 				_pMaster->PushNotificationByKey("notification:calibration_bad", MasterNotificationInterface::Type::WARNING, false);
 				eyegui::resetDriftMap(_pMaster->_pGUI); // reset drift map of GUI
 				success = true;
-
 				break;
-			case FAILED:
+			case CALIBRATION_FAILED:
 				_pMaster->PushNotificationByKey("notification:calibration_failure", MasterNotificationInterface::Type::WARNING, false);
 				break;
-			case NOT_SUPPORTED:
+			case CALIBRATION_NOT_SUPPORTED:
 				_pMaster->PushNotificationByKey("notification:calibration_failure", MasterNotificationInterface::Type::WARNING, false);
 				break;
 			}
 
 			// Store this recalibration in Firebase
-			std::string date = GetDate(); // current date
-			int startIndex = _pMaster->GetStartIndex(); // start index
-			_pMaster->PushBackAsyncJob(
-				[date, startIndex, success]() // copy of date, start index and success
+			nlohmann::json record = { { "success", success } };
+			_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_RECALIBRATION_COUNT, FirebaseJSONKey::GENERAL_RECALIBRATION, record);
+
+			// Remove points of last calibration
+			for (const auto& index : _pMaster->_lastCalibrationPointsFrameIndices)
 			{
-				// Create record
-				nlohmann::json record = { { "date", date }, { "startIndex", startIndex }, { "success", success } };
+				eyegui::removeFloatingFrame(_pMaster->_pSuperCalibrationLayout, index, false);
+			}
+			_pMaster->_lastCalibrationPointsFrameIndices.clear();
 
-				// Persist record
-				std::promise<int> promise; auto future = promise.get_future(); // future provides index
-				FirebaseMailer::Instance().PushBack_Transform(FirebaseIntegerKey::GENERAL_RECALIBRATION_COUNT, 1, &promise); // adds one to the count
-				FirebaseMailer::Instance().PushBack_Put(FirebaseJSONKey::GENERAL_RECALIBRATION, record, std::to_string(future.get() - 1)); // send JSON to database
+			// Decide what to display
+			if (spCalibrationInfo->empty())
+			{
+				// Show message
+				eyegui::setContentOfTextBlock(_pMaster->_pSuperCalibrationLayout, "calibration_message", eyegui::fetchLocalization(_pMaster->_pSuperGUI, "calibration_message"));
+			}
+			else
+			{
+				// Hide message
+				eyegui::setContentOfTextBlock(_pMaster->_pSuperCalibrationLayout, "calibration_message", "");
 
-				// Return some value (not used)
-				return true;
-			});
+				// Show points of this calibration
+				const float calibrationDisplayX = 0.075f;
+				const float calibrationDisplayY = 0.175f;
+				const float calibrationDisplayWidth = 0.35f;
+				const float calibrationDisplayHeight = 0.35f;
+				const float calibrationPointSize = 0.1f;
+				for (const auto& rPoint : *spCalibrationInfo.get())
+				{
+					// Decide on point visualization
+					std::string brickFilepath = "bricks/CalibrationDisplayOkPoint.beyegui";
+					switch (rPoint.result)
+					{
+					case CALIBRATION_POINT_OK:
+						brickFilepath = "bricks/CalibrationDisplayOkPoint.beyegui";
+						break;
+					case CALIBRATION_POINT_BAD:
+						brickFilepath = "bricks/CalibrationDisplayBadPoint.beyegui";
+						break;
+					case CALIBRATION_POINT_FAILED:
+						brickFilepath = "bricks/CalibrationDisplayFailedPoint.beyegui";
+						break;
+					}
 
-			// Hide layout after calibration
-			eyegui::setVisibilityOfLayout(_pMaster->_pSuperCalibrationLayout, false, false, true);
+					// Decide on position TODO: this has assumption that calibration is fullscreen on primary display
+					float relPointX = (float)rPoint.positionX / _pMaster->GetScreenWidth();
+					float relPointY = (float)rPoint.positionY / _pMaster->GetScreenHeight();
+					float x = calibrationDisplayX + (relPointX * calibrationDisplayWidth);
+					x -= calibrationPointSize / 2.f;
+					float y = calibrationDisplayY + (relPointY * calibrationDisplayHeight);
+					y -= calibrationPointSize / 2.f;
+
+					// Add point visualization
+					_pMaster->_lastCalibrationPointsFrameIndices.push_back(eyegui::addFloatingFrameWithBrick(_pMaster->_pSuperCalibrationLayout, brickFilepath, x, y, calibrationPointSize, calibrationPointSize, true, false));
+				}
+			}
 		}
 	}
 }
@@ -1174,6 +1245,7 @@ void Master::MasterButtonListener::up(eyegui::Layout* pLayout, std::string id)
     {
         _pMaster->_paused = false;
         eyegui::setDescriptionVisibility(_pMaster->_pGUI, eyegui::DescriptionVisibility::ON_PENETRATION); // TODO look up in Settings for set value
+		_pMaster->SimplePushBackAsyncJob(FirebaseIntegerKey::GENERAL_UNPAUSE_COUNT, FirebaseJSONKey::GENERAL_UNPAUSE);
     }
 }
 

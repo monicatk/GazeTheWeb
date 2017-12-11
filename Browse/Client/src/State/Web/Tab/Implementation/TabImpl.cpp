@@ -23,16 +23,16 @@ Tab::Tab(
 	_pMaster = pMaster;
 	_pCefMediator = pCefMediator;
 	_pWeb = pWeb;
-	_url = url;
+	// URL etc. is set by meditator
 
 	// Create layouts for Tab (overlay at first, because behind other layouts)
 	_pOverlayLayout = _pMaster->AddLayout("layouts/Overlay.xeyegui", EYEGUI_TAB_LAYER, false);
 	_pScrollingOverlayLayout = _pMaster->AddLayout("layouts/Overlay.xeyegui", EYEGUI_TAB_LAYER, false);
 	_pPanelLayout = _pMaster->AddLayout("layouts/Tab.xeyegui", EYEGUI_TAB_LAYER, false);
 	_pVideoModeLayout = _pMaster->AddLayout("layouts/TabVideoMode.xeyegui", EYEGUI_TAB_LAYER, false);
+	_pVideoModePauseOverlayLayout = _pMaster->AddLayout("layouts/TabVideoModePauseOverlay.xeyegui", EYEGUI_TAB_LAYER, false);
 	_pPipelineAbortLayout = _pMaster->AddLayout("layouts/TabPipelineAbort.xeyegui", EYEGUI_TAB_LAYER, false);
     _pDebugLayout = _pMaster->AddLayout("layouts/TabDebug.xeyegui", EYEGUI_TAB_LAYER, false);
-	
 
 	// Create scroll up and down floating frames in special overlay layout which always on top of standard overlay
 	_scrollUpProgressFrameIndex = eyegui::addFloatingFrameWithBrick(
@@ -83,11 +83,15 @@ Tab::Tab(
     eyegui::registerButtonListener(_pPanelLayout, "selection", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPanelLayout, "zoom", _spTabButtonListener);
 	// eyegui::registerButtonListener(_pPanelLayout, "test_button", _spTabButtonListener); // TODO: only for testing new features
-	eyegui::registerButtonListener(_pVideoModeLayout, "play_pause", _spTabButtonListener);
+	eyegui::registerButtonListener(_pPanelLayout, "dashboard", _spTabButtonListener);
+	eyegui::registerButtonListener(_pVideoModeLayout, "play", _spTabButtonListener);
+	eyegui::registerButtonListener(_pVideoModeLayout, "pause", _spTabButtonListener);
 	eyegui::registerButtonListener(_pVideoModeLayout, "volume_up", _spTabButtonListener);
 	eyegui::registerButtonListener(_pVideoModeLayout, "volume_down", _spTabButtonListener);
 	eyegui::registerButtonListener(_pVideoModeLayout, "mute", _spTabButtonListener);
 	eyegui::registerButtonListener(_pVideoModeLayout, "exit", _spTabButtonListener);
+	eyegui::registerButtonListener(_pVideoModePauseOverlayLayout, "skip-10", _spTabButtonListener);
+	eyegui::registerButtonListener(_pVideoModePauseOverlayLayout, "skip+30", _spTabButtonListener);
 	eyegui::registerButtonListener(_pPipelineAbortLayout, "abort", _spTabButtonListener);
 	eyegui::registerSensorListener(_pScrollingOverlayLayout, "scroll_up_sensor", _spTabSensorListener);
 	eyegui::registerSensorListener(_pScrollingOverlayLayout, "scroll_down_sensor", _spTabSensorListener);
@@ -102,10 +106,13 @@ Tab::Tab(
     _upWebView = std::unique_ptr<WebView>(new WebView(webViewInGUI.x, webViewInGUI.y, webViewInGUI.width, webViewInGUI.height));
 
 	// Register itself and painted texture in mediator to receive DOMNodes
-	_pCefMediator->RegisterTab(this);
+	_pCefMediator->RegisterTab(this, url);
 
 	// Prepare debugging overlay
 	InitDebuggingOverlay();
+
+	// Fill version string
+	eyegui::setContentOfTextBlock(_pPanelLayout, "version_info", "Version " + std::to_string(CLIENT_VERSION));
 }
 
 Tab::~Tab()
@@ -137,8 +144,13 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 	{
 		if (_timeUntilPolling <= 0.f)
 		{
-			_pCefMediator->Poll(this); // TODO: maybe only start after completely loaded
-			_timeUntilPolling = 1.f / setup::DOM_POLLING_FREQUENCY;
+			_pCefMediator->Poll(this, setup::DOM_POLLING_PARTITION_NUMBER, _pollingPartitionIndex); // TODO: maybe only start after completely loaded
+			_timeUntilPolling = 1.f / setup::DOM_POLLING_FREQUENCY; // update time until polling
+			++_pollingPartitionIndex; // update polling partition index
+			if (_pollingPartitionIndex >= setup::DOM_POLLING_PARTITION_NUMBER)
+			{
+				_pollingPartitionIndex = 0;
+			}
 		}
 		else
 		{
@@ -222,14 +234,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 			continue;
 
 		// Check whether link is visible
-		const auto bitmask = rIdNodePair.second->GetOccBitmask();
-		bool visible = true;
-		/*
-		for (const auto& bit : bitmask)
-		{
-			visible &= bit;
-		}
-		*/
+		bool visible = !rIdNodePair.second->IsOccluded();
 
 		// Only highlight if visible
 		if (visible)
@@ -330,7 +335,9 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
         // STANDARD GUI IS VISIBLE
 
         // Gaze mouse
-        if(_gazeMouse && !(_pMaster->IsPaused()))
+        if(
+			(_gazeMouse && spInput->windowFocused && !_pMaster->IsPaused())
+			|| ShortenURL(_url) == "augreal.mklab.iti.gr") // hack for MAMEM training and dashboard page to get gaze through mouse coordinate
         {
             EmulateMouseCursor(spTabInput->webViewPixelGazeX, spTabInput->webViewPixelGazeY);
         }
@@ -348,21 +355,19 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		eyegui::setInputUsageOfLayout(_pPipelineAbortLayout, false);
 
 		// Manual scrolling
-		bool showScrollUp = false;
-		bool showScrollDown = false;
-		if (!_autoScrolling)
-		{
-			// Scroll up
-			if (_scrollingOffsetY > 0)
-			{
-				showScrollUp = true;
-			}
+		bool canScrollUp = false;
+		bool canScrollDown = false;
 
-			// Scroll down
-			if ((_pageHeight - 1) > (_scrollingOffsetY + _upWebView->GetResolutionY()))
-			{
-				showScrollDown = true;
-			}
+		// Scroll up
+		if (_scrollingOffsetY > 1) // should be zero but this fixes the issue that scroll to top is still active after usage
+		{
+			canScrollUp = true;
+		}
+
+		// Scroll down
+		if ((_pageHeight - 1) > (_scrollingOffsetY + _upWebView->GetResolutionY()))
+		{
+			canScrollDown = true;
 		}
 
 		// Set progress of scrolling
@@ -378,13 +383,13 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		eyegui::setProgress(_pScrollingOverlayLayout, "scroll_down_progress", progressDown);
 
 		// Set visibility of scroll elements
-		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpProgressFrameIndex, showScrollUp, false, true);
-		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownProgressFrameIndex, showScrollDown, false, true);
-		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpSensorFrameIndex, showScrollUp, false, true);
-		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownSensorFrameIndex, showScrollDown, false, true);
+		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpProgressFrameIndex, !_autoScrolling && canScrollUp, false, true);
+		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownProgressFrameIndex, !_autoScrolling && canScrollDown, false, true);
+		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollUpSensorFrameIndex, !_autoScrolling && canScrollUp, false, true);
+		eyegui::setVisibilityOFloatingFrame(_pScrollingOverlayLayout, _scrollDownSensorFrameIndex, !_autoScrolling && canScrollDown, false, true);
 
 		// Set activity of scroll to top button
-		eyegui::setElementActivity(_pPanelLayout, "scroll_to_top", showScrollUp, true);
+		eyegui::setElementActivity(_pPanelLayout, "scroll_to_top", canScrollUp, true);
 
 		// Check, that gaze is not upon a fixed element
 		bool gazeUponFixed = false;
@@ -480,7 +485,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 		// ############################
 		
 		// Check for URL change and whether to start new social record
-		if (_url != BLANK_PAGE_URL && _prevURL != _url)
+		if (_prevURL != _url)
 		{
 			// Classify URL, which platform was entered?
 			auto platform = SocialRecord::ClassifyURL(_url);
@@ -508,7 +513,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 			}
 			else // recording of platform continues
 			{
-				_spSocialRecord->AddPage(_url); // seems that a subpage was opened
+				_spSocialRecord->AddPage(_url, _metaKeywords); // seems that a subpage was opened
 			}
 
 			// Update previous URL
@@ -524,8 +529,16 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
 
 				// Update social record
 				_spSocialRecord->AddTimeInForeground(tpf); // this update is only called when in foreground
-				if (userActive) { _spSocialRecord->AddTimeActiveUser(tpf); }// add on duration while user is active
-				_spSocialRecord->AddScrollingDelta(glm::abs(_scrollingOffsetY - _prevScrolling));
+				if (userActive) { _spSocialRecord->AddTimeActiveUser(tpf); } // add on duration while user is active
+				if (spInput->gazeEmulated) { _spSocialRecord->AddTimeEmulatedInput(tpf); }
+				if (_autoScrolling) // automatic scrolling
+				{
+					_spSocialRecord->AddAutomaticScrollingDelta(glm::abs(_scrollingOffsetY - _prevScrolling));
+				}
+				else // manual scrolling
+				{
+					_spSocialRecord->AddManualScrollingDelta(glm::abs(_scrollingOffsetY - _prevScrolling));
+				}
 
 				// Prepare next update
 				_prevScrolling = _scrollingOffsetY; // scrolling delta helper
@@ -603,7 +616,7 @@ void Tab::Deactivate()
 	AbortAndClearPipelines();
 
 	// Exit video mode
-	ExitVideoMode();
+	ExitVideoMode(true);
 
 	// Remember being not active
 	_active = false;
@@ -611,17 +624,14 @@ void Tab::Deactivate()
 
 void Tab::OpenURL(std::string URL)
 {
-	// Set URL
-	_url = URL;
+	// Tell CEF to load a new URL (sets later URL and title here)
+	_pCefMediator->LoadURLInTab(this, URL);
 
 	// Abort any pipeline execution
 	AbortAndClearPipelines();
 
 	// Exit video mode
 	ExitVideoMode();
-
-	// Tell CEF to refresh this tab (which will fetch the URL and load it)
-	_pCefMediator->RefreshTab(this);
 
 	// Reset scrolling
 	_scrollingOffsetX = 0.0;
@@ -681,15 +691,19 @@ void Tab::SetDataTransfer(bool active)
 	{
 		// Abort current social record
 		_spSocialRecord = nullptr;
+
+		// Abort current history entry
+		_spHistoryPage = nullptr;
 	}
 }
 
 void Tab::NotifyClick(std::string tag, std::string id, float x, float y)
 {
-	if (_spSocialRecord != nullptr)
+	if (_userTriggeredClick && _spSocialRecord != nullptr)
 	{
 		_spSocialRecord->AddClick(tag, id, x, y);
 	}
+	_userTriggeredClick = false; // ok click went from here to CEF and back from JavaScript to here, reset this bool
 }
 
 void Tab::ScheduleTextInputTrigger(int id)
@@ -800,6 +814,9 @@ void Tab::EnterVideoMode(int id)
 			// Set visibility of layout
 			eyegui::setVisibilityOfLayout(_pVideoModeLayout, true, true, true);
 
+			// Set visibility of pause overlay layout (just blend out, do not ask for current state)
+			eyegui::setVisibilityOfLayout(_pVideoModePauseOverlayLayout, false, false, false);
+
 			// Deactivate all triggers
 			for (auto pTrigger : _triggers)
 			{
@@ -812,7 +829,7 @@ void Tab::EnterVideoMode(int id)
 	}
 }
 
-void Tab::ExitVideoMode()
+void Tab::ExitVideoMode(bool immediately)
 {
 	if (_videoModeId >= 0)
 	{
@@ -830,7 +847,10 @@ void Tab::ExitVideoMode()
 		_videoModeId = -1; // indicating that video mode is off
 
 		// Set visibility of layout
-		eyegui::setVisibilityOfLayout(_pVideoModeLayout, false, false, true);
+		eyegui::setVisibilityOfLayout(_pVideoModeLayout, false, false, !immediately);
+
+		// Set visibility of pause overlay layout (just blend out, do not ask for current state)
+		eyegui::setVisibilityOfLayout(_pVideoModePauseOverlayLayout, false, false, !immediately);
 
 		// Activate all triggers
 		for (auto pTrigger : _triggers)
@@ -839,7 +859,7 @@ void Tab::ExitVideoMode()
 		}
 
 		// Activate scrolling overlay
-		eyegui::setVisibilityOfLayout(_pScrollingOverlayLayout, true, true, true);
+		eyegui::setVisibilityOfLayout(_pScrollingOverlayLayout, true, true, !immediately);
 	}
 }
 
@@ -853,9 +873,18 @@ void Tab::StartSocialRecord(std::string URL, SocialPlatform platform)
 			EndSocialRecord(); // makes social record null
 		}
 
+		// Filter certain URLs so no social record is created
+		if (
+			URL.empty()
+			|| URL.find(BLANK_PAGE_URL) != std::string::npos
+			|| URL.find(setup::DASHBOARD_URL) != std::string::npos)
+		{
+			return; // without starting a new social record
+		}
+
 		// Start new record
-		_spSocialRecord = std::shared_ptr<SocialRecord>(new SocialRecord(SocialRecord::ExtractDomain(URL), platform, _pMaster->GetStartIndex()));
-		_spSocialRecord->StartAndAddPage(URL);
+		_spSocialRecord = std::shared_ptr<SocialRecord>(new SocialRecord(SocialRecord::ExtractDomain(URL), platform, FirebaseMailer::Instance().GetStartIndex()));
+		_spSocialRecord->StartAndAddPage(URL, _metaKeywords);
 	}
 }
 

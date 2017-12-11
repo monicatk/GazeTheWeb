@@ -40,6 +40,7 @@ public:
     virtual ~Web();
 
     // Add tab and return id of it
+	int AddTab(bool show = true);
     int AddTab(std::string URL, bool show = true);
 
     // Add tab after another
@@ -101,17 +102,6 @@ public:
 	// Add tab after that tab
     virtual void PushAddTabAfterJob(Tab* pCaller, std::string URL);
 
-	// Add page to history job
-	virtual void PushAddPageToHistoryJob(Tab* pCaller, HistoryManager::Page page);
-
-	// Add delete page from history job
-	virtual void PushDeletePageFromHistoryJob(Tab* pCaller,
-		HistoryManager::Page page,
-		bool deleteOnlyFirst = false);
-
-	// Review front history entry
-	virtual HistoryManager::Page GetFrontHistoryEntry() const;
-
     // Get own id in web. Returns -1 if not found
     virtual int GetIdOfTab(Tab const * pCaller) const;
 
@@ -120,6 +110,10 @@ public:
 	virtual void actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input);
 
 	virtual void dictationOfVoice(std::string transcript);
+
+	// Add history entry
+	virtual std::shared_ptr<HistoryManager::Page> AddPageToHistory(std::string URL, std::string title);
+
 
 private:
 
@@ -160,48 +154,6 @@ private:
         std::string _URL;
         bool _show;
     };
-
-	class AddPageToHistoryJob : public TabJob
-	{
-	public:
-
-		// Constructor
-		AddPageToHistoryJob(Tab* pCaller, HistoryManager::Page page) : TabJob(pCaller)
-		{
-			_page = page;
-		}
-
-		// Execute
-		virtual void Execute(Web* pCallee);
-
-	protected:
-
-		// Members
-		HistoryManager::Page _page;
-	};
-
-	class DeletePageFromHistoryJob : public TabJob
-	{
-	public:
-
-		// Constructor
-		DeletePageFromHistoryJob(Tab* pCaller, 
-			HistoryManager::Page page,
-			bool deleteOnlyFirst) : TabJob(pCaller)
-		{
-			_page = page;
-			_deleteOnlyFirst = deleteOnlyFirst;
-		}
-
-		// Execute
-		virtual void Execute(Web* pCallee);
-
-	protected:
-
-		// Members
-		HistoryManager::Page _page;
-		bool _deleteOnlyFirst;
-	};
 
     // Give listener full access
     friend class WebButtonListener;
