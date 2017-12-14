@@ -337,7 +337,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
         // Gaze mouse
         if(
 			(_gazeMouse && spInput->windowFocused && !_pMaster->IsPaused())
-			|| ShortenURL(_url) == "augreal.mklab.iti.gr") // hack for MAMEM training and dashboard page to get gaze through mouse coordinate
+			|| ShortenURL(_url) == "http://127.0.0.1:8080/template.html") // hack for MAMEM training and dashboard page to get gaze through mouse coordinate
         {
             EmulateMouseCursor(spTabInput->webViewPixelGazeX, spTabInput->webViewPixelGazeY);
         }
@@ -754,6 +754,54 @@ std::vector<Tab::DOMLinkInfo> Tab::RetrieveDOMLinkInfos() const
 			if (!text.empty()) // there is some text
 			{
 				result.push_back(Tab::DOMLinkInfo(rLink.second->GetRects(), text));
+			}
+		}
+	}
+	return result;
+}
+
+std::vector<Tab::DOMVideoInfo> Tab::RetrieveDOMVideoInfos() const
+{
+	std::vector<Tab::DOMVideoInfo> result;
+	result.reserve(_VideoMap.size());
+	for (const auto& rLink : _VideoMap)
+	{
+		if (!rLink.second->GetRects().empty()) // there is at least one rectangle
+		{
+			result.push_back(Tab::DOMVideoInfo(rLink.second->GetRects(), ""));
+			
+		}
+	}
+	return result;
+}
+std::vector<Tab::DOMCheckboxInfo> Tab::RetrieveDOMCheckboxInfos() const
+{
+	std::vector<Tab::DOMCheckboxInfo> result;
+	result.reserve(_CheckboxMap.size());
+	for (const auto& rLink : _CheckboxMap)
+	{
+		if (!rLink.second->GetRects().empty()) // there is at least one rectangle
+		{
+			bool checkStates = rLink.second->GetCheckedState();
+			std::vector<DOMAttribute> descriptions = rLink.second->GetAttributes();
+			result.push_back(Tab::DOMCheckboxInfo(rLink.second->GetRects(), checkStates, descriptions));
+		}
+	}
+	return result;
+}
+
+std::vector<Tab::DOMTextInputInfo> Tab::RetrieveDOMTextInputInfos() const
+{
+	std::vector<Tab::DOMTextInputInfo> result;
+	result.reserve(_TextInputMap.size());
+	for (const auto& rLink : _TextInputMap)
+	{
+		if (!rLink.second->GetRects().empty()) // there is at least one rectangle
+		{
+			std::string text = rLink.second->GetText();
+			if (!text.empty()) // there is some text
+			{
+				result.push_back(Tab::DOMTextInputInfo(rLink.second->GetRects(), text));
 			}
 		}
 	}

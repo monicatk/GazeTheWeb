@@ -55,11 +55,8 @@ namespace setup
 	static const FilterKernel FILTER_KERNEL = FilterKernel::GAUSSIAN;
 	static const int	FILTER_WINDOW_SIZE = 30;
 	static const bool	FILTER_USE_OUTLIER_REMOVAL = true;
-<<<<<<< HEAD
-	static const bool	USE_EYEGUI_DRIFT_MAP = false && !DEMO_MODE;
-=======
 	static const bool	USE_EYEGUI_DRIFT_MAP = !DEMO_MODE;
->>>>>>> upstream/master
+
 
 	// Distortion
 	static const bool	EYEINPUT_DISTORT_GAZE = false && !DEPLOYMENT;
@@ -72,7 +69,7 @@ namespace setup
 	static const std::string	LAB_STREAM_INPUT_NAME = LAB_STREAM_OUTPUT_NAME; //  "GazeTheWebInput"; // may be set to same value as LAB_STREAM_OUTPUT_NAME to receive own events for debugging purposes
 	static const bool			LOG_INTERACTIONS = false; // on eyeGUI level, deprecated
 	static const bool			TAB_TRIGGER_SHOW_BADGE = false;
-	static const std::string	DASHBOARD_URL = "https://augreal.mklab.iti.gr/mamem/gtw-home"; // without slash at the end
+	static const std::string	DASHBOARD_URL = "http://127.0.0.1:8080/template.html"; // without slash at the end
 
 	// Firebase
 	static const bool			FIREBASE_MAILING = !DEMO_MODE; // on/off switch for sending data to Firebase

@@ -49,8 +49,8 @@ std::map<std::string, VoiceAction> voiceActionMapping = {
 	{ "new tab",VoiceAction::NEW_TAB },
 	{ "utep",VoiceAction::NEW_TAB },
 	{ "neutab",VoiceAction::NEW_TAB },
-	{ "neo tap",VoiceAction::NEW_TAB }
-	
+	{ "neo tap",VoiceAction::NEW_TAB },
+	{ "checkbox",VoiceAction::CHECKBOX }
 	//{ "",VoiceAction:: },
 
 };

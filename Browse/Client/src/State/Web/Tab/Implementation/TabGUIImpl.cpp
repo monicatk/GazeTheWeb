@@ -129,9 +129,6 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			_pTab->ExitVideoMode();
 		}
 	}
-<<<<<<< HEAD
-	LogInfo("------ button ", id, " down finished-----");
-=======
 	else
 	{
 		// ### Vide mode pause overlay layout ###
@@ -152,7 +149,6 @@ void Tab::TabButtonListener::down(eyegui::Layout* pLayout, std::string id)
 			}
 		}
 	}
->>>>>>> upstream/master
 }
 
 void Tab::TabButtonListener::up(eyegui::Layout* pLayout, std::string id)

@@ -48,13 +48,13 @@ public:
     int GetWindowWidth() const { return _width; }
     int GetWindowHeight() const { return _height; }
 
-<<<<<<< HEAD
+
 	VoiceResult voiceResult = VoiceResult{ VoiceAction::NO_ACTION,"" };
-=======
+
 	// Getter for screen width and height
 	int GetScreenWidth() const;
 	int GetScreenHeight() const;
->>>>>>> upstream/master
+
 
     // Get time provided by GLFW
     double GetTime() const;

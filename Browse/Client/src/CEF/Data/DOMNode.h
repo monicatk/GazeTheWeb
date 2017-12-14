@@ -462,6 +462,8 @@ public:
 
 	bool GetCheckedState() const { return _checked; }
 
+	std::vector<DOMAttribute> GetAttributes() { return _description; }
+
 private:
 	typedef DOMNode super;
 
