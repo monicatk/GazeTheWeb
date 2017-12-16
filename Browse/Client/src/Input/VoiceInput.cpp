@@ -73,7 +73,7 @@ std::map<std::string, std::string> textToDigit = {
 	{ "seven","7" },{ "eight","8" },{ "att","8" },
 	{ "nine","9" },{ "ten","10" },{ "tan","10" }
 
-	
+
 };
 std::set<std::string> textToDigitKeyKeys = {
 	"zero","one","two","three","four","five","six","seven","eight","nine","ten",
@@ -82,41 +82,47 @@ std::set<std::string> textToDigitKeyKeys = {
 
 //deal with para
 std::string findPrefixAndParameters(VoiceAction action, std::vector<std::string> transcript, int paraIndex) {
-	if (action==VoiceAction::GO_TO || action == VoiceAction::NEW_TAB)
-	// command GO TO
+	if (action == VoiceAction::GO_TO || action == VoiceAction::NEW_TAB)
+		// command GO TO
 	{
 		std::string urlString = "";
-		if (!transcript[paraIndex].empty()) {
-			urlString = transcript[paraIndex];
-			size_t found = urlString.find('.');
-			if (found == std::string::npos) {
-				urlString = transcript[paraIndex] + ".com";
+		if (transcript.size() > 1) {
+			if (!transcript[paraIndex].empty()) {
+				urlString = transcript[paraIndex];
+				size_t found = urlString.find('.');
+				if (found == std::string::npos) {
+					urlString = transcript[paraIndex] + ".com";
+				}
+				return urlString;
 			}
+
 		}
-		return urlString;
 	}
 	//command SEARCH
 	if (action == VoiceAction::SEARCH || action == VoiceAction::CLICK) {
-		if (!transcript[paraIndex].empty()) {
-			std::string searchText = "";
-			for (int i = paraIndex; i < transcript.size();i++) { searchText += transcript[i]; };
-			return searchText;
+		if (transcript.size() > 1) {
+			if (!transcript[paraIndex].empty()) {
+				std::string searchText = "";
+				for (int i = paraIndex; i < transcript.size(); i++) { searchText += transcript[i]; };
+				return searchText;
+			}
 		}
 	}
-
 	if (action == VoiceAction::TEXT_INPUT || action == VoiceAction::VIDEO_INPUT || action == VoiceAction::JUMP) {
-		if (!transcript[paraIndex].empty()) {
-			std::string num = "";
-			size_t last_index = transcript[paraIndex].find_last_not_of("0123456789");
-			num = transcript[paraIndex].substr(last_index + 1);
-			if (num.empty()) {
-				for (std::string key : textToDigitKeyKeys) {
-					std::size_t found = transcript[paraIndex].find(key);
-					if (found != std::string::npos)
-						num += textToDigit[key];
+		if (transcript.size() > 1) {
+			if (!transcript[paraIndex].empty()) {
+				std::string num = "";
+				size_t last_index = transcript[paraIndex].find_last_not_of("0123456789");
+				num = transcript[paraIndex].substr(last_index + 1);
+				if (num.empty()) {
+					for (std::string key : textToDigitKeyKeys) {
+						std::size_t found = transcript[paraIndex].find(key);
+						if (found != std::string::npos)
+							num += textToDigit[key];
+					}
 				}
+				return num;
 			}
-			return num;
 		}
 	}
 
@@ -319,7 +325,7 @@ VoiceResult VoiceInput::EndAndProcessAudioRecording()
 		std::string postBuffer;
 		std::string answerHeaderBuffer;
 		std::string answerBodyBuffer;
-		struct curl_slist* headers = NULL; // init to NULL is important 
+		struct curl_slist* headers = NULL; // init to NULL is important
 		headers = curl_slist_append(headers, "Content-Type: application/json"); // type is JSON
 																				// Set options
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers); // apply header
@@ -355,9 +361,9 @@ VoiceResult VoiceInput::EndAndProcessAudioRecording()
 
 		// Parse answer to JSON object and extract id token
 		auto jsonAnswer = json::parse(answerBodyBuffer);
-/*
-		const std::string test ="{\"results\": [{\"alternatives\": [{\"transcript\": \"jump 10\",\"confidence\" : 0.80277747}]}]}";
-		auto jsonAnswer = json::parse(test);*/
+
+		//const std::string test = "{\"results\": [{\"alternatives\": [{\"transcript\": \"video\",\"confidence\" : 0.80277747}]}]}";
+		//auto jsonAnswer = json::parse(test);
 		if (!jsonAnswer.empty()) {
 			auto result = jsonAnswer["results"][0]["alternatives"][0];
 			if (result.empty())
@@ -372,25 +378,28 @@ VoiceResult VoiceInput::EndAndProcessAudioRecording()
 				std::string voiceCommand = "";
 				int voicePara = 0;
 				std::vector<std::string> keySplitList;
-				std::vector<std::string> tranSplitList=split(transcript, ' ');
+				std::vector<std::string> tranSplitList = split(transcript, ' ');
 				int tranSplitListLen = tranSplitList.size();
-				if (!transcript.empty()) {				
-					 for (std::string key : voiceActionKeys) {
-						 //lev distance of key with transciption
-						 int levCom = 0;
-						 keySplitList= split(key, ' ');
-						 int keySplitListLen = keySplitList.size();					
-						 for (int i = 0; i < keySplitListLen;i++) {
-							 if(i<tranSplitListLen){
-							 levCom += uiLevenshteinDistance(tranSplitList[i], keySplitList[i]);
-							 if (tranSplitList[i] == keySplitList[i] || levCom ==0|| (levCom<2 && levCom!=key.size()))
-							 {
-								 voiceCommand = key;
-								 voicePara = i+1;
-								 LogInfo("VoiceInput: voice distance between transcript ( ", tranSplitList[i], " ) and ( ", keySplitList[i], " ) is ", levCom);
-							 }
-						 } }			
-						 // min leven disctance						
+				LogInfo("tran len ", tranSplitListLen);
+				if (!transcript.empty()) {
+					for (std::string key : voiceActionKeys) {
+						//lev distance of key with transciption
+						int levCom = 0;
+						keySplitList = split(key, ' ');
+						int keySplitListLen = keySplitList.size();
+						LogInfo("key ", key, " len: ", keySplitListLen);
+						for (int i = 0; i < keySplitListLen; i++) {
+							if (i < tranSplitListLen) {
+								levCom += uiLevenshteinDistance(tranSplitList[i], keySplitList[i]);
+								if (tranSplitList[i] == keySplitList[i] || levCom == 0 || (levCom < 2 && levCom != key.size()))
+								{
+									voiceCommand = key;
+									voicePara = i + 1;
+									LogInfo("VoiceInput: voice distance between transcript ( ", tranSplitList[i], " ) and ( ", keySplitList[i], " ) is ", levCom);
+								}
+							}
+						}
+						// min leven disctance						
 					}
 				}
 				if (!voiceCommand.empty())

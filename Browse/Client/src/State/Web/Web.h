@@ -111,7 +111,7 @@ public:
 
 	virtual void dictationOfVoice(std::string transcript);
 
-	std::pair<float, float> Web::nearestElement(Tab::DOMVideoInfo link, std::vector<Rect> rectList, float gazeXOffset, float gazeYOffset, float shortestDis);
+	std::pair<int, float> Web::nearestElement(std::vector<Rect> rectList, float gazeXOffset, float gazeYOffset, float shortestDis, int nodeId);
 
 	// Add history entry
 	virtual std::shared_ptr<HistoryManager::Page> AddPageToHistory(std::string URL, std::string title);

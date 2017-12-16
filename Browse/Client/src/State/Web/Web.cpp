@@ -1295,13 +1295,15 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 			if (tabId >= 0) {
 				float gazeYOffset = input->gazeY + _tabs.at(tabId)->getScrollingOffsetY();
 				float gazeXOffset = input->gazeX - _tabs.at(tabId)->GetWebViewX();
+				std::pair<float, float> finalCD = { gazeXOffset , gazeYOffset };
 				LogInfo("gaze offset X:", gazeXOffset, " ,Y:", gazeYOffset);
-				std::vector<Tab::DOMVideoInfo> domVideoList = _tabs.at(tabId)->RetrieveDOMVideoInfos();
+				std::vector<Tab::DOMTextInputInfo> domTextList = _tabs.at(tabId)->RetrieveDOMTextInputInfos();
 				float shortestDis = 100.f;
-				for (Tab::DOMVideoInfo link : domVideoList) {
-					std::pair<float, float> finalCD = nearestElement(link, link.rects, gazeXOffset, gazeYOffset, shortestDis);
-					_tabs.at(tabId)->EmulateLeftMouseButtonClick(finalCD.first, finalCD.second - _tabs.at(tabId)->getScrollingOffsetY());
+				for (Tab::DOMTextInputInfo link : domTextList) {
+					std::pair<int, float> {index, shortestDis} = nearestElement(link.rects, gazeXOffset, gazeYOffset, shortestDis, link.nodeId);
+					LogInfo("index  ", index, "dis ", shortestDis);
 				}
+				_tabs.at(tabId)->ScheduleTextInputTrigger(index);
 			}
 		}}break;
 
@@ -1311,8 +1313,8 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 		// ###############################
 
 	case VoiceAction::CLICK: {
-		float thresholdY = 10.0;
-		float thresholdX = 5.0;
+		float thresholdY = 50.0;
+		float thresholdX = 100.0;
 		float finalLinkX = 0.0;
 		float finalLinkY = 0.0;
 		int tabId = _currentTabId;
@@ -1331,17 +1333,22 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 				std::vector<Rect> rectList = link.rects;
 				for (Rect rect : rectList) {
 					//get the lev distance between text of link and transcription
-					if (!voiceResult.keyworkds.empty())
+					if (!voiceResult.keyworkds.empty()) {
+						std::transform(voiceResult.keyworkds.begin(), voiceResult.keyworkds.end(), voiceResult.keyworkds.begin(), ::tolower);
 						// gaze must be within (threshold  + the area of link )
 						if ((glm::abs(rect.top - gazeYOffset) < thresholdY || glm::abs(rect.bottom - gazeYOffset) < thresholdY) &&
 							(glm::abs(rect.right - gazeXOffset) < thresholdX || glm::abs(rect.left - gazeXOffset) < thresholdX)) {
-							int levDis = uiLevenshteinDistance(voiceResult.keyworkds, link.text);
-							if (levDis < levDisMax) {
+							std::string linktext = link.text;
+							std::transform(linktext.begin(), linktext.end(), linktext.begin(), ::tolower);
+							int levDis = uiLevenshteinDistance(voiceResult.keyworkds, linktext);
+							if (levDis < levDisMax && levDis != linktext.size()) {
+								LogInfo("shorter dis:", linktext, " . dis:", levDis, ", gazeoffset Y:", rect.Center().y, ", gazeoffset X:", rect.Center().x);
 								finalLinkY = rect.Center().y;
 								finalLinkX = rect.Center().x;
 								levDisMax = levDis;
 							}
 						}
+					}
 					//get the distance of link and gaze
 					if (levDisMax == 20) {
 						float dx = glm::max(glm::abs(gazeXOffset - rect.Center().x) - (rect.Width() / 2.f), 0.f);
@@ -1383,13 +1390,14 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 			if (tabId >= 0) {
 				float gazeYOffset = input->gazeY + _tabs.at(tabId)->getScrollingOffsetY();
 				float gazeXOffset = input->gazeX - _tabs.at(tabId)->GetWebViewX();
+				std::pair<float, float> finalCD = { gazeXOffset , gazeYOffset };
 				LogInfo("gaze offset X:", gazeXOffset, " ,Y:", gazeYOffset);
-				std::vector<Tab::DOMVideoInfo> domVideoList = _tabs.at(tabId)->RetrieveDOMVideoInfos();	
+				std::vector<Tab::DOMVideoInfo> domVideoList = _tabs.at(tabId)->RetrieveDOMVideoInfos();
 				float shortestDis = 100.f;
 				for (Tab::DOMVideoInfo link : domVideoList) {
-					std::pair<float, float> finalCD=nearestElement(link, link.rects, gazeXOffset, gazeYOffset, shortestDis);
-					_tabs.at(tabId)->EmulateLeftMouseButtonClick(finalCD.first, finalCD.second - _tabs.at(tabId)->getScrollingOffsetY());
+					std::pair<int, float> {index, shortestDis} = nearestElement(link.rects, gazeXOffset, gazeYOffset, shortestDis, link.nodeId);
 				}
+				_tabs.at(tabId)->ScheduleVideoModeTrigger(index);
 			}
 		}}break;
 	case VoiceAction::INCREASE: {
@@ -1449,8 +1457,8 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 			_pMaster->PushNotification(u"The time is not valid", MasterNotificationInterface::Type::WARNING, false);
 		}}break;
 	case VoiceAction::CHECKBOX: {
-		float thresholdY = 10.0;
-		float thresholdX = 5.0;
+		float thresholdY = 100.0;
+		float thresholdX = 100.0;
 		float finalLinkX = 0.0;
 		float finalLinkY = 0.0;
 		int tabId = _currentTabId;
@@ -1471,7 +1479,7 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 					//get the lev distance between text of link and transcription
 					/*if (!voiceResult.keyworkds.empty())
 						// gaze must be within (threshold  + the area of link )
-						
+
 						if ((glm::abs(rect.top - gazeYOffset) < thresholdY || glm::abs(rect.bottom - gazeYOffset) < thresholdY) &&
 							(glm::abs(rect.right - gazeXOffset) < thresholdX || glm::abs(rect.left - gazeXOffset) < thresholdX)) {
 							std::vector<DOMAttribute> desc = link.description;
@@ -1483,13 +1491,12 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 							}
 						}
 						*/
-					//get the distance of link and gaze
+						//get the distance of link and gaze
 					if (levDisMax == 20) {
 						float dx = glm::max(glm::abs(gazeXOffset - rect.Center().x) - (rect.Width() / 2.f), 0.f);
 						float dy = glm::max(glm::abs(gazeYOffset - rect.Center().y) - (rect.Height() / 2.f), 0.f);
 						float distance = glm::sqrt((dx * dx) + (dy * dy));
-						if (distance < 100.f)
-							LogInfo("checkbox: ", distance, "  ,x:", rect.Center().x, " ,y:", rect.Center().y);
+						LogInfo("checkbox: ", distance, "  ,x:", rect.Center().x, " ,y:", rect.Center().y);
 						if (shortestDis > distance) {
 							finalLinkY = rect.Center().y;
 							finalLinkX = rect.Center().x;
@@ -1514,7 +1521,7 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 }
 
 //nearestElement(link, rectList, gazeXOffset,  gazeYOffset,shortestDis) 
-std::pair<float, float> Web::nearestElement(Tab::DOMVideoInfo link,std::vector<Rect> rectList, float gazeXOffset, float gazeYOffset, float shortestDis) {
+std::pair<int, float> Web::nearestElement(std::vector<Rect> rectList, float gazeXOffset, float gazeYOffset, float shortestDis, int nodeId) {
 	float finalLinkX = 0.0;
 	float finalLinkY = 0.0;
 	for (Rect rect : rectList) {
@@ -1523,16 +1530,15 @@ std::pair<float, float> Web::nearestElement(Tab::DOMVideoInfo link,std::vector<R
 		float dx = glm::max(glm::abs(gazeXOffset - rect.Center().x) - (rect.Width() / 2.f), 0.f);
 		float dy = glm::max(glm::abs(gazeYOffset - rect.Center().y) - (rect.Height() / 2.f), 0.f);
 		float distance = glm::sqrt((dx * dx) + (dy * dy));
-		if (distance < 100.f)
+		if (distance <shortestDis) {
 			LogInfo("nearestElement :", distance, "  ,x:", rect.Center().x, " ,y:", rect.Center().y);
-		if (shortestDis > distance) {
-			finalLinkY = rect.Center().y;
-			finalLinkX = rect.Center().x;
-			shortestDis = distance;
+				finalLinkY = rect.Center().y;
+				finalLinkX = rect.Center().x;
+				shortestDis = distance;
 		}
 	}
-	std::pair<float, float> finalCD = { finalLinkX ,finalLinkY };
-	return  finalCD ;
+	std::pair<int, float> finalCD = { nodeId ,shortestDis };
+	return  finalCD;
 }
 void Web::dictationOfVoice(std::string transcription) {
 

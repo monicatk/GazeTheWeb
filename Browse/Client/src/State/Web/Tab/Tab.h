@@ -126,28 +126,28 @@ public:
 
 	struct DOMVideoInfo
 	{
-		DOMVideoInfo(std::vector<Rect> rects, std::string text) : rects(rects), text(text) {}
+		DOMVideoInfo(std::vector<Rect> rects, int nodeId) : rects(rects), nodeId(nodeId) {}
 		std::vector<Rect> rects;
-		std::string text;
+		int nodeId;
 	};
 	std::vector<DOMVideoInfo> RetrieveDOMVideoInfos() const;
 
+	struct DOMTextInputInfo
+	{
+		DOMTextInputInfo(std::vector<Rect> rects, int nodeId) : rects(rects), nodeId(nodeId) {}
+		std::vector<Rect> rects;
+		int nodeId;
+	};
+	std::vector<DOMTextInputInfo> RetrieveDOMTextInputInfos() const;
+
 	struct DOMCheckboxInfo
 	{
-		DOMCheckboxInfo(std::vector<Rect> rects, bool checkState, std::vector<DOMAttribute> description) : rects(rects), checkState(checkState),description(description) {}
+		DOMCheckboxInfo(std::vector<Rect> rects) : rects(rects) {}
 		std::vector<Rect> rects;
-		bool checkState;
-		std::vector<DOMAttribute> description;
 	};
 	std::vector<DOMCheckboxInfo> RetrieveDOMCheckboxInfos() const;
 
-	struct DOMTextInputInfo
-	{
-		DOMTextInputInfo(std::vector<Rect> rects, std::string text) : rects(rects), text(text) {}
-		std::vector<Rect> rects;
-		std::string text;
-	};
-	std::vector<DOMTextInputInfo> RetrieveDOMTextInputInfos() const;
+	
 
 	// Getter for URL
 	std::string GetURL() const { return _url; }
