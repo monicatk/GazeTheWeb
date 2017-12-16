@@ -1,0 +1,213 @@
+﻿<!DOCTYPE html>
+<html>
+<title>Chinese zodiac</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
+<style>
+    body,
+    html {
+        height: 100%;
+        font-family: "Inconsolata", sans-serif;
+    }
+
+    .bgimg {
+        background-position: center;
+        background-size: cover;
+        background-image: url("zodiac_backg.jpg");
+        min-height: 75%;
+    }
+</style>
+
+<body>
+    <!-- Header with image -->
+    <header class="bgimg w3-display-container w3-grayscale-min" id="home">
+        <div class="w3-display-bottomleft w3-center w3-padding-large w3-hide-small">
+            <span class="w3-tag">source: Wikipedia</span>
+        </div>
+        <div class="w3-display-middle w3-center">
+            <span class="w3-text-white" style="font-size:90px">Chinese zodiac</span>
+        </div>
+    </header>
+
+    <!-- Add a background color and large text to the whole page -->
+    <div class="w3-sand w3-grayscale w3-large">
+        <!-- About Container -->
+        <div class="w3-container" id="about">
+            <div class="w3-content">
+                <h5 class="w3-center w3-padding-64"><span class="w3-tag w3-wide">ABOUT CHINESE ZODIAC</span></h5>
+                <!-- task1 -->
+                <div class="w3-leftbar w3-light-grey">
+                    <p><i>1. choose one link of 12 animal in the second line to see the image of this animal</i></p>
+                </div>
+                <p>
+                    <img id="zodiacImg">
+                </p>
+                <p>
+                    The <b>Chinese zodiac</b> is a classification scheme that assigns an animal and its reputed attributes to each year in a repeating 12-year cycle. In order, the 12 animals are:
+                    <a href="javascript:openimage('rat.gif')" value='rat'>Rat</a>
+                    <a href="javascript:openimage('ox.gif')" value="ox.gif">Ox</a>
+                    <a href="javascript:openimage('tiger.gif')" value="tiger.gif">Tiger</a>
+                    <a href="javascript:openimage('rabbit.gif')" value="rabbit.gif">Rabbit</a>
+                    <a href="javascript:openimage('dragon.gif')" value="dragon.gif">Dragon</a>
+                    <a href="javascript:openimage('snake.gif')" value="snake.gif">Snake</a>
+                    <a href="javascript:openimage('horse.gif')" value="horse.gif">Horse</a>
+                    <a href="javascript:openimage('ram.gif')" value="ram.gif">Goat</a>
+                    <a href="javascript:openimage('monkey.gif')" value="monkey.gif">Monkey</a>
+                    <a href="javascript:openimage('rooster.gif')" value="rooster.gif">Rooster</a>
+                    <a href="javascript:openimage('dog.gif')" value="dog.gif">Dog</a>
+                    <a href="javascript:openimage('pig.gif')" value="pig.gif">Pig</a>.The 12-year cycle is an approximation to the 11.86-year <a href="https://en.wikipedia.org/wiki/Orbital_period" title="Orbital period">orbital period</a> of <a href="https://en.wikipedia.org/wiki/Jupiter"
+                                                                                                                                                                                                                                                     title="Jupiter">Jupiter</a>, the largest planet of the <a href="https://en.wikipedia.org/wiki/Solar_system" class="mw-redirect" title="Solar system">solar system</a>.
+                    <sup id="cite_ref-Zai_2015_1-0" class="reference"><a href="#cite_note-Zai_2015-1">[1]</a></sup> It and its variations remain popular in several <a href="https://en.wikipedia.org/wiki/East_Asia" title="East Asia">East Asian</a> countries including
+                    <a href="https://en.wikipedia.org/wiki/China" title="China">China</a>, <a href="https://en.wikipedia.org/wiki/Korea" title="Korea">Korea</a>, <a href="https://en.wikipedia.org/wiki/Japan" title="Japan">Japan</a>, and <a href="https://en.wikipedia.org/wiki/Mongolia"
+                                                                                                                                                                                                                                                title="Mongolia">Mongolia</a>, as well as in other Asian countries like <a href="https://en.wikipedia.org/wiki/Vietnam" title="Vietnam">Vietnam</a>, <a href="https://en.wikipedia.org/wiki/Burma" class="mw-redirect" title="Burma">Burma</a>,
+                    <a href="https://en.wikipedia.org/wiki/Nepal" title="Nepal">Nepal</a>, <a href="https://en.wikipedia.org/wiki/Bhutan" title="Bhutan">Bhutan</a>, <a href="https://en.wikipedia.org/wiki/Sri_Lanka" title="Sri Lanka">Sri Lanka</a>, <a href="https://en.wikipedia.org/wiki/Cambodia"
+                                                                                                                                                                                                                                                           title="Cambodia">Cambodia</a>,
+                    <a href="https://en.wikipedia.org/wiki/Laos" title="Laos">Laos</a> and <a href="https://en.wikipedia.org/wiki/Thailand" title="Thailand">Thailand</a>, along with the <a href="https://en.wikipedia.org/wiki/Buddhist_calendar" title="Buddhist calendar">Buddhist calendar</a>.
+                    According to the Chinese zodiac, 2017 is the year of the <a href="https://en.wikipedia.org/wiki/Rooster_(zodiac)" title="Rooster (zodiac)">Rooster</a>. (source: wikipedia)
+                </p>
+                <!-- task2 -->
+                <div class="w3-leftbar w3-light-grey">
+                    <p><i>2. type in your birth year to see the future carrer</i></p>
+                </div>
+                <!-- Form Container -->
+                <div class="input-group">
+                    <input id="birthyear" class="form-control" type="year" placeholder="birth year">
+                    <span class="input-group-btn">
+                        <button id="check" class="btn btn-default w3-black" type="button" onclick="myFunction()">CHECK</button>
+                    </span>
+                    <p id="result"></p>
+                </div>
+                <!-- task3 -->
+                <div class="w3-leftbar w3-light-grey ">
+                    <p><i>3. Believe the Chinese zodiacs? Select one checkbox</i></p>
+                </div>
+                <div class="w3-row-padding">
+                    <div style="width: 426px; height: 40px; left: 0px; top: -140px;">
+                    <input  type="checkbox" id="believe" name="yes" value="yes">
+                    <label  for="believe">YES</label>
+                        </div><div>
+                    <input type="checkbox" id="notbelieve" name="no" value="no">
+                    <label for="notbelieve">NO</label>
+                </div>
+
+              
+                <!-- task4 -->
+                <!-- Video Container -->
+                <div class="w3-leftbar w3-light-grey">
+                    <p><i>4. choose one video to watch and stop</i></p>
+                </div>
+                <div class="w3-row-padding">
+                    <video class="nativeEmbedPlayerPid" id="pid_mwe_player_1"
+                           src="Schlossbergbahn.webm.480p.webm"
+                           style="width: 426px; height: 240px; left: 0px; top: -240px;" controls></video>
+                    <video class="nativeEmbedPlayerPid" id="pid_mwe_player_0"
+                           src="2030.wikimedia.org.webm.360p.webm"
+                           style="width: 426px; height: 240px; left: 0px; top: -240px;" controls></video>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End page content -->
+    <!-- Footer -->
+    <footer class="w3-center w3-light-grey w3-padding-48 w3-large">
+        <p> Thank you so much for participant</p>
+        <small>The text of chinese zodiac is from <a href="https://en.wikipedia.org/wiki/Chinese_zodiac">Wikipedia</a>.</small>
+        <small>All of chinses animal images are from https://raw.githubusercontent.com/Gracie930/chinesezodiac/master/img/</small>
+    </footer>
+
+    <!-- Add Google Maps -->
+    <script>
+        function openimage(obj) {
+            console.log(" ++++++++++++++++++++  " + obj);
+            document.getElementById("zodiacImg").src = obj;
+        }
+        function myFunction() {
+            var x, text, i;
+            x = document.getElementById("birthyear").value;
+            console.log("x:" + x);
+            //zodiac = chinese_zodiac(x);
+            i = (x - 4) % 12;
+            if (isNaN(i) || i < 0 || i > 12) {
+                text = "";
+            } else {
+                var zodiacSign = [{
+                    name: "rat",
+                    personality: "Quick-witted, Resourceful, Versatile, Kind, Smart, Lovely",
+                    careers: "Administrator, Director, Manager, Entrepreneur, Writer, Musician, Lawyer, Researcher, Racing Car Driver",
+                    img: "rat.gif"
+                }, {
+                    name: "ox",
+                    personality: "Diligent, Reliable, Honest, Determinded, Ambitious",
+                    careers: "Agriculture, Manufacturing, Pharmacy, Mechanics, Engineering, Real Estate, Interior Design, Painting, Carpentry, Quarry Work",
+                    img: "ox.gif"
+                }, {
+                    name: "tiger",
+                    personality: "Brave, Confident, Adventurous, Expensive, Open, Independent",
+                    careers: "Advertising Agent, Office Manager, Travel Agent, Actor, Writer, Artist, Pilot, Flight Attendant, Musician, Comedian, Chauffeur",
+                    img: "tiger.gif"
+                }, {
+                    name: "rabbit",
+                    personality: "Gentle, Quiet, Clever, Elegant, Alert, Kind, Patient",
+                    careers: "Cultivation, Breeding, Education, Health Care, Medicine, Culture, Police/Judiciary Work, Politics",
+                    img: "rabbit.gif"
+                }, {
+                    name: "dragon",
+                    personality: "Enthusiastic, Condident, Intelligent, Ambitious, Hardworking, Straightforward",
+                    careers: "Journalist, Teacher, Inventor, Manager, Computer Analyst, Lawyer, Engineer, Architect, Broker, Sales person",
+                    img: "dragon.gif"
+                }, {
+                    name: "snake",
+                    personality: "Intelligent, Wise, Materialistic, Calm, Courageous, Lively, Communicative",
+                    careers: "Scientist, Analyst, Investigator, Painter, Potter, Jeweler, Astrologer, Magician, Dietician, Sociologist",
+                    img: "snake.gif"
+                }, {
+                    name: "horse",
+                    personality: "Active, Energetic, Kind, Rational, Optimistic, Sentimental, Straightforward",
+                    careers: "Publicist, Sales Representative, Journalist, Language Instructor, Translator, Bartender, Performer, Tour Operator, Librarian, Pilot",
+                    img: "horse.gif"
+                }, {
+                    name: "ram",
+                    personality: "Calm, Gentle, Creative, Thoughtful, Amicable, Perservering, Frank, Honest",
+                    careers: "Pediatrician, Actor, Daycare Teacher, Interior Designer, Florist, Hair Stylist, Musician, Editor, Illustrator, Art History Teacher.",
+                    img: "ram.gif"
+                }, {
+                    name: "monkey",
+                    personality: "Smart, Shap, Brilliant, Independent, Honest, Cordial, Positive",
+                    careers: "Accounting, Banking, Science, Engineering, Stock Market Trading, Air Traffic Control, Film Directing, Jewelry, Salesmanship",
+                    img: "monkey.gif"
+                }, {
+                    name: "rooster",
+                    personality: "Observant, Hardworking, Confidient, Courageous, Talent, Frank, Honest",
+                    careers: "Newsreader, Sales Person, Restaurant Owner, Hairdresser, Public Relations Officer, Farmer, Athlete, Teacher, Waiter, Journalist, Travel Writer, Dentist, Surgeon, Soldier, Fireman, Security Guard, Police Officer",
+                    img: "rooster.gif"
+                }, {
+                    name: "dog",
+                    personality: "Honest, Amiable, Kind, Casutious, Prudent, Loyal, Sincere",
+                    careers: "Police Officer, Scientist, Counselor, Interior Designer, Professor, Politician, Priest, Nurse, Clerk, Judge",
+                    img: "dog.gif"
+                }, {
+                    name: "pig",
+                    personality: "Compassionate, Generous, Easy-going, Ambitious, Earnest, Responsible, Modest",
+                    careers: "Entertainers, Caterers, Doctors, Veterinarians, Interior Decorators. Promising Career Fields Include Transportation, Entertainment, Retail, Hospitality",
+                    img: "pig.gif"
+                }]
+                var type = zodiacSign[i].name
+                var img = zodiacSign[i].img
+                var text = zodiacSign[i].personality
+                var careers = zodiacSign[i].careers
+                text = "<p class=\"w3-center w3-padding-64\">\
+            <span class=\"w3-tag w3-wide\"> " + type + "</span></p>\
+                <p id=\"text\"> <b>Personality  </b> " + text + "</p> \
+                <p id=\"careers\"><b>Suited careers  </b> " + careers + " </p> ";
+            }
+            document.getElementById("result").innerHTML = text;
+        }
+
+    </script>
+
+</body>
+
+</html>
