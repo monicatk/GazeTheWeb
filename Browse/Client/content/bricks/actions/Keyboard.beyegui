@@ -1,29 +1,17 @@
 <?xml version="1.0"?>
 <grid showbackground="true" consumeinput="true" style="tab_overlay">
-	<row size="32%">
+	<row size="90%">
 		<column size="100%">
 				<grid>
 					<row size="100%">
-						<column size="11%">
-							<stack direction="vertical">
-								<circlebutton id="next_word" icon="icons/NextWord.png" desckey="action_keyboard:next_word" border="10%"/>
-								<circlebutton id="previous_word" icon="icons/PreviousWord.png" desckey="action_keyboard:previous_word" border="10%"/>
-							</stack>
-						</column>
-						<column size="4%">
+						<column size="5%">
 							<blank/>
 						</column>
-						<column size="70%">
+						<column size="90%">
 							<textedit border="5%" style="tab_overlay_noback" id="text_edit"/>
 						</column>
-						<column size="4%">
+						<column size="5%">
 							<blank/>
-						</column>
-						<column size="11%">
-							<stack direction="vertical">
-								<circlebutton id="next_letter" icon="icons/NextLetter.png" desckey="action_keyboard:next_letter" border="10%"/>
-								<circlebutton id="previous_letter" icon="icons/PreviousLetter.png" desckey="action_keyboard:previous_letter" border="10%"/>
-							</stack>
 						</column>
 					</row>
 				</grid>
@@ -33,18 +21,11 @@
 		<column size="100%">
 			<grid relativescale="125%">
 					<row size="100%">
-						<column size="20%">
-							<stack separator="0.5%">
-								<boxbutton id="delete_character" icon="icons/DeleteCharacter.png" desckey="action_keyboard:delete"/>
-								<boxbutton id="paste" icon="icons/Paste.png" desckey="action_keyboard:paste"/>
-							</stack>
-						</column>
-						<column size="60%">
-							<wordsuggest style="tab_overlay_panel" id="word_suggest"/>
+						<column size="80%">
+							<blank/>
 						</column>
 						<column size="20%">
 							<stack separator="0.5%">
-								<boxbutton id="complete" icon="icons/Ok.png" desckey="action_keyboard:complete"/>
 								<boxbutton id="submit" icon="icons/Submit.png" desckey="action_keyboard:submit"/>
 							</stack>
 						</column>
@@ -52,7 +33,7 @@
 				</grid>			
 		</column>
 	</row>
-	<row size="46%">
+	<!-- <row size="46%">
 		<column size="100%">
 			<keyboard style="tab_overlay_noback" id="keyboard" border="2%" instantpress="false"/>
 		</column>
@@ -75,6 +56,6 @@
 				<boxbutton icon="icons/NewLine.png" id="new_line" desckey="action_keyboard:new_line"  relativescale="150%"/>
 			</stack>
 		</column>
-	</row>
+	</row> -->
 </grid>
 

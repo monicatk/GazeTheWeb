@@ -11,8 +11,9 @@
 #include "src/Utils/Texture.h"
 #include "src/Utils/MakeUnique.h"
 #include "src/Arguments.h"
+#include "src/State/Web/Tab/Pipelines/Actions/Action.h"
+#include "src/State/Web/Tab/Pipelines/Actions/KeyboardAction.h"
 #include <algorithm>
-
 
 // Include singleton for mailing to JavaScript
 #include "src/Singletons/JSMailer.h"
@@ -1300,8 +1301,21 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 				std::vector<Tab::DOMTextInputInfo> domTextList = _tabs.at(tabId)->RetrieveDOMTextInputInfos();
 				float shortestDis = 100.f;
 				for (Tab::DOMTextInputInfo link : domTextList) {
-					std::pair<int, float> {index, shortestDis} = nearestElement(link.rects, gazeXOffset, gazeYOffset, shortestDis, link.nodeId);
-					LogInfo("index  ", index, "dis ", shortestDis);
+					float finalLinkX = 0.0;
+					float finalLinkY = 0.0;
+					for (Rect rect : link.rects) {
+						float dx = glm::max(glm::abs(gazeXOffset - rect.Center().x) - (rect.Width() / 2.f), 0.f);
+						float dy = glm::max(glm::abs(gazeYOffset - rect.Center().y) - (rect.Height() / 2.f), 0.f);
+						float distance = glm::sqrt((dx * dx) + (dy * dy));
+						if (distance <shortestDis) {
+							LogInfo("nearestElement :", distance, "  ,x:", rect.Center().x, " ,y:", rect.Center().y);
+							finalLinkY = rect.Center().y;
+							finalLinkX = rect.Center().x;
+							shortestDis = distance;
+							index = link.nodeId;
+						}
+					}
+					LogInfo("text id:", link.nodeId, "shortest dis: ", shortestDis);
 				}
 				_tabs.at(tabId)->ScheduleTextInputTrigger(index);
 			}
@@ -1390,12 +1404,25 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 			if (tabId >= 0) {
 				float gazeYOffset = input->gazeY + _tabs.at(tabId)->getScrollingOffsetY();
 				float gazeXOffset = input->gazeX - _tabs.at(tabId)->GetWebViewX();
-				std::pair<float, float> finalCD = { gazeXOffset , gazeYOffset };
 				LogInfo("gaze offset X:", gazeXOffset, " ,Y:", gazeYOffset);
 				std::vector<Tab::DOMVideoInfo> domVideoList = _tabs.at(tabId)->RetrieveDOMVideoInfos();
 				float shortestDis = 100.f;
 				for (Tab::DOMVideoInfo link : domVideoList) {
-					std::pair<int, float> {index, shortestDis} = nearestElement(link.rects, gazeXOffset, gazeYOffset, shortestDis, link.nodeId);
+					float finalLinkX = 0.0;
+					float finalLinkY = 0.0;
+					for (Rect rect : link.rects) {
+						float dx = glm::max(glm::abs(gazeXOffset - rect.Center().x) - (rect.Width() / 2.f), 0.f);
+						float dy = glm::max(glm::abs(gazeYOffset - rect.Center().y) - (rect.Height() / 2.f), 0.f);
+						float distance = glm::sqrt((dx * dx) + (dy * dy));
+						if (distance <shortestDis) {
+							LogInfo("nearestElement :", distance, "  ,x:", rect.Center().x, " ,y:", rect.Center().y);
+							finalLinkY = rect.Center().y;
+							finalLinkX = rect.Center().x;
+							shortestDis = distance;
+							index = link.nodeId;
+						}
+					}
+					LogInfo("video id:", link.nodeId, "shortest dis: ", shortestDis);
 				}
 				_tabs.at(tabId)->ScheduleVideoModeTrigger(index);
 			}
@@ -1546,6 +1573,20 @@ void Web::dictationOfVoice(std::string transcription) {
 	std::u16string s16;
 	eyegui_helper::convertUTF8ToUTF16(transcription, s16);
 	//TODO:: 
+	//_tabs.at(_currentTabId)->SetContentOfTextBlock("text_block", s16);
+
+	std::string _overlayTextEditId = "text_input_action_text_edit";
+	//std::string _overlayWordSuggestId = "text_input_action_word_suggest";
+	// Add content from keyboard
+	_tabs.at(_currentTabId)->AddContentAtCursorInTextEdit(_overlayTextEditId, s16);
+}
+
+/*void Web::dictationOfVoice(std::string transcription) {
+
+	transcription = transcription;
+	std::u16string s16;
+	eyegui_helper::convertUTF8ToUTF16(transcription, s16);
+	//TODO:: 
 	_tabs.at(_currentTabId)->SetContentOfTextBlock("text_block", s16);
 
 	std::string _overlayTextEditId = "text_input_action_text_edit";
@@ -1557,5 +1598,4 @@ void Web::dictationOfVoice(std::string transcription) {
 	_tabs.at(_currentTabId)->DisplaySuggestionsInWordSuggest(
 		_overlayWordSuggestId,
 		s16);
-}
-
+}*/

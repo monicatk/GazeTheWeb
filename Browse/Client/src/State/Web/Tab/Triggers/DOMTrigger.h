@@ -94,6 +94,8 @@ DOMTrigger<T>::DOMTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& 
 
 	// ### BUTTON ###
 
+	/*
+
 	// Create id, which is unique in overlay
 	_overlayButtonId = "dom_trigger_button" + idExtension + "_" + std::to_string(_spNode->GetId());
 
@@ -136,11 +138,15 @@ DOMTrigger<T>::DOMTrigger(TabInteractionInterface* pTab, std::vector<Trigger*>& 
 		eyegui_helper::convertUTF8ToUTF16(std::to_string(_spNode->GetId() + 1), id16); // id is displayed with value + 1 for usability
 		_pTab->SetContentOfTextBlock(_overlayBadgeId, id16);
 	}
+
+	*/
 }
 
 template <class T>
 DOMTrigger<T>::~DOMTrigger()
 {
+	/*
+
 	// ### BUTTON ###
 
 	// Delete overlay frame
@@ -156,11 +162,14 @@ DOMTrigger<T>::~DOMTrigger()
 		// Delete overlay frame
 		_pTab->RemoveFloatingFrameFromOverlay(_overlayBadgeFrameIndex);
 	}
+
+	*/
 }
 
 template <class T>
 bool DOMTrigger<T>::Update(float tpf, const std::shared_ptr<const TabInput> spInput)
 {
+	/*
 	// Decide visibility
 	bool visible =
 		!_spNode->IsOccluded() // node is not occluded
@@ -197,6 +206,8 @@ bool DOMTrigger<T>::Update(float tpf, const std::shared_ptr<const TabInput> spIn
 		_pTab->SetSizeOfFloatingFrameInOverlay(_overlayBadgeFrameIndex, CalculateWidthOfBadgeOverlay(), TAB_TRIGGER_BADGE_SIZE);
 	}
 
+	*/
+
 	// #############
 
 	// Remember about being triggered
@@ -217,21 +228,25 @@ void DOMTrigger<T>::Draw() const
 template <class T>
 void DOMTrigger<T>::Activate()
 {
+	/*
 	_pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayButtonFrameIndex, _visible); // button
 	if (setup::TAB_TRIGGER_SHOW_BADGE)
 	{
 		_pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayBadgeFrameIndex, _visible); // badge
 	}
+	*/
 }
 
 template <class T>
 void DOMTrigger<T>::Deactivate()
 {
+	/*
 	_pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayButtonFrameIndex, false); // button
 	if (setup::TAB_TRIGGER_SHOW_BADGE)
 	{
 		_pTab->SetVisibilityOfFloatingFrameInOverlay(_overlayBadgeFrameIndex, false); // badge
 	}
+	*/
 }
 
 template <class T>

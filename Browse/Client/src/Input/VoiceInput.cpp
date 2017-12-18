@@ -34,7 +34,7 @@ std::map<std::string, VoiceAction> voiceActionMapping = {
 	{ "text", VoiceAction::TEXT_INPUT },
 	{ "video", VoiceAction::VIDEO_INPUT },
 	{ "go to", VoiceAction::GO_TO },
-	{ "search", VoiceAction::SEARCH },
+	{ "type", VoiceAction::SEARCH },
 	{ "click", VoiceAction::CLICK },
 	{ "clique", VoiceAction::CLICK },
 	{"increase",VoiceAction::INCREASE},
@@ -50,7 +50,8 @@ std::map<std::string, VoiceAction> voiceActionMapping = {
 	{ "utep",VoiceAction::NEW_TAB },
 	{ "neutab",VoiceAction::NEW_TAB },
 	{ "neo tap",VoiceAction::NEW_TAB },
-	{ "checkbox",VoiceAction::CHECKBOX }
+	{ "check",VoiceAction::CHECKBOX },
+	{ "chuck",VoiceAction::CHECKBOX },
 	//{ "",VoiceAction:: },
 
 };
@@ -60,10 +61,10 @@ std::set<std::string> voiceActionKeys = {
 	"bookmark","back", "top","new tab","neo tap","neutab","utep",
 	"reload","bottom","button","forward",
 	"text","video",
-	"go to","search","click","clique",
+	"go to","type","click","clique",
 	"increase","decrease",
 	"mute","unmute",
-	"play","jump","quit","crypt","checkbox"
+	"play","jump","quit","crypt","check","chuck"
 };
 
 std::map<std::string, std::string> textToDigit = {
@@ -291,7 +292,7 @@ VoiceResult VoiceInput::EndAndProcessAudioRecording()
 		LogInfo("VoiceInput: Samples received: ", spAudio->getSampleCount());
 
 		LogInfo("VoiceInput: Start processing");
-/*
+
 		// 1. Store Audio locally as .wav (for example in system' TEMP folder)
 		//    See this link for "how to save as wave": http://www.cplusplus.com/forum/beginner/166954/
 
@@ -361,9 +362,9 @@ VoiceResult VoiceInput::EndAndProcessAudioRecording()
 
 		// Parse answer to JSON object and extract id token
 		auto jsonAnswer = json::parse(answerBodyBuffer);
-		*/
-		const std::string test = "{\"results\": [{\"alternatives\": [{\"transcript\": \"checkbox\",\"confidence\" : 0.80277747}]}]}";
-		auto jsonAnswer = json::parse(test);
+		
+		//const std::string test = "{\"results\": [{\"alternatives\": [{\"transcript\": \"click ox\",\"confidence\" : 0.80277747}]}]}";
+		//auto jsonAnswer = json::parse(test);
 		if (!jsonAnswer.empty()) {
 			auto result = jsonAnswer["results"][0]["alternatives"][0];
 			if (result.empty())
@@ -387,7 +388,7 @@ VoiceResult VoiceInput::EndAndProcessAudioRecording()
 						int levCom = 0;
 						keySplitList = split(key, ' ');
 						int keySplitListLen = keySplitList.size();
-						LogInfo("key ", key, " len: ", keySplitListLen);
+						//LogInfo("key ", key, " len: ", keySplitListLen);
 						for (int i = 0; i < keySplitListLen; i++) {
 							if (i < tranSplitListLen) {
 								levCom += uiLevenshteinDistance(tranSplitList[i], keySplitList[i]);
@@ -395,7 +396,7 @@ VoiceResult VoiceInput::EndAndProcessAudioRecording()
 								{
 									voiceCommand = key;
 									voicePara = i + 1;
-									//LogInfo("VoiceInput: voice distance between transcript ( ", tranSplitList[i], " ) and ( ", keySplitList[i], " ) is ", levCom);
+									LogInfo("VoiceInput: voice distance between transcript ( ", tranSplitList[i], " ) and ( ", keySplitList[i], " ) is ", levCom);
 								}
 							}
 						}
