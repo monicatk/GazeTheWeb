@@ -11,7 +11,7 @@ DOMTextInput.prototype.inputText = function(text, submit){
 	else if (this.node.tagName == 'INPUT')
 	{
 		// GOOGLE FIX
-		/*var inputs = this.node.parentNode.getElementsByTagName("INPUT");
+		var inputs = this.node.parentNode.getElementsByTagName("INPUT");
 		var n = inputs.length;
 		var zIndex = window.getComputedStyle(this.node, null).getPropertyValue('z-index');
 		for(var i = 0; i < n && n > 1; i++)
@@ -24,7 +24,7 @@ DOMTextInput.prototype.inputText = function(text, submit){
 					ConsolePrint("Set text input on another input field with higher z-index");
 				}
 			}
-		}*/
+		}
 		this.node.value = text;
 	}
 	else
@@ -35,7 +35,7 @@ DOMTextInput.prototype.inputText = function(text, submit){
 	
 	this.setText(text);
 
-	if(submit)
+	if(!submit)
 		if(this.rects.length > 0)
 		{
 			var rect = this.getRects()[0];
@@ -58,7 +58,7 @@ DOMTextInput.prototype.inputText = function(text, submit){
 					'y': rect[0] + (rect[2]-rect[0])/2
 		};
 
-		ConsolePrint("Returning rect's center(submit): " + response.x + ", " + response.y + " name "+this.node.tagName );
+		ConsolePrint("Returning rect's center: " + response.x + ", " + response.y + " name "+this.node.tagName );
 		return response;
 	}
 	else

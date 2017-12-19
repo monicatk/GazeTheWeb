@@ -37,6 +37,8 @@ std::map<std::string, VoiceAction> voiceActionMapping = {
 	{ "type", VoiceAction::SEARCH },
 	{ "click", VoiceAction::CLICK },
 	{ "clique", VoiceAction::CLICK },
+	{ "clip", VoiceAction::CLICK },
+	{ "please", VoiceAction::CLICK },
 	{"increase",VoiceAction::INCREASE},
 	{ "decrease",VoiceAction::DECREASE },
 	{ "mute",VoiceAction::MUTE },
@@ -61,7 +63,7 @@ std::set<std::string> voiceActionKeys = {
 	"bookmark","back", "top","new tab","neo tap","neutab","utep",
 	"reload","bottom","button","forward",
 	"text","video",
-	"go to","type","click","clique",
+	"go to","type","click","clique","clip","please",
 	"increase","decrease",
 	"mute","unmute",
 	"play","jump","quit","crypt","check","chuck"

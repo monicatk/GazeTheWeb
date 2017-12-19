@@ -75,8 +75,10 @@
                 <!-- Form Container -->
                 <div class="input-group">
 					<form onclick="myFunction(); return false; ">
-						<input type="text" id="birthyear" placeholder="birth year" >
-                        <input id="check" class="btn btn-default w3-black" type="submit">
+                          <input id="birthyear" class="form-control" type="year" placeholder="birth year">
+-                    <span class="input-group-btn">
+-                        <button id="check" class="btn btn-default w3-black" type="button" onclick="myFunction()">CHECK</button>
+-                    </span>
                     </form>
                     <p id="result"></p>
                 </div>
