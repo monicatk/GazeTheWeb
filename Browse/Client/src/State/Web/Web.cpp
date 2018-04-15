@@ -11,8 +11,9 @@
 #include "src/Utils/Texture.h"
 #include "src/Utils/MakeUnique.h"
 #include "src/Arguments.h"
+#include "src/State/Web/Tab/Pipelines/Actions/Action.h"
+#include "src/State/Web/Tab/Pipelines/Actions/KeyboardAction.h"
 #include <algorithm>
-
 
 // Include singleton for mailing to JavaScript
 #include "src/Singletons/JSMailer.h"
@@ -1310,8 +1311,21 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 				std::vector<Tab::DOMTextInputInfo> domTextList = _tabs.at(tabId)->RetrieveDOMTextInputInfos();
 				float shortestDis = 100.f;
 				for (Tab::DOMTextInputInfo link : domTextList) {
-					std::pair<int, float> {index, shortestDis} = nearestElement(link.rects, gazeXOffset, gazeYOffset, shortestDis, link.nodeId);
-					LogInfo("index  ", index, "dis ", shortestDis);
+					float finalLinkX = 0.0;
+					float finalLinkY = 0.0;
+					for (Rect rect : link.rects) {
+						float dx = glm::max(glm::abs(gazeXOffset - rect.Center().x) - (rect.Width() / 2.f), 0.f);
+						float dy = glm::max(glm::abs(gazeYOffset - rect.Center().y) - (rect.Height() / 2.f), 0.f);
+						float distance = glm::sqrt((dx * dx) + (dy * dy));
+						if (distance <shortestDis) {
+							LogInfo("nearestElement :", distance, "  ,x:", rect.Center().x, " ,y:", rect.Center().y);
+							finalLinkY = rect.Center().y;
+							finalLinkX = rect.Center().x;
+							shortestDis = distance;
+							index = link.nodeId;
+						}
+					}
+					LogInfo("text id:", link.nodeId, "shortest dis: ", shortestDis);
 				}
 				_tabs.at(tabId)->ScheduleTextInputTrigger(index);
 			}
@@ -1325,14 +1339,14 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 	case VoiceAction::CLICK: {
 		float thresholdY = 50.0;
 		float thresholdX = 100.0;
-		float finalLinkX = 0.0;
-		float finalLinkY = 0.0;
 		int tabId = _currentTabId;
 		if (tabId >= 0) {
 			//LogInfo("scrollingOffset Y:", _tabs.at(tabId)->getScrollingOffsetY(), " ,X:", _tabs.at(tabId)->getScrollingOffsetX());
 			//LogInfo("web Y:", _tabs.at(tabId)->GetWebViewY(), " ,X:", _tabs.at(tabId)->GetWebViewX());
 			//LogInfo("Window Height:", _tabs.at(tabId)->GetWindowHeight(), " , width:", _tabs.at(tabId)->GetWindowWidth());
 			//LogInfo("Web Height:", _tabs.at(tabId)->GetWebViewHeight(), " , width:", _tabs.at(tabId)->GetWebViewWidth());
+			float finalLinkX = input->gazeX;
+			float finalLinkY = input->gazeY;
 			float gazeYOffset = input->gazeY + _tabs.at(tabId)->getScrollingOffsetY();
 			float gazeXOffset = input->gazeX - _tabs.at(tabId)->GetWebViewX();
 			LogInfo("gaze offset X:", gazeXOffset, " ,Y:", gazeYOffset);
@@ -1364,9 +1378,8 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 						float dx = glm::max(glm::abs(gazeXOffset - rect.Center().x) - (rect.Width() / 2.f), 0.f);
 						float dy = glm::max(glm::abs(gazeYOffset - rect.Center().y) - (rect.Height() / 2.f), 0.f);
 						float distance = glm::sqrt((dx * dx) + (dy * dy));
-						if (distance < 100.f)
-							LogInfo(link.text, ":", distance, "  ,x:", rect.Center().x, " ,y:", rect.Center().y);
 						if (shortestDis > distance) {
+							LogInfo("shorter dis:", distance,", gazeoffset Y:", rect.Center().y, ", gazeoffset X:", rect.Center().x);
 							finalLinkY = rect.Center().y;
 							finalLinkX = rect.Center().x;
 							shortestDis = distance;
@@ -1400,12 +1413,25 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 			if (tabId >= 0) {
 				float gazeYOffset = input->gazeY + _tabs.at(tabId)->getScrollingOffsetY();
 				float gazeXOffset = input->gazeX - _tabs.at(tabId)->GetWebViewX();
-				std::pair<float, float> finalCD = { gazeXOffset , gazeYOffset };
+				float finalLinkX = input->gazeX;
+				float finalLinkY = input->gazeY;
 				LogInfo("gaze offset X:", gazeXOffset, " ,Y:", gazeYOffset);
 				std::vector<Tab::DOMVideoInfo> domVideoList = _tabs.at(tabId)->RetrieveDOMVideoInfos();
 				float shortestDis = 100.f;
 				for (Tab::DOMVideoInfo link : domVideoList) {
-					std::pair<int, float> {index, shortestDis} = nearestElement(link.rects, gazeXOffset, gazeYOffset, shortestDis, link.nodeId);
+					for (Rect rect : link.rects) {
+						float dx = glm::max(glm::abs(gazeXOffset - rect.Center().x) - (rect.Width() / 2.f), 0.f);
+						float dy = glm::max(glm::abs(gazeYOffset - rect.Center().y) - (rect.Height() / 2.f), 0.f);
+						float distance = glm::sqrt((dx * dx) + (dy * dy));
+						if (distance <shortestDis) {
+							LogInfo("nearestElement :", distance, "  ,x:", rect.Center().x, " ,y:", rect.Center().y);
+							finalLinkY = rect.Center().y;
+							finalLinkX = rect.Center().x;
+							shortestDis = distance;
+							index = link.nodeId;
+						}
+					}
+					LogInfo("video id:", link.nodeId, "shortest dis: ", shortestDis);
 				}
 				_tabs.at(tabId)->ScheduleVideoModeTrigger(index);
 			}
@@ -1469,8 +1495,6 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 	case VoiceAction::CHECKBOX: {
 		float thresholdY = 100.0;
 		float thresholdX = 100.0;
-		float finalLinkX = 0.0;
-		float finalLinkY = 0.0;
 		int tabId = _currentTabId;
 		if (tabId >= 0) {
 			//LogInfo("scrollingOffset Y:", _tabs.at(tabId)->getScrollingOffsetY(), " ,X:", _tabs.at(tabId)->getScrollingOffsetX());
@@ -1479,6 +1503,8 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 			//LogInfo("Web Height:", _tabs.at(tabId)->GetWebViewHeight(), " , width:", _tabs.at(tabId)->GetWebViewWidth());
 			float gazeYOffset = input->gazeY + _tabs.at(tabId)->getScrollingOffsetY();
 			float gazeXOffset = input->gazeX - _tabs.at(tabId)->GetWebViewX();
+			float finalLinkX = input->gazeX;
+			float finalLinkY = input->gazeY;
 			LogInfo("gaze offset X:", gazeXOffset, " ,Y:", gazeYOffset);
 			std::vector<Tab::DOMCheckboxInfo> domCheckBoxList = _tabs.at(tabId)->RetrieveDOMCheckboxInfos();
 			int levDisMax = 20;
@@ -1556,6 +1582,20 @@ void Web::dictationOfVoice(std::string transcription) {
 	std::u16string s16;
 	eyegui_helper::convertUTF8ToUTF16(transcription, s16);
 	//TODO:: 
+	//_tabs.at(_currentTabId)->SetContentOfTextBlock("text_block", s16);
+
+	std::string _overlayTextEditId = "text_input_action_text_edit";
+	//std::string _overlayWordSuggestId = "text_input_action_word_suggest";
+	// Add content from keyboard
+	_tabs.at(_currentTabId)->AddContentAtCursorInTextEdit(_overlayTextEditId, s16);
+}
+
+/*void Web::dictationOfVoice(std::string transcription) {
+
+	transcription = transcription;
+	std::u16string s16;
+	eyegui_helper::convertUTF8ToUTF16(transcription, s16);
+	//TODO:: 
 	_tabs.at(_currentTabId)->SetContentOfTextBlock("text_block", s16);
 
 	std::string _overlayTextEditId = "text_input_action_text_edit";
@@ -1567,5 +1607,4 @@ void Web::dictationOfVoice(std::string transcription) {
 	_tabs.at(_currentTabId)->DisplaySuggestionsInWordSuggest(
 		_overlayWordSuggestId,
 		s16);
-}
-
+}*/

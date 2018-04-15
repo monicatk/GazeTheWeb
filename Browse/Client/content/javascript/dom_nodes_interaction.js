@@ -57,7 +57,8 @@ DOMTextInput.prototype.inputText = function(text, submit){
 					'x': rect[1] + (rect[3]-rect[1])/2, 
 					'y': rect[0] + (rect[2]-rect[0])/2
 		};
-		ConsolePrint("Returning rect's center: "+response.x+", "+response.y);
+
+		ConsolePrint("Returning rect's center: " + response.x + ", " + response.y + " name "+this.node.tagName );
 		return response;
 	}
 	else

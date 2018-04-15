@@ -40,7 +40,7 @@
                 <h5 class="w3-center w3-padding-64"><span class="w3-tag w3-wide">ABOUT CHINESE ZODIAC</span></h5>
                 <!-- task1 -->
                 <div class="w3-leftbar w3-light-grey">
-                    <p><i>1. choose one link of 12 animal in the second line to see the image of this animal</i></p>
+                    <p><i>1. choose the link of animal <b>"Rabbit"</b> in the second line to see the image of this animal</i></p>
                 </div>
                 <p>
                     <img id="zodiacImg">
@@ -74,15 +74,17 @@
                 </div>
                 <!-- Form Container -->
                 <div class="input-group">
-                    <input id="birthyear" class="form-control" type="year" placeholder="birth year">
-                    <span class="input-group-btn">
-                        <button id="check" class="btn btn-default w3-black" type="button" onclick="myFunction()">CHECK</button>
-                    </span>
+					<form onclick="myFunction(); return false; ">
+                          <input id="birthyear" class="form-control" type="year" placeholder="birth year">
+-                    <span class="input-group-btn">
+-                        <button id="check" class="btn btn-default w3-black" type="button" onclick="myFunction()">CHECK</button>
+-                    </span>
+                    </form>
                     <p id="result"></p>
                 </div>
                 <!-- task3 -->
                 <div class="w3-leftbar w3-light-grey ">
-                    <p><i>3. Believe the Chinese zodiacs? Select one checkbox</i></p>
+                    <p><i>3. Believe the Chinese zodiacs? Select <b>"NO"</b></i></p>
                 </div>
                 <div class="w3-row-padding">
                     <div style="width: 426px; height: 40px; left: 0px; top: -140px;">
@@ -97,7 +99,7 @@
                 <!-- task4 -->
                 <!-- Video Container -->
                 <div class="w3-leftbar w3-light-grey">
-                    <p><i>4. choose one video to watch and stop</i></p>
+                    <p><i>4. choose the <b>second </b> video to watch and pause</i></p>
                 </div>
                 <div class="w3-row-padding">
                     <video class="nativeEmbedPlayerPid" id="pid_mwe_player_1"
@@ -120,7 +122,8 @@
 
     <!-- Add Google Maps -->
     <script>
-        function openimage(obj) {
+	
+   function openimage(obj) {
             console.log(" ++++++++++++++++++++  " + obj);
             document.getElementById("zodiacImg").src = obj;
         }

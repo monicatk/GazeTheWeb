@@ -337,7 +337,7 @@ void Tab::Update(float tpf, const std::shared_ptr<const Input> spInput)
         // Gaze mouse
         if(
 			(_gazeMouse && spInput->windowFocused && !_pMaster->IsPaused())
-			|| ShortenURL(_url) == "127.0.0.1:8080") // hack for MAMEM training and dashboard page to get gaze through mouse coordinate
+			|| ShortenURL(_url) == "duckduckgo") // hack for MAMEM training and dashboard page to get gaze through mouse coordinate
         {
             EmulateMouseCursor(spTabInput->webViewPixelGazeX, spTabInput->webViewPixelGazeY);
         }
@@ -738,6 +738,7 @@ void Tab::ScheduleVideoModeTrigger(int id)
 		if (iter != _videoModeTriggers.end())
 		{
 			iter->second->Schedule();
+			PlayVideo(id);
 		}
 	}
 }

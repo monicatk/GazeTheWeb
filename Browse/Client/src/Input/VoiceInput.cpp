@@ -34,9 +34,11 @@ std::map<std::string, VoiceAction> voiceActionMapping = {
 	{ "text", VoiceAction::TEXT_INPUT },
 	{ "video", VoiceAction::VIDEO_INPUT },
 	{ "go to", VoiceAction::GO_TO },
-	{ "search", VoiceAction::SEARCH },
+	{ "type", VoiceAction::SEARCH },
 	{ "click", VoiceAction::CLICK },
 	{ "clique", VoiceAction::CLICK },
+	{ "clip", VoiceAction::CLICK },
+	{ "please", VoiceAction::CLICK },
 	{"increase",VoiceAction::INCREASE},
 	{ "decrease",VoiceAction::DECREASE },
 	{ "mute",VoiceAction::MUTE },
@@ -50,9 +52,14 @@ std::map<std::string, VoiceAction> voiceActionMapping = {
 	{ "utep",VoiceAction::NEW_TAB },
 	{ "neutab",VoiceAction::NEW_TAB },
 	{ "neo tap",VoiceAction::NEW_TAB },
+<<<<<<< HEAD
 	{ "checkbox",VoiceAction::CHECKBOX },
 	{ "delete",VoiceAction::DELETEALL },
 	{ "backspace",VoiceAction::BACKSPACE }
+=======
+	{ "check",VoiceAction::CHECKBOX },
+	{ "chuck",VoiceAction::CHECKBOX },
+>>>>>>> 2c468da9488a36963d5edcc8dcb881eb331bf19e
 	//{ "",VoiceAction:: },
 
 };
@@ -62,11 +69,15 @@ std::set<std::string> voiceActionKeys = {
 	"bookmark","back", "top","new tab","neo tap","neutab","utep",
 	"reload","bottom","button","forward",
 	"text","video",
-	"go to","search","click","clique",
+	"go to","type","click","clique","clip","please",
 	"increase","decrease",
 	"mute","unmute",
+<<<<<<< HEAD
 	"play","jump","quit","crypt","checkbox",
 	"delete","backspace"
+=======
+	"play","jump","quit","crypt","check","chuck"
+>>>>>>> 2c468da9488a36963d5edcc8dcb881eb331bf19e
 };
 
 std::map<std::string, std::string> textToDigit = {
@@ -365,7 +376,11 @@ VoiceResult VoiceInput::EndAndProcessAudioRecording()
 		// Parse answer to JSON object and extract id token
 		auto jsonAnswer = json::parse(answerBodyBuffer);
 		
+<<<<<<< HEAD
 		//const std::string test = "{\"results\": [{\"alternatives\": [{\"transcript\": \"checkbox\",\"confidence\" : 0.80277747}]}]}";
+=======
+		//const std::string test = "{\"results\": [{\"alternatives\": [{\"transcript\": \"click ox\",\"confidence\" : 0.80277747}]}]}";
+>>>>>>> 2c468da9488a36963d5edcc8dcb881eb331bf19e
 		//auto jsonAnswer = json::parse(test);
 		if (!jsonAnswer.empty()) {
 			auto result = jsonAnswer["results"][0]["alternatives"][0];
@@ -390,7 +405,7 @@ VoiceResult VoiceInput::EndAndProcessAudioRecording()
 						int levCom = 0;
 						keySplitList = split(key, ' ');
 						int keySplitListLen = keySplitList.size();
-						LogInfo("key ", key, " len: ", keySplitListLen);
+						//LogInfo("key ", key, " len: ", keySplitListLen);
 						for (int i = 0; i < keySplitListLen; i++) {
 							if (i < tranSplitListLen) {
 								levCom += uiLevenshteinDistance(tranSplitList[i], keySplitList[i]);
@@ -398,7 +413,7 @@ VoiceResult VoiceInput::EndAndProcessAudioRecording()
 								{
 									voiceCommand = key;
 									voicePara = i + 1;
-									//LogInfo("VoiceInput: voice distance between transcript ( ", tranSplitList[i], " ) and ( ", keySplitList[i], " ) is ", levCom);
+									LogInfo("VoiceInput: voice distance between transcript ( ", tranSplitList[i], " ) and ( ", keySplitList[i], " ) is ", levCom);
 								}
 							}
 						}
