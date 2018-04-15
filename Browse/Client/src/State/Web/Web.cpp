@@ -1309,7 +1309,7 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 				std::pair<float, float> finalCD = { gazeXOffset , gazeYOffset };
 				LogInfo("gaze offset X:", gazeXOffset, " ,Y:", gazeYOffset);
 				std::vector<Tab::DOMTextInputInfo> domTextList = _tabs.at(tabId)->RetrieveDOMTextInputInfos();
-				float shortestDis = 100.f;
+				float shortestDis = 50.f;
 				for (Tab::DOMTextInputInfo link : domTextList) {
 					float finalLinkX = 0.0;
 					float finalLinkY = 0.0;
@@ -1327,7 +1327,8 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 					}
 					LogInfo("text id:", link.nodeId, "shortest dis: ", shortestDis);
 				}
-				_tabs.at(tabId)->ScheduleTextInputTrigger(index);
+				if (shortestDis <50.f)
+					_tabs.at(tabId)->ScheduleTextInputTrigger(index);
 			}
 		}}break;
 
@@ -1352,7 +1353,7 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 			LogInfo("gaze offset X:", gazeXOffset, " ,Y:", gazeYOffset);
 			std::vector<Tab::DOMLinkInfo> domLinkList = _tabs.at(tabId)->RetrieveDOMLinkInfos();
 			int levDisMax = 20;
-			float shortestDis = 100.f;
+			float shortestDis = 50.f;
 			for (Tab::DOMLinkInfo link : domLinkList) {
 				std::vector<Rect> rectList = link.rects;
 				for (Rect rect : rectList) {
@@ -1417,7 +1418,7 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 				float finalLinkY = input->gazeY;
 				LogInfo("gaze offset X:", gazeXOffset, " ,Y:", gazeYOffset);
 				std::vector<Tab::DOMVideoInfo> domVideoList = _tabs.at(tabId)->RetrieveDOMVideoInfos();
-				float shortestDis = 100.f;
+				float shortestDis = 50.f;
 				for (Tab::DOMVideoInfo link : domVideoList) {
 					for (Rect rect : link.rects) {
 						float dx = glm::max(glm::abs(gazeXOffset - rect.Center().x) - (rect.Width() / 2.f), 0.f);
@@ -1433,7 +1434,8 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 					}
 					LogInfo("video id:", link.nodeId, "shortest dis: ", shortestDis);
 				}
-				_tabs.at(tabId)->ScheduleVideoModeTrigger(index);
+				if (shortestDis <50.f)
+					_tabs.at(tabId)->ScheduleVideoModeTrigger(index);
 			}
 		}}break;
 	case VoiceAction::INCREASE: {
@@ -1493,8 +1495,8 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 			_pMaster->PushNotification(u"The time is not valid", MasterNotificationInterface::Type::WARNING, false);
 		}}break;
 	case VoiceAction::CHECKBOX: {
-		float thresholdY = 100.0;
-		float thresholdX = 100.0;
+		float thresholdY = 50.0;
+		float thresholdX = 50.0;
 		int tabId = _currentTabId;
 		if (tabId >= 0) {
 			//LogInfo("scrollingOffset Y:", _tabs.at(tabId)->getScrollingOffsetY(), " ,X:", _tabs.at(tabId)->getScrollingOffsetX());
@@ -1508,7 +1510,7 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 			LogInfo("gaze offset X:", gazeXOffset, " ,Y:", gazeYOffset);
 			std::vector<Tab::DOMCheckboxInfo> domCheckBoxList = _tabs.at(tabId)->RetrieveDOMCheckboxInfos();
 			int levDisMax = 20;
-			float shortestDis = 100.f;
+			float shortestDis = 50.f;
 			for (Tab::DOMCheckboxInfo link : domCheckBoxList) {
 				std::vector<Rect> rectList = link.rects;
 				for (Rect rect : rectList) {

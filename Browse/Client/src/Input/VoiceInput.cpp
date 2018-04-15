@@ -52,14 +52,10 @@ std::map<std::string, VoiceAction> voiceActionMapping = {
 	{ "utep",VoiceAction::NEW_TAB },
 	{ "neutab",VoiceAction::NEW_TAB },
 	{ "neo tap",VoiceAction::NEW_TAB },
-<<<<<<< HEAD
-	{ "checkbox",VoiceAction::CHECKBOX },
 	{ "delete",VoiceAction::DELETEALL },
-	{ "backspace",VoiceAction::BACKSPACE }
-=======
+	{ "backspace",VoiceAction::BACKSPACE },
 	{ "check",VoiceAction::CHECKBOX },
 	{ "chuck",VoiceAction::CHECKBOX },
->>>>>>> 2c468da9488a36963d5edcc8dcb881eb331bf19e
 	//{ "",VoiceAction:: },
 
 };
@@ -72,12 +68,8 @@ std::set<std::string> voiceActionKeys = {
 	"go to","type","click","clique","clip","please",
 	"increase","decrease",
 	"mute","unmute",
-<<<<<<< HEAD
-	"play","jump","quit","crypt","checkbox",
+	"play","jump","quit","crypt","check","chuck",
 	"delete","backspace"
-=======
-	"play","jump","quit","crypt","check","chuck"
->>>>>>> 2c468da9488a36963d5edcc8dcb881eb331bf19e
 };
 
 std::map<std::string, std::string> textToDigit = {
@@ -376,11 +368,8 @@ VoiceResult VoiceInput::EndAndProcessAudioRecording()
 		// Parse answer to JSON object and extract id token
 		auto jsonAnswer = json::parse(answerBodyBuffer);
 		
-<<<<<<< HEAD
-		//const std::string test = "{\"results\": [{\"alternatives\": [{\"transcript\": \"checkbox\",\"confidence\" : 0.80277747}]}]}";
-=======
+
 		//const std::string test = "{\"results\": [{\"alternatives\": [{\"transcript\": \"click ox\",\"confidence\" : 0.80277747}]}]}";
->>>>>>> 2c468da9488a36963d5edcc8dcb881eb331bf19e
 		//auto jsonAnswer = json::parse(test);
 		if (!jsonAnswer.empty()) {
 			auto result = jsonAnswer["results"][0]["alternatives"][0];
