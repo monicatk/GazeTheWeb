@@ -1276,6 +1276,16 @@ void Web::actionsOfVoice(VoiceResult voiceResult, std::shared_ptr<Input> input) 
 		if (!voiceResult.keyworkds.empty())
 			dictationOfVoice(voiceResult.keyworkds);
 	}break;
+	case VoiceAction::BACKSPACE: {
+		int tabId = _currentTabId;
+		if (tabId >= 0)
+			_tabs.at(tabId)->DeleteContentAtCursorInTextEdit("text_input_action_text_edit", -1);
+	}break;
+	case VoiceAction::DELETEALL: {
+		int tabId = _currentTabId;
+		if (tabId >= 0)
+			_tabs.at(tabId)->DeleteContentInTextEdit("text_input_action_text_edit");
+	}break;
 	case VoiceAction::TEXT_INPUT: {
 		if (!voiceResult.keyworkds.empty()) {
 			try
